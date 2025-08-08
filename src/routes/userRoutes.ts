@@ -1,0 +1,83 @@
+import type { LucideIcon } from 'lucide-react';
+import { 
+  Home, 
+  Send, 
+  History, 
+  MapPin, 
+  User
+} from 'lucide-react';
+import { RouteID } from '../types/routes';
+
+
+export interface Route {
+  id: string;
+  path: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+export const user_desktop_routes: Route[] = [
+  {
+    id: "home" as RouteID,
+    path: "/users/dashboard",
+    label: "Dashboard",
+    icon: Home,
+  },
+    {
+        id: "send" as RouteID,
+        path: "/users/send",
+        label: "Send Money",
+        icon: Send,
+    },
+    {
+        id: "history" as RouteID,
+        path: "/users/history",
+        label: "Transaction History",
+        icon: History,
+    },
+    {
+        id: "withdraw" as RouteID,
+        path: "/users/withdraw",
+        label: "Withdraw Money",
+        icon: MapPin,
+    },
+    {
+        id: "profile" as RouteID,
+        path: "/users/profile",
+        label: "Profile & Settings",
+        icon: User,
+    },
+];
+
+export const user_mobile_routes: Route[] = [
+  {
+    id: "home" as RouteID,
+    path: "/users/dashboard",
+    label: "Home",
+    icon: Home,
+  },
+  {
+    id: "send" as RouteID,
+    path: "/users/send",
+    label: "Send",
+    icon: Send,
+  },
+  {
+    id: "history" as RouteID,
+    path: "/users/history",
+    label: "History",
+    icon: History,
+  },
+  {
+    id: "withdraw" as RouteID,
+    path: "/users/withdraw",
+    label: "Withdraw",
+    icon: MapPin,
+  },
+  {
+    id: "profile" as RouteID,
+    path: "/users/profile",
+    label: "Profile",
+    icon: User,
+  },
+]
