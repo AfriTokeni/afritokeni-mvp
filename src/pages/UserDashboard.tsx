@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { UserData, Transaction, Currency } from '../types/user_dashboard';
 import { useNavigate } from 'react-router-dom';
+import KYCStatusAlert from '../components/KYCStatusAlert';
 
 
 
@@ -115,6 +116,9 @@ const UserDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* KYC Status Alert */}
+      <KYCStatusAlert />
+      
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-2xl">
