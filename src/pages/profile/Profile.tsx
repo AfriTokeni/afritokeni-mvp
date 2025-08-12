@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { User, Check} from 'lucide-react';
+import { User, Check, LogOut } from 'lucide-react';
 import { UserData} from '../../types/user_dashboard';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 
 const UserProfile: React.FC = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   
   // Mock user data
   const [user] = useState<UserData>({
@@ -15,6 +19,11 @@ const UserProfile: React.FC = () => {
     },
     isVerified: true
   });
+
+  const handleLogout = () => {
+      logout();
+      navigate('/auth/login');
+  };
 
   return (
     <div className="space-y-6">
@@ -49,6 +58,18 @@ const UserProfile: React.FC = () => {
           <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
             <span className="font-medium text-gray-800">Help & Support</span>
             <span className="text-gray-400">→</span>
+          </button>
+          
+          {/* Logout Button - Only visible on mobile */}
+          <button 
+            onClick={handleLogout}
+            className="md:hidden w-full flex items-center justify-between p-4 bg-red-50 rounded-lg hover:bg-red-100 border border-red-200"
+          >
+            <div className="flex items-center space-x-3">
+              <LogOut className="w-5 h-5 text-red-600" />
+              <span className="font-medium text-red-700">Logout</span>
+            </div>
+            <span className="text-red-400">→</span>
           </button>
         </div>
       </div>
