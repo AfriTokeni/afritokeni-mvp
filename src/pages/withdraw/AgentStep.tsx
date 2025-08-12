@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { ArrowLeft } from 'lucide-react';
-import type L from 'leaflet';
+import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import type { Agent } from './types';
 
