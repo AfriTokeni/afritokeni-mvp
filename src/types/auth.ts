@@ -1,0 +1,74 @@
+export interface LoginFormData {
+  emailOrPhone: string;
+  password: string;
+  userType: 'user' | 'agent';
+}
+
+export interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  userType: 'user' | 'agent';
+}
+
+export interface UserKYCData {
+  documentType: 'national_id' | 'passport' | 'drivers_license';
+  documentNumber: string;
+  documentFile?: File;
+  pin: string;
+  confirmPin: string;
+}
+
+export interface AgentKYCData {
+  documentType: 'national_id' | 'passport' | 'drivers_license';
+  documentNumber: string;
+  documentFile?: File;
+  businessLicense: string;
+  businessLicenseFile?: File;
+  location: {
+    country: string;
+    state: string;
+    city: string;
+    address: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  locationDescription: string;
+}
+
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: 'user' | 'agent';
+  isVerified: boolean;
+  kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  createdAt: Date;
+}
+
+export interface AuthContextType {
+  user: User | null;
+  login: (formData: LoginFormData) => Promise<boolean>;
+  register: (formData: RegisterFormData) => Promise<boolean>;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+export interface LocationSuggestion {
+  place_id: string;
+  display_name: string;
+  lat: string;
+  lon: string;
+  address: {
+    country?: string;
+    state?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+  };
+}
