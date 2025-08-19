@@ -4,7 +4,8 @@ import {
   Send, 
   History, 
   MapPin, 
-  User
+  User,
+  Banknote
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 
@@ -39,7 +40,7 @@ export const user_desktop_routes: Route[] = [
         id: "withdraw" as RouteID,
         path: "/users/withdraw",
         label: "Withdraw Money",
-        icon: MapPin,
+        icon: Banknote,
     },
     {
         id: "profile" as RouteID,
@@ -72,7 +73,7 @@ export const user_mobile_routes: Route[] = [
     id: "withdraw" as RouteID,
     path: "/users/withdraw",
     label: "Withdraw",
-    icon: MapPin,
+    icon: Banknote,
   },
   {
     id: "profile" as RouteID,
