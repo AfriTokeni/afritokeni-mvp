@@ -372,7 +372,7 @@ const AgentDashboard: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-base font-semibold text-gray-800">Recent Transactions</h2>
-          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+          <button onClick={() => navigate('/agents/transactions')} className="text-blue-600 hover:text-blue-700 text-sm font-medium">
             View All
           </button>
         </div>
