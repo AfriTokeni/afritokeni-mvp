@@ -1,26 +1,24 @@
-# Juno: React Example
+# AfriTokeni MVP
 
-```sh
-npm create juno@latest -- --template react-ts-example
-```
+SMS-based financial system built on Internet Computer Protocol (ICP) for Uganda's unbanked population.
 
-> 🧑‍🚀 **Seasoned dev?** Delete this file. Have fun!
+## Overview
 
-![A screenshot of the example](https://raw.githubusercontent.com/junobuild/create-juno/main/screenshots/screenshot-example.png)
-
-An example developed for [Juno](https://juno.build) using [React](https://react.dev).
+AfriTokeni provides banking services via SMS for feature phones and web interface for smartphones, targeting Uganda's 14.6M unbanked adults with 83% lower costs than traditional mobile money.
 
 ## 🧭 Getting Started
 
-To start experimenting with Juno locally, follow these steps:
+**IMPORTANT:** This app requires Juno's local development environment for ICP authentication to work.
 
-### 1. Start the local development emulator
+### 1. Start the Juno development emulator (REQUIRED)
 
-This will spin up the Juno backend locally:
+**You MUST run this first** - the ICP authentication will not work without it:
 
 ```bash
 juno dev start
 ```
+
+This starts the local ICP blockchain emulator and Internet Identity service at `localhost:8000`.
 
 ### 2. Create a Satellite
 
@@ -54,19 +52,21 @@ In another terminal, start your app's dev server:
 npm run dev
 ```
 
-### 5. Create a Datastore collection
+### 5. Create required Datastore collections
 
-This template is a note-taking app, so it needs a `notes` collection. Create it in the Datastore.
+AfriTokeni needs these collections in the Datastore:
+- `users` - User profiles and authentication data
+- `transactions` - Transaction history
+- `balances` - User account balances
 
 👉 [Go to Datastore](http://localhost:5866/datastore)
 
-### 6. Create a Storage collection
+### 6. Test the application
 
-Likewise, it needs a collection named `images` to save assets. Create it in the Storage.
+- **Web Authentication**: Click "Sign in with Internet Identity" on the landing page
+- **SMS Banking**: Use the "📱 Access SMS Banking" for feature phone simulation
 
-👉 [Go to Storage](http://localhost:5866/storage)
-
-You only need to do this once. After that, you're ready to build 🚀
+**Note**: Make sure `juno dev start` is running or authentication will fail with connection errors.
 
 ## 🛰️ Production
 

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authSubscribe, signIn, signOut, setDoc, getDoc, type User as JunoUser } from '@junobuild/core';
 import { AuthContextType, User, LoginFormData, RegisterFormData } from '../types/auth';
+import { nanoid } from 'nanoid';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -15,43 +17,106 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+// Hybrid authentication for AfriTokeni - serves both SMS-only and web users
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [authMethod, setAuthMethod] = useState<'sms' | 'web'>('web');
 
-  // Load user from localStorage on mount
+  // Subscribe to Juno authentication state
   useEffect(() => {
-    const savedUser = localStorage.getItem('afritokeni_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
+    const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
+      if (junoUser) {
+        // Convert Juno user to our User type
+        const afritokeniUser: User = {
+          id: junoUser.key,
+          firstName: 'ICP',
+          lastName: 'User',
+          email: junoUser.key, // Use key as identifier
+          phone: '',
+          userType: 'user',
+          isVerified: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        setUser(afritokeniUser);
+        setAuthMethod('web');
+        localStorage.setItem('afritokeni_user', JSON.stringify(afritokeniUser));
+        localStorage.setItem('afritokeni_auth_method', 'web');
+      } else {
+        setUser(null);
         localStorage.removeItem('afritokeni_user');
+        localStorage.removeItem('afritokeni_auth_method');
       }
-    }
+    });
+
+    return unsubscribe;
   }, []);
 
-  const login = async (formData: LoginFormData): Promise<boolean> => {
+  // Hybrid login - supports both SMS and web authentication
+  const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock successful login
-      const mockUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
-        firstName: 'John',
-        lastName: 'Doe',
-        email: formData.emailOrPhone,
-        userType: formData.userType,
-        isVerified: false,
-        kycStatus: 'not_started',
-        createdAt: new Date()
-      };
-
-      setUser(mockUser);
-      localStorage.setItem('afritokeni_user', JSON.stringify(mockUser));
+      if (method === 'web') {
+        // Use Juno/ICP Internet Identity authentication
+        await signIn();
+        return true;
+      } else if (method === 'sms') {
+        // SMS-based authentication for feature phone users
+        // In real implementation:
+        // 1. Send SMS with verification code to formData.emailOrPhone
+        // 2. User replies with code via SMS
+        // 3. Verify code and authenticate
+        
+        // For demo, simulate SMS verification
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Try to get existing user by phone
+        let existingUser: User | null = null;
+        try {
+          const doc = await getDoc({
+            collection: 'users',
+            key: formData.emailOrPhone // Use phone as key
+          });
+          existingUser = doc?.data as User || null;
+        } catch (error) {
+          console.log('User not found, will need to register via SMS');
+        }
+        
+        if (!existingUser) {
+          // For SMS users, auto-register with basic info
+          const newUser: User = {
+            id: nanoid(),
+            firstName: 'SMS User',
+            lastName: formData.emailOrPhone.slice(-4), // Last 4 digits
+            email: formData.emailOrPhone,
+            userType: formData.userType,
+            isVerified: true, // SMS verified
+            kycStatus: 'not_started',
+            createdAt: new Date()
+          };
+          
+          // Save to datastore
+          await setDoc({
+            collection: 'users',
+            doc: {
+              key: formData.emailOrPhone,
+              data: newUser
+            }
+          });
+          
+          existingUser = newUser;
+        }
+        
+        setUser(existingUser);
+        setAuthMethod('sms');
+        localStorage.setItem('afritokeni_user', JSON.stringify(existingUser));
+        localStorage.setItem('afritokeni_auth_method', 'sms');
+        
+      } else {
+        // This should not be reached as web auth is handled above
+        throw new Error('Invalid authentication method');
+      }
       
       return true;
     } catch (error) {
@@ -62,26 +127,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // SMS-based registration
   const register = async (formData: RegisterFormData): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // In real implementation, this would:
+      // 1. Send SMS with verification code to formData.email (phone)
+      // 2. User enters code
+      // 3. Verify code and create account
       
-      // Mock successful registration
-      const mockUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
+      // For demo, simulate SMS verification
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const newUser: User = {
+        id: nanoid(),
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email,
+        email: formData.email, // This is actually phone number
         userType: formData.userType,
-        isVerified: false,
+        isVerified: true, // SMS verified
         kycStatus: 'not_started',
         createdAt: new Date()
       };
-
-      setUser(mockUser);
-      localStorage.setItem('afritokeni_user', JSON.stringify(mockUser));
+      
+      // Save user to Juno datastore
+      await setDoc({
+        collection: 'users',
+        doc: {
+          key: formData.email, // Use phone as key
+          data: newUser
+        }
+      });
+      
+      // Set user as logged in
+      setUser(newUser);
+      localStorage.setItem('afritokeni_user', JSON.stringify(newUser));
       
       return true;
     } catch (error) {
@@ -92,13 +172,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('afritokeni_user');
+  const logout = async () => {
+    if (authMethod === 'web') {
+      // Use Juno signOut for web users
+      await signOut();
+    } else {
+      // For SMS users, just clear local state
+      setUser(null);
+      setAuthMethod('web');
+      localStorage.removeItem('afritokeni_user');
+      localStorage.removeItem('afritokeni_auth_method');
+    }
   };
 
   const value: AuthContextType = {
     user,
+    authMethod,
     login,
     register,
     logout,
