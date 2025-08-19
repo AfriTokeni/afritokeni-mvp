@@ -44,7 +44,7 @@ const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes}
   });
 
   // Mock notifications data
-  const [notifications, setNotifications] = useState<Notification[]>([
+  const [notifications] = useState<Notification[]>([
     {
       id: '1',
       title: 'Transaction Completed',
