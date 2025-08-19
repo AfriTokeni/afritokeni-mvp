@@ -8,86 +8,35 @@ import {
   ArrowDown,
   Plus,
   Minus,
+  RefreshCw
 } from 'lucide-react';
-import { UserData, Transaction, Currency } from '../types/user_dashboard';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 
 
 
 const UserDashboard: React.FC = () => {
   const [showBalance, setShowBalance] = useState<boolean>(true);
-
   const navigate = useNavigate();
-  
-  // Mock user data
-  const [user] = useState<UserData>({
-    name: 'John Kamau',
-    phone: '+256701234567',
-    balances: {
-      UGX: 850000,
-      USDC: 245.50
-    },
-    isVerified: true
-  });
-
-  // Mock transaction data
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: 'TXN001',
-      type: 'received',
-      amount: 50000,
-      currency: 'UGX',
-      from: '+254700123456',
-      date: '2025-08-07T10:30:00Z',
-      status: 'completed',
-      description: 'From Mary Wanjiku'
-    },
-    {
-      id: 'TXN002',
-      type: 'sent',
-      amount: 25.50,
-      currency: 'USDC',
-      to: '+255713456789',
-      date: '2025-08-06T15:45:00Z',
-      status: 'completed',
-      description: 'To Peter Mwangi'
-    },
-    {
-      id: 'TXN003',
-      type: 'withdrawal',
-      amount: 100000,
-      currency: 'UGX',
-      agent: 'Agent Sarah - Nakawa Market',
-      date: '2025-08-05T12:15:00Z',
-      status: 'completed',
-      description: 'Cash withdrawal'
-    },
-    {
-      id: 'TXN004',
-      type: 'deposit',
-      amount: 75.00,
-      currency: 'USDC',
-      agent: 'Agent John - Kampala Central',
-      date: '2025-08-04T09:20:00Z',
-      status: 'pending',
-      description: 'Cash deposit'
-    }
-  ]);
+  const { user } = useAuth();
+  const { 
+    balance, 
+    transactions, 
+    isLoading, 
+    error, 
+    formattedBalance, 
+    recentTransactions,
+    refreshData 
+  } = useAfriTokeni();
 
 
-  const formatCurrency = (amount: number, currency: Currency): string => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
-        style: 'currency',
-        currency: 'UGX'
-      }).format(amount);
-    } else {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(amount);
-    }
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-UG', {
+      style: 'currency',
+      currency: 'UGX'
+    }).format(amount);
   };
 
   const formatDate = (dateString: string): string => {
