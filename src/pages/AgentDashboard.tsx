@@ -1,18 +1,18 @@
 import React from 'react';
 import { Users, CreditCard, TrendingUp, MapPin } from 'lucide-react';
 import KYCStatusAlert from '../components/KYCStatusAlert';
+import PageLayout from '../components/PageLayout';
 
 const AgentDashboard: React.FC = () => {
   return (
-    <div className="space-y-6">
+    <PageLayout title="Agent Dashboard">
+      <div className="space-y-6">
       {/* KYC Status Alert */}
       <KYCStatusAlert />
       
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Agent Dashboard</h1>
-          <p className="text-gray-600">Manage your agent operations and customer transactions</p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, Agent</h1>
+        <p className="text-gray-600">Manage your agent operations and customer transactions</p>
       </div>
 
       {/* Stats Cards */}
@@ -103,7 +103,8 @@ const AgentDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </PageLayout>
   );
 };
 

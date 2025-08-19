@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { RegisterFormData } from '../../types/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import AfriTokeniLogo from '../../components/AfriTokeniLogo';
+import PageLayout from '../../components/PageLayout';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();

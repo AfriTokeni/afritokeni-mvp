@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoginFormData } from '../../types/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import AfriTokeniLogo from '../../components/AfriTokeniLogo';
+import PageLayout from '../../components/PageLayout';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -53,27 +54,27 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <AfriTokeniLogo size="lg" />
+    <PageLayout title="Sign In" showUserMenu={false}>
+      <div className="max-w-md mx-auto">
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-lg">A</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Sign in to your account
+          </h2>
+          <p className="text-gray-600">
+            Or{' '}
+            <button
+              onClick={() => navigate('/auth/register')}
+              className="font-medium text-black hover:text-gray-700 underline"
+            >
+              create a new account
+            </button>
+          </p>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <button
-            onClick={() => navigate('/auth/register')}
-            className="font-medium text-blue-600 hover:text-blue-500"
-          >
-            create a new account
-          </button>
-        </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           {/* User Type Selection */}
           <div className="mb-6">
             <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
@@ -176,15 +177,15 @@ const LoginPage: React.FC = () => {
                 type="button"
                 onClick={handleICPLogin}
                 disabled={isLoading}
-                className="flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-indigo-600 to-purple-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                {isLoading ? 'Connecting to Internet Identity...' : '🔐 Sign in with Internet Identity'}
+                <span>{isLoading ? 'Connecting...' : 'Sign in with Internet Identity'}</span>
               </button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
