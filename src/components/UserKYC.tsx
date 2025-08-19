@@ -19,9 +19,9 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const documentTypes = [
-    { value: 'national_id', label: 'National ID Card' },
-    { value: 'passport', label: 'International Passport' },
-    { value: 'drivers_license', label: 'Driver&apos;s License' }
+    { value: "national_id", label: "National ID Card" },
+    { value: "passport", label: "International Passport"},
+    { value: "drivers_license", label: "Driver's License"}
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
