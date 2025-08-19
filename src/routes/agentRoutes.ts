@@ -2,11 +2,9 @@ import {
   LayoutDashboard, 
   Users, 
   CreditCard, 
-  History, 
   Settings,
-  MapPin,
-  TrendingUp,
-  LucideIcon
+  LucideIcon,
+  Banknote
 } from 'lucide-react';
 
 export interface Route {
@@ -24,28 +22,22 @@ export const agent_desktop_routes: Route[] = [
     icon: LayoutDashboard,
   },
   {
+    id: 'withdraw',
+    path: '/agents/withdraw',
+    label: 'Withdraw',
+    icon: Banknote,
+  },
+  {
+    id: 'deposit',
+    path: '/agents/deposit',
+    label: 'Deposit',
+    icon: CreditCard,
+  },
+  {
     id: 'customers',
     path: '/agents/customers',
     label: 'Customers',
     icon: Users,
-  },
-  {
-    id: 'transactions',
-    path: '/agents/transactions',
-    label: 'Transactions',
-    icon: CreditCard,
-  },
-  {
-    id: 'analytics',
-    path: '/agents/analytics',
-    label: 'Analytics',
-    icon: TrendingUp,
-  },
-  {
-    id: 'location',
-    path: '/agents/location',
-    label: 'Location',
-    icon: MapPin,
   },
   {
     id: 'settings',
@@ -63,16 +55,22 @@ export const agent_mobile_routes: Route[] = [
     icon: LayoutDashboard,
   },
   {
+    id: 'withdraw',
+    path: '/agents/withdraw',
+    label: 'Withdraw',
+    icon: Banknote,
+  },
+  {
+    id: 'deposit',
+    path: '/agents/deposit',
+    label: 'Deposit',
+    icon: CreditCard,
+  },
+  {
     id: 'customers',
     path: '/agents/customers',
     label: 'Customers',
     icon: Users,
-  },
-  {
-    id: 'transactions',
-    path: '/agents/transactions',
-    label: 'Transactions',
-    icon: History,
   },
   {
     id: 'settings',
