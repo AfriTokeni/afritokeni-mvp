@@ -1,102 +1,414 @@
-import React from 'react';
-import { Users, CreditCard, TrendingUp, MapPin } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Users, 
+  CreditCard, 
+  TrendingUp, 
+  MapPin, 
+  Clock,
+  User,
+  CheckCircle,
+  XCircle,
+  Navigation,
+  Eye,
+  EyeOff,
+  Plus,
+  Minus
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import PageLayout from '../components/PageLayout';
 
+interface AgentStatus {
+  status: 'available' | 'busy' | 'cash-out';
+  location?: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  lastUpdated: Date;
+}
+
+interface Transaction {
+  id: string;
+  customer: string;
+  customerPhone: string;
+  type: 'deposit' | 'withdrawal' | 'send-money';
+  amount: {
+    ugx: number;
+    usdc: number;
+  };
+  commission: {
+    ugx: number;
+    usdc: number;
+  };
+  status: 'completed' | 'pending' | 'failed';
+  timestamp: Date;
+}
+
+interface AgentBalance {
+  cash: {
+    ugx: number;
+    usdc: number;
+  };
+  digital: {
+    ugx: number;
+    usdc: number;
+  };
+}
+
 const AgentDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  
+  const [agentStatus, setAgentStatus] = useState<AgentStatus>({
+    status: 'available',
+    lastUpdated: new Date()
+  });
+  
+  const [balance] = useState<AgentBalance>({
+    cash: { ugx: 2450000, usdc: 500 },
+    digital: { ugx: 1250000, usdc: 328.75 }
+  });
+  
+  const [dailyEarnings] = useState({
+    ugx: 45000,
+    usdc: 12.50,
+    transactionCount: 23
+  });
+  
+  const [transactions] = useState<Transaction[]>([
+    {
+      id: 'TXN001',
+      customer: 'John Kamau',
+      customerPhone: '+256701234567',
+      type: 'withdrawal',
+      amount: { ugx: 100000, usdc: 26.32 },
+      commission: { ugx: 2000, usdc: 0.53 },
+      status: 'completed',
+      timestamp: new Date(Date.now() - 1000 * 60 * 10)
+    },
+    {
+      id: 'TXN002',
+      customer: 'Mary Nakato',
+      customerPhone: '+256702345678',
+      type: 'deposit',
+      amount: { ugx: 75000, usdc: 19.74 },
+      commission: { ugx: 1500, usdc: 0.39 },
+      status: 'completed',
+      timestamp: new Date(Date.now() - 1000 * 60 * 45)
+    },
+    {
+      id: 'TXN003',
+      customer: 'Peter Okello',
+      customerPhone: '+256703456789',
+      type: 'send-money',
+      amount: { ugx: 200000, usdc: 52.63 },
+      commission: { ugx: 3000, usdc: 0.79 },
+      status: 'pending',
+      timestamp: new Date(Date.now() - 1000 * 60 * 120)
+    }
+  ]);
+  
+  const [showBalance, setShowBalance] = useState(true);
+
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC'): string => {
+    if (currency === 'UGX') {
+      return new Intl.NumberFormat('en-UG', {
+        style: 'currency',
+        currency: 'UGX'
+      }).format(amount);
+    } else {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(amount);
+    }
+  };
+
+  const updateAgentStatus = (newStatus: AgentStatus['status']) => {
+    setAgentStatus(prev => ({
+      ...prev,
+      status: newStatus,
+      lastUpdated: new Date()
+    }));
+  };
+
+  const updateLocation = async () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by this browser.');
+      return;
+    }
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000 // 5 minutes
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      // Mock reverse geocoding - in real app, use a geocoding service
+      const mockAddress = `Kampala, Uganda (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+      
+      setAgentStatus(prev => ({
+        ...prev,
+        location: { latitude, longitude, address: mockAddress },
+        lastUpdated: new Date()
+      }));
+      
+      // Here you would send the coordinates to your backend
+      console.log('Sending location to backend:', { latitude, longitude });
+      
+    } catch (error) {
+      console.error('Error getting location:', error);
+      alert('Unable to get your location. Please check your browser permissions.');
+    }
+  };
+
+  const getStatusColor = (status: AgentStatus['status']) => {
+    switch (status) {
+      case 'available': return 'bg-green-100 text-green-800 border-green-200';
+      case 'busy': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'cash-out': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status: AgentStatus['status']) => {
+    switch (status) {
+      case 'available': return <CheckCircle className="w-4 h-4" />;
+      case 'busy': return <Clock className="w-4 h-4" />;
+      case 'cash-out': return <XCircle className="w-4 h-4" />;
+      default: return <User className="w-4 h-4" />;
+    }
+  };
   return (
-    <PageLayout title="Agent Dashboard">
-      <div className="space-y-6">
+    <div className="space-y-4">
       {/* KYC Status Alert */}
       <KYCStatusAlert />
       
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, Agent</h1>
-        <p className="text-gray-600">Manage your agent operations and customer transactions</p>
+      {/* Top Row - Status & Location */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Agent Status Control */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-600">Status:</span>
+              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border ${getStatusColor(agentStatus.status)}`}>
+                {getStatusIcon(agentStatus.status)}
+                <span className="text-sm font-medium capitalize">{agentStatus.status.replace('-', ' ')}</span>
+              </div>
+            </div>
+            <div className="flex space-x-1">
+              <button
+                onClick={() => updateAgentStatus('available')}
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  agentStatus.status === 'available' 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Available
+              </button>
+              <button
+                onClick={() => updateAgentStatus('busy')}
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  agentStatus.status === 'busy' 
+                    ? 'bg-yellow-600 text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Busy
+              </button>
+              <button
+                onClick={() => updateAgentStatus('cash-out')}
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  agentStatus.status === 'cash-out' 
+                    ? 'bg-red-600 text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Cash Out
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Location Update Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <MapPin className="w-5 h-5 text-gray-500" />
+              <div>
+                <h3 className="text-sm font-medium text-gray-800">Location</h3>
+                <p className="text-xs text-gray-600">
+                  {agentStatus.location 
+                    ? `Updated ${agentStatus.lastUpdated.toLocaleTimeString()}`
+                    : 'Not set'
+                  }
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={updateLocation}
+              className="flex items-center space-x-2 px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700"
+            >
+              <Navigation className="w-3 h-3" />
+              <span>Update</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Users className="h-8 w-8 text-blue-600" />
+      {/* Balance Cards & Quick Actions Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* UGX Balance Card */}
+        <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-4 rounded-xl">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <p className="text-blue-100 text-xs">UGX Balance</p>
+              <div className="flex items-center space-x-2">
+                <span className="text-xl font-bold">
+                  {showBalance ? formatCurrency(balance.digital.ugx, 'UGX') : '****'}
+                </span>
+                <button 
+                  onClick={() => setShowBalance(!showBalance)}
+                  className="text-blue-200 hover:text-white"
+                >
+                  {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Customers</p>
-              <p className="text-2xl font-bold text-gray-800">1,247</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <CreditCard className="h-8 w-8 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Today&apos;s Transactions</p>
-              <p className="text-2xl font-bold text-gray-800">89</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <TrendingUp className="h-8 w-8 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Revenue Today</p>
-              <p className="text-2xl font-bold text-gray-800">$2,847</p>
+            <div className="bg-white bg-opacity-20 p-1 rounded">
+              <span className="text-xs font-semibold">UGX</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <MapPin className="h-8 w-8 text-orange-600" />
+        {/* USDC Balance Card */}
+        <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white p-4 rounded-xl">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <p className="text-purple-100 text-xs">USDC Balance</p>
+              <div className="flex items-center space-x-2">
+                <span className="text-xl font-bold">
+                  {showBalance ? formatCurrency(balance.digital.usdc, 'USDC') : '****'}
+                </span>
+                <button 
+                  onClick={() => setShowBalance(!showBalance)}
+                  className="text-purple-200 hover:text-white"
+                >
+                  {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Service Areas</p>
-              <p className="text-2xl font-bold text-gray-800">3</p>
+            <div className="bg-white bg-opacity-20 p-1 rounded">
+              <span className="text-xs font-semibold">USDC</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={() => navigate('/agents/deposit')}
+            className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          >
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mb-2 mx-auto">
+              <Plus className="w-4 h-4 text-green-600" />
+            </div>
+            <span className="text-xs font-medium text-gray-800">Deposit</span>
+          </button>
+
+          <button 
+            onClick={() => navigate('/agents/withdraw')}
+            className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          >
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mb-2 mx-auto">
+              <Minus className="w-4 h-4 text-blue-600" />
+            </div>
+            <span className="text-xs font-medium text-gray-800">Withdrawal</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+          <div className="flex items-center">
+            <TrendingUp className="h-6 w-6 text-green-600" />
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Daily Earnings</p>
+              <p className="text-lg font-bold text-gray-800">
+                {formatCurrency(dailyEarnings.ugx, 'UGX')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+          <div className="flex items-center">
+            <CreditCard className="h-6 w-6 text-blue-600" />
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Today&apos;s Transactions</p>
+              <p className="text-lg font-bold text-gray-800">{dailyEarnings.transactionCount}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+          <div className="flex items-center">
+            <Users className="h-6 w-6 text-purple-600" />
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Active Customers</p>
+              <p className="text-lg font-bold text-gray-800">1,247</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Transactions */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800">Recent Transactions</h2>
+        <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-gray-800">Recent Transactions</h2>
+          <button onClick={() => navigate('/agents/transactions')} className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            View All
+          </button>
         </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {[
-              { id: 1, customer: 'John Doe', type: 'Withdrawal', amount: '$120', status: 'Completed', time: '2 min ago' },
-              { id: 2, customer: 'Jane Smith', type: 'Deposit', amount: '$75', status: 'Completed', time: '15 min ago' },
-              { id: 3, customer: 'Mike Johnson', type: 'Withdrawal', amount: '$200', status: 'Pending', time: '1 hour ago' },
-            ].map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-600">
+        <div className="p-4">
+          <div className="space-y-3">
+            {transactions.slice(0, 4).map((transaction) => (
+              <div key={transaction.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600">
                       {transaction.customer.split(' ').map(n => n[0]).join('')}
                     </span>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-800">{transaction.customer}</p>
-                    <p className="text-xs text-gray-600">{transaction.type} • {transaction.time}</p>
+                    <p className="text-xs text-gray-600">
+                      {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace('-', ' ')}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-800">{transaction.amount}</p>
-                  <p className={`text-xs ${
-                    transaction.status === 'Completed' ? 'text-green-600' : 'text-yellow-600'
-                  }`}>
-                    {transaction.status}
-                  </p>
+                  <div className="text-sm font-medium text-gray-800">
+                    {formatCurrency(transaction.amount.ugx, 'UGX')}
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-green-600 font-medium">
+                      +{formatCurrency(transaction.commission.ugx, 'UGX')}
+                    </span>
+                    <span className={`ml-2 ${
+                      transaction.status === 'completed' ? 'text-green-600' : 
+                      transaction.status === 'pending' ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -104,7 +416,6 @@ const AgentDashboard: React.FC = () => {
         </div>
       </div>
       </div>
-    </PageLayout>
   );
 };
 
