@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { signOut } from '@junobuild/core';
 
 interface HeaderProps {
   title?: string;
@@ -17,8 +18,17 @@ const Header: React.FC<HeaderProps> = ({
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/');
+    try {
+      // Call Juno signOut directly to ensure proper logout
+      await signOut();
+      // Also call our auth context logout for cleanup
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still navigate even if there's an error
+      navigate('/');
+    }
   };
 
   const handleBack = () => {
@@ -53,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({
           {showUserMenu && user && (
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600">
-                {user.authMethod === 'sms' ? user.phone : user.email}
+                {user.email}
               </div>
               <button
                 onClick={handleLogout}

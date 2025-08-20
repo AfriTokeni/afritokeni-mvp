@@ -1,5 +1,6 @@
 import { initSatellite } from "@junobuild/core";
 import { FC, useEffect } from "react";
+import junoConfig from "../juno.config";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Layout from "./components/Layout.tsx";
@@ -19,9 +20,7 @@ import ProcessWithdrawal from "./pages/withdraw/ProcessWithdrawal.tsx";
 import ProcessDeposit from "./pages/ProcessDeposit.tsx";
 import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
 
-// Auth Pages
-import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
+// Auth Pages - Only KYC pages needed
 import UserKYCPage from "./pages/auth/UserKYCPage";
 import AgentKYCPage from "./pages/auth/AgentKYCPage";
 
@@ -36,6 +35,7 @@ const App: FC = () => {
     const initJuno = async () => {
       try {
         await initSatellite({
+          satelliteId: junoConfig.satellite.ids?.development || "atbka-rp777-77775-aaaaq-cai",
           workers: {
             auth: true,
           },
@@ -53,7 +53,7 @@ const App: FC = () => {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Auth Routes - Removed since ICP auth is handled directly on landing page */}
+          {/* Auth Routes - Only Juno/ICP authentication used */}
           
           {/* SMS Interface Demo */}
           <Route path="/sms" element={<SMSInterface />} />

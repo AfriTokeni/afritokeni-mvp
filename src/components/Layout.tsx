@@ -132,10 +132,10 @@ const isActive = (path:string) => location.pathname.startsWith(path);
       <header className="bg-white shadow-sm border-b border-gray-100 px-4 py-4 md:px-6">
         <div className="flex items-center justify-between max-w-6xl mx-auto px-6">
           <div>
-            <h1 className="text-lg font-semibold text-gray-800 md:text-xl">
+            {/* <h1 className="text-lg font-semibold text-gray-800 md:text-xl">
               Hello, {user.name.split(' ')[0]}
             </h1>
-            <p className="text-sm text-gray-600">Welcome back to your wallet</p>
+            <p className="text-sm text-gray-600">Welcome back to your wallet</p> */}
           </div>
           <div className="flex items-center space-x-3">
             <div className="relative">
@@ -291,8 +291,8 @@ const isActive = (path:string) => location.pathname.startsWith(path);
       {/* Desktop Sidebar Navigation */}
       <nav className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex-col">
         {/* Brand Section */}
-        <div className="p-6 border-b border-gray-200">
-          <AfriTokeniLogo size="lg" />
+        <div className="p-5 border-b border-gray-200">
+          <AfriTokeniLogo/>
         </div>
         
         {/* Navigation Links */}

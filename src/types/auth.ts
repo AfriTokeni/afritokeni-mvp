@@ -56,7 +56,7 @@ export interface AuthContextType {
   user: User | null;
   authMethod: 'sms' | 'web';
   login: (formData: LoginFormData, method?: 'sms' | 'web') => Promise<boolean>;
-  register: (formData: RegisterFormData, method?: 'sms' | 'web') => Promise<boolean>;
+  register: (formData: RegisterFormData) => Promise<boolean>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
