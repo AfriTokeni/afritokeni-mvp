@@ -65,7 +65,7 @@ const UserDashboard: React.FC = () => {
   };
 
   return (
-    <PageLayout title="Dashboard">
+    // <PageLayout title="Dashboard">
       <div className="space-y-6">
       {/* KYC Status Alert */}
       <KYCStatusAlert />
@@ -78,7 +78,7 @@ const UserDashboard: React.FC = () => {
               <p className="text-gray-600 text-sm font-medium">UGX Balance</p>
               <div className="flex items-center space-x-2 mt-2">
                 <span className="text-2xl md:text-3xl font-bold text-gray-900">
-                  {showBalance ? formatCurrency(user.balances.UGX, 'UGX') : '****'}
+                  {showBalance ? formatCurrency(user?.balances?.UGX, 'UGX') : '****'}
                 </span>
                 <button 
                   onClick={() => setShowBalance(!showBalance)}
@@ -100,7 +100,7 @@ const UserDashboard: React.FC = () => {
               <p className="text-gray-600 text-sm font-medium">USDC Balance</p>
               <div className="flex items-center space-x-2 mt-2">
                 <span className="text-2xl md:text-3xl font-bold text-gray-900">
-                  {showBalance ? formatCurrency(user.balances.USDC, 'USDC') : '****'}
+                  {showBalance ? formatCurrency(user?.balances?.USDC, 'USDC') : '****'}
                 </span>
                 <button 
                   onClick={() => setShowBalance(!showBalance)}
@@ -196,7 +196,7 @@ const UserDashboard: React.FC = () => {
         </div>
       </div>
       </div>
-    </PageLayout>
+    // </PageLayout>
   );
 };
 
