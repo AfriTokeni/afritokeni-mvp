@@ -130,7 +130,7 @@ const isActive = (path:string) => location.pathname.startsWith(path);
 
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-100 px-4 py-4 md:px-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between max-w-6xl mx-auto px-6">
           <div>
             <h1 className="text-lg font-semibold text-gray-800 md:text-xl">
               Hello, {user.name.split(' ')[0]}
@@ -149,57 +149,59 @@ const isActive = (path:string) => location.pathname.startsWith(path);
                 )}
               </button>
 
-              {/* Notifications Dropdown */}
-              {showNotifications && (
-                <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                  <div className="p-4 border-b border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
-                    {unreadCount > 0 && (
-                      <p className="text-sm text-gray-600">{unreadCount} unread</p>
-                    )}
-                  </div>
-                  
-                  {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
-                      <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                      <p>No notifications</p>
-                    </div>
-                  ) : (
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                            !notification.read ? 'bg-blue-50' : ''
-                          }`}
-                          // onClick={() => handleNotificationClick(notification)}
-                        >
-                          <div className="flex items-start space-x-3">
-                            {getNotificationIcon(notification.type)}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <h4 className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
-                                  {notification.title}
-                                </h4>
-                                <span className="text-xs text-gray-500">
-                                  {formatTimestamp(notification.timestamp)}
-                                </span>
-                              </div>
-                              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                                {notification.message}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+            
             </div>
           </div>
         </div>
       </header>
+
+        {/* Notifications Dropdown */}
+        {showNotifications && (
+          <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+              {unreadCount > 0 && (
+                <p className="text-sm text-gray-600">{unreadCount} unread</p>
+              )}
+            </div>
+            
+            {notifications.length === 0 ? (
+              <div className="p-4 text-center text-gray-500">
+                <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p>No notifications</p>
+              </div>
+            ) : (
+              <div className="max-h-64 overflow-y-auto">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                      !notification.read ? 'bg-blue-50' : ''
+                    }`}
+                    // onClick={() => handleNotificationClick(notification)}
+                  >
+                    <div className="flex items-start space-x-3">
+                      {getNotificationIcon(notification.type)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h4 className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                            {notification.title}
+                          </h4>
+                          <span className="text-xs text-gray-500">
+                            {formatTimestamp(notification.timestamp)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {notification.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
       {/* Notification Detail Modal */}
       {selectedNotification && (
@@ -257,7 +259,7 @@ const isActive = (path:string) => location.pathname.startsWith(path);
 
       {/* Main Content */}
       <main className="px-4 py-6 md:px-6 pb-20 md:pb-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto px-6 py-8">
           {children}
         </div>
       </main>
