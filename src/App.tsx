@@ -33,12 +33,20 @@ import LandingPage from "./pages/LandingPage";
 
 const App: FC = () => {
   useEffect(() => {
-    (async () =>
-      await initSatellite({
-        workers: {
-          auth: true,
-        },
-      }))();
+    const initJuno = async () => {
+      try {
+        await initSatellite({
+          workers: {
+            auth: true,
+          },
+        });
+        console.log("Juno satellite initialized successfully");
+      } catch (error) {
+        console.error("Failed to initialize Juno satellite:", error);
+      }
+    };
+    
+    initJuno();
   }, []);
 
   return (
