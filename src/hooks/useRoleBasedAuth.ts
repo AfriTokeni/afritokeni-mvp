@@ -16,35 +16,33 @@ export const useRoleBasedAuth = () => {
 
   const checkAndRedirectUser = async (junoUser: JunoUser) => {
     setIsCheckingRole(true);
-    
     try {
-      // Check if user role exists in datastore
-      let roleDoc;
-      try {
-        roleDoc = await getDoc({
-          collection: 'user_roles',
-          key: junoUser.key
-        });
-      } catch (error) {
-        console.log('Role not found for user:', junoUser.key);
-      }
+      const roleDoc = await getDoc({
+        collection: 'user_roles',
+        key: junoUser.key
+      });
 
       if (roleDoc?.data) {
         // User has existing role, redirect accordingly
         const roleData = roleDoc.data as RoleData;
         
-        // Update last login
-        await setDoc({
-          collection: 'user_roles',
-          doc: {
-            key: junoUser.key,
-            data: {
-              ...roleData,
-              lastLogin: new Date().toISOString()
-            },
-            version: undefined
-          }
-        });
+        try {
+          // Update last login
+          await setDoc({
+            collection: 'user_roles',
+            doc: {
+              key: junoUser.key,
+              data: {
+                ...roleData,
+                lastLogin: new Date().toISOString()
+              },
+              version: roleDoc.version
+            }
+          });
+        } catch (updateError) {
+          console.warn('Failed to update last login:', updateError);
+          // Continue with redirect even if update fails
+        }
 
         // Redirect based on role
         if (roleData.role === 'agent') {
@@ -54,14 +52,12 @@ export const useRoleBasedAuth = () => {
         }
       } else {
         // New user - need to determine role
-        // For now, we'll show a role selection screen
-        // You could also implement logic to auto-detect based on other criteria
         navigate('/auth/role-selection');
       }
     } catch (error) {
       console.error('Error checking user role:', error);
-      // Default to user dashboard on error
-      navigate('/users/dashboard');
+      // For new users or on error, go to role selection
+      navigate('/auth/role-selection');
     } finally {
       setIsCheckingRole(false);
     }
@@ -93,8 +89,7 @@ export const useRoleBasedAuth = () => {
         collection: 'user_roles',
         doc: {
           key: junoUser.key,
-          data: roleData,
-          version: undefined
+          data: roleData
         }
       });
 

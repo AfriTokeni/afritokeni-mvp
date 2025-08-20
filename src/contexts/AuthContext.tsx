@@ -183,15 +183,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
-    if (authMethod === 'web') {
-      // Use Juno signOut for web users
-      await signOut();
-    } else {
-      // For SMS users, just clear local state
+    try {
+      if (authMethod === 'web') {
+        // Use Juno signOut for web users
+        await signOut();
+      }
+      
+      // Clear local state for all auth methods
       setUser(null);
       setAuthMethod('web');
       localStorage.removeItem('afritokeni_user');
       localStorage.removeItem('afritokeni_auth_method');
+      
+      // Force redirect to landing page
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if signOut fails
+      setUser(null);
+      setAuthMethod('web');
+      localStorage.removeItem('afritokeni_user');
+      localStorage.removeItem('afritokeni_auth_method');
+      window.location.href = '/';
     }
   };
 

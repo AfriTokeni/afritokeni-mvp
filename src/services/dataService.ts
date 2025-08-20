@@ -79,7 +79,11 @@ export class DataService {
       collection: 'transactions',
       doc: {
         key: id,
-        data: newTransaction
+        data: {
+          ...newTransaction,
+          createdAt: newTransaction.createdAt.toISOString()
+        },
+        version: undefined
       }
     });
 
