@@ -1,18 +1,18 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Smartphone, Zap, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { LoginFormData } from '../types/auth';
 
 const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
   const { login, isLoading } = useAuth();
 
   const handleICPLogin = async () => {
     try {
       const success = await login({} as LoginFormData, 'web');
-      if (success) {
-        navigate('/users/dashboard');
+      // Don't navigate here - let the AuthContext handle role-based routing
+      if (!success) {
+        console.error('Authentication failed');
       }
     } catch (error) {
       console.error('Authentication failed:', error);
