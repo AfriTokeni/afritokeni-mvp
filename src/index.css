@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @font-face {
   font-family: "JetBrains Mono";
@@ -61,6 +62,39 @@
   }
 }
 
-html {
-  font-family: var(--font-display);
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+/* Stripe-inspired design system */
+:root {
+  --color-primary: #635bff;
+  --color-primary-hover: #5a54e6;
+  --color-success: #00d924;
+  --color-warning: #ffb020;
+  --color-error: #df1b41;
+  --color-neutral-50: #fafbfc;
+  --color-neutral-100: #f6f9fc;
+  --color-neutral-200: #e3e8ee;
+  --color-neutral-300: #d4d9e0;
+  --color-neutral-400: #aab7c4;
+  --color-neutral-500: #8792a2;
+  --color-neutral-600: #697386;
+  --color-neutral-700: #425466;
+  --color-neutral-800: #1a1f36;
+  --color-neutral-900: #0a0e27;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  
+  --border-radius-sm: 6px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
 }

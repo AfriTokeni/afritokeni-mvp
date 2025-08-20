@@ -100,7 +100,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             collection: 'users',
             doc: {
               key: formData.emailOrPhone,
-              data: newUser
+              data: {
+                ...newUser,
+                createdAt: newUser.createdAt.toISOString()
+              }
             }
           });
           
@@ -151,8 +154,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await setDoc({
         collection: 'users',
         doc: {
-          key: formData.email, // Use phone as key
-          data: newUser
+          key: formData.email,
+          data: {
+            ...newUser,
+            createdAt: newUser.createdAt.toISOString()
+          }
         }
       });
       
