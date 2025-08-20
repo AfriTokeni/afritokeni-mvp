@@ -184,7 +184,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
             e.stopPropagation();
             onAgentSelect(agent);
           }}
-          className="flex-1 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs"
+          className="flex-1 px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-xs font-semibold transition-colors duration-200"
         >
           Select Agent
         </button>
@@ -196,21 +196,21 @@ const AgentStep: React.FC<AgentStepProps> = ({
       <div className="flex items-center space-x-4">
         <button
           onClick={onBackToAmount}
-          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+          className="flex items-center space-x-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Amount</span>
+          <span className="font-medium">Back to Amount</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">Select Agent</h2>
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+        <div className="p-6 border-b border-neutral-200">
+          <div className="flex justify-between items-start mb-6">
+            <h2 className="text-xl font-bold text-neutral-900">Select Agent</h2>
             {(ugxAmount || usdcAmount) && (
               <div className="text-right">
-                <p className="text-sm text-gray-600">Withdrawal Amount</p>
-                <p className="text-lg font-semibold text-gray-800">
+                <p className="text-sm font-medium text-neutral-600 mb-1">Withdrawal Amount</p>
+                <p className="text-lg font-bold font-mono text-neutral-900">
                   {ugxAmount ? `${ugxAmount.toLocaleString()} UGX` : ''}
                   {ugxAmount && usdcAmount && ' • '}
                   {usdcAmount ? `${usdcAmount.toFixed(2)} USDC` : ''}
@@ -218,19 +218,19 @@ const AgentStep: React.FC<AgentStepProps> = ({
               </div>
             )}
           </div>
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-neutral-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('map')}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'map' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                viewMode === 'map' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >
               Map View
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                viewMode === 'list' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >
               List View
@@ -239,8 +239,9 @@ const AgentStep: React.FC<AgentStepProps> = ({
         </div>
 
         {locationError && (
-          <div className="p-4 bg-yellow-50 text-yellow-800 text-sm">
-            {locationError}
+          <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-sm">
+            <p className="font-medium">Location Error</p>
+            <p>{locationError}</p>
           </div>
         )}
 
@@ -281,22 +282,23 @@ const AgentStep: React.FC<AgentStepProps> = ({
         {viewMode === 'list' && (
           <div className="w-full h-96 lg:h-[500px] overflow-y-auto">
             {availableAgents.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No available agents at the moment.
+              <div className="p-8 text-center text-neutral-500">
+                <p className="font-medium">No available agents at the moment.</p>
+                <p className="text-sm mt-1">Please try again later or contact support.</p>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-200">
+              <ul className="divide-y divide-neutral-200">
                 {availableAgents.map((agent) => (
                   <li
                     key={agent.id}
-                    className="p-4 hover:bg-gray-50"
+                    className="p-6 hover:bg-neutral-50 transition-colors duration-200"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-medium text-lg">{agent.name}</h3>
-                        <p className="text-gray-600 text-sm mt-1">{agent.locationName}</p>
-                        <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                          <span>
+                        <h3 className="font-semibold text-lg text-neutral-900">{agent.name}</h3>
+                        <p className="text-neutral-600 text-sm mt-1">{agent.locationName}</p>
+                        <div className="mt-3 flex items-center space-x-4 text-sm">
+                          <span className="text-neutral-600 font-medium">
                             {userLocation
                               ? calculateDistance(
                                   userLocation[0], userLocation[1],
@@ -304,7 +306,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
                                 )
                               : 'Distance unknown'}
                           </span>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             agent.status === 'online'
                               ? 'bg-green-100 text-green-800'
                               : agent.status === 'busy'
@@ -314,14 +316,14 @@ const AgentStep: React.FC<AgentStepProps> = ({
                             {agent.status}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Available: {agent.availableBalance.toLocaleString()} UGX
+                        <p className="text-sm text-neutral-600 mt-2 font-mono">
+                          Available: <span className="font-bold">{agent.availableBalance.toLocaleString()} UGX</span>
                         </p>
                       </div>
                       <button
                         onClick={() => onAgentSelect(agent)}
                         disabled={agent.status !== 'online'}
-                        className="ml-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="ml-4 bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200 font-semibold"
                       >
                         Select
                       </button>

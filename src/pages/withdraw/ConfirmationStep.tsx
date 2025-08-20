@@ -8,6 +8,7 @@ interface ConfirmationStepProps {
   userLocation: [number, number] | null;
   selectedAgent: Agent;
   withdrawalCode: string;
+  onMakeAnotherWithdrawal?: () => void;
 }
 
 const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
@@ -15,7 +16,8 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   usdcAmount,
   userLocation,
   selectedAgent,
-  withdrawalCode
+  withdrawalCode,
+  onMakeAnotherWithdrawal
 }) => {
   const [codeCopied, setCodeCopied] = useState(false);
 
@@ -37,93 +39,93 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-green-600" />
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Check className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">Your Withdrawal Code is Ready</h2>
-          <p className="text-gray-600 mt-2">Show this code to the agent to complete your withdrawal</p>
+          <h2 className="text-2xl font-bold text-neutral-900">Your Withdrawal Code is Ready</h2>
+          <p className="text-neutral-600 mt-2">Show this code to the agent to complete your withdrawal</p>
         </div>
 
         {/* Withdrawal Code */}
-        <div className="bg-gray-50 rounded-lg p-6 mb-6">
+        <div className="bg-neutral-50 rounded-xl p-8 mb-8 border border-neutral-200">
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">Withdrawal Code</p>
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-3xl font-mono font-bold text-blue-600 tracking-wider">
+            <p className="text-sm font-medium text-neutral-600 mb-3">Withdrawal Code</p>
+            <div className="flex items-center justify-center space-x-3">
+              <span className="text-4xl font-mono font-bold text-neutral-900 tracking-wider">
                 {withdrawalCode}
               </span>
               <button
                 onClick={handleCopyCode}
-                className="p-2 text-gray-500 hover:text-blue-600"
+                className="p-2 text-neutral-500 hover:text-neutral-900 transition-colors duration-200"
                 title="Copy code"
               >
-                {codeCopied ? <Check className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
+                {codeCopied ? <Check className="w-6 h-6 text-green-600" /> : <Copy className="w-6 h-6" />}
               </button>
             </div>
             {codeCopied && (
-              <p className="text-green-600 text-sm mt-1">Code copied to clipboard!</p>
+              <p className="text-green-600 text-sm mt-2 font-medium">Code copied to clipboard!</p>
             )}
           </div>
         </div>
 
         {/* Transaction Summary */}
-        <div className="border-t border-gray-200 pt-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Transaction Summary</h3>
-          <div className="space-y-3 text-sm">
+        <div className="border-t border-neutral-200 pt-8 mb-8">
+          <h3 className="text-lg font-bold text-neutral-900 mb-6">Transaction Summary</h3>
+          <div className="space-y-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Withdrawal Amount (USDC):</span>
-              <span className="font-medium">{usdcAmount.toFixed(2)} USDC</span>
+              <span className="text-neutral-600 font-medium">Withdrawal Amount (USDC):</span>
+              <span className="font-mono font-bold">{usdcAmount.toFixed(2)} USDC</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Withdrawal Amount (UGX):</span>
-              <span className="font-medium">{ugxAmount.toLocaleString()} UGX</span>
+              <span className="text-neutral-600 font-medium">Withdrawal Amount (UGX):</span>
+              <span className="font-mono font-bold">{ugxAmount.toLocaleString()} UGX</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Transaction Fee:</span>
-              <span className="font-medium text-green-600">Free</span>
+              <span className="text-neutral-600 font-medium">Transaction Fee:</span>
+              <span className="font-bold text-green-600">Free</span>
             </div>
-            <div className="border-t pt-2 flex justify-between font-semibold">
-              <span>Total to Receive:</span>
-              <span>{ugxAmount.toLocaleString()} UGX</span>
+            <div className="border-t border-neutral-200 pt-4 flex justify-between">
+              <span className="font-bold text-neutral-900">Total to Receive:</span>
+              <span className="font-mono font-bold text-neutral-900">{ugxAmount.toLocaleString()} UGX</span>
             </div>
           </div>
         </div>
 
         {/* Withdrawal Instructions */}
-        <div className="border-t border-gray-200 pt-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Withdrawal Instructions</h3>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-            <li>Visit the selected agent location</li>
-            <li>Show your withdrawal code: <strong>{withdrawalCode}</strong></li>
-            <li>Present a valid ID for verification</li>
-            <li>Receive your cash and keep the receipt</li>
+        <div className="border-t border-neutral-200 pt-8 mb-8">
+          <h3 className="text-lg font-bold text-neutral-900 mb-6">Withdrawal Instructions</h3>
+          <ol className="list-decimal list-inside space-y-3 text-sm text-neutral-700">
+            <li className="font-medium">Visit the selected agent location</li>
+            <li className="font-medium">Show your withdrawal code: <strong className="font-mono text-neutral-900">{withdrawalCode}</strong></li>
+            <li className="font-medium">Present a valid ID for verification</li>
+            <li className="font-medium">Receive your cash and keep the receipt</li>
           </ol>
         </div>
 
         {/* Agent Details */}
         {selectedAgent && (
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Agent Details</h3>
-            <div className="bg-blue-50 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-blue-600" />
+          <div className="border-t border-neutral-200 pt-8">
+            <h3 className="text-lg font-bold text-neutral-900 mb-6">Agent Details</h3>
+            <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
+              <div className="flex items-start space-x-4">
+                <div className="w-14 h-14 bg-neutral-100 rounded-full flex items-center justify-center">
+                  <MapPin className="w-7 h-7 text-neutral-600" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800">{selectedAgent.name}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{selectedAgent.address}</p>
+                  <h4 className="font-bold text-neutral-900 text-lg">{selectedAgent.name}</h4>
+                  <p className="text-sm text-neutral-600 mt-2">{selectedAgent.address}</p>
                   
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Phone className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-700">{selectedAgent.contact}</span>
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center space-x-3 text-sm">
+                      <Phone className="w-4 h-4 text-neutral-500" />
+                      <span className="text-neutral-700 font-medium">{selectedAgent.contact}</span>
                     </div>
                     
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Clock className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-700">{selectedAgent.operatingHours}</span>
+                    <div className="flex items-center space-x-3 text-sm">
+                      <Clock className="w-4 h-4 text-neutral-500" />
+                      <span className="text-neutral-700 font-medium">{selectedAgent.operatingHours}</span>
                     </div>
                   </div>
 
@@ -132,7 +134,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                         e.stopPropagation();
                         handleGetDirections(selectedAgent.location);
                     }}
-                    className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
+                    className="mt-6 bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 text-sm font-semibold transition-colors duration-200"
                   >
                     Get Directions
                   </button>
@@ -144,7 +146,8 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
 
         <div className="mt-8 flex space-x-4">
           <button
-            className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-200"
+            onClick={onMakeAnotherWithdrawal}
+            className="flex-1 bg-neutral-100 text-neutral-700 py-3 px-6 rounded-lg font-semibold hover:bg-neutral-200 transition-colors duration-200"
           >
             Make Another Withdrawal
           </button>

@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import AmountStep from './AmountStep';
 import AgentStep from './AgentStep';
 import ConfirmationStep from './ConfirmationStep';
+import PageLayout from '../../components/PageLayout';
 import type { Agent, WithdrawStep } from './types';
 
 
@@ -50,35 +51,43 @@ const WithdrawPage: React.FC = () => {
     generateWithdrawalCode();
   };
 
+  const handleMakeAnotherWithdrawal = () => {
+    setCurrentStep('amount');
+    setSelectedAgent(null);
+    setWithdrawalCode('');
+    setFinalUgxAmount(0);
+    setFinalUsdcAmount(0);
+  };
+
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-blue-800 mb-6">Withdraw Cash</h1>
+    <PageLayout>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-neutral-900 mb-8">Withdraw Cash</h1>
         
         {/* Step Indicator */}
         <div className="mb-8 flex items-center justify-center space-x-4">
-          <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-blue-600' : currentStep === 'agent' || currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'amount' ? 'bg-blue-600 text-white' : currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+          <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-neutral-900' : currentStep === 'agent' || currentStep === 'confirmation' ? 'text-green-600' : 'text-neutral-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'amount' ? 'bg-neutral-900 text-white' : currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-neutral-200'}`}>
               1
             </div>
             <span className="text-sm font-medium">Enter Amount</span>
           </div>
           
-          <div className={`w-8 h-0.5 ${currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          <div className={`w-8 h-0.5 ${currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600' : 'bg-neutral-200'}`}></div>
           
-          <div className={`flex items-center space-x-2 ${currentStep === 'agent' ? 'text-blue-600' : currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'agent' ? 'bg-blue-600 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+          <div className={`flex items-center space-x-2 ${currentStep === 'agent' ? 'text-neutral-900' : currentStep === 'confirmation' ? 'text-green-600' : 'text-neutral-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'agent' ? 'bg-neutral-900 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-neutral-200'}`}>
               2
             </div>
             <span className="text-sm font-medium">Select Agent</span>
           </div>
           
-          <div className={`w-8 h-0.5 ${currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          <div className={`w-8 h-0.5 ${currentStep === 'confirmation' ? 'bg-green-600' : 'bg-neutral-200'}`}></div>
           
-          <div className={`flex items-center space-x-2 ${currentStep === 'confirmation' ? 'text-blue-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'confirmation' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
+          <div className={`flex items-center space-x-2 ${currentStep === 'confirmation' ? 'text-neutral-900' : 'text-neutral-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'confirmation' ? 'bg-neutral-900 text-white' : 'bg-neutral-200'}`}>
               3
             </div>
             <span className="text-sm font-medium">Confirmation</span>
@@ -114,10 +123,11 @@ const WithdrawPage: React.FC = () => {
             userLocation={userLocation}
             selectedAgent={selectedAgent}
             withdrawalCode={withdrawalCode}
+            onMakeAnotherWithdrawal={handleMakeAnotherWithdrawal}
           />
         )}
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
