@@ -19,6 +19,7 @@ import AgentDashboard from "./pages/AgentDashboard.tsx";
 import ProcessWithdrawal from './pages/withdraw/ProcessWithdrawal';
 import ProcessDeposit from './pages/ProcessDeposit';
 import AgentCustomers from './pages/AgentCustomers';
+import AgentSettings from './pages/AgentSettings';
 import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
 
 // Auth Pages - Only KYC pages needed
@@ -83,7 +84,7 @@ const App: FC = () => {
                 <Route path="customers" element={<AgentCustomers/>} />
                 <Route path="transactions" element={<AgentTransactions/>} />
                 <Route path="location" element={<div>Location Page</div>} />
-                <Route path="settings" element={<div>Settings Page</div>} />
+                <Route path="settings" element={<AgentSettings/>} />
                 <Route path="agent-kyc" element={<AgentKYCPage />} />
               </Routes>
             </Layout>
