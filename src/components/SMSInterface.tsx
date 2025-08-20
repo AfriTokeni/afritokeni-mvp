@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import { MessageSquare, Send, Phone } from 'lucide-react';
@@ -6,10 +7,62 @@ import { MessageSquare, Send, Phone } from 'lucide-react';
 const SMSInterface: React.FC = () => {
   const { user, authMethod, login } = useAuth();
   const { processSMSCommand } = useAfriTokeni();
+  const location = useLocation();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [smsMessage, setSmsMessage] = useState('');
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Auto-run command if passed from landing page
+  useEffect(() => {
+    const state = location.state as { command?: string };
+    if (state?.command) {
+      setSmsMessage(state.command);
+      // Auto-execute the command after a brief delay
+      setTimeout(() => {
+        if (state.command) {
+          executeCommand(state.command);
+        }
+      }, 500);
+    }
+  }, [location.state]);
+
+  const executeCommand = async (command: string) => {
+    setIsProcessing(true);
+    try {
+      if (user) {
+        // Authenticated user - use real SMS processing
+        const result = await processSMSCommand(phoneNumber, command);
+        setResponse(result);
+      } else {
+        // Demo mode - show example responses
+        const demoResponses: { [key: string]: string } = {
+          '*AFRI#': 'Welcome to AfriTokeni!\n1. Check Balance\n2. Send Money\n3. Find Agents\n4. Transaction History\nReply with number',
+          'BAL': 'Your balance:\nUGX 450,000\nUSDC 118.42\n\nLast updated: Just now',
+          'AGENTS': 'Nearby agents:\n1. Sarah - Kampala Central (500m)\n2. John - Nakawa Market (1.2km)\n3. Grace - Wandegeya (2.1km)\nReply with number for details',
+          'SEND': 'To send money, use:\nSEND [amount] [phone]\nExample: SEND 10000 256701234567',
+          '1': 'Your balance:\nUGX 450,000\nUSDC 118.42\n\nSend *AFRI# for main menu'
+        };
+        
+        const cmd = command.toUpperCase();
+        let response = demoResponses[cmd];
+        
+        if (!response) {
+          if (cmd.startsWith('SEND ')) {
+            response = 'Demo: Money sent successfully!\nTransaction ID: TXN123456\nFee: UGX 500\nNew balance: UGX 439,500';
+          } else {
+            response = 'Command not recognized. Send *AFRI# for menu.';
+          }
+        }
+        
+        setResponse(response);
+      }
+    } catch (error) {
+      setResponse('Sorry, there was an error processing your request.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleSMSLogin = async () => {
     if (!phoneNumber) return;
@@ -29,17 +82,8 @@ const SMSInterface: React.FC = () => {
 
   const handleSMSCommand = async () => {
     if (!smsMessage.trim()) return;
-    
-    setIsProcessing(true);
-    try {
-      const result = await processSMSCommand(phoneNumber, smsMessage);
-      setResponse(result);
-      setSmsMessage('');
-    } catch (error) {
-      setResponse('Sorry, there was an error processing your request.');
-    } finally {
-      setIsProcessing(false);
-    }
+    await executeCommand(smsMessage);
+    setSmsMessage('');
   };
 
   return (
@@ -87,44 +131,42 @@ const SMSInterface: React.FC = () => {
             )}
 
             {/* SMS Command Input */}
-            {user && (
-              <>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
-                    SMS Command
-                  </label>
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      value={smsMessage}
-                      onChange={(e) => setSmsMessage(e.target.value)}
-                      placeholder="Type SMS command (e.g., BAL, *AFRI#)"
-                      className="flex-1 px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-lg"
-                      onKeyPress={(e) => e.key === 'Enter' && handleSMSCommand()}
-                    />
-                    <button
-                      onClick={handleSMSCommand}
-                      disabled={!smsMessage.trim() || isProcessing}
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
-                    >
-                      <Send className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
+                SMS Command {!user && <span className="text-gray-500">(Demo Mode)</span>}
+              </label>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={smsMessage}
+                  onChange={(e) => setSmsMessage(e.target.value)}
+                  placeholder="Type SMS command (e.g., BAL, *AFRI#)"
+                  className="flex-1 px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-lg"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSMSCommand()}
+                />
+                <button
+                  onClick={handleSMSCommand}
+                  disabled={!smsMessage.trim() || isProcessing}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
 
-                {/* User Info */}
-                <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
-                  <p className="text-sm text-gray-700 mb-1">
-                    <strong>User:</strong> {user.firstName} {user.lastName}
-                  </p>
-                  <p className="text-sm text-gray-700 mb-1">
-                    <strong>Phone:</strong> {user.email}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <strong>Auth Method:</strong> <span className="text-indigo-600 font-medium">{authMethod.toUpperCase()}</span>
-                  </p>
-                </div>
-              </>
+            {/* User Info */}
+            {user && (
+              <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
+                <p className="text-sm text-gray-700 mb-1">
+                  <strong>User:</strong> {user.firstName} {user.lastName}
+                </p>
+                <p className="text-sm text-gray-700 mb-1">
+                  <strong>Phone:</strong> {user.email}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <strong>Auth Method:</strong> <span className="text-indigo-600 font-medium">{authMethod.toUpperCase()}</span>
+                </p>
+              </div>
             )}
 
             {/* SMS Response */}
@@ -136,28 +178,26 @@ const SMSInterface: React.FC = () => {
             )}
 
             {/* Quick Commands */}
-            {user && (
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Quick Commands:</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { cmd: '*AFRI#', desc: 'Main Menu' },
-                    { cmd: 'BAL', desc: 'Check Balance' },
-                    { cmd: 'AGENTS', desc: 'Find Agents' },
-                    { cmd: 'SEND 10000 256701234567', desc: 'Send Money' }
-                  ].map((item) => (
-                    <button
-                      key={item.cmd}
-                      onClick={() => setSmsMessage(item.cmd)}
-                      className="text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-200 transition-colors"
-                    >
-                      <div className="font-mono text-indigo-600 font-medium text-sm">{item.cmd}</div>
-                      <div className="text-gray-600 text-xs mt-1">{item.desc}</div>
-                    </button>
-                  ))}
-                </div>
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="font-semibold text-gray-900 mb-4">Quick Commands:</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { cmd: '*AFRI#', desc: 'Main Menu' },
+                  { cmd: 'BAL', desc: 'Check Balance' },
+                  { cmd: 'AGENTS', desc: 'Find Agents' },
+                  { cmd: 'SEND 10000 256701234567', desc: 'Send Money' }
+                ].map((item) => (
+                  <button
+                    key={item.cmd}
+                    onClick={() => setSmsMessage(item.cmd)}
+                    className="text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-200 transition-colors"
+                  >
+                    <div className="font-mono text-indigo-600 font-medium text-sm">{item.cmd}</div>
+                    <div className="text-gray-600 text-xs mt-1">{item.desc}</div>
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

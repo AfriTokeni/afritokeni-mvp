@@ -83,11 +83,13 @@ export const useRoleBasedAuth = () => {
       });
 
       // Redirect based on selected role
-      if (role === 'agent') {
-        navigate('/agents/dashboard');
-      } else {
-        navigate('/users/dashboard');
-      }
+      setTimeout(() => {
+        if (role === 'agent') {
+          navigate('/agents/dashboard');
+        } else {
+          navigate('/users/dashboard');
+        }
+      }, 100);
     } catch (error) {
       console.error('Error setting user role:', error);
       throw error;
