@@ -20,6 +20,7 @@ import ProcessWithdrawal from './pages/withdraw/ProcessWithdrawal';
 import ProcessDeposit from './pages/ProcessDeposit';
 import AgentCustomers from './pages/AgentCustomers';
 import AgentSettings from './pages/AgentSettings';
+import RoleSelection from './pages/auth/RoleSelection';
 import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
 
 // Auth Pages - Only KYC pages needed
@@ -89,6 +90,9 @@ const App: FC = () => {
               </Routes>
             </Layout>
           } />
+          
+          {/* Auth Routes */}
+          <Route path="/auth/role-selection" element={<RoleSelection />} />
           
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />

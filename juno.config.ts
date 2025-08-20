@@ -34,6 +34,12 @@ export default defineConfig({
           memory: "stable",
         },
         {
+          collection: "user_roles",
+          read: "managed",
+          write: "managed",
+          memory: "stable",
+        },
+        {
           collection: "sms_messages",
           read: "managed",
           write: "managed",

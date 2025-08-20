@@ -102,9 +102,14 @@ const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes}
     setSelectedNotification(null);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/auth/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      navigate('/');
+    }
   };
 
 const isActive = (path:string) => location.pathname.startsWith(path);

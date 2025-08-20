@@ -29,9 +29,14 @@ const AgentSettings: React.FC = () => {
     joinDate: new Date('2024-01-15')
   });
 
-  const handleLogout = () => {
-    logout();
-    navigate('/auth/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      navigate('/');
+    }
   };
 
   return (
