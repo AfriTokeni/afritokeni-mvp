@@ -60,7 +60,7 @@ const UserDashboard: React.FC = () => {
   };
 
   return (
-    <PageLayout title="Dashboard">
+    // <PageLayout title="Dashboard">
       <div className="space-y-8">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-black to-gray-800 rounded-2xl p-8 text-white">
@@ -244,7 +244,7 @@ const UserDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    // </PageLayout>
   );
 };
 
