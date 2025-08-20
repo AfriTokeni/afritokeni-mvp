@@ -6,13 +6,18 @@ import Layout from "./components/Layout.tsx";
 import { user_desktop_routes, user_mobile_routes } from "./routes/userRoutes.ts";
 import { agent_desktop_routes, agent_mobile_routes } from "./routes/agentRoutes.ts";
 
-// Pages
+// User Pages
 import UserDashboard from "./pages/UserDashboard.tsx";
-import AgentDashboard from "./pages/AgentDashboard.tsx";
 import SendMoney from "./pages/send/SendMoney.tsx";
 import UserTransactions from "./pages/transactions/Transactions.tsx";
 import UserProfile from "./pages/profile/Profile.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
+
+//Agent Pages
+import AgentDashboard from "./pages/AgentDashboard.tsx";
+import ProcessWithdrawal from "./pages/withdraw/ProcessWithdrawal.tsx";
+import ProcessDeposit from "./pages/ProcessDeposit.tsx";
+import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
 
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -64,9 +69,9 @@ const App: FC = () => {
             <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes}>
               <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
-                <Route path="customers" element={<div>Customers Page</div>} />
-                <Route path="transactions" element={<div>Agent Transactions Page</div>} />
-                <Route path="analytics" element={<div>Analytics Page</div>} />
+                <Route path="withdraw" element={<ProcessWithdrawal/>} />
+                <Route path="deposit" element={<ProcessDeposit/>} />
+                <Route path="transactions" element={<AgentTransactions/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<div>Settings Page</div>} />
                 <Route path="agent-kyc" element={<AgentKYCPage />} />
