@@ -41,7 +41,8 @@ export const useRoleBasedAuth = () => {
             data: {
               ...roleData,
               lastLogin: new Date().toISOString()
-            }
+            },
+            version: undefined
           }
         });
 
@@ -68,9 +69,23 @@ export const useRoleBasedAuth = () => {
 
   const setUserRole = async (junoUser: JunoUser, role: UserRole) => {
     try {
+      let existingRoleData;
+      try {
+        const existingRoleDoc = await getDoc({
+          collection: 'user_roles',
+          key: junoUser.key
+        });
+        existingRoleData = existingRoleDoc?.data as RoleData | undefined;
+      } catch (error) {
+        console.log('Role not found for user:', junoUser.key);
+      }
+
+      const existingRole = existingRoleData?.role || role;
+
+      // Update last login time
       const roleData: RoleData = {
-        role,
-        createdAt: new Date().toISOString(),
+        role: existingRole,
+        createdAt: existingRoleData?.createdAt || new Date().toISOString(),
         lastLogin: new Date().toISOString()
       };
 
@@ -78,7 +93,8 @@ export const useRoleBasedAuth = () => {
         collection: 'user_roles',
         doc: {
           key: junoUser.key,
-          data: roleData
+          data: roleData,
+          version: undefined
         }
       });
 
