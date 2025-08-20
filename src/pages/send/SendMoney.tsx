@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Check,
   Phone,
-  DollarSign
+  DollarSign,
+  ArrowLeft
 } from 'lucide-react';
-import { UserData, Currency } from '../../types/user_dashboard';
+import { useNavigate } from 'react-router-dom';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
+import PageLayout from '../../components/PageLayout';
 
 // Mock recipient data
 const RECIPIENTS = [
@@ -16,6 +19,9 @@ const RECIPIENTS = [
 const EXCHANGE_RATE = 3800; // 1 USDC = 3800 UGX
 
 const SendMoney: React.FC = () => {
+  const navigate = useNavigate();
+  const { balance } = useAfriTokeni();
+  
   const [ugxAmount, setUgxAmount] = useState<string>('');
   const [usdcAmount, setUsdcAmount] = useState<string>('');
   const [recipientPhone, setRecipientPhone] = useState<string>('');
@@ -25,30 +31,12 @@ const SendMoney: React.FC = () => {
   const [selectedRecipient, setSelectedRecipient] = useState<{name: string, phone: string} | null>(null);
   
   const searchTimeoutRef = useRef<number | null>(null);
-  
-  // Mock user data
-  const [user] = useState<UserData>({
-    name: 'John Kamau',
-    phone: '+256701234567',
-    balances: {
-      UGX: 850000,
-      USDC: 245.50
-    },
-    isVerified: true
-  });
 
-  const formatCurrency = (amount: number, currency: Currency): string => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
-        style: 'currency',
-        currency: 'UGX'
-      }).format(amount);
-    } else {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(amount);
-    }
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-UG', {
+      style: 'currency',
+      currency: 'UGX'
+    }).format(amount);
   };
 
   // Debounced search effect
@@ -110,41 +98,53 @@ const SendMoney: React.FC = () => {
   };
 
   return (
-         <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">Send Money</h2>
-        
+    <PageLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/users/dashboard')}
+              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-neutral-600" />
+            </button>
+            <h1 className="text-2xl font-semibold text-neutral-900">Send Money</h1>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8">
         {sendStep === 1 && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-3">
                 Recipient Phone Number
               </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
                 <input
                   type="tel"
                   value={recipientPhone}
                   onChange={(e) => handleRecipientSearch(e.target.value)}
                   placeholder="+256701234567"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                 />
                 {/* Recipient search results dropdown */}
                 {showResults && recipientResults.length > 0 && (
-                  <div className="absolute left-0 right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                  <div className="absolute left-0 right-0 top-12 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
                     {recipientResults.map(r => (
                       <button
                         key={r.phone}
                         type="button"
-                        className="w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center justify-between"
+                        className="w-full text-left px-4 py-3 hover:bg-neutral-50 flex items-center justify-between transition-colors duration-200"
                         onClick={() => {
                           setRecipientPhone(r.phone);
                           setSelectedRecipient(r);
                           setShowResults(false);
                         }}
                       >
-                        <span className="font-medium text-gray-800">{r.name}</span>
-                        <span className="text-gray-500 text-sm">{r.phone}</span>
+                        <span className="font-medium text-neutral-900">{r.name}</span>
+                        <span className="text-neutral-500 text-sm">{r.phone}</span>
                       </button>
                     ))}
                   </div>
@@ -153,59 +153,59 @@ const SendMoney: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-4">
+              <label className="block text-sm font-medium text-neutral-700 mb-4">
                 Amount to Send
               </label>
               
               {/* UGX Input */}
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-600 mb-2">
+              <div className="mb-6">
+                <label className="block text-xs font-medium text-neutral-600 mb-2">
                   UGX (Ugandan Shilling)
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   <input
                     type="number"
                     value={ugxAmount}
                     onChange={(e) => handleUgxAmountChange(e.target.value)}
                     placeholder="10,000"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  Available: {formatCurrency(user.balances.UGX, 'UGX')}
+                <p className="mt-2 text-sm text-neutral-500">
+                  Available: {formatCurrency(balance?.balance || 0)}
                 </p>
               </div>
 
-              {/* USDC Input */}
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-600 mb-2">
-                  USDC (US Dollar Coin)
+              {/* USD Input */}
+              <div className="mb-6">
+                <label className="block text-xs font-medium text-neutral-600 mb-2">
+                  USD (US Dollar Equivalent)
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   <input
                     type="number"
                     value={usdcAmount}
                     onChange={(e) => handleUsdcAmountChange(e.target.value)}
                     placeholder="25.00"
                     step="0.01"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  Available: {formatCurrency(user.balances.USDC, 'USDC')}
+                <p className="mt-2 text-sm text-neutral-500">
+                  Available: ${((balance?.balance || 0) * 0.00026).toFixed(2)} USD
                 </p>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-xs text-blue-600 font-medium">Exchange Rate</p>
-                <p className="text-sm text-blue-800">1 USDC = {EXCHANGE_RATE.toLocaleString()} UGX</p>
+              <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                <p className="text-xs text-neutral-600 font-medium">Exchange Rate</p>
+                <p className="text-sm text-neutral-800">1 USD = {EXCHANGE_RATE.toLocaleString()} UGX</p>
                 {(ugxAmount || usdcAmount) && (
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-xs text-neutral-600 mt-2">
                     {ugxAmount ? `${parseFloat(ugxAmount).toLocaleString()} UGX` : ''} 
                     {ugxAmount && usdcAmount ? ' ≈ ' : ''}
-                    {usdcAmount ? `${parseFloat(usdcAmount).toFixed(2)} USDC` : ''}
+                    {usdcAmount ? `$${parseFloat(usdcAmount).toFixed(2)} USD` : ''}
                   </p>
                 )}
               </div>
@@ -214,7 +214,7 @@ const SendMoney: React.FC = () => {
             <button
               onClick={() => setSendStep(2)}
               disabled={!recipientPhone || (!ugxAmount && !usdcAmount)}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200"
             >
               Continue
             </button>
@@ -223,16 +223,16 @@ const SendMoney: React.FC = () => {
 
         {sendStep === 2 && (
           <div className="space-y-6">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-3">Transaction Summary</h3>
-              <div className="space-y-2 text-sm">
+            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
+              <h3 className="font-semibold mb-4 text-neutral-900">Transaction Summary</h3>
+              <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Recipient:</span>
-                  <span className="font-medium">
+                  <span className="text-neutral-600">Recipient:</span>
+                  <span className="font-medium text-neutral-900">
                     {selectedRecipient ? (
                       <div className="text-right">
                         <div>{selectedRecipient.name}</div>
-                        <div className="text-sm text-gray-500">{selectedRecipient.phone}</div>
+                        <div className="text-sm text-neutral-500">{selectedRecipient.phone}</div>
                       </div>
                     ) : (
                       recipientPhone
@@ -240,32 +240,32 @@ const SendMoney: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Amount:</span>
-                  <span className="font-medium">
+                  <span className="text-neutral-600">Amount:</span>
+                  <span className="font-medium text-neutral-900 font-mono">
                     {ugxAmount && `${parseFloat(ugxAmount).toLocaleString()} UGX`}
                     {ugxAmount && usdcAmount && ' ≈ '}
-                    {usdcAmount && `${parseFloat(usdcAmount).toFixed(2)} USDC`}
+                    {usdcAmount && `$${parseFloat(usdcAmount).toFixed(2)} USD`}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Fee:</span>
-                  <span className="font-medium">Free</span>
+                  <span className="text-neutral-600">Fee:</span>
+                  <span className="font-medium text-green-600">Free</span>
                 </div>
-                <div className="border-t pt-2 flex justify-between font-semibold">
-                  <span>Total:</span>
-                  <span>
+                <div className="border-t border-neutral-200 pt-3 flex justify-between font-semibold">
+                  <span className="text-neutral-900">Total:</span>
+                  <span className="text-neutral-900 font-mono">
                     {ugxAmount && `${parseFloat(ugxAmount).toLocaleString()} UGX`}
                     {ugxAmount && usdcAmount && ' ≈ '}
-                    {usdcAmount && `${parseFloat(usdcAmount).toFixed(2)} USDC`}
+                    {usdcAmount && `$${parseFloat(usdcAmount).toFixed(2)} USD`}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-4">
               <button
                 onClick={() => setSendStep(1)}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200"
+                className="flex-1 bg-neutral-100 text-neutral-700 py-3 rounded-lg font-semibold hover:bg-neutral-200 transition-colors duration-200"
               >
                 Back
               </button>
@@ -275,7 +275,7 @@ const SendMoney: React.FC = () => {
                   // Simulate transaction processing
                   setTimeout(() => setSendStep(1), 2000);
                 }}
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+                className="flex-1 bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 transition-colors duration-200"
               >
                 Send Money
               </button>
@@ -284,23 +284,24 @@ const SendMoney: React.FC = () => {
         )}
 
         {sendStep === 3 && (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-green-600" />
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Check className="w-10 h-10 text-green-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Money Sent Successfully!</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-xl font-semibold text-neutral-900 mb-3">Money Sent Successfully!</h3>
+            <p className="text-neutral-600 mb-6 font-mono">
               {ugxAmount && `${parseFloat(ugxAmount).toLocaleString()} UGX`}
               {ugxAmount && usdcAmount && ' ≈ '}
-              {usdcAmount && `${parseFloat(usdcAmount).toFixed(2)} USDC`} has been sent to {selectedRecipient ? selectedRecipient.name : recipientPhone}
+              {usdcAmount && `$${parseFloat(usdcAmount).toFixed(2)} USD`} has been sent to {selectedRecipient ? selectedRecipient.name : recipientPhone}
             </p>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-neutral-500 bg-neutral-50 px-4 py-2 rounded-lg inline-block">
               Transaction ID: TXN{Date.now().toString().slice(-6)}
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

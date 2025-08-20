@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   LogOut
 } from 'lucide-react';
-import { UserData } from '../types/user_dashboard';
 import { Route } from '../routes/userRoutes';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Notification } from '../types/notification';
@@ -32,16 +31,7 @@ const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes}
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   
-  // Mock user data
-  const [user] = useState<UserData>({
-    name: 'John Kamau',
-    phone: '+256701234567',
-    balances: {
-      UGX: 850000,
-      USDC: 245.50
-    },
-    isVerified: true
-  });
+  // Mock user data - removed unused variable
 
   // Mock notifications data
   const [notifications] = useState<Notification[]>([
@@ -120,7 +110,7 @@ const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes}
 const isActive = (path:string) => location.pathname.startsWith(path);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       {/* Mobile Brand Header */}
       <div className="md:hidden bg-white border-b border-gray-100 px-4 py-3">
         <div className="flex items-center ">
@@ -128,36 +118,26 @@ const isActive = (path:string) => location.pathname.startsWith(path);
         </div>
       </div>
 
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100 px-4 py-4 md:px-6">
-        <div className="flex items-center justify-between max-w-6xl mx-auto px-6">
-          <div>
-            {/* <h1 className="text-lg font-semibold text-gray-800 md:text-xl">
-              Hello, {user.name.split(' ')[0]}
-            </h1>
-            <p className="text-sm text-gray-600">Welcome back to your wallet</p> */}
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <button 
-                className="relative p-2 text-gray-600 hover:text-gray-800"
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                )}
-              </button>
-
-            
-            </div>
-          </div>
+      {/* Floating Notification Bell */}
+      <div className="fixed top-4 right-6 z-50">
+        <div className="relative">
+          <button 
+            className="relative p-3 bg-white text-gray-600 hover:text-gray-800 rounded-full shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-200"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-medium">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              </span>
+            )}
+          </button>
         </div>
-      </header>
+      </div>
 
         {/* Notifications Dropdown */}
         {showNotifications && (
-          <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
+          <div className="fixed top-16 right-6 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
             <div className="p-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
               {unreadCount > 0 && (
@@ -289,15 +269,15 @@ const isActive = (path:string) => location.pathname.startsWith(path);
       </nav>
 
       {/* Desktop Sidebar Navigation */}
-      <nav className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex-col">
+      <nav className="hidden md:flex fixed left-0 top-0 h-full w-72 bg-white border-r border-neutral-200 flex-col shadow-sm">
         {/* Brand Section */}
-        <div className="p-5 border-b border-gray-200">
+        <div className="px-6 py-6 border-b border-neutral-200">
           <AfriTokeniLogo/>
         </div>
         
         {/* Navigation Links */}
-        <div className="p-6 flex-1">
-          <div className="space-y-2">
+        <div className="px-4 py-6 flex-1">
+          <div className="space-y-1">
             {desktop_routes.map((route: Route) => {
               const Icon = route.icon;
               const isActiveRoute = isActive(route.path);
@@ -305,14 +285,14 @@ const isActive = (path:string) => location.pathname.startsWith(path);
                 <button
                   key={route.id}
                   onClick={() => navigate(route.path)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 text-sm font-medium ${
                     isActiveRoute 
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                      ? 'text-white bg-neutral-900 shadow-sm' 
+                      : 'text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
-                  <span className="font-medium">{route.label}</span>
+                  <span>{route.label}</span>
                 </button>
               );
             })}
@@ -320,13 +300,13 @@ const isActive = (path:string) => location.pathname.startsWith(path);
         </div>
         
         {/* Logout Button */}
-        <div className="p-6 border-t border-gray-200">
+        <div className="px-4 py-4 border-t border-neutral-200">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-600 hover:text-red-600 hover:bg-red-50"
+            className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 text-sm font-medium text-neutral-600 hover:text-red-600 hover:bg-red-50"
           >
             <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
+            <span>Sign out</span>
           </button>
         </div>
       </nav>
@@ -336,9 +316,13 @@ const isActive = (path:string) => location.pathname.startsWith(path);
         @media (min-width: 768px) {
           main {
             margin-left: 16rem;
+            margin-right: 2rem;
+            max-width: calc(100vw - 18rem);
           }
           header {
             margin-left: 16rem;
+            margin-right: 2rem;
+            max-width: calc(100vw - 18rem);
           }
         }
         .line-clamp-2 {
