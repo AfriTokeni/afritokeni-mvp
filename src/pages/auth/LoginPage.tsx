@@ -35,23 +35,21 @@ const LoginPage: React.FC = () => {
     setError('');
   };
 
+  const handleICPLogin = async () => {
+    try {
+      const success = await login({} as LoginFormData, 'web');
+      if (success) {
+        // Redirect to user dashboard after successful ICP authentication
+        navigate('/users/dashboard');
+      }
+    } catch (error) {
+      setError('Authentication failed. Please try again.');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.emailOrPhone || !formData.password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    const success = await login(formData);
-    
-    if (success) {
-      // Redirect based on user type
-      const redirectPath = formData.userType === 'user' ? '/users/dashboard' : '/agents/dashboard';
-      navigate(redirectPath);
-    } else {
-      setError('Invalid credentials. Please try again.');
-    }
+    await handleICPLogin();
   };
 
   return (
@@ -175,11 +173,12 @@ const LoginPage: React.FC = () => {
 
             <div>
               <button
-                type="submit"
+                type="button"
+                onClick={handleICPLogin}
                 disabled={isLoading}
-                className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-indigo-600 to-purple-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? 'Connecting to Internet Identity...' : '🔐 Sign in with Internet Identity'}
               </button>
             </div>
           </form>

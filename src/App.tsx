@@ -25,6 +25,12 @@ import RegisterPage from "./pages/auth/RegisterPage";
 import UserKYCPage from "./pages/auth/UserKYCPage";
 import AgentKYCPage from "./pages/auth/AgentKYCPage";
 
+// SMS Interface
+import SMSInterface from "./components/SMSInterface";
+
+// Landing Page
+import LandingPage from "./pages/LandingPage";
+
 const App: FC = () => {
   useEffect(() => {
     (async () =>
@@ -39,9 +45,10 @@ const App: FC = () => {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Auth Routes */}
-          <Route path="/auth/login" element={<LoginPage />} />
-          <Route path="/auth/register" element={<RegisterPage />} />
+          {/* Auth Routes - Removed since ICP auth is handled directly on landing page */}
+          
+          {/* SMS Interface Demo */}
+          <Route path="/sms" element={<SMSInterface />} />
     
           {/* User Routes */}
           <Route path="/users/*" element={
@@ -72,8 +79,10 @@ const App: FC = () => {
             </Layout>
           } />
           
+          {/* Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+          
           {/* Default redirects */}
-          <Route path="/" element={<Navigate to="/auth/login" replace />} />
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />
         </Routes>
       </AuthProvider>

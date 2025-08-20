@@ -49,13 +49,15 @@ export interface User {
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
   createdAt: Date;
+  junoUser?: any; // Juno User object
 }
 
 export interface AuthContextType {
   user: User | null;
-  login: (formData: LoginFormData) => Promise<boolean>;
-  register: (formData: RegisterFormData) => Promise<boolean>;
-  logout: () => void;
+  authMethod: 'sms' | 'web';
+  login: (formData: LoginFormData, method?: 'sms' | 'web') => Promise<boolean>;
+  register: (formData: RegisterFormData, method?: 'sms' | 'web') => Promise<boolean>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
