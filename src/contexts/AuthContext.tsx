@@ -17,13 +17,13 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-// Hybrid authentication for AfriTokeni - serves both SMS-only and web users
+// Hybrid authentication for AfriTokeni - SMS for users without internet, ICP for web users
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'sms' | 'web'>('web');
 
-  // Subscribe to Juno authentication state
+  // Subscribe to Juno authentication state for web users
   useEffect(() => {
     const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
       if (junoUser) {
@@ -33,11 +33,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           firstName: 'ICP',
           lastName: 'User',
           email: junoUser.key, // Use key as identifier
-          phone: '',
           userType: 'user',
           isVerified: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          kycStatus: 'not_started',
+          createdAt: new Date()
         };
         setUser(afritokeniUser);
         setAuthMethod('web');
@@ -53,16 +52,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  // Hybrid login - supports both SMS and web authentication
+  // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
     setIsLoading(true);
     try {
       if (method === 'web') {
-        // Use Juno/ICP Internet Identity authentication
+        // Use Juno/ICP Internet Identity authentication for web users
         await signIn();
         return true;
       } else if (method === 'sms') {
-        // SMS-based authentication for feature phone users
+        // SMS-based authentication for users without internet (feature phones)
         // In real implementation:
         // 1. Send SMS with verification code to formData.emailOrPhone
         // 2. User replies with code via SMS
@@ -113,12 +112,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('afritokeni_user', JSON.stringify(existingUser));
         localStorage.setItem('afritokeni_auth_method', 'sms');
         
+        return true;
       } else {
-        // This should not be reached as web auth is handled above
         throw new Error('Invalid authentication method');
       }
-      
-      return true;
     } catch (error) {
       console.error('Login error:', error);
       return false;
@@ -127,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // SMS-based registration
+  // SMS-based registration for users without internet
   const register = async (formData: RegisterFormData): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -143,7 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: nanoid(),
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email, // This is actually phone number
+        email: formData.email, // This is actually phone number for SMS users
         userType: formData.userType,
         isVerified: true, // SMS verified
         kycStatus: 'not_started',
@@ -161,7 +158,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Set user as logged in
       setUser(newUser);
+      setAuthMethod('sms');
       localStorage.setItem('afritokeni_user', JSON.stringify(newUser));
+      localStorage.setItem('afritokeni_auth_method', 'sms');
       
       return true;
     } catch (error) {
