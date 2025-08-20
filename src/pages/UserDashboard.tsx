@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import KYCStatusAlert from '../components/KYCStatusAlert';
+import PageLayout from '../components/PageLayout';
 
 
 
@@ -64,52 +65,53 @@ const UserDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    // <PageLayout title="Dashboard">
+      <div className="space-y-6">
       {/* KYC Status Alert */}
       <KYCStatusAlert />
       
       {/* Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-blue-100 text-sm">UGX Balance</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl md:text-3xl font-bold">
-                  {showBalance ? formatCurrency(user.balances.UGX, 'UGX') : '****'}
+              <p className="text-gray-600 text-sm font-medium">UGX Balance</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">
+                  {showBalance ? formatCurrency(user?.balances?.UGX, 'UGX') : '****'}
                 </span>
                 <button 
                   onClick={() => setShowBalance(!showBalance)}
-                  className="text-blue-200 hover:text-white"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-              <span className="text-xs font-semibold">UGX</span>
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <span className="text-xs font-semibold text-gray-700">UGX</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white p-6 rounded-2xl">
+        <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-purple-100 text-sm">USDC Balance</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl md:text-3xl font-bold">
-                  {showBalance ? formatCurrency(user.balances.USDC, 'USDC') : '****'}
+              <p className="text-gray-600 text-sm font-medium">USDC Balance</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">
+                  {showBalance ? formatCurrency(user?.balances?.USDC, 'USDC') : '****'}
                 </span>
                 <button 
                   onClick={() => setShowBalance(!showBalance)}
-                  className="text-purple-200 hover:text-white"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-              <span className="text-xs font-semibold">USDC</span>
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <span className="text-xs font-semibold text-gray-700">USDC</span>
             </div>
           </div>
         </div>
@@ -193,7 +195,8 @@ const UserDashboard: React.FC = () => {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    // </PageLayout>
   );
 };
 

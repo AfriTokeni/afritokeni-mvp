@@ -15,12 +15,14 @@ const AfriTokeniLogo: React.FC<AfriTokeniLogoProps> = ({ size = 'md', className 
   const { icon, text, iconText } = sizeClasses[size];
 
   return (
-    <div className={`flex items-center space-x-3 ${className}`}>
-      <div className={`${icon} bg-blue-600 rounded-lg flex items-center justify-center`}>
-        <span className={`text-white font-bold ${iconText}`}>A</span>
+      <div className="flex items-center space-x-3">
+        <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-sm">A</span>
+        </div>
+        <h1 className="text-xl font-semibold text-gray-900">
+          AfriTokeni
+        </h1>
       </div>
-      <span className={`${text} font-bold text-gray-800`}>AfriTokeni</span>
-    </div>
   );
 };
 

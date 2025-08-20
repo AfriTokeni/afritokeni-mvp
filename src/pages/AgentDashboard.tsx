@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import KYCStatusAlert from '../components/KYCStatusAlert';
+import PageLayout from '../components/PageLayout';
 
 interface AgentStatus {
   status: 'available' | 'busy' | 'cash-out';
@@ -264,47 +265,47 @@ const AgentDashboard: React.FC = () => {
       {/* Balance Cards & Quick Actions Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* UGX Balance Card */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-4 rounded-xl">
+        <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
           <div className="flex justify-between items-start mb-3">
             <div>
-              <p className="text-blue-100 text-xs">UGX Balance</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-xl font-bold">
+              <p className="text-gray-600 text-sm font-medium">UGX Balance</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">
                   {showBalance ? formatCurrency(balance.digital.ugx, 'UGX') : '****'}
                 </span>
                 <button 
                   onClick={() => setShowBalance(!showBalance)}
-                  className="text-blue-200 hover:text-white"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
-            <div className="bg-white bg-opacity-20 p-1 rounded">
-              <span className="text-xs font-semibold">UGX</span>
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <span className="text-xs font-semibold text-gray-700">UGX</span>
             </div>
           </div>
         </div>
 
         {/* USDC Balance Card */}
-        <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white p-4 rounded-xl">
-          <div className="flex justify-between items-start mb-3">
+        <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-purple-100 text-xs">USDC Balance</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-xl font-bold">
+              <p className="text-gray-600 text-sm font-medium">USDC Balance</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">
                   {showBalance ? formatCurrency(balance.digital.usdc, 'USDC') : '****'}
                 </span>
                 <button 
                   onClick={() => setShowBalance(!showBalance)}
-                  className="text-purple-200 hover:text-white"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
-            <div className="bg-white bg-opacity-20 p-1 rounded">
-              <span className="text-xs font-semibold">USDC</span>
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <span className="text-xs font-semibold text-gray-700">USDC</span>
             </div>
           </div>
         </div>
@@ -414,7 +415,7 @@ const AgentDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
   );
 };
 
