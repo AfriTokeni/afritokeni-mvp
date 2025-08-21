@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { getDoc, setDoc, type User as JunoUser } from '@junobuild/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export type UserRole = 'user' | 'agent';
 
@@ -13,8 +13,16 @@ interface RoleData {
 export const useRoleBasedAuth = () => {
   const [isCheckingRole, setIsCheckingRole] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const inFlightRef = useRef(false);
+  const lastHandledUserKeyRef = useRef<string | null>(null);
+  const lastNavigatedPathRef = useRef<string | null>(null);
 
-  const checkAndRedirectUser = async (junoUser: JunoUser) => {
+  const checkAndRedirectUser = useCallback(async (junoUser: JunoUser) => {
+    if (inFlightRef.current || lastHandledUserKeyRef.current === junoUser.key) {
+      return;
+    }
+    inFlightRef.current = true;
     setIsCheckingRole(true);
     try {
       const roleDoc = await getDoc({
@@ -26,44 +34,37 @@ export const useRoleBasedAuth = () => {
         // User has existing role, redirect accordingly
         const roleData = roleDoc.data as RoleData;
         
-        try {
-          // Update last login
-          await setDoc({
-            collection: 'user_roles',
-            doc: {
-              key: junoUser.key,
-              data: {
-                ...roleData,
-                lastLogin: new Date().toISOString()
-              },
-              version: roleDoc.version
-            }
-          });
-        } catch (updateError) {
-          console.warn('Failed to update last login:', updateError);
-          // Continue with redirect even if update fails
-        }
-
-        // Redirect based on role
-        if (roleData.role === 'agent') {
-          navigate('/agents/dashboard');
-        } else {
-          navigate('/users/dashboard');
+        // Skip login update for now to avoid version issues
+        // Just redirect based on role
+        const target = roleData.role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
+        if (location.pathname !== target) {
+          navigate(target, { replace: true });
+          lastNavigatedPathRef.current = target;
         }
       } else {
         // New user - need to determine role
-        navigate('/auth/role-selection');
+        const target = '/auth/role-selection';
+        if (location.pathname !== target) {
+          navigate(target, { replace: true });
+          lastNavigatedPathRef.current = target;
+        }
       }
     } catch (error) {
       console.error('Error checking user role:', error);
       // For new users or on error, go to role selection
-      navigate('/auth/role-selection');
+      const target = '/auth/role-selection';
+      if (location.pathname !== target) {
+        navigate(target, { replace: true });
+        lastNavigatedPathRef.current = target;
+      }
     } finally {
+      lastHandledUserKeyRef.current = junoUser.key;
+      inFlightRef.current = false;
       setIsCheckingRole(false);
     }
-  };
+  }, [location.pathname, navigate]);
 
-  const setUserRole = async (junoUser: JunoUser, role: UserRole) => {
+  const setUserRole = useCallback(async (junoUser: JunoUser, role: UserRole) => {
     try {
       let existingRoleData;
       try {
@@ -94,20 +95,21 @@ export const useRoleBasedAuth = () => {
       });
 
       // Redirect based on selected role
-      setTimeout(() => {
-        if (role === 'agent') {
-          navigate('/agents/dashboard');
-        } else {
-          navigate('/users/dashboard');
-        }
-      }, 100);
+      const target = role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
+      if (location.pathname !== target) {
+        // small timeout keeps UX smooth post-write
+        setTimeout(() => {
+          navigate(target, { replace: true });
+          lastNavigatedPathRef.current = target;
+        }, 50);
+      }
     } catch (error) {
       console.error('Error setting user role:', error);
       throw error;
     }
-  };
+  }, [location.pathname, navigate]);
 
-  const getUserRole = async (junoUser: JunoUser): Promise<UserRole | null> => {
+  const getUserRole = useCallback(async (junoUser: JunoUser): Promise<UserRole | null> => {
     try {
       const roleDoc = await getDoc({
         collection: 'user_roles',
@@ -122,7 +124,7 @@ export const useRoleBasedAuth = () => {
       console.error('Error getting user role:', error);
       return null;
     }
-  };
+  }, []);
 
   return {
     isCheckingRole,
