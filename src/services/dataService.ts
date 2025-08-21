@@ -66,24 +66,27 @@ export interface SMSMessage {
 
 // Simplified data service following Juno patterns
 export class DataService {
-  // Transaction operations
+    // Transaction operations
   static async createTransaction(transaction: Omit<Transaction, 'id' | 'createdAt'>): Promise<Transaction> {
-    const id = nanoid();
+    const now = new Date();
     const newTransaction: Transaction = {
       ...transaction,
-      id,
-      createdAt: new Date()
+      id: nanoid(),
+      createdAt: now
+    };
+
+    // Convert Date fields to ISO strings
+    const dataForJuno = {
+      ...newTransaction,
+      createdAt: now.toISOString(),
+      completedAt: newTransaction.completedAt ? newTransaction.completedAt.toISOString() : undefined
     };
 
     await setDoc({
       collection: 'transactions',
       doc: {
-        key: id,
-        data: {
-          ...newTransaction,
-          createdAt: newTransaction.createdAt.toISOString()
-        },
-        version: undefined
+        key: newTransaction.id,
+        data: dataForJuno
       }
     });
 
@@ -125,15 +128,22 @@ export class DataService {
       if (!existing) return false;
 
       const updated = { ...existing, ...updates };
-      
+
+      // Convert Date fields to ISO strings
+      const dataForJuno = {
+        ...updated,
+        createdAt: updated.createdAt ? updated.createdAt.toISOString() : undefined,
+        completedAt: updated.completedAt ? updated.completedAt.toISOString() : undefined
+      };
+
       await setDoc({
         collection: 'transactions',
         doc: {
           key: id,
-          data: updated
+          data: dataForJuno
         }
       });
-      
+
       return true;
     } catch (error) {
       console.error('Error updating transaction:', error);
@@ -157,21 +167,28 @@ export class DataService {
 
   static async updateUserBalance(userId: string, balance: number): Promise<boolean> {
     try {
+      const now = new Date();
       const userBalance: UserBalance = {
         userId,
         balance,
         currency: 'UGX',
-        lastUpdated: new Date()
+        lastUpdated: now
+      };
+
+      // Convert Date field to ISO string
+      const dataForJuno = {
+        ...userBalance,
+        lastUpdated: now.toISOString()
       };
 
       await setDoc({
         collection: 'balances',
         doc: {
           key: userId,
-          data: userBalance
+          data: dataForJuno
         }
       });
-      
+
       return true;
     } catch (error) {
       console.error('Error updating user balance:', error);
@@ -181,17 +198,24 @@ export class DataService {
 
   // Agent operations
   static async createAgent(agent: Omit<Agent, 'id' | 'createdAt'>): Promise<Agent> {
+    const now = new Date();
     const newAgent: Agent = {
       ...agent,
       id: nanoid(),
-      createdAt: new Date()
+      createdAt: now
+    };
+
+    // Convert Date field to ISO string
+    const dataForJuno = {
+      ...newAgent,
+      createdAt: now.toISOString()
     };
 
     await setDoc({
       collection: 'agents',
       doc: {
         key: newAgent.id,
-        data: newAgent
+        data: dataForJuno
       }
     });
 
@@ -251,17 +275,24 @@ export class DataService {
 
   // SMS operations
   static async logSMSMessage(message: Omit<SMSMessage, 'id' | 'createdAt'>): Promise<SMSMessage> {
+    const now = new Date();
     const newMessage: SMSMessage = {
       ...message,
       id: nanoid(),
-      createdAt: new Date()
+      createdAt: now
+    };
+
+    // Convert Date field to ISO string
+    const dataForJuno = {
+      ...newMessage,
+      createdAt: now.toISOString()
     };
 
     await setDoc({
       collection: 'sms_messages',
       doc: {
         key: newMessage.id,
-        data: newMessage
+        data: dataForJuno
       }
     });
 
@@ -365,7 +396,7 @@ export class DataService {
     return `Confirm sending UGX ${amount.toLocaleString()} to ${phone}? Reply YES with your PIN.`;
   }
 
-  private static async handleAgentsCommand(userId?: string): Promise<string> {
+  private static async handleAgentsCommand(_userId?: string): Promise<string> {
     // For demo, return mock agents
     return `Nearest agents:
 1. Kampala Rd Shop - 0.2km
