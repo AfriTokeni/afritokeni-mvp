@@ -12,9 +12,7 @@ import { Route } from '../routes/userRoutes';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Notification } from '../types/notification';
 import AfriTokeniLogo from './AfriTokeniLogo';
-import { useAuth } from '../contexts/AuthContext';
-
-
+import { useAuthentication } from '../context/AuthenticationContext';
 interface LayoutProps {
   children: React.ReactNode;
   desktop_routes:Route[];
@@ -26,7 +24,8 @@ const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes}
   
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const {logout} = useAuthentication();
+
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);

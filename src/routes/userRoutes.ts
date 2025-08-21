@@ -1,11 +1,10 @@
 import type { LucideIcon } from 'lucide-react';
-import { 
-  Home, 
-  Send, 
-  History, 
-  MapPin, 
+import {
+  Home,
+  Send,
+  History,
+  Banknote,
   User,
-  Banknote
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 

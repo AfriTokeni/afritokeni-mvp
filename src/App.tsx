@@ -2,7 +2,7 @@ import { initSatellite } from "@junobuild/core";
 import { FC, useEffect } from "react";
 import junoConfig from "../juno.config";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthenticationProvider } from "./context/AuthenticationContext.tsx";
 import Layout from "./components/Layout.tsx";
 import { user_desktop_routes, user_mobile_routes } from "./routes/userRoutes.ts";
 import { agent_desktop_routes, agent_mobile_routes } from "./routes/agentRoutes.ts";
@@ -28,7 +28,7 @@ import UserKYCPage from "./pages/auth/UserKYCPage";
 import AgentKYCPage from "./pages/auth/AgentKYCPage";
 
 // SMS Interface
-import SMSInterface from "./components/SMSInterface";
+import SMSUI from "./components/SMSUI.tsx";
 
 // Landing Page
 import LandingPage from "./pages/LandingPage";
@@ -54,12 +54,12 @@ const App: FC = () => {
 
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <AuthenticationProvider>
         <Routes>
           {/* Auth Routes - Only Juno/ICP authentication used */}
           
           {/* SMS Interface Demo */}
-          <Route path="/sms" element={<SMSInterface />} />
+          <Route path="/sms" element={<SMSUI />} />
     
           {/* User Routes */}
           <Route path="/users/*" element={
@@ -100,7 +100,7 @@ const App: FC = () => {
           {/* Default redirects */}
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />
         </Routes>
-      </AuthProvider>
+      </AuthenticationProvider>
     </BrowserRouter>
   );
 };

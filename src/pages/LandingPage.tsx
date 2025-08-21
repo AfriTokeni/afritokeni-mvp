@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Smartphone, Zap, Lock } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
 
 const LandingPage: React.FC = () => {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading } = useAuthentication();
 
   const handleICPLogin = async () => {
     try {

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { User, Check, LogOut, Shield, Bell, MapPin, Clock, DollarSign } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
+import { useAuthentication } from '../context/AuthenticationContext';
 
 interface AgentData {
   name: string;
@@ -15,7 +15,7 @@ interface AgentData {
 }
 
 const AgentSettings: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout } = useAuthentication();
   const navigate = useNavigate();
   
   // Mock agent data

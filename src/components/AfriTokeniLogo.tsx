@@ -5,7 +5,7 @@ interface AfriTokeniLogoProps {
   className?: string;
 }
 
-const AfriTokeniLogo: React.FC<AfriTokeniLogoProps> = ({ size = 'md', className = '' }) => {
+const AfriTokeniLogo: React.FC<AfriTokeniLogoProps> = ({ size = 'md' }) => {
   const sizeClasses = {
     sm: { icon: 'w-6 h-6', text: 'text-lg', iconText: 'text-sm' },
     md: { icon: 'w-8 h-8', text: 'text-xl', iconText: 'text-lg' },
@@ -16,10 +16,10 @@ const AfriTokeniLogo: React.FC<AfriTokeniLogoProps> = ({ size = 'md', className 
 
   return (
       <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">A</span>
+        <div className={`${icon} bg-black rounded-lg flex items-center justify-center`}>
+          <span className={`text-white font-bold ${iconText}`}>A</span>
         </div>
-        <h1 className="text-xl font-semibold text-gray-900">
+        <h1 className={`${text} font-semibold text-gray-900`}>
           AfriTokeni
         </h1>
       </div>

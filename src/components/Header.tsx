@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuthentication } from '../context/AuthenticationContext';
 import { signOut } from '@junobuild/core';
 
 interface HeaderProps {
@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({
   showUserMenu = true 
 }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthentication();
 
   const handleLogout = async () => {
     try {
