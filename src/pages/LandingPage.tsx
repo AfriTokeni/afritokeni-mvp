@@ -1,18 +1,18 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Smartphone, Zap, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { LoginFormData } from '../types/auth';
 
 const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
   const { login, isLoading } = useAuth();
 
   const handleICPLogin = async () => {
     try {
       const success = await login({} as LoginFormData, 'web');
-      if (success) {
-        navigate('/users/dashboard');
+      // Don't navigate here - let the AuthContext handle role-based routing
+      if (!success) {
+        console.error('Authentication failed');
       }
     } catch (error) {
       console.error('Authentication failed:', error);
@@ -78,8 +78,84 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* SMS Demo Section */}
       <section className="bg-gray-50 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Try SMS Banking Now
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              See how easy it is to bank with just text messages
+            </p>
+          </div>
+          
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-50 border border-green-100 text-green-700 text-sm font-medium mb-4">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Live SMS Demo
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Try these commands:</h3>
+                  <p className="text-gray-600">Click any command to see how SMS banking works</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    to="/sms"
+                    state={{ command: '*AFRI#' }}
+                    className="text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-200 transition-colors group"
+                  >
+                    <div className="font-mono text-indigo-600 font-medium text-sm group-hover:text-indigo-700">*AFRI#</div>
+                    <div className="text-gray-600 text-xs mt-1">Main Menu</div>
+                  </Link>
+                  
+                  <Link
+                    to="/sms"
+                    state={{ command: 'BAL' }}
+                    className="text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-200 transition-colors group"
+                  >
+                    <div className="font-mono text-indigo-600 font-medium text-sm group-hover:text-indigo-700">BAL</div>
+                    <div className="text-gray-600 text-xs mt-1">Check Balance</div>
+                  </Link>
+                  
+                  <Link
+                    to="/sms"
+                    state={{ command: 'AGENTS' }}
+                    className="text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-200 transition-colors group"
+                  >
+                    <div className="font-mono text-indigo-600 font-medium text-sm group-hover:text-indigo-700">AGENTS</div>
+                    <div className="text-gray-600 text-xs mt-1">Find Agents</div>
+                  </Link>
+                  
+                  <Link
+                    to="/sms"
+                    state={{ command: 'SEND 10000 256701234567' }}
+                    className="text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-200 transition-colors group"
+                  >
+                    <div className="font-mono text-indigo-600 font-medium text-sm group-hover:text-indigo-700">SEND</div>
+                    <div className="text-gray-600 text-xs mt-1">Send Money</div>
+                  </Link>
+                </div>
+                
+                <div className="text-center pt-4 border-t border-gray-200">
+                  <Link
+                    to="/sms"
+                    className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium text-sm"
+                  >
+                    Try full SMS interface →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">

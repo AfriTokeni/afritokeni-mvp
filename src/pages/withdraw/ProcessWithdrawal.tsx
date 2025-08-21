@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import WithdrawalList from './WithdrawalList';
 import VerifyIdentity from './VerifyIdentity';
 import ApproveWithdrawal from './ApproveWithdrawal';
+import PageLayout from '../../components/PageLayout';
 
 export interface WithdrawalRequest {
   id: string;
@@ -61,69 +62,71 @@ const ProcessWithdrawal: React.FC = () => {
   };
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => currentStep === 'list' ? navigate('/agents/dashboard') : handleBack()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">{getStepTitle()}</h1>
-            <p className="text-sm text-gray-600">
-              {currentStep === 'list' && 'Select a withdrawal request to process'}
-              {currentStep === 'verify' && 'Verify the customer\'s identity before proceeding'}
-              {currentStep === 'approve' && 'Enter withdrawal code to complete the transaction'}
-            </p>
+    <PageLayout>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => currentStep === 'list' ? navigate('/agents/dashboard') : handleBack()}
+              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
+            >
+              <ArrowLeft className="w-5 h-5 text-neutral-600" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-neutral-900">{getStepTitle()}</h1>
+              <p className="text-sm text-neutral-600 mt-1">
+                {currentStep === 'list' && 'Select a withdrawal request to process'}
+                {currentStep === 'verify' && 'Verify the customer\'s identity before proceeding'}
+                {currentStep === 'approve' && 'Enter withdrawal code to complete the transaction'}
+              </p>
+            </div>
+          </div>
+          
+          {/* Step Indicator */}
+          <div className="flex items-center space-x-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+              currentStep === 'list' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
+            }`}>
+              1
+            </div>
+            <div className="w-8 h-0.5 bg-neutral-300"></div>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+              currentStep === 'verify' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
+            }`}>
+              2
+            </div>
+            <div className="w-8 h-0.5 bg-neutral-300"></div>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+              currentStep === 'approve' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
+            }`}>
+              3
+            </div>
           </div>
         </div>
-        
-        {/* Step Indicator */}
-        <div className="flex items-center space-x-2">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            currentStep === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
-            1
-          </div>
-          <div className="w-8 h-0.5 bg-gray-300"></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            currentStep === 'verify' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
-            2
-          </div>
-          <div className="w-8 h-0.5 bg-gray-300"></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            currentStep === 'approve' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
-            3
-          </div>
-        </div>
-      </div>
 
-      {/* Step Content */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        {currentStep === 'list' && (
-          <WithdrawalList onSelectWithdrawal={handleSelectWithdrawal} />
-        )}
-        
-        {currentStep === 'verify' && selectedWithdrawal && (
-          <VerifyIdentity 
-            withdrawal={selectedWithdrawal} 
-            onVerifyComplete={handleVerifyComplete}
-          />
-        )}
-        
-        {currentStep === 'approve' && selectedWithdrawal && (
-          <ApproveWithdrawal 
-            withdrawal={selectedWithdrawal}
-            onApprovalComplete={handleApprovalComplete}
-          />
-        )}
+        {/* Step Content */}
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+          {currentStep === 'list' && (
+            <WithdrawalList onSelectWithdrawal={handleSelectWithdrawal} />
+          )}
+          
+          {currentStep === 'verify' && selectedWithdrawal && (
+            <VerifyIdentity 
+              withdrawal={selectedWithdrawal} 
+              onVerifyComplete={handleVerifyComplete}
+            />
+          )}
+          
+          {currentStep === 'approve' && selectedWithdrawal && (
+            <ApproveWithdrawal 
+              withdrawal={selectedWithdrawal}
+              onApprovalComplete={handleApprovalComplete}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

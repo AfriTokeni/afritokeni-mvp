@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authSubscribe, signIn, signOut, setDoc, getDoc, type User as JunoUser } from '@junobuild/core';
 import { AuthContextType, User, LoginFormData, RegisterFormData } from '../types/auth';
+import { useRoleBasedAuth } from '../hooks/useRoleBasedAuth';
 import { nanoid } from 'nanoid';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,18 +23,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'sms' | 'web'>('web');
+  const { checkAndRedirectUser } = useRoleBasedAuth();
 
   // Subscribe to Juno authentication state for web users
   useEffect(() => {
     const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
       if (junoUser) {
-        // Convert Juno user to our User type
+        // For ICP users, check their role and redirect accordingly
+        checkAndRedirectUser(junoUser);
+        
+        // Convert Juno user to our User type (role will be determined by the hook)
         const afritokeniUser: User = {
           id: junoUser.key,
           firstName: 'ICP',
           lastName: 'User',
           email: junoUser.key, // Use key as identifier
-          userType: 'user',
+          userType: 'user', // This will be updated based on role check
           isVerified: true,
           kycStatus: 'not_started',
           createdAt: new Date()
@@ -50,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [checkAndRedirectUser]);
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
@@ -178,15 +183,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
-    if (authMethod === 'web') {
-      // Use Juno signOut for web users
-      await signOut();
-    } else {
-      // For SMS users, just clear local state
+    try {
+      if (authMethod === 'web') {
+        // Use Juno signOut for web users
+        await signOut();
+      }
+      
+      // Clear local state for all auth methods
       setUser(null);
       setAuthMethod('web');
       localStorage.removeItem('afritokeni_user');
       localStorage.removeItem('afritokeni_auth_method');
+      
+      // Force redirect to landing page
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if signOut fails
+      setUser(null);
+      setAuthMethod('web');
+      localStorage.removeItem('afritokeni_user');
+      localStorage.removeItem('afritokeni_auth_method');
+      window.location.href = '/';
     }
   };
 
