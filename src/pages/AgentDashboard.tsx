@@ -324,40 +324,40 @@ const AgentDashboard: React.FC = () => {
             onClick={() => navigate('/agents/deposit')}
             className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <Plus className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <Plus className="w-6 h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-800 block text-center">Deposit</span>
+            <span className="text-sm font-semibold text-neutral-900 block text-center">Deposit</span>
           </button>
 
           <button 
             onClick={() => navigate('/agents/withdraw')}
             className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <Minus className="w-6 h-6 text-red-600" />
+            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <Minus className="w-6 h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-800 block text-center">Withdrawal</span>
+            <span className="text-sm font-semibold text-neutral-900 block text-center">Withdrawal</span>
           </button>
 
           <button 
             onClick={() => navigate('/agents/customers')}
             className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <Users className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <Users className="w-6 h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-800 block text-center">Customers</span>
+            <span className="text-sm font-semibold text-neutral-900 block text-center">Customers</span>
           </button>
 
           <button 
             onClick={() => navigate('/agents/settings')}
             className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <CreditCard className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <CreditCard className="w-6 h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-800 block text-center">Settings</span>
+            <span className="text-sm font-semibold text-neutral-900 block text-center">Settings</span>
           </button>
         </div>
 
@@ -365,8 +365,8 @@ const AgentDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-green-600" />
+              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+                <TrendingUp className="h-6 w-6 text-neutral-600" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-neutral-600">Daily Earnings</p>
@@ -379,8 +379,8 @@ const AgentDashboard: React.FC = () => {
 
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <CreditCard className="h-6 w-6 text-blue-600" />
+              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+                <CreditCard className="h-6 w-6 text-neutral-600" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-neutral-600">Today's Transactions</p>
@@ -391,8 +391,8 @@ const AgentDashboard: React.FC = () => {
 
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-purple-600" />
+              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+                <Users className="h-6 w-6 text-neutral-600" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-neutral-600">Active Customers</p>
