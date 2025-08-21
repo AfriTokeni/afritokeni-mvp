@@ -9,8 +9,9 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
-import { getDoc } from '@junobuild/core';
 import { User as UserType } from '../types/auth';
+import { getDoc } from '@junobuild/core';
+import { DataService } from '../services/dataService';
 
 export interface DepositData {
   customerPhone: string;
@@ -81,6 +82,11 @@ const ProcessDeposit: React.FC = () => {
       }
     } catch (error) {
       console.error('Error searching user:', error);
+      setDepositData(prev => ({
+        ...prev,
+        customerPhone: phone,
+        customer: undefined
+      }));
     } finally {
       setIsSearchingUser(false);
     }
@@ -108,14 +114,83 @@ const ProcessDeposit: React.FC = () => {
     setIsProcessing(true);
     
     try {
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get current user's balance
+      const customerId = depositData.customer?.id || `user_${Date.now()}`;
+      let currentBalance = 0;
+      
+      try {
+        const balanceData = await DataService.getUserBalance(customerId);
+        currentBalance = balanceData?.balance || 0;
+      } catch {
+        console.log('No existing balance found, starting with 0');
+      }
+
+      // Create transaction in Juno datastore
+      const transaction = await DataService.createTransaction({
+        userId: customerId,
+        type: 'deposit',
+        amount: depositData.amount.ugx,
+        currency: 'UGX',
+        agentId: 'agent_001', // Mock agent ID - in production, get from auth context
+        status: 'completed',
+        description: `Cash deposit via agent`,
+        completedAt: new Date(),
+        metadata: {
+          agentLocation: 'Kampala Central',
+          smsReference: `DEP${Date.now().toString().slice(-6)}`
+        }
+      });
+
+      // Update user balance in Juno datastore
+      const newBalance = currentBalance + depositData.amount.ugx;
+      await DataService.updateUserBalance(customerId, newBalance);
+
+      // Initialize user data if new user
+      if (!depositData.customer) {
+        await DataService.initializeUserData(customerId);
+      }
+
+      // Send SMS notification via our webhook API
+      try {
+        const smsMessage = `AfriTokeni: You have received UGX ${depositData.amount.ugx.toLocaleString()} from Agent. New balance: UGX ${newBalance.toLocaleString()}. Transaction ID: ${transaction.id}. Thank you!`;
+        
+        // Call our SMS webhook to send notification
+        await fetch('http://localhost:3001/api/sms/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            phoneNumber: depositData.customerPhone,
+            message: smsMessage,
+            transactionId: transaction.id
+          })
+        });
+
+        // Log SMS in Juno datastore
+        await DataService.logSMSMessage({
+          userId: customerId,
+          phoneNumber: depositData.customerPhone,
+          message: smsMessage,
+          direction: 'outbound',
+          status: 'sent',
+          transactionId: transaction.id
+        });
+      } catch (smsError) {
+        console.error('SMS sending failed, but transaction completed:', smsError);
+      }
+
+      console.log('Deposit processed successfully:', transaction);
       setCurrentStep('complete');
       
       // Auto redirect after success
       setTimeout(() => {
         handleNewDeposit();
       }, 3000);
+
+    } catch (error) {
+      console.error('Error processing deposit:', error);
+      alert('An error occurred while processing the deposit. Please try again.');
     } finally {
       setIsProcessing(false);
     }
