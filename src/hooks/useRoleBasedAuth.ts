@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { getDoc, setDoc, type User as JunoUser } from '@junobuild/core';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export type UserRole = 'user' | 'agent';
 
@@ -25,10 +25,24 @@ export const useRoleBasedAuth = () => {
     inFlightRef.current = true;
     setIsCheckingRole(true);
     try {
-      const roleDoc = await getDoc({
-        collection: 'user_roles',
-        key: junoUser.key
-      });
+      // Add retry logic for network issues
+      let roleDoc;
+      let retries = 3;
+      
+      while (retries > 0) {
+        try {
+          roleDoc = await getDoc({
+            collection: 'user_roles',
+            key: junoUser.key
+          });
+          break; // Success, exit retry loop
+        } catch (fetchError) {
+          retries--;
+          if (retries === 0) throw fetchError;
+          console.warn(`Retrying getDoc, ${retries} attempts left:`, fetchError);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+        }
+      }
 
       if (roleDoc?.data) {
         // User has existing role, redirect accordingly

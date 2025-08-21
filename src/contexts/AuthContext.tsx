@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { authSubscribe, signIn, signOut, setDoc, getDoc, type User as JunoUser } from '@junobuild/core';
 import { AuthContextType, User, LoginFormData, RegisterFormData } from '../types/auth';
 import { useRoleBasedAuth } from '../hooks/useRoleBasedAuth';
@@ -24,14 +24,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'sms' | 'web'>('web');
   const { checkAndRedirectUser } = useRoleBasedAuth();
+  // Keep a ref of latest checker to avoid re-subscribing when its identity changes
+  const checkAndRedirectRef = useRef(checkAndRedirectUser);
+  useEffect(() => {
+    checkAndRedirectRef.current = checkAndRedirectUser;
+  }, [checkAndRedirectUser]);
 
   // Subscribe to Juno authentication state for web users
   useEffect(() => {
     const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
       if (junoUser) {
         // For ICP users, check their role and redirect accordingly
-        checkAndRedirectUser(junoUser);
-        
+        checkAndRedirectRef.current(junoUser);
+
         // Convert Juno user to our User type (role will be determined by the hook)
         const afritokeniUser: User = {
           id: junoUser.key,
@@ -55,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return unsubscribe;
-  }, [checkAndRedirectUser]);
+  }, []);
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
