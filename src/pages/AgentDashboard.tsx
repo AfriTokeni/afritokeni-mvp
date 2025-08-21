@@ -278,7 +278,7 @@ const AgentDashboard: React.FC = () => {
                 <p className="text-neutral-600 text-sm font-semibold">UGX Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
-                    {showBalance ? 'USh 1,250,000' : '••••••••'}
+                    {showBalance ? `USh ${balance.digital.ugx.toLocaleString()}` : '••••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
@@ -301,7 +301,7 @@ const AgentDashboard: React.FC = () => {
                 <p className="text-neutral-600 text-sm font-semibold">USDC Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
-                    {showBalance ? '$328.75' : '••••••'}
+                    {showBalance ? `$${balance.digital.usdc.toFixed(2)}` : '••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
