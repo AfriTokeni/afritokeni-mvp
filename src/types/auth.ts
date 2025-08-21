@@ -48,7 +48,7 @@ export interface User {
   userType: 'user' | 'agent';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
-  createdAt: Date;
+  createdAt?: Date; // Optional since Juno handles timestamps automatically
   junoUser?: any; // Juno User object
 }
 
