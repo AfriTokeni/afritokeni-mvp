@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
-import { MessageSquare, Send, Phone } from 'lucide-react';
+import { MessageSquare, Send, Phone, Loader2 } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 
 const SMSUI: React.FC = () => {
@@ -12,7 +12,8 @@ const SMSUI: React.FC = () => {
     register, 
     verifyRegistrationCode, 
     cancelVerification,
-    isVerifying 
+    isVerifying,
+    isLoading 
   } = useAuthentication();
   const { processSMSCommand } = useAfriTokeni();
   const location = useLocation();
@@ -21,6 +22,8 @@ const SMSUI: React.FC = () => {
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [verificationCode, setVerificationCode] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
   // Auto-run command if passed from landing page
   useEffect(() => {
@@ -79,20 +82,26 @@ const SMSUI: React.FC = () => {
       return;
     }
     
-    const success = await register({
-      firstName:'SMS',
-      lastName:'USER',
-      email: phoneNumber, // phone number as email
-      password: '', // Not used for SMS auth
-      confirmPassword: '', // Not used for SMS auth
-      userType:'user'
-    });
-    
-    
-    if (success) {
-      setResponse(`Verification code sent to ${phoneNumber}. Please enter the code below.`);
-    } else {
-      setResponse('Failed to send verification code. Please try again.');
+    setIsRegistering(true);
+    try {
+      const success = await register({
+        firstName:'SMS',
+        lastName:'USER',
+        email: phoneNumber, // phone number as email
+        password: '', // Not used for SMS auth
+        confirmPassword: '', // Not used for SMS auth
+        userType:'user'
+      });
+      
+      if (success) {
+        setResponse(`Verification code sent to ${phoneNumber}. Please enter the code below.`);
+      } else {
+        setResponse('Failed to send verification code. Please try again.');
+      }
+    } catch (error) {
+      setResponse('Error occurred during registration. Please try again.');
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -102,12 +111,19 @@ const SMSUI: React.FC = () => {
       return;
     }
 
-    const success = await verifyRegistrationCode(verificationCode);
-    
-    if (success) {
-      setResponse(`Welcome to AfriTokeni, ${user?.firstName}! Registration complete. Send *AFRI# for menu.`);
-    } else {
-      setResponse('Invalid verification code. Please try again.');
+    setIsVerifyingCode(true);
+    try {
+      const success = await verifyRegistrationCode(verificationCode);
+      
+      if (success) {
+        setResponse(`Welcome to AfriTokeni, ${user?.firstName}! Registration complete. Send *AFRI# for menu.`);
+      } else {
+        setResponse('Invalid verification code. Please try again.');
+      }
+    } catch (error) {
+      setResponse('Error occurred during verification. Please try again.');
+    } finally {
+      setIsVerifyingCode(false);
     }
   };
 
@@ -157,10 +173,13 @@ const SMSUI: React.FC = () => {
         </div>
         <button
             onClick={handleCodeVerification}
-            disabled={!verificationCode}
-            className="w-full bg-neutral-900 text-white py-4 px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm"
+            disabled={!verificationCode || isVerifyingCode}
+            className="w-full bg-neutral-900 text-white py-4 px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm cursor-pointer"
         >
-            Verify Code
+            <div className="flex items-center justify-center gap-2">
+              {isVerifyingCode && <Loader2 className="h-5 w-5 animate-spin" />}
+              {isVerifyingCode ? 'Verifying...' : 'Verify Code'}
+            </div>
         </button>
     </>
   )
@@ -203,10 +222,13 @@ const SMSUI: React.FC = () => {
             {!user && (
               <button
                 onClick={handleSMSRegistration}
-                disabled={!phoneNumber}
-                className="w-full bg-neutral-900 text-white py-4 px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm"
+                disabled={!phoneNumber || isRegistering}
+                className="w-full bg-neutral-900 text-white py-4 px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm cursor-pointer"
               >
-                Register/Login via SMS
+                <div className="flex items-center justify-center gap-2">
+                  {isRegistering && <Loader2 className="h-5 w-5 animate-spin" />}
+                  {isRegistering ? 'Sending SMS...' : 'Register/Login via SMS'}
+                </div>
               </button>
             )}
             </>
@@ -229,7 +251,7 @@ const SMSUI: React.FC = () => {
                 <button
                   onClick={handleSMSCommand}
                   disabled={!smsMessage.trim() || isProcessing}
-                  className="bg-neutral-900 text-white px-6 py-4 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+                  className="bg-neutral-900 text-white px-6 py-4 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm cursor-pointer"
                 >
                   <Send className="h-5 w-5" />
                 </button>
@@ -272,7 +294,7 @@ const SMSUI: React.FC = () => {
                   <button
                     key={item.cmd}
                     onClick={() => setSmsMessage(item.cmd)}
-                    className="text-left p-3 bg-neutral-50 hover:bg-neutral-100 rounded-xl border border-neutral-200 hover:border-neutral-300 transition-colors"
+                    className="text-left p-3 bg-neutral-50 hover:bg-neutral-100 rounded-xl border border-neutral-200 hover:border-neutral-300 transition-colors cursor-pointer"
                   >
                     <div className="font-mono text-neutral-900 font-semibold text-sm">{item.cmd}</div>
                     <div className="text-neutral-600 text-xs mt-1">{item.desc}</div>
