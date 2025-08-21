@@ -59,6 +59,14 @@ export interface AuthContextType {
   register: (formData: RegisterFormData) => Promise<boolean>;
   logout: () => Promise<void>;
   isLoading: boolean;
+  // SMS verification methods
+  verifyRegistrationCode: (code: string) => Promise<boolean>;
+  cancelVerification: () => void;
+  // SMS verification state
+  isVerifying: boolean;
+  verificationPhoneNumber: string | null;
+  // Development helper
+  devVerificationCode?: string;
 }
 
 export interface LocationSuggestion {
