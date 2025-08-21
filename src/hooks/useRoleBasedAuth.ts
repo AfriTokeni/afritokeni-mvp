@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { getDoc, setDoc, type User as JunoUser } from '@junobuild/core';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -14,8 +14,15 @@ export const useRoleBasedAuth = () => {
   const [isCheckingRole, setIsCheckingRole] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const inFlightRef = useRef(false);
+  const lastHandledUserKeyRef = useRef<string | null>(null);
+  const lastNavigatedPathRef = useRef<string | null>(null);
 
   const checkAndRedirectUser = useCallback(async (junoUser: JunoUser) => {
+    if (inFlightRef.current || lastHandledUserKeyRef.current === junoUser.key) {
+      return;
+    }
+    inFlightRef.current = true;
     setIsCheckingRole(true);
     try {
       // Add retry logic for network issues
@@ -46,12 +53,14 @@ export const useRoleBasedAuth = () => {
         const target = roleData.role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
         if (location.pathname !== target) {
           navigate(target, { replace: true });
+          lastNavigatedPathRef.current = target;
         }
       } else {
         // New user - need to determine role
         const target = '/auth/role-selection';
         if (location.pathname !== target) {
           navigate(target, { replace: true });
+          lastNavigatedPathRef.current = target;
         }
       }
     } catch (error) {
@@ -60,8 +69,11 @@ export const useRoleBasedAuth = () => {
       const target = '/auth/role-selection';
       if (location.pathname !== target) {
         navigate(target, { replace: true });
+        lastNavigatedPathRef.current = target;
       }
     } finally {
+      lastHandledUserKeyRef.current = junoUser.key;
+      inFlightRef.current = false;
       setIsCheckingRole(false);
     }
   }, [location.pathname, navigate]);
@@ -100,7 +112,10 @@ export const useRoleBasedAuth = () => {
       const target = role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
       if (location.pathname !== target) {
         // small timeout keeps UX smooth post-write
-        setTimeout(() => navigate(target, { replace: true }), 50);
+        setTimeout(() => {
+          navigate(target, { replace: true });
+          lastNavigatedPathRef.current = target;
+        }, 50);
       }
     } catch (error) {
       console.error('Error setting user role:', error);
