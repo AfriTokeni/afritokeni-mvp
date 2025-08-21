@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuthentication } from '../context/AuthenticationContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import { MessageSquare, Send, Phone } from 'lucide-react';
 
 const SMSInterface: React.FC = () => {
-  const { user, authMethod, login } = useAuth();
+  const { user, authMethod, login } = useAuthentication();
   const { processSMSCommand } = useAfriTokeni();
   const location = useLocation();
   const [phoneNumber, setPhoneNumber] = useState('');
