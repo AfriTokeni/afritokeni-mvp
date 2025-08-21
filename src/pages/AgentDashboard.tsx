@@ -365,7 +365,7 @@ const AgentDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center  mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
                 <TrendingUp className="h-6 w-6 text-neutral-600" />
               </div>
               <div>
@@ -379,7 +379,7 @@ const AgentDashboard: React.FC = () => {
 
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center  mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
                 <CreditCard className="h-6 w-6 text-neutral-600" />
               </div>
               <div>
@@ -391,7 +391,7 @@ const AgentDashboard: React.FC = () => {
 
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center  mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
                 <Users className="h-6 w-6 text-neutral-600" />
               </div>
               <div>
