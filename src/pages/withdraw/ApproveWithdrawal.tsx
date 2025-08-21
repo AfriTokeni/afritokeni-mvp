@@ -258,7 +258,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
           disabled={!withdrawalCode || isProcessing || !cashGiven}
           className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center ${
             withdrawalCode && cashGiven && !isProcessing
-              ? 'bg-green-600 text-white hover:bg-green-700'
+              ? 'w-full bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200'
               : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
           }`}
         >

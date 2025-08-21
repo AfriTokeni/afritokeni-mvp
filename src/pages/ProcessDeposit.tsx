@@ -354,7 +354,7 @@ const ProcessDeposit: React.FC = () => {
                     <button
                       onClick={handleConfirmDeposit}
                       disabled={!actualAmount.ugx || !actualAmount.usdc || isProcessing}
-                      className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+                      className="flex-1 bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
                     >
                       {isProcessing ? (
                         <>
