@@ -87,34 +87,34 @@ const SMSInterface: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-2xl mx-auto px-4">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-900 text-sm font-semibold mb-6">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium mb-6">
             <MessageSquare className="h-4 w-4 mr-2" />
             SMS Banking Demo
           </div>
-          <h1 className="text-4xl font-bold text-neutral-900 mb-4">Try SMS Banking</h1>
-          <p className="text-xl text-neutral-600 leading-relaxed">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Try SMS Banking</h1>
+          <p className="text-xl text-gray-600 leading-relaxed">
             Experience how AfriTokeni works on any phone with simple SMS commands.
           </p>
         </div>
         
-        <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
           <div className="space-y-6">
             {/* Phone Number Input */}
             <div>
-              <label className="block text-sm font-semibold text-neutral-900 mb-3">
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
                 Phone Number
               </label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="tel"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="+256701234567"
-                  className="w-full pl-12 pr-4 py-4 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 transition-colors text-lg"
+                  className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-lg"
                 />
               </div>
             </div>
@@ -124,7 +124,7 @@ const SMSInterface: React.FC = () => {
               <button
                 onClick={handleSMSLogin}
                 disabled={!phoneNumber}
-                className="w-full bg-neutral-900 text-white py-4 px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-6 rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 shadow-lg"
               >
                 Register/Login via SMS
               </button>
@@ -132,7 +132,7 @@ const SMSInterface: React.FC = () => {
 
             {/* SMS Command Input */}
             <div>
-              <label className="block text-sm font-semibold text-neutral-900 mb-3">
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
                 SMS Command {!user && <span className="text-gray-500">(Demo Mode)</span>}
               </label>
               <div className="flex gap-3">
@@ -141,13 +141,13 @@ const SMSInterface: React.FC = () => {
                   value={smsMessage}
                   onChange={(e) => setSmsMessage(e.target.value)}
                   placeholder="Type SMS command (e.g., BAL, *AFRI#)"
-                  className="flex-1 px-4 py-4 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 transition-colors text-lg"
+                  className="flex-1 px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-lg"
                   onKeyPress={(e) => e.key === 'Enter' && handleSMSCommand()}
                 />
                 <button
                   onClick={handleSMSCommand}
                   disabled={!smsMessage.trim() || isProcessing}
-                  className="bg-neutral-900 text-white px-6 py-4 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
                 >
                   <Send className="h-5 w-5" />
                 </button>
@@ -156,30 +156,30 @@ const SMSInterface: React.FC = () => {
 
             {/* User Info */}
             {user && (
-              <div className="bg-neutral-50 border border-neutral-200 p-4 rounded-xl">
-                <p className="text-sm text-neutral-700 mb-1">
+              <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
+                <p className="text-sm text-gray-700 mb-1">
                   <strong>User:</strong> {user.firstName} {user.lastName}
                 </p>
-                <p className="text-sm text-neutral-700 mb-1">
+                <p className="text-sm text-gray-700 mb-1">
                   <strong>Phone:</strong> {user.email}
                 </p>
-                <p className="text-sm text-neutral-700">
-                  <strong>Auth Method:</strong> <span className="text-neutral-900 font-semibold">{authMethod.toUpperCase()}</span>
+                <p className="text-sm text-gray-700">
+                  <strong>Auth Method:</strong> <span className="text-indigo-600 font-medium">{authMethod.toUpperCase()}</span>
                 </p>
               </div>
             )}
 
             {/* SMS Response */}
             {response && (
-              <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6">
-                <h3 className="font-semibold text-neutral-900 mb-3">SMS Response:</h3>
-                <p className="text-neutral-800 whitespace-pre-wrap font-mono text-sm bg-white p-3 rounded-lg border border-neutral-200">{response}</p>
+              <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+                <h3 className="font-semibold text-green-900 mb-3">SMS Response:</h3>
+                <p className="text-green-800 whitespace-pre-wrap font-mono text-sm bg-white p-3 rounded-lg border">{response}</p>
               </div>
             )}
 
             {/* Quick Commands */}
-            <div className="border-t border-neutral-200 pt-6">
-              <h3 className="font-semibold text-neutral-900 mb-4">Quick Commands:</h3>
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="font-semibold text-gray-900 mb-4">Quick Commands:</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { cmd: '*AFRI#', desc: 'Main Menu' },
@@ -190,10 +190,10 @@ const SMSInterface: React.FC = () => {
                   <button
                     key={item.cmd}
                     onClick={() => setSmsMessage(item.cmd)}
-                    className="text-left p-3 bg-neutral-50 hover:bg-neutral-100 rounded-xl border border-neutral-200 hover:border-neutral-300 transition-colors"
+                    className="text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-indigo-200 transition-colors"
                   >
-                    <div className="font-mono text-neutral-900 font-semibold text-sm">{item.cmd}</div>
-                    <div className="text-neutral-600 text-xs mt-1">{item.desc}</div>
+                    <div className="font-mono text-indigo-600 font-medium text-sm">{item.cmd}</div>
+                    <div className="text-gray-600 text-xs mt-1">{item.desc}</div>
                   </button>
                 ))}
               </div>
