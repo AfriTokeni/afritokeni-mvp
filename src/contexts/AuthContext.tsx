@@ -101,8 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             email: formData.emailOrPhone,
             userType: formData.userType,
             isVerified: true, // SMS verified
-            kycStatus: 'not_started',
-            createdAt: new Date()
+            kycStatus: 'not_started'
           };
           
           // Save to datastore
@@ -110,10 +109,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             collection: 'users',
             doc: {
               key: formData.emailOrPhone,
-              data: {
-                ...newUser,
-                createdAt: newUser.createdAt.toISOString()
-              }
+              data: newUser
             }
           });
           
@@ -156,8 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: formData.email, // This is actually phone number for SMS users
         userType: formData.userType,
         isVerified: true, // SMS verified
-        kycStatus: 'not_started',
-        createdAt: new Date()
+        kycStatus: 'not_started'
       };
       
       // Save user to Juno datastore
@@ -165,10 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         collection: 'users',
         doc: {
           key: formData.email,
-          data: {
-            ...newUser,
-            createdAt: newUser.createdAt.toISOString()
-          }
+          data: newUser
         }
       });
       
