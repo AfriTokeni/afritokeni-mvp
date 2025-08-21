@@ -1,10 +1,10 @@
 import React from 'react';
 import { AlertTriangle, Clock, XCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuthentication } from '../context/AuthenticationContext';
 
 const KYCStatusAlert: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuthentication();
   const navigate = useNavigate();
 
   if (!user) return null;

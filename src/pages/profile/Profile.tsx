@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { User, Check, LogOut } from 'lucide-react';
 import { UserData} from '../../types/user_dashboard';
-import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
+import { useAuthentication } from '../../context/AuthenticationContext';
 
 
 const UserProfile: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout } = useAuthentication();
   const navigate = useNavigate();
   
   // Mock user data

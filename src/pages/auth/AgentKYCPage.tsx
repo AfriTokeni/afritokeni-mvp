@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import AgentKYC from '../../components/AgentKYC';
 import { AgentKYCData } from '../../types/auth';
+import { useAuthentication } from '../../context/AuthenticationContext';
 
 const AgentKYCPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuthentication();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleKYCSubmit = async (data: AgentKYCData) => {

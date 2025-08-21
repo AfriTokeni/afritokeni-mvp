@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuthentication } from '../context/AuthenticationContext';
 import { DataService, Transaction, UserBalance, Agent } from '../services/dataService';
 
 export const useAfriTokeni = () => {
-  const { user } = useAuth();
+  const { user } = useAuthentication();
   const [balance, setBalance] = useState<UserBalance | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ export const useAfriTokeni = () => {
   };
 
   const sendMoney = async (
-    amount: number, 
+    amount: string, 
     recipientPhone: string, 
     recipientName?: string
   ): Promise<{ success: boolean; message: string; transaction?: Transaction }> => {
@@ -54,7 +54,8 @@ export const useAfriTokeni = () => {
       return { success: false, message: 'User not authenticated' };
     }
 
-    if (!balance || balance.balance < amount) {
+    const numericAmount = parseFloat(amount);
+    if (!balance || balance.balance < numericAmount) {
       return { success: false, message: 'Insufficient balance' };
     }
 
@@ -63,19 +64,22 @@ export const useAfriTokeni = () => {
 
     try {
       // Create transaction
+      // Create the transaction record in our database
       const transaction = await DataService.createTransaction({
         userId: user.id,
         type: 'send',
-        amount,
+        amount: numericAmount,
         currency: 'UGX',
-        recipientPhone,
-        recipientName,
-        status: 'pending',
-        description: `Send money to ${recipientPhone}`
+        recipientPhone: recipientPhone,
+        recipientName: recipientName,
+        status: 'completed',
+        metadata: {
+          smsReference: `TXN${Date.now().toString().slice(-8)}`
+        }
       });
 
-      // Update balance
-      const newBalance = balance.balance - amount;
+      // Update user balance
+      const newBalance = balance.balance - numericAmount;
       await DataService.updateUserBalance(user.id, newBalance);
 
       // Update transaction status
@@ -131,7 +135,7 @@ export const useAfriTokeni = () => {
       const withdrawalCode = Math.random().toString(36).substr(2, 6).toUpperCase();
 
       // Create transaction
-      const transaction = await DataService.createTransaction({
+      await DataService.createTransaction({
         userId: user.id,
         type: 'withdraw',
         amount,
