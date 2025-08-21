@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, User, Phone, MapPin, Clock, AlertCircle, Banknote } from 'lucide-react';
+import { CheckCircle, User, Phone, MapPin, Clock, AlertCircle } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
 
 interface ApproveWithdrawalProps {
@@ -76,23 +76,6 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
       setIsProcessing(false);
     }
   };
-
-  const calculateDenominations = (amount: number) => {
-    const denominations = [100000, 50000, 20000, 10000, 5000, 2000, 1000, 500];
-    const breakdown: { [key: number]: number } = {};
-    let remaining = amount;
-
-    for (const denom of denominations) {
-      if (remaining >= denom) {
-        breakdown[denom] = Math.floor(remaining / denom);
-        remaining = remaining % denom;
-      }
-    }
-
-    return breakdown;
-  };
-
-  const denominations = calculateDenominations(withdrawal.amount.ugx);
 
   if (isCompleted) {
     return (
