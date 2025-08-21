@@ -1,3 +1,16 @@
+// ========================================
+// AfriTokeni SMS Webhook Server
+// ========================================
+// This server acts as a webhook bridge between:
+// 1. Juno datastore (handled by frontend DataService)
+// 2. AfricasTalking SMS API
+// 
+// Architecture:
+// - Frontend handles all Juno datastore operations via DataService
+// - This server only handles SMS sending and receiving webhooks
+// - All transaction/balance data persists in Juno, not here
+// ========================================
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -48,7 +61,6 @@ const sendSMS = async (phoneNumber, message) => {
             message, 
             from: process.env.AT_SHORT_CODE || "AfriTokeni"
         });
-        console.log(response);
     // For demo purposes, always return success
     return {
         status: 'Success',
@@ -184,6 +196,265 @@ app.post('/api/webhook/sms', (req, res) => {
   }
 });
 
+// Route to send SMS (called by frontend after Juno operations)
+app.post('/api/sms/send', async (req, res) => {
+  try {
+    const { phoneNumber, message, transactionId } = req.body;
+    
+    if (!phoneNumber || !message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phone number and message are required'
+      });
+    }
+
+    // Send SMS via AfricasTalking
+    await sendSMS(phoneNumber, message);
+
+    console.log(`📱 SMS sent for transaction ${transactionId || 'N/A'} to ${phoneNumber}`);
+
+    res.json({
+      success: true,
+      message: 'SMS sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Error sending SMS:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send SMS'
+    });
+  }
+});
+
+// Route to handle incoming SMS (webhook from AfricasTalking)
+app.post('/api/webhook/sms', (req, res) => {
+  try {
+    const { from, text, date, id } = req.body;
+    
+    console.log(`📨 Received SMS from ${from}: ${text}`);
+    
+    // Process SMS commands here
+    // For now, just log and acknowledge
+    
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).send('Error');
+  }
+});
+
+// Route to process deposit
+app.post('/api/deposit', async (req, res) => {
+  try {
+    const { customerPhone, amount, agentId } = req.body;
+    
+    if (!customerPhone || !amount || !agentId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Customer phone, amount, and agent ID are required'
+      });
+    }
+
+    // Format phone number
+    const formattedPhone = customerPhone.startsWith('+') ? customerPhone : `+254${customerPhone.replace(/^0/, '')}`;
+    
+    // Get or create user via Juno datastore
+    const userResult = await JunoDataService.getUserByPhone(formattedPhone);
+    
+    if (!userResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to get user information'
+      });
+    }
+
+    const user = userResult.user;
+
+    // Generate transaction ID
+    const transactionId = `DEP${Date.now().toString().slice(-6)}`;
+    
+    // Create transaction record in Juno datastore
+    const transactionData = {
+      id: transactionId,
+      userId: user.id,
+      type: 'deposit',
+      amount: parseFloat(amount),
+      currency: 'UGX',
+      agentId,
+      status: 'completed',
+      description: `Cash deposit via agent`,
+      completedAt: new Date().toISOString(),
+      metadata: {
+        agentLocation: 'Kampala Central',
+        smsReference: transactionId
+      }
+    };
+
+    // Store transaction in Juno
+    const transactionResult = await JunoDataService.createTransaction(transactionData);
+    
+    if (!transactionResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to create transaction'
+      });
+    }
+
+    // Get current balance and update
+    const balanceResult = await JunoDataService.getUserBalance(user.id);
+    const currentBalance = balanceResult.success ? balanceResult.balance : 0;
+    const newBalance = currentBalance + parseFloat(amount);
+    
+    // Update user balance in Juno
+    const balanceUpdateResult = await JunoDataService.updateUserBalance(user.id, newBalance);
+    
+    if (!balanceUpdateResult.success) {
+      console.error('Failed to update balance, but transaction was recorded');
+    }
+
+    // Mock agent details
+    const agentDetails = {
+      name: 'Agent Smith',
+      businessName: 'Smith Financial Services',
+      phone: '+254712345678',
+      location: 'Kampala Central'
+    };
+
+    // Send SMS notification to user
+    const smsMessage = `AfriTokeni: You have received UGX ${parseFloat(amount).toLocaleString()} from ${agentDetails.businessName}. New balance: UGX ${newBalance.toLocaleString()}. Transaction ID: ${transactionId}. Thank you!`;
+    
+    try {
+      await sendSMS(formattedPhone, smsMessage);
+      
+      // Log SMS in Juno datastore
+      await JunoDataService.logSMSMessage({
+        userId: user.id,
+        phoneNumber: formattedPhone,
+        message: smsMessage,
+        direction: 'outbound',
+        status: 'sent',
+        transactionId
+      });
+    } catch (smsError) {
+      console.error('SMS sending failed, but transaction completed:', smsError);
+    }
+
+    console.log(`💰 Deposit processed: ${transactionId} - UGX ${amount} for ${formattedPhone}`);
+
+    res.json({
+      success: true,
+      transaction: {
+        id: transactionId,
+        amount: parseFloat(amount),
+        currency: 'UGX',
+        newBalance,
+        customer: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: formattedPhone
+        },
+        agent: agentDetails,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('Error processing deposit:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to process deposit'
+    });
+  }
+});
+
+// Route to send SMS (called by frontend after Juno operations)
+app.post('/api/sms/send', async (req, res) => {
+  try {
+    const { phoneNumber, message, transactionId } = req.body;
+    
+    if (!phoneNumber || !message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phone number and message are required'
+      });
+    }
+
+    // Send SMS via AfricasTalking
+    await sendSMS(phoneNumber, message);
+
+    console.log(`📱 SMS sent for transaction ${transactionId || 'N/A'} to ${phoneNumber}`);
+
+    res.json({
+      success: true,
+      message: 'SMS sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Error sending SMS:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send SMS'
+    });
+  }
+});
+
+// Route to get user balance
+app.get('/api/balance/:phoneNumber', async (req, res) => {
+  try {
+    const { phoneNumber } = req.params;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phone number is required'
+      });
+    }
+
+    // Format phone number
+    const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+254${phoneNumber.replace(/^0/, '')}`;
+    
+    // Get user from Juno datastore
+    const userResult = await JunoDataService.getUserByPhone(formattedPhone);
+    
+    if (!userResult.success) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const user = userResult.user;
+
+    // Get balance from Juno datastore
+    const balanceResult = await JunoDataService.getUserBalance(user.id);
+
+    if (!balanceResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to get balance'
+      });
+    }
+
+    res.json({
+      success: true,
+      balance: {
+        userId: user.id,
+        balance: balanceResult.balance,
+        currency: 'UGX',
+        lastUpdated: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('Error getting balance:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
@@ -196,11 +467,13 @@ app.get('/health', (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'AfriTokeni SMS API Server',
+    message: 'AfriTokeni SMS Webhook Server',
     version: '1.0.0',
+    description: 'SMS bridge between Juno frontend and AfricasTalking',
     endpoints: [
       'POST /api/send-sms',
-      'POST /api/verify-code',
+      'POST /api/verify-code', 
+      'POST /api/sms/send',
       'POST /api/webhook/sms',
       'GET /health'
     ]
@@ -208,9 +481,11 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 AfriTokeni SMS API server running on port ${PORT}`);
-  console.log(`📡 Webhook endpoint: http://localhost:${PORT}/api/webhook/sms`);
-  console.log(`🔍 Health check: http://localhost:${PORT}/health`);
+  console.log(`🚀 AfriTokeni SMS Webhook Server running on port ${PORT}`);
+  console.log(`📡 SMS Webhook endpoint: http://localhost:${PORT}/api/webhook/sms`);
+  console.log(`� SMS Send endpoint: http://localhost:${PORT}/api/sms/send`);
+  console.log(`�🔍 Health check: http://localhost:${PORT}/health`);
+  console.log(`💡 Note: All data operations handled by Juno frontend`);
 });
 
 // Graceful shutdown
