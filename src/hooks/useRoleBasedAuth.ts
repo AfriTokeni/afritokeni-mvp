@@ -81,12 +81,15 @@ export const useRoleBasedAuth = () => {
   const setUserRole = useCallback(async (junoUser: JunoUser, role: UserRole) => {
     try {
       let existingRoleData;
+      let existingRoleVersion: bigint | undefined;
       try {
         const existingRoleDoc = await getDoc({
           collection: 'user_roles',
           key: junoUser.key
         });
         existingRoleData = existingRoleDoc?.data as RoleData | undefined;
+        // Juno versions are bigint; pass through if present
+        existingRoleVersion = (existingRoleDoc as any)?.version as bigint | undefined;
       } catch (error) {
         console.log('Role not found for user:', junoUser.key);
       }
@@ -104,7 +107,9 @@ export const useRoleBasedAuth = () => {
         collection: 'user_roles',
         doc: {
           key: junoUser.key,
-          data: roleData
+          data: roleData,
+          // include version if exists to avoid version conflict
+          version: existingRoleVersion
         }
       });
 
