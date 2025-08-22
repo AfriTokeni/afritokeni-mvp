@@ -3,7 +3,7 @@ import { defineConfig } from "@junobuild/config";
 export default defineConfig({
   satellite: {
     ids: {
-      development: "atbka-rp777-77775-aaaaq-cai",
+      development: "uxrrr-q7777-77774-qaaaq-cai"
     },
     source: "dist",
     predeploy: ["npm run build"],
@@ -11,44 +11,44 @@ export default defineConfig({
       datastore: [
         {
           collection: "users",
-          read: "managed",
-          write: "managed",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
         {
           collection: "transactions",
-          read: "managed",
-          write: "managed",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
         {
           collection: "balances",
-          read: "managed",
-          write: "managed",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
         {
           collection: "agents",
-          read: "managed",
-          write: "managed",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
         {
           collection: "user_roles",
-          read: "managed",
-          write: "managed",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
         {
           collection: "sms_messages",
-          read: "managed",
-          write: "managed",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
         {
           collection: "notes",
-          read: "managed",
-          write: "managed",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
       ],

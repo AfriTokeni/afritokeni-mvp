@@ -1,3 +1,16 @@
+// ========================================
+// AfriTokeni SMS Webhook Server
+// ========================================
+// This server acts as a webhook bridge between:
+// 1. Juno datastore (handled by frontend DataService)
+// 2. AfricasTalking SMS API
+// 
+// Architecture:
+// - Frontend handles all Juno datastore operations via DataService
+// - This server only handles SMS sending and receiving webhooks
+// - All transaction/balance data persists in Juno, not here
+// ========================================
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -48,7 +61,6 @@ const sendSMS = async (phoneNumber, message) => {
             message, 
             from: process.env.AT_SHORT_CODE || "AfriTokeni"
         });
-        console.log(response);
     // For demo purposes, always return success
     return {
         status: 'Success',
@@ -79,8 +91,6 @@ app.post('/api/send-sms', async (req, res) => {
         userId: userId || 'anonymous',
         timestamp: Date.now()
       });
-      
-      console.log(`📝 Stored verification code for ${phoneNumber}: ${verificationCode}`);
     }
     
     // Send SMS
@@ -196,21 +206,18 @@ app.get('/health', (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'AfriTokeni SMS API Server',
+    message: 'AfriTokeni SMS Webhook Server',
     version: '1.0.0',
+    description: 'SMS bridge between Juno frontend and AfricasTalking',
     endpoints: [
       'POST /api/send-sms',
-      'POST /api/verify-code',
-      'POST /api/webhook/sms',
-      'GET /health'
+      'POST /api/verify-code', 
     ]
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 AfriTokeni SMS API server running on port ${PORT}`);
-  console.log(`📡 Webhook endpoint: http://localhost:${PORT}/api/webhook/sms`);
-  console.log(`🔍 Health check: http://localhost:${PORT}/health`);
+  console.log(`🚀 AfriTokeni SMS Webhook Server running on port ${PORT}`);
 });
 
 // Graceful shutdown

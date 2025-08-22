@@ -8,12 +8,9 @@ const SMSUI: React.FC = () => {
   const { 
     user, 
     authMethod, 
-    login, 
     register, 
     verifyRegistrationCode, 
-    cancelVerification,
-    isVerifying,
-    isLoading 
+    isVerifying
   } = useAuthentication();
   const { processSMSCommand } = useAfriTokeni();
   const location = useLocation();
@@ -116,7 +113,7 @@ const SMSUI: React.FC = () => {
       const success = await verifyRegistrationCode(verificationCode);
       
       if (success) {
-        setResponse(`Welcome to AfriTokeni, ${user?.firstName}! Registration complete. Send *AFRI# for menu.`);
+        setResponse(`Welcome to AfriTokeni, ${user?.firstName} ${user?.lastName}! Registration complete. Send *AFRI# for menu.`);
       } else {
         setResponse('Invalid verification code. Please try again.');
       }
@@ -125,28 +122,6 @@ const SMSUI: React.FC = () => {
     } finally {
       setIsVerifyingCode(false);
     }
-  };
-
-  const handleSMSLogin = async () => {
-    if (!phoneNumber) return;
-    
-    const success = await login({
-      emailOrPhone: phoneNumber,
-      password: '', // Not used for SMS auth
-      userType: 'user'
-    }, 'sms');
-    
-    if (success) {
-      setResponse(`Welcome back to AfriTokeni! Send *AFRI# for menu.`);
-    } else {
-      setResponse(`Login failed. Please try registration instead.`);
-    }
-  };
-
-  const resetRegistration = () => {
-    setVerificationCode('');
-    setResponse('');
-    cancelVerification();
   };
 
   const handleSMSCommand = async () => {

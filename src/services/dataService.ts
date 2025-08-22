@@ -86,7 +86,8 @@ export class DataService {
       collection: 'transactions',
       doc: {
         key: newTransaction.id,
-        data: dataForJuno
+        data: dataForJuno,
+        version:1n
       }
     });
 
@@ -140,7 +141,8 @@ export class DataService {
         collection: 'transactions',
         doc: {
           key: id,
-          data: dataForJuno
+          data: dataForJuno,
+          version:1n
         }
       });
 
@@ -185,7 +187,8 @@ export class DataService {
         collection: 'balances',
         doc: {
           key: userId,
-          data: dataForJuno
+          data: dataForJuno,
+          version:1n
         }
       });
 
@@ -215,7 +218,8 @@ export class DataService {
       collection: 'agents',
       doc: {
         key: newAgent.id,
-        data: dataForJuno
+        data: dataForJuno,
+        version: 1n
       }
     });
 
