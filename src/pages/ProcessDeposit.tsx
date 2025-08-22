@@ -155,7 +155,7 @@ const ProcessDeposit: React.FC = () => {
         const smsMessage = `AfriTokeni: You have received UGX ${depositData.amount.ugx.toLocaleString()} from Agent. New balance: UGX ${newBalance.toLocaleString()}. Transaction ID: ${transaction.id}. Thank you!`;
         
         // Call our SMS webhook to send notification
-        await fetch('http://localhost:3001/api/sms/send', {
+        await fetch('http://localhost:3001/api/send-sms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
