@@ -10,7 +10,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { getDoc } from '@junobuild/core';
-import { DataService } from '../../services/dataService';
 import { User as UserType } from '../../types/auth';
 import PageLayout from '../../components/PageLayout';
 
@@ -26,7 +25,7 @@ interface TransactionResult {
 
 const SendMoney: React.FC = () => {
   const navigate = useNavigate();
-  const { balance, user } = useAfriTokeni();
+  const { balance, user, sendMoney, calculateFee } = useAfriTokeni();
   
   const [ugxAmount, setUgxAmount] = useState<string>('');
   const [usdcAmount, setUsdcAmount] = useState<string>('');
@@ -100,11 +99,6 @@ const SendMoney: React.FC = () => {
     };
   }, [recipientPhone]);
 
-  // Calculate transaction fee (1% of amount)
-  const calculateFee = (amount: number): number => {
-    return amount * 0.01;
-  };
-
   // Handle UGX amount change
   const handleUgxAmountChange = (value: string) => {
     setUgxAmount(value);
@@ -136,93 +130,22 @@ const SendMoney: React.FC = () => {
     setIsProcessing(true);
     try {
       const sendAmount = parseFloat(ugxAmount);
-      const fee = calculateFee(sendAmount);
-      const totalAmount = sendAmount + fee;
-
-      // Check if sender has sufficient balance
-      const senderBalance = await DataService.getUserBalance(user.id);
-      if (!senderBalance || senderBalance.balance < totalAmount) {
-        alert('Insufficient balance');
-        return;
-      }
-
-      // Create send transaction
-      const sendTransaction = await DataService.createTransaction({
-        userId: user.id,
-        type: 'send',
-        amount: sendAmount,
-        currency: 'UGX',
-        recipientId: recipient.id,
-        recipientPhone: recipientPhone,
-        recipientName: `${recipient.firstName} ${recipient.lastName}`,
-        status: 'completed',
-        description: `Money sent to ${recipient.firstName} ${recipient.lastName}`,
-        completedAt: new Date(),
-        metadata: {
-          smsReference: `SEND${Date.now().toString().slice(-6)}`
-        }
-      });
-
-      // Create receive transaction for recipient
-      await DataService.createTransaction({
-        userId: recipient.id,
-        type: 'receive',
-        amount: sendAmount,
-        currency: 'UGX',
-        status: 'completed',
-        description: `Money received from ${user.firstName} ${user.lastName}`,
-        completedAt: new Date(),
-        metadata: {
-          smsReference: `RCV${Date.now().toString().slice(-6)}`
-        }
-      });
-
-      // Update sender balance (deduct amount + fee)
-      await DataService.updateUserBalance(user.id, senderBalance.balance - totalAmount);
-
-      // Update recipient balance (add amount)
-      const recipientBalance = await DataService.getUserBalance(recipient.id);
-      const newRecipientBalance = (recipientBalance?.balance || 0) + sendAmount;
-      await DataService.updateUserBalance(recipient.id, newRecipientBalance);
-
-      // Send SMS notifications
-      try {
-        // SMS to sender
-        const senderSMS = `AfriTokeni: You sent UGX ${sendAmount.toLocaleString()} to ${recipient.firstName} ${recipient.lastName} (${recipientPhone}). Fee: UGX ${fee.toLocaleString()}. New balance: UGX ${(senderBalance.balance - totalAmount).toLocaleString()}. Ref: ${sendTransaction.id}`;
-        await fetch('http://localhost:3001/api/send-sms', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phoneNumber: user.email,
-            message: senderSMS,
-            transactionId: sendTransaction.id
-          })
+      
+      // Use the sendMoney function from the hook
+      const result = await sendMoney(sendAmount, recipientPhone, recipient);
+      
+      if (result.success && result.transaction && result.fee !== undefined) {
+        setTransactionResult({
+          id: result.transaction.id,
+          amount: sendAmount,
+          fee: result.fee,
+          recipient: recipient,
+          timestamp: new Date()
         });
-
-        // SMS to recipient
-        const recipientSMS = `AfriTokeni: You received UGX ${sendAmount.toLocaleString()} from ${user.firstName} ${user.lastName} (${user.email}). New balance: UGX ${newRecipientBalance.toLocaleString()}. Ref: ${sendTransaction.id}`;
-        await fetch('http://localhost:3001/api/send-sm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phoneNumber: recipientPhone,
-            message: recipientSMS,
-            transactionId: sendTransaction.id
-          })
-        });
-      } catch (smsError) {
-        console.error('SMS sending failed:', smsError);
+        setSendStep(3);
+      } else {
+        alert(result.message);
       }
-
-      setTransactionResult({
-        id: sendTransaction.id,
-        amount: sendAmount,
-        fee: fee,
-        recipient: recipient,
-        timestamp: new Date()
-      });
-
-      setSendStep(3);
     } catch (error) {
       console.error('Error sending money:', error);
       alert('Failed to send money. Please try again.');
