@@ -182,7 +182,7 @@ const UserDashboard: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-medium text-neutral-900">{transaction.description}</p>
-                      <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt.toISOString())}</p>
+                      <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : transaction.createdAt)}</p>
                     </div>
                   </div>
                   <div className="text-right">
