@@ -14,6 +14,9 @@ export interface RegisterFormData {
 }
 
 export interface UserKYCData {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   documentType: 'national_id' | 'passport' | 'drivers_license';
   documentNumber: string;
   documentFile?: File;
@@ -67,6 +70,8 @@ export interface AuthContextType {
   verificationPhoneNumber: string | null;
   // Development helper
   devVerificationCode?: string;
+  // User update method
+  updateUser: (updatedUser: User) => void;
 }
 
 export interface LocationSuggestion {
