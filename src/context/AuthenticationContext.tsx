@@ -5,6 +5,18 @@ import { useRoleBasedAuth } from '../hooks/useRoleBasedAuth';
 import { nanoid } from 'nanoid';
 import { SMSService } from '../services/smsService';
 
+// Interface for user data as stored in Juno (with string dates)
+interface UserDataFromJuno {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: 'user' | 'agent';
+  isVerified: boolean;
+  kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  createdAt: string;
+}
+
 const AuthenticationContext = createContext<AuthContextType | undefined>(undefined);
 
 const useAuthentication = () => {
@@ -25,6 +37,25 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'sms' | 'web'>('web');
   
+  // Helper function to store user data in both session and local storage
+  const storeUserData = (userData: User, method: 'sms' | 'web') => {
+    const userString = JSON.stringify(userData);
+    // Store in sessionStorage for tab-specific access
+    sessionStorage.setItem('afritokeni_user', userString);
+    sessionStorage.setItem('afritokeni_auth_method', method);
+    // Store in localStorage for persistence across sessions
+    localStorage.setItem('afritokeni_user', userString);
+    localStorage.setItem('afritokeni_auth_method', method);
+  };
+
+  // Helper function to clear user data from both storages
+  const clearUserData = () => {
+    sessionStorage.removeItem('afritokeni_user');
+    sessionStorage.removeItem('afritokeni_auth_method');
+    localStorage.removeItem('afritokeni_user');
+    localStorage.removeItem('afritokeni_auth_method');
+  };
+  
   // SMS verification states
   const [verificationState, setVerificationState] = useState<{
     isVerifying: boolean;
@@ -44,32 +75,113 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAndRedirectRef.current = checkAndRedirectUser;
   }, [checkAndRedirectUser]);
 
+  // Initialize user from sessionStorage (tab-specific) or localStorage (global) on app start
+  useEffect(() => {
+    // Priority: sessionStorage (tab-specific) > localStorage (global)
+    let storedUser = sessionStorage.getItem('afritokeni_user');
+    let storedAuthMethod = sessionStorage.getItem('afritokeni_auth_method');
+    
+    // Fallback to localStorage if sessionStorage is empty
+    if (!storedUser || !storedAuthMethod) {
+      storedUser = localStorage.getItem('afritokeni_user');
+      storedAuthMethod = localStorage.getItem('afritokeni_auth_method');
+      
+      // If found in localStorage, copy to sessionStorage for this tab
+      if (storedUser && storedAuthMethod) {
+        sessionStorage.setItem('afritokeni_user', storedUser);
+        sessionStorage.setItem('afritokeni_auth_method', storedAuthMethod);
+      }
+    }
+    
+    if (storedUser && storedAuthMethod) {
+      try {
+        const parsedUser = JSON.parse(storedUser) as User;
+        // Convert createdAt string back to Date if it exists
+        if (parsedUser.createdAt && typeof parsedUser.createdAt === 'string') {
+          parsedUser.createdAt = new Date(parsedUser.createdAt);
+        }
+        setUser(parsedUser);
+        setAuthMethod(storedAuthMethod as 'sms' | 'web');
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        sessionStorage.removeItem('afritokeni_user');
+        sessionStorage.removeItem('afritokeni_auth_method');
+        localStorage.removeItem('afritokeni_user');
+        localStorage.removeItem('afritokeni_auth_method');
+      }
+    }
+  }, []);
+
   // Subscribe to Juno authentication state for web users
   useEffect(() => {
-    const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
+    const unsubscribe = authSubscribe(async (junoUser: JunoUser | null) => {
       if (junoUser) {
         // For ICP users, check their role and redirect accordingly
         checkAndRedirectRef.current(junoUser);
 
-        // Convert Juno user to our User type (role will be determined by the hook)
-        const afritokeniUser: User = {
-          id: junoUser.key,
-          firstName: 'ICP',
-          lastName: 'User',
-          email: junoUser.key, // Use key as identifier
-          userType: 'user', // This will be updated based on role check
-          isVerified: true,
-          kycStatus: 'not_started',
-          createdAt: new Date()
-        };
+        // Check if user already exists in our datastore with KYC information
+        let afritokeniUser: User;
+        
+        try {
+          // Try to get existing user data from our users collection
+          const existingUserDoc = await getDoc({
+            collection: 'users',
+            key: junoUser.key
+          });
+          
+          if (existingUserDoc?.data) {
+            // User exists, use their existing data (including KYC status)
+            const userData = existingUserDoc.data as UserDataFromJuno;
+            afritokeniUser = {
+              ...userData,
+              createdAt: userData.createdAt ? new Date(userData.createdAt) : new Date()
+            } as User;
+          } else {
+            // New user, create default profile
+            afritokeniUser = {
+              id: junoUser.key,
+              firstName: 'ICP',
+              lastName: 'User',
+              email: junoUser.key, // Use key as identifier
+              userType: 'user', // This will be updated based on role check
+              isVerified: true,
+              kycStatus: 'not_started',
+              createdAt: new Date()
+            };
+            
+            // Save new user to our datastore
+            await setDoc({
+              collection: 'users',
+              doc: {
+                key: junoUser.key,
+                data: {
+                  ...afritokeniUser,
+                  createdAt: afritokeniUser.createdAt?.toISOString() || new Date().toISOString()
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error loading user data for web auth:', error);
+          // Fallback to basic user if datastore fails
+          afritokeniUser = {
+            id: junoUser.key,
+            firstName: 'ICP',
+            lastName: 'User',
+            email: junoUser.key,
+            userType: 'user',
+            isVerified: true,
+            kycStatus: 'not_started',
+            createdAt: new Date()
+          };
+        }
+
         setUser(afritokeniUser);
         setAuthMethod('web');
-        localStorage.setItem('afritokeni_user', JSON.stringify(afritokeniUser));
-        localStorage.setItem('afritokeni_auth_method', 'web');
+        storeUserData(afritokeniUser, 'web');
       } else {
         setUser(null);
-        localStorage.removeItem('afritokeni_user');
-        localStorage.removeItem('afritokeni_auth_method');
+        clearUserData();
       }
     });
 
@@ -101,7 +213,14 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
             collection: 'users',
             key: formattedPhone
           });
-          existingUser = doc?.data as User || null;
+          
+          if (doc?.data) {
+            const userData = doc.data as UserDataFromJuno;
+            existingUser = {
+              ...userData,
+              createdAt: userData.createdAt ? new Date(userData.createdAt) : new Date()
+            } as User;
+          }
         } catch {
           console.log('User not found, will create new account');
         }
@@ -145,8 +264,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         setUser(existingUser);
         setAuthMethod('sms');
-        localStorage.setItem('afritokeni_user', JSON.stringify(existingUser));
-        localStorage.setItem('afritokeni_auth_method', 'sms');
+        storeUserData(existingUser, 'sms');
         
         return true;
       } else {
@@ -264,8 +382,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Set user as logged in
       setUser(newUser);
       setAuthMethod('sms');
-      localStorage.setItem('afritokeni_user', JSON.stringify(newUser));
-      localStorage.setItem('afritokeni_auth_method', 'sms');
+      storeUserData(newUser, 'sms');
       
       // Clear verification state
       setVerificationState({
@@ -304,8 +421,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Clear local state for all auth methods
       setUser(null);
       setAuthMethod('web');
-      localStorage.removeItem('afritokeni_user');
-      localStorage.removeItem('afritokeni_auth_method');
+      clearUserData();
       
       // Force redirect to landing page
       window.location.href = '/';
@@ -314,8 +430,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Force logout even if signOut fails
       setUser(null);
       setAuthMethod('web');
-      localStorage.removeItem('afritokeni_user');
-      localStorage.removeItem('afritokeni_auth_method');
+      clearUserData();
       window.location.href = '/';
     }
   };
@@ -331,7 +446,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     cancelVerification,
     isVerifying: verificationState.isVerifying,
     verificationPhoneNumber: verificationState.phoneNumber,
-    devVerificationCode: verificationState.devVerificationCode
+    devVerificationCode: verificationState.devVerificationCode,
+    // Add updateUser function for KYC completion
+    updateUser: (updatedUser: User) => {
+      setUser(updatedUser);
+      storeUserData(updatedUser, authMethod);
+    }
   };
 
   return (
