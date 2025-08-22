@@ -1,0 +1,10 @@
+ {
+      "id": "usr_001",
+      "firstName": "John",
+      "lastName": "Mugisha",
+      "email": "+256774590636",
+      "userType": "user",
+      "isVerified": true,
+      "kycStatus": "not_started",
+      "createdAt": "2024-01-15T08:30:00.000Z"
+}
