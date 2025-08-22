@@ -113,7 +113,7 @@ const SMSUI: React.FC = () => {
       const success = await verifyRegistrationCode(verificationCode);
       
       if (success) {
-        setResponse(`Welcome to AfriTokeni, ${user?.firstName}! Registration complete. Send *AFRI# for menu.`);
+        setResponse(`Welcome to AfriTokeni, ${user?.firstName} ${user?.lastName}! Registration complete. Send *AFRI# for menu.`);
       } else {
         setResponse('Invalid verification code. Please try again.');
       }
