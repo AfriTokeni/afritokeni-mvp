@@ -58,13 +58,17 @@ const ProcessDeposit: React.FC = () => {
     setIsSearchingUser(true);
     try {
       // Format phone number
-      const formattedPhone = phone.startsWith('+') ? phone : `+254${phone.replace(/^0/, '')}`;
+      const formattedPhone = phone.startsWith('+') ? phone : `+256${phone.replace(/^0/, '')}`;
+
+      console.log('Searching user by phone:', formattedPhone);
       
       // Search for user in Juno datastore
       const userDoc = await getDoc({
         collection: 'users',
         key: formattedPhone
       });
+
+      console.log('User document found:', userDoc);
 
       if (userDoc?.data) {
         const user = userDoc.data as UserType;
