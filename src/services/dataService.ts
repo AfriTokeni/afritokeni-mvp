@@ -1,5 +1,18 @@
 import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { nanoid } from 'nanoid';
+import { User } from '../types/auth';
+
+// Interface for user data as stored in Juno (with string dates)
+interface UserDataFromJuno {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: 'user' | 'agent';
+  isVerified: boolean;
+  kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  createdAt: string;
+}
 
 // Transaction types for AfriTokeni
 export interface Transaction {
@@ -66,6 +79,106 @@ export interface SMSMessage {
 
 // Simplified data service following Juno patterns
 export class DataService {
+  // User operations
+  static async createUser(userData: {
+    id?: string; // Optional ID, if not provided will generate new one
+    firstName: string;
+    lastName: string;
+    email: string; // This will be the phone number
+    userType: 'user' | 'agent';
+    kycStatus?: 'pending' | 'approved' | 'rejected' | 'not_started';
+  }): Promise<User> {
+    const now = new Date();
+    const newUser: User = {
+      id: userData.id || nanoid(), // Use provided ID or generate new one
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      userType: userData.userType,
+      isVerified: false,
+      kycStatus: userData.kycStatus || 'not_started',
+      createdAt: now
+    };
+
+    // Convert Date fields to ISO strings for Juno storage
+    const dataForJuno = {
+      ...newUser,
+      createdAt: now.toISOString()
+    };
+
+    // Save user to Juno datastore using phone number as key
+    await setDoc({
+      collection: 'users',
+      doc: {
+        key: userData.email, // Use phone number as key for easy lookup
+        data: dataForJuno,
+        version: 1n
+      }
+    });
+
+    return newUser;
+  }
+
+  static async getUser(phoneNumber: string): Promise<User | null> {
+    try {
+      const doc = await getDoc({
+        collection: 'users',
+        key: phoneNumber
+      });
+
+      if (!doc?.data) {
+        return null;
+      }
+
+      // Convert string date back to Date object
+      const rawData = doc.data as UserDataFromJuno;
+      const user: User = {
+        id: rawData.id,
+        firstName: rawData.firstName,
+        lastName: rawData.lastName,
+        email: rawData.email,
+        userType: rawData.userType,
+        isVerified: rawData.isVerified,
+        kycStatus: rawData.kycStatus,
+        createdAt: new Date(rawData.createdAt)
+      };
+
+      return user;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return null;
+    }
+  }
+
+  static async updateUser(phoneNumber: string, updates: Partial<User>): Promise<boolean> {
+    try {
+      const existingUser = await this.getUser(phoneNumber);
+      if (!existingUser) return false;
+
+      const updatedUser = { ...existingUser, ...updates };
+      
+      // Convert Date fields to ISO strings for Juno storage
+      const dataForJuno = {
+        ...updatedUser,
+        createdAt: updatedUser.createdAt?.toISOString()
+      };
+
+      await setDoc({
+        collection: 'users',
+        doc: {
+          key: phoneNumber,
+          data: dataForJuno,
+          version: 1n
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return false;
+    }
+  }
+
     // Transaction operations
   static async createTransaction(transaction: Omit<Transaction, 'id' | 'createdAt'>): Promise<Transaction> {
     const now = new Date();
@@ -160,7 +273,26 @@ export class DataService {
         collection: 'balances',
         key: userId
       });
-      return doc?.data as UserBalance || null;
+      
+      if (!doc?.data) {
+        return null;
+      }
+
+      // Convert string date back to Date object
+      const rawData = doc.data as {
+        userId: string;
+        balance: number;
+        currency: 'UGX';
+        lastUpdated: string;
+      };
+      const userBalance: UserBalance = {
+        userId: rawData.userId,
+        balance: rawData.balance,
+        currency: rawData.currency,
+        lastUpdated: new Date(rawData.lastUpdated)
+      };
+
+      return userBalance;
     } catch (error) {
       console.error('Error getting user balance:', error);
       return null;
@@ -183,18 +315,27 @@ export class DataService {
         lastUpdated: now.toISOString()
       };
 
+      // Get current document to obtain its version
+      const existingDoc = await getDoc({
+        collection: 'balances',
+        key: userId
+      });
+
+      // Update with proper version handling
       await setDoc({
         collection: 'balances',
         doc: {
           key: userId,
           data: dataForJuno,
-          version:1n
+          version: existingDoc?.version ? existingDoc.version + 1n : 1n
         }
       });
 
+      console.log('Balance updated successfully:', { userId, balance, hadExisting: !!existingDoc });
       return true;
     } catch (error) {
       console.error('Error updating user balance:', error);
+      console.error('Update details:', { userId, balance });
       return false;
     }
   }
