@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { authSubscribe, signIn, signOut, setDoc, getDoc, type User as JunoUser } from '@junobuild/core';
 import { AuthContextType, User, LoginFormData, RegisterFormData } from '../types/auth';
 import { useRoleBasedAuth } from '../hooks/useRoleBasedAuth';
+import { DataService } from '../services/dataService';
 import { nanoid } from 'nanoid';
 import { SMSService } from '../services/smsService';
 
@@ -123,10 +124,10 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         let afritokeniUser: User;
         
         try {
-          // Try to get existing user data from our users collection
+          // Try to get existing user data from our users collection using user ID as key
           const existingUserDoc = await getDoc({
             collection: 'users',
-            key: junoUser.key
+            key: junoUser.key // For web users, use ID as document key
           });
           
           if (existingUserDoc?.data) {
@@ -137,17 +138,28 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
               createdAt: userData.createdAt ? new Date(userData.createdAt) : new Date()
             } as User;
           } else {
-            // New user, create default profile
+            // New web user, create profile using ID as key
             afritokeniUser = {
               id: junoUser.key,
               firstName: 'ICP',
               lastName: 'User',
-              email: junoUser.key, // Use key as identifier
+              email: junoUser.key, // Use key as identifier for web users
               userType: 'user', // This will be updated based on role check
               isVerified: true,
               kycStatus: 'not_started',
               createdAt: new Date()
             };
+
+            // Create user record in datastore with ID as key
+            await DataService.createUser({
+              id: afritokeniUser.id,
+              firstName: afritokeniUser.firstName,
+              lastName: afritokeniUser.lastName,
+              email: afritokeniUser.email,
+              userType: afritokeniUser.userType,
+              kycStatus: afritokeniUser.kycStatus,
+              authMethod: 'web' // Important: specify this is a web user
+            });
             
             // Save new user to our datastore
             await setDoc({
@@ -206,21 +218,10 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return false;
         }
         
-        // Try to get existing user by phone
+        // Try to get existing SMS user by phone
         let existingUser: User | null = null;
         try {
-          const doc = await getDoc({
-            collection: 'users',
-            key: formattedPhone
-          });
-          
-          if (doc?.data) {
-            const userData = doc.data as UserDataFromJuno;
-            existingUser = {
-              ...userData,
-              createdAt: userData.createdAt ? new Date(userData.createdAt) : new Date()
-            } as User;
-          }
+          existingUser = await DataService.getUser(formattedPhone);
         } catch {
           console.log('User not found, will create new account');
         }
@@ -251,12 +252,14 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           // For demo purposes, we'll auto-verify and save the user
           // In production, you'd wait for the user to respond with the code
-          await setDoc({
-            collection: 'users',
-            doc: {
-              key: formattedPhone,
-              data: newUser
-            }
+          await DataService.createUser({
+            id: newUser.id,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            email: formattedPhone, // Phone number for SMS users
+            userType: newUser.userType,
+            kycStatus: newUser.kycStatus,
+            authMethod: 'sms' // Important: specify this is an SMS user
           });
           
           existingUser = newUser;
