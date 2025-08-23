@@ -72,6 +72,8 @@ export interface AuthContextType {
   devVerificationCode?: string;
   // User update method
   updateUser: (updatedUser: User) => void;
+  // User type update method (for role selection)
+  updateUserType: (newUserType: 'user' | 'agent') => void;
 }
 
 export interface LocationSuggestion {
