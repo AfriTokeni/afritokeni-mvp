@@ -59,6 +59,7 @@ export interface Agent {
     };
   };
   isActive: boolean;
+  status: 'available' | 'busy' | 'cash_out' | 'offline';
   cashBalance: number;
   digitalBalance: number;
   commissionRate: number;
@@ -112,13 +113,18 @@ export class DataService {
     // For SMS users: use phone number (email field) as key
     const documentKey = userData.authMethod === 'web' ? newUser.id : userData.email;
 
+     const existingDoc = await getDoc({
+        collection: 'users',
+        key: documentKey
+      });
+
     // Save user to Juno datastore
     await setDoc({
       collection: 'users',
       doc: {
         key: documentKey,
         data: dataForJuno,
-        version: 1n
+        version: existingDoc?.version ? existingDoc.version : 1n
       }
     });
 
@@ -172,6 +178,14 @@ export class DataService {
       const existingUser = await this.getUserByKey(key);
       if (!existingUser) return false;
 
+      // Get the current document to retrieve its version
+      const existingDoc = await getDoc({
+        collection: 'users',
+        key: key
+      });
+
+      if (!existingDoc) return false;
+
       const updatedUser = { ...existingUser, ...updates };
       
       // Convert Date fields to ISO strings for Juno storage
@@ -180,13 +194,13 @@ export class DataService {
         createdAt: updatedUser.createdAt?.toISOString() || new Date().toISOString()
       };
 
-      // Use the same key for updates
+      // Use the same key for updates with current version
       await setDoc({
         collection: 'users',
         doc: {
           key: key,
           data: dataForJuno,
-          version: 1n
+          version: existingDoc.version
         }
       });
 
@@ -302,7 +316,7 @@ export class DataService {
       doc: {
         key: newTransaction.id,
         data: dataForJuno,
-        version:existingDoc?.version ? existingDoc.version : 1n
+        version: existingDoc?.version ? existingDoc.version : 1n
       }
     });
 
@@ -338,6 +352,105 @@ export class DataService {
     }
   }
 
+  // Get agent facilitated transactions (transactions where agent helped customers)
+  static async getAgentTransactions(agentId: string): Promise<Transaction[]> {
+    try {
+      const docs = await listDocs({
+        collection: 'transactions'
+      });
+      
+      return docs.items
+        .map(doc => doc.data as Transaction)
+        .filter(transaction => transaction.agentId === agentId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      console.error('Error getting agent transactions:', error);
+      return [];
+    }
+  }
+
+  // Get agent transactions by user ID (agent's own transactions, not facilitated ones)
+  static async getAgentTransactionsByUserId(userId: string): Promise<Transaction[]> {
+    try {
+      // Return transactions where the agent is the actual user (userId), not just the facilitator
+      const docs = await listDocs({
+        collection: 'transactions'
+      });
+      
+      return docs.items
+        .map(doc => doc.data as Transaction)
+        .filter(transaction => transaction.userId === userId) // Agent's own transactions
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      console.error('Error getting agent transactions by user ID:', error);
+      return [];
+    }
+  }
+
+  // Calculate agent daily earnings
+  static calculateAgentDailyEarnings(transactions: Transaction[]): {
+    totalAmount: number;
+    totalCommission: number;
+    transactionCount: number;
+    completedCount: number;
+  } {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const todayTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.createdAt);
+      return transactionDate >= today && transactionDate < tomorrow;
+    });
+
+    const completedTransactions = todayTransactions.filter(
+      transaction => transaction.status === 'completed'
+    );
+
+    const totalAmount = completedTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+    const totalCommission = completedTransactions.reduce((sum, transaction) => {
+      // Calculate 2% commission on completed transactions
+      return sum + (transaction.amount * 0.02);
+    }, 0);
+
+    return {
+      totalAmount,
+      totalCommission,
+      transactionCount: todayTransactions.length,
+      completedCount: completedTransactions.length
+    };
+  }
+
+  // Get all customers (users of type 'user')
+  static async getAllCustomers(): Promise<User[]> {
+    try {
+      const docs = await listDocs({
+        collection: 'users'
+      });
+      
+      return docs.items
+        .map(doc => {
+          const rawData = doc.data as UserDataFromJuno;
+          return {
+            id: rawData.id,
+            firstName: rawData.firstName,
+            lastName: rawData.lastName,
+            email: rawData.email,
+            userType: rawData.userType,
+            isVerified: rawData.isVerified,
+            kycStatus: rawData.kycStatus,
+            createdAt: new Date(rawData.createdAt)
+          } as User;
+        })
+        .filter(user => user.userType === 'user')
+        .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+    } catch (error) {
+      console.error('Error getting all customers:', error);
+      return [];
+    }
+  }
+
   static async updateTransaction(id: string, updates: Partial<Transaction>): Promise<boolean> {
     try {
       const existing = await this.getTransaction(id);
@@ -362,7 +475,7 @@ export class DataService {
         doc: {
           key: id,
           data: dataForJuno,
-          version:existingDoc?.version ? existingDoc.version : 1n
+          version: existingDoc?.version ? existingDoc.version : 1n
         }
       });
 
@@ -474,6 +587,99 @@ export class DataService {
     return newAgent;
   }
 
+  // Complete Agent KYC process - updates user details and creates agent record
+  static async completeAgentKYC(agentKYCData: {
+    // User details to update
+    userId: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string; // This becomes the email field
+    
+    // Agent-specific details
+    businessName?: string;
+    location: {
+      country: string;
+      state: string;
+      city: string;
+      address: string;
+      coordinates: {
+        lat: number;
+        lng: number;
+      };
+    };
+    operatingHours?: string;
+    operatingDays?: string[];
+    
+    // Optional documents (for future use)
+    documentType?: string;
+    documentNumber?: string;
+    businessLicense?: string;
+  }): Promise<{ user: User; agent: Agent }> {
+    try {
+      // 1. Update user details in users collection
+      const userUpdates: Partial<User> = {
+        firstName: agentKYCData.firstName,
+        lastName: agentKYCData.lastName,
+        email: agentKYCData.phoneNumber,
+        kycStatus: 'approved', // Set to approved after KYC completion
+        isVerified: true
+      };
+
+      const userUpdateSuccess = await this.updateUser(agentKYCData.userId, userUpdates, 'web');
+      if (!userUpdateSuccess) {
+        throw new Error('Failed to update user details');
+      }
+
+      // Get the updated user
+      const updatedUser = await this.getUserByKey(agentKYCData.userId);
+      if (!updatedUser) {
+        throw new Error('Failed to retrieve updated user');
+      }
+
+      // 2. Get digital balance for agent from balances collection
+      const userBalance = await this.getUserBalance(agentKYCData.userId);
+      let digitalBalance = userBalance?.balance || 0;
+
+      // If digital balance is 0, set a random figure between 100,000 and 1,000,000 UGX
+      if (digitalBalance === 0) {
+        digitalBalance = Math.floor(Math.random() * 900000) + 100000; // Random between 100,000 and 1,000,000 UGX
+        
+        // Update the balance in the balances table
+        await this.updateUserBalance(agentKYCData.userId, digitalBalance);
+      }
+
+      // 3. Generate random cash balance (as requested)
+      const cashBalance = Math.floor(Math.random() * 2000000) + 500000; // Random between 500,000 and 2,500,000 UGX
+
+      // 4. Create agent record in agents collection
+      const agentData: Omit<Agent, 'id' | 'createdAt'> = {
+        userId: agentKYCData.userId,
+        businessName: agentKYCData.businessName || `${agentKYCData.firstName} ${agentKYCData.lastName} Agent`,
+        location: agentKYCData.location,
+        isActive: true,
+        status: 'available', // Default status when agent is created
+        cashBalance: cashBalance,
+        digitalBalance: digitalBalance,
+        commissionRate: 0.02 // Default 2% commission rate
+      };
+
+      const newAgent = await this.createAgent(agentData);
+
+      // 5. Initialize user balance if it doesn't exist (but don't override the random balance we just set)
+      if (!userBalance && digitalBalance === 0) {
+        await this.updateUserBalance(agentKYCData.userId, 0);
+      }
+
+      return {
+        user: updatedUser,
+        agent: newAgent
+      };
+    } catch (error) {
+      console.error('Error completing agent KYC:', error);
+      throw error;
+    }
+  }
+
   static async getAgent(id: string): Promise<Agent | null> {
     try {
       const doc = await getDoc({
@@ -487,16 +693,156 @@ export class DataService {
     }
   }
 
-  static async getNearbyAgents(lat: number, lng: number, radius: number = 5): Promise<Agent[]> {
+  // Get agent by userId
+  static async getAgentByUserId(userId: string): Promise<Agent | null> {
+    try {
+      const docs = await listDocs({
+        collection: 'agents'
+      });
+
+      // Find agent with matching userId
+      for (const doc of docs.items) {
+        const agentData = doc.data as Agent;
+        if (agentData.userId === userId) {
+          return {
+            ...agentData,
+            createdAt: agentData.createdAt ? new Date(agentData.createdAt) : new Date()
+          };
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error getting agent by userId:', error);
+      return null;
+    }
+  }
+
+  // Update agent status
+  static async updateAgentStatus(agentId: string, status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> {
+    try {
+      const existingAgent = await this.getAgent(agentId);
+      if (!existingAgent) return false;
+
+      // Get current document to obtain its version
+      const existingDoc = await getDoc({
+        collection: 'agents',
+        key: agentId
+      });
+
+      if (!existingDoc) return false;
+
+      const updatedAgent = { 
+        ...existingAgent, 
+        status,
+        // Ensure createdAt is a string for Juno storage
+        createdAt: typeof existingAgent.createdAt === 'string' 
+          ? existingAgent.createdAt 
+          : existingAgent.createdAt.toISOString()
+      };
+
+      await setDoc({
+        collection: 'agents',
+        doc: {
+          key: agentId,
+          data: updatedAgent,
+          version: existingDoc.version
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      return false;
+    }
+  }
+
+  // Update agent status by userId (convenience method)
+  static async updateAgentStatusByUserId(userId: string, status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> {
+    try {
+      const agent = await this.getAgentByUserId(userId);
+      if (!agent) return false;
+      
+      return await this.updateAgentStatus(agent.id, status);
+    } catch (error) {
+      console.error('Error updating agent status by userId:', error);
+      return false;
+    }
+  }
+
+  // Update agent balances (cash and digital)
+  static async updateAgentBalance(agentId: string, updates: { 
+    cashBalance?: number; 
+    digitalBalance?: number; 
+  }): Promise<boolean> {
+    try {
+      const existingAgent = await this.getAgent(agentId);
+      if (!existingAgent) return false;
+
+      // Get current document to obtain its version
+      const existingDoc = await getDoc({
+        collection: 'agents',
+        key: agentId
+      });
+
+      if (!existingDoc) return false;
+
+      const updatedAgent = { 
+        ...existingAgent,
+        ...(updates.cashBalance !== undefined && { cashBalance: updates.cashBalance }),
+        ...(updates.digitalBalance !== undefined && { digitalBalance: updates.digitalBalance }),
+        // Ensure createdAt is a string for Juno storage
+        createdAt: typeof existingAgent.createdAt === 'string' 
+          ? existingAgent.createdAt 
+          : existingAgent.createdAt.toISOString()
+      };
+
+      await setDoc({
+        collection: 'agents',
+        doc: {
+          key: agentId,
+          data: updatedAgent,
+          version: existingDoc.version
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating agent balance:', error);
+      return false;
+    }
+  }
+
+  // Update agent balance by userId (convenience method)
+  static async updateAgentBalanceByUserId(userId: string, updates: { 
+    cashBalance?: number; 
+    digitalBalance?: number; 
+  }): Promise<boolean> {
+    try {
+      const agent = await this.getAgentByUserId(userId);
+      if (!agent) return false;
+      
+      return await this.updateAgentBalance(agent.id, updates);
+    } catch (error) {
+      console.error('Error updating agent balance by userId:', error);
+      return false;
+    }
+  }
+
+  static async getNearbyAgents(lat: number, lng: number, radius: number = 5, includeStatuses?: ('available' | 'busy' | 'cash_out' | 'offline')[]): Promise<Agent[]> {
     try {
       const docs = await listDocs({
         collection: 'agents'
       });
       
+      // Default to only available agents if no statuses specified
+      const allowedStatuses = includeStatuses || ['available'];
+      
       return docs.items
         .map(doc => doc.data as Agent)
         .filter(agent => {
           if (!agent.isActive) return false;
+          if (!allowedStatuses.includes(agent.status)) return false;
           
           // Simple distance calculation (not precise but good for demo)
           const agentLat = agent.location.coordinates.lat;
@@ -544,7 +890,8 @@ export class DataService {
       collection: 'sms_messages',
       doc: {
         key: newMessage.id,
-        data: dataForJuno
+        data: dataForJuno,
+        version: 1n
       }
     });
 
