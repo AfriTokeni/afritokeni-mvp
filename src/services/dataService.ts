@@ -167,7 +167,7 @@ export class DataService {
     return this.getUserByKey(userId);
   }
 
-  static async updateUser(key: string, updates: Partial<User>, authMethod?: 'sms' | 'web'): Promise<boolean> {
+  static async updateUser(key: string, updates: Partial<User>, _authMethod?: 'sms' | 'web'): Promise<boolean> {
     try {
       const existingUser = await this.getUserByKey(key);
       if (!existingUser) return false;
@@ -211,7 +211,14 @@ export class DataService {
   static async searchUsers(searchTerm: string): Promise<User[]> {
     try {
       // First, try to find user by exact phone number match (for SMS users)
-      const directMatch = await this.getUserByKey(searchTerm);
+      // Try both original case and formatted phone number
+      let directMatch = await this.getUserByKey(searchTerm);
+      if (!directMatch && searchTerm.match(/^\d+$/)) {
+        // If it's a number, try formatting as phone number
+        const formattedPhone = searchTerm.startsWith('+') ? searchTerm : `+256${searchTerm.replace(/^0/, '')}`;
+        directMatch = await this.getUserByKey(formattedPhone);
+      }
+      
       if (directMatch) {
         return [directMatch];
       }
@@ -225,7 +232,7 @@ export class DataService {
         return [];
       }
 
-      const searchTermLower = searchTerm.toLowerCase();
+      const searchTermLower = searchTerm.toLowerCase().trim();
       const matchedUsers: User[] = [];
 
       for (const doc of allUsersResult.items) {
@@ -241,12 +248,17 @@ export class DataService {
           createdAt: new Date(rawData.createdAt)
         };
 
-        // Check if search term matches phone (email field), first name, or last name
+        // Check if search term matches phone (email field), first name, or last name (case insensitive)
         const matchesPhone = user.email.toLowerCase().includes(searchTermLower);
         const matchesFirstName = user.firstName.toLowerCase().includes(searchTermLower);
         const matchesLastName = user.lastName.toLowerCase().includes(searchTermLower);
+        
+        // Also check for partial phone number matches (last digits)
+        const phoneDigits = user.email.replace(/\D/g, ''); // Extract only digits
+        const searchDigits = searchTerm.replace(/\D/g, '');
+        const matchesPhoneDigits = searchDigits.length >= 3 && phoneDigits.includes(searchDigits);
 
-        if (matchesPhone || matchesFirstName || matchesLastName) {
+        if (matchesPhone || matchesFirstName || matchesLastName || matchesPhoneDigits) {
           matchedUsers.push(user);
         }
       }
@@ -280,12 +292,17 @@ export class DataService {
       completedAt: newTransaction.completedAt ? newTransaction.completedAt.toISOString() : undefined
     };
 
+    const existingDoc = await getDoc({
+      collection: 'transactions',
+      key: newTransaction.id
+    });
+
     await setDoc({
       collection: 'transactions',
       doc: {
         key: newTransaction.id,
         data: dataForJuno,
-        version:1n
+        version:existingDoc?.version ? existingDoc.version : 1n
       }
     });
 
@@ -335,12 +352,17 @@ export class DataService {
         completedAt: updated.completedAt ? updated.completedAt.toISOString() : undefined
       };
 
+      const existingDoc = await getDoc({
+        collection: 'transactions',
+        key: id
+      });
+
       await setDoc({
         collection: 'transactions',
         doc: {
           key: id,
           data: dataForJuno,
-          version:1n
+          version:existingDoc?.version ? existingDoc.version : 1n
         }
       });
 
@@ -412,7 +434,7 @@ export class DataService {
         doc: {
           key: userId,
           data: dataForJuno,
-          version: existingDoc?.version ? existingDoc.version + 1n : 1n
+          version: existingDoc?.version ? existingDoc.version : 1n
         }
       });
 
