@@ -7,6 +7,8 @@ export const useAfriTokeni = () => {
   const { user } = useAuthentication();
   const [balance, setBalance] = useState<UserBalance | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
+  const [agent, setAgent] = useState<Agent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,13 +30,26 @@ export const useAfriTokeni = () => {
       
       setBalance(userBalance);
       setTransactions(userTransactions);
+
+      // Load agent data if user is an agent
+      if (user.userType === 'agent') {
+        const [agentData, agentTransactionsData] = await Promise.all([
+          DataService.getAgentByUserId(user.id),
+          DataService.getAgentTransactionsByUserId(user.id)
+        ]);
+        setAgent(agentData);
+        setAgentTransactions(agentTransactionsData);
+      } else {
+        setAgent(null);
+        setAgentTransactions([]);
+      }
     } catch (err) {
       setError('Failed to load user data');
       console.error('Error loading user data:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.userType]);
 
   // Load user data when user changes
   useEffect(() => {
@@ -43,6 +58,8 @@ export const useAfriTokeni = () => {
     } else {
       setBalance(null);
       setTransactions([]);
+      setAgent(null);
+      setAgentTransactions([]);
     }
   }, [user?.id, loadUserData]);
 
@@ -290,11 +307,32 @@ export const useAfriTokeni = () => {
     loadUserData();
   };
 
+  // Agent status management
+  const updateAgentStatus = async (status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> => {
+    if (!user?.id || user.userType !== 'agent') {
+      return false;
+    }
+
+    try {
+      const success = await DataService.updateAgentStatusByUserId(user.id, status);
+      if (success) {
+        // Refresh agent data to reflect the status change
+        await loadUserData();
+      }
+      return success;
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      return false;
+    }
+  };
+
   return {
     // Data
     user,
     balance,
     transactions,
+    agentTransactions,
+    agent,
     isLoading,
     error,
     
@@ -306,6 +344,7 @@ export const useAfriTokeni = () => {
     processSMSCommand,
     refreshData,
     calculateFee,
+    updateAgentStatus,
     
     // Computed values
     formattedBalance: balance ? `UGX ${balance.balance.toLocaleString()}` : 'UGX 0',
