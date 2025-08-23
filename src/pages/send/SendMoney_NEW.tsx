@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
+import { getDoc } from '@junobuild/core';
 import { DataService } from '../../services/dataService';
 import { User as UserType } from '../../types/auth';
 import PageLayout from '../../components/PageLayout';
@@ -25,21 +26,18 @@ interface TransactionResult {
 
 const SendMoney: React.FC = () => {
   const navigate = useNavigate();
-  const { balance, user, sendMoney, calculateFee } = useAfriTokeni();
+  const { balance, user } = useAfriTokeni();
   
   const [ugxAmount, setUgxAmount] = useState<string>('');
   const [usdcAmount, setUsdcAmount] = useState<string>('');
   const [recipientPhone, setRecipientPhone] = useState<string>('');
   const [sendStep, setSendStep] = useState<number>(1);
   const [recipient, setRecipient] = useState<UserType | null>(null);
-  const [searchResults, setSearchResults] = useState<UserType[]>([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearchingUser, setIsSearchingUser] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
   
   const searchTimeoutRef = useRef<number | null>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-UG', {
@@ -48,64 +46,36 @@ const SendMoney: React.FC = () => {
     }).format(amount);
   };
 
-  // Search for user with debouncing
-  const searchUserByPhone = async (searchTerm: string) => {
-    if (!searchTerm || searchTerm.length < 3) {
+  // Search for user by phone number
+  const searchUserByPhone = async (phone: string) => {
+    if (!phone || phone.length < 10) {
       setRecipient(null);
-      setSearchResults([]);
-      setShowSearchResults(false);
       return;
     }
     
     setIsSearchingUser(true);
     try {
-      // Use the enhanced search functionality with case insensitive search
-      const users = await DataService.searchUsers(searchTerm);
+      // Format phone number
+      const formattedPhone = phone.startsWith('+') ? phone : `+256${phone.replace(/^0/, '')}`;
       
-      setSearchResults(users);
-      setShowSearchResults(users.length > 0);
-      
-      // Don't auto-select if there are multiple results
-      if (users.length === 1) {
-        setRecipient(users[0]);
+      // Search for user in Juno datastore using getDoc
+      const userDoc = await getDoc({
+        collection: 'users',
+        key: formattedPhone
+      });
+
+      if (userDoc && userDoc.data) {
+        setRecipient(userDoc.data as UserType);
       } else {
         setRecipient(null);
       }
     } catch (error) {
       console.error('Error searching user:', error);
       setRecipient(null);
-      setSearchResults([]);
-      setShowSearchResults(false);
     } finally {
       setIsSearchingUser(false);
     }
   };
-
-  // Handle user selection from dropdown
-  const handleUserSelection = (selectedUser: UserType) => {
-    setRecipient(selectedUser);
-    // Set the display value to show user's phone or name, but keep it searchable
-    const displayValue = selectedUser.email.startsWith('+') 
-      ? selectedUser.email 
-      : `${selectedUser.firstName} ${selectedUser.lastName}`;
-    setRecipientPhone(displayValue);
-    setSearchResults([]);
-    setShowSearchResults(false);
-  };
-
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setShowSearchResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   // Debounced search effect
   useEffect(() => {
@@ -113,14 +83,12 @@ const SendMoney: React.FC = () => {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    if (recipientPhone.length >= 3) {
+    if (recipientPhone.length >= 10) {
       searchTimeoutRef.current = window.setTimeout(() => {
         searchUserByPhone(recipientPhone);
       }, 500); // 500ms debounce
     } else {
       setRecipient(null);
-      setSearchResults([]);
-      setShowSearchResults(false);
     }
 
     // Cleanup timeout on unmount
@@ -130,6 +98,11 @@ const SendMoney: React.FC = () => {
       }
     };
   }, [recipientPhone]);
+
+  // Calculate transaction fee (1% of amount)
+  const calculateFee = (amount: number): number => {
+    return amount * 0.01;
+  };
 
   // Handle UGX amount change
   const handleUgxAmountChange = (value: string) => {
@@ -162,26 +135,93 @@ const SendMoney: React.FC = () => {
     setIsProcessing(true);
     try {
       const sendAmount = parseFloat(ugxAmount);
-      
-      // For SMS, use the phone number from recipient.email field
-      // For web users, their phone number is also stored in the email field after KYC
-      const recipientPhoneNumber = recipient.email.startsWith('+') ? recipient.email : recipientPhone;
-      
-      // Use the sendMoney function from the hook
-      const result = await sendMoney(sendAmount, recipientPhoneNumber, recipient);
-      
-      if (result.success && result.transaction && result.fee !== undefined) {
-        setTransactionResult({
-          id: result.transaction.id,
-          amount: sendAmount,
-          fee: result.fee,
-          recipient: recipient,
-          timestamp: new Date()
-        });
-        setSendStep(3);
-      } else {
-        alert(result.message);
+      const fee = calculateFee(sendAmount);
+      const totalAmount = sendAmount + fee;
+
+      // Check if sender has sufficient balance
+      const senderBalance = await DataService.getUserBalance(user.id);
+      if (!senderBalance || senderBalance.balance < totalAmount) {
+        alert('Insufficient balance');
+        return;
       }
+
+      // Create send transaction
+      const sendTransaction = await DataService.createTransaction({
+        userId: user.id,
+        type: 'send',
+        amount: sendAmount,
+        currency: 'UGX',
+        recipientId: recipient.id,
+        recipientPhone: recipientPhone,
+        recipientName: `${recipient.firstName} ${recipient.lastName}`,
+        status: 'completed',
+        description: `Money sent to ${recipient.firstName} ${recipient.lastName}`,
+        completedAt: new Date(),
+        metadata: {
+          smsReference: `SEND${Date.now().toString().slice(-6)}`
+        }
+      });
+
+      // Create receive transaction for recipient
+      await DataService.createTransaction({
+        userId: recipient.id,
+        type: 'receive',
+        amount: sendAmount,
+        currency: 'UGX',
+        status: 'completed',
+        description: `Money received from ${user.firstName} ${user.lastName}`,
+        completedAt: new Date(),
+        metadata: {
+          smsReference: `RCV${Date.now().toString().slice(-6)}`
+        }
+      });
+
+      // Update sender balance (deduct amount + fee)
+      await DataService.updateUserBalance(user.id, senderBalance.balance - totalAmount);
+
+      // Update recipient balance (add amount)
+      const recipientBalance = await DataService.getUserBalance(recipient.id);
+      const newRecipientBalance = (recipientBalance?.balance || 0) + sendAmount;
+      await DataService.updateUserBalance(recipient.id, newRecipientBalance);
+
+      // Send SMS notifications
+      try {
+        // SMS to sender
+        const senderSMS = `AfriTokeni: You sent UGX ${sendAmount.toLocaleString()} to ${recipient.firstName} ${recipient.lastName} (${recipientPhone}). Fee: UGX ${fee.toLocaleString()}. New balance: UGX ${(senderBalance.balance - totalAmount).toLocaleString()}. Ref: ${sendTransaction.id}`;
+        await fetch('http://localhost:3001/api/sms/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phoneNumber: user.email,
+            message: senderSMS,
+            transactionId: sendTransaction.id
+          })
+        });
+
+        // SMS to recipient
+        const recipientSMS = `AfriTokeni: You received UGX ${sendAmount.toLocaleString()} from ${user.firstName} ${user.lastName} (${user.email}). New balance: UGX ${newRecipientBalance.toLocaleString()}. Ref: ${sendTransaction.id}`;
+        await fetch('http://localhost:3001/api/sms/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phoneNumber: recipientPhone,
+            message: recipientSMS,
+            transactionId: sendTransaction.id
+          })
+        });
+      } catch (smsError) {
+        console.error('SMS sending failed:', smsError);
+      }
+
+      setTransactionResult({
+        id: sendTransaction.id,
+        amount: sendAmount,
+        fee: fee,
+        recipient: recipient,
+        timestamp: new Date()
+      });
+
+      setSendStep(3);
     } catch (error) {
       console.error('Error sending money:', error);
       alert('Failed to send money. Please try again.');
@@ -212,79 +252,46 @@ const SendMoney: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-3">
-                  Recipient Search (Phone / Name)
+                  Recipient Phone Number
                 </label>
-                <div className="relative" ref={searchContainerRef}>
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 z-10" />
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   <input
                     type="tel"
                     value={recipientPhone}
                     onChange={(e) => setRecipientPhone(e.target.value)}
-                    onFocus={() => {
-                      if (searchResults.length > 0) {
-                        setShowSearchResults(true);
-                      }
-                    }}
-                    placeholder="Enter phone number, first name, or last name"
+                    placeholder="+256701234567"
                     className="w-full pl-10 pr-10 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                   />
                   {isSearchingUser && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin z-10" />
-                  )}
-                  
-                  {/* Search Results Dropdown */}
-                  {showSearchResults && searchResults.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {searchResults.map((user, index) => (
-                        <div
-                          key={`${user.id}-${index}`}
-                          onClick={() => handleUserSelection(user)}
-                          className="flex items-center space-x-3 p-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0"
-                        >
-                          <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <User className="w-4 h-4 text-neutral-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-neutral-900 truncate">
-                              {user.firstName} {user.lastName}
-                            </p>
-                            <p className="text-sm text-neutral-500 truncate">
-                              {user.email.startsWith('+') ? user.email : 'Web User'}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin" />
                   )}
                 </div>
                 
-                {/* Display selected user */}
+                {/* Display found user */}
                 {recipient && (
-                  <div className="mt-3 bg-neutral-50 rounded-lg p-4 border border-neutral-200">
+                  <div className="mt-3 bg-green-50 rounded-lg p-4 border border-green-200">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-neutral-600" />
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <User className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-semibold text-neutral-900">
+                        <p className="font-semibold text-green-900">
                           {recipient.firstName} {recipient.lastName}
                         </p>
-                        <p className="text-sm text-neutral-700">
-                          {/* Show phone number for both web and SMS users - it's stored in email field */}
-                          {recipient.email.startsWith('+') ? recipient.email : 'Web User'}
-                        </p>
+                        <p className="text-sm text-green-700">{recipient.email}</p>
                       </div>
                     </div>
                   </div>
                 )}
                 
                 {/* User not found message */}
-                {recipientPhone && searchResults.length === 0 && !recipient && !isSearchingUser && recipientPhone.length >= 3 && (
+                {recipientPhone && !recipient && !isSearchingUser && recipientPhone.length >= 10 && (
                   <div className="mt-3 bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                       <p className="text-sm text-yellow-800">
-                        User not found. Please verify the search term.
+                        User not found. Please verify the phone number.
                       </p>
                     </div>
                   </div>

@@ -1,5 +1,18 @@
 import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { nanoid } from 'nanoid';
+import { User } from '../types/auth';
+
+// Interface for user data as stored in Juno (with string dates)
+interface UserDataFromJuno {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: 'user' | 'agent';
+  isVerified: boolean;
+  kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  createdAt: string;
+}
 
 // Transaction types for AfriTokeni
 export interface Transaction {
@@ -66,7 +79,204 @@ export interface SMSMessage {
 
 // Simplified data service following Juno patterns
 export class DataService {
-    // Transaction operations
+  // User operations
+  static async createUser(userData: {
+    id?: string; // Optional ID, if not provided will generate new one
+    firstName: string;
+    lastName: string;
+    email: string; // This will be the phone number for SMS users, or user ID for web users
+    userType: 'user' | 'agent';
+    kycStatus?: 'pending' | 'approved' | 'rejected' | 'not_started';
+    authMethod?: 'sms' | 'web'; // To determine key strategy
+  }): Promise<User> {
+    const now = new Date();
+    const newUser: User = {
+      id: userData.id || nanoid(), // Use provided ID or generate new one
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      userType: userData.userType,
+      isVerified: false,
+      kycStatus: userData.kycStatus || 'not_started',
+      createdAt: now
+    };
+
+    // Convert Date fields to ISO strings for Juno storage
+    const dataForJuno = {
+      ...newUser,
+      createdAt: now.toISOString()
+    };
+
+    // Determine key based on auth method
+    // For web users: use ID as key
+    // For SMS users: use phone number (email field) as key
+    const documentKey = userData.authMethod === 'web' ? newUser.id : userData.email;
+
+    // Save user to Juno datastore
+    await setDoc({
+      collection: 'users',
+      doc: {
+        key: documentKey,
+        data: dataForJuno,
+        version: 1n
+      }
+    });
+
+    return newUser;
+  }
+
+  // Get user by key (either ID for web users or phone for SMS users)
+  static async getUserByKey(key: string): Promise<User | null> {
+    try {
+      const doc = await getDoc({
+        collection: 'users',
+        key: key
+      });
+
+      if (!doc?.data) {
+        return null;
+      }
+
+      // Convert string date back to Date object
+      const rawData = doc.data as UserDataFromJuno;
+      const user: User = {
+        id: rawData.id,
+        firstName: rawData.firstName,
+        lastName: rawData.lastName,
+        email: rawData.email,
+        userType: rawData.userType,
+        isVerified: rawData.isVerified,
+        kycStatus: rawData.kycStatus,
+        createdAt: new Date(rawData.createdAt)
+      };
+
+      return user;
+    } catch (error) {
+      console.error('Error getting user by key:', error);
+      return null;
+    }
+  }
+
+  // Legacy method for SMS users - get user by phone number
+  static async getUser(phoneNumber: string): Promise<User | null> {
+    return this.getUserByKey(phoneNumber);
+  }
+
+  // Get web user by ID
+  static async getWebUserById(userId: string): Promise<User | null> {
+    return this.getUserByKey(userId);
+  }
+
+  static async updateUser(key: string, updates: Partial<User>, _authMethod?: 'sms' | 'web'): Promise<boolean> {
+    try {
+      const existingUser = await this.getUserByKey(key);
+      if (!existingUser) return false;
+
+      const updatedUser = { ...existingUser, ...updates };
+      
+      // Convert Date fields to ISO strings for Juno storage
+      const dataForJuno = {
+        ...updatedUser,
+        createdAt: updatedUser.createdAt?.toISOString() || new Date().toISOString()
+      };
+
+      // Use the same key for updates
+      await setDoc({
+        collection: 'users',
+        doc: {
+          key: key,
+          data: dataForJuno,
+          version: 1n
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return false;
+    }
+  }
+
+  // Legacy method for SMS users
+  static async updateUserByPhone(phoneNumber: string, updates: Partial<User>): Promise<boolean> {
+    return this.updateUser(phoneNumber, updates, 'sms');
+  }
+
+  // Method for web users
+  static async updateWebUser(userId: string, updates: Partial<User>): Promise<boolean> {
+    return this.updateUser(userId, updates, 'web');
+  }
+
+  // Enhanced search functionality - search by phone, first name, or last name
+  static async searchUsers(searchTerm: string): Promise<User[]> {
+    try {
+      // First, try to find user by exact phone number match (for SMS users)
+      // Try both original case and formatted phone number
+      let directMatch = await this.getUserByKey(searchTerm);
+      if (!directMatch && searchTerm.match(/^\d+$/)) {
+        // If it's a number, try formatting as phone number
+        const formattedPhone = searchTerm.startsWith('+') ? searchTerm : `+256${searchTerm.replace(/^0/, '')}`;
+        directMatch = await this.getUserByKey(formattedPhone);
+      }
+      
+      if (directMatch) {
+        return [directMatch];
+      }
+
+      // If not found by direct key match, search through all users
+      const allUsersResult = await listDocs({
+        collection: 'users'
+      });
+
+      if (!allUsersResult.items) {
+        return [];
+      }
+
+      const searchTermLower = searchTerm.toLowerCase().trim();
+      const matchedUsers: User[] = [];
+
+      for (const doc of allUsersResult.items) {
+        const rawData = doc.data as UserDataFromJuno;
+        const user: User = {
+          id: rawData.id,
+          firstName: rawData.firstName,
+          lastName: rawData.lastName,
+          email: rawData.email,
+          userType: rawData.userType,
+          isVerified: rawData.isVerified,
+          kycStatus: rawData.kycStatus,
+          createdAt: new Date(rawData.createdAt)
+        };
+
+        // Check if search term matches phone (email field), first name, or last name (case insensitive)
+        const matchesPhone = user.email.toLowerCase().includes(searchTermLower);
+        const matchesFirstName = user.firstName.toLowerCase().includes(searchTermLower);
+        const matchesLastName = user.lastName.toLowerCase().includes(searchTermLower);
+        
+        // Also check for partial phone number matches (last digits)
+        const phoneDigits = user.email.replace(/\D/g, ''); // Extract only digits
+        const searchDigits = searchTerm.replace(/\D/g, '');
+        const matchesPhoneDigits = searchDigits.length >= 3 && phoneDigits.includes(searchDigits);
+
+        if (matchesPhone || matchesFirstName || matchesLastName || matchesPhoneDigits) {
+          matchedUsers.push(user);
+        }
+      }
+
+      return matchedUsers;
+    } catch (error) {
+      console.error('Error searching users:', error);
+      return [];
+    }
+  }
+
+  // Search specifically by phone number (legacy method)
+  static async searchUserByPhone(phoneNumber: string): Promise<User | null> {
+    const users = await this.searchUsers(phoneNumber);
+    return users.length > 0 ? users[0] : null;
+  }
+
+  // Transaction operations
   static async createTransaction(transaction: Omit<Transaction, 'id' | 'createdAt'>): Promise<Transaction> {
     const now = new Date();
     const newTransaction: Transaction = {
@@ -82,12 +292,17 @@ export class DataService {
       completedAt: newTransaction.completedAt ? newTransaction.completedAt.toISOString() : undefined
     };
 
+    const existingDoc = await getDoc({
+      collection: 'transactions',
+      key: newTransaction.id
+    });
+
     await setDoc({
       collection: 'transactions',
       doc: {
         key: newTransaction.id,
         data: dataForJuno,
-        version:1n
+        version:existingDoc?.version ? existingDoc.version : 1n
       }
     });
 
@@ -137,12 +352,17 @@ export class DataService {
         completedAt: updated.completedAt ? updated.completedAt.toISOString() : undefined
       };
 
+      const existingDoc = await getDoc({
+        collection: 'transactions',
+        key: id
+      });
+
       await setDoc({
         collection: 'transactions',
         doc: {
           key: id,
           data: dataForJuno,
-          version:1n
+          version:existingDoc?.version ? existingDoc.version : 1n
         }
       });
 
@@ -160,7 +380,26 @@ export class DataService {
         collection: 'balances',
         key: userId
       });
-      return doc?.data as UserBalance || null;
+      
+      if (!doc?.data) {
+        return null;
+      }
+
+      // Convert string date back to Date object
+      const rawData = doc.data as {
+        userId: string;
+        balance: number;
+        currency: 'UGX';
+        lastUpdated: string;
+      };
+      const userBalance: UserBalance = {
+        userId: rawData.userId,
+        balance: rawData.balance,
+        currency: rawData.currency,
+        lastUpdated: new Date(rawData.lastUpdated)
+      };
+
+      return userBalance;
     } catch (error) {
       console.error('Error getting user balance:', error);
       return null;
@@ -183,18 +422,27 @@ export class DataService {
         lastUpdated: now.toISOString()
       };
 
+      // Get current document to obtain its version
+      const existingDoc = await getDoc({
+        collection: 'balances',
+        key: userId
+      });
+
+      // Update with proper version handling
       await setDoc({
         collection: 'balances',
         doc: {
           key: userId,
           data: dataForJuno,
-          version:1n
+          version: existingDoc?.version ? existingDoc.version : 1n
         }
       });
 
+      console.log('Balance updated successfully:', { userId, balance, hadExisting: !!existingDoc });
       return true;
     } catch (error) {
       console.error('Error updating user balance:', error);
+      console.error('Update details:', { userId, balance });
       return false;
     }
   }

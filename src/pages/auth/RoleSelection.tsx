@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Shield, ArrowRight } from 'lucide-react';
 import { authSubscribe, type User as JunoUser } from '@junobuild/core';
 import { useRoleBasedAuth, type UserRole } from '../../hooks/useRoleBasedAuth';
+import { useAuthentication } from '../../context/AuthenticationContext';
 import { useEffect } from 'react';
 
 const RoleSelection: React.FC = () => {
@@ -9,6 +10,7 @@ const RoleSelection: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [junoUser, setJunoUser] = useState<JunoUser | null>(null);
   const { setUserRole } = useRoleBasedAuth();
+  const { updateUserType } = useAuthentication();
 
   useEffect(() => {
     const unsubscribe = authSubscribe((user: JunoUser | null) => {
@@ -26,7 +28,10 @@ const RoleSelection: React.FC = () => {
 
     setIsLoading(true);
     try {
+      // Set the role in the user_roles collection
       await setUserRole(junoUser, role);
+      // Update the userType in the authentication context to trigger storage key change
+      updateUserType(role);
     } catch (error) {
       console.error('Failed to set user role:', error);
     } finally {

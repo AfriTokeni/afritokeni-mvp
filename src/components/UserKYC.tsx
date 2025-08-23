@@ -9,6 +9,9 @@ interface UserKYCProps {
 
 const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
   const [formData, setFormData] = useState<UserKYCData>({
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
     documentType: 'national_id',
     documentNumber: '',
     pin: '',
@@ -44,6 +47,20 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else if (!/^\+256\d{9}$/.test(formData.phoneNumber) && !/^0\d{9}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Please enter a valid Ugandan phone number';
+    }
 
     if (!formData.documentNumber.trim()) {
       newErrors.documentNumber = 'Document number is required';
@@ -89,6 +106,74 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Personal Information */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900">Personal Information</h3>
+          
+          {/* First Name */}
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              placeholder="Enter your first name"
+              className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.firstName ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.firstName && (
+              <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+            )}
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              placeholder="Enter your last name"
+              className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.lastName ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.lastName && (
+              <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+            )}
+          </div>
+
+          {/* Phone Number */}
+          <div>
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+              placeholder="+256701234567 or 0701234567"
+              className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.phoneNumber && (
+              <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>
+            )}
+          </div>
+        </div>
+
         {/* Document Type */}
         <div>
           <label htmlFor="documentType" className="block text-sm font-medium text-gray-700 mb-2">
@@ -233,7 +318,7 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center px-4 py-3 bg-neutral-900 text-white rounded-lg font-semibold hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
         >
           {isLoading ? (
             <>

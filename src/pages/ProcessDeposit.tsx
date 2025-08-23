@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
-  ArrowLeft,
-  User,
-  Phone,
-  DollarSign,
-  Check,
+  ArrowLeft, 
+  DollarSign, 
+  Phone, 
+  User, 
+  Check, 
   Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
-import { User as UserType } from '../types/auth';
-import { getDoc } from '@junobuild/core';
 import { DataService } from '../services/dataService';
+import { User as UserType } from '../types/auth';
+import PageLayout from '../components/PageLayout';
 
 export interface DepositData {
   customerPhone: string;
@@ -32,8 +31,13 @@ const ProcessDeposit: React.FC = () => {
     amount: { ugx: 0, usdc: 0 }
   });
   const [ugxAmount, setUgxAmount] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<UserType[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearchingUser, setIsSearchingUser] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<number | null>(null);
 
   // Exchange rate: 1 USDC = 3800 UGX (approximate)
   const EXCHANGE_RATE = 3800;
@@ -52,49 +56,109 @@ const ProcessDeposit: React.FC = () => {
     }
   };
 
-  const searchUserByPhone = async (phone: string) => {
-    if (!phone) return;
+  const searchUserByPhone = async (searchTerm: string) => {
+    if (!searchTerm || searchTerm.length < 3) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      setDepositData(prev => ({
+        ...prev,
+        customerPhone: searchTerm,
+        customer: undefined
+      }));
+      return;
+    }
     
     setIsSearchingUser(true);
     try {
-      // Format phone number
-      const formattedPhone = phone.startsWith('+') ? phone : `+256${phone.replace(/^0/, '')}`;
-
-      console.log('Searching user by phone:', formattedPhone);
+      console.log('Searching user by term:', searchTerm);
       
-      // Search for user in Juno datastore
-      const userDoc = await getDoc({
-        collection: 'users',
-        key: formattedPhone
-      });
+      // Use the new enhanced search functionality
+      const users = await DataService.searchUsers(searchTerm);
 
-      console.log('User document found:', userDoc);
+      console.log('Users found:', users);
 
-      if (userDoc?.data) {
-        const user = userDoc.data as UserType;
+      setSearchResults(users);
+      setShowSearchResults(users.length > 0);
+
+      // Don't auto-select if there are multiple results
+      if (users.length === 1) {
+        const user = users[0];
         setDepositData(prev => ({
           ...prev,
-          customerPhone: formattedPhone,
+          customerPhone: user.email.startsWith('+') ? user.email : searchTerm,
           customer: user
         }));
       } else {
         setDepositData(prev => ({
           ...prev,
-          customerPhone: formattedPhone,
+          customerPhone: searchTerm,
           customer: undefined
         }));
       }
     } catch (error) {
       console.error('Error searching user:', error);
+      setSearchResults([]);
+      setShowSearchResults(false);
       setDepositData(prev => ({
         ...prev,
-        customerPhone: phone,
+        customerPhone: searchTerm,
         customer: undefined
       }));
     } finally {
       setIsSearchingUser(false);
     }
   };
+
+  // Handle user selection from dropdown
+  const handleUserSelection = (selectedUser: UserType) => {
+    // Set the display value to show user's phone or name, but keep it searchable
+    const displayValue = selectedUser.email.startsWith('+') 
+      ? selectedUser.email 
+      : `${selectedUser.firstName} ${selectedUser.lastName}`;
+    setDepositData(prev => ({
+      ...prev,
+      customerPhone: displayValue,
+      customer: selectedUser
+    }));
+    setSearchResults([]);
+    setShowSearchResults(false);
+  };
+
+  // Handle input change with debouncing
+  const handlePhoneInputChange = (value: string) => {
+    setDepositData(prev => ({ ...prev, customerPhone: value }));
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (value.length >= 3) {
+      searchTimeoutRef.current = window.setTimeout(() => {
+        searchUserByPhone(value);
+      }, 500); // 500ms debounce
+    } else {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      setDepositData(prev => ({
+        ...prev,
+        customer: undefined
+      }));
+    }
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleAmountChange = (value: string) => {
     setUgxAmount(value);
@@ -240,7 +304,7 @@ const ProcessDeposit: React.FC = () => {
             <div>
               <h1 className="text-2xl font-bold text-neutral-900">{getStepTitle()}</h1>
               <p className="text-sm text-neutral-600 mt-1">
-                {currentStep === 'input' && 'Enter customer phone number and deposit amount'}
+                {currentStep === 'input' && 'Search customer by phone, first name, or last name and enter deposit amount'}
                 {currentStep === 'summary' && 'Review and confirm the deposit details'}
                 {currentStep === 'complete' && 'Deposit has been successfully processed'}
               </p>
@@ -278,24 +342,49 @@ const ProcessDeposit: React.FC = () => {
                 {/* Phone Number Input */}
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-3">
-                    Customer Phone Number
+                    Customer Search (Phone / Name)
                   </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                  <div className="relative" ref={searchContainerRef}>
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 z-10" />
                     <input
                       type="tel"
                       value={depositData.customerPhone}
-                      onChange={(e) => {
-                        setDepositData(prev => ({ ...prev, customerPhone: e.target.value }));
-                        if (e.target.value.length >= 10) {
-                          searchUserByPhone(e.target.value);
+                      onChange={(e) => handlePhoneInputChange(e.target.value)}
+                      onFocus={() => {
+                        if (searchResults.length > 0) {
+                          setShowSearchResults(true);
                         }
                       }}
-                      placeholder="+254701234567"
+                      placeholder="Enter phone number, first name, or last name"
                       className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200"
                     />
                     {isSearchingUser && (
-                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin" />
+                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin z-10" />
+                    )}
+
+                    {/* Search Results Dropdown */}
+                    {showSearchResults && searchResults.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {searchResults.map((user, index) => (
+                          <div
+                            key={`${user.id}-${index}`}
+                            onClick={() => handleUserSelection(user)}
+                            className="flex items-center space-x-3 p-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0"
+                          >
+                            <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 text-neutral-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-neutral-900 truncate">
+                                {user.firstName} {user.lastName}
+                              </p>
+                              <p className="text-sm text-neutral-500 truncate">
+                                {user.email.startsWith('+') ? user.email : 'Web User'}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -312,8 +401,20 @@ const ProcessDeposit: React.FC = () => {
                         <p className="font-semibold text-neutral-900">
                           {depositData.customer.firstName} {depositData.customer.lastName}
                         </p>
-                        <p className="text-sm text-neutral-600">{depositData.customer.email}</p>
+                        <p className="text-sm text-neutral-700">{depositData.customer.email}</p>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Customer not found message */}
+                {depositData.customerPhone && searchResults.length === 0 && !depositData.customer && !isSearchingUser && depositData.customerPhone.length >= 3 && (
+                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <p className="text-sm text-yellow-800">
+                        Customer not found. A new customer record will be created for this phone number.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -472,10 +573,10 @@ const ProcessDeposit: React.FC = () => {
                   The deposit has been successfully processed and recorded.
                 </p>
                 
-                <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
+                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6 mb-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-green-800 mb-3">Transaction Summary</h3>
-                    <div className="space-y-2 text-sm text-green-700">
+                    <h3 className="text-lg font-semibold text-neutral-800 mb-3">Transaction Summary</h3>
+                    <div className="space-y-2 text-sm text-neutral-700">
                       <p><strong>Customer:</strong> {depositData.customer ? `${depositData.customer.firstName} ${depositData.customer.lastName}` : depositData.customerPhone}</p>
                       <p><strong>Amount:</strong> <span className="font-mono">{formatCurrency(depositData.amount.ugx, 'UGX')}</span></p>
                       <p><strong>Transaction ID:</strong> <span className="font-mono">DEP{Date.now().toString().slice(-6)}</span></p>
