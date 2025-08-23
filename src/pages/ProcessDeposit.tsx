@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { 
-  ArrowLeft,
-  User,
-  Phone,
-  DollarSign,
-  Check,
+  ArrowLeft, 
+  DollarSign, 
+  Phone, 
+  User, 
+  Check, 
   Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
-import { User as UserType } from '../types/auth';
-import { getDoc } from '@junobuild/core';
 import { DataService } from '../services/dataService';
+import { User as UserType } from '../types/auth';
+import PageLayout from '../components/PageLayout';
 
 export interface DepositData {
   customerPhone: string;
@@ -52,35 +51,32 @@ const ProcessDeposit: React.FC = () => {
     }
   };
 
-  const searchUserByPhone = async (phone: string) => {
-    if (!phone) return;
+  const searchUserByPhone = async (searchTerm: string) => {
+    if (!searchTerm) return;
     
     setIsSearchingUser(true);
     try {
-      // Format phone number
-      const formattedPhone = phone.startsWith('+') ? phone : `+256${phone.replace(/^0/, '')}`;
-
-      console.log('Searching user by phone:', formattedPhone);
+      console.log('Searching user by term:', searchTerm);
       
-      // Search for user in Juno datastore
-      const userDoc = await getDoc({
-        collection: 'users',
-        key: formattedPhone
-      });
+      // Use the new enhanced search functionality
+      // This will search by phone number, first name, or last name
+      const users = await DataService.searchUsers(searchTerm);
 
-      console.log('User document found:', userDoc);
+      console.log('Users found:', users);
 
-      if (userDoc?.data) {
-        const user = userDoc.data as UserType;
+      if (users.length > 0) {
+        // If multiple users found, take the first one
+        // In a real app, you might want to show a list for user selection
+        const user = users[0];
         setDepositData(prev => ({
           ...prev,
-          customerPhone: formattedPhone,
+          customerPhone: user.email, // Phone is stored in email field for SMS users
           customer: user
         }));
       } else {
         setDepositData(prev => ({
           ...prev,
-          customerPhone: formattedPhone,
+          customerPhone: searchTerm,
           customer: undefined
         }));
       }
@@ -88,7 +84,7 @@ const ProcessDeposit: React.FC = () => {
       console.error('Error searching user:', error);
       setDepositData(prev => ({
         ...prev,
-        customerPhone: phone,
+        customerPhone: searchTerm,
         customer: undefined
       }));
     } finally {
@@ -240,7 +236,7 @@ const ProcessDeposit: React.FC = () => {
             <div>
               <h1 className="text-2xl font-bold text-neutral-900">{getStepTitle()}</h1>
               <p className="text-sm text-neutral-600 mt-1">
-                {currentStep === 'input' && 'Enter customer phone number and deposit amount'}
+                {currentStep === 'input' && 'Search customer by phone, first name, or last name and enter deposit amount'}
                 {currentStep === 'summary' && 'Review and confirm the deposit details'}
                 {currentStep === 'complete' && 'Deposit has been successfully processed'}
               </p>
@@ -278,7 +274,7 @@ const ProcessDeposit: React.FC = () => {
                 {/* Phone Number Input */}
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-3">
-                    Customer Phone Number
+                    Customer Search (Phone / Name)
                   </label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -287,11 +283,11 @@ const ProcessDeposit: React.FC = () => {
                       value={depositData.customerPhone}
                       onChange={(e) => {
                         setDepositData(prev => ({ ...prev, customerPhone: e.target.value }));
-                        if (e.target.value.length >= 10) {
+                        if (e.target.value.length >= 3) { // Reduced from 10 to 3 for name searches
                           searchUserByPhone(e.target.value);
                         }
                       }}
-                      placeholder="+254701234567"
+                      placeholder="Enter phone number, first name, or last name"
                       className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200"
                     />
                     {isSearchingUser && (

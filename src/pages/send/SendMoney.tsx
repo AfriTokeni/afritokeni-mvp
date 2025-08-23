@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { getDoc } from '@junobuild/core';
+import { DataService } from '../../services/dataService';
 import { User as UserType } from '../../types/auth';
 import PageLayout from '../../components/PageLayout';
 
@@ -47,25 +47,21 @@ const SendMoney: React.FC = () => {
 
   // Search for user by phone number
   const searchUserByPhone = async (phone: string) => {
-    if (!phone || phone.length < 10) {
+    if (!phone || phone.length < 3) {
       setRecipient(null);
       return;
     }
     
     setIsSearchingUser(true);
     try {
-      // Format phone number
-      const formattedPhone = phone.startsWith('+') ? phone : `+256${phone.replace(/^0/, '')}`;
+      // Use the new enhanced search functionality
+      // This will search by phone number, first name, or last name
+      const users = await DataService.searchUsers(phone);
       
-      // Search for user in Juno datastore
-      const userDoc = await getDoc({
-        collection: 'users',
-        key: formattedPhone
-      });
-
-      if (userDoc?.data) {
-        const userData = userDoc.data as UserType;
-        setRecipient(userData);
+      if (users.length > 0) {
+        // If multiple users found, take the first one
+        // In a real app, you might want to show a list for user selection
+        setRecipient(users[0]);
       } else {
         setRecipient(null);
       }
@@ -83,7 +79,7 @@ const SendMoney: React.FC = () => {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    if (recipientPhone.length >= 10) {
+    if (recipientPhone.length >= 3) { // Reduced from 10 to 3 for name searches
       searchTimeoutRef.current = window.setTimeout(() => {
         searchUserByPhone(recipientPhone);
       }, 500); // 500ms debounce
@@ -176,7 +172,7 @@ const SendMoney: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-3">
-                  Recipient Phone Number
+                  Recipient Search (Phone / Name)
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -184,7 +180,7 @@ const SendMoney: React.FC = () => {
                     type="tel"
                     value={recipientPhone}
                     onChange={(e) => setRecipientPhone(e.target.value)}
-                    placeholder="+256701234567"
+                    placeholder="Enter phone number, first name, or last name"
                     className="w-full pl-10 pr-10 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                   />
                   {isSearchingUser && (
@@ -210,12 +206,12 @@ const SendMoney: React.FC = () => {
                 )}
                 
                 {/* User not found message */}
-                {recipientPhone && !recipient && !isSearchingUser && recipientPhone.length >= 10 && (
+                {recipientPhone && !recipient && !isSearchingUser && recipientPhone.length >= 3 && (
                   <div className="mt-3 bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                       <p className="text-sm text-yellow-800">
-                        User not found. Please verify the phone number.
+                        User not found. Please verify the search term.
                       </p>
                     </div>
                   </div>
