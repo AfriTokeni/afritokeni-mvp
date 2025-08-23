@@ -25,11 +25,12 @@ export interface UserKYCData {
 }
 
 export interface AgentKYCData {
-  documentType: 'national_id' | 'passport' | 'drivers_license';
-  documentNumber: string;
-  documentFile?: File;
-  businessLicense: string;
-  businessLicenseFile?: File;
+  // Personal Details
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  
+  // Operating Details
   location: {
     country: string;
     state: string;
@@ -41,6 +42,17 @@ export interface AgentKYCData {
     };
   };
   locationDescription: string;
+  operatingHours: string;
+  operatingDays: string;
+  
+  // Personal Identification (Optional)
+  documentType?: 'national_id' | 'passport' | 'drivers_license';
+  documentNumber?: string;
+  documentFile?: File;
+  
+  // Business License (Optional)
+  businessLicense?: string;
+  businessLicenseFile?: File;
 }
 
 export interface User {
@@ -79,13 +91,14 @@ export interface AuthContextType {
 export interface LocationSuggestion {
   place_id: string;
   display_name: string;
-  lat: string;
-  lon: string;
-  address: {
-    country?: string;
-    state?: string;
-    city?: string;
-    town?: string;
-    village?: string;
+  location: {
+    country: string;
+    state: string;
+    city: string;
+    address: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
   };
 }
