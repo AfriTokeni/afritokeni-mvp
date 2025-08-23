@@ -32,11 +32,14 @@ const SendMoney: React.FC = () => {
   const [recipientPhone, setRecipientPhone] = useState<string>('');
   const [sendStep, setSendStep] = useState<number>(1);
   const [recipient, setRecipient] = useState<UserType | null>(null);
+  const [searchResults, setSearchResults] = useState<UserType[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearchingUser, setIsSearchingUser] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
   
   const searchTimeoutRef = useRef<number | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-UG', {
@@ -49,6 +52,8 @@ const SendMoney: React.FC = () => {
   const searchUserByPhone = async (searchTerm: string) => {
     if (!searchTerm || searchTerm.length < 3) {
       setRecipient(null);
+      setSearchResults([]);
+      setShowSearchResults(false);
       return;
     }
     
@@ -57,8 +62,11 @@ const SendMoney: React.FC = () => {
       // Use the enhanced search functionality with case insensitive search
       const users = await DataService.searchUsers(searchTerm);
       
-      if (users.length > 0) {
-        // If multiple users found, take the first one
+      setSearchResults(users);
+      setShowSearchResults(users.length > 0);
+      
+      // Don't auto-select if there are multiple results
+      if (users.length === 1) {
         setRecipient(users[0]);
       } else {
         setRecipient(null);
@@ -66,10 +74,38 @@ const SendMoney: React.FC = () => {
     } catch (error) {
       console.error('Error searching user:', error);
       setRecipient(null);
+      setSearchResults([]);
+      setShowSearchResults(false);
     } finally {
       setIsSearchingUser(false);
     }
   };
+
+  // Handle user selection from dropdown
+  const handleUserSelection = (selectedUser: UserType) => {
+    setRecipient(selectedUser);
+    // Set the display value to show user's phone or name, but keep it searchable
+    const displayValue = selectedUser.email.startsWith('+') 
+      ? selectedUser.email 
+      : `${selectedUser.firstName} ${selectedUser.lastName}`;
+    setRecipientPhone(displayValue);
+    setSearchResults([]);
+    setShowSearchResults(false);
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Debounced search effect
   useEffect(() => {
@@ -83,6 +119,8 @@ const SendMoney: React.FC = () => {
       }, 500); // 500ms debounce
     } else {
       setRecipient(null);
+      setSearchResults([]);
+      setShowSearchResults(false);
     }
 
     // Cleanup timeout on unmount
@@ -176,25 +214,55 @@ const SendMoney: React.FC = () => {
                 <label className="block text-sm font-medium text-neutral-700 mb-3">
                   Recipient Search (Phone / Name)
                 </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                <div className="relative" ref={searchContainerRef}>
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 z-10" />
                   <input
                     type="tel"
                     value={recipientPhone}
                     onChange={(e) => setRecipientPhone(e.target.value)}
+                    onFocus={() => {
+                      if (searchResults.length > 0) {
+                        setShowSearchResults(true);
+                      }
+                    }}
                     placeholder="Enter phone number, first name, or last name"
                     className="w-full pl-10 pr-10 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                   />
                   {isSearchingUser && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin" />
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin z-10" />
+                  )}
+                  
+                  {/* Search Results Dropdown */}
+                  {showSearchResults && searchResults.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {searchResults.map((user, index) => (
+                        <div
+                          key={`${user.id}-${index}`}
+                          onClick={() => handleUserSelection(user)}
+                          className="flex items-center space-x-3 p-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0"
+                        >
+                          <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-neutral-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-neutral-900 truncate">
+                              {user.firstName} {user.lastName}
+                            </p>
+                            <p className="text-sm text-neutral-500 truncate">
+                              {user.email.startsWith('+') ? user.email : 'Web User'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
                 
-                {/* Display found user */}
+                {/* Display selected user */}
                 {recipient && (
                   <div className="mt-3 bg-neutral-50 rounded-lg p-4 border border-neutral-200">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-neutral-50 rounded-full flex items-center justify-center">
+                      <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center">
                         <User className="w-5 h-5 text-neutral-600" />
                       </div>
                       <div>
@@ -211,7 +279,7 @@ const SendMoney: React.FC = () => {
                 )}
                 
                 {/* User not found message */}
-                {recipientPhone && !recipient && !isSearchingUser && recipientPhone.length >= 3 && (
+                {recipientPhone && searchResults.length === 0 && !recipient && !isSearchingUser && recipientPhone.length >= 3 && (
                   <div className="mt-3 bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
