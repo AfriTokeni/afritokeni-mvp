@@ -26,10 +26,11 @@ const LandingPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+               <img src="/afriTokeni.svg" alt="AfriTokeni Logo" className={`h-5 w-auto`} />
+              {/* <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
-              <h1 className="text-xl font-semibold text-gray-900">AfriTokeni</h1>
+              <h1 className="text-xl font-semibold text-gray-900">AfriTokeni</h1> */}
             </div>
             <button
               onClick={handleICPLogin}
