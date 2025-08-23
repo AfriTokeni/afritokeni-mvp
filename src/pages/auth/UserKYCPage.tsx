@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import UserKYC from '../../components/UserKYC';
-import { UserKYCData } from '../../types/auth';
+import { UserKYCData, User } from '../../types/auth';
 import { DataService } from '../../services/dataService';
 
 const UserKYCPage: React.FC = () => {
@@ -40,21 +40,32 @@ const UserKYCPage: React.FC = () => {
         }
       }
 
+      // Check authentication method to determine key strategy
+      const authMethod = localStorage.getItem('afritokeni_auth_method') || 'web';
+      
       // Create user in Juno datastore with existing ID or generate new one
       // If user already exists, update their information instead of creating new
       let finalUser;
       if (existingUserId && user) {
-        // For existing users, try to get user by phone number
-        const existingUser = await DataService.getUser(formattedPhone);
+        let existingUser: User | null = null;
+        
+        if (authMethod === 'web') {
+          // For web users, look up by user ID
+          existingUser = await DataService.getWebUserById(existingUserId);
+        } else {
+          // For SMS users, look up by phone number
+          existingUser = await DataService.getUser(formattedPhone);
+        }
         
         if (existingUser) {
           // Update existing user with new information
-          const updateSuccess = await DataService.updateUser(formattedPhone, {
+          const updateKey = authMethod === 'web' ? existingUserId : formattedPhone;
+          const updateSuccess = await DataService.updateUser(updateKey, {
             firstName: data.firstName,
             lastName: data.lastName,
             kycStatus: 'pending',
-            // For both web and SMS users, update email to phone number for financial operations
-            email: formattedPhone
+            // For SMS users, update email to phone; for web users, keep existing email
+            email: authMethod === 'sms' ? formattedPhone : existingUser.email
           });
           
           if (updateSuccess) {
@@ -63,21 +74,22 @@ const UserKYCPage: React.FC = () => {
               firstName: data.firstName,
               lastName: data.lastName,
               kycStatus: 'pending' as const,
-              // For both web and SMS users, use phone number as email for financial operations
-              email: formattedPhone
+              // Update email based on auth method
+              email: authMethod === 'sms' ? formattedPhone : existingUser.email
             };
           } else {
             throw new Error('Failed to update existing user');
           }
         } else {
-          // Create new user with existing ID
+          // Create new user with existing ID and appropriate auth method
           finalUser = await DataService.createUser({
             id: existingUserId,
             firstName: data.firstName,
             lastName: data.lastName,
-            email: formattedPhone, // Use phone number for both web and SMS users
+            email: authMethod === 'sms' ? formattedPhone : existingUserId, // Use phone for SMS, ID for web
             userType: 'user',
-            kycStatus: 'pending'
+            kycStatus: 'pending',
+            authMethod: authMethod as 'sms' | 'web'
           });
         }
       } else {
@@ -87,7 +99,8 @@ const UserKYCPage: React.FC = () => {
           lastName: data.lastName,
           email: formattedPhone,
           userType: 'user',
-          kycStatus: 'pending'
+          kycStatus: 'pending',
+          authMethod: 'sms' // Default for users without existing ID
         });
       }
 
@@ -96,7 +109,7 @@ const UserKYCPage: React.FC = () => {
 
       // Determine auth method and email for storage
       const isWebUser = user?.email === user?.id;
-      const authMethod = isWebUser ? 'web' : 'sms';
+      const storageAuthMethod = isWebUser ? 'web' : 'sms';
       // After KYC, both web and SMS users use phone number as email for financial operations
       const emailForStorage = formattedPhone;
 
@@ -114,9 +127,9 @@ const UserKYCPage: React.FC = () => {
       // Store in both sessionStorage (tab-specific) and localStorage (persistent)
       const userString = JSON.stringify(userForStorage);
       sessionStorage.setItem('afritokeni_user', userString);
-      sessionStorage.setItem('afritokeni_auth_method', authMethod);
+      sessionStorage.setItem('afritokeni_auth_method', storageAuthMethod);
       localStorage.setItem('afritokeni_user', userString);
-      localStorage.setItem('afritokeni_auth_method', authMethod);
+      localStorage.setItem('afritokeni_auth_method', storageAuthMethod);
 
       // Update authentication context
       updateUser({
