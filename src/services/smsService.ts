@@ -22,18 +22,18 @@ export class SMSService {
     const cleaned = phone.replace(/\D/g, '');
     
     // If starts with 254 (Kenya country code), it's already formatted
-    if (cleaned.startsWith('254')) {
+    if (cleaned.startsWith('256')) {
       return `+${cleaned}`;
     }
     
     // If starts with 0, replace with Kenya country code
     if (cleaned.startsWith('0')) {
-      return `+254${cleaned.substring(1)}`;
+      return `+256${cleaned.substring(1)}`;
     }
     
     // If 9 digits, assume it's a Kenyan number without leading 0
     if (cleaned.length === 9) {
-      return `+254${cleaned}`;
+      return `+256${cleaned}`;
     }
     
     // If already has + at start, return as is
@@ -42,7 +42,7 @@ export class SMSService {
     }
     
     // Default to adding Kenya country code
-    return `+254${cleaned}`;
+    return `+256${cleaned}`;
   }
   
   /**
