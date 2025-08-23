@@ -70,7 +70,7 @@ const ProcessDeposit: React.FC = () => {
         const user = users[0];
         setDepositData(prev => ({
           ...prev,
-          customerPhone: user.email, // Phone is stored in email field for SMS users
+          customerPhone: user.email.startsWith('+') ? user.email : searchTerm, // Use phone from email field
           customer: user
         }));
       } else {
@@ -283,7 +283,7 @@ const ProcessDeposit: React.FC = () => {
                       value={depositData.customerPhone}
                       onChange={(e) => {
                         setDepositData(prev => ({ ...prev, customerPhone: e.target.value }));
-                        if (e.target.value.length >= 3) { // Reduced from 10 to 3 for name searches
+                        if (e.target.value.length >= 3) {
                           searchUserByPhone(e.target.value);
                         }
                       }}

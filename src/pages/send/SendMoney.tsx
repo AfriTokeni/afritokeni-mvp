@@ -45,22 +45,20 @@ const SendMoney: React.FC = () => {
     }).format(amount);
   };
 
-  // Search for user by phone number
-  const searchUserByPhone = async (phone: string) => {
-    if (!phone || phone.length < 3) {
+  // Search for user with debouncing
+  const searchUserByPhone = async (searchTerm: string) => {
+    if (!searchTerm || searchTerm.length < 3) {
       setRecipient(null);
       return;
     }
     
     setIsSearchingUser(true);
     try {
-      // Use the new enhanced search functionality
-      // This will search by phone number, first name, or last name
-      const users = await DataService.searchUsers(phone);
+      // Use the enhanced search functionality with case insensitive search
+      const users = await DataService.searchUsers(searchTerm);
       
       if (users.length > 0) {
         // If multiple users found, take the first one
-        // In a real app, you might want to show a list for user selection
         setRecipient(users[0]);
       } else {
         setRecipient(null);
@@ -79,7 +77,7 @@ const SendMoney: React.FC = () => {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    if (recipientPhone.length >= 3) { // Reduced from 10 to 3 for name searches
+    if (recipientPhone.length >= 3) {
       searchTimeoutRef.current = window.setTimeout(() => {
         searchUserByPhone(recipientPhone);
       }, 500); // 500ms debounce
@@ -127,8 +125,12 @@ const SendMoney: React.FC = () => {
     try {
       const sendAmount = parseFloat(ugxAmount);
       
+      // For SMS, use the phone number from recipient.email field
+      // For web users, their phone number is also stored in the email field after KYC
+      const recipientPhoneNumber = recipient.email.startsWith('+') ? recipient.email : recipientPhone;
+      
       // Use the sendMoney function from the hook
-      const result = await sendMoney(sendAmount, recipientPhone, recipient);
+      const result = await sendMoney(sendAmount, recipientPhoneNumber, recipient);
       
       if (result.success && result.transaction && result.fee !== undefined) {
         setTransactionResult({
@@ -199,7 +201,10 @@ const SendMoney: React.FC = () => {
                         <p className="font-semibold text-neutral-900">
                           {recipient.firstName} {recipient.lastName}
                         </p>
-                        <p className="text-sm text-neutral-700">{recipient.email}</p>
+                        <p className="text-sm text-neutral-700">
+                          {/* Show phone number for both web and SMS users - it's stored in email field */}
+                          {recipient.email.startsWith('+') ? recipient.email : 'Web User'}
+                        </p>
                       </div>
                     </div>
                   </div>
