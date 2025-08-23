@@ -25,23 +25,10 @@ const UserKYCPage: React.FC = () => {
       // First check if user is already logged in and has an ID
       if (user?.id) {
         existingUserId = user.id;
-      } else {
-        // Check localStorage for existing user
-        const storedUser = localStorage.getItem('afritokeni_user');
-        if (storedUser) {
-          try {
-            const parsedUser = JSON.parse(storedUser);
-            if (parsedUser?.id) {
-              existingUserId = parsedUser.id;
-            }
-          } catch (error) {
-            console.error('Error parsing stored user:', error);
-          }
-        }
       }
 
-      // Check authentication method to determine key strategy
-      const authMethod = localStorage.getItem('afritokeni_auth_method') || 'web';
+      // Check authentication method - if no current user, default to web
+      const authMethod = user ? 'web' : 'web'; // Default to web for logged in users
       
       // Create user in Juno datastore with existing ID or generate new one
       // If user already exists, update their information instead of creating new
@@ -107,31 +94,8 @@ const UserKYCPage: React.FC = () => {
       // Initialize user balance (only if it's a new user or balance doesn't exist)
       await DataService.initializeUserData(finalUser.id);
 
-      // Determine auth method and email for storage
-      const isWebUser = user?.email === user?.id;
-      const storageAuthMethod = isWebUser ? 'web' : 'sms';
-      // After KYC, both web and SMS users use phone number as email for financial operations
-      const emailForStorage = formattedPhone;
-
-      // Update localStorage with user information (using both session and local storage)
-      const userForStorage = {
-        id: finalUser.id,
-        firstName: finalUser.firstName,
-        lastName: finalUser.lastName,
-        email: emailForStorage, // Phone number for both user types
-        userType: 'user' as const,
-        kycStatus: 'pending' as const,
-        isVerified: false
-      };
-
-      // Store in both sessionStorage (tab-specific) and localStorage (persistent)
-      const userString = JSON.stringify(userForStorage);
-      sessionStorage.setItem('afritokeni_user', userString);
-      sessionStorage.setItem('afritokeni_auth_method', storageAuthMethod);
-      localStorage.setItem('afritokeni_user', userString);
-      localStorage.setItem('afritokeni_auth_method', storageAuthMethod);
-
-      // Update authentication context
+      // Update authentication context with new user information
+      // The updateUser method will handle storing the data with the correct keys
       updateUser({
         id: finalUser.id,
         firstName: finalUser.firstName,
