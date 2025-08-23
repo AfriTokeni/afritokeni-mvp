@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { DataService } from '../services/dataService';
 import { User as UserType } from '../types/auth';
 import PageLayout from '../components/PageLayout';
+import { useAfriTokeni } from '../hooks/useAfriTokeni';
 
 export interface DepositData {
   customerPhone: string;
@@ -25,6 +26,7 @@ type Step = 'input' | 'summary' | 'complete';
 
 const ProcessDeposit: React.FC = () => {
   const navigate = useNavigate();
+  const { user: currentUser, agent: currentAgent } = useAfriTokeni();
   const [currentStep, setCurrentStep] = useState<Step>('input');
   const [depositData, setDepositData] = useState<DepositData>({
     customerPhone: '',
@@ -182,6 +184,16 @@ const ProcessDeposit: React.FC = () => {
     setIsProcessing(true);
     
     try {
+      // Validate that we have an agent logged in
+      if (!currentAgent || !currentUser) {
+        throw new Error('Agent authentication required for deposit processing');
+      }
+
+      // Check if agent has sufficient digital balance
+      if (currentAgent.digitalBalance < depositData.amount.ugx) {
+        throw new Error(`Insufficient digital balance. Available: UGX ${currentAgent.digitalBalance.toLocaleString()}, Required: UGX ${depositData.amount.ugx.toLocaleString()}`);
+      }
+
       // Get current user's balance
       const customerId = depositData.customer?.id || `user_${Date.now()}`;
       let currentBalance = 0;
@@ -193,25 +205,66 @@ const ProcessDeposit: React.FC = () => {
         console.log('No existing balance found, starting with 0');
       }
 
-      // Create transaction in Juno datastore
-      const transaction = await DataService.createTransaction({
+      // Calculate commission (2% for agents)
+      const commissionAmount = Math.round(depositData.amount.ugx * 0.02);
+
+      // 1. Create transaction for the customer (user receiving the deposit)
+      const customerTransaction = await DataService.createTransaction({
         userId: customerId,
         type: 'deposit',
         amount: depositData.amount.ugx,
         currency: 'UGX',
-        agentId: 'agent_001', // Mock agent ID - in production, get from auth context
+        agentId: currentAgent.id,
         status: 'completed',
-        description: `Cash deposit via agent`,
+        description: `Cash deposit via agent ${currentAgent.businessName || 'Agent'}`,
         completedAt: new Date(),
         metadata: {
-          agentLocation: 'Kampala Central',
+          agentLocation: currentAgent.location?.city || 'Unknown',
           smsReference: `DEP${Date.now().toString().slice(-6)}`
         }
       });
 
-      // Update user balance in Juno datastore
-      const newBalance = currentBalance + depositData.amount.ugx;
-      await DataService.updateUserBalance(customerId, newBalance);
+      // 2. Create transaction for the agent (agent processing the deposit)
+      const agentTransaction = await DataService.createTransaction({
+        userId: currentUser.id,
+        type: 'deposit',
+        amount: depositData.amount.ugx,
+        currency: 'UGX',
+        agentId: currentAgent.id,
+        status: 'completed',
+        description: `Processed deposit for ${depositData.customer?.firstName || 'customer'} - Commission: UGX ${commissionAmount.toLocaleString()}`,
+        completedAt: new Date(),
+        metadata: {
+          agentLocation: currentAgent.location?.city || 'Unknown',
+          smsReference: `DEP${Date.now().toString().slice(-6)}`
+        }
+      });
+
+      // 3. Update customer balance (increase by deposit amount)
+      const newCustomerBalance = currentBalance + depositData.amount.ugx;
+      await DataService.updateUserBalance(customerId, newCustomerBalance);
+
+      // 4. Update agent's digital balance (reduce by deposit amount)
+      const newAgentDigitalBalance = currentAgent.digitalBalance - depositData.amount.ugx;
+      
+      // Update agent's digital balance in the agents collection
+      await DataService.updateAgentBalanceByUserId(currentUser.id, {
+        digitalBalance: newAgentDigitalBalance
+      });
+
+      // 5. Agent gets commission added to their main balance (both balances and agents collections)
+      const agentBalance = await DataService.getUserBalance(currentUser.id);
+      const currentAgentBalance = agentBalance?.balance || 0;
+      const newAgentBalance = currentAgentBalance + commissionAmount;
+      
+      // Update main balance in balances collection
+      await DataService.updateUserBalance(currentUser.id, newAgentBalance);
+      
+      // Also update cash balance in agents collection to keep them synchronized
+      const newAgentCashBalance = currentAgent.cashBalance + commissionAmount;
+      await DataService.updateAgentBalanceByUserId(currentUser.id, {
+        cashBalance: newAgentCashBalance
+      });
 
       // Initialize user data if new user
       if (!depositData.customer) {
@@ -220,7 +273,7 @@ const ProcessDeposit: React.FC = () => {
 
       // Send SMS notification via our webhook API
       try {
-        const smsMessage = `AfriTokeni: You have received UGX ${depositData.amount.ugx.toLocaleString()} from Agent. New balance: UGX ${newBalance.toLocaleString()}. Transaction ID: ${transaction.id}. Thank you!`;
+        const smsMessage = `AfriTokeni: You have received UGX ${depositData.amount.ugx.toLocaleString()} from Agent. New balance: UGX ${newCustomerBalance.toLocaleString()}. Transaction ID: ${customerTransaction.id}. Thank you!`;
         
         // Call our SMS webhook to send notification
         await fetch('http://localhost:3001/api/send-sms', {
@@ -231,7 +284,7 @@ const ProcessDeposit: React.FC = () => {
           body: JSON.stringify({
             phoneNumber: depositData.customerPhone,
             message: smsMessage,
-            transactionId: transaction.id
+            transactionId: customerTransaction.id
           })
         });
 
@@ -242,13 +295,17 @@ const ProcessDeposit: React.FC = () => {
           message: smsMessage,
           direction: 'outbound',
           status: 'sent',
-          transactionId: transaction.id
+          transactionId: customerTransaction.id
         });
       } catch (smsError) {
         console.error('SMS sending failed, but transaction completed:', smsError);
       }
 
-      console.log('Deposit processed successfully:', transaction);
+      console.log('Deposit processed successfully:', { 
+        customerTransaction: customerTransaction.id, 
+        agentTransaction: agentTransaction.id,
+        commission: commissionAmount 
+      });
       setCurrentStep('complete');
       
       // Auto redirect after success
