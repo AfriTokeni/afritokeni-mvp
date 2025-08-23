@@ -64,8 +64,8 @@ const UserKYCPage: React.FC = () => {
             firstName: data.firstName,
             lastName: data.lastName,
             kycStatus: 'pending',
-            // For SMS users, update email to phone; for web users, keep existing email
-            email: authMethod === 'sms' ? formattedPhone : existingUser.email
+            // After KYC, all users (web and SMS) store phone number in email field for financial operations
+            email: formattedPhone
           });
           
           if (updateSuccess) {
@@ -74,8 +74,8 @@ const UserKYCPage: React.FC = () => {
               firstName: data.firstName,
               lastName: data.lastName,
               kycStatus: 'pending' as const,
-              // Update email based on auth method
-              email: authMethod === 'sms' ? formattedPhone : existingUser.email
+              // After KYC, all users store phone number in email field
+              email: formattedPhone
             };
           } else {
             throw new Error('Failed to update existing user');
@@ -86,7 +86,7 @@ const UserKYCPage: React.FC = () => {
             id: existingUserId,
             firstName: data.firstName,
             lastName: data.lastName,
-            email: authMethod === 'sms' ? formattedPhone : existingUserId, // Use phone for SMS, ID for web
+            email: formattedPhone, // After KYC, all users store phone number in email field
             userType: 'user',
             kycStatus: 'pending',
             authMethod: authMethod as 'sms' | 'web'
@@ -136,7 +136,7 @@ const UserKYCPage: React.FC = () => {
         id: finalUser.id,
         firstName: finalUser.firstName,
         lastName: finalUser.lastName,
-        email: formattedPhone, // Phone number for both web and SMS users after KYC
+        email: formattedPhone, // After KYC, all users have phone number in email field
         userType: 'user',
         kycStatus: 'pending',
         isVerified: false,
