@@ -17,6 +17,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import PageLayout from '../components/PageLayout';
+import { useAfriTokeni } from '../hooks/useAfriTokeni';
+import { DataService } from '../services/dataService';
+import { User as UserType } from '../types/auth';
 
 interface AgentStatus {
   status: 'available' | 'busy' | 'cash-out';
@@ -28,85 +31,62 @@ interface AgentStatus {
   lastUpdated: Date;
 }
 
-interface Transaction {
-  id: string;
-  customer: string;
-  customerPhone: string;
-  type: 'deposit' | 'withdrawal' | 'send-money';
-  amount: {
-    ugx: number;
-    usdc: number;
-  };
-  commission: {
-    ugx: number;
-    usdc: number;
-  };
-  status: 'completed' | 'pending' | 'failed';
-  timestamp: Date;
-}
-
-interface AgentBalance {
-  cash: {
-    ugx: number;
-    usdc: number;
-  };
-  digital: {
-    ugx: number;
-    usdc: number;
-  };
-}
-
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { agent, agentTransactions, updateAgentStatus: updateStatus } = useAfriTokeni();
   
+  // Calculate real daily earnings from agent transactions
+  const dailyEarnings = React.useMemo(() => {
+    if (!agentTransactions.length) {
+      return { ugx: 0, usdc: 0, transactionCount: 0 };
+    }
+    
+    const earnings = DataService.calculateAgentDailyEarnings(agentTransactions);
+    return {
+      ugx: earnings.totalCommission,
+      usdc: earnings.totalCommission * 0.00026, // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
+      transactionCount: earnings.completedCount
+    };
+  }, [agentTransactions]);
+
+  // Load customers data
+  const [customers, setCustomers] = React.useState<UserType[]>([]);
+  
+  React.useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        const allCustomers = await DataService.getAllCustomers();
+        setCustomers(allCustomers);
+      } catch (error) {
+        console.error('Error loading customers:', error);
+      }
+    };
+    
+    loadCustomers();
+  }, []);
+  
+  // Local state for UI status (fallback to agent data if available)
   const [agentStatus, setAgentStatus] = useState<AgentStatus>({
-    status: 'available',
+    status: agent?.status === 'cash_out' ? 'cash-out' : 
+            agent?.status === 'offline' ? 'available' : 
+            (agent?.status || 'available'),
     lastUpdated: new Date()
   });
   
-  const [balance] = useState<AgentBalance>({
-    cash: { ugx: 2450000, usdc: 500 },
-    digital: { ugx: 1250000, usdc: 328.75 }
-  });
-  
-  const [dailyEarnings] = useState({
-    ugx: 45000,
-    usdc: 12.50,
-    transactionCount: 23
-  });
-  
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: 'TXN001',
-      customer: 'John Kamau',
-      customerPhone: '+256701234567',
-      type: 'withdrawal',
-      amount: { ugx: 100000, usdc: 26.32 },
-      commission: { ugx: 2000, usdc: 0.53 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 10)
+  // Use real agent data if available, otherwise fallback to mock data
+  const agentBalance = agent ? {
+    cash: { 
+      ugx: agent.cashBalance, 
+      usdc: agent.cashBalance * 0.00026 // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
     },
-    {
-      id: 'TXN002',
-      customer: 'Mary Nakato',
-      customerPhone: '+256702345678',
-      type: 'deposit',
-      amount: { ugx: 75000, usdc: 19.74 },
-      commission: { ugx: 1500, usdc: 0.39 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 45)
-    },
-    {
-      id: 'TXN003',
-      customer: 'Peter Okello',
-      customerPhone: '+256703456789',
-      type: 'send-money',
-      amount: { ugx: 200000, usdc: 52.63 },
-      commission: { ugx: 3000, usdc: 0.79 },
-      status: 'pending',
-      timestamp: new Date(Date.now() - 1000 * 60 * 120)
+    digital: { 
+      ugx: agent.digitalBalance, 
+      usdc: agent.digitalBalance * 0.00026 // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
     }
-  ]);
+  } : {
+    cash: { ugx: 0, usdc: 0 },
+    digital: { ugx: 0, usdc: 0 }
+  };
   
   const [showBalance, setShowBalance] = useState(true);
 
@@ -124,12 +104,30 @@ const AgentDashboard: React.FC = () => {
     }
   };
 
-  const updateAgentStatus = (newStatus: AgentStatus['status']) => {
-    setAgentStatus(prev => ({
-      ...prev,
-      status: newStatus,
-      lastUpdated: new Date()
-    }));
+  const updateAgentStatus = async (newStatus: AgentStatus['status']) => {
+    // Convert UI status to backend status format
+    const backendStatus = newStatus === 'cash-out' ? 'cash_out' : newStatus;
+    
+    try {
+      // Update in backend if we have the updateStatus function
+      if (updateStatus) {
+        const success = await updateStatus(backendStatus as 'available' | 'busy' | 'cash_out' | 'offline');
+        if (!success) {
+          alert('Failed to update status. Please try again.');
+          return;
+        }
+      }
+      
+      // Update local state
+      setAgentStatus(prev => ({
+        ...prev,
+        status: newStatus,
+        lastUpdated: new Date()
+      }));
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      alert('Failed to update status. Please try again.');
+    }
   };
 
   const updateLocation = async () => {
@@ -278,7 +276,7 @@ const AgentDashboard: React.FC = () => {
                 <p className="text-neutral-600 text-sm font-semibold">UGX Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
-                    {showBalance ? `USh ${balance.digital.ugx.toLocaleString()}` : '••••••••'}
+                    {showBalance ? `USh ${agentBalance.digital.ugx.toLocaleString()}` : '••••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
@@ -301,7 +299,7 @@ const AgentDashboard: React.FC = () => {
                 <p className="text-neutral-600 text-sm font-semibold">USDC Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
-                    {showBalance ? `$${balance.digital.usdc.toFixed(2)}` : '••••••'}
+                    {showBalance ? `$${agentBalance.digital.usdc.toFixed(2)}` : '••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
@@ -313,6 +311,13 @@ const AgentDashboard: React.FC = () => {
               </div>
               <div className="bg-neutral-100 p-2 rounded-lg">
                 <span className="text-xs font-bold text-neutral-700">USDC</span>
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-neutral-100">
+              <span className="text-neutral-500 text-sm">1 USD = 3,846 UGX</span>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-blue-600 font-medium text-sm">Live</span>
               </div>
             </div>
           </div>
@@ -383,7 +388,7 @@ const AgentDashboard: React.FC = () => {
                 <CreditCard className="h-6 w-6 text-neutral-600" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-neutral-600">Today's Transactions</p>
+                <p className="text-sm font-semibold text-neutral-600">Today&apos;s Transactions</p>
                 <p className="text-xl font-bold text-neutral-900 font-mono mt-1">{dailyEarnings.transactionCount}</p>
               </div>
             </div>
@@ -396,7 +401,7 @@ const AgentDashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-semibold text-neutral-600">Active Customers</p>
-                <p className="text-xl font-bold text-neutral-900 font-mono mt-1">1,247</p>
+                <p className="text-xl font-bold text-neutral-900 font-mono mt-1">{customers.length}</p>
               </div>
             </div>
           </div>
@@ -412,28 +417,28 @@ const AgentDashboard: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {transactions.slice(0, 4).map((transaction) => (
+              {agentTransactions.slice(0, 4).map((transaction) => (
                 <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-neutral-100 last:border-b-0">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center">
                       <span className="text-sm font-bold text-neutral-600">
-                        {transaction.customer.split(' ').map(n => n[0]).join('')}
+                        {transaction.description ? transaction.description.split(' ').map((n: string) => n[0]).join('').slice(0, 2) : 'TX'}
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-neutral-900">{transaction.customer}</p>
+                      <p className="text-sm font-semibold text-neutral-900">{transaction.description || 'Transaction'}</p>
                       <p className="text-xs text-neutral-600 font-medium mt-1">
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace('-', ' ')}
+                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace(/[_-]/g, ' ')}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-bold text-neutral-900 font-mono">
-                      {formatCurrency(transaction.amount.ugx, 'UGX')}
+                      {formatCurrency(transaction.amount, 'UGX')}
                     </div>
                     <div className="text-xs mt-1">
                       <span className="text-green-600 font-bold font-mono">
-                        +{formatCurrency(transaction.commission.ugx, 'UGX')}
+                        +{formatCurrency(Math.round(transaction.amount * 0.02), 'UGX')}
                       </span>
                       <span className={`ml-2 font-semibold ${
                         transaction.status === 'completed' ? 'text-green-600' : 
@@ -445,6 +450,11 @@ const AgentDashboard: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {agentTransactions.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-neutral-600">No transactions yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
