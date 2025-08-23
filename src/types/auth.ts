@@ -17,11 +17,11 @@ export interface UserKYCData {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  documentType: 'national_id' | 'passport' | 'drivers_license';
-  documentNumber: string;
+  documentType?: 'national_id' | 'passport' | 'drivers_license';
+  documentNumber?: string;
   documentFile?: File;
-  pin: string;
-  confirmPin: string;
+  pin?: string;
+  confirmPin?: string;
 }
 
 export interface AgentKYCData {

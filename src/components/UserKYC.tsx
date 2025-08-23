@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Eye, EyeOff, Shield, CheckCircle } from 'lucide-react';
+import { Upload, Shield, CheckCircle } from 'lucide-react';
 import { UserKYCData } from '../types/auth';
 
 interface UserKYCProps {
@@ -14,11 +14,7 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
     phoneNumber: '',
     documentType: 'national_id',
     documentNumber: '',
-    pin: '',
-    confirmPin: ''
   });
-  const [showPin, setShowPin] = useState(false);
-  const [showConfirmPin, setShowConfirmPin] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const documentTypes = [
@@ -62,25 +58,7 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
       newErrors.phoneNumber = 'Please enter a valid Ugandan phone number';
     }
 
-    if (!formData.documentNumber.trim()) {
-      newErrors.documentNumber = 'Document number is required';
-    }
-
-    if (!formData.documentFile) {
-      newErrors.documentFile = 'Document image is required';
-    }
-
-    if (!formData.pin) {
-      newErrors.pin = 'PIN is required';
-    } else if (formData.pin.length !== 4 || !/^\d{4}$/.test(formData.pin)) {
-      newErrors.pin = 'PIN must be exactly 4 digits';
-    }
-
-    if (!formData.confirmPin) {
-      newErrors.confirmPin = 'Please confirm your PIN';
-    } else if (formData.pin !== formData.confirmPin) {
-      newErrors.confirmPin = 'PINs do not match';
-    }
+    // Document fields are now optional - no validation required
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -177,7 +155,7 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
         {/* Document Type */}
         <div>
           <label htmlFor="documentType" className="block text-sm font-medium text-gray-700 mb-2">
-            Document Type
+            Document Type (Optional)
           </label>
           <select
             id="documentType"
@@ -195,15 +173,15 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
         {/* Document Number */}
         <div>
           <label htmlFor="documentNumber" className="block text-sm font-medium text-gray-700 mb-2">
-            Document Number
+            Document Number (Optional)
           </label>
           <input
             type="text"
             id="documentNumber"
             name="documentNumber"
-            value={formData.documentNumber}
+            value={formData.documentNumber || ''}
             onChange={handleInputChange}
-            placeholder="Enter your document number"
+            placeholder="Enter your document number (optional)"
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.documentNumber ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -216,7 +194,7 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
         {/* Document Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Document Image
+            Document Image (Optional)
           </label>
           <div className={`border-2 border-dashed rounded-md p-4 text-center ${
             errors.documentFile ? 'border-red-500' : 'border-gray-300'
@@ -231,7 +209,7 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
             <label htmlFor="documentFile" className="cursor-pointer">
               <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
               <p className="text-sm text-gray-600">
-                {formData.documentFile ? formData.documentFile.name : 'Click to upload document image'}
+                {formData.documentFile ? formData.documentFile.name : 'Click to upload document image (optional)'}
               </p>
               <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
             </label>
@@ -239,79 +217,6 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
           {errors.documentFile && (
             <p className="mt-1 text-sm text-red-600">{errors.documentFile}</p>
           )}
-        </div>
-
-        {/* PIN Setup */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Set Transaction PIN</h3>
-          
-          <div>
-            <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-2">
-              4-Digit PIN
-            </label>
-            <div className="relative">
-              <input
-                type={showPin ? 'text' : 'password'}
-                id="pin"
-                name="pin"
-                value={formData.pin}
-                onChange={handleInputChange}
-                placeholder="Enter 4-digit PIN"
-                maxLength={4}
-                className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.pin ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPin(!showPin)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                {showPin ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
-                )}
-              </button>
-            </div>
-            {errors.pin && (
-              <p className="mt-1 text-sm text-red-600">{errors.pin}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="confirmPin" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirm PIN
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPin ? 'text' : 'password'}
-                id="confirmPin"
-                name="confirmPin"
-                value={formData.confirmPin}
-                onChange={handleInputChange}
-                placeholder="Re-enter PIN"
-                maxLength={4}
-                className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.confirmPin ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPin(!showConfirmPin)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                {showConfirmPin ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
-                )}
-              </button>
-            </div>
-            {errors.confirmPin && (
-              <p className="mt-1 text-sm text-red-600">{errors.confirmPin}</p>
-            )}
-          </div>
         </div>
 
         {/* Submit Button */}
