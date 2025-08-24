@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Copy, Check, MapPin, Phone, Clock } from 'lucide-react';
+import { DataService } from '../../services/dataService';
+import { useAuthentication } from '../../context/AuthenticationContext';
 import type { Agent } from './types';
 
 interface ConfirmationStepProps {
   ugxAmount: number;
   usdcAmount: number;
+  fee: number;
   userLocation: [number, number] | null;
   selectedAgent: Agent;
   withdrawalCode: string;
@@ -14,12 +17,39 @@ interface ConfirmationStepProps {
 const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   ugxAmount,
   usdcAmount,
+  fee,
   userLocation,
   selectedAgent,
   withdrawalCode,
   onMakeAnotherWithdrawal
 }) => {
+  const { userData } = useAuthentication();
   const [codeCopied, setCodeCopied] = useState(false);
+  const [transactionCreated, setTransactionCreated] = useState(false);
+
+  // Create transaction on component mount
+  useEffect(() => {
+    const initializeWithdrawal = async () => {
+      if (!userData?.id || transactionCreated) return;
+
+      try {
+        // Create withdraw transaction
+        await DataService.createWithdrawTransaction(
+          userData.id,
+          ugxAmount,
+          selectedAgent.id,
+          withdrawalCode,
+          fee
+        );
+
+        setTransactionCreated(true);
+      } catch (error) {
+        console.error('Error initializing withdrawal:', error);
+      }
+    };
+
+    initializeWithdrawal();
+  }, [userData?.id, ugxAmount, selectedAgent.id, withdrawalCode, fee, transactionCreated]);
 
   const handleCopyCode = async () => {
     try {
@@ -45,7 +75,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
             <Check className="w-10 h-10 text-green-600" />
           </div>
           <h2 className="text-2xl font-bold text-neutral-900">Your Withdrawal Code is Ready</h2>
-          <p className="text-neutral-600 mt-2">Show this code to the agent to complete your withdrawal</p>
+          <p className="text-neutral-600 mt-2">Show this 6-digit code to the agent to complete your withdrawal</p>
         </div>
 
         {/* Withdrawal Code */}
@@ -83,8 +113,12 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
               <span className="font-mono font-bold">{ugxAmount.toLocaleString()} UGX</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-600 font-medium">Transaction Fee:</span>
-              <span className="font-bold text-green-600">Free</span>
+              <span className="text-neutral-600 font-medium">Transaction Fee (1%):</span>
+              <span className="font-mono font-bold text-red-600">{fee.toLocaleString()} UGX</span>
+            </div>
+            <div className="flex justify-between pt-2 border-t border-neutral-200">
+              <span className="text-neutral-600 font-medium">Total Deducted:</span>
+              <span className="font-mono font-bold">{(ugxAmount + fee).toLocaleString()} UGX</span>
             </div>
             <div className="border-t border-neutral-200 pt-4 flex justify-between">
               <span className="font-bold text-neutral-900">Total to Receive:</span>
@@ -98,7 +132,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
           <h3 className="text-lg font-bold text-neutral-900 mb-6">Withdrawal Instructions</h3>
           <ol className="list-decimal list-inside space-y-3 text-sm text-neutral-700">
             <li className="font-medium">Visit the selected agent location</li>
-            <li className="font-medium">Show your withdrawal code: <strong className="font-mono text-neutral-900">{withdrawalCode}</strong></li>
+            <li className="font-medium">Show your 6-digit withdrawal code: <strong className="font-mono text-neutral-900">{withdrawalCode}</strong></li>
             <li className="font-medium">Present a valid ID for verification</li>
             <li className="font-medium">Receive your cash and keep the receipt</li>
           </ol>
