@@ -19,7 +19,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const searchTimeout = useRef<number | undefined>(undefined);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Location data based on existing agents in agents.json
