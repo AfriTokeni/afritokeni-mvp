@@ -186,8 +186,8 @@ const AgentDashboard: React.FC = () => {
     <PageLayout>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* KYC Status Alert */}
-        <KYCStatusAlert />
-      
+        <KYCStatusAlert user_type="agent" />
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-neutral-900">Agent Dashboard</h1>
