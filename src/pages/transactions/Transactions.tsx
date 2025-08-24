@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   ArrowUp,
   ArrowDown,
@@ -7,76 +7,60 @@ import {
   Search,
   Filter,
 } from 'lucide-react';
-import { Transaction, Currency } from '../../types/user_dashboard';
+import { Transaction } from '../../services/dataService';
 import PageLayout from '../../components/PageLayout';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
 
 
 const UserTransactions: React.FC = () => {
+  const { transactions, isLoading } = useAfriTokeni();
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900 mx-auto mb-4"></div>
+              <p className="text-neutral-600">Loading transactions...</p>
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
-  // Mock transaction data
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: 'TXN001',
-      type: 'received',
-      amount: 50000,
-      currency: 'UGX',
-      from: '+254700123456',
-      date: '2025-08-07T10:30:00Z',
-      status: 'completed',
-      description: 'From Mary Wanjiku'
-    },
-    {
-      id: 'TXN002',
-      type: 'sent',
-      amount: 25.50,
-      currency: 'USDC',
-      to: '+255713456789',
-      date: '2025-08-06T15:45:00Z',
-      status: 'completed',
-      description: 'To Peter Mwangi'
-    },
-    {
-      id: 'TXN003',
-      type: 'withdrawal',
-      amount: 100000,
-      currency: 'UGX',
-      agent: 'Agent Sarah - Nakawa Market',
-      date: '2025-08-05T12:15:00Z',
-      status: 'completed',
-      description: 'Cash withdrawal'
-    },
-    {
-      id: 'TXN004',
-      type: 'deposit',
-      amount: 75.00,
-      currency: 'USDC',
-      agent: 'Agent John - Kampala Central',
-      date: '2025-08-04T09:20:00Z',
-      status: 'pending',
-      description: 'Cash deposit'
-    }
-  ]);
+  // No transactions state
+  if (!transactions.length) {
+    return (
+      <PageLayout>
+        <div className="max-w-4xl mx-auto space-y-6">
+          <h1 className="text-2xl font-bold text-neutral-900">Transaction History</h1>
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-12 text-center">
+            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ArrowUp className="w-8 h-8 text-neutral-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">No transactions yet</h3>
+            <p className="text-neutral-600">Your transaction history will appear here once you start sending or receiving money.</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
 
 
-  const formatCurrency = (amount: number, currency: Currency): string => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
-        style: 'currency',
-        currency: 'UGX'
-      }).format(amount);
-    } else {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(amount);
-    }
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-UG', {
+      style: 'currency',
+      currency: 'UGX'
+    }).format(amount);
   };
 
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (date: Date): string => {
+    return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -86,16 +70,35 @@ const UserTransactions: React.FC = () => {
 
   const getTransactionIcon = (type: Transaction['type']): React.ReactElement => {
     switch (type) {
-      case 'sent':
+      case 'send':
         return <ArrowUp className="w-5 h-5 text-red-500" />;
-      case 'received':
+      case 'receive':
         return <ArrowDown className="w-5 h-5 text-green-500" />;
-      case 'withdrawal':
+      case 'withdraw':
         return <Minus className="w-5 h-5 text-orange-500" />;
       case 'deposit':
         return <Plus className="w-5 h-5 text-blue-500" />;
       default:
         return <ArrowUp className="w-5 h-5" />;
+    }
+  };
+
+  const getTransactionDescription = (transaction: Transaction): string => {
+    if (transaction.description) {
+      return transaction.description;
+    }
+
+    switch (transaction.type) {
+      case 'send':
+        return `Sent to ${transaction.recipientName || transaction.recipientPhone || 'recipient'}`;
+      case 'receive':
+        return 'Money received';
+      case 'withdraw':
+        return 'Cash withdrawal';
+      case 'deposit':
+        return 'Cash deposit';
+      default:
+        return 'Transaction';
     }
   };
 
@@ -129,20 +132,20 @@ const UserTransactions: React.FC = () => {
                     {getTransactionIcon(transaction.type)}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-neutral-900 mb-1">{transaction.description}</p>
+                    <p className="font-semibold text-neutral-900 mb-1">{getTransactionDescription(transaction)}</p>
                     <div className="flex items-center space-x-4 text-sm text-neutral-600">
-                      <span>{formatDate(transaction.date)}</span>
+                      <span>{formatDate(transaction.createdAt)}</span>
                       <span className="text-xs font-mono text-neutral-500">ID: {transaction.id}</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className={`font-bold text-lg font-mono mb-1 ${
-                    transaction.type === 'sent' || transaction.type === 'withdrawal' 
+                    transaction.type === 'send' || transaction.type === 'withdraw' 
                       ? 'text-red-600' : 'text-green-600'
                   }`}>
-                    {transaction.type === 'sent' || transaction.type === 'withdrawal' ? '-' : '+'}
-                    {formatCurrency(transaction.amount, transaction.currency)}
+                    {transaction.type === 'send' || transaction.type === 'withdraw' ? '-' : '+'}
+                    {formatCurrency(transaction.amount)}
                   </p>
                   <div className="flex items-center justify-end space-x-2">
                     <div className={`w-2 h-2 rounded-full ${
