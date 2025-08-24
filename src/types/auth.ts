@@ -68,11 +68,17 @@ export interface User {
 }
 
 export interface AuthContextType {
-  user: User | null;
+  // New structure with combined user object
+  user: {
+    user: User | null;
+    agent: User | null;
+  };
+  
   authMethod: 'sms' | 'web';
+  
   login: (formData: LoginFormData, method?: 'sms' | 'web') => Promise<boolean>;
   register: (formData: RegisterFormData) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: (userTypeToLogout?: 'user' | 'agent') => Promise<void>;
   isLoading: boolean;
   // SMS verification methods
   verifyRegistrationCode: (code: string) => Promise<boolean>;
@@ -83,9 +89,9 @@ export interface AuthContextType {
   // Development helper
   devVerificationCode?: string;
   // User update method
-  updateUser: (updatedUser: User) => void;
+  updateUser: (updatedUser: User) => Promise<void>;
   // User type update method (for role selection)
-  updateUserType: (newUserType: 'user' | 'agent') => void;
+  updateUserType: (newUserType: 'user' | 'agent', currentUserType: 'user' | 'agent') => Promise<void>;
 }
 
 export interface LocationSuggestion {
