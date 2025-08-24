@@ -20,6 +20,7 @@ export interface Transaction {
   userId: string;
   type: 'send' | 'receive' | 'withdraw' | 'deposit';
   amount: number;
+  fee?: number;
   currency: 'UGX';
   recipientId?: string;
   recipientPhone?: string;
@@ -133,6 +134,7 @@ export class DataService {
 
   // Get user by key (either ID for web users or phone for SMS users)
   static async getUserByKey(key: string): Promise<User | null> {
+    console.log('Getting user by key:', key);
     try {
       const doc = await getDoc({
         collection: 'users',
@@ -200,7 +202,7 @@ export class DataService {
         doc: {
           key: key,
           data: dataForJuno,
-          version: existingDoc.version
+          version: existingDoc.version ? existingDoc.version : 1n
         }
       });
 
@@ -569,6 +571,11 @@ export class DataService {
       createdAt: now
     };
 
+    const existingDoc = await getDoc({
+      collection: 'agents',
+      key: newAgent.id
+    });
+
     // Convert Date field to ISO string
     const dataForJuno = {
       ...newAgent,
@@ -580,7 +587,7 @@ export class DataService {
       doc: {
         key: newAgent.id,
         data: dataForJuno,
-        version: 1n
+        version: existingDoc?.version ? existingDoc.version : 1n
       }
     });
 
@@ -1030,5 +1037,175 @@ Reply with agent number to withdraw.`;
 3. Find Agents - AGENTS
 4. Withdraw Cash - WITHDRAW amount
 5. Help - HELP`;
+  }
+
+  // Withdraw Transaction Methods
+  static async createWithdrawTransaction(
+    userId: string,
+    amount: number,
+    agentId: string,
+    withdrawalCode: string,
+    fee: number
+  ): Promise<Transaction> {
+    try {
+      const transaction: Transaction = {
+        id: nanoid(),
+        userId,
+        type: 'withdraw',
+        amount,
+        fee,
+        currency: 'UGX',
+        agentId,
+        status: 'pending',
+        description: `Cash withdrawal of UGX ${amount.toLocaleString()}`,
+        createdAt: new Date(),
+        metadata: {
+          withdrawalCode,
+          agentLocation: '', // This could be populated with agent location
+        }
+      };
+
+      await setDoc({
+        collection: 'transactions',
+        doc: {
+          key: transaction.id,
+          data: {
+            ...transaction,
+            createdAt: transaction.createdAt.getTime().toString()
+          }
+        }
+      });
+
+      // Send SMS notification to user (log it for now)
+      await this.logSMSMessage({
+        userId,
+        phoneNumber: '+256123456789', // This should be the user's phone number from their profile
+        message: `Withdrawal request created. Code: ${withdrawalCode}. Amount: UGX ${amount.toLocaleString()}. Show this code to agent ${agentId} to complete withdrawal.`,
+        direction: 'outbound',
+        status: 'sent',
+        transactionId: transaction.id
+      });
+
+      return transaction;
+    } catch (error) {
+      console.error('Error creating withdraw transaction:', error);
+      throw new Error('Failed to create withdraw transaction');
+    }
+  }
+
+  static async completeWithdrawTransaction(
+    transactionId: string,
+    agentId: string,
+    verificationCode: string
+  ): Promise<boolean> {
+    try {
+      // Get the transaction
+      const transactionDoc = await getDoc({
+        collection: 'transactions',
+        key: transactionId
+      });
+
+      if (!transactionDoc?.data) {
+        throw new Error('Transaction not found');
+      }
+
+      const transaction = transactionDoc.data as Transaction;
+      
+      // Verify the withdrawal code
+      if (transaction.metadata?.withdrawalCode !== verificationCode) {
+        throw new Error('Invalid withdrawal code');
+      }
+
+      // Verify the agent
+      if (transaction.agentId !== agentId) {
+        throw new Error('Agent not authorized for this transaction');
+      }
+
+      // Update user balance (reduce)
+      const userBalance = await this.getUserBalance(transaction.userId);
+      if (!userBalance) {
+        throw new Error('User balance not found');
+      }
+      
+      const totalDeduction = transaction.amount + (transaction.amount * 0.01); // Amount + 1% fee
+      
+      if (userBalance.balance < totalDeduction) {
+        throw new Error('Insufficient balance');
+      }
+
+      await this.updateUserBalance(transaction.userId, userBalance.balance - totalDeduction);
+
+      // Update agent balance (increase)
+      const agent = await this.getAgent(agentId);
+      if (!agent) {
+        throw new Error('Agent not found');
+      }
+
+      const commission = transaction.amount * agent.commissionRate;
+      const agentReceives = transaction.amount - commission;
+      await this.updateAgentBalance(agentId, { 
+        cashBalance: agent.cashBalance + agentReceives 
+      });
+
+      // Update transaction status
+      const updatedTransaction = {
+        ...transaction,
+        status: 'completed' as const,
+        completedAt: new Date()
+      };
+
+      await setDoc({
+        collection: 'transactions',
+        doc: {
+          key: transactionId,
+          data: {
+            ...updatedTransaction,
+            createdAt: transaction.createdAt instanceof Date 
+              ? transaction.createdAt.getTime().toString()
+              : transaction.createdAt,
+            completedAt: updatedTransaction.completedAt.getTime().toString()
+          }
+        }
+      });
+
+      // Send completion SMS to user (log it for now)
+      await this.logSMSMessage({
+        userId: transaction.userId,
+        phoneNumber: '+256123456789', // User's phone number
+        message: `Withdrawal completed! You received UGX ${transaction.amount.toLocaleString()} cash. Transaction ID: ${transactionId}`,
+        direction: 'outbound',
+        status: 'sent',
+        transactionId
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error completing withdraw transaction:', error);
+      throw error;
+    }
+  }
+
+  static async getPendingWithdrawals(agentId: string): Promise<Transaction[]> {
+    try {
+      const docs = await listDocs({
+        collection: 'transactions'
+      });
+
+      return docs.items
+        .map(doc => doc.data as Transaction)
+        .filter(transaction => 
+          transaction.type === 'withdraw' && 
+          transaction.status === 'pending' &&
+          transaction.agentId === agentId
+        )
+        .sort((a, b) => {
+          const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+          const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+          return dateB.getTime() - dateA.getTime();
+        });
+    } catch (error) {
+      console.error('Error getting pending withdrawals:', error);
+      return [];
+    }
   }
 }
