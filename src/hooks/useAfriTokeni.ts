@@ -12,48 +12,82 @@ export const useAfriTokeni = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   const loadUserData = useCallback(async () => {
-    if (!user?.id) return;
+    // Check if we have any user logged in
+    if (!user?.user?.id && !user?.agent?.id) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
-      // Initialize user data if needed
-      await DataService.initializeUserData(user.id);
+      // Initialize arrays to store data for both user types
+      const dataPromises: Promise<any>[] = [];
       
-      // Load balance and transactions
-      const [userBalance, userTransactions] = await Promise.all([
-        DataService.getUserBalance(user.id),
-        DataService.getUserTransactions(user.id)
-      ]);
-      
-      setBalance(userBalance);
-      setTransactions(userTransactions);
+      // Load regular user data if user is logged in
+      if (user?.user?.id) {
+        await DataService.initializeUserData(user.user.id);
+        
+        dataPromises.push(
+          DataService.getUserBalance(user.user.id),
+          DataService.getUserTransactions(user.user.id)
+        );
+      }
 
-      // Load agent data if user is an agent
-      if (user.userType === 'agent') {
-        const [agentData, agentTransactionsData] = await Promise.all([
-          DataService.getAgentByUserId(user.id),
-          DataService.getAgentTransactionsByUserId(user.id)
-        ]);
+      console.log('Data promises for user:', user.agent?.id);
+      
+      // Load agent data if agent is logged in
+      if (user?.agent?.id) {
+        await DataService.initializeUserData(user.agent.id);
+        
+        dataPromises.push(
+          DataService.getAgentByUserId(user.agent.id),
+          DataService.getAgentTransactionsByUserId(user.agent.id)
+        );
+      }
+      
+      // Execute all promises
+      const results = await Promise.all(dataPromises);
+      
+      let resultIndex = 0;
+      
+      // Process regular user data if available
+      if (user?.user?.id) {
+        const userBalance = results[resultIndex++];
+        const userTransactions = results[resultIndex++];
+        
+        setBalance(userBalance);
+        setTransactions(userTransactions);
+      } else {
+        // Clear user data if no user is logged in
+        setBalance(null);
+        setTransactions([]);
+      }
+      
+      // Process agent data if available
+      if (user?.agent?.id) {
+        const agentData = results[resultIndex++];
+        const agentTransactionsData = results[resultIndex++];
+        
         setAgent(agentData);
         setAgentTransactions(agentTransactionsData);
       } else {
+        // Clear agent data if no agent is logged in
         setAgent(null);
         setAgentTransactions([]);
       }
+      
     } catch (err) {
       setError('Failed to load user data');
       console.error('Error loading user data:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, user?.userType]);
+  }, [user?.user?.id, user?.agent?.id]);
 
   // Load user data when user changes
   useEffect(() => {
-    if (user?.id) {
+    if (user?.user?.id || user?.agent?.id) {
       loadUserData();
     } else {
       setBalance(null);
@@ -61,7 +95,7 @@ export const useAfriTokeni = () => {
       setAgent(null);
       setAgentTransactions([]);
     }
-  }, [user?.id, loadUserData]);
+  }, [user?.user?.id, user?.agent?.id, loadUserData]);
 
   const calculateFee = (amount: number): number => {
     return Math.round(amount * 0.01); // 1% fee
@@ -77,7 +111,7 @@ export const useAfriTokeni = () => {
     transaction?: Transaction;
     fee?: number;
   }> => {
-    if (!user?.id) {
+    if (!user.user?.id) {
       return { success: false, message: 'User not authenticated' };
     }
 
@@ -85,7 +119,7 @@ export const useAfriTokeni = () => {
     const totalAmount = amount + fee;
 
     // Check if sender has sufficient balance
-    const senderBalance = await DataService.getUserBalance(user.id);
+    const senderBalance = await DataService.getUserBalance(user.user.id);
     if (!senderBalance || senderBalance.balance < totalAmount) {
       return { success: false, message: 'Insufficient balance' };
     }
@@ -96,7 +130,7 @@ export const useAfriTokeni = () => {
     try {
       // Create send transaction for sender
       const sendTransaction = await DataService.createTransaction({
-        userId: user.id,
+        userId: user.user.id,
         type: 'send',
         amount: amount,
         currency: 'UGX',
@@ -118,7 +152,7 @@ export const useAfriTokeni = () => {
         amount: amount,
         currency: 'UGX',
         status: 'completed',
-        description: `Money received from ${user.firstName} ${user.lastName}`,
+        description: `Money received from ${user.user.firstName} ${user.user.lastName}`,
         completedAt: new Date(),
         metadata: {
           smsReference: `RCV${Date.now().toString().slice(-6)}`
@@ -127,12 +161,12 @@ export const useAfriTokeni = () => {
 
       // Update sender balance (deduct amount + fee)
       console.log('Updating sender balance:', {
-        userId: user.id,
+        userId: user.user.id,
         currentBalance: senderBalance.balance,
         totalAmount,
         newBalance: senderBalance.balance - totalAmount
       });
-      const senderUpdateSuccess = await DataService.updateUserBalance(user.id, senderBalance.balance - totalAmount);
+      const senderUpdateSuccess = await DataService.updateUserBalance(user.user.id, senderBalance.balance - totalAmount);
       if (!senderUpdateSuccess) {
         throw new Error('Failed to update sender balance');
       }
@@ -159,7 +193,7 @@ export const useAfriTokeni = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            phoneNumber: user.email,
+            phoneNumber: user.user.email,
             message: senderSMS,
             transactionId: sendTransaction.id
           })
@@ -202,7 +236,7 @@ export const useAfriTokeni = () => {
     amount: number,
     agentId?: string
   ): Promise<{ success: boolean; message: string; withdrawalCode?: string }> => {
-    if (!user?.id) {
+    if (!user.user?.id) {
       return { success: false, message: 'User not authenticated' };
     }
 
@@ -219,7 +253,7 @@ export const useAfriTokeni = () => {
 
       // Create transaction
       await DataService.createTransaction({
-        userId: user.id,
+        userId: user.user.id,
         type: 'withdraw',
         amount,
         currency: 'UGX',
@@ -246,7 +280,7 @@ export const useAfriTokeni = () => {
   };
 
   const depositMoney = async (amount: number): Promise<{ success: boolean; message: string }> => {
-    if (!user?.id) {
+    if (!user.user?.id) {
       return { success: false, message: 'User not authenticated' };
     }
 
@@ -256,7 +290,7 @@ export const useAfriTokeni = () => {
     try {
       // Create transaction
       await DataService.createTransaction({
-        userId: user.id,
+        userId: user.user.id,
         type: 'deposit',
         amount,
         currency: 'UGX',
@@ -267,7 +301,7 @@ export const useAfriTokeni = () => {
 
       // Update balance
       const newBalance = (balance?.balance || 0) + amount;
-      await DataService.updateUserBalance(user.id, newBalance);
+      await DataService.updateUserBalance(user.user.id, newBalance);
 
       // Refresh data
       await loadUserData();
@@ -309,12 +343,12 @@ export const useAfriTokeni = () => {
 
   // Agent status management
   const updateAgentStatus = async (status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> => {
-    if (!user?.id || user.userType !== 'agent') {
+    if (!user.agent?.id || user.agent.userType !== 'agent') {
       return false;
     }
 
     try {
-      const success = await DataService.updateAgentStatusByUserId(user.id, status);
+      const success = await DataService.updateAgentStatusByUserId(user.agent.id, status);
       if (success) {
         // Refresh agent data to reflect the status change
         await loadUserData();
