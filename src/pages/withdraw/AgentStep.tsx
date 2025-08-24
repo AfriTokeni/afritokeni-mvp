@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { ArrowLeft } from 'lucide-react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
+import { DataService, Agent as DBAgent } from '../../services/dataService';
 import type { Agent } from './types';
 
 interface AgentStepProps {
@@ -14,41 +15,21 @@ interface AgentStepProps {
   onAgentSelect: (agent: Agent) => void;
 }
 
-const mockAgents: Agent[] = [
-  {
-    id: '1',
-    name: 'Kampala Central Agent',
-    status: 'online',
-    location: [0.3136, 32.5811],
-    locationName: 'Kampala Road, Central Business District',
-    address: 'Plot 12, Kampala Road, Central Business District, Kampala',
-    contact: '+256 123 456 789',
-    operatingHours: 'Mon-Fri: 8am - 6pm',
-    availableBalance: 25000
-  },
-  {
-    id: '2',
-    name: 'Entebbe Airport Agent',
-    status: 'online',
-    location: [0.0428, 32.4637],
-    locationName: 'Entebbe International Airport, Main Terminal',
-    address: 'Entebbe International Airport, Departure Hall, Gate 3',
-    contact: '+256 123 456 780',
-    operatingHours: 'Daily: 6am - 10pm',
-    availableBalance: 18000
-  },
-  {
-    id: '3',
-    name: 'Jinja Town Agent',
-    status: 'busy',
-    location: [0.4244, 33.2041],
-    locationName: 'Main Street, Jinja Town Center',
-    address: 'Shop 15, Main Street Shopping Complex, Jinja',
-    contact: '+256 123 456 781',
-    operatingHours: 'Mon-Sat: 8am - 7pm',
-    availableBalance: 32000
-  },
-];
+// Convert database agent to UI agent format
+const convertDbAgentToUIAgent = (dbAgent: DBAgent): Agent => {
+  return {
+    id: dbAgent.id,
+    name: dbAgent.businessName,
+    status: dbAgent.status === 'available' ? 'online' : 
+            dbAgent.status === 'busy' ? 'busy' : 'offline',
+    location: [dbAgent.location.coordinates.lat, dbAgent.location.coordinates.lng],
+    locationName: `${dbAgent.location.city}, ${dbAgent.location.state}`,
+    address: dbAgent.location.address,
+    contact: 'Contact via app', // Could be updated when contact info is added to Agent schema
+    operatingHours: 'Business hours vary', // Could be updated when business hours are added
+    availableBalance: dbAgent.cashBalance
+  };
+};
 
 const createBlinkingUserIcon = () => {
   return L.divIcon({
@@ -130,6 +111,30 @@ const AgentStep: React.FC<AgentStepProps> = ({
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch nearby agents
+  useEffect(() => {
+    const fetchNearbyAgents = async () => {
+      if (!userLocation) return;
+      
+      setIsLoading(true);
+      try {
+        const [lat, lng] = userLocation;
+        const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
+        const uiAgents = dbAgents.map(convertDbAgentToUIAgent);
+        setAgents(uiAgents);
+      } catch (error) {
+        console.error('Error fetching nearby agents:', error);
+        setAgents([]); // Fallback to empty array
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNearbyAgents();
+  }, [userLocation]);
 
   const handleMarkerClick = (agent: Agent) => {
     setSelectedAgent(agent);
@@ -138,7 +143,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
     }
   };
 
-    const availableAgents = mockAgents.filter(agent => agent.availableBalance > 0);
+  const availableAgents = agents.filter(agent => agent.availableBalance > 0);
 
   const renderAgentDetails = (agent: Agent) => (
     <div className="max-w-xs">
@@ -245,7 +250,14 @@ const AgentStep: React.FC<AgentStepProps> = ({
           </div>
         )}
 
-        {viewMode === 'map' && userLocation && (
+        {isLoading ? (
+          <div className="w-full h-96 lg:h-[500px] flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900 mx-auto mb-4"></div>
+              <p className="text-neutral-600">Loading nearby agents...</p>
+            </div>
+          </div>
+        ) : viewMode === 'map' && userLocation && (
           <div className="w-full h-96 lg:h-[500px] relative">
             <MapContainer
               center={userLocation}
@@ -279,7 +291,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
           </div>
         )}
 
-        {viewMode === 'list' && (
+        {!isLoading && viewMode === 'list' && (
           <div className="w-full h-96 lg:h-[500px] overflow-y-auto">
             {availableAgents.length === 0 ? (
               <div className="p-8 text-center text-neutral-500">
