@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { getDoc, setDoc, type User as JunoUser } from '@junobuild/core';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { DataService } from '../services/dataService';
 
 export type UserRole = 'user' | 'agent';
 
@@ -107,6 +108,29 @@ export const useRoleBasedAuth = () => {
           data: roleData
         }
       });
+
+      // New web user, create profile using ID as key
+      const afritokeniUser = {
+          id: junoUser.key,
+          firstName: 'ICP',
+          lastName: 'User',
+          email: junoUser.key, // Use key as identifier for web users
+          userType: role, // Use determined role
+          isVerified: true,
+          kycStatus: 'not_started',
+          createdAt: new Date()
+        };
+
+        // Create user record in datastore with ID as key
+        await DataService.createUser({
+          id: afritokeniUser.id,
+          firstName: afritokeniUser.firstName,
+          lastName: afritokeniUser.lastName,
+          email: afritokeniUser.email,
+          userType: afritokeniUser.userType,
+          kycStatus: 'not_started',
+          authMethod: 'web' // Important: specify this is a web user
+        });
 
       // Redirect based on selected role
       const target = role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
