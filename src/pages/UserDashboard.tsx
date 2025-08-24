@@ -52,8 +52,8 @@ const UserDashboard: React.FC = () => {
       <div className="space-y-8">
 
         {/* KYC Status Alert */}
-        <KYCStatusAlert />
-        
+        <KYCStatusAlert user_type="user" />
+
         {/* Balance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
