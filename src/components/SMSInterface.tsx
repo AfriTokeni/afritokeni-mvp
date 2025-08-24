@@ -13,6 +13,9 @@ const SMSInterface: React.FC = () => {
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Use whichever data is available (userData or agentData)
+  const currentUser = user.user;
+
   // Auto-run command if passed from landing page
   useEffect(() => {
     const state = location.state as { command?: string };
@@ -30,7 +33,7 @@ const SMSInterface: React.FC = () => {
   const executeCommand = async (command: string) => {
     setIsProcessing(true);
     try {
-      if (user) {
+      if (currentUser) {
         // Authenticated user - use real SMS processing
         const result = await processSMSCommand(phoneNumber, command);
         setResponse(result);
@@ -120,7 +123,7 @@ const SMSInterface: React.FC = () => {
             </div>
 
             {/* SMS Login Button */}
-            {!user && (
+            {!currentUser && (
               <button
                 onClick={handleSMSLogin}
                 disabled={!phoneNumber}
@@ -133,7 +136,7 @@ const SMSInterface: React.FC = () => {
             {/* SMS Command Input */}
             <div>
               <label className="block text-sm font-semibold text-neutral-900 mb-3">
-                SMS Command {!user && <span className="text-gray-500">(Demo Mode)</span>}
+                SMS Command {!currentUser && <span className="text-gray-500">(Demo Mode)</span>}
               </label>
               <div className="flex gap-3">
                 <input
@@ -155,13 +158,13 @@ const SMSInterface: React.FC = () => {
             </div>
 
             {/* User Info */}
-            {user && (
+            {currentUser && (
               <div className="bg-neutral-50 border border-neutral-200 p-4 rounded-xl">
                 <p className="text-sm text-neutral-700 mb-1">
-                  <strong>User:</strong> {user.firstName} {user.lastName}
+                  <strong>User:</strong> {currentUser.firstName} {currentUser.lastName}
                 </p>
                 <p className="text-sm text-neutral-700 mb-1">
-                  <strong>Phone:</strong> {user.email}
+                  <strong>Phone:</strong> {currentUser.email}
                 </p>
                 <p className="text-sm text-neutral-700">
                   <strong>Auth Method:</strong> <span className="text-neutral-900 font-semibold">{authMethod.toUpperCase()}</span>
