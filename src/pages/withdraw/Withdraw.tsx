@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-
 import 'leaflet/dist/leaflet.css';
 import AmountStep from './AmountStep';
 import AgentStep from './AgentStep';
 import ConfirmationStep from './ConfirmationStep';
 import PageLayout from '../../components/PageLayout';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import type { Agent, WithdrawStep } from './types';
 
-
-
 const WithdrawPage: React.FC = () => {
+  const { balance } = useAfriTokeni();
   const [currentStep, setCurrentStep] = useState<WithdrawStep>('amount');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -17,6 +16,7 @@ const WithdrawPage: React.FC = () => {
   const [withdrawalCode, setWithdrawalCode] = useState<string>('');
   const [finalUgxAmount, setFinalUgxAmount] = useState<number>(0);
   const [finalUsdcAmount, setFinalUsdcAmount] = useState<number>(0);
+  const [withdrawalFee, setWithdrawalFee] = useState<number>(0);
 
   // Exchange rate (mock)
   const exchangeRate = 3750; // 1 USDC = 3750 UGX
@@ -98,10 +98,12 @@ const WithdrawPage: React.FC = () => {
         {currentStep === 'amount' && (
           <AmountStep
             exchangeRate={exchangeRate}
-            onContinue={(ugxAmount: string, usdcAmount: string) => {
+            userBalance={balance?.balance || 0}
+            onContinue={(ugxAmount: string, usdcAmount: string, fee: number) => {
               // Store the amounts for the confirmation step
               setFinalUgxAmount(parseFloat(ugxAmount) || 0);
               setFinalUsdcAmount(parseFloat(usdcAmount) || 0);
+              setWithdrawalFee(fee);
               setCurrentStep('agent');
             }}
           />
@@ -120,6 +122,7 @@ const WithdrawPage: React.FC = () => {
           <ConfirmationStep
             ugxAmount={finalUgxAmount}
             usdcAmount={finalUsdcAmount}
+            fee={withdrawalFee}
             userLocation={userLocation}
             selectedAgent={selectedAgent}
             withdrawalCode={withdrawalCode}
