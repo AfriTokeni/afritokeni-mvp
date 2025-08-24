@@ -113,11 +113,12 @@ const SMSUI: React.FC = () => {
       const success = await verifyRegistrationCode(verificationCode);
       
       if (success) {
-        setResponse(`Welcome to AfriTokeni, ${user?.firstName} ${user?.lastName}! Registration complete. Send *AFRI# for menu.`);
+        const currentUser = user?.user;
+        setResponse(`Welcome to AfriTokeni, ${currentUser?.firstName} ${currentUser?.lastName}! Registration complete. Send *AFRI# for menu.`);
       } else {
         setResponse('Invalid verification code. Please try again.');
       }
-    } catch (error) {
+    } catch (_error) {
       setResponse('Error occurred during verification. Please try again.');
     } finally {
       setIsVerifyingCode(false);
@@ -234,13 +235,13 @@ const SMSUI: React.FC = () => {
             </div>
 
             {/* User Info */}
-            {user && (
+            {user.user && (
               <div className="bg-neutral-50 border border-neutral-200 p-4 rounded-xl">
                 <p className="text-sm text-neutral-700 mb-1">
-                  <strong>User:</strong> {user.firstName} {user.lastName}
+                  <strong>User:</strong> {user.user.firstName} {user.user.lastName}
                 </p>
                 <p className="text-sm text-neutral-700 mb-1">
-                  <strong>Phone:</strong> {user.email}
+                  <strong>Phone:</strong> {user.user.email}
                 </p>
                 <p className="text-sm text-neutral-700">
                   <strong>Auth Method:</strong> <span className="text-neutral-900 font-semibold">{authMethod.toUpperCase()}</span>
