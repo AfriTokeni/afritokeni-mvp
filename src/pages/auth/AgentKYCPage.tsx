@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AgentKYC from '../../components/AgentKYC';
 import { AgentKYCData } from '../../types/auth';
@@ -14,7 +14,7 @@ const AgentKYCPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      if (!user) {
+      if (!user.agent) {
         throw new Error('No user found');
       }
 
@@ -25,7 +25,7 @@ const AgentKYCPage: React.FC = () => {
 
       // Complete the agent KYC process
       const result = await DataService.completeAgentKYC({
-        userId: user.id,
+        userId: user.agent.id,
         firstName: data.firstName,
         lastName: data.lastName,
         phoneNumber: data.phoneNumber,
@@ -46,8 +46,8 @@ const AgentKYCPage: React.FC = () => {
 
       console.log('Agent KYC completed successfully:', result);
 
-      // Update user in context with new data
-      updateUser(result.user);
+      // Update agent in context with new data
+      await updateUser(result.user);
       
       // Show success message and redirect
       alert(`Agent verification completed successfully! 
@@ -69,11 +69,11 @@ Welcome to AfriTokeni Agent Network!`);
     }
   };
 
-  // Redirect if user is not logged in or is not an agent
-  // if (!user || user.userType !== 'agent') {
-  //   navigate('/');
-  //   return null;
-  // }
+  // Redirect if agent is not logged in
+  if (!user.agent) {
+    navigate('/');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
