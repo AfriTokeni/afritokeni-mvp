@@ -17,10 +17,11 @@ interface LayoutProps {
   children: React.ReactNode;
   desktop_routes:Route[];
   mobile_routes:Route[];
+  user_type: 'user' | 'agent';
 }
 
 
-const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes}) => {
+const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes, user_type}) => {
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -103,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes}
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logout(user_type);
       navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
