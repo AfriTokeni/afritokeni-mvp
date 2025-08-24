@@ -15,7 +15,10 @@ const Header: React.FC<HeaderProps> = ({
   showUserMenu = true 
 }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthentication();
+  const { userData, agentData, logout } = useAuthentication();
+  
+  // Use whichever data is available (userData or agentData)
+  const currentUser = userData || agentData;
 
   const handleLogout = async () => {
     try {
@@ -60,10 +63,10 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           
-          {showUserMenu && user && (
+          {showUserMenu && currentUser && (
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600">
-                {user.email}
+                {currentUser.email}
               </div>
               <button
                 onClick={handleLogout}
