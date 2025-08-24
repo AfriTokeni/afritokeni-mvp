@@ -3,14 +3,23 @@ import { AlertTriangle, Clock, XCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../context/AuthenticationContext';
 
-const KYCStatusAlert: React.FC = () => {
+interface KYCStatusAlertProps {
+  user_type: 'user' | 'agent';
+}
+
+const KYCStatusAlert: React.FC<KYCStatusAlertProps> = ({user_type}) => {
   const { user } = useAuthentication();
   const navigate = useNavigate();
 
-  if (!user) return null;
+  // Use whichever data is available (userData or agentData)
+  const currentUser = user[user_type];
+
+  console.log('KYCStatusAlert - currentUser:', user);
+
+  if (!currentUser) return null;
 
   const getStatusConfig = () => {
-    switch (user.kycStatus) {
+    switch (currentUser.kycStatus) {
       case 'not_started':
         return {
           icon: <AlertTriangle className="w-5 h-5 text-yellow-600" />,
@@ -20,7 +29,7 @@ const KYCStatusAlert: React.FC = () => {
           title: 'Complete Your Verification',
           message: 'To use all features of AfriTokeni, please complete your identity verification.',
           actionText: 'Start Verification',
-          actionPath: user.userType === 'user' ? '/users/user-kyc' : '/agents/agent-kyc'
+          actionPath: currentUser.userType === 'user' ? '/users/user-kyc' : '/agents/agent-kyc'
         };
       case 'pending':
         return {
@@ -42,7 +51,7 @@ const KYCStatusAlert: React.FC = () => {
           title: 'Verification Rejected',
           message: 'Your verification was rejected. Please update your documents and try again.',
           actionText: 'Re-submit Documents',
-          actionPath: user.userType === 'user' ? '/users/user-kyc' : '/agents/agent-kyc'
+          actionPath: currentUser.userType === 'user' ? '/users/user-kyc' : '/agents/agent-kyc'
         };
       case 'approved':
         return null; // Don't show alert for approved users
@@ -79,9 +88,9 @@ const KYCStatusAlert: React.FC = () => {
               <button
                 onClick={handleActionClick}
                 className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white ${
-                  user.kycStatus === 'not_started' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-red-600 hover:bg-red-700'
+                  currentUser.kycStatus === 'not_started' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-red-600 hover:bg-red-700'
                 } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  user.kycStatus === 'not_started' ? 'focus:ring-yellow-500' : 'focus:ring-red-500'
+                  currentUser.kycStatus === 'not_started' ? 'focus:ring-yellow-500' : 'focus:ring-red-500'
                 } transition-colors`}
               >
                 {statusConfig.actionText}
