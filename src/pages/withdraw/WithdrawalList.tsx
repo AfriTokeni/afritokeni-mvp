@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, CreditCard, Search } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
+import { DataService, Transaction } from '../../services/dataService';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
 interface WithdrawalListProps {
   onSelectWithdrawal: (withdrawal: WithdrawalRequest) => void;
@@ -9,65 +11,70 @@ interface WithdrawalListProps {
 const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const { agent } = useAfriTokeni();
+  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock withdrawal requests data
-  const [withdrawalRequests] = useState<WithdrawalRequest[]>([
-    {
-      id: 'WD001',
-      userName: 'Sarah Nakamura',
-      userPhone: '+256781234567',
-      amount: { ugx: 150000, usdc: 39.47 },
-      withdrawalCode: 'WD001234',
-      requestedAt: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
-      status: 'pending',
-      userNationalId: 'CM12345678901234',
-      location: 'Kampala Central'
-    },
-    {
-      id: 'WD002',
-      userName: 'John Mukasa',
-      userPhone: '+256782345678',
-      amount: { ugx: 75000, usdc: 19.74 },
-      withdrawalCode: 'WD002345',
-      requestedAt: new Date(Date.now() - 25 * 60 * 1000), // 25 minutes ago
-      status: 'pending',
-      userNationalId: 'CM23456789012345',
-      location: 'Entebbe'
-    },
-    {
-      id: 'WD003',
-      userName: 'Grace Acheng',
-      userPhone: '+256783456789',
-      amount: { ugx: 300000, usdc: 78.95 },
-      withdrawalCode: 'WD003456',
-      requestedAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-      status: 'pending',
-      userNationalId: 'CM34567890123456',
-      location: 'Jinja'
-    },
-    {
-      id: 'WD004',
-      userName: 'Peter Kiprotich',
-      userPhone: '+256784567890',
-      amount: { ugx: 200000, usdc: 52.63 },
-      withdrawalCode: 'WD004567',
-      requestedAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000), // 1.5 hours ago
-      status: 'pending',
-      userNationalId: 'CM45678901234567',
-      location: 'Mbarara'
-    },
-    {
-      id: 'WD005',
-      userName: 'Diana Namubiru',
-      userPhone: '+256785678901',
-      amount: { ugx: 100000, usdc: 26.32 },
-      withdrawalCode: 'WD005678',
-      requestedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      status: 'verified',
-      userNationalId: 'CM56789012345678',
-      location: 'Gulu'
+  // Function to convert Transaction to WithdrawalRequest
+  const convertTransactionToWithdrawalRequest = async (transaction: Transaction): Promise<WithdrawalRequest | null> => {
+    try {
+      // Get user details for the withdrawal request
+      const user = await DataService.getWebUserById(transaction.userId);
+      if (!user) return null;
+
+      return {
+        id: transaction.id,
+        userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+        userPhone: user.email || 'Unknown', // Using email as phone since that's what's available
+        amount: {
+          ugx: transaction.amount,
+          usdc: transaction.amount * 0.00026 // Convert to USDC using exchange rate
+        },
+        withdrawalCode: (transaction as { withdrawalCode?: string }).withdrawalCode || '', // Type assertion for withdrawalCode
+        requestedAt: transaction.createdAt instanceof Date ? transaction.createdAt : new Date(transaction.createdAt),
+        status: transaction.status as 'pending' | 'verified' | 'approved' | 'completed' | 'rejected',
+        userNationalId: 'N/A', // Not available in User type
+        location: 'N/A' // Not available in User type
+      };
+    } catch (error) {
+      console.error('Error converting transaction:', error);
+      return null;
     }
-  ]);
+  };
+
+  // Fetch real withdrawal requests
+  useEffect(() => {
+    const fetchWithdrawalRequests = async () => {
+      if (!agent?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        // Get pending withdrawals for this agent
+        const pendingTransactions = await DataService.getPendingWithdrawals(agent.id);
+        
+        // Convert transactions to withdrawal requests
+        const withdrawalRequestPromises = pendingTransactions.map(convertTransactionToWithdrawalRequest);
+        const withdrawalRequestsResults = await Promise.all(withdrawalRequestPromises);
+        
+        // Filter out null results
+        const validWithdrawalRequests = withdrawalRequestsResults.filter(
+          (request): request is WithdrawalRequest => request !== null
+        );
+        
+        setWithdrawalRequests(validWithdrawalRequests);
+      } catch (error) {
+        console.error('Error fetching withdrawal requests:', error);
+        setWithdrawalRequests([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWithdrawalRequests();
+  }, [agent?.id]);
 
   const formatCurrency = (amount: number, currency: 'UGX' | 'USDC') => {
     if (currency === 'UGX') {
@@ -145,7 +152,15 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
 
       {/* Withdrawal Requests List */}
       <div className="space-y-4">
-        {filteredRequests.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <CreditCard className="w-8 h-8 text-neutral-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Loading withdrawal requests...</h3>
+            <p className="text-neutral-600">Please wait while we fetch the latest requests</p>
+          </div>
+        ) : filteredRequests.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CreditCard className="w-8 h-8 text-neutral-400" />
