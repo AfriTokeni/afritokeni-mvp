@@ -195,7 +195,7 @@ const SMSUI: React.FC = () => {
             </div>
 
             {/* SMS Login Button */}
-            {!user && (
+            {!user.user && (
               <button
                 onClick={handleSMSRegistration}
                 disabled={!phoneNumber || isRegistering}
