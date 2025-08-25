@@ -63,19 +63,19 @@ const ProcessWithdrawal: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
             <button
               onClick={() => currentStep === 'list' ? navigate('/agents/dashboard') : handleBack()}
-              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors duration-200 flex-shrink-0"
             >
-              <ArrowLeft className="w-5 h-5 text-neutral-600" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-900">{getStepTitle()}</h1>
-              <p className="text-sm text-neutral-600 mt-1">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 truncate">{getStepTitle()}</h1>
+              <p className="text-xs sm:text-sm text-neutral-600 mt-1">
                 {currentStep === 'list' && 'Select a withdrawal request to process'}
                 {currentStep === 'verify' && 'Verify the customer\'s identity before proceeding'}
                 {currentStep === 'approve' && 'Enter withdrawal code to complete the transaction'}
@@ -84,20 +84,20 @@ const ProcessWithdrawal: React.FC = () => {
           </div>
           
           {/* Step Indicator */}
-          <div className="flex items-center space-x-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors duration-200 ${
               currentStep === 'list' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
             }`}>
               1
             </div>
-            <div className="w-8 h-0.5 bg-neutral-300"></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+            <div className="w-4 sm:w-8 h-0.5 bg-neutral-300"></div>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors duration-200 ${
               currentStep === 'verify' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
             }`}>
               2
             </div>
-            <div className="w-8 h-0.5 bg-neutral-300"></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+            <div className="w-4 sm:w-8 h-0.5 bg-neutral-300"></div>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors duration-200 ${
               currentStep === 'approve' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
             }`}>
               3

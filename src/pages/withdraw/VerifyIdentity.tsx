@@ -99,38 +99,38 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Withdrawal Details Header */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="w-6 h-6 text-blue-600" />
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800">{withdrawal.userName}</h3>
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate">{withdrawal.userName}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-600">
                 <div className="flex items-center space-x-1">
-                  <Phone className="w-4 h-4" />
-                  <span>{withdrawal.userPhone}</span>
+                  <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="truncate">{withdrawal.userPhone}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{withdrawal.location}</span>
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="truncate">{withdrawal.location}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Requested {getTimeAgo(withdrawal.requestedAt)}</span>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="text-right">
-            <div className="text-2xl font-bold text-gray-800">
+          <div className="text-left sm:text-right">
+            <div className="text-xl sm:text-2xl font-bold text-gray-800">
               {formatCurrency(withdrawal.amount.ugx, 'UGX')}
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-xs sm:text-sm text-gray-600">
               ≈ {formatCurrency(withdrawal.amount.usdc, 'USDT')}
             </div>
             <div className="text-xs text-gray-500 mt-1">
@@ -141,12 +141,12 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
       </div>
 
       {/* Important Notice */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
         <div className="flex items-start space-x-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-amber-800">Important Security Notice</h4>
-            <p className="text-sm text-amber-700 mt-1">
+            <h4 className="text-xs sm:text-sm font-medium text-amber-800">Important Security Notice</h4>
+            <p className="text-xs sm:text-sm text-amber-700 mt-1">
               Please complete ALL verification steps before proceeding to withdrawal approval. 
               This ensures the security of both the customer and your agency.
             </p>
@@ -155,21 +155,21 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
       </div>
 
       {/* Verification Steps */}
-      <div className="space-y-4 mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Identity Verification Checklist</h2>
+      <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-800">Identity Verification Checklist</h2>
         
         {verificationInstructions.map((instruction, index) => (
           <div 
             key={instruction.key}
-            className={`border rounded-lg p-4 transition-colors ${
+            className={`border rounded-lg p-3 sm:p-4 transition-colors ${
               verificationSteps[instruction.key] 
                 ? 'border-green-200 bg-green-50' 
                 : 'border-gray-200 bg-white'
             }`}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-3 flex-1">
-                <div className={`p-2 rounded-lg ${
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-start space-x-2 sm:space-x-3 flex-1">
+                <div className={`p-1.5 sm:p-2 rounded-lg ${
                   verificationSteps[instruction.key] 
                     ? 'bg-green-100 text-green-600' 
                     : 'bg-gray-100 text-gray-600'
@@ -177,30 +177,21 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
                   {instruction.icon}
                 </div>
                 
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-medium">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-2">
+                    <span className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-medium">
                       {index + 1}
                     </span>
-                    <h3 className="text-base font-medium text-gray-800">{instruction.title}</h3>
+                    <h3 className="text-sm sm:text-base font-medium text-gray-800">{instruction.title}</h3>
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-3">{instruction.description}</p>
-                  
-                  {/* <ul className="space-y-1">
-                    {instruction.details.map((detail, detailIndex) => (
-                      <li key={detailIndex} className="text-sm text-gray-700 flex items-start">
-                        <span className="text-gray-400 mr-2">•</span>
-                        <span>{detail}</span>
-                      </li>
-                    ))}
-                  </ul> */}
+                  <p className="text-xs sm:text-sm text-gray-600">{instruction.description}</p>
                 </div>
               </div>
               
               <button
                 onClick={() => handleStepToggle(instruction.key)}
-                className={`ml-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`w-full sm:w-auto sm:ml-4 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   verificationSteps[instruction.key]
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -214,17 +205,17 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
       </div>
 
       {/* Progress Summary */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-        <div className="flex items-center justify-between">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div>
-            <h4 className="text-sm font-medium text-gray-800">Verification Progress</h4>
-            <p className="text-sm text-gray-600">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-800">Verification Progress</h4>
+            <p className="text-xs sm:text-sm text-gray-600">
               {Object.values(verificationSteps).filter(Boolean).length} of {Object.keys(verificationSteps).length} steps completed
             </p>
           </div>
-          <div className="text-right">
-            <div className="w-16 h-16 relative">
-              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+          <div className="text-left sm:text-right">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 relative mx-auto sm:mx-0">
+              <svg className="w-12 h-12 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 36 36">
                 <path
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
@@ -240,7 +231,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-800">
+                <span className="text-xs sm:text-sm font-medium text-gray-800">
                   {Math.round((Object.values(verificationSteps).filter(Boolean).length / Object.keys(verificationSteps).length) * 100)}%
                 </span>
               </div>
@@ -254,7 +245,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
         <button
           onClick={onVerifyComplete}
           disabled={!allStepsCompleted}
-          className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${
+          className={`flex-1 py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base font-medium transition-colors ${
             allStepsCompleted
               ? 'w-full bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
