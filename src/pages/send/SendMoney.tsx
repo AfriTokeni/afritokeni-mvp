@@ -192,30 +192,30 @@ const SendMoney: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="space-y-6">
+      <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={() => navigate('/users/dashboard')}
               className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-neutral-600" />
             </button>
-            <h1 className="text-2xl font-semibold text-neutral-900">Send Money</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-neutral-900">Send Money</h1>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8">
           {/* Step 1: Enter recipient and amount */}
           {sendStep === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-3">
+                <label className="block text-sm font-medium text-neutral-700 mb-2 sm:mb-3">
                   Recipient Search (Phone / Name)
                 </label>
                 <div className="relative" ref={searchContainerRef}>
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 z-10" />
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 z-10" />
                   <input
                     type="tel"
                     value={recipientPhone}
@@ -226,29 +226,29 @@ const SendMoney: React.FC = () => {
                       }
                     }}
                     placeholder="Enter phone number, first name, or last name"
-                    className="w-full pl-10 pr-10 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
+                    className="w-full pl-9 sm:pl-10 pr-10 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                   />
                   {isSearchingUser && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin z-10" />
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 animate-spin z-10" />
                   )}
                   
                   {/* Search Results Dropdown */}
                   {showSearchResults && searchResults.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-y-auto">
                       {searchResults.map((user, index) => (
                         <div
                           key={`${user.id}-${index}`}
                           onClick={() => handleUserSelection(user)}
-                          className="flex items-center space-x-3 p-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0"
+                          className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0"
                         >
-                          <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <User className="w-4 h-4 text-neutral-600" />
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <User className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-600" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-neutral-900 truncate">
+                            <p className="font-medium text-neutral-900 text-sm sm:text-base truncate">
                               {user.firstName} {user.lastName}
                             </p>
-                            <p className="text-sm text-neutral-500 truncate">
+                            <p className="text-xs sm:text-sm text-neutral-500 truncate">
                               {user.email.startsWith('+') ? user.email : 'Web User'}
                             </p>
                           </div>
@@ -260,16 +260,16 @@ const SendMoney: React.FC = () => {
                 
                 {/* Display selected user */}
                 {recipient && (
-                  <div className="mt-3 bg-neutral-50 rounded-lg p-4 border border-neutral-200">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-neutral-600" />
+                  <div className="mt-2 sm:mt-3 bg-neutral-50 rounded-lg p-3 sm:p-4 border border-neutral-200">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
                       </div>
                       <div>
-                        <p className="font-semibold text-neutral-900">
+                        <p className="font-semibold text-neutral-900 text-sm sm:text-base">
                           {recipient.firstName} {recipient.lastName}
                         </p>
-                        <p className="text-sm text-neutral-700">
+                        <p className="text-xs sm:text-sm text-neutral-700">
                           {/* Show phone number for both web and SMS users - it's stored in email field */}
                           {recipient.email.startsWith('+') ? recipient.email : 'Web User'}
                         </p>
@@ -280,10 +280,10 @@ const SendMoney: React.FC = () => {
                 
                 {/* User not found message */}
                 {recipientPhone && searchResults.length === 0 && !recipient && !isSearchingUser && recipientPhone.length >= 3 && (
-                  <div className="mt-3 bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                  <div className="mt-2 sm:mt-3 bg-yellow-50 rounded-lg p-3 sm:p-4 border border-yellow-200">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <p className="text-sm text-yellow-800">
+                      <p className="text-xs sm:text-sm text-yellow-800">
                         User not found. Please verify the search term.
                       </p>
                     </div>
@@ -292,56 +292,56 @@ const SendMoney: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-4">
+                <label className="block text-sm font-medium text-neutral-700 mb-3 sm:mb-4">
                   Amount to Send
                 </label>
                 
                 {/* UGX Input */}
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <label className="block text-xs font-medium text-neutral-600 mb-2">
                     UGX (Ugandan Shilling)
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                     <input
                       type="number"
                       value={ugxAmount}
                       onChange={(e) => handleUgxAmountChange(e.target.value)}
                       placeholder="10,000"
-                      className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
+                      className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                     />
                   </div>
-                  <p className="mt-2 text-sm text-neutral-500">
+                  <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-neutral-500">
                     Available: {formatCurrency(balance?.balance || 0)}
                   </p>
                 </div>
 
                 {/* USDT Input */}
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <label className="block text-xs font-medium text-neutral-600 mb-2">
                     USDT (Tether Equivalent)
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                     <input
                       type="number"
                       value={usdcAmount}
                       onChange={(e) => handleUsdcAmountChange(e.target.value)}
                       placeholder="25.00"
                       step="0.01"
-                      className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
+                      className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
                     />
                   </div>
-                  <p className="mt-2 text-sm text-neutral-500">
+                  <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-neutral-500">
                     Available: ${((balance?.balance || 0) * 0.00026).toFixed(2)} USDT
                   </p>
                 </div>
 
-                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 sm:p-4">
                   <p className="text-xs text-neutral-600 font-medium">Exchange Rate</p>
                   <p className="text-sm text-neutral-800">1 USDT = {EXCHANGE_RATE.toLocaleString()} UGX</p>
                   {(ugxAmount || usdcAmount) && (
-                    <p className="text-xs text-neutral-600 mt-2">
+                    <p className="text-xs text-neutral-600 mt-1 sm:mt-2">
                       {ugxAmount ? `${parseFloat(ugxAmount).toLocaleString()} UGX` : ''} 
                       {ugxAmount && usdcAmount ? ' ≈ ' : ''}
                       {usdcAmount ? `$${parseFloat(usdcAmount).toFixed(2)} USDT` : ''}
@@ -353,7 +353,7 @@ const SendMoney: React.FC = () => {
               <button
                 onClick={() => setSendStep(2)}
                 disabled={!recipientPhone || !recipient || (!ugxAmount && !usdcAmount)}
-                className="w-full bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200"
+                className="w-full bg-neutral-900 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200"
               >
                 Continue
               </button>
@@ -362,58 +362,72 @@ const SendMoney: React.FC = () => {
 
           {/* Step 2: Transaction summary */}
           {sendStep === 2 && (
-            <div className="space-y-6">
-              <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-                <h3 className="font-semibold mb-4 text-neutral-900">Transaction Summary</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Recipient:</span>
-                    <span className="font-medium text-neutral-900">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-neutral-50 p-4 sm:p-6 rounded-xl border border-neutral-200">
+                <h3 className="font-semibold mb-3 sm:mb-4 text-neutral-900 text-base sm:text-lg">Transaction Summary</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  {/* Recipient Row */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
+                    <span className="text-neutral-600 text-sm sm:text-base flex-shrink-0">Recipient:</span>
+                    <div className="font-medium text-neutral-900 text-right sm:text-right">
                       {recipient ? (
-                        <div className="text-right">
-                          <div>{recipient.firstName} {recipient.lastName}</div>
-                          <div className="text-sm text-neutral-500">{recipientPhone}</div>
+                        <div>
+                          <div className="text-sm sm:text-base break-words">{recipient.firstName} {recipient.lastName}</div>
+                          <div className="text-xs sm:text-sm text-neutral-500 break-all">{recipientPhone}</div>
                         </div>
                       ) : (
-                        recipientPhone
+                        <span className="text-sm sm:text-base break-all">{recipientPhone}</span>
                       )}
-                    </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Amount:</span>
-                    <span className="font-medium text-neutral-900 font-mono">
-                      {ugxAmount && `${parseFloat(ugxAmount).toLocaleString()} UGX`}
-                      {ugxAmount && usdcAmount && ' ≈ '}
-                      {usdcAmount && `$${parseFloat(usdcAmount).toFixed(2)} USD`}
-                    </span>
+                  
+                  {/* Amount Row */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+                    <span className="text-neutral-600 text-sm sm:text-base flex-shrink-0">Amount:</span>
+                    <div className="font-medium text-neutral-900 font-mono text-sm sm:text-base text-right break-words">
+                      {ugxAmount && (
+                        <div>{parseFloat(ugxAmount).toLocaleString()} UGX</div>
+                      )}
+                      {ugxAmount && usdcAmount && (
+                        <div className="text-xs sm:text-sm text-neutral-500">
+                          ≈ ${parseFloat(usdcAmount).toFixed(2)} USDT
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Transaction Fee (1%):</span>
-                    <span className="font-medium text-orange-600">
+                  
+                  {/* Fee Row */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+                    <span className="text-neutral-600 text-sm sm:text-base flex-shrink-0">Fee (1%):</span>
+                    <span className="font-medium text-orange-600 text-sm sm:text-base font-mono break-words">
                       {ugxAmount && `${calculateFee(parseFloat(ugxAmount)).toLocaleString()} UGX`}
                     </span>
                   </div>
-                  <div className="border-t border-neutral-200 pt-3 flex justify-between font-semibold">
-                    <span className="text-neutral-900">Total (Amount + Fee):</span>
-                    <span className="text-neutral-900 font-mono">
-                      {ugxAmount && `${(parseFloat(ugxAmount) + calculateFee(parseFloat(ugxAmount))).toLocaleString()} UGX`}
-                    </span>
+                  
+                  {/* Total Row */}
+                  <div className="border-t border-neutral-200 pt-3">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+                      <span className="text-neutral-900 font-semibold text-sm sm:text-base flex-shrink-0">Total:</span>
+                      <span className="text-neutral-900 font-mono font-semibold text-sm sm:text-base break-words">
+                        {ugxAmount && `${(parseFloat(ugxAmount) + calculateFee(parseFloat(ugxAmount))).toLocaleString()} UGX`}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex space-x-4">
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                 <button
                   onClick={() => setSendStep(1)}
                   disabled={isProcessing}
-                  className="flex-1 bg-neutral-100 text-neutral-700 py-3 rounded-lg font-semibold hover:bg-neutral-200 transition-colors duration-200 disabled:opacity-50"
+                  className="flex-1 bg-neutral-100 text-neutral-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-neutral-200 transition-colors duration-200 disabled:opacity-50"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleSendMoney}
                   disabled={isProcessing}
-                  className="flex-1 bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 transition-colors duration-200 disabled:opacity-50 flex items-center justify-center"
+                  className="flex-1 bg-neutral-900 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-neutral-800 transition-colors duration-200 disabled:opacity-50 flex items-center justify-center"
                 >
                   {isProcessing ? (
                     <>
@@ -430,20 +444,32 @@ const SendMoney: React.FC = () => {
 
           {/* Step 3: Success */}
           {sendStep === 3 && transactionResult && (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Check className="w-10 h-10 text-green-600" />
+            <div className="text-center py-8 sm:py-12">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-neutral-900 mb-3">Money Sent Successfully!</h3>
-              <p className="text-neutral-600 mb-6 font-mono">
-                {transactionResult.amount.toLocaleString()} UGX has been sent to {transactionResult.recipient.firstName} {transactionResult.recipient.lastName}
+              <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-2 sm:mb-3">Money Sent Successfully!</h3>
+              <p className="text-neutral-600 mb-4 sm:mb-6 font-mono text-sm sm:text-base px-2 sm:px-4 break-words">
+                <span className="font-semibold">{transactionResult.amount.toLocaleString()} UGX</span> has been sent to{' '}
+                <span className="font-semibold">{transactionResult.recipient.firstName} {transactionResult.recipient.lastName}</span>
               </p>
-              <div className="space-y-2 text-sm text-neutral-500 bg-neutral-50 px-4 py-4 rounded-lg inline-block">
-                <div>Transaction ID: {transactionResult.id}</div>
-                <div>Fee: {transactionResult.fee.toLocaleString()} UGX</div>
-                <div>Total: {(transactionResult.amount + transactionResult.fee).toLocaleString()} UGX</div>
+              <div className="bg-neutral-50 px-3 sm:px-4 py-3 sm:py-4 rounded-lg mx-auto max-w-xs sm:max-w-sm">
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-neutral-600">
+                  <div className="flex justify-between items-center">
+                    <span>Transaction ID:</span>
+                    <span className="font-mono text-right break-all ml-2">{transactionResult.id}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Fee:</span>
+                    <span className="font-mono">{transactionResult.fee.toLocaleString()} UGX</span>
+                  </div>
+                  <div className="flex justify-between items-center font-semibold text-neutral-900 pt-1 border-t border-neutral-200">
+                    <span>Total:</span>
+                    <span className="font-mono">{(transactionResult.amount + transactionResult.fee).toLocaleString()} UGX</span>
+                  </div>
+                </div>
               </div>
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <button
                   onClick={() => {
                     setSendStep(1);
@@ -453,7 +479,7 @@ const SendMoney: React.FC = () => {
                     setUsdcAmount('');
                     setTransactionResult(null);
                   }}
-                  className="bg-neutral-900 text-white px-6 py-2 rounded-lg font-semibold hover:bg-neutral-800 transition-colors duration-200"
+                  className="bg-neutral-900 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-neutral-800 transition-colors duration-200"
                 >
                   Send Another
                 </button>
