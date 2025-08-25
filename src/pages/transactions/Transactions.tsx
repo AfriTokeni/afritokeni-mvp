@@ -20,11 +20,11 @@ const UserTransactions: React.FC = () => {
   if (isLoading) {
     return (
       <PageLayout>
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex justify-center items-center py-12">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <div className="flex justify-center items-center py-8 sm:py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900 mx-auto mb-4"></div>
-              <p className="text-neutral-600">Loading transactions...</p>
+              <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-neutral-900 mx-auto mb-3 sm:mb-4"></div>
+              <p className="text-sm sm:text-base text-neutral-600">Loading transactions...</p>
             </div>
           </div>
         </div>
@@ -36,14 +36,14 @@ const UserTransactions: React.FC = () => {
   if (!transactions.length) {
     return (
       <PageLayout>
-        <div className="max-w-4xl mx-auto space-y-6">
-          <h1 className="text-2xl font-bold text-neutral-900">Transaction History</h1>
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-12 text-center">
-            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ArrowUp className="w-8 h-8 text-neutral-400" />
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Transaction History</h1>
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 sm:p-12 text-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <ArrowUp className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
             </div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">No transactions yet</h3>
-            <p className="text-neutral-600">Your transaction history will appear here once you start sending or receiving money.</p>
+            <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-1 sm:mb-2">No transactions yet</h3>
+            <p className="text-sm sm:text-base text-neutral-600 px-4">Your transaction history will appear here once you start sending or receiving money.</p>
           </div>
         </div>
       </PageLayout>
@@ -106,16 +106,16 @@ const UserTransactions: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-          <h1 className="text-2xl font-bold text-neutral-900">Transaction History</h1>
-          <div className="flex space-x-3">
-            <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Transaction History</h1>
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <button className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200">
               <Search className="w-4 h-4 text-neutral-500" />
               <span className="text-sm font-medium text-neutral-700">Search</span>
             </button>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200">
+            <button className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200">
               <Filter className="w-4 h-4 text-neutral-500" />
               <span className="text-sm font-medium text-neutral-700">Filter</span>
             </button>
@@ -125,21 +125,67 @@ const UserTransactions: React.FC = () => {
         {/* Transactions List */}
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 divide-y divide-neutral-100">
           {transactions.map((transaction) => (
-            <div key={transaction.id} className="p-6 hover:bg-neutral-50 transition-colors duration-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
+            <div key={transaction.id} className="p-4 sm:p-6 hover:bg-neutral-50 transition-colors duration-200">
+              {/* Mobile Layout */}
+              <div className="block sm:hidden">
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
                     {getTransactionIcon(transaction.type)}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-neutral-900 mb-1">{getTransactionDescription(transaction)}</p>
-                    <div className="flex items-center space-x-4 text-sm text-neutral-600">
-                      <span>{formatDate(transaction.createdAt)}</span>
-                      <span className="text-xs font-mono text-neutral-500">ID: {transaction.id}</span>
+                  <div className="flex-1 min-w-0">
+                    {/* Transaction Description - Full text with wrapping */}
+                    <div className="mb-2">
+                      <p className="font-semibold text-neutral-900 text-sm leading-5 break-words">
+                        {getTransactionDescription(transaction)}
+                      </p>
+                    </div>
+                    
+                    {/* Amount - Prominent display */}
+                    <div className="mb-2">
+                      <p className={`font-bold text-base font-mono ${
+                        transaction.type === 'send' || transaction.type === 'withdraw' 
+                          ? 'text-red-600' : 'text-green-600'
+                      }`}>
+                        {transaction.type === 'send' || transaction.type === 'withdraw' ? '-' : '+'}
+                        {formatCurrency(transaction.amount)}
+                      </p>
+                    </div>
+                    
+                    {/* Date and Status */}
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-neutral-600">{formatDate(transaction.createdAt)}</p>
+                      <div className="flex items-center space-x-1">
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          transaction.status === 'completed' ? 'bg-green-500' : 
+                          transaction.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}></div>
+                        <span className="text-xs font-medium text-neutral-600 capitalize">{transaction.status}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Transaction ID - Full display with wrapping */}
+                    <div className="bg-neutral-50 rounded-md px-2 py-1">
+                      <span className="text-xs font-mono text-neutral-500 break-all">
+                        ID: {transaction.id}
+                      </span>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden sm:flex items-start space-x-4">
+                <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  {getTransactionIcon(transaction.type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-neutral-900 mb-2 leading-6 break-words">{getTransactionDescription(transaction)}</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-neutral-600 space-y-1 sm:space-y-0">
+                    <span className="flex-shrink-0">{formatDate(transaction.createdAt)}</span>
+                    <span className="text-xs font-mono text-neutral-500 break-all">ID: {transaction.id}</span>
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
                   <p className={`font-bold text-lg font-mono mb-1 ${
                     transaction.type === 'send' || transaction.type === 'withdraw' 
                       ? 'text-red-600' : 'text-green-600'
