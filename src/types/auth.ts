@@ -63,6 +63,7 @@ export interface User {
   userType: 'user' | 'agent';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  pin?: string; // USSD PIN for mobile users
   createdAt?: Date; // Optional since Juno handles timestamps automatically
   junoUser?: any; // Juno User object
 }

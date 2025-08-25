@@ -2,8 +2,10 @@ import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { User } from '../types/auth';
 
+
+
 // Interface for user data as stored in Juno (with string dates)
-interface UserDataFromJuno {
+export interface UserDataFromJuno {
   id: string;
   firstName: string;
   lastName: string;
@@ -11,6 +13,7 @@ interface UserDataFromJuno {
   userType: 'user' | 'agent';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  pin?: string;
   createdAt: string;
 }
 
@@ -79,6 +82,37 @@ export interface SMSMessage {
   createdAt: Date;
 }
 
+export interface UserPin {
+  userId: string;
+  phoneNumber: string;
+  pin: string;
+  isSet: boolean;
+  createdAt: Date;
+  lastUpdated: Date;
+}
+
+export interface USSDSession {
+  sessionId: string;
+  phoneNumber: string;
+  userId?: string;
+  currentMenu: 'pin_check' | 'pin_setup' | 'main_menu' | 'send_money' | 'check_balance' | 'withdraw_money' | 'transaction_history';
+  step: number;
+  tempData?: {
+    newPin?: string;
+    sendAmount?: number;
+    sendRecipient?: string;
+    withdrawAmount?: number;
+    pinAttempts?: number;
+  };
+  createdAt: Date;
+  lastActivity: Date;
+  
+  // Add session management methods
+  isExpired(): boolean;
+  updateActivity(): void;
+}
+
+
 // Simplified data service following Juno patterns
 export class DataService {
   // User operations
@@ -89,6 +123,7 @@ export class DataService {
     email: string; // This will be the phone number for SMS users, or user ID for web users
     userType: 'user' | 'agent';
     kycStatus?: 'pending' | 'approved' | 'rejected' | 'not_started';
+    pin?: string; // USSD PIN for mobile users
     authMethod?: 'sms' | 'web'; // To determine key strategy
   }): Promise<User> {
     const now = new Date();
@@ -100,6 +135,7 @@ export class DataService {
       userType: userData.userType,
       isVerified: false,
       kycStatus: userData.kycStatus || 'not_started',
+      pin: userData.pin,
       createdAt: now
     };
 
@@ -116,7 +152,7 @@ export class DataService {
 
      const existingDoc = await getDoc({
         collection: 'users',
-        key: documentKey
+        key: documentKey,
       });
 
     // Save user to Juno datastore
@@ -126,7 +162,8 @@ export class DataService {
         key: documentKey,
         data: dataForJuno,
         version: existingDoc?.version ? existingDoc.version : 1n
-      }
+      
+      },     
     });
 
     return newUser;
@@ -138,7 +175,7 @@ export class DataService {
     try {
       const doc = await getDoc({
         collection: 'users',
-        key: key
+        key: key,
       });
 
       if (!doc?.data) {
@@ -155,6 +192,7 @@ export class DataService {
         userType: rawData.userType,
         isVerified: rawData.isVerified,
         kycStatus: rawData.kycStatus,
+        pin: rawData.pin,
         createdAt: new Date(rawData.createdAt)
       };
 
@@ -183,7 +221,7 @@ export class DataService {
       // Get the current document to retrieve its version
       const existingDoc = await getDoc({
         collection: 'users',
-        key: key
+        key: key,
       });
 
       if (!existingDoc) return false;
@@ -203,7 +241,7 @@ export class DataService {
           key: key,
           data: dataForJuno,
           version: existingDoc.version ? existingDoc.version : 1n
-        }
+        },
       });
 
       return true;
@@ -934,6 +972,625 @@ export class DataService {
     }
   }
 
+  // USSD Operations
+  static async getUserPin(phoneNumber: string, satellite?: any): Promise<UserPin | null> {
+    console.log(`Satellite ID here: ${satellite}`);
+    try {
+      // Get user by phone number (which is stored as email for SMS users)
+      const user = await this.getUserByKey(phoneNumber, satellite);
+      
+      if (!user || !user.pin) {
+        return null;
+      }
+
+      return {
+        userId: user.id,
+        phoneNumber: phoneNumber,
+        pin: user.pin,
+        isSet: true,
+        createdAt: user.createdAt || new Date(),
+        lastUpdated: user.createdAt || new Date()
+      };
+    } catch (error) {
+      console.error('Error getting user pin:', error);
+      return null;
+    }
+  }
+
+  static async createOrUpdateUserPin(phoneNumber: string, pin: string, satellite?: any): Promise<boolean> {
+    try {
+      // Get user by phone number (stored as email for SMS users)
+      let user = await this.getUserByKey(phoneNumber, satellite);
+
+      if (!user) {
+        // Create new user if doesn't exist
+        user = await this.createUser({
+          firstName: 'USSD',
+          lastName: 'User',
+          email: phoneNumber,
+          userType: 'user',
+          pin: pin,
+          authMethod: 'sms'
+        });
+        return true;
+      } else {
+        // Update existing user with PIN
+        return await this.updateUser(phoneNumber, { pin: pin }, 'sms');
+      }
+    } catch (error) {
+      console.error('Error creating/updating user pin:', error);
+      return false;
+    }
+  }
+
+  static async createUSSDSession(sessionId: string, phoneNumber: string): Promise<USSDSession> {
+    const now = new Date();
+    const session: USSDSession = {
+      sessionId,
+      phoneNumber,
+      currentMenu: 'pin_check', // Start with PIN check
+      step: 0,
+      createdAt: now,
+      lastActivity: now,
+      isExpired(): boolean {
+        return Date.now() - this.lastActivity.getTime() > 180000; // 3 minutes
+      },
+      updateActivity(): void {
+        this.lastActivity = new Date();
+      }
+    };
+
+    const dataForJuno = {
+      ...session,
+      createdAt: now.toISOString(),
+      lastActivity: now.toISOString()
+    };
+
+    await setDoc({
+      collection: 'ussd_sessions',
+      doc: {
+        key: sessionId,
+        data: dataForJuno,
+        version: 1n
+      }
+    });
+
+    return session;
+  }
+
+  static async getUSSDSession(sessionId: string): Promise<USSDSession | null> {
+    try {
+      const doc = await getDoc({
+        collection: 'ussd_sessions',
+        key: sessionId
+      });
+
+      if (!doc?.data) {
+        return null;
+      }
+
+      const rawData = doc.data as {
+        sessionId: string;
+        phoneNumber: string;
+        userId?: string;
+        currentMenu: string;
+        step: number;
+        tempData?: any;
+        createdAt: string;
+        lastActivity: string;
+      };
+      
+      const session: USSDSession = {
+        sessionId: rawData.sessionId,
+        phoneNumber: rawData.phoneNumber,
+        userId: rawData.userId,
+        currentMenu: rawData.currentMenu as any,
+        step: rawData.step || 0,
+        tempData: rawData.tempData,
+        createdAt: new Date(rawData.createdAt),
+        lastActivity: new Date(rawData.lastActivity),
+        isExpired(): boolean {
+          return Date.now() - this.lastActivity.getTime() > 180000; // 3 minutes
+        },
+        updateActivity(): void {
+          this.lastActivity = new Date();
+        }
+      };
+      
+      return session;
+    } catch (error) {
+      console.error('Error getting USSD session:', error);
+      return null;
+    }
+  }
+
+  static async updateUSSDSession(sessionId: string, updates: Partial<USSDSession>): Promise<boolean> {
+    try {
+      const existingSession = await this.getUSSDSession(sessionId);
+      if (!existingSession) {
+        return false;
+      }
+
+      const existingDoc = await getDoc({
+        collection: 'ussd_sessions',
+        key: sessionId
+      });
+
+      const updatedSession = {
+        ...existingSession,
+        ...updates,
+        lastActivity: new Date()
+      };
+
+      const dataForJuno = {
+        ...updatedSession,
+        createdAt: updatedSession.createdAt.toISOString(),
+        lastActivity: updatedSession.lastActivity.toISOString()
+      };
+
+      await setDoc({
+        collection: 'ussd_sessions',
+        doc: {
+          key: sessionId,
+          data: dataForJuno,
+          version: existingDoc?.version ? existingDoc.version : 1n
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating USSD session:', error);
+      return false;
+    }
+  }
+
+  // Main USSD handler
+  static async processUSSDRequest(sessionId: string, phoneNumber: string, text: string): Promise<{ response: string; continueSession: boolean }> {
+    try {
+      let session = await this.getUSSDSession(sessionId);
+      
+      if (!session) {
+        // Create new session
+        session = await this.createUSSDSession(sessionId, phoneNumber);
+      }
+
+      // Check if user has a PIN set
+      const userPin = await this.getUserPin(phoneNumber);
+      
+      if (!userPin || !userPin.isSet) {
+        return await this.handlePinSetup(session, text);
+      } else {
+        // User has PIN, check current menu
+        if (session.currentMenu === 'pin_check') {
+          // Update session to main menu since PIN is already set
+          await this.updateUSSDSession(sessionId, { currentMenu: 'main_menu' });
+          return this.getMainMenuResponse();
+        } else {
+          return await this.handleMainMenuFlow(session, text, userPin);
+        }
+      }
+    } catch (error) {
+      console.error('Error processing USSD request:', error);
+      return {
+        response: 'Sorry, an error occurred. Please try again.',
+        continueSession: false
+      };
+    }
+  }
+
+  private static async handlePinSetup(session: USSDSession, text: string): Promise<{ response: string; continueSession: boolean }> {
+    if (session.currentMenu === 'pin_setup') {
+      if (!text || text.trim() === '') {
+        return {
+          response: 'Welcome to AfriTokeni!\nPlease set your 4-digit PIN to secure your account:',
+          continueSession: true
+        };
+      } else {
+        // Validate PIN (4 digits)
+        const pin = text.trim();
+        if (!/^\d{4}$/.test(pin)) {
+          return {
+            response: 'Invalid PIN. Please enter exactly 4 digits:',
+            continueSession: true
+          };
+        }
+
+        // Store temporary PIN and move to confirmation step
+        await this.updateUSSDSession(session.sessionId, {
+          currentMenu: 'pin_setup',
+          step: 2,
+          tempData: { newPin: pin }
+        });
+
+        return {
+          response: 'Please confirm your PIN by entering it again:',
+          continueSession: true
+        };
+      }
+    } else if (session.step === 2) {
+      // PIN confirmation step
+      const confirmPin = text.trim();
+      const originalPin = session.tempData?.newPin;
+
+      if (confirmPin !== originalPin) {
+        // Reset to PIN setup
+        await this.updateUSSDSession(session.sessionId, {
+          currentMenu: 'pin_setup',
+          step: 1,
+          tempData: {}
+        });
+        return {
+          response: 'PINs do not match. Please set your 4-digit PIN again:',
+          continueSession: true
+        };
+      }
+
+      // PINs match, save to database
+      const success = await this.createOrUpdateUserPin(session.phoneNumber, originalPin!);
+      
+      if (success) {
+        // Create user if doesn't exist
+        let user = await this.getUserByKey(session.phoneNumber);
+        if (!user) {
+          user = await this.createUser({
+            firstName: 'USSD',
+            lastName: 'User',
+            email: session.phoneNumber,
+            userType: 'user',
+            authMethod: 'sms'
+          });
+          
+          // Initialize user balance
+          await this.initializeUserData(user.id);
+        }
+
+        await this.updateUSSDSession(session.sessionId, {
+          currentMenu: 'main_menu',
+          step: 0,
+          userId: user.id,
+          tempData: {}
+        });
+
+        return this.getMainMenuResponse();
+      } else {
+        return {
+          response: 'Error saving PIN. Please try again.',
+          continueSession: false
+        };
+      }
+    }
+
+    return {
+      response: 'Invalid request.',
+      continueSession: false
+    };
+  }
+
+  private static async handleMainMenuFlow(session: USSDSession, text: string, userPin: UserPin): Promise<{ response: string; continueSession: boolean }> {
+    if (session.currentMenu === 'main_menu') {
+      const choice = text.trim();
+      
+      switch (choice) {
+        case '1':
+          await this.updateUSSDSession(session.sessionId, { currentMenu: 'send_money', step: 1 });
+          return {
+            response: 'Send Money\nEnter recipient phone number (format: 256XXXXXXXXX):',
+            continueSession: true
+          };
+        case '2':
+          return await this.handleCheckBalance(session, userPin);
+        case '3':
+          await this.updateUSSDSession(session.sessionId, { currentMenu: 'withdraw_money', step: 1 });
+          return {
+            response: 'Withdraw Money\nEnter amount to withdraw (UGX):',
+            continueSession: true
+          };
+        case '4':
+          return await this.handleTransactionHistory(session, userPin);
+        default:
+          return this.getMainMenuResponse();
+      }
+    } else if (session.currentMenu === 'send_money') {
+      return await this.handleSendMoneyFlow(session, text);
+    } else if (session.currentMenu === 'withdraw_money') {
+      return await this.handleWithdrawMoneyFlow(session, text);
+    }
+
+    return this.getMainMenuResponse();
+  }
+
+  private static getMainMenuResponse(): { response: string; continueSession: boolean } {
+    return {
+      response: `AfriTokeni Menu
+1. Send Money
+2. Check Balance  
+3. Withdraw Money
+4. Transaction History
+
+Choose an option (1-4):`,
+      continueSession: true
+    };
+  }
+
+  private static async handleCheckBalance(session: USSDSession, userPin: UserPin): Promise<{ response: string; continueSession: boolean }> {
+    try {
+      const user = await this.getUserByKey(session.phoneNumber);
+      if (!user) {
+        return {
+          response: 'User not found. Please try again.',
+          continueSession: false
+        };
+      }
+
+      const balance = await this.getUserBalance(user.id);
+      const amount = balance?.balance || 0;
+
+      return {
+        response: `Your Account Balance
+Amount: UGX ${amount.toLocaleString()}
+
+Thank you for using AfriTokeni!`,
+        continueSession: false
+      };
+    } catch (error) {
+      console.error('Error checking balance:', error);
+      return {
+        response: 'Error retrieving balance. Please try again.',
+        continueSession: false
+      };
+    }
+  }
+
+  private static async handleTransactionHistory(session: USSDSession, userPin: UserPin): Promise<{ response: string; continueSession: boolean }> {
+    try {
+      const user = await this.getUserByKey(session.phoneNumber);
+      if (!user) {
+        return {
+          response: 'User not found. Please try again.',
+          continueSession: false
+        };
+      }
+
+      const transactions = await this.getUserTransactions(user.id);
+      const recentTransactions = transactions.slice(0, 5); // Show last 5 transactions
+
+      if (recentTransactions.length === 0) {
+        return {
+          response: 'No transactions found.\n\nThank you for using AfriTokeni!',
+          continueSession: false
+        };
+      }
+
+      let response = 'Last 5 Transactions:\n\n';
+      recentTransactions.forEach((txn, index) => {
+        const date = new Date(txn.createdAt).toLocaleDateString();
+        const type = txn.type.charAt(0).toUpperCase() + txn.type.slice(1);
+        response += `${index + 1}. ${type}: UGX ${txn.amount.toLocaleString()} - ${date}\n`;
+      });
+
+      response += '\nThank you for using AfriTokeni!';
+
+      return {
+        response,
+        continueSession: false
+      };
+    } catch (error) {
+      console.error('Error getting transaction history:', error);
+      return {
+        response: 'Error retrieving transaction history. Please try again.',
+        continueSession: false
+      };
+    }
+  }
+
+  private static async handleSendMoneyFlow(session: USSDSession, text: string): Promise<{ response: string; continueSession: boolean }> {
+    if (!session.tempData?.sendRecipient) {
+      // First step: get recipient phone number
+      const phone = text.trim();
+      if (!/^256\d{9}$/.test(phone)) {
+        return {
+          response: 'Invalid phone number format. Please enter in format 256XXXXXXXXX:',
+          continueSession: true
+        };
+      }
+
+      await this.updateUSSDSession(session.sessionId, {
+        tempData: { ...session.tempData, sendRecipient: phone }
+      });
+
+      return {
+        response: 'Enter amount to send (UGX):',
+        continueSession: true
+      };
+    } else if (!session.tempData?.sendAmount) {
+      // Second step: get amount
+      const amount = parseInt(text.trim());
+      if (isNaN(amount) || amount <= 0) {
+        return {
+          response: 'Invalid amount. Please enter a valid amount (UGX):',
+          continueSession: true
+        };
+      }
+
+      // Check balance
+      const user = await this.getUserByKey(session.phoneNumber);
+      if (!user) {
+        return {
+          response: 'User not found. Transaction cancelled.',
+          continueSession: false
+        };
+      }
+
+      const balance = await this.getUserBalance(user.id);
+      if (!balance || balance.balance < amount) {
+        return {
+          response: `Insufficient balance. Your balance is UGX ${balance?.balance.toLocaleString() || 0}.\n\nTransaction cancelled.`,
+          continueSession: false
+        };
+      }
+
+      await this.updateUSSDSession(session.sessionId, {
+        tempData: { ...session.tempData, sendAmount: amount }
+      });
+
+      return {
+        response: `Confirm transaction:
+Send UGX ${amount.toLocaleString()} to ${session.tempData.sendRecipient}
+
+1. Confirm
+2. Cancel`,
+        continueSession: true
+      };
+    } else {
+      // Third step: confirmation
+      const choice = text.trim();
+      if (choice === '1') {
+        // Process transaction
+        try {
+          const user = await this.getUserByKey(session.phoneNumber);
+          if (!user) {
+            return {
+              response: 'User not found. Transaction cancelled.',
+              continueSession: false
+            };
+          }
+
+          // Create transaction
+          const transaction = await this.createTransaction({
+            userId: user.id,
+            type: 'send',
+            amount: session.tempData.sendAmount!,
+            currency: 'UGX',
+            recipientPhone: session.tempData.sendRecipient,
+            status: 'completed',
+            description: `Money sent to ${session.tempData.sendRecipient}`
+          });
+
+          // Update sender balance
+          const currentBalance = await this.getUserBalance(user.id);
+          const newBalance = (currentBalance?.balance || 0) - session.tempData.sendAmount!;
+          await this.updateUserBalance(user.id, newBalance);
+
+          return {
+            response: `Transaction Successful!
+UGX ${session.tempData.sendAmount!.toLocaleString()} sent to ${session.tempData.sendRecipient}
+Reference: ${transaction.id.substring(0, 8)}
+
+Thank you for using AfriTokeni!`,
+            continueSession: false
+          };
+        } catch (error) {
+          console.error('Error processing send money:', error);
+          return {
+            response: 'Transaction failed. Please try again.',
+            continueSession: false
+          };
+        }
+      } else {
+        return {
+          response: 'Transaction cancelled.\n\nThank you for using AfriTokeni!',
+          continueSession: false
+        };
+      }
+    }
+  }
+
+  private static async handleWithdrawMoneyFlow(session: USSDSession, text: string): Promise<{ response: string; continueSession: boolean }> {
+    if (!session.tempData?.withdrawAmount) {
+      // First step: get amount
+      const amount = parseInt(text.trim());
+      if (isNaN(amount) || amount <= 0) {
+        return {
+          response: 'Invalid amount. Please enter a valid amount (UGX):',
+          continueSession: true
+        };
+      }
+
+      // Check balance
+      const user = await this.getUserByKey(session.phoneNumber);
+      if (!user) {
+        return {
+          response: 'User not found. Transaction cancelled.',
+          continueSession: false
+        };
+      }
+
+      const balance = await this.getUserBalance(user.id);
+      if (!balance || balance.balance < amount) {
+        return {
+          response: `Insufficient balance. Your balance is UGX ${balance?.balance.toLocaleString() || 0}.\n\nTransaction cancelled.`,
+          continueSession: false
+        };
+      }
+
+      await this.updateUSSDSession(session.sessionId, {
+        tempData: { ...session.tempData, withdrawAmount: amount }
+      });
+
+      return {
+        response: `Confirm withdrawal:
+Amount: UGX ${amount.toLocaleString()}
+
+1. Confirm
+2. Cancel`,
+        continueSession: true
+      };
+    } else {
+      // Second step: confirmation
+      const choice = text.trim();
+      if (choice === '1') {
+        // Generate withdrawal code
+        const withdrawalCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        
+        try {
+          const user = await this.getUserByKey(session.phoneNumber);
+          if (!user) {
+            return {
+              response: 'User not found. Transaction cancelled.',
+              continueSession: false
+            };
+          }
+
+          // Create withdrawal transaction
+          const transaction = await this.createTransaction({
+            userId: user.id,
+            type: 'withdraw',
+            amount: session.tempData.withdrawAmount!,
+            currency: 'UGX',
+            status: 'pending',
+            description: `Cash withdrawal of UGX ${session.tempData.withdrawAmount!.toLocaleString()}`,
+            metadata: {
+              withdrawalCode
+            }
+          });
+
+          return {
+            response: `Withdrawal Code Generated!
+Code: ${withdrawalCode}
+Amount: UGX ${session.tempData.withdrawAmount!.toLocaleString()}
+
+Visit any AfriTokeni agent with this code and your ID to collect cash.
+Code expires in 24 hours.
+
+Thank you for using AfriTokeni!`,
+            continueSession: false
+          };
+        } catch (error) {
+          console.error('Error processing withdrawal:', error);
+          return {
+            response: 'Withdrawal failed. Please try again.',
+            continueSession: false
+          };
+        }
+      } else {
+        return {
+          response: 'Withdrawal cancelled.\n\nThank you for using AfriTokeni!',
+          continueSession: false
+        };
+      }
+    }
+  }
+
   // SMS Command Processing
   static async processSMSCommand(phoneNumber: string, message: string, userId?: string): Promise<string> {
     const command = message.trim().toUpperCase();
@@ -1071,7 +1728,8 @@ Reply with agent number to withdraw.`;
           key: transaction.id,
           data: {
             ...transaction,
-            createdAt: transaction.createdAt.getTime().toString()
+            createdAt: transaction.createdAt.toISOString(),
+            completedAt: transaction.completedAt ? transaction.completedAt.toISOString() : undefined
           }
         }
       });
