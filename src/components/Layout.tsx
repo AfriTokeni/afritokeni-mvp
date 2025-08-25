@@ -117,20 +117,20 @@ const isActive = (path:string) => location.pathname.startsWith(path);
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Mobile Brand Header */}
-      <div className="md:hidden bg-white border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center ">
+      <div className="md:hidden bg-white border-b border-neutral-200 px-3 py-3 safe-area-inset-top">
+        <div className="flex items-center justify-between">
           <AfriTokeniLogo size="md" />
         </div>
       </div>
 
       {/* Floating Notification Bell */}
-      <div className="fixed top-4 right-6 z-50">
+      <div className="fixed top-3 right-3 md:top-4 md:right-6 z-50">
         <div className="relative">
           <button 
-            className="relative p-3 bg-white text-gray-600 hover:text-gray-800 rounded-full shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-200"
+            className="relative p-2 md:p-3 bg-white text-neutral-600 hover:text-neutral-800 rounded-full shadow-lg border border-neutral-200 hover:shadow-xl transition-all duration-200"
             onClick={() => setShowNotifications(!showNotifications)}
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-4 h-4 md:w-5 md:h-5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-medium">{unreadCount > 9 ? '9+' : unreadCount}</span>
@@ -244,13 +244,13 @@ const isActive = (path:string) => location.pathname.startsWith(path);
 
       {/* Main Content */}
       <main className="px-2 py-4 sm:px-4 sm:py-6 md:px-6 pb-20 md:pb-6">
-        <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+        <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-4 md:py-6">
           {children}
         </div>
       </main>
 
       {/* Bottom Navigation (Mobile) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 px-2 py-1 safe-area-inset-bottom">
         <div className="flex items-center justify-around">
           {mobile_routes.map((route: Route) => {
             const Icon = route.icon;
@@ -259,14 +259,16 @@ const isActive = (path:string) => location.pathname.startsWith(path);
               <button
                 key={route.id}
                 onClick={() => navigate(route.path)}
-                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                className={`flex flex-col items-center py-2 px-2 rounded-lg transition-all duration-200 min-w-0 flex-1 mx-1 ${
                   isActiveRoute
-                    ? 'text-white bg-neutral-900 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-800'
+                    ? 'text-white bg-neutral-900 shadow-lg transform scale-105' 
+                    : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
-                <Icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium">{route.label}</span>
+                <Icon className={`${isActiveRoute ? 'w-5 h-5' : 'w-4 h-4'} mb-1 transition-all duration-200`} />
+                <span className={`${isActiveRoute ? 'text-xs' : 'text-xs'} font-medium truncate max-w-full`}>
+                  {route.label}
+                </span>
               </button>
             );
           })}
