@@ -13,6 +13,7 @@ interface RoleData {
 
 export const useRoleBasedAuth = () => {
   const [isCheckingRole, setIsCheckingRole] = useState(false);
+  const [isUserCreated, setIsUserCreated] = useState('idle');
   const navigate = useNavigate();
   const location = useLocation();
   const inFlightRef = useRef(false);
@@ -80,6 +81,7 @@ export const useRoleBasedAuth = () => {
   }, [location.pathname, navigate]);
 
   const setUserRole = useCallback(async (junoUser: JunoUser, role: UserRole) => {
+    setIsUserCreated('loading');
     try {
       let existingRoleData;
       try {
@@ -132,6 +134,8 @@ export const useRoleBasedAuth = () => {
           authMethod: 'web' // Important: specify this is a web user
         });
 
+        setIsUserCreated('success');
+
       // Redirect based on selected role
       const target = role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
       if (location.pathname !== target) {
@@ -143,6 +147,7 @@ export const useRoleBasedAuth = () => {
       }
     } catch (error) {
       console.error('Error setting user role:', error);
+      setIsUserCreated('error');
       throw error;
     }
   }, [location.pathname, navigate]);
@@ -164,10 +169,13 @@ export const useRoleBasedAuth = () => {
     }
   }, []);
 
+  const isUserCreatedSuccess = isUserCreated === 'success';
+
   return {
     isCheckingRole,
     checkAndRedirectUser,
     setUserRole,
-    getUserRole
+    getUserRole,
+    isUserCreatedSuccess
   };
 };

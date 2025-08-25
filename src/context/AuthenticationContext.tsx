@@ -202,7 +202,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     pendingUserData: null
   });
   
-  const { checkAndRedirectUser } = useRoleBasedAuth();
+  const { checkAndRedirectUser, isUserCreatedSuccess } = useRoleBasedAuth();
   // Keep a ref of latest checker to avoid re-subscribing when its identity changes
   const checkAndRedirectRef = useRef(checkAndRedirectUser);
   useEffect(() => {
@@ -339,7 +339,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array is intentional - we handle user changes inside the callback
+  }, [isUserCreatedSuccess]); // Empty dependency array is intentional - we handle user changes inside the callback
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
