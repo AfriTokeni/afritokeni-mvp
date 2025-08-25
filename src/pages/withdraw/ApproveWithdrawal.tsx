@@ -14,7 +14,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
   const [codeError, setCodeError] = useState('');
   const [cashGiven, setCashGiven] = useState(false);
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC') => {
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT') => {
     if (currency === 'UGX') {
       return new Intl.NumberFormat('en-UG', {
         style: 'currency',
@@ -140,7 +140,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
               {formatCurrency(withdrawal.amount.ugx, 'UGX')}
             </div>
             <div className="text-sm text-neutral-600 font-mono">
-              ≈ {formatCurrency(withdrawal.amount.usdc, 'USDC')}
+              ≈ {formatCurrency(withdrawal.amount.usdc, 'USDT')}
             </div>
           </div>
         </div>

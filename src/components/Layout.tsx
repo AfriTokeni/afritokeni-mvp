@@ -243,8 +243,8 @@ const isActive = (path:string) => location.pathname.startsWith(path);
       )}
 
       {/* Main Content */}
-      <main className="px-4 py-6 md:px-6 pb-20 md:pb-6">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <main className="px-2 py-4 sm:px-4 sm:py-6 md:px-6 pb-20 md:pb-6">
+        <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
           {children}
         </div>
       </main>
@@ -261,7 +261,7 @@ const isActive = (path:string) => location.pathname.startsWith(path);
                 onClick={() => navigate(route.path)}
                 className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
                   isActiveRoute
-                    ? 'text-blue-600 bg-blue-50' 
+                    ? 'text-white bg-neutral-900 shadow-sm' 
                     : 'text-gray-600 hover:text-gray-800'
                 }`}
               >

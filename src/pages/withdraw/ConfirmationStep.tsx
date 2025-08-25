@@ -105,8 +105,8 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
           <h3 className="text-lg font-bold text-neutral-900 mb-6">Transaction Summary</h3>
           <div className="space-y-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-neutral-600 font-medium">Withdrawal Amount (USDC):</span>
-              <span className="font-mono font-bold">{usdcAmount.toFixed(2)} USDC</span>
+              <span className="text-neutral-600 font-medium">Withdrawal Amount (USDT):</span>
+              <span className="font-mono font-bold">{usdcAmount.toFixed(2)} USDT</span>
             </div>
             <div className="flex justify-between">
               <span className="text-neutral-600 font-medium">Withdrawal Amount (UGX):</span>

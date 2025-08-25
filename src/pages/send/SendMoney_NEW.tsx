@@ -14,7 +14,7 @@ import { DataService } from '../../services/dataService';
 import { User as UserType } from '../../types/auth';
 import PageLayout from '../../components/PageLayout';
 
-const EXCHANGE_RATE = 3800; // 1 USDC = 3800 UGX
+const EXCHANGE_RATE = 3800; // 1 USDT = 3800 UGX
 
 interface TransactionResult {
   id: string;
@@ -116,7 +116,7 @@ const SendMoney: React.FC = () => {
     }
   };
 
-  // Handle USDC amount change
+  // Handle USDT amount change
   const handleUsdcAmountChange = (value: string) => {
     setUsdcAmount(value);
     const num = parseFloat(value);
@@ -324,24 +324,38 @@ const SendMoney: React.FC = () => {
                 </div>
 
                 {/* USD Input */}
+                                {/* USDT Input */}
                 <div className="mb-6">
-                  <label className="block text-xs font-medium text-neutral-600 mb-2">
-                    USD (US Dollar Equivalent)
+                  <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    USDT (Tether Equivalent)
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
                     <input
                       type="number"
+                      placeholder="0.00"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-medium"
                       value={usdcAmount}
                       onChange={(e) => handleUsdcAmountChange(e.target.value)}
-                      placeholder="25.00"
                       step="0.01"
-                      className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
+                      min="0"
                     />
+                    <DollarSign className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   </div>
-                  <p className="mt-2 text-sm text-neutral-500">
-                    Available: ${((balance?.balance || 0) * 0.00026).toFixed(2)} USD
-                  </p>
+                  <div className="mt-2 text-sm text-neutral-600">
+                    Available: ${((balance?.balance || 0) * 0.00026).toFixed(2)} USDT
+                  </div>
+                </div>
+
+                {/* Exchange Rate and Summary */}
+                <div className="bg-neutral-50 rounded-xl p-4 mb-6">
+                  <p className="text-sm text-neutral-800">1 USDT = {EXCHANGE_RATE.toLocaleString()} UGX</p>
+                  {(ugxAmount || usdcAmount) && (
+                    <p className="text-sm text-neutral-600 mt-2">
+                      {ugxAmount ? `UGX ${parseFloat(ugxAmount).toLocaleString()}` : ''}
+                      {ugxAmount && usdcAmount ? ' ≈ ' : ''}
+                      {usdcAmount ? `$${parseFloat(usdcAmount).toFixed(2)} USDT` : ''}
+                    </p>
+                  )}
                 </div>
 
                 <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">

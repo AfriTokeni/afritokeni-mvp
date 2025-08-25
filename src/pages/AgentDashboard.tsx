@@ -90,7 +90,7 @@ const AgentDashboard: React.FC = () => {
   
   const [showBalance, setShowBalance] = useState(true);
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC'): string => {
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT'): string => {
     if (currency === 'UGX') {
       return new Intl.NumberFormat('en-UG', {
         style: 'currency',
@@ -99,7 +99,7 @@ const AgentDashboard: React.FC = () => {
     } else {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD'
+        currency: 'USDT'
       }).format(amount);
     }
   };
@@ -296,7 +296,7 @@ const AgentDashboard: React.FC = () => {
           <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
-                <p className="text-neutral-600 text-sm font-semibold">USDC Balance</p>
+                <p className="text-neutral-600 text-sm font-semibold">USDT Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
                     {showBalance ? `$${agentBalance.digital.usdc.toFixed(2)}` : '••••••'}
@@ -310,11 +310,11 @@ const AgentDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="bg-neutral-100 p-2 rounded-lg">
-                <span className="text-xs font-bold text-neutral-700">USDC</span>
+                <span className="text-xs font-bold text-neutral-700">USDT</span>
               </div>
             </div>
             <div className="flex justify-between items-center pt-4 border-t border-neutral-100">
-              <span className="text-neutral-500 text-sm">1 USD = 3,846 UGX</span>
+              <span className="text-neutral-500 text-sm">1 USDT = 3,846 UGX</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span className="text-blue-600 font-medium text-sm">Live</span>

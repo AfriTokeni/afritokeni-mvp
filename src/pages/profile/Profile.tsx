@@ -16,7 +16,7 @@ const UserProfile: React.FC = () => {
     phone: '+256701234567',
     balances: {
       UGX: 850000,
-      USDC: 245.50
+      USDT: 245.50
     },
     isVerified: true
   });

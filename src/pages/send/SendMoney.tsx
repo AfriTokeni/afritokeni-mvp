@@ -13,7 +13,7 @@ import { DataService } from '../../services/dataService';
 import { User as UserType } from '../../types/auth';
 import PageLayout from '../../components/PageLayout';
 
-const EXCHANGE_RATE = 3800; // 1 USDC = 3800 UGX
+const EXCHANGE_RATE = 3800; // 1 USDT = 3800 UGX
 
 interface TransactionResult {
   id: string;
@@ -143,7 +143,7 @@ const SendMoney: React.FC = () => {
     }
   };
 
-  // Handle USDC amount change
+  // Handle USDT amount change
   const handleUsdcAmountChange = (value: string) => {
     setUsdcAmount(value);
     const num = parseFloat(value);
@@ -316,10 +316,10 @@ const SendMoney: React.FC = () => {
                   </p>
                 </div>
 
-                {/* USD Input */}
+                {/* USDT Input */}
                 <div className="mb-6">
                   <label className="block text-xs font-medium text-neutral-600 mb-2">
-                    USD (US Dollar Equivalent)
+                    USDT (Tether Equivalent)
                   </label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -333,18 +333,18 @@ const SendMoney: React.FC = () => {
                     />
                   </div>
                   <p className="mt-2 text-sm text-neutral-500">
-                    Available: ${((balance?.balance || 0) * 0.00026).toFixed(2)} USD
+                    Available: ${((balance?.balance || 0) * 0.00026).toFixed(2)} USDT
                   </p>
                 </div>
 
                 <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
                   <p className="text-xs text-neutral-600 font-medium">Exchange Rate</p>
-                  <p className="text-sm text-neutral-800">1 USD = {EXCHANGE_RATE.toLocaleString()} UGX</p>
+                  <p className="text-sm text-neutral-800">1 USDT = {EXCHANGE_RATE.toLocaleString()} UGX</p>
                   {(ugxAmount || usdcAmount) && (
                     <p className="text-xs text-neutral-600 mt-2">
                       {ugxAmount ? `${parseFloat(ugxAmount).toLocaleString()} UGX` : ''} 
                       {ugxAmount && usdcAmount ? ' ≈ ' : ''}
-                      {usdcAmount ? `$${parseFloat(usdcAmount).toFixed(2)} USD` : ''}
+                      {usdcAmount ? `$${parseFloat(usdcAmount).toFixed(2)} USDT` : ''}
                     </p>
                   )}
                 </div>

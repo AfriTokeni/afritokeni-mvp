@@ -218,7 +218,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
                 <p className="text-lg font-bold font-mono text-neutral-900">
                   {ugxAmount ? `${ugxAmount.toLocaleString()} UGX` : ''}
                   {ugxAmount && usdcAmount && ' • '}
-                  {usdcAmount ? `${usdcAmount.toFixed(2)} USDC` : ''}
+                  {usdcAmount ? `${usdcAmount.toFixed(2)} USDT` : ''}
                 </p>
               </div>
             )}

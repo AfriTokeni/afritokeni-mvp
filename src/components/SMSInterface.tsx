@@ -41,10 +41,10 @@ const SMSInterface: React.FC = () => {
         // Demo mode - show example responses
         const demoResponses: { [key: string]: string } = {
           '*AFRI#': 'Welcome to AfriTokeni!\n1. Check Balance\n2. Send Money\n3. Find Agents\n4. Transaction History\nReply with number',
-          'BAL': 'Your balance:\nUGX 450,000\nUSDC 118.42\n\nLast updated: Just now',
+          'BAL': 'Your balance:\nUGX 450,000\nUSDT 118.42\n\nLast updated: Just now',
           'AGENTS': 'Nearby agents:\n1. Sarah - Kampala Central (500m)\n2. John - Nakawa Market (1.2km)\n3. Grace - Wandegeya (2.1km)\nReply with number for details',
           'SEND': 'To send money, use:\nSEND [amount] [phone]\nExample: SEND 10000 256701234567',
-          '1': 'Your balance:\nUGX 450,000\nUSDC 118.42\n\nSend *AFRI# for main menu'
+          '1': 'Your balance:\nUGX 450,000\nUSDT 118.42\n\nSend *AFRI# for main menu'
         };
         
         const cmd = command.toUpperCase();

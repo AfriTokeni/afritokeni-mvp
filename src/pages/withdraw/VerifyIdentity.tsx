@@ -15,7 +15,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
     customerPresence: false
   });
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC') => {
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT') => {
     if (currency === 'UGX') {
       return new Intl.NumberFormat('en-UG', {
         style: 'currency',
@@ -131,7 +131,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
               {formatCurrency(withdrawal.amount.ugx, 'UGX')}
             </div>
             <div className="text-sm text-gray-600">
-              ≈ {formatCurrency(withdrawal.amount.usdc, 'USDC')}
+              ≈ {formatCurrency(withdrawal.amount.usdc, 'USDT')}
             </div>
             <div className="text-xs text-gray-500 mt-1">
               Code: <span className="font-mono font-medium">{withdrawal.withdrawalCode}</span>

@@ -125,10 +125,10 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
         <div className="text-center text-neutral-500 font-medium">OR</div>
 
-        {/* USDC Input */}
+        {/* USDT Input */}
         <div>
           <label htmlFor="usdc-amount" className="block text-sm font-medium text-neutral-700 mb-3">
-            Amount in USDC (US Dollar Coin)
+            Amount in USDT (Tether)
           </label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />

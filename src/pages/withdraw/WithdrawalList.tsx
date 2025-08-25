@@ -28,7 +28,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
         userPhone: user.email || 'Unknown', // Using email as phone since that's what's available
         amount: {
           ugx: transaction.amount,
-          usdc: transaction.amount * 0.00026 // Convert to USDC using exchange rate
+          usdc: transaction.amount * 0.00026 // Convert to USDT using exchange rate
         },
         withdrawalCode: (transaction as { withdrawalCode?: string }).withdrawalCode || '', // Type assertion for withdrawalCode
         requestedAt: transaction.createdAt instanceof Date ? transaction.createdAt : new Date(transaction.createdAt),
@@ -76,7 +76,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
     fetchWithdrawalRequests();
   }, [agent?.id]);
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC') => {
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT') => {
     if (currency === 'UGX') {
       return new Intl.NumberFormat('en-UG', {
         style: 'currency',
@@ -209,7 +209,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
                     {formatCurrency(request.amount.ugx, 'UGX')}
                   </div>
                   <div className="text-sm text-neutral-600 mb-2 font-mono">
-                    ≈ {formatCurrency(request.amount.usdc, 'USDC')}
+                    ≈ {formatCurrency(request.amount.usdc, 'USDT')}
                   </div>
                   
                   {/* Withdrawal Code */}

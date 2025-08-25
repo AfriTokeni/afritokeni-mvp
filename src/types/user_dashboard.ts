@@ -3,7 +3,7 @@ export interface UserData {
   phone: string;
   balances: {
     UGX: number;
-    USDC: number;
+    USDT: number;
   };
   isVerified: boolean;
 }
@@ -12,7 +12,7 @@ export interface Transaction {
   id: string;
   type: 'sent' | 'received' | 'withdrawal' | 'deposit';
   amount: number;
-  currency: 'UGX' | 'USDC';
+  currency: 'UGX' | 'USDT';
   from?: string;
   to?: string;
   agent?: string;
@@ -31,9 +31,9 @@ export interface Agent {
   services: Array<'withdrawal' | 'deposit' | 'exchange'>;
   cashAvailable: {
     UGX: number;
-    USDC: number;
+    USDT: number;
   };
 }
 
 
-export type Currency = 'UGX' | 'USDC';
+export type Currency = 'UGX' | 'USDT';
