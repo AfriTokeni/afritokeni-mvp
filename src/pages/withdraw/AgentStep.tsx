@@ -350,8 +350,8 @@ const AgentStep: React.FC<AgentStepProps> = ({
 
       {/* Mobile Agent Details Dialog */}
       {selectedAgent && isMobileDialogOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end md:hidden">
-          <div className="bg-white w-full rounded-t-3xl p-3 sm:p-6 max-h-[70vh] overflow-y-auto">
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+          <div className="bg-white w-full rounded-t-3xl p-3 sm:p-6 max-h-[70vh] overflow-y-auto border-t shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-base sm:text-lg lg:text-xl font-semibold">Agent Details</h3>
               <button
