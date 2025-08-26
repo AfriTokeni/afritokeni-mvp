@@ -23,11 +23,11 @@ const convertDbAgentToUIAgent = (dbAgent: DBAgent): Agent => {
     status: dbAgent.status === 'available' ? 'online' : 
             dbAgent.status === 'busy' ? 'busy' : 'offline',
     location: [dbAgent.location.coordinates.lat, dbAgent.location.coordinates.lng],
-    locationName: `${dbAgent.location.city}, ${dbAgent.location.state}`,
+    locationName: dbAgent.location.address,
     address: dbAgent.location.address,
     contact: 'Contact via app', // Could be updated when contact info is added to Agent schema
     operatingHours: 'Business hours vary', // Could be updated when business hours are added
-    availableBalance: dbAgent.cashBalance
+    availableBalance: dbAgent.digitalBalance
   };
 };
 
