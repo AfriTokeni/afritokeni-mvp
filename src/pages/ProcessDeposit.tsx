@@ -26,7 +26,7 @@ type Step = 'input' | 'summary' | 'complete';
 
 const ProcessDeposit: React.FC = () => {
   const navigate = useNavigate();
-  const { user: currentUser, agent: currentAgent } = useAfriTokeni();
+  const { user, agent: currentAgent, refreshData } = useAfriTokeni();
   const [currentStep, setCurrentStep] = useState<Step>('input');
   const [depositData, setDepositData] = useState<DepositData>({
     customerPhone: '',
@@ -185,7 +185,7 @@ const ProcessDeposit: React.FC = () => {
     
     try {
       // Validate that we have an agent logged in
-      if (!currentAgent || !currentUser) {
+      if (!currentAgent || !user.agent?.id) {
         throw new Error('Agent authentication required for deposit processing');
       }
 
@@ -226,7 +226,7 @@ const ProcessDeposit: React.FC = () => {
 
       // 2. Create transaction for the agent (agent processing the deposit)
       const agentTransaction = await DataService.createTransaction({
-        userId: currentUser.id,
+        userId: user.agent.id,
         type: 'deposit',
         amount: depositData.amount.ugx,
         currency: 'UGX',
@@ -248,21 +248,21 @@ const ProcessDeposit: React.FC = () => {
       const newAgentDigitalBalance = currentAgent.digitalBalance - depositData.amount.ugx;
       
       // Update agent's digital balance in the agents collection
-      await DataService.updateAgentBalanceByUserId(currentUser.id, {
+      await DataService.updateAgentBalanceByUserId(user.agent.id, {
         digitalBalance: newAgentDigitalBalance
       });
 
       // 5. Agent gets commission added to their main balance (both balances and agents collections)
-      const agentBalance = await DataService.getUserBalance(currentUser.id);
+      const agentBalance = await DataService.getUserBalance(user.agent.id);
       const currentAgentBalance = agentBalance?.balance || 0;
       const newAgentBalance = currentAgentBalance + commissionAmount;
       
       // Update main balance in balances collection
-      await DataService.updateUserBalance(currentUser.id, newAgentBalance);
+      await DataService.updateUserBalance(user.agent.id, newAgentBalance);
       
       // Also update cash balance in agents collection to keep them synchronized
       const newAgentCashBalance = currentAgent.cashBalance + commissionAmount;
-      await DataService.updateAgentBalanceByUserId(currentUser.id, {
+      await DataService.updateAgentBalanceByUserId(user.agent.id, {
         cashBalance: newAgentCashBalance
       });
 
@@ -306,6 +306,10 @@ const ProcessDeposit: React.FC = () => {
         agentTransaction: agentTransaction.id,
         commission: commissionAmount 
       });
+      
+      // Refresh agent data to update balance, earnings, and transactions
+      await refreshData();
+      
       setCurrentStep('complete');
       
       // Auto redirect after success
