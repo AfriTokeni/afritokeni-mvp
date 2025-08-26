@@ -427,6 +427,55 @@ export class DataService {
     }
   }
 
+  // Get all agent-related transactions (only agent commission/earnings transactions)
+  static async getAllAgentTransactions(agentId: string, userId: string): Promise<Transaction[]> {
+    try {
+      const docs = await listDocs({
+        collection: 'transactions'
+      });
+      
+      const allTransactions = docs.items.map(doc => doc.data as Transaction);
+      
+      // Filter for agent commission/earnings transactions only:
+      const agentTransactions = allTransactions.filter(transaction => {
+        // 1. Agent commission transactions from deposits:
+        // These have userId = agent's user ID AND agentId = agent's ID
+        // These represent the agent's commission earnings from processing deposits
+        if (transaction.userId === userId && transaction.agentId === agentId && 
+            transaction.type === 'deposit') {
+          return true;
+        }
+        
+        // 2. Agent fee transactions from withdrawals:
+        // These have agentId = agent's ID but userId = customer's ID
+        // These represent transactions where the agent earned fees from facilitating withdrawals
+        if (transaction.agentId === agentId && transaction.userId !== userId && 
+            transaction.type === 'withdraw') {
+          return true;
+        }
+        
+        // 3. Agent's own business transactions (personal deposits/withdrawals)
+        // These have userId = agent's user ID but no agentId (agent acting as regular user)
+        if (transaction.userId === userId && !transaction.agentId && 
+            (transaction.type === 'withdraw' || transaction.type === 'deposit')) {
+          return true;
+        }
+        
+        return false;
+      });
+      
+      // Remove duplicates (in case a transaction matches multiple conditions)
+      const uniqueTransactions = agentTransactions.filter((transaction, index, self) =>
+        index === self.findIndex(t => t.id === transaction.id)
+      );
+      
+      return uniqueTransactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      console.error('Error getting all agent transactions:', error);
+      return [];
+    }
+  }
+
   // Calculate agent daily earnings
   static calculateAgentDailyEarnings(transactions: Transaction[]): {
     totalAmount: number;

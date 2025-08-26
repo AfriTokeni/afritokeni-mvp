@@ -40,9 +40,10 @@ export const useAfriTokeni = () => {
       if (user?.agent?.id) {
         await DataService.initializeUserData(user.agent.id);
         
-        // First get agent data, then get facilitated transactions
+        // First get agent data, then get all agent-related transactions
         const agentData = await DataService.getAgentByUserId(user.agent.id);
-        const agentTransactionsData = agentData ? await DataService.getAgentTransactions(agentData.id) : [];
+        const agentTransactionsData = agentData ? 
+          await DataService.getAllAgentTransactions(agentData.id, user.agent.id) : [];
         
         // Add to results manually instead of using promises array
         dataPromises.push(
