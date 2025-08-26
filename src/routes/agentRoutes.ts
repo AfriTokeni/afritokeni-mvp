@@ -1,10 +1,11 @@
-import { 
-  LayoutDashboard, 
+import {  
   Users, 
   CreditCard, 
   Settings,
   LucideIcon,
-  Banknote
+  Banknote,
+  Home,
+  LayoutDashboard
 } from 'lucide-react';
 
 export interface Route {
@@ -16,7 +17,7 @@ export interface Route {
 
 export const agent_desktop_routes: Route[] = [
   {
-    id: 'dashboard',
+    id: 'home',
     path: '/agents/dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard,
@@ -49,10 +50,10 @@ export const agent_desktop_routes: Route[] = [
 
 export const agent_mobile_routes: Route[] = [
   {
-    id: 'dashboard',
+    id: 'home',
     path: '/agents/dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
+    label: 'Home',
+    icon: Home,
   },
   {
     id: 'withdraw',

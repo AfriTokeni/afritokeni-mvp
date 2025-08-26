@@ -5,6 +5,7 @@ import {
   History,
   Banknote,
   User,
+  LayoutDashboard,
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 
@@ -21,7 +22,7 @@ export const user_desktop_routes: Route[] = [
     id: "home" as RouteID,
     path: "/users/dashboard",
     label: "Dashboard",
-    icon: Home,
+    icon: LayoutDashboard,
   },
     {
         id: "send" as RouteID,
