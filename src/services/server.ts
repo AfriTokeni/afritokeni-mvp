@@ -66,8 +66,8 @@ interface VerificationData {
 
 // AfricasTalking configuration
 const credentials = {
-    username: process.env.AT_USERNAME || "",
-    apiKey: process.env.AT_API_KEY || ""
+    username: process.env.VITE_AT_USERNAME || "",
+    apiKey: process.env.VITE_AT_API_KEY || ""
 };
 const africastalking = AfricasTalking(credentials);
 const sms = africastalking.SMS;
@@ -216,7 +216,7 @@ async function sendSMSNotification(phoneNumber: string, message: string): Promis
     const response = await sms.send({
       to: phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`,
       message: message,
-      from: process.env.AT_SHORT_CODE || "AfriTokeni"
+      from: process.env.VITE_AT_SHORT_CODE || "AfriTokeni"
     });
     console.log("SMS sent successfully:", response);
     return response;
@@ -783,7 +783,10 @@ Transaction ID: ${transactionId}
 
 Show this code to the agent with your ID to collect cash.`;
 
+console.log(`Sending withdrawal SMS to ${session.phoneNumber}`);
+
         try {
+          console.log(`Sending SMS with withdrawal details to ${session.phoneNumber}`);
           await sendSMSNotification(session.phoneNumber, smsMessage);
         } catch (smsError) {
           console.error('SMS sending failed:', smsError);
@@ -825,10 +828,10 @@ const sendSMS = async (phoneNumber: string, message: string) => {
     console.log(`Using AfricasTalking credentials: ${JSON.stringify(credentials)}`);
 
     try {
-        const response = await sms.send({
+      await sms.send({
             to: phoneNumber,
             message, 
-            from: process.env.AT_SHORT_CODE || "AfriTokeni"
+            from: process.env.VITE_AT_SHORT_CODE || "22948"
         });
         return {
             status: 'Success',
