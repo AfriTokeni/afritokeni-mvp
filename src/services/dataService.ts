@@ -1822,7 +1822,8 @@ Reply with agent number to withdraw.`;
               ? transaction.createdAt.getTime().toString()
               : transaction.createdAt,
             completedAt: updatedTransaction.completedAt.getTime().toString()
-          }
+          },
+          version: transactionDoc?.version ? transactionDoc.version : 1n
         }
       });
 

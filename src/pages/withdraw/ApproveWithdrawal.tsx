@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { CheckCircle, User, Phone, MapPin, Clock, AlertCircle } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
+import { DataService } from '../../services/dataService';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
 interface ApproveWithdrawalProps {
   withdrawal: WithdrawalRequest;
@@ -8,6 +10,7 @@ interface ApproveWithdrawalProps {
 }
 
 const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApprovalComplete }) => {
+  const { agent } = useAfriTokeni();
   const [withdrawalCode, setWithdrawalCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -59,18 +62,30 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
       return;
     }
 
+    if (!agent?.id) {
+      setCodeError('Agent authentication required. Please refresh and try again.');
+      return;
+    }
+
     setIsProcessing(true);
+    setCodeError('');
     
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call Juno backend to complete the withdrawal transaction
+      await DataService.completeWithdrawTransaction(
+        withdrawal.id,
+        agent.id,
+        withdrawalCode
+      );
+      
       setIsCompleted(true);
       
       // Auto redirect after success
       setTimeout(() => {
         onApprovalComplete();
       }, 3000);
-    } catch {
+    } catch (error) {
+      console.error('Error completing withdrawal transaction:', error);
       setCodeError('Failed to process withdrawal. Please try again.');
     } finally {
       setIsProcessing(false);
