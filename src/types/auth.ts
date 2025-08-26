@@ -17,19 +17,20 @@ export interface UserKYCData {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  documentType: 'national_id' | 'passport' | 'drivers_license';
-  documentNumber: string;
+  documentType?: 'national_id' | 'passport' | 'drivers_license';
+  documentNumber?: string;
   documentFile?: File;
-  pin: string;
-  confirmPin: string;
+  pin?: string;
+  confirmPin?: string;
 }
 
 export interface AgentKYCData {
-  documentType: 'national_id' | 'passport' | 'drivers_license';
-  documentNumber: string;
-  documentFile?: File;
-  businessLicense: string;
-  businessLicenseFile?: File;
+  // Personal Details
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  
+  // Operating Details
   location: {
     country: string;
     state: string;
@@ -41,6 +42,17 @@ export interface AgentKYCData {
     };
   };
   locationDescription: string;
+  operatingHours: string;
+  operatingDays: string;
+  
+  // Personal Identification (Optional)
+  documentType?: 'national_id' | 'passport' | 'drivers_license';
+  documentNumber?: string;
+  documentFile?: File;
+  
+  // Business License (Optional)
+  businessLicense?: string;
+  businessLicenseFile?: File;
 }
 
 export interface User {
@@ -51,16 +63,23 @@ export interface User {
   userType: 'user' | 'agent';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  pin?: string; // USSD PIN for mobile users
   createdAt?: Date; // Optional since Juno handles timestamps automatically
   junoUser?: any; // Juno User object
 }
 
 export interface AuthContextType {
-  user: User | null;
+  // New structure with combined user object
+  user: {
+    user: User | null;
+    agent: User | null;
+  };
+  
   authMethod: 'sms' | 'web';
+  
   login: (formData: LoginFormData, method?: 'sms' | 'web') => Promise<boolean>;
   register: (formData: RegisterFormData) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: (userTypeToLogout?: 'user' | 'agent') => Promise<void>;
   isLoading: boolean;
   // SMS verification methods
   verifyRegistrationCode: (code: string) => Promise<boolean>;
@@ -71,21 +90,22 @@ export interface AuthContextType {
   // Development helper
   devVerificationCode?: string;
   // User update method
-  updateUser: (updatedUser: User) => void;
+  updateUser: (updatedUser: User) => Promise<void>;
   // User type update method (for role selection)
-  updateUserType: (newUserType: 'user' | 'agent') => void;
+  updateUserType: (newUserType: 'user' | 'agent', currentUserType: 'user' | 'agent') => Promise<void>;
 }
 
 export interface LocationSuggestion {
   place_id: string;
   display_name: string;
-  lat: string;
-  lon: string;
-  address: {
-    country?: string;
-    state?: string;
-    city?: string;
-    town?: string;
-    village?: string;
+  location: {
+    country: string;
+    state: string;
+    city: string;
+    address: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
   };
 }

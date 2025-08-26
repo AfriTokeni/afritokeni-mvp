@@ -17,6 +17,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import PageLayout from '../components/PageLayout';
+import { useAfriTokeni } from '../hooks/useAfriTokeni';
+import { DataService } from '../services/dataService';
+import { User as UserType } from '../types/auth';
 
 interface AgentStatus {
   status: 'available' | 'busy' | 'cash-out';
@@ -28,108 +31,103 @@ interface AgentStatus {
   lastUpdated: Date;
 }
 
-interface Transaction {
-  id: string;
-  customer: string;
-  customerPhone: string;
-  type: 'deposit' | 'withdrawal' | 'send-money';
-  amount: {
-    ugx: number;
-    usdc: number;
-  };
-  commission: {
-    ugx: number;
-    usdc: number;
-  };
-  status: 'completed' | 'pending' | 'failed';
-  timestamp: Date;
-}
-
-interface AgentBalance {
-  cash: {
-    ugx: number;
-    usdc: number;
-  };
-  digital: {
-    ugx: number;
-    usdc: number;
-  };
-}
-
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { agent, agentTransactions, updateAgentStatus: updateStatus } = useAfriTokeni();
   
+  // Calculate real daily earnings from agent transactions
+  const dailyEarnings = React.useMemo(() => {
+    if (!agentTransactions.length) {
+      return { ugx: 0, usdc: 0, transactionCount: 0 };
+    }
+    
+    const earnings = DataService.calculateAgentDailyEarnings(agentTransactions);
+    return {
+      ugx: earnings.totalCommission,
+      usdc: earnings.totalCommission * 0.00026, // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
+      transactionCount: earnings.completedCount
+    };
+  }, [agentTransactions]);
+
+  // Load customers data
+  const [customers, setCustomers] = React.useState<UserType[]>([]);
+  
+  React.useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        const allCustomers = await DataService.getAllCustomers();
+        setCustomers(allCustomers);
+      } catch (error) {
+        console.error('Error loading customers:', error);
+      }
+    };
+    
+    loadCustomers();
+  }, []);
+  
+  // Local state for UI status (fallback to agent data if available)
   const [agentStatus, setAgentStatus] = useState<AgentStatus>({
-    status: 'available',
+    status: agent?.status === 'cash_out' ? 'cash-out' : 
+            agent?.status === 'offline' ? 'available' : 
+            (agent?.status || 'available'),
     lastUpdated: new Date()
   });
   
-  const [balance] = useState<AgentBalance>({
-    cash: { ugx: 2450000, usdc: 500 },
-    digital: { ugx: 1250000, usdc: 328.75 }
-  });
-  
-  const [dailyEarnings] = useState({
-    ugx: 45000,
-    usdc: 12.50,
-    transactionCount: 23
-  });
-  
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: 'TXN001',
-      customer: 'John Kamau',
-      customerPhone: '+256701234567',
-      type: 'withdrawal',
-      amount: { ugx: 100000, usdc: 26.32 },
-      commission: { ugx: 2000, usdc: 0.53 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 10)
+  // Use real agent data if available, otherwise fallback to mock data
+  const agentBalance = agent ? {
+    cash: { 
+      ugx: agent.cashBalance, 
+      usdc: agent.cashBalance * 0.00026 // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
     },
-    {
-      id: 'TXN002',
-      customer: 'Mary Nakato',
-      customerPhone: '+256702345678',
-      type: 'deposit',
-      amount: { ugx: 75000, usdc: 19.74 },
-      commission: { ugx: 1500, usdc: 0.39 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 45)
-    },
-    {
-      id: 'TXN003',
-      customer: 'Peter Okello',
-      customerPhone: '+256703456789',
-      type: 'send-money',
-      amount: { ugx: 200000, usdc: 52.63 },
-      commission: { ugx: 3000, usdc: 0.79 },
-      status: 'pending',
-      timestamp: new Date(Date.now() - 1000 * 60 * 120)
+    digital: { 
+      ugx: agent.digitalBalance, 
+      usdc: agent.digitalBalance * 0.00026 // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
     }
-  ]);
+  } : {
+    cash: { ugx: 0, usdc: 0 },
+    digital: { ugx: 0, usdc: 0 }
+  };
   
   const [showBalance, setShowBalance] = useState(true);
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC'): string => {
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT'): string => {
     if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
+      return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'UGX'
       }).format(amount);
     } else {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD'
+        currency: 'USDT'
       }).format(amount);
     }
   };
 
-  const updateAgentStatus = (newStatus: AgentStatus['status']) => {
-    setAgentStatus(prev => ({
-      ...prev,
-      status: newStatus,
-      lastUpdated: new Date()
-    }));
+  const updateAgentStatus = async (newStatus: AgentStatus['status']) => {
+    // Convert UI status to backend status format
+    const backendStatus = newStatus === 'cash-out' ? 'cash_out' : newStatus;
+    
+    try {
+      // Update in backend if we have the updateStatus function
+      if (updateStatus) {
+        const success = await updateStatus(backendStatus as 'available' | 'busy' | 'cash_out' | 'offline');
+        if (!success) {
+          alert('Failed to update status. Please try again.');
+          return;
+        }
+      }
+      
+      // Update local state
+      setAgentStatus(prev => ({
+        ...prev,
+        status: newStatus,
+        lastUpdated: new Date()
+      }));
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      alert('Failed to update status. Please try again.');
+    }
   };
 
   const updateLocation = async () => {
@@ -186,29 +184,29 @@ const AgentDashboard: React.FC = () => {
   };
   return (
     <PageLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
         {/* KYC Status Alert */}
-        <KYCStatusAlert />
-      
+        <KYCStatusAlert user_type="agent" />
+
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-neutral-900">Agent Dashboard</h1>
-          <p className="text-neutral-600 mt-1">Manage your agent operations and track earnings</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Agent Dashboard</h1>
+          <p className="text-neutral-600 mt-1 text-sm sm:text-base">Manage your agent operations and track earnings</p>
         </div>
 
         {/* Top Row - Status & Location */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Agent Status Control */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-3">
-                <span className="text-sm font-semibold text-neutral-700">Status:</span>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-700">Status:</span>
                 <div className={`flex items-center space-x-2 px-3 py-2 rounded-full border ${getStatusColor(agentStatus.status)}`}>
                   {getStatusIcon(agentStatus.status)}
-                  <span className="text-sm font-semibold capitalize">{agentStatus.status.replace('-', ' ')}</span>
+                  <span className="text-xs sm:text-sm font-semibold capitalize">{agentStatus.status.replace('-', ' ')}</span>
                 </div>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => updateAgentStatus('available')}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 ${
@@ -244,13 +242,13 @@ const AgentDashboard: React.FC = () => {
           </div>
 
           {/* Location Update Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-4">
-                <MapPin className="w-6 h-6 text-neutral-500" />
-                <div>
-                  <h3 className="text-sm font-bold text-neutral-900">Location</h3>
-                  <p className="text-xs text-neutral-600 mt-1">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-neutral-900">Location</h3>
+                  <p className="text-xs text-neutral-600 mt-1 truncate">
                     {agentStatus.location 
                       ? `Updated ${agentStatus.lastUpdated.toLocaleTimeString()}`
                       : 'Not set'
@@ -260,7 +258,7 @@ const AgentDashboard: React.FC = () => {
               </div>
               <button
                 onClick={updateLocation}
-                className="flex items-center space-x-2 px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm font-semibold hover:bg-neutral-800 transition-colors duration-200"
+                className="flex items-center justify-center space-x-2 px-4 py-2 bg-neutral-900 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-neutral-800 transition-colors duration-200 w-full sm:w-auto"
               >
                 <Navigation className="w-4 h-4" />
                 <span>Update</span>
@@ -270,133 +268,140 @@ const AgentDashboard: React.FC = () => {
         </div>
 
         {/* Balance Cards Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* UGX Balance Card */}
-          <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm">
+          <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <p className="text-neutral-600 text-sm font-semibold">UGX Balance</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">UGX Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
-                  <span className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
-                    {showBalance ? `USh ${balance.digital.ugx.toLocaleString()}` : '••••••••'}
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono truncate">
+                    {showBalance ? `UGX ${agentBalance.digital.ugx.toLocaleString()}` : '••••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
-                    className="text-neutral-400 hover:text-neutral-600 transition-colors duration-200"
+                    className="text-neutral-400 hover:text-neutral-600 transition-colors duration-200 flex-shrink-0"
                   >
-                    {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showBalance ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </button>
                 </div>
               </div>
-              <div className="bg-neutral-100 p-2 rounded-lg">
+              <div className="bg-neutral-100 p-2 rounded-lg flex-shrink-0">
                 <span className="text-xs font-bold text-neutral-700">UGX</span>
               </div>
             </div>
           </div>
 
           {/* USDC Balance Card */}
-          <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm">
+          <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <p className="text-neutral-600 text-sm font-semibold">USDC Balance</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">USDT Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
-                  <span className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
-                    {showBalance ? `$${balance.digital.usdc.toFixed(2)}` : '••••••'}
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono truncate">
+                    {showBalance ? `$${agentBalance.digital.usdc.toFixed(2)}` : '••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
-                    className="text-neutral-400 hover:text-neutral-600 transition-colors duration-200"
+                    className="text-neutral-400 hover:text-neutral-600 transition-colors duration-200 flex-shrink-0"
                   >
-                    {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showBalance ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </button>
                 </div>
               </div>
-              <div className="bg-neutral-100 p-2 rounded-lg">
-                <span className="text-xs font-bold text-neutral-700">USDC</span>
+              <div className="bg-neutral-100 p-2 rounded-lg flex-shrink-0">
+                <span className="text-xs font-bold text-neutral-700">USDT</span>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-neutral-100 space-y-2 sm:space-y-0">
+              <span className="text-neutral-500 text-xs sm:text-sm">1 USDT = 3,846 UGX</span>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-blue-600 font-medium text-xs sm:text-sm">Live</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <button 
             onClick={() => navigate('/agents/deposit')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <Plus className="w-6 h-6 text-neutral-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-900 block text-center">Deposit</span>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Deposit</span>
           </button>
 
           <button 
             onClick={() => navigate('/agents/withdraw')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <Minus className="w-6 h-6 text-neutral-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-900 block text-center">Withdrawal</span>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Withdrawal</span>
           </button>
 
           <button 
             onClick={() => navigate('/agents/customers')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <Users className="w-6 h-6 text-neutral-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-900 block text-center">Customers</span>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Customers</span>
           </button>
 
           <button 
             onClick={() => navigate('/agents/settings')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
           >
-            <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <CreditCard className="w-6 h-6 text-neutral-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
+              <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
             </div>
-            <span className="text-sm font-semibold text-neutral-900 block text-center">Settings</span>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Settings</span>
           </button>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center  mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-                <TrendingUp className="h-6 w-6 text-neutral-600" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-neutral-200">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200 flex-shrink-0">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-neutral-600">Daily Earnings</p>
-                <p className="text-xl font-bold text-neutral-900 font-mono mt-1">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold text-neutral-600">Daily Earnings</p>
+                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1 truncate">
                   {formatCurrency(dailyEarnings.ugx, 'UGX')}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center  mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-                <CreditCard className="h-6 w-6 text-neutral-600" />
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-neutral-200">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200 flex-shrink-0">
+                <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-neutral-600">Today's Transactions</p>
-                <p className="text-xl font-bold text-neutral-900 font-mono mt-1">{dailyEarnings.transactionCount}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold text-neutral-600">Today&apos;s Transactions</p>
+                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{dailyEarnings.transactionCount}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center  mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-                <Users className="h-6 w-6 text-neutral-600" />
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-neutral-200">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200 flex-shrink-0">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-neutral-600">Active Customers</p>
-                <p className="text-xl font-bold text-neutral-900 font-mono mt-1">1,247</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold text-neutral-600">Active Customers</p>
+                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{customers.length}</p>
               </div>
             </div>
           </div>
@@ -404,47 +409,52 @@ const AgentDashboard: React.FC = () => {
 
         {/* Recent Transactions */}
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
-          <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-neutral-900">Recent Transactions</h2>
-            <button onClick={() => navigate('/agents/transactions')} className="text-neutral-600 hover:text-neutral-900 text-sm font-semibold transition-colors duration-200">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-neutral-200 flex items-center justify-between">
+            <h2 className="text-base sm:text-lg font-bold text-neutral-900">Recent Transactions</h2>
+            <button onClick={() => navigate('/agents/transactions')} className="text-neutral-600 hover:text-neutral-900 text-xs sm:text-sm font-semibold transition-colors duration-200">
               View All
             </button>
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {transactions.slice(0, 4).map((transaction) => (
+          <div className="p-4 sm:p-6">
+            <div className="space-y-3 sm:space-y-4">
+              {agentTransactions.slice(0, 4).map((transaction) => (
                 <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-neutral-100 last:border-b-0">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-neutral-600">
-                        {transaction.customer.split(' ').map(n => n[0]).join('')}
+                  <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-neutral-600">
+                        {transaction.description ? transaction.description.split(' ').map((n: string) => n[0]).join('').slice(0, 2) : 'TX'}
                       </span>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-neutral-900">{transaction.customer}</p>
-                      <p className="text-xs text-neutral-600 font-medium mt-1">
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace('-', ' ')}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-semibold text-neutral-900 truncate">{transaction.description || 'Transaction'}</p>
+                      <p className="text-xs text-neutral-600 font-medium mt-1 truncate">
+                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace(/[_-]/g, ' ')}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-bold text-neutral-900 font-mono">
-                      {formatCurrency(transaction.amount.ugx, 'UGX')}
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <div className="text-xs sm:text-sm font-bold text-neutral-900 font-mono">
+                      {formatCurrency(transaction.amount, 'UGX')}
                     </div>
                     <div className="text-xs mt-1">
                       <span className="text-green-600 font-bold font-mono">
-                        +{formatCurrency(transaction.commission.ugx, 'UGX')}
+                        +{formatCurrency(Math.round(transaction.amount * 0.02), 'UGX')}
                       </span>
-                      <span className={`ml-2 font-semibold ${
+                      <div className={`mt-1 font-semibold text-xs ${
                         transaction.status === 'completed' ? 'text-green-600' : 
                         transaction.status === 'pending' ? 'text-yellow-600' : 'text-red-600'
                       }`}>
                         {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                      </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
+              {agentTransactions.length === 0 && (
+                <div className="text-center py-6 sm:py-8">
+                  <p className="text-neutral-600 text-sm">No transactions yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

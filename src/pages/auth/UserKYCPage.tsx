@@ -23,17 +23,17 @@ const UserKYCPage: React.FC = () => {
       let existingUserId: string | null = null;
       
       // First check if user is already logged in and has an ID
-      if (user?.id) {
-        existingUserId = user.id;
+      if (user.user?.id) {
+        existingUserId = user.user.id;
       }
 
       // Check authentication method - if no current user, default to web
-      const authMethod = user ? 'web' : 'web'; // Default to web for logged in users
+      const authMethod = user.user ? 'web' : 'web'; // Default to web for logged in users
       
       // Create user in Juno datastore with existing ID or generate new one
       // If user already exists, update their information instead of creating new
       let finalUser;
-      if (existingUserId && user) {
+      if (existingUserId && user.user) {
         let existingUser: User | null = null;
         
         if (authMethod === 'web') {
@@ -96,7 +96,7 @@ const UserKYCPage: React.FC = () => {
 
       // Update authentication context with new user information
       // The updateUser method will handle storing the data with the correct keys
-      updateUser({
+      await updateUser({
         id: finalUser.id,
         firstName: finalUser.firstName,
         lastName: finalUser.lastName,
@@ -122,7 +122,7 @@ const UserKYCPage: React.FC = () => {
 
   // Allow access to KYC page even if not logged in for new user registration
   // If user is logged in and is an agent, redirect to agent KYC
-  if (user && user.userType === 'agent') {
+  if (user.user && user.user.userType === 'agent') {
     navigate('/agents/agent-kyc');
     return null;
   }

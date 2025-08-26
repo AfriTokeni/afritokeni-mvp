@@ -19,64 +19,289 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const searchTimeout = useRef<number | undefined>(undefined);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Mock location data - in a real app, this would come from a geocoding API
+  // Location data based on existing agents in agents.json
   const mockLocations: LocationSuggestion[] = [
     {
       place_id: "1",
-      display_name: "Lagos, Lagos State, Nigeria",
-      lat: "6.5244",
-      lon: "3.3792",
-      address: {
-        country: "Nigeria",
-        state: "Lagos State",
-        city: "Lagos"
+      display_name: "Kampala Central, Central Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Kampala Road, Central Division, Kampala",
+        coordinates: {
+          lat: 0.3476,
+          lng: 32.5825
+        }
       }
     },
     {
       place_id: "2",
-      display_name: "Abuja, Federal Capital Territory, Nigeria",
-      lat: "9.0765",
-      lon: "7.3986",
-      address: {
-        country: "Nigeria",
-        state: "Federal Capital Territory",
-        city: "Abuja"
+      display_name: "Rubaga, Mengo, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Buganda Road, Mengo, Kampala",
+        coordinates: {
+          lat: 0.3136,
+          lng: 32.5811
+        }
       }
     },
     {
       place_id: "3",
-      display_name: "Kano, Kano State, Nigeria",
-      lat: "12.0022",
-      lon: "8.5920",
-      address: {
-        country: "Nigeria",
-        state: "Kano State",
-        city: "Kano"
+      display_name: "Lugogo, Nakawa Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Jinja Road, Nakawa Division, Kampala",
+        coordinates: {
+          lat: 0.3563,
+          lng: 32.6378
+        }
       }
     },
     {
       place_id: "4",
-      display_name: "Port Harcourt, Rivers State, Nigeria",
-      lat: "4.8156",
-      lon: "7.0498",
-      address: {
-        country: "Nigeria",
-        state: "Rivers State",
-        city: "Port Harcourt"
+      display_name: "Quality Mall Area, Wakiso, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Entebbe Road, Wakiso, Kampala",
+        coordinates: {
+          lat: 0.2906,
+          lng: 32.5739
+        }
       }
     },
     {
       place_id: "5",
-      display_name: "Ibadan, Oyo State, Nigeria",
-      lat: "7.3775",
-      lon: "3.9470",
-      address: {
-        country: "Nigeria",
-        state: "Oyo State",
-        city: "Ibadan"
+      display_name: "Mulago, Kawempe Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Bombo Road, Kawempe Division, Kampala",
+        coordinates: {
+          lat: 0.3319,
+          lng: 32.5729
+        }
+      }
+    },
+    {
+      place_id: "6",
+      display_name: "Ggaba, Makindye Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Masaka Road, Makindye Division, Kampala",
+        coordinates: {
+          lat: 0.3157,
+          lng: 32.5656
+        }
+      }
+    },
+    {
+      place_id: "7",
+      display_name: "Makerere University Area, Kasangati, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Gayaza Road, Kasangati, Kampala",
+        coordinates: {
+          lat: 0.3341,
+          lng: 32.6189
+        }
+      }
+    },
+    {
+      place_id: "8",
+      display_name: "Kabalagala, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Ggaba Road, Kabalagala, Kampala",
+        coordinates: {
+          lat: 0.2742,
+          lng: 32.6014
+        }
+      }
+    },
+    {
+      place_id: "9",
+      display_name: "Makerere Hill, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Hoima Road, Makerere, Kampala",
+        coordinates: {
+          lat: 0.3298,
+          lng: 32.5456
+        }
+      }
+    },
+    {
+      place_id: "10",
+      display_name: "Kamwokya, Central Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Kamwokya, Central Division, Kampala",
+        coordinates: {
+          lat: 0.3789,
+          lng: 32.6156
+        }
+      }
+    },
+    {
+      place_id: "11",
+      display_name: "Muyenga, Makindye Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Muyenga, Makindye Division, Kampala",
+        coordinates: {
+          lat: 0.3023,
+          lng: 32.5698
+        }
+      }
+    },
+    {
+      place_id: "12",
+      display_name: "Wandegeya, Central Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Wandegeya, Central Division, Kampala",
+        coordinates: {
+          lat: 0.3645,
+          lng: 32.5923
+        }
+      }
+    },
+    {
+      place_id: "13",
+      display_name: "Ntinda, Nakawa Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Ntinda, Nakawa Division, Kampala",
+        coordinates: {
+          lat: 0.2987,
+          lng: 32.6234
+        }
+      }
+    },
+    {
+      place_id: "14",
+      display_name: "Old Kampala, Central Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Old Kampala, Central Division, Kampala",
+        coordinates: {
+          lat: 0.3512,
+          lng: 32.5634
+        }
+      }
+    },
+    {
+      place_id: "15",
+      display_name: "Kyanja, Nakawa Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Kyanja, Nakawa Division, Kampala",
+        coordinates: {
+          lat: 0.3167,
+          lng: 32.6445
+        }
+      }
+    },
+    {
+      place_id: "16",
+      display_name: "Kansanga, Makindye Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Kansanga, Makindye Division, Kampala",
+        coordinates: {
+          lat: 0.2834,
+          lng: 32.5512
+        }
+      }
+    },
+    {
+      place_id: "17",
+      display_name: "Bwaise, Kawempe Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Bwaise, Kawempe Division, Kampala",
+        coordinates: {
+          lat: 0.3423,
+          lng: 32.5512
+        }
+      }
+    },
+    {
+      place_id: "18",
+      display_name: "Kisaasi, Nakawa Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Kisaasi, Nakawa Division, Kampala",
+        coordinates: {
+          lat: 0.3689,
+          lng: 32.6523
+        }
+      }
+    },
+    {
+      place_id: "19",
+      display_name: "Nsambya, Makindye Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Nsambya, Makindye Division, Kampala",
+        coordinates: {
+          lat: 0.2945,
+          lng: 32.5823
+        }
+      }
+    },
+    {
+      place_id: "20",
+      display_name: "Bukoto, Central Division, Kampala",
+      location: {
+        country: "Uganda",
+        state: "Central",
+        city: "Kampala",
+        address: "Bukoto, Central Division, Kampala",
+        coordinates: {
+          lat: 0.3834,
+          lng: 32.5834
+        }
       }
     }
   ];
@@ -89,12 +314,12 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       if (searchQuery.trim()) {
         const filtered = mockLocations.filter(location =>
           location.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          location.address.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          location.address.state?.toLowerCase().includes(searchQuery.toLowerCase())
+          location.location.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          location.location.state?.toLowerCase().includes(searchQuery.toLowerCase())
         );
         setSuggestions(filtered);
       } else {
-        setSuggestions(mockLocations.slice(0, 5));
+        setSuggestions(mockLocations);
       }
       setIsLoading(false);
     }, 300);
@@ -149,7 +374,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     <div className="relative" ref={containerRef}>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
+          <Search className="h-5 w-5 text-neutral-400" />
         </div>
         <input
           type="text"
@@ -158,14 +383,14 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           onFocus={handleFocus}
           placeholder={placeholder}
           required={required}
-          className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full pl-10 pr-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 bg-white placeholder-neutral-500"
         />
         {query && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
             <button
               type="button"
               onClick={handleClear}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-neutral-400 hover:text-neutral-600"
             >
               <X className="h-5 w-5" />
             </button>
@@ -176,7 +401,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       {isOpen && (
         <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto">
           {isLoading ? (
-            <div className="px-4 py-2 text-sm text-gray-500">
+            <div className="px-4 py-2 text-sm text-neutral-500">
               Searching locations...
             </div>
           ) : suggestions.length > 0 ? (
@@ -185,23 +410,23 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                 key={suggestion.place_id}
                 type="button"
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 flex items-center"
+                className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:bg-neutral-50 flex items-center"
               >
-                <MapPin className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
+                <MapPin className="h-4 w-4 text-neutral-400 mr-3 flex-shrink-0" />
                 <div className="truncate">
-                  <div className="font-medium">{suggestion.address.city}</div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {suggestion.address.state}, {suggestion.address.country}
+                  <div className="font-medium">{suggestion.display_name}</div>
+                  <div className="text-xs text-neutral-500 truncate">
+                    {suggestion.location.state}, {suggestion.location.country}
                   </div>
                 </div>
               </button>
             ))
           ) : query.trim() ? (
-            <div className="px-4 py-2 text-sm text-gray-500">
+            <div className="px-4 py-2 text-sm text-neutral-500">
               No locations found for &quot;{query}&quot;
             </div>
           ) : (
-            <div className="px-4 py-2 text-sm text-gray-500">
+            <div className="px-4 py-2 text-sm text-neutral-500">
               Start typing to search for locations
             </div>
           )}

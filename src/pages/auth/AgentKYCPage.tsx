@@ -1,38 +1,77 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AgentKYC from '../../components/AgentKYC';
 import { AgentKYCData } from '../../types/auth';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { DataService } from '../../services/dataService';
 
 const AgentKYCPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuthentication();
+  const { user, updateUser } = useAuthentication();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleKYCSubmit = async (data: AgentKYCData) => {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In a real app, you would submit the KYC data to your backend
-      console.log('Agent KYC submitted:', data);
+      if (!user.agent) {
+        throw new Error('No user found');
+      }
+
+      // Ensure coordinates are available
+      if (!data.location.coordinates) {
+        throw new Error('Location coordinates are required');
+      }
+
+      // Complete the agent KYC process
+      const result = await DataService.completeAgentKYC({
+        userId: user.agent.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phoneNumber: data.phoneNumber,
+        businessName: `${data.firstName} ${data.lastName} Agent Service`, // Generate business name
+        location: {
+          country: data.location.country,
+          state: data.location.state,
+          city: data.location.city,
+          address: data.location.address,
+          coordinates: data.location.coordinates
+        },
+        operatingHours: data.operatingHours,
+        operatingDays: data.operatingDays ? data.operatingDays.split(',').map(d => d.trim()) : [], // Convert string to array
+        documentType: data.documentType,
+        documentNumber: data.documentNumber,
+        businessLicense: data.businessLicense
+      });
+
+      console.log('Agent KYC completed successfully:', result);
+
+      // Update agent in context with new data
+      await updateUser(result.user);
       
       // Show success message and redirect
-      alert('Agent verification submitted successfully! We will review your documents and location, then contact you within 2-3 business days to complete the setup.');
+      alert(`Agent verification completed successfully! 
+
+Agent Details:
+- Business: ${result.agent.businessName}
+- Location: ${result.agent.location.city}, ${result.agent.location.state}
+- Cash Balance: UGX ${result.agent.cashBalance.toLocaleString()}
+- Digital Balance: UGX ${result.agent.digitalBalance.toLocaleString()}
+
+Welcome to AfriTokeni Agent Network!`);
+      
       navigate('/agents/dashboard');
     } catch (error) {
       console.error('KYC submission failed:', error);
-      alert('Failed to submit agent verification. Please try again.');
+      alert(`Failed to complete agent verification: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Redirect if user is not logged in or is not an agent
-  if (!user || user.userType !== 'agent') {
-    navigate('/auth/login');
+  // Redirect if agent is not logged in
+  if (!user.agent) {
+    navigate('/');
     return null;
   }
 

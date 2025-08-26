@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, CreditCard, Search } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
+import { DataService, Transaction } from '../../services/dataService';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
 interface WithdrawalListProps {
   onSelectWithdrawal: (withdrawal: WithdrawalRequest) => void;
@@ -9,67 +11,72 @@ interface WithdrawalListProps {
 const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const { agent } = useAfriTokeni();
+  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock withdrawal requests data
-  const [withdrawalRequests] = useState<WithdrawalRequest[]>([
-    {
-      id: 'WD001',
-      userName: 'Sarah Nakamura',
-      userPhone: '+256781234567',
-      amount: { ugx: 150000, usdc: 39.47 },
-      withdrawalCode: 'WD001234',
-      requestedAt: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
-      status: 'pending',
-      userNationalId: 'CM12345678901234',
-      location: 'Kampala Central'
-    },
-    {
-      id: 'WD002',
-      userName: 'John Mukasa',
-      userPhone: '+256782345678',
-      amount: { ugx: 75000, usdc: 19.74 },
-      withdrawalCode: 'WD002345',
-      requestedAt: new Date(Date.now() - 25 * 60 * 1000), // 25 minutes ago
-      status: 'pending',
-      userNationalId: 'CM23456789012345',
-      location: 'Entebbe'
-    },
-    {
-      id: 'WD003',
-      userName: 'Grace Acheng',
-      userPhone: '+256783456789',
-      amount: { ugx: 300000, usdc: 78.95 },
-      withdrawalCode: 'WD003456',
-      requestedAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-      status: 'pending',
-      userNationalId: 'CM34567890123456',
-      location: 'Jinja'
-    },
-    {
-      id: 'WD004',
-      userName: 'Peter Kiprotich',
-      userPhone: '+256784567890',
-      amount: { ugx: 200000, usdc: 52.63 },
-      withdrawalCode: 'WD004567',
-      requestedAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000), // 1.5 hours ago
-      status: 'pending',
-      userNationalId: 'CM45678901234567',
-      location: 'Mbarara'
-    },
-    {
-      id: 'WD005',
-      userName: 'Diana Namubiru',
-      userPhone: '+256785678901',
-      amount: { ugx: 100000, usdc: 26.32 },
-      withdrawalCode: 'WD005678',
-      requestedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      status: 'verified',
-      userNationalId: 'CM56789012345678',
-      location: 'Gulu'
+  // Function to convert Transaction to WithdrawalRequest
+  const convertTransactionToWithdrawalRequest = async (transaction: Transaction): Promise<WithdrawalRequest | null> => {
+    try {
+      // Get user details for the withdrawal request
+      const user = await DataService.getWebUserById(transaction.userId);
+      if (!user) return null;
+
+      return {
+        id: transaction.id,
+        userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+        userPhone: user.email || 'Unknown', // Using email as phone since that's what's available
+        amount: {
+          ugx: transaction.amount,
+          usdc: transaction.amount * 0.00026 // Convert to USDT using exchange rate
+        },
+        withdrawalCode: transaction?.metadata?.withdrawalCode || '', // Type assertion for withdrawalCode
+        requestedAt: transaction.createdAt instanceof Date ? transaction.createdAt : new Date(transaction.createdAt),
+        status: transaction.status as 'pending' | 'verified' | 'approved' | 'completed' | 'rejected',
+        userNationalId: 'N/A', // Not available in User type
+        location: 'N/A' // Not available in User type
+      };
+    } catch (error) {
+      console.error('Error converting transaction:', error);
+      return null;
     }
-  ]);
+  };
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC') => {
+  // Fetch real withdrawal requests
+  useEffect(() => {
+    const fetchWithdrawalRequests = async () => {
+      if (!agent?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        // Get pending withdrawals for this agent
+        const pendingTransactions = await DataService.getPendingWithdrawals(agent.id);
+        
+        // Convert transactions to withdrawal requests
+        const withdrawalRequestPromises = pendingTransactions.map(convertTransactionToWithdrawalRequest);
+        const withdrawalRequestsResults = await Promise.all(withdrawalRequestPromises);
+        
+        // Filter out null results
+        const validWithdrawalRequests = withdrawalRequestsResults.filter(
+          (request): request is WithdrawalRequest => request !== null
+        );
+        
+        setWithdrawalRequests(validWithdrawalRequests);
+      } catch (error) {
+        console.error('Error fetching withdrawal requests:', error);
+        setWithdrawalRequests([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWithdrawalRequests();
+  }, [agent?.id]);
+
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT') => {
     if (currency === 'UGX') {
       return new Intl.NumberFormat('en-UG', {
         style: 'currency',
@@ -117,9 +124,9 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
   });
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
           <input
@@ -127,14 +134,14 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
             placeholder="Search by name, phone, or withdrawal code..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200"
+            className="w-full pl-10 pr-4 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200 text-sm sm:text-base"
           />
         </div>
         
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200"
+          className="px-3 sm:px-4 py-2 sm:py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200 text-sm sm:text-base"
         >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
@@ -144,14 +151,22 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
       </div>
 
       {/* Withdrawal Requests List */}
-      <div className="space-y-4">
-        {filteredRequests.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CreditCard className="w-8 h-8 text-neutral-400" />
+      <div className="space-y-3 sm:space-y-4">
+        {loading ? (
+          <div className="text-center py-8 sm:py-12">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 animate-pulse">
+              <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
             </div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">No withdrawal requests found</h3>
-            <p className="text-neutral-600">
+            <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">Loading withdrawal requests...</h3>
+            <p className="text-neutral-600 text-sm sm:text-base">Please wait while we fetch the latest requests</p>
+          </div>
+        ) : filteredRequests.length === 0 ? (
+          <div className="text-center py-8 sm:py-12">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
+            </div>
+            <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">No withdrawal requests found</h3>
+            <p className="text-neutral-600 text-sm sm:text-base">
               {searchTerm || filterStatus !== 'all' 
                 ? 'Try adjusting your search or filter criteria'
                 : 'Withdrawal requests will appear here when customers make requests'
@@ -163,25 +178,25 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
             <div
               key={request.id}
               onClick={() => onSelectWithdrawal(request)}
-              className="bg-white border border-neutral-200 rounded-xl p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-neutral-300"
+              className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-neutral-300"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+                <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
                   {/* User Avatar */}
-                  <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-neutral-600" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
                   </div>
                   
                   {/* User Info */}
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-neutral-900">{request.userName}</h3>
-                    <div className="flex items-center space-x-4 text-sm text-neutral-600 mt-1">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-neutral-900 truncate">{request.userName}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-neutral-600 mt-1 space-y-1 sm:space-y-0">
                       <div className="flex items-center space-x-1">
-                        <Phone className="w-4 h-4" />
-                        <span>{request.userPhone}</span>
+                        <Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="truncate">{request.userPhone}</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Clock className="w-4 h-4" />
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                         <span>{getTimeAgo(request.requestedAt)}</span>
                       </div>
                     </div>
@@ -189,12 +204,12 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
                 </div>
 
                 {/* Amount and Status */}
-                <div className="text-right">
-                  <div className="text-lg font-bold text-neutral-900 font-mono">
+                <div className="text-left sm:text-right flex-shrink-0">
+                  <div className="text-base sm:text-lg font-bold text-neutral-900 font-mono">
                     {formatCurrency(request.amount.ugx, 'UGX')}
                   </div>
-                  <div className="text-sm text-neutral-600 mb-2 font-mono">
-                    ≈ {formatCurrency(request.amount.usdc, 'USDC')}
+                  <div className="text-xs sm:text-sm text-neutral-600 mb-2 font-mono">
+                    ≈ {formatCurrency(request.amount.usdc, 'USDT')}
                   </div>
                   
                   {/* Withdrawal Code */}
@@ -215,8 +230,8 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
 
       {/* Summary */}
       {filteredRequests.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-neutral-200">
-          <div className="flex justify-between text-sm text-neutral-600">
+        <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-neutral-200">
+          <div className="flex flex-col sm:flex-row sm:justify-between text-xs sm:text-sm text-neutral-600 space-y-2 sm:space-y-0">
             <span>Showing {filteredRequests.length} withdrawal request{filteredRequests.length !== 1 ? 's' : ''}</span>
             <span className="font-mono font-semibold">
               Total: {formatCurrency(

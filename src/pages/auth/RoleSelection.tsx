@@ -31,7 +31,7 @@ const RoleSelection: React.FC = () => {
       // Set the role in the user_roles collection
       await setUserRole(junoUser, role);
       // Update the userType in the authentication context to trigger storage key change
-      updateUserType(role);
+      // await updateUserType(role,'user');
     } catch (error) {
       console.error('Failed to set user role:', error);
     } finally {

@@ -38,7 +38,7 @@ const App: FC = () => {
     const initJuno = async () => {
       try {
         await initSatellite({
-          satelliteId: junoConfig.satellite.ids?.development || "atbka-rp777-77775-aaaaq-cai",
+          satelliteId: junoConfig.satellite.ids?.development || "uxrrr-q7777-77774-qaaaq-cai",
           workers: {
             auth: true,
           },
@@ -63,7 +63,7 @@ const App: FC = () => {
     
           {/* User Routes */}
           <Route path="/users/*" element={
-            <Layout desktop_routes={user_desktop_routes} mobile_routes={user_mobile_routes}>
+            <Layout desktop_routes={user_desktop_routes} mobile_routes={user_mobile_routes} user_type="user">
               <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
@@ -77,7 +77,7 @@ const App: FC = () => {
           
           {/* Agent Routes */}
           <Route path="/agents/*" element={
-            <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes}>
+            <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes} user_type="agent">
               <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
                 <Route path="withdraw" element={<ProcessWithdrawal/>} />

@@ -1,386 +1,328 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   ArrowUp,
   ArrowDown,
   Plus,
   Minus,
   Search,
-  Download,
-  Calendar,
-  DollarSign,
-  TrendingUp
 } from 'lucide-react';
-
-interface AgentTransaction {
-  id: string;
-  customer: string;
-  customerPhone: string;
-  type: 'deposit' | 'withdrawal' | 'send-money' | 'receive-money';
-  amount: {
-    ugx: number;
-    usdc: number;
-  };
-  commission: {
-    ugx: number;
-    usdc: number;
-  };
-  status: 'completed' | 'pending' | 'failed';
-  timestamp: Date;
-  location?: string;
-  notes?: string;
-}
+import { Transaction } from '../../services/dataService';
+import PageLayout from '../../components/PageLayout';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
 const AgentTransactions: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'deposit' | 'withdrawal' | 'send-money' | 'receive-money'>('all');
-  const [dateRange, setDateRange] = useState<'today' | 'week' | 'month' | 'all'>('all');
+  const { agentTransactions, isLoading } = useAfriTokeni();
+  
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState<string>('all');
+  const [typeFilter, setTypeFilter] = React.useState<string>('all');
 
-  // Mock transaction data
-  const [transactions] = useState<AgentTransaction[]>([
-    {
-      id: 'AGT001',
-      customer: 'John Kamau',
-      customerPhone: '+256701234567',
-      type: 'withdrawal',
-      amount: { ugx: 100000, usdc: 26.32 },
-      commission: { ugx: 2000, usdc: 0.53 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 10),
-      location: 'Kampala Central',
-      notes: 'Regular customer withdrawal'
-    },
-    {
-      id: 'AGT002',
-      customer: 'Mary Nakato',
-      customerPhone: '+256702345678',
-      type: 'deposit',
-      amount: { ugx: 75000, usdc: 19.74 },
-      commission: { ugx: 1500, usdc: 0.39 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 45),
-      location: 'Nakawa Market'
-    },
-    {
-      id: 'AGT003',
-      customer: 'Peter Okello',
-      customerPhone: '+256703456789',
-      type: 'send-money',
-      amount: { ugx: 200000, usdc: 52.63 },
-      commission: { ugx: 3000, usdc: 0.79 },
-      status: 'pending',
-      timestamp: new Date(Date.now() - 1000 * 60 * 120),
-      location: 'Wandegeya'
-    },
-    {
-      id: 'AGT004',
-      customer: 'Sarah Namugga',
-      customerPhone: '+256704567890',
-      type: 'withdrawal',
-      amount: { ugx: 150000, usdc: 39.47 },
-      commission: { ugx: 3000, usdc: 0.79 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 180),
-      location: 'Kampala Central',
-      notes: 'Large withdrawal - ID verified'
-    },
-    {
-      id: 'AGT005',
-      customer: 'David Mukasa',
-      customerPhone: '+256705678901',
-      type: 'deposit',
-      amount: { ugx: 50000, usdc: 13.16 },
-      commission: { ugx: 1000, usdc: 0.26 },
-      status: 'failed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 240),
-      location: 'Ntinda',
-      notes: 'Insufficient cash available'
-    },
-    {
-      id: 'AGT006',
-      customer: 'Grace Achieng',
-      customerPhone: '+256706789012',
-      type: 'receive-money',
-      amount: { ugx: 80000, usdc: 21.05 },
-      commission: { ugx: 1600, usdc: 0.42 },
-      status: 'completed',
-      timestamp: new Date(Date.now() - 1000 * 60 * 300),
-      location: 'Kampala Central'
-    }
-  ]);
+  const itemsPerPage = 10;
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC'): string => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
-        style: 'currency',
-        currency: 'UGX'
-      }).format(amount);
-    } else {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(amount);
-    }
+  const formatCurrency = (amount: number): string => {
+    return `UGX ${amount.toLocaleString()}`;
   };
 
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getTransactionIcon = (type: AgentTransaction['type']): React.ReactElement => {
+  const getTransactionIcon = (type: string) => {
     switch (type) {
-      case 'withdrawal':
-        return <Minus className="w-5 h-5 text-red-500" />;
+      case 'send':
+        return <ArrowUp className="h-5 w-5 text-red-500" />;
+      case 'receive':
+        return <ArrowDown className="h-5 w-5 text-green-500" />;
+      case 'withdraw':
+        return <Minus className="h-5 w-5 text-blue-500" />;
       case 'deposit':
-        return <Plus className="w-5 h-5 text-green-500" />;
-      case 'send-money':
-        return <ArrowUp className="w-5 h-5 text-blue-500" />;
-      case 'receive-money':
-        return <ArrowDown className="w-5 h-5 text-purple-500" />;
+        return <Plus className="h-5 w-5 text-purple-500" />;
       default:
-        return <DollarSign className="w-5 h-5 text-gray-500" />;
+        return <Plus className="h-5 w-5 text-gray-500" />;
     }
   };
 
-  const getStatusBadge = (status: AgentTransaction['status']) => {
-    const statusClasses = {
-      completed: 'bg-green-100 text-green-800 border-green-200',
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      failed: 'bg-red-100 text-red-800 border-red-200'
-    };
-    
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClasses[status]}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'text-green-600 bg-green-100';
+      case 'pending':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'failed':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
   };
 
-  const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.customerPhone.includes(searchTerm) ||
-                         transaction.id.toLowerCase().includes(searchTerm.toLowerCase());
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'send':
+        return 'text-red-600 bg-red-100';
+      case 'receive':
+        return 'text-green-600 bg-green-100';
+      case 'withdraw':
+        return 'text-blue-600 bg-blue-100';
+      case 'deposit':
+        return 'text-purple-600 bg-purple-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  // Filter transactions based on search term and filters
+  const filteredTransactions = React.useMemo(() => {
+    if (!agentTransactions) return [];
     
-    const matchesStatus = statusFilter === 'all' || transaction.status === statusFilter;
-    const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
-    
-    let matchesDate = true;
-    if (dateRange !== 'all') {
-      const now = new Date();
-      const transactionDate = transaction.timestamp;
+    return agentTransactions.filter((transaction: Transaction) => {
+      const description = transaction.description || '';
+      const transactionId = transaction.id || '';
       
-      switch (dateRange) {
-        case 'today':
-          matchesDate = transactionDate.toDateString() === now.toDateString();
-          break;
-        case 'week': {
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          matchesDate = transactionDate >= weekAgo;
-          break;
-        }
-        case 'month': {
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          matchesDate = transactionDate >= monthAgo;
-          break;
-        }
-      }
-    }
-    
-    return matchesSearch && matchesStatus && matchesType && matchesDate;
-  });
+      const matchesSearch = 
+        description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        transactionId.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilter === 'all' || transaction.status === statusFilter;
+      const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
+      
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [agentTransactions, searchTerm, statusFilter, typeFilter]);
 
-  const totalCommission = transactions
-    .filter(t => t.status === 'completed')
-    .reduce((acc, t) => ({ ugx: acc.ugx + t.commission.ugx, usdc: acc.usdc + t.commission.usdc }), { ugx: 0, usdc: 0 });
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, typeFilter]);
+
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center items-center h-48 sm:h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-indigo-600 mx-auto mb-3 sm:mb-4"></div>
+            <p className="text-sm sm:text-base text-gray-600">Loading transactions...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Agent Transactions</h2>
-          <p className="text-gray-600">Track and manage your customer transactions</p>
-        </div>
-        <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <Download className="w-4 h-4" />
-          <span className="text-sm">Export</span>
-        </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <TrendingUp className="h-8 w-8 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Commission</p>
-              <p className="text-xl font-bold text-gray-800">{formatCurrency(totalCommission.ugx, 'UGX')}</p>
-              <p className="text-sm text-gray-500">≈ {formatCurrency(totalCommission.usdc, 'USDC')}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <DollarSign className="h-8 w-8 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Transactions</p>
-              <p className="text-2xl font-bold text-gray-800">{transactions.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Calendar className="h-8 w-8 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Today&apos;s Count</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {transactions.filter(t => t.timestamp.toDateString() === new Date().toDateString()).length}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+    <PageLayout>
+      <div className="space-y-4 sm:space-y-6">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Agent Transaction History</h1>
+        
+        {/* Search and Filters */}
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Customer, phone, or ID..."
+                placeholder="Search transactions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'completed' | 'pending' | 'failed')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
-              <option value="all">All Status</option>
+              <option value="all">All Statuses</option>
               <option value="completed">Completed</option>
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+            
             <select
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as 'all' | 'deposit' | 'withdrawal' | 'send-money' | 'receive-money')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="all">All Types</option>
+              <option value="send">Send</option>
+              <option value="receive">Receive</option>
+              <option value="withdraw">Withdraw</option>
               <option value="deposit">Deposit</option>
-              <option value="withdrawal">Withdrawal</option>
-              <option value="send-money">Send Money</option>
-              <option value="receive-money">Receive Money</option>
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value as 'today' | 'week' | 'month' | 'all')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('all');
+                setTypeFilter('all');
+              }}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-            </select>
+              Clear Filters
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Transaction List */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Transactions ({filteredTransactions.length})
-          </h3>
-        </div>
-        <div className="divide-y divide-gray-100">
-          {filteredTransactions.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <DollarSign className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p>No transactions found matching your filters.</p>
+        {/* Transactions Table */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          {currentTransactions.length === 0 ? (
+            <div className="p-6 sm:p-8 text-center">
+              <Plus className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-1 sm:mb-2">No transactions found</h3>
+              <p className="text-sm sm:text-base text-gray-500">
+                {agentTransactions?.length === 0 
+                  ? "You haven't made any transactions yet."
+                  : "No transactions match your current filters."
+                }
+              </p>
             </div>
           ) : (
-            filteredTransactions.map((transaction) => (
-              <div key={transaction.id} className="p-6 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                      {getTransactionIcon(transaction.type)}
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2 mb-1">
-                        <p className="font-semibold text-gray-800">{transaction.customer}</p>
-                        {getStatusBadge(transaction.status)}
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Transaction
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {currentTransactions.map((transaction: Transaction) => (
+                      <tr key={transaction.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 max-w-xs">
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full">
+                              {getTransactionIcon(transaction.type)}
+                            </div>
+                            <div className="ml-4 min-w-0 flex-1">
+                              <div className="text-sm font-medium text-gray-900 break-words leading-5">
+                                {transaction.description || 'Transaction'}
+                              </div>
+                              <div className="text-xs text-gray-500 break-all mt-1">
+                                ID: {transaction.id}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(transaction.type)}`}>
+                            {transaction.type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatCurrency(transaction.amount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
+                            {transaction.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(transaction.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-4">
+                {currentTransactions.map((transaction: Transaction) => (
+                  <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center bg-gray-100 rounded-full">
+                        {getTransactionIcon(transaction.type)}
                       </div>
-                      <p className="text-sm text-gray-600">{transaction.customerPhone}</p>
-                      <p className="text-xs text-gray-500">
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace('-', ' ')} • 
-                        {formatDate(transaction.timestamp)} • 
-                        {transaction.location}
-                      </p>
-                      {transaction.notes && (
-                        <p className="text-xs text-blue-600 mt-1">{transaction.notes}</p>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        {/* Transaction Description - Full text with wrapping */}
+                        <div className="mb-3">
+                          <p className="text-sm font-medium text-gray-900 leading-5 break-words">
+                            {transaction.description || 'Transaction'}
+                          </p>
+                        </div>
+                        
+                        {/* Amount - Prominent display */}
+                        <div className="mb-3">
+                          <p className="text-base font-semibold text-gray-900">
+                            {formatCurrency(transaction.amount)}
+                          </p>
+                        </div>
+                        
+                        {/* Transaction ID - Full display with background */}
+                        <div className="bg-gray-50 rounded-md px-2 py-1 mb-3">
+                          <p className="text-xs text-gray-500 break-all">
+                            ID: {transaction.id}
+                          </p>
+                        </div>
+                        
+                        {/* Type, Status, and Date */}
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(transaction.type)}`}>
+                              {transaction.type}
+                            </span>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
+                              {transaction.status}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(transaction.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="text-right">
-                    <div className="mb-2">
-                      <p className="font-semibold text-gray-800">
-                        {formatCurrency(transaction.amount.ugx, 'UGX')}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        ≈ {formatCurrency(transaction.amount.usdc, 'USDC')}
-                      </p>
-                    </div>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-                      <p className="text-xs text-green-600 font-medium">Commission</p>
-                      <p className="text-sm font-semibold text-green-800">
-                        +{formatCurrency(transaction.commission.ugx, 'UGX')}
-                      </p>
-                      <p className="text-xs text-green-600">
-                        ≈ +{formatCurrency(transaction.commission.usdc, 'USDC')}
-                      </p>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">ID: {transaction.id}</p>
+                ))}
+              </div>
+
+              {/* Responsive Pagination */}
+              {totalPages > 1 && (
+                <div className="bg-white px-3 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                  <div className="flex-1 flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="w-full sm:w-auto relative inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-xs sm:text-sm text-gray-700 text-center">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="w-full sm:w-auto relative inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
                   </div>
                 </div>
-              </div>
-            ))
+              )}
+            </>
           )}
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

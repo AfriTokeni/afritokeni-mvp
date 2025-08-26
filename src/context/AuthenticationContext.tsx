@@ -32,9 +32,14 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+interface IUser{
+  agent: User | null;
+  user: User | null;
+}
+
 // Hybrid authentication for AfriTokeni - SMS for users without internet, ICP for web users
 const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<IUser>({ agent: null, user: null });
   const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'sms' | 'web'>('web');
   
@@ -47,16 +52,20 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const userKey = `afritokeni_${userType}`;
     const methodKey = `afritokeni_${userType}_auth_method`;
     
-    // Store in sessionStorage for tab-specific access
-    sessionStorage.setItem(userKey, userString);
-    sessionStorage.setItem(methodKey, method);
+
     // Store in localStorage for persistence across sessions
     localStorage.setItem(userKey, userString);
     localStorage.setItem(methodKey, method);
-    
+
+    const prev_logged_user = localStorage.getItem('afritokeni_current_user_type');
+    const parsedUser = prev_logged_user ?  JSON.parse(prev_logged_user) : {};
+    const obj = {
+      ...parsedUser,
+      [userType]:userType
+    }
+
     // Also store current active user info for easy retrieval
-    sessionStorage.setItem('afritokeni_current_user_type', userType);
-    localStorage.setItem('afritokeni_current_user_type', userType);
+    localStorage.setItem('afritokeni_current_user_type', JSON.stringify(obj));
   };
 
   // Helper function to clear user data from both storages
@@ -66,16 +75,24 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userKey = `afritokeni_${userType}`;
       const methodKey = `afritokeni_${userType}_auth_method`;
       
-      sessionStorage.removeItem(userKey);
-      sessionStorage.removeItem(methodKey);
       localStorage.removeItem(userKey);
       localStorage.removeItem(methodKey);
       
       // Only clear current user type if it matches the one being cleared
-      const currentUserType = sessionStorage.getItem('afritokeni_current_user_type');
-      if (currentUserType === userType) {
-        sessionStorage.removeItem('afritokeni_current_user_type');
-        localStorage.removeItem('afritokeni_current_user_type');
+      const currentUserType = JSON.parse(localStorage.getItem('afritokeni_current_user_type') || '{}');
+      console.log('Current user type before clearing:', currentUserType?.[userType]);
+      if (currentUserType?.[userType] === userType) {
+        // Remove only the specific user type from the object
+        const updatedCurrentUserType = { ...currentUserType };
+        delete updatedCurrentUserType[userType];
+        
+        // If no user types remain, remove the key entirely
+        if (Object.keys(updatedCurrentUserType).length === 0) {
+          localStorage.removeItem('afritokeni_current_user_type');
+        } else {
+          // Otherwise, update with the remaining user types
+          localStorage.setItem('afritokeni_current_user_type', JSON.stringify(updatedCurrentUserType));
+        }
       }
     } else {
       // Clear all data (for complete logout scenarios)
@@ -83,81 +100,90 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const userKey = `afritokeni_${type}`;
         const methodKey = `afritokeni_${type}_auth_method`;
         
-        sessionStorage.removeItem(userKey);
-        sessionStorage.removeItem(methodKey);
+
         localStorage.removeItem(userKey);
         localStorage.removeItem(methodKey);
       });
       
       // Clear current user type indicators
-      sessionStorage.removeItem('afritokeni_current_user_type');
       localStorage.removeItem('afritokeni_current_user_type');
     }
   };
 
   // Helper function to get stored user data for specific user type
-  const getStoredUserData = (userType?: 'user' | 'agent') => {
-    let targetUserType = userType;
+  const getStoredUserData = () => {
+    // let targetUserType = userType;
+    // console.log('Getting stored user data for type:', userType);
+
+    // // If no specific user type requested, get the current active one
+    // if (!targetUserType) {
+    //   targetUserType = localStorage.getItem('afritokeni_current_user_type') as 'user' | 'agent';
+    // }
     
-    // If no specific user type requested, get the current active one
-    if (!targetUserType) {
-      targetUserType = sessionStorage.getItem('afritokeni_current_user_type') as 'user' | 'agent' ||
-                      localStorage.getItem('afritokeni_current_user_type') as 'user' | 'agent';
-    }
-    
-    // If still no user type found, try to find any existing data (prioritize user over agent)
-    if (!targetUserType) {
-      // Check if user data exists
-      const userExists = localStorage.getItem('afritokeni_user') && localStorage.getItem('afritokeni_user_auth_method');
-      const agentExists = localStorage.getItem('afritokeni_agent') && localStorage.getItem('afritokeni_agent_auth_method');
+    // // If still no user type found, try to find any existing data (prioritize user over agent)
+    // if (!targetUserType) {
+    //   // Check if user data exists
+    //   const userExists = localStorage.getItem('afritokeni_user') && localStorage.getItem('afritokeni_user_auth_method');
+    //   const agentExists = localStorage.getItem('afritokeni_agent') && localStorage.getItem('afritokeni_agent_auth_method');
       
-      if (userExists) {
-        targetUserType = 'user';
-      } else if (agentExists) {
-        targetUserType = 'agent';
-      }
-    }
+    //   if (userExists) {
+    //     targetUserType = 'user';
+    //   } else if (agentExists) {
+    //     targetUserType = 'agent';
+    //   }
+    // }
+
+    const user_type_storage = localStorage.getItem('afritokeni_current_user_type');
+   
+
+    const target_user_type = user_type_storage ?  JSON.parse(localStorage.getItem('afritokeni_current_user_type') || '{}') : null;
+    console.log('Target user type for retrieval:', target_user_type);
+
+    if (!target_user_type) return null;
+
+    // if (!targetUserType) return null;
     
-    if (!targetUserType) return null;
-    
-    const userKey = `afritokeni_${targetUserType}`;
-    const methodKey = `afritokeni_${targetUserType}_auth_method`;
-    
-    // Priority: sessionStorage (tab-specific) > localStorage (global)
-    let storedUser = sessionStorage.getItem(userKey);
-    let storedAuthMethod = sessionStorage.getItem(methodKey);
-    
-    // Fallback to localStorage if sessionStorage is empty
-    if (!storedUser || !storedAuthMethod) {
-      storedUser = localStorage.getItem(userKey);
-      storedAuthMethod = localStorage.getItem(methodKey);
-      
-      // If found in localStorage, copy to sessionStorage for this tab
-      if (storedUser && storedAuthMethod) {
-        sessionStorage.setItem(userKey, storedUser);
-        sessionStorage.setItem(methodKey, storedAuthMethod);
-        sessionStorage.setItem('afritokeni_current_user_type', targetUserType);
-      }
-    }
-    
-    if (storedUser && storedAuthMethod) {
+    const userKey = `afritokeni_${target_user_type['user']}`;
+    const userMethodKey = `afritokeni_${target_user_type['user']}_auth_method`;
+
+    const agent_user_key = `afritokeni_${target_user_type['agent']}`;
+    const agent_user_method_key = `afritokeni_${target_user_type['agent']}_auth_method`;
+
+    // User data
+    const storedUser = JSON.parse(localStorage.getItem(userKey) || 'null');
+    const storedUserAuthMethod = localStorage.getItem(userMethodKey);
+
+    // Agent user data
+    const storedAgentUser = JSON.parse(localStorage.getItem(agent_user_key) || 'null');
+    const storedAgentAuthMethod = localStorage.getItem(agent_user_method_key);
+
+    if ((storedUser && storedUserAuthMethod) || (storedAgentUser && storedAgentAuthMethod)) {
       try {
-        const parsedUser = JSON.parse(storedUser) as User;
+        const parsedUser = storedUser as User;
+
+        const parsedAgentUser = storedAgentUser as User;
         // Convert createdAt string back to Date if it exists
         if (parsedUser.createdAt && typeof parsedUser.createdAt === 'string') {
           parsedUser.createdAt = new Date(parsedUser.createdAt);
         }
+
+        // Convert createdAt string back to Date if it exists
+        if (parsedAgentUser.createdAt && typeof parsedAgentUser.createdAt === 'string') {
+          parsedAgentUser.createdAt = new Date(parsedAgentUser.createdAt);
+        }
+
         return {
-          user: parsedUser,
-          authMethod: storedAuthMethod as 'sms' | 'web'
+          user: {user: parsedUser, agent: parsedAgentUser},
+          authMethod: storedAgentAuthMethod as 'sms' | 'web'
         };
       } catch (error) {
         console.error('Error parsing stored user data:', error);
+
         // Clear corrupted data
-        sessionStorage.removeItem(userKey);
-        sessionStorage.removeItem(methodKey);
         localStorage.removeItem(userKey);
-        localStorage.removeItem(methodKey);
+        localStorage.removeItem(agent_user_key);
+        localStorage.removeItem(userMethodKey);
+        localStorage.removeItem(agent_user_method_key);
       }
     }
     
@@ -176,7 +202,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     pendingUserData: null
   });
   
-  const { checkAndRedirectUser } = useRoleBasedAuth();
+  const { checkAndRedirectUser, isUserCreatedSuccess } = useRoleBasedAuth();
   // Keep a ref of latest checker to avoid re-subscribing when its identity changes
   const checkAndRedirectRef = useRef(checkAndRedirectUser);
   useEffect(() => {
@@ -185,6 +211,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize user from stored data on app start
   useEffect(() => {
+    
     const storedData = getStoredUserData();
     
     if (storedData) {
@@ -196,6 +223,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Subscribe to Juno authentication state for web users
   useEffect(() => {
     const unsubscribe = authSubscribe(async (junoUser: JunoUser | null) => {
+      console.log('Juno user state changed:', junoUser);
       if (junoUser) {
         // For ICP users, check their role and redirect accordingly
         checkAndRedirectRef.current(junoUser);
@@ -224,7 +252,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           } catch {
             console.log('No existing role found, defaulting to user');
           }
-          
+
+          console.log('existing user doc', existingUserDoc);
+
           if (existingUserDoc?.data) {
             // User exists, use their existing data (including KYC status)
             const userData = existingUserDoc.data as UserDataFromJuno;
@@ -233,41 +263,48 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
               userType: userRole, // Use the role from user_roles collection
               createdAt: userData.createdAt ? new Date(userData.createdAt) : new Date()
             } as User;
-          } else {
-            // New web user, create profile using ID as key
-            afritokeniUser = {
-              id: junoUser.key,
-              firstName: 'ICP',
-              lastName: 'User',
-              email: junoUser.key, // Use key as identifier for web users
-              userType: userRole, // Use determined role
-              isVerified: true,
-              kycStatus: 'not_started',
-              createdAt: new Date()
-            };
 
-            // Create user record in datastore with ID as key
-            await DataService.createUser({
-              id: afritokeniUser.id,
-              firstName: afritokeniUser.firstName,
-              lastName: afritokeniUser.lastName,
-              email: afritokeniUser.email,
-              userType: afritokeniUser.userType,
-              kycStatus: afritokeniUser.kycStatus,
-              authMethod: 'web' // Important: specify this is a web user
+            setUser({
+              ...user,
+              [userRole]: afritokeniUser
             });
+            setAuthMethod('web');
+            storeUserData(afritokeniUser, 'web');
+          } else {
+            // // New web user, create profile using ID as key
+            // afritokeniUser = {
+            //   id: junoUser.key,
+            //   firstName: 'ICP',
+            //   lastName: 'User',
+            //   email: junoUser.key, // Use key as identifier for web users
+            //   userType: userRole, // Use determined role
+            //   isVerified: true,
+            //   kycStatus: 'not_started',
+            //   createdAt: new Date()
+            // };
+
+            // // Create user record in datastore with ID as key
+            // await DataService.createUser({
+            //   id: afritokeniUser.id,
+            //   firstName: afritokeniUser.firstName,
+            //   lastName: afritokeniUser.lastName,
+            //   email: afritokeniUser.email,
+            //   userType: afritokeniUser.userType,
+            //   kycStatus: afritokeniUser.kycStatus,
+            //   authMethod: 'web' // Important: specify this is a web user
+            // });
             
             // Save new user to our datastore
-            await setDoc({
-              collection: 'users',
-              doc: {
-                key: junoUser.key,
-                data: {
-                  ...afritokeniUser,
-                  createdAt: afritokeniUser.createdAt?.toISOString() || new Date().toISOString()
-                }
-              }
-            });
+            // await setDoc({
+            //   collection: 'users',
+            //   doc: {
+            //     key: junoUser.key,
+            //     data: {
+            //       ...afritokeniUser,
+            //       createdAt: afritokeniUser.createdAt?.toISOString() || new Date().toISOString()
+            //     }
+            //   }
+            // });
           }
         } catch (error) {
           console.error('Error loading user data for web auth:', error);
@@ -283,29 +320,33 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date()
           };
         }
-
-        setUser(afritokeniUser);
-        setAuthMethod('web');
-        storeUserData(afritokeniUser, 'web');
       } else {
-        const currentUserBeforeLogout = user;
-        setUser(null);
-        // When user logs out, only clear their specific user type data
-        if (currentUserBeforeLogout?.userType) {
-          clearUserData(currentUserBeforeLogout.userType);
-        }
+        // const currentUserBeforeLogout = user;
+        // setUser({user: null, agent: null});
+
+        // // Clear user data
+        // if (currentUserBeforeLogout.user?.userType) {
+        //   clearUserData(currentUserBeforeLogout.user.userType);
+        // }
+        // // Clear agent user data
+        // if (currentUserBeforeLogout.agent?.userType) {
+        //   clearUserData(currentUserBeforeLogout.agent.userType);
+        // }
       }
     });
 
+    console.log('User authentication state changed');
+
     return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array is intentional - we handle user changes inside the callback
+  }, [isUserCreatedSuccess]); // Empty dependency array is intentional - we handle user changes inside the callback
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
     setIsLoading(true);
     try {
       if (method === 'web') {
+        console.log('Web login initiated');
         // Use Juno/ICP Internet Identity authentication for web users
         await signIn();
         return true;
@@ -365,8 +406,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           existingUser = newUser;
         }
-        
-        setUser(existingUser);
+        const stored_agent = existingUser.userType == 'agent' ? existingUser : null;
+        const stored_user = existingUser.userType == 'user' ? existingUser : null;
+        setUser({ user: stored_user, agent: stored_agent });
         setAuthMethod('sms');
         storeUserData(existingUser, 'sms');
         
@@ -482,9 +524,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           data: newUser
         }
       });
-      
+
+      const stored_agent = newUser.userType == 'agent' ? newUser : null;
+      const stored_user = newUser.userType == 'user' ? newUser : null;
+
       // Set user as logged in
-      setUser(newUser);
+      setUser({ user: stored_user, agent: stored_agent });
       setAuthMethod('sms');
       storeUserData(newUser, 'sms');
       
@@ -515,29 +560,71 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
-  const logout = async () => {
+  const logout = async (userTypeToLogout?: 'user' | 'agent') => {
     try {
-      if (authMethod === 'web') {
+      let targetUserType: 'user' | 'agent' | undefined = userTypeToLogout;
+      
+      // If no specific user type provided, determine based on current context
+      if (!targetUserType) {
+        // You could add logic here to determine which user is "currently active"
+        // For now, let's prioritize user over agent, or require explicit specification
+        if (user.user && user.agent) {
+          // Both are active - require explicit specification
+          throw new Error('Multiple user types active. Please specify which user type to logout.');
+        } else if (user.user) {
+          targetUserType = 'user';
+        } else if (user.agent) {
+          targetUserType = 'agent';
+        }
+      }
+      
+      if (!targetUserType) {
+        throw new Error('No user type to logout');
+      }
+
+      console.log('Logging out user type:', targetUserType);
+      console.log('Current user state before logout:', user);
+      console.log('Current auth method before logout:', authMethod);
+      console.log('User to logout:', user[targetUserType]);
+      
+      if (authMethod === 'web' && user[targetUserType]) {
         // Use Juno signOut for web users
+        console.log('Signing out web user via Juno');
         await signOut();
       }
       
-      // Clear local state for current user type only
-      const currentUserType = user?.userType;
-      setUser(null);
-      setAuthMethod('web');
-      clearUserData(currentUserType);
+      // Clear only the specified user type from state
+      setUser(prev => ({
+        ...prev,
+        [targetUserType]: null
+      }));
       
-      // Force redirect to landing page
-      window.location.href = '/';
+      // Clear storage for the specific user type
+      clearUserData(targetUserType);
+      
+      // If no users remain, reset auth method and redirect
+      const remainingUser = targetUserType === 'user' ? user.agent : user.user;
+      if (!remainingUser) {
+        setAuthMethod('web');
+        window.location.href = '/';
+      }
+      
     } catch (error) {
       console.error('Logout error:', error);
-      // Force logout even if signOut fails
-      const currentUserType = user?.userType;
-      setUser(null);
-      setAuthMethod('web');
-      clearUserData(currentUserType);
-      window.location.href = '/';
+      // Force logout logic here
+      if (userTypeToLogout) {
+        setUser(prev => ({
+          ...prev,
+          [userTypeToLogout]: null
+        }));
+        clearUserData(userTypeToLogout);
+        
+        const remainingUser = userTypeToLogout === 'user' ? user.agent : user.user;
+        if (!remainingUser) {
+          setAuthMethod('web');
+          window.location.href = '/';
+        }
+      }
     }
   };
 
@@ -554,22 +641,58 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     verificationPhoneNumber: verificationState.phoneNumber,
     devVerificationCode: verificationState.devVerificationCode,
     // Add updateUser function for KYC completion and role updates
-    updateUser: (updatedUser: User) => {
-      // If userType is changing, clear old storage and set new
-      if (user && user.userType !== updatedUser.userType) {
-        clearUserData(user.userType);
+    updateUser: async(updatedUser: User) => {
+      const userType = updatedUser.userType;
+      
+      // Get the current user of the same type for comparison
+      const currentUser = user[userType];
+      
+      // If userType is changing for an existing user, clear old storage
+      if (currentUser && currentUser.userType !== updatedUser.userType) {
+        clearUserData(currentUser.userType);
       }
-      setUser(updatedUser);
+      
+      // Update the specific user type in the state
+      setUser(prev => ({
+        ...prev,
+        [userType]: updatedUser
+      }));
+      
+      // Store the updated user data
       storeUserData(updatedUser, authMethod);
     },
     // Add method to update userType specifically (for role selection)
-    updateUserType: (newUserType: 'user' | 'agent') => {
-      if (user) {
-        // Clear old storage
-        clearUserData(user.userType);
-        // Update user with new type
-        const updatedUser = { ...user, userType: newUserType };
-        setUser(updatedUser);
+    updateUserType: async (newUserType: 'user' | 'agent', currentUserType?: 'user' | 'agent') => {
+      // If currentUserType is not provided, try to determine it
+      let sourceUserType = currentUserType;
+      if (!sourceUserType) {
+        if (user.user && !user.agent) {
+          sourceUserType = 'user';
+        } else if (user.agent && !user.user) {
+          sourceUserType = 'agent';
+        } else if (user.user && user.agent) {
+          throw new Error('Multiple user types active. Please specify which user type to update.');
+        } else {
+          throw new Error('No user found to update.');
+        }
+      }
+      
+      const currentUser = user[sourceUserType];
+      if (currentUser) {
+        // Clear old storage for the source user type
+        clearUserData(sourceUserType);
+        
+        // Create updated user with new type
+        const updatedUser = { ...currentUser, userType: newUserType };
+        
+        // Clear the old user type from state and set the new one
+        setUser(prev => ({
+          ...prev,
+          [sourceUserType]: null, // Clear the old type
+          [newUserType]: updatedUser // Set the new type
+        }));
+        
+        // Store with new user type
         storeUserData(updatedUser, authMethod);
       }
     }
