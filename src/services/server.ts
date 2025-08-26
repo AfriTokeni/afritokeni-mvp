@@ -449,18 +449,35 @@ Enter recipient phone number (256XXXXXXXXX):`);
     //     return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
     //   }
 
-    console.log(`Getting user by key number: ${currentInput}`);
+    console.log(`Searching for user by phone number: ${currentInput}`);
 
-      // Check if recipient exists in users collection
-      const recipient = await DataService.getUserByKey(currentInput);
+      // Use the new findUserByPhoneNumber method that handles both SMS and web users
+      let recipient = await DataService.findUserByPhoneNumber(currentInput);
+      
+      if (!recipient) {
+        // Try with + prefix
+        recipient = await DataService.findUserByPhoneNumber(`+${currentInput}`);
+      }
+      
+      if (!recipient) {
+        // Try direct key lookup as fallback
+        recipient = await DataService.getUserByKey(currentInput);
+      }
+      
+      if (!recipient) {
+        // Try with + prefix as key
+        recipient = await DataService.getUserByKey(`+${currentInput}`);
+      }
+
       if (!recipient) {
         return continueSession(`Phone number ${currentInput} is not registered with AfriTokeni.
         
 Please enter a valid recipient phone number (256XXXXXXXXX):`);
       }
 
-      // Store recipient data
+      // Store recipient data - use the actual recipient ID for transaction processing
       session.data.recipientPhone = currentInput;
+      session.data.recipientId = recipient.id;
       session.data.recipientName = `${recipient.firstName} ${recipient.lastName}`;
       session.step = 3;
       return continueSession(`Recipient: ${recipient.firstName} ${recipient.lastName}

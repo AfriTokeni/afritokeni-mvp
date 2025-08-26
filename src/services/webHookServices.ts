@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { setDoc, getDoc } from '@junobuild/core';
+import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { User } from '../types/auth';
 import { AnonymousIdentity } from "@dfinity/agent";
@@ -211,6 +211,88 @@ export class WebhookDataService {
     }
   }
 
+  // Find user by phone number - handles both SMS users (phone as key) and web users (phone in email field)
+  static async findUserByPhoneNumber(phoneNumber: string): Promise<User | null> {
+    try {
+      // First try to get user directly by phone number (SMS users)
+      let user = await this.getUserByKey(phoneNumber);
+      if (user) {
+        return user;
+      }
+
+      // Try with + prefix
+      user = await this.getUserByKey(`+${phoneNumber}`);
+      if (user) {
+        return user;
+      }
+
+      // Try with various phone number formats
+      const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+      if (cleanPhone.startsWith('256')) {
+        const withPlus = `+${cleanPhone}`;
+        user = await this.getUserByKey(withPlus);
+        if (user) {
+          return user;
+        }
+      }
+
+      // If not found as direct key, search for web users where phone number is in email field
+      console.log(`Phone number ${phoneNumber} not found as direct key. Searching web users...`);
+      
+      try {
+        // List all users to search through them
+        const userDocs = await listDocs({
+          collection: 'users',
+          satellite
+        });
+
+        console.log(`Searching through ${userDocs.items.length} users for phone: ${phoneNumber}`);
+
+        // Search through all users to find one with matching phone number in email field
+        for (const doc of userDocs.items) {
+          const userData = doc.data as UserDataFromJuno;
+          
+          // Check if email field matches the phone number (for web users)
+          if (userData.email === phoneNumber || 
+              userData.email === `+${phoneNumber}` ||
+              userData.email === `+${cleanPhone}` ||
+              userData.email === cleanPhone) {
+            
+            console.log(`Found web user: ${userData.firstName} ${userData.lastName} with phone ${userData.email}`);
+            
+            // Convert and return the user
+            const foundUser: User = {
+              id: userData.id,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              email: userData.email,
+              userType: userData.userType,
+              isVerified: userData.isVerified,
+              kycStatus: userData.kycStatus,
+              pin: userData.pin,
+              createdAt: new Date(userData.createdAt)
+            };
+            
+            return foundUser;
+          }
+        }
+        
+        console.log(`No web user found with phone number: ${phoneNumber}`);
+        return null;
+        
+      } catch (searchError) {
+        console.error('Error searching web users:', searchError);
+        // Fall back to original behavior if search fails
+        console.log(`Unable to search for user with phone ${phoneNumber}. Search functionality failed.`);
+        return null;
+      }
+      
+    } catch (error) {
+      console.error('Error finding user by phone number:', error);
+      return null;
+    }
+  }
+
   static async updateUser(key: string, updates: Partial<User>, _authMethod?: 'sms' | 'web'): Promise<boolean> {
     try {
       const existingUser = await this.getUserByKey(key);
@@ -305,21 +387,31 @@ export class WebhookDataService {
   }
 
     // Balance operations
-    static async getUserBalance(userId: string): Promise<UserBalance | null> {
+    static async getUserBalance(userIdentifier: string): Promise<UserBalance | null> {
       try {
-        const existingUser = await this.getUserByKey(userId);
-        console.log(`Getting balance for user: ${existingUser?.id} ${userId}`); 
-        if (!existingUser) {
-            return null
-        };
+        // First try to get user by the identifier (could be user ID or phone number)
+        let user = await this.getUserByKey(userIdentifier);
+        
+        // If not found by direct key lookup, try to find by phone number
+        if (!user) {
+          console.log(`User not found by key ${userIdentifier}, trying phone number search...`);
+          user = await this.findUserByPhoneNumber(userIdentifier);
+        }
+        
+        console.log(`Getting balance for user: ${user?.id} (searched with: ${userIdentifier})`); 
+        if (!user) {
+            console.log(`User not found with identifier: ${userIdentifier}`);
+            return null;
+        }
             
         const doc = await getDoc({
           collection: 'balances',
-          key: existingUser.id,
+          key: user.id, // Always use the actual user ID for balance lookup
           satellite
         });
         
         if (!doc?.data) {
+          console.log(`No balance document found for user ID: ${user.id}`);
           return null;
         }
   
@@ -337,6 +429,7 @@ export class WebhookDataService {
           lastUpdated: new Date(rawData.lastUpdated)
         };
   
+        console.log(`Found balance for user ${user.firstName} ${user.lastName}: UGX ${userBalance.balance}`);
         return userBalance;
       } catch (error) {
         console.error('Error getting user balance:', error);
@@ -468,9 +561,9 @@ export class WebhookDataService {
     }> {
       console.log(`Processing send money: ${senderPhone} -> ${recipientPhone}, Amount: ${amount}, Fee: ${fee}`);
       try {
-        // Get sender and recipient users
-        const sender = await this.getUserByKey(senderPhone);
-        const recipient = await this.getUserByKey(recipientPhone);
+        // Get sender and recipient users using the new search method
+        const sender = await this.findUserByPhoneNumber(senderPhone);
+        const recipient = await this.findUserByPhoneNumber(recipientPhone);
 
         if (!sender) {
           return { success: false, error: 'Sender not found' };
@@ -480,9 +573,12 @@ export class WebhookDataService {
           return { success: false, error: 'Recipient not found' };
         }
 
-        // Get current balances
+        console.log(`Found sender: ${sender.firstName} ${sender.lastName} (ID: ${sender.id})`);
+        console.log(`Found recipient: ${recipient.firstName} ${recipient.lastName} (ID: ${recipient.id})`);
+
+        // Get current balances using the user IDs (not phone numbers)
         const senderBalance = await this.getUserBalance(senderPhone);
-        const recipientBalance = await this.getUserBalance(recipientPhone);
+        const recipientBalance = await this.getUserBalance(recipient.id);
 
         if (!senderBalance) {
           return { success: false, error: 'Sender balance not found' };
@@ -496,6 +592,8 @@ export class WebhookDataService {
         // Calculate new balances
         const newSenderBalance = senderBalance.balance - totalRequired;
         const newRecipientBalance = (recipientBalance?.balance || 0) + amount;
+
+        console.log(`Updating balances - Sender: ${newSenderBalance}, Recipient: ${newRecipientBalance}`);
 
         // Update balances
         const senderBalanceUpdated = await this.updateUserBalance(sender.id, newSenderBalance);
