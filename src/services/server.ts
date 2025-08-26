@@ -372,7 +372,7 @@ async function handleCheckBalance(input: string, session: USSDSession): Promise<
       // PIN is correct, get user balance
       try {
         // const cleanPhone = session.phoneNumber.replace('+', '');
-        const balance = await getUserBalance(`+${session.phoneNumber}`);
+        const balance = await getUserBalance(session.phoneNumber);
         
         if (balance !== null) {
           return endSession(`Your Account Balance

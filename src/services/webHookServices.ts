@@ -466,6 +466,7 @@ export class WebhookDataService {
       transactionId?: string;
       error?: string;
     }> {
+      console.log(`Processing send money: ${senderPhone} -> ${recipientPhone}, Amount: ${amount}, Fee: ${fee}`);
       try {
         // Get sender and recipient users
         const sender = await this.getUserByKey(senderPhone);
