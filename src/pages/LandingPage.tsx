@@ -205,9 +205,9 @@ const LandingPage: React.FC = () => {
       <footer className="bg-gray-900 text-white py-8 sm:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <span className="text-black font-bold text-xs sm:text-sm">A</span>
-            </div>
+            {/* <div className="w-28 h-28 sm:w-30 sm:h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4 p-3">
+                <img src="/afriTokeni.svg" alt="AfriTokeni Logo" className="h-4 sm:h-5 w-auto" />
+            </div> */}
             <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">AfriTokeni</h3>
             <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 px-4 sm:px-0">Banking for everyone, everywhere in Africa</p>
             <div className="text-xs sm:text-sm text-gray-500">
