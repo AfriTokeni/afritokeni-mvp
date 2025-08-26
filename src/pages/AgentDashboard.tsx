@@ -292,7 +292,7 @@ const AgentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* USDC Balance Card */}
+          {/* USDT Balance Card */}
           <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1 min-w-0">

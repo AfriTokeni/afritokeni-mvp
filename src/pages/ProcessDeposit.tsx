@@ -44,9 +44,9 @@ const ProcessDeposit: React.FC = () => {
   // Exchange rate: 1 USDC = 3800 UGX (approximate)
   const EXCHANGE_RATE = 3800;
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC'): string => {
+  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT'): string => {
     if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
+      return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'UGX'
       }).format(amount);
@@ -512,7 +512,7 @@ const ProcessDeposit: React.FC = () => {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-2 sm:mb-3">
-                      Equivalent USDC
+                      Equivalent USDT
                     </label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
@@ -525,7 +525,7 @@ const ProcessDeposit: React.FC = () => {
                       />
                     </div>
                     <p className="text-xs text-neutral-500 mt-1">
-                      Rate: 1 USDC = {EXCHANGE_RATE.toLocaleString()} UGX
+                      Rate: 1 USDT = {EXCHANGE_RATE.toLocaleString()} UGX
                     </p>
                   </div>
                 </div>
@@ -583,9 +583,9 @@ const ProcessDeposit: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-neutral-600 text-sm sm:text-base">USDC Equivalent:</span>
+                      <span className="text-neutral-600 text-sm sm:text-base">USDT Equivalent:</span>
                       <span className="font-bold text-neutral-900 font-mono text-sm sm:text-lg">
-                        {formatCurrency(depositData.amount.usdc, 'USDC')}
+                        {formatCurrency(depositData.amount.usdc, 'USDT')}
                       </span>
                     </div>
                   </div>
