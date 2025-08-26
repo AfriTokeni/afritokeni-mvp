@@ -438,20 +438,33 @@ export class WebhookDataService {
     }
 
     // Create or update user balance
-    static async updateUserBalance(userId: string, newBalance: number): Promise<boolean> {
+    static async updateUserBalance(userIdentifier: string, newBalance: number): Promise<boolean> {
       try {
-        const existingUser = await this.getUserByKey(userId);
-        if (!existingUser) return false;
+        // First try to get user by the identifier (could be user ID or phone number)
+        let user = await this.getUserByKey(userIdentifier);
+        
+        // If not found by direct key lookup, try to find by phone number
+        if (!user) {
+          console.log(`User not found by key ${userIdentifier}, trying phone number search for balance update...`);
+          user = await this.findUserByPhoneNumber(userIdentifier);
+        }
+        
+        if (!user) {
+          console.log(`User not found with identifier: ${userIdentifier} for balance update`);
+          return false;
+        }
 
-        // Get existing balance document
+        console.log(`Updating balance for user: ${user.firstName} ${user.lastName} (ID: ${user.id}) to UGX ${newBalance}`);
+
+        // Get existing balance document using the actual user ID
         const existingDoc = await getDoc({
           collection: 'balances',
-          key: existingUser.id,
+          key: user.id, // Always use the actual user ID for balance operations
           satellite
         });
 
         const balanceData = {
-          userId: existingUser.id,
+          userId: user.id, // Always use the actual user ID
           balance: newBalance,
           currency: 'UGX' as const,
           lastUpdated: new Date().toISOString()
@@ -461,13 +474,14 @@ export class WebhookDataService {
         await setDoc({
           collection: 'balances',
           doc: {
-            key: existingUser.id,
+            key: user.id, // Always use the actual user ID as the document key
             data: balanceData,
             version: existingDoc?.version ? existingDoc.version : 1n
           },
           satellite
         });
 
+        console.log(`✅ Balance updated successfully for user ${user.firstName} ${user.lastName}: UGX ${newBalance}`);
         return true;
       } catch (error) {
         console.error('Error updating user balance:', error);
@@ -502,7 +516,7 @@ export class WebhookDataService {
           recipientId: transactionData.recipientId,
           recipientPhone: transactionData.recipientPhone,
           status: 'completed' as const,
-          description: transactionData.description || `Sent money to ${transactionData.recipientPhone}`,
+          description:`Sent money to ${transactionData.recipientPhone}`,
           createdAt: now.toISOString(),
           completedAt: now.toISOString(),
           reference: transactionId
@@ -520,7 +534,7 @@ export class WebhookDataService {
           senderId: transactionData.senderId,
           senderPhone: transactionData.senderPhone,
           status: 'completed' as const,
-          description: transactionData.description || `Received money from ${transactionData.senderPhone}`,
+          description:`Received money from ${transactionData.senderPhone}`,
           createdAt: now.toISOString(),
           completedAt: now.toISOString(),
           reference: transactionId
@@ -596,7 +610,7 @@ export class WebhookDataService {
         console.log(`Updating balances - Sender: ${newSenderBalance}, Recipient: ${newRecipientBalance}`);
 
         // Update balances
-        const senderBalanceUpdated = await this.updateUserBalance(sender.id, newSenderBalance);
+        const senderBalanceUpdated = await this.updateUserBalance(senderPhone, newSenderBalance);
         const recipientBalanceUpdated = await this.updateUserBalance(recipient.id, newRecipientBalance);
 
         if (!senderBalanceUpdated || !recipientBalanceUpdated) {
