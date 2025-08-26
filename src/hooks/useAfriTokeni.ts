@@ -195,7 +195,7 @@ export const useAfriTokeni = () => {
       try {
         // SMS to sender
         const senderSMS = `AfriTokeni: You sent UGX ${amount.toLocaleString()} to ${recipient.firstName} ${recipient.lastName} (${recipientPhone}). Fee: UGX ${fee.toLocaleString()}. New balance: UGX ${(senderBalance.balance - totalAmount).toLocaleString()}. Ref: ${sendTransaction.id}`;
-        await fetch('http://localhost:3001/api/send-sms', {
+        await fetch(`${process.env.VITE_API_URL}/api/send-sms`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -207,7 +207,7 @@ export const useAfriTokeni = () => {
 
         // SMS to recipient
         const recipientSMS = `AfriTokeni: You received UGX ${amount.toLocaleString()} from ${user.user.firstName} ${user.user.lastName} (${user.user.email}). New balance: UGX ${newRecipientBalance.toLocaleString()}. Ref: ${sendTransaction.id}`;
-        await fetch('http://localhost:3001/api/send-sms', {
+        await fetch(`${process.env.VITE_API_URL}/api/send-sms`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
