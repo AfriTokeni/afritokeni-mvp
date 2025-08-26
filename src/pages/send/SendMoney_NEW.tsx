@@ -146,13 +146,6 @@ const SendMoney: React.FC = () => {
       }
 
       const senderBalance = await DataService.getUserBalance(currentUser.id);
-      const currentUser = user.user || user.agent;
-      if (!currentUser) {
-        alert('User not authenticated');
-        return;
-      }
-
-      const senderBalance = await DataService.getUserBalance(currentUser.id);
       if (!senderBalance || senderBalance.balance < totalAmount) {
         alert('Insufficient balance');
         return;
@@ -160,7 +153,6 @@ const SendMoney: React.FC = () => {
 
       // Create send transaction
       const sendTransaction = await DataService.createTransaction({
-        userId: currentUser.id,
         userId: currentUser.id,
         type: 'send',
         amount: sendAmount,
@@ -184,7 +176,6 @@ const SendMoney: React.FC = () => {
         currency: 'UGX',
         status: 'completed',
         description: `Money received from ${currentUser.firstName} ${currentUser.lastName}`,
-        description: `Money received from ${currentUser.firstName} ${currentUser.lastName}`,
         completedAt: new Date(),
         metadata: {
           smsReference: `RCV${Date.now().toString().slice(-6)}`
@@ -192,7 +183,6 @@ const SendMoney: React.FC = () => {
       });
 
       // Update sender balance (deduct amount + fee)
-      await DataService.updateUserBalance(currentUser.id, senderBalance.balance - totalAmount);
       await DataService.updateUserBalance(currentUser.id, senderBalance.balance - totalAmount);
 
       // Update recipient balance (add amount)
