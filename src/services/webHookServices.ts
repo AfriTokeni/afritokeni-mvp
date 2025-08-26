@@ -8,8 +8,8 @@ import type { SatelliteOptions } from "@junobuild/core";
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
-  satelliteId: process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID || "dkk74-oyaaa-aaaal-askxq-cai",
-  container: false
+  satelliteId: process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID || "uxrrr-q7777-77774-qaaaq-cai",
+  container: true
 };
 
 // Interface for user data as stored in Juno (with string dates)

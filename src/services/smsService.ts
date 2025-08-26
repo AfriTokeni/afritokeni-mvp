@@ -11,7 +11,7 @@ interface VerificationCodeResponse extends SMSResponse {
 }
 
 export class SMSService {
-  private static readonly API_BASE_URL = `${process.env.VITE_API_URL}/api`;
+  private static readonly API_BASE_URL = 'http://localhost:3001/api';
 
   /**
    * Format phone number to E.164 format (international standard)
