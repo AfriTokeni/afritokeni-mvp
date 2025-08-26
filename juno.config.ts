@@ -3,8 +3,8 @@ import { defineConfig } from "@junobuild/config";
 export default defineConfig({
   satellite: {
     ids: {
-      development: process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID,
-      production: process.env.VITE_PRODUCTION_JUNO_SATELLITE_ID
+      development: process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID || "uxrrr-q7777-77774-qaaaq-cai",
+      production: process.env.VITE_PRODUCTION_JUNO_SATELLITE_ID || "dkk74-oyaaa-aaaal-askxq-cai"
     },
     source: "dist",
     predeploy: ["npm run build","npm run build:backend"],
