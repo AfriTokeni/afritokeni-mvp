@@ -273,7 +273,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
                   
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base sm:text-lg font-semibold text-neutral-900 truncate">{request.userName}</h3>
+                    <h3 className="text-sm font-semibold text-neutral-900 truncate">{request.userName}</h3>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-neutral-600 mt-1 space-y-1 sm:space-y-0">
                       <div className="flex items-center space-x-1">
                         <Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -289,7 +289,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
 
                 {/* Amount and Status */}
                 <div className="text-left sm:text-right flex-shrink-0">
-                  <div className="text-base sm:text-lg font-bold text-neutral-900 font-mono">
+                  <div className="text-base font-bold text-neutral-900 font-mono">
                     {formatCurrency(request.amount.ugx, 'UGX')}
                   </div>
                   <div className="text-xs sm:text-sm text-neutral-600 mb-2 font-mono">
