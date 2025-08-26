@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Copy, Check, MapPin, Phone, Clock } from 'lucide-react';
-import { DataService } from '../../services/dataService';
-import { useAuthentication } from '../../context/AuthenticationContext';
 import type { Agent } from './types';
 
 interface ConfirmationStepProps {
@@ -23,33 +21,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   withdrawalCode,
   onMakeAnotherWithdrawal
 }) => {
-  const { userData } = useAuthentication();
   const [codeCopied, setCodeCopied] = useState(false);
-  const [transactionCreated, setTransactionCreated] = useState(false);
-
-  // Create transaction on component mount
-  useEffect(() => {
-    const initializeWithdrawal = async () => {
-      if (!userData?.id || transactionCreated) return;
-
-      try {
-        // Create withdraw transaction
-        await DataService.createWithdrawTransaction(
-          userData.id,
-          ugxAmount,
-          selectedAgent.id,
-          withdrawalCode,
-          fee
-        );
-
-        setTransactionCreated(true);
-      } catch (error) {
-        console.error('Error initializing withdrawal:', error);
-      }
-    };
-
-    initializeWithdrawal();
-  }, [userData?.id, ugxAmount, selectedAgent.id, withdrawalCode, fee, transactionCreated]);
 
   const handleCopyCode = async () => {
     try {

@@ -12,7 +12,9 @@ interface AgentStepProps {
   ugxAmount?: number;
   usdcAmount?: number;
   onBackToAmount: () => void;
-  onAgentSelect: (agent: Agent) => void;
+  onAgentSelect: (selectedAgent: Agent) => void;
+  isCreatingTransaction?: boolean;
+  transactionError?: string | null;
 }
 
 // Convert database agent to UI agent format
@@ -107,6 +109,8 @@ const AgentStep: React.FC<AgentStepProps> = ({
   usdcAmount,
   onBackToAmount,
   onAgentSelect,
+  isCreatingTransaction = false,
+  transactionError,
 }) => {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
@@ -189,9 +193,10 @@ const AgentStep: React.FC<AgentStepProps> = ({
             e.stopPropagation();
             onAgentSelect(agent);
           }}
-          className="flex-1 px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-xs font-semibold transition-colors duration-200"
+          disabled={isCreatingTransaction}
+          className="flex-1 px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed text-xs font-semibold transition-colors duration-200"
         >
-          Select Agent
+          {isCreatingTransaction ? 'Creating Withdrawal...' : 'Select Agent'}
         </button>
       </div>
     </div>
@@ -247,6 +252,13 @@ const AgentStep: React.FC<AgentStepProps> = ({
           <div className="p-3 sm:p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-sm">
             <p className="font-medium">Location Error</p>
             <p className="text-xs sm:text-sm">{locationError}</p>
+          </div>
+        )}
+
+        {transactionError && (
+          <div className="p-3 sm:p-4 bg-red-50 border-l-4 border-red-400 text-red-800 text-sm">
+            <p className="font-medium">Transaction Error</p>
+            <p className="text-xs sm:text-sm">{transactionError}</p>
           </div>
         )}
 
@@ -334,10 +346,10 @@ const AgentStep: React.FC<AgentStepProps> = ({
                       </div>
                       <button
                         onClick={() => onAgentSelect(agent)}
-                        disabled={agent.status !== 'online'}
+                        disabled={agent.status !== 'online' || isCreatingTransaction}
                         className="w-full sm:w-auto sm:ml-4 bg-neutral-900 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200 font-semibold text-xs sm:text-sm lg:text-base"
                       >
-                        Select
+                        {isCreatingTransaction ? 'Creating...' : 'Select'}
                       </button>
                     </div>
                   </li>
