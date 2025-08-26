@@ -124,7 +124,7 @@ const AgentCustomers: React.FC = () => {
 
   const formatCurrency = (amount: number, currency: 'UGX' | 'USDC'): string => {
     if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
+      return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'UGX',
         minimumFractionDigits: 0,
