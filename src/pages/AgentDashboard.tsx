@@ -92,7 +92,7 @@ const AgentDashboard: React.FC = () => {
 
   const formatCurrency = (amount: number, currency: 'UGX' | 'USDT'): string => {
     if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
+      return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'UGX'
       }).format(amount);
@@ -276,7 +276,7 @@ const AgentDashboard: React.FC = () => {
                 <p className="text-neutral-600 text-xs sm:text-sm font-semibold">UGX Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono truncate">
-                    {showBalance ? `USh ${agentBalance.digital.ugx.toLocaleString()}` : '••••••••'}
+                    {showBalance ? `UGX ${agentBalance.digital.ugx.toLocaleString()}` : '••••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
