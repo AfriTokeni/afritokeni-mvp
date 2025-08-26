@@ -211,7 +211,7 @@ const LandingPage: React.FC = () => {
             <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">AfriTokeni</h3>
             <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 px-4 sm:px-0">Banking for everyone, everywhere in Africa</p>
             <div className="text-xs sm:text-sm text-gray-500">
-              © 2024 AfriTokeni. Built on Internet Computer Protocol.
+              © 2025 AfriTokeni. Built on Internet Computer Protocol.
             </div>
           </div>
         </div>
