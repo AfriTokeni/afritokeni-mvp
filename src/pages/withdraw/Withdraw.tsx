@@ -5,10 +5,13 @@ import AgentStep from './AgentStep';
 import ConfirmationStep from './ConfirmationStep';
 import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
+import { useAuthentication } from '../../context/AuthenticationContext';
+import { DataService } from '../../services/dataService';
 import type { Agent, WithdrawStep } from './types';
 
 const WithdrawPage: React.FC = () => {
   const { balance } = useAfriTokeni();
+  const { user } = useAuthentication();
   const [currentStep, setCurrentStep] = useState<WithdrawStep>('amount');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -17,6 +20,8 @@ const WithdrawPage: React.FC = () => {
   const [finalUgxAmount, setFinalUgxAmount] = useState<number>(0);
   const [finalUsdcAmount, setFinalUsdcAmount] = useState<number>(0);
   const [withdrawalFee, setWithdrawalFee] = useState<number>(0);
+  const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
 
   // Exchange rate (mock)
   const exchangeRate = 3750; // 1 USDC = 3750 UGX
@@ -45,10 +50,37 @@ const WithdrawPage: React.FC = () => {
     return code;
   };
 
-  const handleAgentSelect = (agent: Agent) => {
-    setSelectedAgent(agent);
-    setCurrentStep('confirmation');
-    generateWithdrawalCode();
+  const handleAgentSelect = async (agent: Agent) => {
+    if (!user.user?.id) {
+      setTransactionError('User not authenticated');
+      return;
+    }
+
+    setIsCreatingTransaction(true);
+    setTransactionError(null);
+
+    try {
+      // Generate withdrawal code
+      const code = generateWithdrawalCode();
+      
+      // Create withdraw transaction in Juno backend
+      await DataService.createWithdrawTransaction(
+        user.user.id,
+        finalUgxAmount,
+        agent.id,
+        code,
+        withdrawalFee
+      );
+
+      // Set selected agent and proceed to confirmation
+      setSelectedAgent(agent);
+      setCurrentStep('confirmation');
+    } catch (error) {
+      console.error('Error creating withdraw transaction:', error);
+      setTransactionError('Failed to create withdrawal. Please try again.');
+    } finally {
+      setIsCreatingTransaction(false);
+    }
   };
 
   const handleMakeAnotherWithdrawal = () => {
@@ -57,6 +89,8 @@ const WithdrawPage: React.FC = () => {
     setWithdrawalCode('');
     setFinalUgxAmount(0);
     setFinalUsdcAmount(0);
+    setTransactionError(null);
+    setIsCreatingTransaction(false);
   };
 
 
@@ -118,6 +152,8 @@ const WithdrawPage: React.FC = () => {
             usdcAmount={finalUsdcAmount}
             onBackToAmount={() => setCurrentStep('amount')}
             onAgentSelect={handleAgentSelect}
+            isCreatingTransaction={isCreatingTransaction}
+            transactionError={transactionError}
           />
         )}
         {currentStep === 'confirmation' && selectedAgent && (

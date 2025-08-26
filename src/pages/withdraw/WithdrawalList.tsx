@@ -30,7 +30,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
           ugx: transaction.amount,
           usdc: transaction.amount * 0.00026 // Convert to USDT using exchange rate
         },
-        withdrawalCode: (transaction as { withdrawalCode?: string }).withdrawalCode || '', // Type assertion for withdrawalCode
+        withdrawalCode: transaction?.metadata?.withdrawalCode || '', // Type assertion for withdrawalCode
         requestedAt: transaction.createdAt instanceof Date ? transaction.createdAt : new Date(transaction.createdAt),
         status: transaction.status as 'pending' | 'verified' | 'approved' | 'completed' | 'rejected',
         userNationalId: 'N/A', // Not available in User type
