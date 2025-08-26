@@ -450,7 +450,11 @@ export class DataService {
 
     const totalAmount = completedTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
     const totalCommission = completedTransactions.reduce((sum, transaction) => {
-      // Calculate 2% commission on completed transactions
+      // For withdrawal transactions, agent earns the fee
+      if (transaction.type === 'withdraw') {
+        return sum + (transaction.fee || 0);
+      }
+      // For other transactions, calculate 2% commission on amount
       return sum + (transaction.amount * 0.02);
     }, 0);
 
@@ -1793,16 +1797,22 @@ Reply with agent number to withdraw.`;
 
       await this.updateUserBalance(transaction.userId, userBalance.balance - totalDeduction);
 
-      // Update agent balance (increase)
+      // Update agent balance
       const agent = await this.getAgent(agentId);
       if (!agent) {
         throw new Error('Agent not found');
       }
 
-      const commission = transaction.amount * agent.commissionRate;
-      const agentReceives = transaction.amount - commission;
+      // Check if agent has sufficient cash balance
+      if (agent.cashBalance < transaction.amount) {
+        throw new Error('Agent has insufficient cash balance');
+      }
+
+      const agentDigitalReceives = transaction.amount + (transaction.fee || 0); // Agent receives user's digital payment including fee
+      
       await this.updateAgentBalance(agentId, { 
-        cashBalance: agent.cashBalance + agentReceives 
+        cashBalance: agent.cashBalance - transaction.amount, // Agent gives cash to user
+        digitalBalance: agent.digitalBalance + agentDigitalReceives // Agent receives digital payment + fee
       });
 
       // Update transaction status

@@ -10,7 +10,7 @@ interface ApproveWithdrawalProps {
 }
 
 const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApprovalComplete }) => {
-  const { agent } = useAfriTokeni();
+  const { agent, refreshData } = useAfriTokeni();
   const [withdrawalCode, setWithdrawalCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -77,6 +77,9 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
         agent.id,
         withdrawalCode
       );
+      
+      // Refresh agent data to update balance, earnings, and transactions
+      await refreshData();
       
       setIsCompleted(true);
       
