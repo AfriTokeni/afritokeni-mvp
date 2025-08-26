@@ -38,7 +38,19 @@ interface USSDSession {
   sessionId: string;
   phoneNumber: string;
   currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance';
-  data: Record<string, any>;
+  data: {
+    amount?: number;
+    withdrawAmount?: number;
+    availableBalance?: number;
+    withdrawFee?: number;
+    availableAgents?: any[];
+    selectedAgent?: any;
+    withdrawalCode?: string;
+    transactionId?: string;
+    pinAttempts?: number;
+    recipientPhoneNumber?: string;
+    [key: string]: any;
+  };
   step: number;
   lastActivity: number;
   
@@ -475,16 +487,19 @@ Enter recipient phone number (256XXXXXXXXX):`);
 Please enter a valid recipient phone number (256XXXXXXXXX):`);
       }
 
-      // Store recipient data - use the actual recipient ID for transaction processing
       session.data.recipientPhone = currentInput;
       session.data.recipientId = recipient.id;
       session.data.recipientName = `${recipient.firstName} ${recipient.lastName}`;
       session.step = 3;
+      
+      const amount = session.data.amount || 0;
+      const fee = session.data.fee || 0;
+      
       return continueSession(`Recipient: ${recipient.firstName} ${recipient.lastName}
 Phone: ${currentInput}
-Amount: UGX ${session.data.amount.toLocaleString()}
-Fee: UGX ${session.data.fee.toLocaleString()}
-Total: UGX ${(session.data.amount + session.data.fee).toLocaleString()}
+Amount: UGX ${amount.toLocaleString()}
+Fee: UGX ${fee.toLocaleString()}
+Total: UGX ${(amount + fee).toLocaleString()}
 
 Enter your PIN to confirm:`);
     }
@@ -511,13 +526,15 @@ Enter your PIN:`);
       console.log(`💳 Processing money transfer: ${session.phoneNumber} -> ${session.data.recipientPhone}, Amount: ${session.data.amount}, Fee: ${session.data.fee}`);
       
       const senderPhone = `+${session.phoneNumber}`;
-      const recipientPhone = session.data.recipientPhone;
+      const recipientPhone = session.data.recipientPhone || '';
+      const amount = session.data.amount || 0;
+      const fee = session.data.fee || 0;
       
       const transferResult = await DataService.processSendMoney(
         senderPhone,
         recipientPhone,
-        session.data.amount,
-        session.data.fee
+        amount,
+        fee
       );
 
       console.log(`Transfer result: ${JSON.stringify(transferResult)}`);
@@ -530,23 +547,24 @@ Thank you for using AfriTokeni!`);
       }
 
       const transactionId = transferResult.transactionId;
+      const recipientName = session.data.recipientName || 'Unknown';
       
       // Send SMS to sender
       await sendSMSNotification(
         session.phoneNumber,
         `Money sent successfully!
-Amount: UGX ${session.data.amount.toLocaleString()}
-To: ${session.data.recipientName} (${session.data.recipientPhone})
-Fee: UGX ${session.data.fee.toLocaleString()}
+Amount: UGX ${amount.toLocaleString()}
+To: ${recipientName} (${recipientPhone})
+Fee: UGX ${fee.toLocaleString()}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
       );
       
       // Send SMS to recipient
       await sendSMSNotification(
-        session.data.recipientPhone,
+        recipientPhone,
         `You received money!
-Amount: UGX ${session.data.amount.toLocaleString()}
+Amount: UGX ${amount.toLocaleString()}
 From: ${session.phoneNumber}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
@@ -554,10 +572,10 @@ Thank you for using AfriTokeni!`
 
       return endSession(`✅ Transaction Successful!
 
-Sent: UGX ${session.data.amount.toLocaleString()}
-To: ${session.data.recipientName}
-Phone: ${session.data.recipientPhone}
-Fee: UGX ${session.data.fee.toLocaleString()}
+Sent: UGX ${amount.toLocaleString()}
+To: ${recipientName}
+Phone: ${recipientPhone}
+Fee: UGX ${fee.toLocaleString()}
 Reference: ${transactionId}
 
 Thank you for using AfriTokeni!`);
@@ -573,44 +591,228 @@ Thank you for using AfriTokeni!`);
 
 async function handleWithdraw(input: string, session: USSDSession): Promise<string> {
   switch (session.step) {
-    case 1:
-      const amount = parseInt(input);
+    case 1: {
+      // Step 1: Get amount to withdraw
+      if (!input) {
+        return continueSession('Withdraw Money\nEnter amount (UGX):');
+      }
+      const sanitized_input = input.split("*")[3];
+
+      console.log(`Withdraw amount: UGX ${sanitized_input}`);
+
+      const amount = parseInt(sanitized_input);
       if (isNaN(amount) || amount <= 0) {
         return continueSession('Invalid amount.\nEnter amount (UGX):');
       }
-      session.data.amount = amount;
+      
+      if (amount < 1000) {
+        return continueSession('Minimum withdrawal: UGX 1,000\nEnter amount (UGX):');
+      }
+      
+      if (amount > 2000000) {
+        return continueSession('Maximum withdrawal: UGX 2,000,000\nEnter amount (UGX):');
+      }
+
+      session.data.withdrawAmount = amount;
       session.step = 2;
-      return continueSession(`Confirm withdrawal:
-Amount: UGX ${amount.toLocaleString()}
-
-1. Confirm
-2. Cancel`);
-    
-    case 2:
-      if (input === '1') {
-        const withdrawalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+      
+      // Step 2: Check user balance
+      console.log(`Checking balance for ${session.phoneNumber}`);
+      try {
+        const userBalance = await DataService.getUserBalance(session.phoneNumber);
         
-        // Send SMS with withdrawal details
-        await sendSMSNotification(
-          session.phoneNumber,
-          `Withdrawal Code: ${withdrawalCode}
-Amount: UGX ${session.data.amount.toLocaleString()}
-Valid for 24 hours
-Visit any AfriTokeni agent to collect cash.`
-        );
+        if (!userBalance) {
+          return endSession('Unable to check balance. Please try again later.');
+        }
         
-        return endSession(`Withdrawal Code: ${withdrawalCode}
-Amount: UGX ${session.data.amount.toLocaleString()}
-Valid for 24 hours
-
-Visit any AfriTokeni agent with this code and your ID to collect cash.
+        const totalRequired = amount + Math.round(amount * 0.01); // Include 1% fee
+        
+        if (userBalance.balance < totalRequired) {
+          return endSession(`Insufficient balance.
+Available: UGX ${userBalance.balance.toLocaleString()}
+Required: UGX ${totalRequired.toLocaleString()} (including fee)
 
 Thank you for using AfriTokeni!`);
-      } else {
+        }
+        
+        session.data.availableBalance = userBalance.balance;
+        session.data.withdrawFee = Math.round(amount * 0.01);
+        session.step = 3;
+        
+        // Step 3: Get list of available agents
+        console.log('Getting available agents...');
+        const agents = await DataService.getAvailableAgents();
+        
+        if (agents.length === 0) {
+          return endSession('No agents available at the moment. Please try again later.');
+        }
+        
+        session.data.availableAgents = agents;
+        
+        let agentList = `Select an agent:
+Amount: UGX ${amount.toLocaleString()}
+Fee: UGX ${session.data.withdrawFee.toLocaleString()}
+Total: UGX ${totalRequired.toLocaleString()}
+
+`;
+        
+        agents.forEach((agent, index) => {
+          agentList += `${index + 1}. ${agent.businessName}
+   ${agent.location.city}, ${agent.location.address}
+`;
+        });
+        
+        agentList += '\n0. Cancel withdrawal';
+        
+        return continueSession(agentList);
+        
+      } catch (error) {
+        console.error('Error checking balance:', error);
+        return endSession('Unable to process withdrawal. Please try again later.');
+      }
+    }
+      
+    case 3: {
+      // Step 4: Agent selection
+      const sanitized_choice = input.split("*")[4];
+      const agentChoice = parseInt(sanitized_choice);
+      
+      if (agentChoice === 0) {
         return endSession('Withdrawal cancelled.\n\nThank you for using AfriTokeni!');
       }
+      
+      const agents = session.data.availableAgents;
+      if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
+        return continueSession('Invalid selection. Choose agent number or 0 to cancel:');
+      }
+      
+      const selectedAgent = agents[agentChoice - 1];
+      session.data.selectedAgent = selectedAgent;
+      session.step = 4;
+      
+      const withdrawAmount = session.data.withdrawAmount || 0;
+      const withdrawFee = session.data.withdrawFee || 0;
+      
+      return continueSession(`Selected Agent:
+${selectedAgent.businessName}
+${selectedAgent.location.city}, ${selectedAgent.location.address}
+
+Amount: UGX ${withdrawAmount.toLocaleString()}
+Fee: UGX ${withdrawFee.toLocaleString()}
+
+Enter your 4-digit PIN to confirm:`);
+    }
+      
+    case 4: {
+      // Step 5: PIN verification
+      const sanitized_input = input.split("*")[5];
+      console.log(`Verifying PIN input: ${sanitized_input.length}`);
+      console.log(`Unsanitized pin input: ${input}`);
+      console.log(`Session data: ${!sanitized_input} - ${sanitized_input.length !== 4} - ${isNaN(parseInt(sanitized_input))}`);
+      if (!sanitized_input || sanitized_input.length !== 4) {
+        session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+        
+        if (session.data.pinAttempts >= 3) {
+          return endSession('Too many incorrect PIN attempts. Transaction cancelled for security.');
+        }
+        
+        return continueSession(`Invalid PIN format. Enter 4-digit PIN:
+Attempts remaining: ${3 - session.data.pinAttempts}`);
+      }
+      
+      console.log(`Verifying PIN for ${session.phoneNumber}`);
+      try {
+        const pinValid = await DataService.verifyUserPin(session.phoneNumber, sanitized_input);
+        
+        if (!pinValid) {
+          session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+          
+          if (session.data.pinAttempts >= 3) {
+            return endSession('Incorrect PIN. Too many attempts. Transaction cancelled for security.');
+          }
+          
+          return continueSession(`Incorrect PIN. Try again:
+Attempts remaining: ${3 - session.data.pinAttempts}`);
+        }
+        
+        session.step = 5;
+        
+        // Step 6: Create pending withdrawal transaction
+        const withdrawalCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.withdrawalCode = withdrawalCode;
+        
+        console.log(`Creating withdrawal transaction for ${session.phoneNumber}`);
+        
+        // Get user to get their ID
+        const user = await DataService.findUserByPhoneNumber(session.phoneNumber);
+        if (!user) {
+          return endSession('User not found. Please try again later.');
+        }
+        
+        const withdrawAmount = session.data.withdrawAmount || 0;
+        const selectedAgent = session.data.selectedAgent;
+        
+        if (!selectedAgent) {
+          return endSession('Agent not selected. Please try again.');
+        }
+        
+        const transactionId = await DataService.createWithdrawTransaction(
+          user.id,
+          withdrawAmount,
+          selectedAgent.id,
+          withdrawalCode
+        );
+        
+        if (!transactionId) {
+          return endSession('Failed to create withdrawal transaction. Please try again later.');
+        }
+        
+        session.data.transactionId = transactionId;
+        
+        const withdrawFee = session.data.withdrawFee || 0;
+        
+        // Send SMS with withdrawal details
+        const smsMessage = `AfriTokeni Withdrawal
+Code: ${withdrawalCode}
+Amount: UGX ${withdrawAmount.toLocaleString()}
+Fee: UGX ${withdrawFee.toLocaleString()}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location.city}
+Valid: 24 hours
+Transaction ID: ${transactionId}
+
+Show this code to the agent with your ID to collect cash.`;
+
+        try {
+          await sendSMSNotification(session.phoneNumber, smsMessage);
+        } catch (smsError) {
+          console.error('SMS sending failed:', smsError);
+          // Continue even if SMS fails
+        }
+        
+        return endSession(`✅ Withdrawal Created!
+
+Code: ${withdrawalCode}
+Amount: UGX ${withdrawAmount.toLocaleString()}
+Fee: UGX ${withdrawFee.toLocaleString()}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location.city}
+
+Valid for 24 hours. Show this code and your ID to the agent to collect cash.
+
+SMS sent with details.
+Transaction ID: ${transactionId}
+
+Thank you for using AfriTokeni!`);
+        
+      } catch (error) {
+        console.error('Error verifying PIN or creating transaction:', error);
+        return endSession('Unable to process withdrawal. Please try again later.');
+      }
+    }
     
     default:
+      // Reset to main menu if something goes wrong
       session.currentMenu = 'main';
       session.step = 0;
       return handleMainMenu('', session);
