@@ -179,14 +179,14 @@ const UserTransactions: React.FC = () => {
                   {getTransactionIcon(transaction.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-neutral-900 mb-2 leading-6 break-words">{getTransactionDescription(transaction)}</p>
+                  <p className="font-semibold text-neutral-900 mb-2 leading-6 break-words text-sm">{getTransactionDescription(transaction)}</p>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-neutral-600 space-y-1 sm:space-y-0">
                     <span className="flex-shrink-0">{formatDate(transaction.createdAt)}</span>
                     <span className="text-xs font-mono text-neutral-500 break-all">ID: {transaction.id}</span>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className={`font-bold text-lg font-mono mb-1 ${
+                  <p className={`font-bold text-sm font-mono mb-1 ${
                     transaction.type === 'send' || transaction.type === 'withdraw' 
                       ? 'text-red-600' : 'text-green-600'
                   }`}>

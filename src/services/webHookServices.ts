@@ -644,4 +644,124 @@ export class WebhookDataService {
         return { success: false, error: 'Transaction processing failed' };
       }
     }
+
+    // Agent operations
+    static async getAvailableAgents(): Promise<Agent[]> {
+      try {
+        const agentDocs = await listDocs({
+          collection: 'agents',
+          satellite
+        });
+
+        const agents: Agent[] = agentDocs.items
+          .map(doc => doc.data as any)
+          .filter(agent => agent.isActive && agent.status === 'available')
+          .map(rawAgent => ({
+            id: rawAgent.id,
+            userId: rawAgent.userId,
+            businessName: rawAgent.businessName,
+            location: rawAgent.location,
+            isActive: rawAgent.isActive,
+            status: rawAgent.status,
+            cashBalance: rawAgent.cashBalance,
+            digitalBalance: rawAgent.digitalBalance,
+            commissionRate: rawAgent.commissionRate,
+            createdAt: new Date(rawAgent.createdAt)
+          }))
+          .slice(0, 10); // Limit to 10 agents for USSD display
+
+        console.log(`Found ${agents.length} available agents`);
+        return agents;
+      } catch (error) {
+        console.error('Error getting available agents:', error);
+        return [];
+      }
+    }
+
+    static async getAgentById(agentId: string): Promise<Agent | null> {
+      try {
+        const doc = await getDoc({
+          collection: 'agents',
+          key: agentId,
+          satellite
+        });
+
+        if (!doc?.data) {
+          return null;
+        }
+
+        const rawAgent = doc.data as any;
+        return {
+          id: rawAgent.id,
+          userId: rawAgent.userId,
+          businessName: rawAgent.businessName,
+          location: rawAgent.location,
+          isActive: rawAgent.isActive,
+          status: rawAgent.status,
+          cashBalance: rawAgent.cashBalance,
+          digitalBalance: rawAgent.digitalBalance,
+          commissionRate: rawAgent.commissionRate,
+          createdAt: new Date(rawAgent.createdAt)
+        };
+      } catch (error) {
+        console.error('Error getting agent by ID:', error);
+        return null;
+      }
+    }
+
+    // Create a withdrawal transaction
+    static async createWithdrawTransaction(userId: string, amount: number, agentId: string, withdrawalCode: string): Promise<string | null> {
+      try {
+        const transactionId = `withdraw_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const now = new Date();
+
+        const transaction = {
+          id: transactionId,
+          userId: userId,
+          type: 'withdraw' as const,
+          amount: amount,
+          fee: Math.round(amount * 0.01), // 1% fee
+          currency: 'UGX' as const,
+          agentId: agentId,
+          status: 'pending' as const,
+          description: `Cash withdrawal of UGX ${amount.toLocaleString()}`,
+          createdAt: now.toISOString(),
+          metadata: {
+            withdrawalCode: withdrawalCode,
+            agentLocation: 'Agent location' // Will be populated with actual agent location
+          }
+        };
+
+        await setDoc({
+          collection: 'transactions',
+          doc: {
+            key: transactionId,
+            data: transaction
+          },
+          satellite
+        });
+
+        console.log(`✅ Withdrawal transaction created: ${transactionId}`);
+        return transactionId;
+      } catch (error) {
+        console.error('Error creating withdrawal transaction:', error);
+        return null;
+      }
+    }
+
+    // Verify user PIN
+    static async verifyUserPin(phoneNumber: string, pin: string): Promise<boolean> {
+      console.log(`Verifying PIN for ${phoneNumber}: ${pin}`);
+      try {
+        const userPin = await this.getUserPin(`+${phoneNumber}`);
+        if (!userPin) {
+          return false;
+        }
+
+        return userPin.pin === pin;
+      } catch (error) {
+        console.error('Error verifying user PIN:', error);
+        return false;
+      }
+    }
 }

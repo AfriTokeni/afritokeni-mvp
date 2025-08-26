@@ -185,7 +185,7 @@ const UserDashboard: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <p className="font-medium text-neutral-900 text-sm truncate pr-2">{transaction.description}</p>
-                          <p className={`font-semibold text-sm font-mono flex-shrink-0 ${
+                          <p className={`font-semibold text-base font-mono flex-shrink-0 ${
                             transaction.type === 'send' || transaction.type === 'withdraw' 
                               ? 'text-red-600' : 'text-green-600'
                           }`}>
@@ -208,12 +208,12 @@ const UserDashboard: React.FC = () => {
                         {getTransactionIcon(transaction.type)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-neutral-900 text-base truncate">{transaction.description}</p>
+                        <p className="font-medium text-neutral-900 text-sm truncate">{transaction.description}</p>
                         <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : transaction.createdAt)}</p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-2">
-                      <p className={`font-semibold text-lg font-mono ${
+                      <p className={`font-semibold text-sm font-mono ${
                         transaction.type === 'send' || transaction.type === 'withdraw' 
                           ? 'text-red-600' : 'text-green-600'
                       }`}>
