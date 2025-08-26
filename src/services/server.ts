@@ -155,7 +155,9 @@ setInterval(() => {
 // Helper functions for PIN management (integrated with DataService)
 async function hasUserPin(phoneNumber: string): Promise<boolean> {
   try {
-    const userPin = await DataService.getUserPin(phoneNumber);
+    console.log(`Checking if user has PIN for: ${phoneNumber}`);
+    const userPin = await DataService.getUserPin(`+${phoneNumber}`);
+    console.log(`PIN check result for ${phoneNumber}:`, userPin ? 'PIN found' : 'No PIN found');
     return userPin !== null && userPin.isSet;
   } catch (error) {
     console.error('Error checking user PIN:', error);
@@ -323,7 +325,7 @@ Please select an option:
   }
 
   console.log(`Main menu input: ${input}`);
-  const sanitized_input = input.split("*")[2];
+  const sanitized_input = input.split("*")[2] ? input.split("*")[2] : input;
 
   switch (sanitized_input) {
     case '1':
@@ -367,7 +369,8 @@ Thank you for using AfriTokeni!`);
 
 async function handleCheckBalance(input: string, session: USSDSession): Promise<string> {
   console.log(`Check balance input: ${input}`);
-  const sanitized_input = input.split("*")[3];
+  const inputParts = input.split('*');
+  const sanitized_input = inputParts[inputParts.length - 1] || '';
   switch (session.step) {
     case 1: {
       // PIN verification step
@@ -596,7 +599,8 @@ async function handleWithdraw(input: string, session: USSDSession): Promise<stri
       if (!input) {
         return continueSession('Withdraw Money\nEnter amount (UGX):');
       }
-      const sanitized_input = input.split("*")[3];
+        const inputParts = input.split('*');
+        const sanitized_input = inputParts[inputParts.length - 1] || '';
 
       console.log(`Withdraw amount: UGX ${sanitized_input}`);
 
@@ -674,7 +678,8 @@ Total: UGX ${totalRequired.toLocaleString()}
       
     case 3: {
       // Step 4: Agent selection
-      const sanitized_choice = input.split("*")[4];
+        const inputParts = input.split('*');
+        const sanitized_choice = inputParts[inputParts.length - 1] || '';
       const agentChoice = parseInt(sanitized_choice);
       
       if (agentChoice === 0) {
@@ -705,7 +710,8 @@ Enter your 4-digit PIN to confirm:`);
       
     case 4: {
       // Step 5: PIN verification
-      const sanitized_input = input.split("*")[5];
+      const inputParts = input.split('*');
+      const sanitized_input = inputParts[inputParts.length - 1] || '';
       console.log(`Verifying PIN input: ${sanitized_input.length}`);
       console.log(`Unsanitized pin input: ${input}`);
       console.log(`Session data: ${!sanitized_input} - ${sanitized_input.length !== 4} - ${isNaN(parseInt(sanitized_input))}`);
