@@ -181,10 +181,5 @@ Build the business and legal framework required for sustainable growth.
 *   **Sustainable Liquidity Model**: Formalize the process for managing the digital asset (stablecoin) and fiat liquidity required to keep the agent network operational.
 *   **Cross-Border Remittances**: After establishing a strong local presence, launch a low-cost remittance corridor between two initial countries (e.g., Uganda and Kenya), leveraging the platform's efficiency.
 
-### Phase 4: Feature Expansion (Long-Term Vision)
-
-Introduce new value-added services to deepen user engagement and financial inclusion.
-
-*   **Micro-Financial Services**: Introduce features like automated savings goals, micro-loans collateralized by digital assets, and bill payment integrations (e.g., utilities, school fees).
 
 
