@@ -8,8 +8,8 @@ import type { SatelliteOptions } from "@junobuild/core";
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
-  satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
-  container: true
+  satelliteId: process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID,
+  container: false
 };
 
 // Interface for user data as stored in Juno (with string dates)
@@ -358,7 +358,7 @@ export class WebhookDataService {
     }
   }
 
-  static async createOrUpdateUserPin(phoneNumber: string, pin: string, userId?: string): Promise<boolean> {
+  static async createOrUpdateUserPin(phoneNumber: string, pin: string, _userId?: string): Promise<boolean> {
     try {
       // Get user by phone number (stored as email for SMS users)
       let user = await this.getUserByKey(phoneNumber);
