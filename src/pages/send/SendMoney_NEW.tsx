@@ -146,6 +146,13 @@ const SendMoney: React.FC = () => {
       }
 
       const senderBalance = await DataService.getUserBalance(currentUser.id);
+      const currentUser = user.user || user.agent;
+      if (!currentUser) {
+        alert('User not authenticated');
+        return;
+      }
+
+      const senderBalance = await DataService.getUserBalance(currentUser.id);
       if (!senderBalance || senderBalance.balance < totalAmount) {
         alert('Insufficient balance');
         return;
@@ -153,6 +160,7 @@ const SendMoney: React.FC = () => {
 
       // Create send transaction
       const sendTransaction = await DataService.createTransaction({
+        userId: currentUser.id,
         userId: currentUser.id,
         type: 'send',
         amount: sendAmount,
@@ -176,6 +184,7 @@ const SendMoney: React.FC = () => {
         currency: 'UGX',
         status: 'completed',
         description: `Money received from ${currentUser.firstName} ${currentUser.lastName}`,
+        description: `Money received from ${currentUser.firstName} ${currentUser.lastName}`,
         completedAt: new Date(),
         metadata: {
           smsReference: `RCV${Date.now().toString().slice(-6)}`
@@ -183,6 +192,7 @@ const SendMoney: React.FC = () => {
       });
 
       // Update sender balance (deduct amount + fee)
+      await DataService.updateUserBalance(currentUser.id, senderBalance.balance - totalAmount);
       await DataService.updateUserBalance(currentUser.id, senderBalance.balance - totalAmount);
 
       // Update recipient balance (add amount)
@@ -205,8 +215,8 @@ const SendMoney: React.FC = () => {
         });
 
         // SMS to recipient
-        const recipientSMS = `AfriTokeni: You received UGX ${sendAmount.toLocaleString()} from ${user.firstName} ${user.lastName} (${user.email}). New balance: UGX ${newRecipientBalance.toLocaleString()}. Ref: ${sendTransaction.id}`;
-        await fetch(`${process.env.VITE_API_URL}/api/sms/send`, {
+        const recipientSMS = `AfriTokeni: You received UGX ${sendAmount.toLocaleString()} from ${currentUser.firstName} ${currentUser.lastName} (${currentUser.email}). New balance: UGX ${newRecipientBalance.toLocaleString()}. Ref: ${sendTransaction.id}`;
+        await fetch('http://localhost:3001/api/sms/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

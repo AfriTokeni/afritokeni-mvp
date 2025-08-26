@@ -833,10 +833,10 @@ const sendSMS = async (phoneNumber: string, message: string) => {
     console.log(`Using AfricasTalking credentials: ${JSON.stringify(credentials)}`);
 
     try {
-      await sms.send({
+        await sms.send({
             to: phoneNumber,
             message, 
-            from: process.env.VITE_AT_SHORT_CODE || "22948"
+            from: process.env.VITE_AT_SHORT_CODE || "AfriTokeni"
         });
         return {
             status: 'Success',
