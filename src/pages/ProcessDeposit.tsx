@@ -348,19 +348,19 @@ const ProcessDeposit: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 p-4 sm:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={() => currentStep === 'input' ? navigate('/agents/dashboard') : handleBack()}
               className="p-2 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
             >
-              <ArrowLeft className="w-5 h-5 text-neutral-600" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-900">{getStepTitle()}</h1>
-              <p className="text-sm text-neutral-600 mt-1">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-2xl font-bold text-neutral-900 truncate">{getStepTitle()}</h1>
+              <p className="text-xs sm:text-sm text-neutral-600 mt-1">
                 {currentStep === 'input' && 'Search customer by phone, first name, or last name and enter deposit amount'}
                 {currentStep === 'summary' && 'Review and confirm the deposit details'}
                 {currentStep === 'complete' && 'Deposit has been successfully processed'}
@@ -369,20 +369,20 @@ const ProcessDeposit: React.FC = () => {
           </div>
           
           {/* Step Indicator */}
-          <div className="flex items-center space-x-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors duration-200 ${
               currentStep === 'input' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
             }`}>
               1
             </div>
-            <div className="w-8 h-0.5 bg-neutral-300"></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+            <div className="w-4 sm:w-8 h-0.5 bg-neutral-300"></div>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors duration-200 ${
               currentStep === 'summary' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
             }`}>
               2
             </div>
-            <div className="w-8 h-0.5 bg-neutral-300"></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-200 ${
+            <div className="w-4 sm:w-8 h-0.5 bg-neutral-300"></div>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors duration-200 ${
               currentStep === 'complete' ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-600'
             }`}>
               3
@@ -391,18 +391,18 @@ const ProcessDeposit: React.FC = () => {
         </div>
 
         {/* Step Content */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200">
           {/* Step 1: Input Customer Details and Amount */}
           {currentStep === 'input' && (
-            <div className="p-6">
-              <div className="space-y-6">
+            <div className="p-4 sm:p-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Phone Number Input */}
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-3">
+                  <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-2 sm:mb-3">
                     Customer Search (Phone / Name)
                   </label>
                   <div className="relative" ref={searchContainerRef}>
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 z-10" />
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 z-10" />
                     <input
                       type="tel"
                       value={depositData.customerPhone}
@@ -413,10 +413,10 @@ const ProcessDeposit: React.FC = () => {
                         }
                       }}
                       placeholder="Enter phone number, first name, or last name"
-                      className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200"
+                      className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200 text-sm sm:text-base"
                     />
                     {isSearchingUser && (
-                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin z-10" />
+                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 animate-spin z-10" />
                     )}
 
                     {/* Search Results Dropdown */}
@@ -426,16 +426,16 @@ const ProcessDeposit: React.FC = () => {
                           <div
                             key={`${user.id}-${index}`}
                             onClick={() => handleUserSelection(user)}
-                            className="flex items-center space-x-3 p-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0"
+                            className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0"
                           >
-                            <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                              <User className="w-4 h-4 text-neutral-600" />
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <User className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-600" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-neutral-900 truncate">
+                              <p className="font-medium text-neutral-900 truncate text-xs sm:text-sm">
                                 {user.firstName} {user.lastName}
                               </p>
-                              <p className="text-sm text-neutral-500 truncate">
+                              <p className="text-xs text-neutral-500 truncate">
                                 {user.email.startsWith('+') ? user.email : 'Web User'}
                               </p>
                             </div>
@@ -448,17 +448,17 @@ const ProcessDeposit: React.FC = () => {
 
                 {/* Customer Details Display */}
                 {depositData.customer && (
-                  <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
-                    <h3 className="text-sm font-medium text-neutral-700 mb-2">Customer Details</h3>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-neutral-600" />
+                  <div className="bg-neutral-50 rounded-lg p-3 sm:p-4 border border-neutral-200">
+                    <h3 className="text-xs sm:text-sm font-medium text-neutral-700 mb-2">Customer Details</h3>
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
                       </div>
-                      <div>
-                        <p className="font-semibold text-neutral-900">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-neutral-900 text-sm sm:text-base truncate">
                           {depositData.customer.firstName} {depositData.customer.lastName}
                         </p>
-                        <p className="text-sm text-neutral-700">{depositData.customer.email}</p>
+                        <p className="text-xs sm:text-sm text-neutral-700 truncate">{depositData.customer.email}</p>
                       </div>
                     </div>
                   </div>
@@ -466,10 +466,10 @@ const ProcessDeposit: React.FC = () => {
 
                 {/* Customer not found message */}
                 {depositData.customerPhone && searchResults.length === 0 && !depositData.customer && !isSearchingUser && depositData.customerPhone.length >= 3 && (
-                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                  <div className="bg-yellow-50 rounded-lg p-3 sm:p-4 border border-yellow-200">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <p className="text-sm text-yellow-800">
+                      <p className="text-xs sm:text-sm text-yellow-800">
                         Customer not found. A new customer record will be created for this phone number.
                       </p>
                     </div>
@@ -478,10 +478,10 @@ const ProcessDeposit: React.FC = () => {
 
                 {/* Customer not found message */}
                 {depositData.customerPhone && !depositData.customer && !isSearchingUser && depositData.customerPhone.length >= 10 && (
-                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                  <div className="bg-yellow-50 rounded-lg p-3 sm:p-4 border border-yellow-200">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <p className="text-sm text-yellow-800">
+                      <p className="text-xs sm:text-sm text-yellow-800">
                         Customer not found in system. They will be prompted to register when receiving the deposit notification.
                       </p>
                     </div>
@@ -489,34 +489,34 @@ const ProcessDeposit: React.FC = () => {
                 )}
 
                 {/* Amount Input */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-3">
+                    <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-2 sm:mb-3">
                       UGX Amount
                     </label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                       <input
                         type="number"
                         value={ugxAmount}
                         onChange={(e) => handleAmountChange(e.target.value)}
                         placeholder="Enter UGX amount"
-                        className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent font-mono transition-colors duration-200"
+                        className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent font-mono transition-colors duration-200 text-sm sm:text-base"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-3">
+                    <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-2 sm:mb-3">
                       Equivalent USDC
                     </label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                       <input
                         type="text"
                         value={depositData.amount.usdc.toFixed(2)}
                         readOnly
-                        className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 font-mono transition-colors duration-200"
+                        className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 border border-neutral-300 rounded-lg bg-neutral-50 font-mono transition-colors duration-200 text-sm sm:text-base"
                         placeholder="Auto-calculated"
                       />
                     </div>
@@ -531,10 +531,10 @@ const ProcessDeposit: React.FC = () => {
                   <button
                     onClick={handleConfirmDeposit}
                     disabled={!depositData.customerPhone || depositData.amount.ugx <= 0}
-                    className="bg-neutral-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2"
+                    className="w-full sm:w-auto bg-neutral-900 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base"
                   >
                     <span>Confirm Deposit</span>
-                    <ArrowLeft className="w-4 h-4 rotate-180" />
+                    <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 rotate-180" />
                   </button>
                 </div>
               </div>
@@ -543,22 +543,22 @@ const ProcessDeposit: React.FC = () => {
 
           {/* Step 2: Summary */}
           {currentStep === 'summary' && (
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-neutral-900 mb-6">Deposit Summary</h2>
+            <div className="p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4 sm:mb-6">Deposit Summary</h2>
               
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Customer Summary */}
-                <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
-                  <h3 className="text-sm font-medium text-neutral-700 mb-4">Customer Information</h3>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-neutral-600" />
+                <div className="bg-neutral-50 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-neutral-200">
+                  <h3 className="text-xs sm:text-sm font-medium text-neutral-700 mb-3 sm:mb-4">Customer Information</h3>
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
                     </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-neutral-900">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-neutral-900 text-sm sm:text-base truncate">
                         {depositData.customer ? `${depositData.customer.firstName} ${depositData.customer.lastName}` : 'New Customer'}
                       </p>
-                      <p className="text-sm text-neutral-600">{depositData.customerPhone}</p>
+                      <p className="text-xs sm:text-sm text-neutral-600 truncate">{depositData.customerPhone}</p>
                       {!depositData.customer && (
                         <p className="text-xs text-yellow-600 mt-1">
                           Will be prompted to register
@@ -569,18 +569,18 @@ const ProcessDeposit: React.FC = () => {
                 </div>
 
                 {/* Amount Summary */}
-                <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
-                  <h3 className="text-sm font-medium text-neutral-700 mb-4">Deposit Amount</h3>
+                <div className="bg-neutral-50 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-neutral-200">
+                  <h3 className="text-xs sm:text-sm font-medium text-neutral-700 mb-3 sm:mb-4">Deposit Amount</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-neutral-600">UGX Amount:</span>
-                      <span className="font-bold text-neutral-900 font-mono text-lg">
+                      <span className="text-neutral-600 text-sm sm:text-base">UGX Amount:</span>
+                      <span className="font-bold text-neutral-900 font-mono text-sm sm:text-lg">
                         {formatCurrency(depositData.amount.ugx, 'UGX')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-neutral-600">USDC Equivalent:</span>
-                      <span className="font-bold text-neutral-900 font-mono text-lg">
+                      <span className="text-neutral-600 text-sm sm:text-base">USDC Equivalent:</span>
+                      <span className="font-bold text-neutral-900 font-mono text-sm sm:text-lg">
                         {formatCurrency(depositData.amount.usdc, 'USDC')}
                       </span>
                     </div>
@@ -588,27 +588,27 @@ const ProcessDeposit: React.FC = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                   <button
                     onClick={() => setCurrentStep('input')}
                     disabled={isProcessing}
-                    className="flex-1 bg-neutral-100 text-neutral-700 py-3 rounded-lg font-semibold hover:bg-neutral-200 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-neutral-100 text-neutral-700 py-3 rounded-lg font-semibold hover:bg-neutral-200 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   >
                     Back to Edit
                   </button>
                   <button
                     onClick={handleProcessDeposit}
                     disabled={isProcessing}
-                    className="flex-1 bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+                    className="flex-1 bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
                   >
                     {isProcessing ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2 animate-spin" />
                         Processing Deposit...
                       </>
                     ) : (
                       <>
-                        <Check className="w-4 h-4 mr-2" />
+                        <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                         Process Deposit
                       </>
                     )}
@@ -620,21 +620,21 @@ const ProcessDeposit: React.FC = () => {
 
           {/* Step 3: Completion */}
           {currentStep === 'complete' && (
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Check className="w-8 h-8 text-green-600" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 mb-2">Deposit Completed!</h2>
-                <p className="text-neutral-600 mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">Deposit Completed!</h2>
+                <p className="text-sm sm:text-base text-neutral-600 mb-4 sm:mb-6">
                   The deposit has been successfully processed and recorded.
                 </p>
                 
-                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6 mb-6">
+                <div className="bg-neutral-50 border border-neutral-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-neutral-800 mb-3">Transaction Summary</h3>
-                    <div className="space-y-2 text-sm text-neutral-700">
-                      <p><strong>Customer:</strong> {depositData.customer ? `${depositData.customer.firstName} ${depositData.customer.lastName}` : depositData.customerPhone}</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-neutral-800 mb-3">Transaction Summary</h3>
+                    <div className="space-y-2 text-xs sm:text-sm text-neutral-700">
+                      <p><strong>Customer:</strong> <span className="break-words">{depositData.customer ? `${depositData.customer.firstName} ${depositData.customer.lastName}` : depositData.customerPhone}</span></p>
                       <p><strong>Amount:</strong> <span className="font-mono">{formatCurrency(depositData.amount.ugx, 'UGX')}</span></p>
                       <p><strong>Transaction ID:</strong> <span className="font-mono">DEP{Date.now().toString().slice(-6)}</span></p>
                       <p><strong>Completed:</strong> {new Date().toLocaleString()}</p>
@@ -642,7 +642,7 @@ const ProcessDeposit: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-sm text-neutral-500">
+                <p className="text-xs sm:text-sm text-neutral-500">
                   Redirecting to new deposit in a few seconds...
                 </p>
               </div>
