@@ -34,33 +34,7 @@ const Layout: React.FC<LayoutProps> = ({children, desktop_routes, mobile_routes,
   // Mock user data - removed unused variable
 
   // Mock notifications data
-  const [notifications] = useState<Notification[]>([
-    {
-      id: '1',
-      title: 'Transaction Completed',
-      message: 'Your withdrawal of 50,000 UGX has been completed successfully. Agent: Kampala Central Agent.',
-      type: 'success',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-      read: false,
-      actionUrl: '/transactions'
-    },
-    {
-      id: '2', 
-      title: 'Security Alert',
-      message: 'New login detected from a different device. If this wasn\'t you, please contact support immediately.',
-      type: 'warning',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-      read: false
-    },
-    {
-      id: '3',
-      title: 'Account Verification',
-      message: 'Your account has been successfully verified. You can now access all features.',
-      type: 'info',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-      read: true
-    }
-  ]);
+  const [notifications] = useState<Notification[]>([]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -124,7 +98,7 @@ const isActive = (path:string) => location.pathname.startsWith(path);
       </div>
 
       {/* Floating Notification Bell */}
-      <div className="fixed top-3 right-3 md:top-4 md:right-6 z-50">
+      <div className="fixed top-3 right-2 sm:right-3 md:top-4 md:right-6 z-50">
         <div className="relative">
           <button 
             className="relative p-2 md:p-3 bg-white text-neutral-600 hover:text-neutral-800 rounded-full shadow-lg border border-neutral-200 hover:shadow-xl transition-all duration-200"
@@ -142,41 +116,43 @@ const isActive = (path:string) => location.pathname.startsWith(path);
 
         {/* Notifications Dropdown */}
         {showNotifications && (
-          <div className="fixed top-16 right-6 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
-            <div className="p-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+          <div className="fixed top-16 right-2 left-2 sm:left-auto sm:right-6 sm:w-80 md:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-80 sm:max-h-96 overflow-y-auto">
+            <div className="p-3 sm:p-4 border-b border-gray-100">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800">Notifications</h3>
               {unreadCount > 0 && (
-                <p className="text-sm text-gray-600">{unreadCount} unread</p>
+                <p className="text-xs sm:text-sm text-gray-600">{unreadCount} unread</p>
               )}
             </div>
             
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
-                <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                <p>No notifications</p>
+                <Bell className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm sm:text-base">No notifications</p>
               </div>
             ) : (
-              <div className="max-h-64 overflow-y-auto">
+              <div className="max-h-56 sm:max-h-64 overflow-y-auto">
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                    className={`p-3 sm:p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
                       !notification.read ? 'bg-blue-50' : ''
                     }`}
                     // onClick={() => handleNotificationClick(notification)}
                   >
-                    <div className="flex items-start space-x-3">
-                      {getNotificationIcon(notification.type)}
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {getNotificationIcon(notification.type)}
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h4 className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                        <div className="flex items-start justify-between">
+                          <h4 className={`text-xs sm:text-sm font-medium pr-2 ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
                             {notification.title}
                           </h4>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 flex-shrink-0">
                             {formatTimestamp(notification.timestamp)}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
                           {notification.message}
                         </p>
                       </div>
