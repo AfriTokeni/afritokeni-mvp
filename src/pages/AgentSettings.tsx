@@ -86,20 +86,20 @@ const AgentSettings: React.FC = () => {
   if (loading) {
     return (
       <PageLayout>
-        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6 mx-2 sm:mx-0">
+        <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
             <div className="animate-pulse">
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-neutral-200 rounded-full mx-auto sm:mx-0"></div>
+              <div className="flex flex-col items-center text-center space-y-4 mb-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-neutral-200 rounded-full"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-6 bg-neutral-200 rounded w-3/4 mx-auto sm:mx-0"></div>
-                  <div className="h-4 bg-neutral-200 rounded w-1/2 mx-auto sm:mx-0"></div>
-                  <div className="h-3 bg-neutral-200 rounded w-2/3 mx-auto sm:mx-0"></div>
+                  <div className="h-6 lg:h-8 bg-neutral-200 rounded w-48 mx-auto"></div>
+                  <div className="h-4 lg:h-6 bg-neutral-200 rounded w-32 mx-auto"></div>
+                  <div className="h-3 lg:h-5 bg-neutral-200 rounded w-36 mx-auto"></div>
                 </div>
               </div>
               <div className="space-y-3">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-12 bg-neutral-100 rounded-lg"></div>
+                  <div key={i} className="h-12 lg:h-14 bg-neutral-100 rounded-lg"></div>
                 ))}
               </div>
             </div>
@@ -113,15 +113,15 @@ const AgentSettings: React.FC = () => {
   if (error) {
     return (
       <PageLayout>
-        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6 mx-2 sm:mx-0">
-            <div className="text-center py-8">
-              <div className="text-red-500 mb-2">⚠️</div>
-              <h2 className="text-lg font-semibold text-neutral-900 mb-2">Failed to Load Agent Data</h2>
-              <p className="text-neutral-600 mb-4">{error}</p>
+        <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-8 xl:p-10 mx-2 sm:mx-0">
+            <div className="text-center py-8 lg:py-12 xl:py-16">
+              <div className="text-red-500 mb-2 text-2xl lg:text-3xl xl:text-4xl">⚠️</div>
+              <h2 className="text-lg lg:text-xl xl:text-2xl font-semibold text-neutral-900 mb-2">Failed to Load Agent Data</h2>
+              <p className="text-neutral-600 mb-4 text-sm lg:text-base xl:text-lg">{error}</p>
               <button 
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600 transition-colors"
+                className="px-4 py-2 lg:px-6 lg:py-3 xl:px-8 xl:py-4 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600 transition-colors text-sm lg:text-base xl:text-lg"
               >
                 Retry
               </button>
@@ -136,12 +136,12 @@ const AgentSettings: React.FC = () => {
   if (!agentData) {
     return (
       <PageLayout>
-        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6 mx-2 sm:mx-0">
-            <div className="text-center py-8">
-              <div className="text-neutral-400 mb-2">👤</div>
-              <h2 className="text-lg font-semibold text-neutral-900 mb-2">No Agent Data Found</h2>
-              <p className="text-neutral-600">Please complete your agent profile setup.</p>
+        <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-8 xl:p-10 mx-2 sm:mx-0">
+            <div className="text-center py-8 lg:py-12 xl:py-16">
+              <div className="text-neutral-400 mb-2 text-2xl lg:text-3xl xl:text-4xl">👤</div>
+              <h2 className="text-lg lg:text-xl xl:text-2xl font-semibold text-neutral-900 mb-2">No Agent Data Found</h2>
+              <p className="text-neutral-600 text-sm lg:text-base xl:text-lg">Please complete your agent profile setup.</p>
             </div>
           </div>
         </div>
@@ -151,63 +151,55 @@ const AgentSettings: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="mb-4 sm:mb-6 px-2 sm:px-0">
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900">Agent Settings</h1>
-          <p className="text-xs sm:text-sm md:text-base text-neutral-600 mt-1">Manage your agent account and preferences</p>
+          <p className="text-sm sm:text-base text-neutral-600 mt-1">Manage your agent account and preferences</p>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6 mx-2 sm:mx-0">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6 sm:mb-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto sm:mx-0">
-              <User className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-600" />
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
+          <div className="flex flex-col items-center text-center space-y-4 mb-6 sm:mb-8">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-neutral-100 rounded-full flex items-center justify-center">
+              <User className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 text-neutral-600" />
             </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-1">{agentData.name}</h2>
+            <div className="flex-1">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 mb-1">{agentData.name}</h2>
               {agentData.businessName && (
-                <p className="text-neutral-600 text-sm sm:text-base mb-1">{agentData.businessName}</p>
+                <p className="text-neutral-600 text-base sm:text-lg mb-1">{agentData.businessName}</p>
               )}
-              <p className="text-neutral-600 font-mono text-sm sm:text-base md:text-lg mb-1">{agentData.phone}</p>
-              <p className="text-xs sm:text-sm text-neutral-500 font-mono mb-2">Agent ID: {agentData.agentId}</p>
-              <div className="flex flex-col xs:flex-row xs:items-center xs:justify-center sm:justify-start space-y-2 xs:space-y-0 xs:space-x-4 mb-2">
-                <div className="flex items-center justify-center sm:justify-start space-x-1">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-500" />
-                  <span className="text-xs sm:text-sm text-neutral-600">{agentData.location}</span>
+              <p className="text-neutral-600 font-mono text-sm sm:text-base lg:text-lg mb-1">{agentData.phone}</p>
+              <p className="text-sm text-neutral-500 font-mono mb-3">Agent ID: {agentData.agentId}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center space-y-2 sm:space-y-0 sm:space-x-6 mb-2">
+                <div className="flex items-center justify-center space-x-1">
+                  <MapPin className="w-4 h-4 text-neutral-500" />
+                  <span className="text-sm text-neutral-600">{agentData.location}</span>
                 </div>
-                <div className="flex items-center justify-center sm:justify-start space-x-1">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-500" />
-                  <span className="text-xs sm:text-sm text-neutral-600">Since {agentData.joinDate.toLocaleDateString()}</span>
+                <div className="flex items-center justify-center space-x-1">
+                  <Clock className="w-4 h-4 text-neutral-500" />
+                  <span className="text-sm text-neutral-600">Since {agentData.joinDate.toLocaleDateString()}</span>
                 </div>
               </div>
-              <div className="flex flex-col xs:flex-row xs:items-center xs:justify-center sm:justify-start space-y-2 xs:space-y-0 xs:space-x-4">
-                <div className="flex items-center justify-center sm:justify-start space-x-2">
-                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
-                  <span className="text-xs sm:text-sm font-medium text-green-600">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center space-y-2 sm:space-y-0 sm:space-x-6">
+                <div className="flex items-center justify-center space-x-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm font-medium text-green-600">
                     {agentData.isVerified ? 'Verified Agent' : 'Pending Verification'}
                   </span>
                 </div>
-                <div className="flex items-center justify-center sm:justify-start space-x-2">
+                <div className="flex items-center justify-center space-x-2">
                   <div className={`w-2 h-2 rounded-full ${agentData.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                  <span className="text-xs sm:text-sm font-medium text-neutral-600 capitalize">{agentData.status}</span>
+                  <span className="text-sm font-medium text-neutral-600 capitalize">{agentData.status}</span>
                 </div>
               </div>
               {(agentData.cashBalance !== undefined || agentData.digitalBalance !== undefined) && (
                 <div className="mt-3 pt-3 border-t border-neutral-100">
-                  <div className="flex flex-col xs:flex-row xs:items-center xs:justify-center sm:justify-start space-y-1 xs:space-y-0 xs:space-x-4">
-                    {/* {agentData.cashBalance !== undefined && (
-                      <div className="flex items-center justify-center sm:justify-start space-x-1">
-                        <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
-                        <span className="text-xs sm:text-sm text-neutral-600">
-                          Cash: UGX {agentData.cashBalance.toLocaleString()}
-                        </span>
-                      </div>
-                    )} */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center space-y-1 sm:space-y-0 sm:space-x-6">
                     {agentData.digitalBalance !== undefined && (
-                      <div className="flex items-center justify-center sm:justify-start space-x-1">
-                        <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
-                        <span className="text-xs sm:text-sm text-neutral-600">
+                      <div className="flex items-center justify-center space-x-1">
+                        <DollarSign className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm text-neutral-600">
                           Digital: UGX {agentData.digitalBalance.toLocaleString()}
                         </span>
                       </div>
@@ -220,64 +212,64 @@ const AgentSettings: React.FC = () => {
 
           {/* Menu Items */}
           <div className="space-y-2 sm:space-y-3">
-            <button className="w-full flex items-center justify-between px-2 py-3 sm:px-3 sm:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
+            <button className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
               <div className="flex items-center space-x-3">
-                <User className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
-                <span className="text-xs sm:text-sm md:text-base font-semibold text-neutral-900">Agent Profile</span>
+                <User className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
+                <span className="text-sm sm:text-base text-neutral-900">Agent Profile</span>
               </div>
-              <span className="text-neutral-400 text-base sm:text-lg">→</span>
+              <span className="text-neutral-400 text-lg">→</span>
             </button>
             
-            <button className="w-full flex items-center justify-between px-2 py-3 sm:px-3 sm:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
+            <button className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
               <div className="flex items-center space-x-3">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
-                <span className="text-xs sm:text-sm md:text-base font-semibold text-neutral-900">Security & Privacy</span>
+                <Shield className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
+                <span className="text-sm sm:text-base text-neutral-900">Security & Privacy</span>
               </div>
-              <span className="text-neutral-400 text-base sm:text-lg">→</span>
+              <span className="text-neutral-400 text-lg">→</span>
             </button>
             
-            <button className="w-full flex items-center justify-between px-2 py-3 sm:px-3 sm:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
+            <button className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
               <div className="flex items-center space-x-3">
-                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
-                <span className="text-xs sm:text-sm md:text-base font-semibold text-neutral-900">Commission Settings</span>
+                <DollarSign className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
+                <span className="text-sm sm:text-base text-neutral-900">Commission Settings</span>
               </div>
-              <span className="text-neutral-400 text-base sm:text-lg">→</span>
+              <span className="text-neutral-400 text-lg">→</span>
             </button>
             
-            <button className="w-full flex items-center justify-between px-2 py-3 sm:px-3 sm:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
+            <button className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
               <div className="flex items-center space-x-3">
-                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
-                <span className="text-xs sm:text-sm md:text-base font-semibold text-neutral-900">Location & Availability</span>
+                <MapPin className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
+                <span className="text-sm sm:text-base text-neutral-900">Location & Availability</span>
               </div>
-              <span className="text-neutral-400 text-base sm:text-lg">→</span>
+              <span className="text-neutral-400 text-lg">→</span>
             </button>
             
-            <button className="w-full flex items-center justify-between px-2 py-3 sm:px-3 sm:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
+            <button className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
               <div className="flex items-center space-x-3">
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
-                <span className="text-xs sm:text-sm md:text-base font-semibold text-neutral-900">Notifications</span>
+                <Bell className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
+                <span className="text-sm sm:text-base text-neutral-900">Notifications</span>
               </div>
-              <span className="text-neutral-400 text-base sm:text-lg">→</span>
+              <span className="text-neutral-400 text-lg">→</span>
             </button>
             
-            <button className="w-full flex items-center justify-between px-2 py-3 sm:px-3 sm:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
+            <button className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors duration-200">
               <div className="flex items-center space-x-3">
-                <User className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-600" />
-                <span className="text-xs sm:text-sm md:text-base font-semibold text-neutral-900">Help & Support</span>
+                <User className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
+                <span className="text-sm sm:text-base text-neutral-900">Help & Support</span>
               </div>
-              <span className="text-neutral-400 text-base sm:text-lg">→</span>
+              <span className="text-neutral-400 text-lg">→</span>
             </button>
             
             {/* Logout Button - Only visible on mobile */}
             <button 
               onClick={handleLogout}
-              className="md:hidden w-full flex items-center justify-between px-2 py-3 sm:px-3 sm:py-4 bg-red-50 rounded-lg hover:bg-red-100 border border-red-200 transition-colors duration-200"
+              className="md:hidden w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-red-50 rounded-lg hover:bg-red-100 border border-red-200 transition-colors duration-200"
             >
               <div className="flex items-center space-x-3">
-                <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
-                <span className="text-xs sm:text-sm md:text-base font-semibold text-red-700">Logout</span>
+                <LogOut className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />
+                <span className="text-sm sm:text-base text-red-700">Logout</span>
               </div>
-              <span className="text-red-400 text-base sm:text-lg">→</span>
+              <span className="text-red-400 text-lg">→</span>
             </button>
           </div>
         </div>
