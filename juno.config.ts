@@ -7,8 +7,7 @@ export default defineConfig({
       production: "dkk74-oyaaa-aaaal-askxq-cai"
     },
     source: "dist",
-    predeploy: ["npm run build","npm run build:backend"],
-    postdeploy: ["npm run start:backend"],
+    predeploy: ["npm run build"],
     collections: {
       datastore: [
         {
