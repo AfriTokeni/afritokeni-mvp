@@ -348,7 +348,7 @@ const ProcessDeposit: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-2 sm:p-4 sm:px-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
@@ -394,7 +394,7 @@ const ProcessDeposit: React.FC = () => {
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200">
           {/* Step 1: Input Customer Details and Amount */}
           {currentStep === 'input' && (
-            <div className="p-4 sm:p-6">
+            <div className="p-3 sm:p-6">
               <div className="space-y-4 sm:space-y-6">
                 {/* Phone Number Input */}
                 <div>
@@ -543,7 +543,7 @@ const ProcessDeposit: React.FC = () => {
 
           {/* Step 2: Summary */}
           {currentStep === 'summary' && (
-            <div className="p-4 sm:p-6">
+            <div className="p-3 sm:p-6">
               <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4 sm:mb-6">Deposit Summary</h2>
               
               <div className="space-y-4 sm:space-y-6">
@@ -620,7 +620,7 @@ const ProcessDeposit: React.FC = () => {
 
           {/* Step 3: Completion */}
           {currentStep === 'complete' && (
-            <div className="p-4 sm:p-6">
+            <div className="p-3 sm:p-6">
               <div className="text-center">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
