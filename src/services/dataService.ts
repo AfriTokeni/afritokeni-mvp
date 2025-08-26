@@ -1030,7 +1030,7 @@ export class DataService {
     console.log(`Satellite ID here: ${satellite}`);
     try {
       // Get user by phone number (which is stored as email for SMS users)
-      const user = await this.getUserByKey(phoneNumber, satellite);
+      const user = await this.getUserByKey(phoneNumber);
       
       if (!user || !user.pin) {
         return null;
@@ -1050,10 +1050,10 @@ export class DataService {
     }
   }
 
-  static async createOrUpdateUserPin(phoneNumber: string, pin: string, satellite?: any): Promise<boolean> {
+  static async createOrUpdateUserPin(phoneNumber: string, pin: string, _satellite?: any): Promise<boolean> {
     try {
       // Get user by phone number (stored as email for SMS users)
-      let user = await this.getUserByKey(phoneNumber, satellite);
+      let user = await this.getUserByKey(phoneNumber);
 
       if (!user) {
         // Create new user if doesn't exist
@@ -1365,7 +1365,7 @@ Choose an option (1-4):`,
     };
   }
 
-  private static async handleCheckBalance(session: USSDSession, userPin: UserPin): Promise<{ response: string; continueSession: boolean }> {
+  private static async handleCheckBalance(session: USSDSession, _userPin: UserPin): Promise<{ response: string; continueSession: boolean }> {
     try {
       const user = await this.getUserByKey(session.phoneNumber);
       if (!user) {
@@ -1394,7 +1394,7 @@ Thank you for using AfriTokeni!`,
     }
   }
 
-  private static async handleTransactionHistory(session: USSDSession, userPin: UserPin): Promise<{ response: string; continueSession: boolean }> {
+  private static async handleTransactionHistory(session: USSDSession, _userPin: UserPin): Promise<{ response: string; continueSession: boolean }> {
     try {
       const user = await this.getUserByKey(session.phoneNumber);
       if (!user) {
@@ -1605,7 +1605,7 @@ Amount: UGX ${amount.toLocaleString()}
           }
 
           // Create withdrawal transaction
-          const transaction = await this.createTransaction({
+          await this.createTransaction({
             userId: user.id,
             type: 'withdraw',
             amount: session.tempData.withdrawAmount!,

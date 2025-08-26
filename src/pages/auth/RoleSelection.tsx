@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { User, Shield, ArrowRight } from 'lucide-react';
 import { authSubscribe, type User as JunoUser } from '@junobuild/core';
 import { useRoleBasedAuth, type UserRole } from '../../hooks/useRoleBasedAuth';
-import { useAuthentication } from '../../context/AuthenticationContext';
 import { useEffect } from 'react';
 
 const RoleSelection: React.FC = () => {
@@ -10,7 +9,6 @@ const RoleSelection: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [junoUser, setJunoUser] = useState<JunoUser | null>(null);
   const { setUserRole } = useRoleBasedAuth();
-  const { updateUserType } = useAuthentication();
 
   useEffect(() => {
     const unsubscribe = authSubscribe((user: JunoUser | null) => {
