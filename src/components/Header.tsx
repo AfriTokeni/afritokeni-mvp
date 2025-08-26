@@ -15,10 +15,10 @@ const Header: React.FC<HeaderProps> = ({
   showUserMenu = true 
 }) => {
   const navigate = useNavigate();
-  const { userData, agentData, logout } = useAuthentication();
+  const { user, logout } = useAuthentication();
   
-  // Use whichever data is available (userData or agentData)
-  const currentUser = userData || agentData;
+  // Use whichever data is available (user.user or user.agent)
+  const currentUser = user.user || user.agent;
 
   const handleLogout = async () => {
     try {

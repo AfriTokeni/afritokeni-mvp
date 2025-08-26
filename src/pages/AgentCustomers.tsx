@@ -51,7 +51,6 @@ const AgentCustomers: React.FC = () => {
             try {
               // Get user transactions to calculate stats
               const transactions = await DataService.getUserTransactions(user.id);
-              const balance = await DataService.getUserBalance(user.id);
               
               // Calculate total volume and transaction count
               const totalVolume = transactions.reduce((sum, transaction) => {

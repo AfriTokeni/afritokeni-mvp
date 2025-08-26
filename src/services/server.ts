@@ -25,7 +25,6 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import AfricasTalking from 'africastalking';
 import { WebhookDataService as DataService } from './webHookServices.js';
-import { send } from 'process';
 
 
 
@@ -73,7 +72,7 @@ const africastalking = AfricasTalking(credentials);
 const sms = africastalking.SMS;
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.VITE_PORT || 3001;
 
 // Middleware
 app.use(cors());
@@ -960,7 +959,7 @@ app.post('/api/verify-code', (req, res) => {
 // Route to handle incoming SMS (webhook from AfricasTalking)
 app.post('/api/webhook/sms', (req, res) => {
   try {
-    const { from, text, date, id } = req.body;
+    const { from, text } = req.body;
     
     console.log(`📨 Received SMS from ${from}: ${text}`);
     
@@ -977,7 +976,7 @@ app.post('/api/webhook/sms', (req, res) => {
 // Route to handle USSD requests (webhook from AfricasTalking)
 app.post('/api/ussd', async (req, res) => {
   try {
-    const { sessionId, serviceCode, phoneNumber, text } = req.body;
+    const { sessionId, phoneNumber, text } = req.body;
     
     console.log(`📱 USSD Request - Session: ${sessionId}, Phone: ${phoneNumber}, Text: "${text}"`);
     
@@ -1027,7 +1026,7 @@ app.post('/api/ussd', async (req, res) => {
 });
 
 // Development endpoint for PIN management
-app.post('/api/dev/pins/clear', async (req, res) => {
+app.post('/api/dev/pins/clear', async (_req, res) => {
   if (process.env.NODE_ENV !== 'production') {
     // Clear in-memory sessions
     ussdSessions.clear();
@@ -1045,14 +1044,13 @@ app.post('/api/dev/pins/clear', async (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', async (req, res) => {
+app.get('/health', async (_req, res) => {
   try {
     // Get PIN count from DataService if available
-    let pinCount = 0;
     try {
       // This would require implementing a method to count users with PINs
       // For now, we'll use session count as a proxy
-      pinCount = ussdSessions.size;
+      // Session count available via ussdSessions.size
     } catch (error) {
       console.error('Error getting PIN count:', error);
     }
@@ -1080,7 +1078,7 @@ app.get('/health', async (req, res) => {
 });
 
 // Root endpoint
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({
     message: 'AfriTokeni SMS & USSD Webhook Server (TypeScript)',
     version: '2.0.0',

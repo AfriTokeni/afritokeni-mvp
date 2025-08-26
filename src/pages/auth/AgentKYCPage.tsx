@@ -1,4 +1,4 @@
-import React, { use, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AgentKYC from '../../components/AgentKYC';
 import { AgentKYCData } from '../../types/auth';

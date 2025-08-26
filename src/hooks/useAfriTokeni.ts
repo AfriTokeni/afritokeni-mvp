@@ -336,7 +336,8 @@ export const useAfriTokeni = () => {
 
   const processSMSCommand = async (phoneNumber: string, message: string): Promise<string> => {
     try {
-      return await DataService.processSMSCommand(phoneNumber, message, user?.id);
+      const userId = user?.user?.id || user?.agent?.id;
+      return await DataService.processSMSCommand(phoneNumber, message, userId);
     } catch (err) {
       console.error('Error processing SMS command:', err);
       return 'Sorry, there was an error processing your request.';
