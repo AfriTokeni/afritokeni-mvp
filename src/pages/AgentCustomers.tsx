@@ -122,24 +122,6 @@ const AgentCustomers: React.FC = () => {
     fetchCustomers();
   }, []);
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDC'): string => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'UGX',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(amount);
-    } else {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(amount);
-    }
-  };
-
   const getTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
@@ -226,7 +208,7 @@ const AgentCustomers: React.FC = () => {
 
         {/* Customer Stats */}
         {!isLoading && !error && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-neutral-600 truncate">Total Customers</p>
@@ -239,15 +221,6 @@ const AgentCustomers: React.FC = () => {
                 <p className="text-xs sm:text-sm font-medium text-neutral-600 truncate">Active Customers</p>
                 <p className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 font-mono mt-1 lg:mt-2 truncate">
                   {customers.filter(c => c.status === 'active').length}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-neutral-600 truncate">Total Volume</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 font-mono mt-1 lg:mt-2 truncate" title={formatCurrency(customers.reduce((sum, c) => sum + c.totalVolume.ugx, 0), 'UGX')}>
-                  {formatCurrency(customers.reduce((sum, c) => sum + c.totalVolume.ugx, 0), 'UGX')}
                 </p>
               </div>
             </div>
@@ -333,13 +306,6 @@ const AgentCustomers: React.FC = () => {
 
                       {/* Customer Stats and Status */}
                       <div className="text-left sm:text-right">
-                        <div className="text-base sm:text-lg font-bold text-neutral-900 font-mono">
-                          {formatCurrency(customer.totalVolume.ugx, 'UGX')}
-                        </div>
-                        <div className="text-xs sm:text-sm text-neutral-600 mb-2 font-mono">
-                          ≈ {formatCurrency(customer.totalVolume.usdc, 'USDC')}
-                        </div>
-                        
                         {/* Transaction Count */}
                         <div className="text-xs text-neutral-500 mb-2">
                           {customer.totalTransactions} transactions • Last: {getTimeAgo(customer.lastTransaction)}
