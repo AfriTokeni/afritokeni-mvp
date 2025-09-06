@@ -219,7 +219,7 @@ const ProcessDeposit: React.FC = () => {
         description: `Cash deposit via agent ${currentAgent.businessName || 'Agent'}`,
         completedAt: new Date(),
         metadata: {
-          agentLocation: currentAgent.location?.city || 'Unknown',
+          agentLocation: currentAgent.location.city || 'Unknown',
           smsReference: `DEP${Date.now().toString().slice(-6)}`
         }
       });
@@ -235,7 +235,7 @@ const ProcessDeposit: React.FC = () => {
         description: `Processed deposit for ${depositData.customer?.firstName || 'customer'} - Commission: UGX ${commissionAmount.toLocaleString()}`,
         completedAt: new Date(),
         metadata: {
-          agentLocation: currentAgent.location?.city || 'Unknown',
+          agentLocation: currentAgent.location.city || 'Unknown',
           smsReference: `DEP${Date.now().toString().slice(-6)}`
         }
       });

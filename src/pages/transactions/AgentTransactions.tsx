@@ -6,10 +6,10 @@ import {
   Minus,
   Search,
 } from 'lucide-react';
-import { Transaction } from '../../types/transaction';
+// Transaction type is imported via normalizeTransaction utility
 import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { normalizeTransaction, getTransactionIcon, formatDate } from '../../utils/transactionUtils';
+import { normalizeTransaction, formatDate } from '../../utils/transactionUtils';
 
 const AgentTransactions: React.FC = () => {
   const { agentTransactions, isLoading } = useAfriTokeni();
@@ -240,7 +240,7 @@ const AgentTransactions: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(transaction.date)}
+                          {formatDate(transaction.createdAt)}
                         </td>
                       </tr>
                     ))}

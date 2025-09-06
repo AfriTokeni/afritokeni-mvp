@@ -40,12 +40,12 @@ const UserDashboard: React.FC = () => {
     return BalanceService.calculateBalance(currentUser.id, userCurrency);
   };
 
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (date: Date | string): string => {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric'
     });
   };
 

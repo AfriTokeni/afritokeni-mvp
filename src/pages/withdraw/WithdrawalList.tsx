@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, CreditCard, Search } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
-import { DataService, Transaction } from '../../services/dataService';
+import { DataService } from '../../services/dataService';
+import { Transaction } from '../../types/transaction';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { User as UserType } from '../../types/auth';
 import { listDocs } from '@junobuild/core';

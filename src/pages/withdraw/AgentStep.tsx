@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import { DataService, Agent as DBAgent } from '../../services/dataService';
-import type { Agent } from './types';
 
 interface AgentStepProps {
   userLocation: [number, number] | null;
@@ -13,26 +12,14 @@ interface AgentStepProps {
   btcAmount: string;
   userCurrency: string;
   onBackToAmount: () => void;
-  onAgentSelect: (selectedAgent: Agent) => void;
+  onAgentSelect: (selectedAgent: DBAgent) => void;
   isCreatingTransaction?: boolean;
   transactionError?: string | null;
 }
 
-// Convert database agent to UI agent format
-const convertDbAgentToUIAgent = (dbAgent: DBAgent): Agent => {
-  return {
-    id: dbAgent.id,
-    name: dbAgent.businessName,
-    status: dbAgent.status === 'available' ? 'online' : 
-            dbAgent.status === 'busy' ? 'busy' : 'offline',
-    location: [dbAgent.location.coordinates.lat, dbAgent.location.coordinates.lng],
-    locationName: dbAgent.location.address,
-    address: dbAgent.location.address,
-    contact: 'Contact via app', // Could be updated when contact info is added to Agent schema
-    operatingHours: 'Business hours vary', // Could be updated when business hours are added
-    availableBalance: dbAgent.digitalBalance
-  };
-};
+// Removed conversion function - using DBAgent directly
+
+// Removed unused helper function
 
 const createBlinkingUserIcon = () => {
   return L.divIcon({
@@ -116,8 +103,8 @@ const AgentStep: React.FC<AgentStepProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [selectedAgent, setSelectedAgent] = useState<DBAgent | null>(null);
+  const [agents, setAgents] = useState<DBAgent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch nearby agents
@@ -129,8 +116,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
       try {
         const [lat, lng] = userLocation;
         const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
-        const uiAgents = dbAgents.map(convertDbAgentToUIAgent);
-        setAgents(uiAgents);
+        setAgents(dbAgents);
       } catch (error) {
         console.error('Error fetching nearby agents:', error);
         setAgents([]); // Fallback to empty array
@@ -142,23 +128,23 @@ const AgentStep: React.FC<AgentStepProps> = ({
     fetchNearbyAgents();
   }, [userLocation]);
 
-  const handleMarkerClick = (agent: Agent) => {
+  const handleMarkerClick = (agent: DBAgent) => {
     setSelectedAgent(agent);
     if (window.innerWidth < 768) {
       setIsMobileDialogOpen(true);
     }
   };
 
-  const availableAgents = agents.filter(agent => agent.availableBalance > 0);
+  const availableAgents = agents.filter(agent => agent.digitalBalance > 0);
 
-  const renderAgentDetails = (agent: Agent) => (
+  const renderAgentDetails = (agent: DBAgent) => (
     <div className="max-w-xs">
-      <h3 className="font-bold text-sm sm:text-base lg:text-lg mb-2">{agent.name}</h3>
+      <h3 className="font-bold text-sm sm:text-base lg:text-lg mb-2">{agent.businessName}</h3>
       <div className="space-y-2 text-xs sm:text-sm">
         <p>
           <span className="font-semibold">Status:</span>{' '}
           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-            agent.status === 'online'
+            agent.status === 'available'
               ? 'bg-green-100 text-green-800'
               : agent.status === 'busy'
               ? 'bg-yellow-100 text-yellow-800'
@@ -168,25 +154,25 @@ const AgentStep: React.FC<AgentStepProps> = ({
           </span>
         </p>
         <p>
-          <span className="font-semibold">Location:</span> {agent.locationName}
+          <span className="font-semibold">Location:</span> {agent.location.address}
         </p>
         <p>
           <span className="font-semibold">Distance:</span>{' '}
           {userLocation
             ? calculateDistance(
                 userLocation[0], userLocation[1],
-                agent.location[0], agent.location[1]
+                agent.location.coordinates.lat, agent.location.coordinates.lng
               )
             : 'Unknown'}
         </p>
         <p>
-          <span className="font-semibold">Contact:</span> {agent.contact}
+          <span className="font-semibold">Contact:</span> Via app
         </p>
         <p>
-          <span className="font-semibold">Operating Hours:</span> {agent.operatingHours}
+          <span className="font-semibold">Operating Hours:</span> Business hours vary
         </p>
         <p>
-          <span className="font-semibold">Available Balance:</span> {agent.availableBalance.toLocaleString()} {userCurrency || 'UGX'}
+          <span className="font-semibold">Available Balance:</span> {agent.digitalBalance.toLocaleString()} {userCurrency || 'UGX'}
         </p>
       </div>
       <div className="mt-3 flex space-x-2">
@@ -289,7 +275,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
               {availableAgents.map((agent) => (
                                   <Marker
                     key={agent.id}
-                    position={agent.location}
+                    position={[agent.location.coordinates.lat, agent.location.coordinates.lng]}
                     icon={createAgentIcon(agent.status)}
                     eventHandlers={{
                       click: () => handleMarkerClick(agent),

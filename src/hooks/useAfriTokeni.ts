@@ -1,29 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthentication } from '../context/AuthenticationContext';
-import { DataService } from '../services/dataService';
+import { DataService, Agent } from '../services/dataService';
 import { TransactionService } from '../services/TransactionService';
 import { User } from '../types/auth';
+import { Transaction } from '../types/transaction';
 
 interface UserBalance {
   balance: number;
   currency: string;
 }
 
-interface Transaction {
-  id: string;
-  type: string;
-  amount: number;
-  currency: string;
-  description: string;
-  status: string;
-  createdAt: string;
-}
-
-interface Agent {
-  id: string;
-  name: string;
-  location: string;
-}
+// Transaction and Agent interfaces imported from their respective modules
 
 export const useAfriTokeni = () => {
   const { user } = useAuthentication();

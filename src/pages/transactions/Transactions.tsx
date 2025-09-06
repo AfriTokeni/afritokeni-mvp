@@ -8,7 +8,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { Transaction } from '../../types/transaction';
-import { formatDate, getTransactionIcon, getTransactionDescription, normalizeTransaction } from '../../utils/transactionUtils';
+import { normalizeTransaction } from '../../utils/transactionUtils';
 import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
