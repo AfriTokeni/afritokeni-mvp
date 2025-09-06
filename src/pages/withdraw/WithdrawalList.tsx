@@ -5,6 +5,7 @@ import { DataService, Transaction } from '../../services/dataService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { User as UserType } from '../../types/auth';
 import { listDocs } from '@junobuild/core';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
 
 interface WithdrawalListProps {
   onSelectWithdrawal: (withdrawal: WithdrawalRequest) => void;
@@ -109,8 +110,8 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
         userName: userName,
         userPhone: userPhone,
         amount: {
-          ugx: transaction.amount,
-          usdc: transaction.amount * 0.00026 // Convert to USDT using exchange rate
+          local: transaction.amount,
+          currency: 'UGX' // This should be dynamic based on user's preferred currency
         },
         withdrawalCode: transaction?.metadata?.withdrawalCode || '', 
         requestedAt: transaction.createdAt instanceof Date ? transaction.createdAt : new Date(transaction.createdAt),
@@ -160,17 +161,8 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
     fetchWithdrawalRequests();
   }, [agent?.id]);
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT') => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
-        style: 'currency',
-        currency: 'UGX',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(amount);
-    } else {
-      return `$${amount.toFixed(2)}`;
-    }
+  const formatCurrency = (amount: number, currency: string) => {
+    return formatCurrencyAmount(amount, currency as keyof typeof AFRICAN_CURRENCIES);
   };
 
   const getStatusColor = (status: string) => {
@@ -290,10 +282,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
                 {/* Amount and Status */}
                 <div className="text-left sm:text-right flex-shrink-0">
                   <div className="text-base font-bold text-neutral-900 font-mono">
-                    {formatCurrency(request.amount.ugx, 'UGX')}
-                  </div>
-                  <div className="text-xs sm:text-sm text-neutral-600 mb-2 font-mono">
-                    ≈ {formatCurrency(request.amount.usdc, 'USDT')}
+                    {formatCurrency(request.amount.local, request.amount.currency)}
                   </div>
                   
                   {/* Withdrawal Code */}
@@ -319,8 +308,8 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
             <span>Showing {filteredRequests.length} withdrawal request{filteredRequests.length !== 1 ? 's' : ''}</span>
             <span className="font-mono font-semibold">
               Total: {formatCurrency(
-                filteredRequests.reduce((sum, req) => sum + req.amount.ugx, 0), 
-                'UGX'
+                filteredRequests.reduce((sum, req) => sum + req.amount.local, 0), 
+                filteredRequests[0]?.amount.currency || 'UGX'
               )}
             </span>
           </div>

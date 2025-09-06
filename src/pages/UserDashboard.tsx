@@ -133,7 +133,18 @@ const UserDashboard: React.FC = () => {
         {/* Quick Actions */}
         <div>
           <h2 className="text-2xl font-bold text-neutral-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button 
+              onClick={() => navigate('/users/deposit')}
+              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-green-200"
+            >
+              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-all duration-200">
+                <Plus className="w-6 h-6 text-green-600 transition-colors duration-200" />
+              </div>
+              <span className="text-neutral-900 font-semibold text-sm">Deposit Cash</span>
+              <p className="text-neutral-500 text-xs mt-1">Add money via agents</p>
+            </button>
+
             <button 
               onClick={() => navigate('/users/send')}
               className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-blue-200"
@@ -147,10 +158,10 @@ const UserDashboard: React.FC = () => {
 
             <button 
               onClick={() => navigate('/users/withdraw')}
-              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-green-200"
+              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-red-200"
             >
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-all duration-200">
-                <Minus className="w-6 h-6 text-green-600 transition-colors duration-200" />
+              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-red-100 transition-all duration-200">
+                <Minus className="w-6 h-6 text-red-600 transition-colors duration-200" />
               </div>
               <span className="text-neutral-900 font-semibold text-sm">Withdraw Cash</span>
               <p className="text-neutral-500 text-xs mt-1">Get cash from agents</p>

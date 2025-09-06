@@ -9,8 +9,9 @@ import type { Agent } from './types';
 interface AgentStepProps {
   userLocation: [number, number] | null;
   locationError: string | null;
-  ugxAmount?: number;
-  usdcAmount?: number;
+  localAmount: number;
+  btcAmount: string;
+  userCurrency: string;
   onBackToAmount: () => void;
   onAgentSelect: (selectedAgent: Agent) => void;
   isCreatingTransaction?: boolean;
@@ -105,8 +106,9 @@ const CenterMap = ({ center }: { center: [number, number] }) => {
 const AgentStep: React.FC<AgentStepProps> = ({
   userLocation,
   locationError,
-  ugxAmount,
-  usdcAmount,
+  localAmount,
+  btcAmount,
+  userCurrency,
   onBackToAmount,
   onAgentSelect,
   isCreatingTransaction = false,
@@ -184,7 +186,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
           <span className="font-semibold">Operating Hours:</span> {agent.operatingHours}
         </p>
         <p>
-          <span className="font-semibold">Available Balance:</span> {agent.availableBalance.toLocaleString()} UGX
+          <span className="font-semibold">Available Balance:</span> {agent.availableBalance.toLocaleString()} {userCurrency || 'UGX'}
         </p>
       </div>
       <div className="mt-3 flex space-x-2">
@@ -217,13 +219,12 @@ const AgentStep: React.FC<AgentStepProps> = ({
         <div className="p-3 sm:p-6 border-b border-neutral-200">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0 mb-4 sm:mb-6">
             <h2 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-900">Select Agent</h2>
-            {(ugxAmount || usdcAmount) && (
+            {localAmount && (
               <div className="text-left sm:text-right">
                 <p className="text-xs sm:text-sm font-medium text-neutral-600 mb-1">Withdrawal Amount</p>
                 <p className="text-sm sm:text-base lg:text-lg font-bold font-mono text-neutral-900">
-                  {ugxAmount ? `${ugxAmount.toLocaleString()} UGX` : ''}
-                  {ugxAmount && usdcAmount && ' • '}
-                  {usdcAmount ? `${usdcAmount.toFixed(2)} USDT` : ''}
+                  {localAmount.toLocaleString()} {userCurrency}
+                  {btcAmount && ` • ₿${parseFloat(btcAmount).toFixed(8)}`}
                 </p>
               </div>
             )}
@@ -341,7 +342,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
                           </span>
                         </div>
                         <p className="text-xs text-neutral-600 mt-2 font-mono">
-                          Available: <span className="font-bold">{agent.availableBalance.toLocaleString()} UGX</span>
+                          Available: <span className="font-bold">{agent.availableBalance.toLocaleString()} {userCurrency || 'UGX'}</span>
                         </p>
                       </div>
                       <button

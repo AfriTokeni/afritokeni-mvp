@@ -13,6 +13,7 @@ import SendMoney from "./pages/send/SendMoney.tsx";
 import UserTransactions from "./pages/transactions/Transactions.tsx";
 import UserProfile from "./pages/profile/Profile.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
+import DepositPage from "./pages/deposit/DepositPage.tsx";
 import BitcoinPage from "./pages/users/BitcoinPage.tsx";
 import ExchangePage from "./pages/users/ExchangePage.tsx";
 import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
@@ -74,6 +75,7 @@ const App: FC = () => {
               <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
+                <Route path="deposit" element={<DepositPage />} />
                 <Route path="history" element={<UserTransactions />} />
                 <Route path="withdraw" element={<WithdrawMoney />} />
                 <Route path="profile" element={<UserProfile />} />
