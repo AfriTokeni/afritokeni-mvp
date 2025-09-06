@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { signOut, getDoc } from '@junobuild/core';
+import { authSubscribe, signIn, signOut, setDoc, getDoc, type User as JunoUser } from '@junobuild/core';
 import { AuthContextType, User, LoginFormData, RegisterFormData } from '../types/auth';
 import { useRoleBasedAuth } from '../hooks/useRoleBasedAuth';
 import { DataService } from '../services/dataService';
@@ -180,6 +180,74 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   
   // SMS verification states
   
+  // Load or create user from Juno authentication
+  const loadOrCreateUserFromJuno = async (junoUser: JunoUser) => {
+    try {
+      // Try to load existing user profile from Juno datastore
+      const userDoc = await getDoc({
+        collection: 'users',
+        key: junoUser.key
+      });
+
+      if (userDoc?.data) {
+        // User exists, load their data
+        const userData = userDoc.data as User;
+        const stored_agent = userData.userType === 'agent' ? userData : null;
+        const stored_user = userData.userType === 'user' ? userData : null;
+        
+        setUser({ user: stored_user, agent: stored_agent });
+        setAuthMethod('web');
+        storeUserData(userData, 'web');
+        console.log('Loaded existing user from Juno:', userData);
+      } else {
+        // New user, create profile (this would typically redirect to registration)
+        console.log('New Juno user detected, would redirect to registration');
+        // For now, we'll create a basic user profile
+        const newUser: User = {
+          id: junoUser.key,
+          firstName: 'New',
+          lastName: 'User',
+          email: junoUser.key + '@afritokeni.com',
+          userType: 'user',
+          isVerified: true,
+          kycStatus: 'not_started',
+          preferredCurrency: 'NGN',
+          location: { country: 'NG', city: 'Lagos' },
+          createdAt: new Date()
+        };
+
+        // Save to Juno datastore
+        await setDoc({
+          collection: 'users',
+          doc: {
+            key: junoUser.key,
+            data: newUser
+          }
+        });
+
+        setUser({ user: newUser, agent: null });
+        setAuthMethod('web');
+        storeUserData(newUser, 'web');
+        console.log('Created new user profile:', newUser);
+      }
+    } catch (error) {
+      console.error('Error loading/creating user from Juno:', error);
+    }
+  };
+
+  // Update user currency preference
+  const updateUserCurrency = (currency: string) => {
+    if (user.user) {
+      const updatedUser = { ...user.user, preferredCurrency: currency };
+      setUser({ ...user, user: updatedUser });
+      storeUserData(updatedUser, authMethod);
+    } else if (user.agent) {
+      const updatedAgent = { ...user.agent, preferredCurrency: currency };
+      setUser({ ...user, agent: updatedAgent });
+      storeUserData(updatedAgent, authMethod);
+    }
+  };
+
   const { checkAndRedirectUser } = useRoleBasedAuth();
   // Keep a ref of latest checker to avoid re-subscribing when its identity changes
   const checkAndRedirectRef = useRef(checkAndRedirectUser);
@@ -187,96 +255,39 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAndRedirectRef.current = checkAndRedirectUser;
   }, [checkAndRedirectUser]);
 
-  // Initialize user from stored data on app start
+  // Initialize user from stored data and subscribe to Juno auth changes
   useEffect(() => {
-    
     const storedData = getStoredUserData();
-    
     if (storedData) {
       setUser(storedData.user);
       setAuthMethod(storedData.authMethod);
+      console.log('Restored user from storage:', storedData.user);
     }
-  }, []);
 
-  const updateUserCurrency = (currency: string) => {
-    if (user.user) {
-      setUser({
-        ...user,
-        user: {
-          ...user.user,
-          preferredCurrency: currency
-        }
-      });
-    } else if (user.agent) {
-      setUser({
-        ...user,
-        agent: {
-          ...user.agent,
-          preferredCurrency: currency
-        }
-      });
-    }
-  };
-
-  // TEMPORARILY DISABLED: Subscribe to Juno authentication state for web users
-  useEffect(() => {
-    // Skip Juno authentication for demo purposes
-    console.log('Juno authentication temporarily disabled for demo');
-    
-    // Create mock users for demo with different African currencies
-    const mockUser: User = {
-      id: 'demo-user-123',
-      firstName: 'Amara',
-      lastName: 'Okafor',
-      email: 'amara.okafor@afritokeni.com',
-      userType: 'user',
-      isVerified: true,
-      kycStatus: 'approved',
-      createdAt: new Date(),
-      preferredCurrency: 'NGN', // Nigerian Naira
-      location: { country: 'NG', city: 'Lagos' }
-    };
-
-    const mockAgent: User = {
-      id: 'demo-agent-456',
-      firstName: 'Kwame',
-      lastName: 'Asante',
-      email: 'kwame.asante@afritokeni.com',
-      userType: 'agent',
-      isVerified: true,
-      kycStatus: 'approved',
-      createdAt: new Date(),
-      preferredCurrency: 'GHS', // Ghanaian Cedi
-      location: { country: 'GH', city: 'Accra' }
-    };
-
-    // Set both mock users for demo
-    setUser({
-      user: mockUser,
-      agent: mockAgent
+    // Subscribe to Juno authentication state changes
+    const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
+      console.log('Juno auth state changed:', junoUser);
+      if (junoUser) {
+        // User is authenticated with Juno/ICP
+        // Load or create user profile from Juno datastore
+        loadOrCreateUserFromJuno(junoUser);
+      } else {
+        // User is not authenticated
+        setUser({ user: null, agent: null });
+        setAuthMethod('web');
+      }
     });
-    setAuthMethod('web');
-    
-    // Store mock data
-    storeUserData(mockUser, 'web');
-    storeUserData(mockAgent, 'web');
 
-    // Return empty cleanup function
-    return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array for demo
+    return unsubscribe;
+  }, []);
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
     try {
       if (method === 'web') {
-        console.log('Web login initiated - using mock data for demo');
-        // TEMPORARILY DISABLED: Use Juno/ICP Internet Identity authentication for web users
-        // await signIn();
-        
-        // Mock login success for demo
-        setTimeout(() => {
-            }, 1000);
+        console.log('Web login initiated - using Juno/ICP Internet Identity');
+        // Use Juno/ICP Internet Identity authentication for web users
+        await signIn();
         return true;
       } else if (method === 'sms') {
         // SMS-based authentication for users without internet (feature phones)
