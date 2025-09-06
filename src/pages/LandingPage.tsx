@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone, Zap, Lock, Bitcoin, Globe } from 'lucide-react';
+import { Smartphone, Zap, Lock, Bitcoin, Globe, Mail, CheckCircle } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
+import { setDoc } from '@junobuild/core';
+import { nanoid } from 'nanoid';
 
 const LandingPage: React.FC = () => {
   const { login } = useAuthentication();
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleICPLogin = async () => {
     try {
@@ -16,6 +21,41 @@ const LandingPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Authentication failed:', error);
+    }
+  };
+
+  const handleEmailSubscription = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      setSubscriptionStatus('error');
+      return;
+    }
+
+    setIsSubscribing(true);
+    try {
+      // Store email subscription in Juno datastore
+      await setDoc({
+        collection: 'email_subscriptions',
+        doc: {
+          key: nanoid(),
+          data: {
+            email: email.toLowerCase().trim(),
+            subscribedAt: new Date().toISOString(),
+            source: 'landing_page',
+            status: 'active'
+          }
+        }
+      });
+      
+      setSubscriptionStatus('success');
+      setEmail('');
+    } catch (error) {
+      console.error('Subscription failed:', error);
+      setSubscriptionStatus('error');
+    } finally {
+      setIsSubscribing(false);
+      // Reset status after 3 seconds
+      setTimeout(() => setSubscriptionStatus('idle'), 3000);
     }
   };
 
@@ -78,6 +118,59 @@ const LandingPage: React.FC = () => {
               >
                 Try SMS Banking
               </Link>
+            </div>
+            
+            {/* Email Subscription Box */}
+            <div className="mt-12 sm:mt-16">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 max-w-2xl mx-auto">
+                <div className="text-center mb-6">
+                  <Mail className="w-8 h-8 text-orange-600 mx-auto mb-3" />
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                    Stay Updated
+                  </h3>
+                  <p className="text-gray-600">
+                    Get the latest updates on AfriTokeni's launch and new features
+                  </p>
+                </div>
+                
+                <form onSubmit={handleEmailSubscription} className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email address"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
+                      disabled={isSubscribing}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSubscribing || !email}
+                    className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isSubscribing ? 'Subscribing...' : 'Subscribe'}
+                  </button>
+                </form>
+                
+                {subscriptionStatus === 'success' && (
+                  <div className="mt-4 flex items-center justify-center text-green-600">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    <span>Successfully subscribed! Thank you for your interest.</span>
+                  </div>
+                )}
+                
+                {subscriptionStatus === 'error' && (
+                  <div className="mt-4 text-center text-red-600">
+                    <span>Please enter a valid email address.</span>
+                  </div>
+                )}
+                
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  We respect your privacy. Unsubscribe at any time.
+                </p>
+              </div>
             </div>
           </div>
         </div>

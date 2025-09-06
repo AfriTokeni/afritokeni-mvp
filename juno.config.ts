@@ -52,6 +52,12 @@ export default defineConfig({
           write: "public",
           memory: "stable",
         },
+        {
+          collection: "email_subscriptions",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
       ],
       storage: [
         {
