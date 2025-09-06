@@ -220,135 +220,87 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Subscribe to Juno authentication state for web users
-  useEffect(() => {
-    const unsubscribe = authSubscribe(async (junoUser: JunoUser | null) => {
-      console.log('Juno user state changed:', junoUser);
-      if (junoUser) {
-        // For ICP users, check their role and redirect accordingly
-        checkAndRedirectRef.current(junoUser);
-
-        // Check if user already exists in our datastore with KYC information
-        let afritokeniUser: User;
-        
-        try {
-          // Try to get existing user data from our users collection using user ID as key
-          const existingUserDoc = await getDoc({
-            collection: 'users',
-            key: junoUser.key // For web users, use ID as document key
-          });
-          
-          // Also check for existing role to determine correct userType
-          let userRole: 'user' | 'agent' = 'user'; // default
-          try {
-            const roleDoc = await getDoc({
-              collection: 'user_roles',
-              key: junoUser.key
-            });
-            if (roleDoc?.data) {
-              const roleData = roleDoc.data as { role: 'user' | 'agent' };
-              userRole = roleData.role;
-            }
-          } catch {
-            console.log('No existing role found, defaulting to user');
-          }
-
-          console.log('existing user doc', existingUserDoc);
-
-          if (existingUserDoc?.data) {
-            // User exists, use their existing data (including KYC status)
-            const userData = existingUserDoc.data as UserDataFromJuno;
-            afritokeniUser = {
-              ...userData,
-              userType: userRole, // Use the role from user_roles collection
-              createdAt: userData.createdAt ? new Date(userData.createdAt) : new Date()
-            } as User;
-
-            setUser({
-              ...user,
-              [userRole]: afritokeniUser
-            });
-            setAuthMethod('web');
-            storeUserData(afritokeniUser, 'web');
-          } else {
-            // // New web user, create profile using ID as key
-            // afritokeniUser = {
-            //   id: junoUser.key,
-            //   firstName: 'ICP',
-            //   lastName: 'User',
-            //   email: junoUser.key, // Use key as identifier for web users
-            //   userType: userRole, // Use determined role
-            //   isVerified: true,
-            //   kycStatus: 'not_started',
-            //   createdAt: new Date()
-            // };
-
-            // // Create user record in datastore with ID as key
-            // await DataService.createUser({
-            //   id: afritokeniUser.id,
-            //   firstName: afritokeniUser.firstName,
-            //   lastName: afritokeniUser.lastName,
-            //   email: afritokeniUser.email,
-            //   userType: afritokeniUser.userType,
-            //   kycStatus: afritokeniUser.kycStatus,
-            //   authMethod: 'web' // Important: specify this is a web user
-            // });
-            
-            // Save new user to our datastore
-            // await setDoc({
-            //   collection: 'users',
-            //   doc: {
-            //     key: junoUser.key,
-            //     data: {
-            //       ...afritokeniUser,
-            //       createdAt: afritokeniUser.createdAt?.toISOString() || new Date().toISOString()
-            //     }
-            //   }
-            // });
-          }
-        } catch (error) {
-          console.error('Error loading user data for web auth:', error);
-          // Fallback to basic user if datastore fails
-          afritokeniUser = {
-            id: junoUser.key,
-            firstName: 'ICP',
-            lastName: 'User',
-            email: junoUser.key,
-            userType: 'user',
-            isVerified: true,
-            kycStatus: 'not_started',
-            createdAt: new Date()
-          };
+  const updateUserCurrency = (currency: string) => {
+    if (user.user) {
+      setUser({
+        ...user,
+        user: {
+          ...user.user,
+          preferredCurrency: currency
         }
-      } else {
-        // const currentUserBeforeLogout = user;
-        // setUser({user: null, agent: null});
+      });
+    } else if (user.agent) {
+      setUser({
+        ...user,
+        agent: {
+          ...user.agent,
+          preferredCurrency: currency
+        }
+      });
+    }
+  };
 
-        // // Clear user data
-        // if (currentUserBeforeLogout.user?.userType) {
-        //   clearUserData(currentUserBeforeLogout.user.userType);
-        // }
-        // // Clear agent user data
-        // if (currentUserBeforeLogout.agent?.userType) {
-        //   clearUserData(currentUserBeforeLogout.agent.userType);
-        // }
-      }
+  // TEMPORARILY DISABLED: Subscribe to Juno authentication state for web users
+  useEffect(() => {
+    // Skip Juno authentication for demo purposes
+    console.log('Juno authentication temporarily disabled for demo');
+    
+    // Create mock users for demo with different African currencies
+    const mockUser: User = {
+      id: 'demo-user-123',
+      firstName: 'Amara',
+      lastName: 'Okafor',
+      email: 'amara.okafor@afritokeni.com',
+      userType: 'user',
+      isVerified: true,
+      kycStatus: 'approved',
+      createdAt: new Date(),
+      preferredCurrency: 'NGN', // Nigerian Naira
+      location: { country: 'NG', city: 'Lagos' }
+    };
+
+    const mockAgent: User = {
+      id: 'demo-agent-456',
+      firstName: 'Kwame',
+      lastName: 'Asante',
+      email: 'kwame.asante@afritokeni.com',
+      userType: 'agent',
+      isVerified: true,
+      kycStatus: 'approved',
+      createdAt: new Date(),
+      preferredCurrency: 'GHS', // Ghanaian Cedi
+      location: { country: 'GH', city: 'Accra' }
+    };
+
+    // Set both mock users for demo
+    setUser({
+      user: mockUser,
+      agent: mockAgent
     });
+    setAuthMethod('web');
+    
+    // Store mock data
+    storeUserData(mockUser, 'web');
+    storeUserData(mockAgent, 'web');
 
-    console.log('User authentication state changed');
-
-    return unsubscribe;
+    // Return empty cleanup function
+    return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isUserCreatedSuccess]); // Empty dependency array is intentional - we handle user changes inside the callback
+  }, []); // Empty dependency array for demo
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
     setIsLoading(true);
     try {
       if (method === 'web') {
-        console.log('Web login initiated');
-        // Use Juno/ICP Internet Identity authentication for web users
-        await signIn();
+        console.log('Web login initiated - using mock data for demo');
+        // TEMPORARILY DISABLED: Use Juno/ICP Internet Identity authentication for web users
+        // await signIn();
+        
+        // Mock login success for demo
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
         return true;
       } else if (method === 'sms') {
         // SMS-based authentication for users without internet (feature phones)
@@ -632,70 +584,10 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     authMethod,
     login,
-    register,
     logout,
-    isLoading,
-    verifyRegistrationCode,
-    cancelVerification,
-    isVerifying: verificationState.isVerifying,
-    verificationPhoneNumber: verificationState.phoneNumber,
-    devVerificationCode: verificationState.devVerificationCode,
-    // Add updateUser function for KYC completion and role updates
-    updateUser: async(updatedUser: User) => {
-      const userType = updatedUser.userType;
-      
-      // Get the current user of the same type for comparison
-      const currentUser = user[userType];
-      
-      // If userType is changing for an existing user, clear old storage
-      if (currentUser && currentUser.userType !== updatedUser.userType) {
-        clearUserData(currentUser.userType);
-      }
-      
-      // Update the specific user type in the state
-      setUser(prev => ({
-        ...prev,
-        [userType]: updatedUser
-      }));
-      
-      // Store the updated user data
-      storeUserData(updatedUser, authMethod);
-    },
-    // Add method to update userType specifically (for role selection)
-    updateUserType: async (newUserType: 'user' | 'agent', currentUserType?: 'user' | 'agent') => {
-      // If currentUserType is not provided, try to determine it
-      let sourceUserType = currentUserType;
-      if (!sourceUserType) {
-        if (user.user && !user.agent) {
-          sourceUserType = 'user';
-        } else if (user.agent && !user.user) {
-          sourceUserType = 'agent';
-        } else if (user.user && user.agent) {
-          throw new Error('Multiple user types active. Please specify which user type to update.');
-        } else {
-          throw new Error('No user found to update.');
-        }
-      }
-      
-      const currentUser = user[sourceUserType];
-      if (currentUser) {
-        // Clear old storage for the source user type
-        clearUserData(sourceUserType);
-        
-        // Create updated user with new type
-        const updatedUser = { ...currentUser, userType: newUserType };
-        
-        // Clear the old user type from state and set the new one
-        setUser(prev => ({
-          ...prev,
-          [sourceUserType]: null, // Clear the old type
-          [newUserType]: updatedUser // Set the new type
-        }));
-        
-        // Store with new user type
-        storeUserData(updatedUser, authMethod);
-      }
-    }
+    register,
+    updateUserCurrency,
+    isAuthenticated: user.user !== null || user.agent !== null,
   };
 
   return (

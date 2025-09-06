@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bitcoin, ArrowRightLeft, Copy, QrCode, RefreshCw, Send, ArrowDown } from 'lucide-react';
+import { Bitcoin, Copy, QrCode, RefreshCw, Send, ArrowDown, TrendingDown, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
 import { BitcoinService } from '../../services/bitcoinService';
@@ -204,24 +204,27 @@ const BitcoinPage: React.FC = () => {
             </button>
 
             <button
-              onClick={() => navigate('/users/exchange/sell')}
+              onClick={() => navigate('/users/bitcoin/deposit')}
               className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-orange-300"
             >
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-200 transition-colors">
-                <ArrowRightLeft className="w-6 h-6 text-orange-600" />
+                <TrendingDown className="w-6 h-6 text-orange-600" />
               </div>
-              <span className="text-neutral-900 font-medium">Sell Bitcoin</span>
+              <div className="font-semibold text-neutral-900 mb-1">Exchange Bitcoin</div>
+              <div className="text-sm text-neutral-600">Send from external wallet for cash</div>
             </button>
 
             <button
-              onClick={() => navigate('/users/exchange/buy')}
+              onClick={() => navigate('/users/exchange')}
               className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-blue-300"
             >
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors">
-                <ArrowRightLeft className="w-6 h-6 text-blue-600" />
+                <TrendingUp className="w-6 h-6 text-blue-600" />
               </div>
-              <span className="text-neutral-900 font-medium">Buy Bitcoin</span>
+              <div className="font-semibold text-neutral-900 mb-1">Buy Bitcoin</div>
+              <div className="text-sm text-neutral-600">Purchase with cash</div>
             </button>
+
           </div>
         </div>
 

@@ -15,6 +15,8 @@ import UserProfile from "./pages/profile/Profile.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
 import BitcoinPage from "./pages/users/BitcoinPage.tsx";
 import ExchangePage from "./pages/users/ExchangePage.tsx";
+import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
+import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
 
 //Agent Pages
 import AgentDashboard from './pages/AgentDashboard';
@@ -77,6 +79,7 @@ const App: FC = () => {
                 <Route path="profile" element={<UserProfile />} />
                 <Route path="user-kyc" element={<UserKYCPage />} />
                 <Route path="bitcoin" element={<BitcoinPage />} />
+                <Route path="bitcoin/deposit" element={<BitcoinDepositPage />} />
                 <Route path="exchange" element={<ExchangePage />} />
               </Routes>
             </Layout>
@@ -105,6 +108,9 @@ const App: FC = () => {
           
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
+          
+          {/* Bitcoin Exchange Info Page */}
+          <Route path="/bitcoin-exchange" element={<BitcoinExchangePage />} />
           
           {/* Tariff Page */}
           <Route path="/tariff" element={<TariffPage />} />

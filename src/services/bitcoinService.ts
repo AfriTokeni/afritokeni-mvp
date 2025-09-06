@@ -129,7 +129,7 @@ export class BitcoinService {
   }
 
   // Get REAL BTC to local currency exchange rate
-  static async getExchangeRate(currency: AfricanCurrency = 'UGX'): Promise<ExchangeRate> {
+  static async getExchangeRate(currency: AfricanCurrency = 'NGN'): Promise<ExchangeRate> {
     try {
       // Get real BTC price in USD first
       const btcUsdResponse = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC');
@@ -147,8 +147,8 @@ export class BitcoinService {
           
           // Map African currencies to their forex codes
           const currencyMap: Record<AfricanCurrency, string> = {
-            'UGX': 'UGX', 'KES': 'KES', 'TZS': 'TZS', 'RWF': 'RWF', 'ETB': 'ETB',
-            'NGN': 'NGN', 'GHS': 'GHS', 'XOF': 'XOF', 'XAF': 'XAF', 'CDF': 'CDF',
+            'NGN': 'NGN', 'KES': 'KES', 'TZS': 'TZS', 'RWF': 'RWF', 'ETB': 'ETB', 'UGX': 'UGX',
+            'GHS': 'GHS', 'XOF': 'XOF', 'XAF': 'XAF', 'CDF': 'CDF',
             'AOA': 'AOA', 'ZAR': 'ZAR', 'BWP': 'BWP', 'EGP': 'EGP', 'MAD': 'MAD',
             'TND': 'TND', 'DZD': 'DZD', 'MUR': 'MUR', 'SLL': 'SLL', 'LRD': 'LRD',
             'GMD': 'GMD', 'SZL': 'SZL', 'LSL': 'LSL', 'NAD': 'NAD', 'ZMW': 'ZMW',
@@ -163,8 +163,8 @@ export class BitcoinService {
           } else {
             // Fallback to estimated rates if not available in forex API
             const fallbackRates: Record<AfricanCurrency, number> = {
-              'UGX': 3700, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'ETB': 120,
-              'NGN': 1550, 'GHS': 15, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
+              'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'ETB': 120,
+              'UGX': 3700, 'GHS': 15, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
               'AOA': 900, 'ZAR': 18, 'BWP': 13.5, 'EGP': 49, 'MAD': 10,
               'TND': 3.1, 'DZD': 135, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
               'GMD': 67, 'SZL': 18, 'LSL': 18, 'NAD': 18, 'ZMW': 27,
@@ -178,8 +178,8 @@ export class BitcoinService {
           console.warn('Forex API failed, using fallback rates:', forexError);
           // Use fallback rates
           const fallbackRates: Record<AfricanCurrency, number> = {
-            'UGX': 3700, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'ETB': 120,
-            'NGN': 1550, 'GHS': 15, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
+            'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'ETB': 120,
+            'UGX': 3700, 'GHS': 15, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
             'AOA': 900, 'ZAR': 18, 'BWP': 13.5, 'EGP': 49, 'MAD': 10,
             'TND': 3.1, 'DZD': 135, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
             'GMD': 67, 'SZL': 18, 'LSL': 18, 'NAD': 18, 'ZMW': 27,
@@ -204,7 +204,7 @@ export class BitcoinService {
       console.error('Error fetching real exchange rate:', error);
       // Fallback to estimated rates
       const fallbackRates: Record<AfricanCurrency, number> = {
-        'UGX': 150000000, 'KES': 6500000, 'NGN': 65000000, 'ZAR': 1200000,
+        'NGN': 65000000, 'KES': 6500000, 'UGX': 150000000, 'ZAR': 1200000,
         'GHS': 800000, 'EGP': 3200000, 'MAD': 650000, 'TZS': 150000000,
         'RWF': 85000000, 'ETB': 7500000, 'XOF': 40000000, 'XAF': 40000000,
         'CDF': 180000000, 'AOA': 55000000, 'BWP': 900000, 'TND': 200000,
@@ -216,7 +216,7 @@ export class BitcoinService {
         'SOS': 38000000, 'LYD': 320000, 'SDG': 40000000
       };
       
-      const rate = fallbackRates[currency] || fallbackRates['UGX'];
+      const rate = fallbackRates[currency] || fallbackRates['NGN'];
       
       return {
         btcToLocal: rate,

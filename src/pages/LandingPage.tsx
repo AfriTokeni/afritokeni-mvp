@@ -5,7 +5,7 @@ import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
 
 const LandingPage: React.FC = () => {
-  const { login, isLoading } = useAuthentication();
+  const { login } = useAuthentication();
 
   const handleICPLogin = async () => {
     try {
@@ -34,10 +34,9 @@ const LandingPage: React.FC = () => {
             </div>
             <button
               onClick={handleICPLogin}
-              disabled={isLoading}
-              className="bg-black text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-black text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
             >
-              {isLoading ? 'Connecting...' : 'Sign in'}
+              Sign in
             </button>
           </div>
         </div>
@@ -61,12 +60,23 @@ const LandingPage: React.FC = () => {
               39 currencies supported, works with or without internet.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
-              <button
-                onClick={handleICPLogin}
-                disabled={isLoading}
-                className="bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              <Link
+                to="/bitcoin-exchange"
+                className="bg-orange-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-orange-700 transition-colors"
               >
-                {isLoading ? 'Connecting...' : 'Start banking'}
+                How Bitcoin Exchange Works
+              </Link>
+              <button
+                onClick={() => window.location.href = '/users/dashboard'}
+                className="bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-gray-800 transition-colors"
+              >
+                View User Dashboard
+              </button>
+              <button
+                onClick={() => window.location.href = '/agents/dashboard'}
+                className="bg-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-green-700 transition-colors"
+              >
+                View Agent Dashboard
               </button>
               <Link
                 to="/sms"
@@ -172,17 +182,15 @@ const LandingPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleICPLogin}
-                    disabled={isLoading}
-                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group disabled:opacity-50"
+                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group"
                   >
                     <div className="font-medium text-green-600 text-sm group-hover:text-green-700">Portfolio</div>
-                    <div className="text-gray-600 text-xs mt-1">Track balances</div>
+                    <div className="text-gray-600 text-xs mt-1">Balance & assets</div>
                   </button>
                   
                   <button
                     onClick={handleICPLogin}
-                    disabled={isLoading}
-                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group disabled:opacity-50"
+                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group"
                   >
                     <div className="font-medium text-green-600 text-sm group-hover:text-green-700">Exchange</div>
                     <div className="text-gray-600 text-xs mt-1">Live trading</div>
@@ -190,8 +198,7 @@ const LandingPage: React.FC = () => {
                   
                   <button
                     onClick={handleICPLogin}
-                    disabled={isLoading}
-                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group disabled:opacity-50"
+                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group"
                   >
                     <div className="font-medium text-green-600 text-sm group-hover:text-green-700">Agents</div>
                     <div className="text-gray-600 text-xs mt-1">Find nearby</div>
@@ -199,8 +206,7 @@ const LandingPage: React.FC = () => {
                   
                   <button
                     onClick={handleICPLogin}
-                    disabled={isLoading}
-                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group disabled:opacity-50"
+                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-green-200 transition-colors group"
                   >
                     <div className="font-medium text-green-600 text-sm group-hover:text-green-700">History</div>
                     <div className="text-gray-600 text-xs mt-1">All transactions</div>
@@ -210,10 +216,9 @@ const LandingPage: React.FC = () => {
                 <div className="text-center pt-4 border-t border-gray-200">
                   <button
                     onClick={handleICPLogin}
-                    disabled={isLoading}
-                    className="inline-flex items-center text-green-600 hover:text-green-700 font-medium text-sm disabled:opacity-50"
+                    className="inline-flex items-center text-green-600 hover:text-green-700 font-medium text-sm"
                   >
-                    {isLoading ? 'Connecting...' : 'Start Web Banking →'}
+                    Start Web Banking →
                   </button>
                 </div>
               </div>
