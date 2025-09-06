@@ -1,22 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { authSubscribe, signIn, signOut, setDoc, getDoc, type User as JunoUser } from '@junobuild/core';
+import { signOut, getDoc } from '@junobuild/core';
 import { AuthContextType, User, LoginFormData, RegisterFormData } from '../types/auth';
 import { useRoleBasedAuth } from '../hooks/useRoleBasedAuth';
 import { DataService } from '../services/dataService';
 import { nanoid } from 'nanoid';
 import { SMSService } from '../services/smsService';
 
-// Interface for user data as stored in Juno (with string dates)
-interface UserDataFromJuno {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  userType: 'user' | 'agent';
-  isVerified: boolean;
-  kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
-  createdAt: string;
-}
 
 const AuthenticationContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -40,7 +29,6 @@ interface IUser{
 // Hybrid authentication for AfriTokeni - SMS for users without internet, ICP for web users
 const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<IUser>({ agent: null, user: null });
-  const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'sms' | 'web'>('web');
   
   // Helper function to store user data with separate keys for users and agents
@@ -191,18 +179,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   // SMS verification states
-  const [verificationState, setVerificationState] = useState<{
-    isVerifying: boolean;
-    phoneNumber: string | null;
-    pendingUserData: RegisterFormData | null;
-    devVerificationCode?: string; // For development/testing only
-  }>({
-    isVerifying: false,
-    phoneNumber: null,
-    pendingUserData: null
-  });
   
-  const { checkAndRedirectUser, isUserCreatedSuccess } = useRoleBasedAuth();
+  const { checkAndRedirectUser } = useRoleBasedAuth();
   // Keep a ref of latest checker to avoid re-subscribing when its identity changes
   const checkAndRedirectRef = useRef(checkAndRedirectUser);
   useEffect(() => {
@@ -290,7 +268,6 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (formData: LoginFormData, method: 'sms' | 'web' = 'web'): Promise<boolean> => {
-    setIsLoading(true);
     try {
       if (method === 'web') {
         console.log('Web login initiated - using mock data for demo');
@@ -299,8 +276,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Mock login success for demo
         setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
+            }, 1000);
         return true;
       } else if (method === 'sms') {
         // SMS-based authentication for users without internet (feature phones)
@@ -372,13 +348,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Login error:', error);
       return false;
     } finally {
-      setIsLoading(false);
     }
   };
 
   // SMS-based registration for users without internet
   const register = async (formData: RegisterFormData): Promise<boolean> => {
-    setIsLoading(true);
     try {
       // Step 1: Send SMS with verification code to formData.email (phone)
       const formattedPhone = SMSService.formatPhoneNumber(formData.email);
@@ -434,83 +408,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Registration error:', error);
       return false;
     } finally {
-      setIsLoading(false);
     }
   };
 
-  // Step 2 & 3: Verify code and create account
-  const verifyRegistrationCode = async (code: string): Promise<boolean> => {
-    if (!verificationState.isVerifying || !verificationState.phoneNumber || !verificationState.pendingUserData) {
-      console.error('No verification in progress');
-      return false;
-    }
-    
-    setIsLoading(true);
-    try {
-      // Step 2: User enters code - verify it
-      const verificationResult = await SMSService.verifyCode(verificationState.phoneNumber, code);
-      
-      if (!verificationResult.success) {
-        console.error('Code verification failed:', verificationResult.error);
-        return false;
-      }
-      
-      // Step 3: Verify code and create account
-      const formData = verificationState.pendingUserData;
-      const newUser: User = {
-        id: nanoid(),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: verificationState.phoneNumber, // Use formatted phone number
-        userType: formData.userType,
-        isVerified: true, // SMS verified
-        kycStatus: 'not_started',
-        createdAt: new Date()
-      };
-      
-      // Save user to Juno datastore
-      await setDoc({
-        collection: 'users',
-        doc: {
-          key: verificationState.phoneNumber,
-          data: newUser
-        }
-      });
-
-      const stored_agent = newUser.userType == 'agent' ? newUser : null;
-      const stored_user = newUser.userType == 'user' ? newUser : null;
-
-      // Set user as logged in
-      setUser({ user: stored_user, agent: stored_agent });
-      setAuthMethod('sms');
-      storeUserData(newUser, 'sms');
-      
-      // Clear verification state
-      setVerificationState({
-        isVerifying: false,
-        phoneNumber: null,
-        pendingUserData: null
-      });
-      
-      console.log('User successfully registered and logged in:', newUser.email);
-      return true;
-      
-    } catch (error) {
-      console.error('Code verification error:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Helper to cancel verification process
-  const cancelVerification = () => {
-    setVerificationState({
-      isVerifying: false,
-      phoneNumber: null,
-      pendingUserData: null
-    });
-  };
 
   const logout = async (userTypeToLogout?: 'user' | 'agent') => {
     try {
@@ -588,6 +490,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     updateUserCurrency,
     isAuthenticated: user.user !== null || user.agent !== null,
+    verifyRegistrationCode: async () => false,
+    cancelVerification: () => {},
+    isVerifying: false,
+    verificationPhoneNumber: null,
+    updateUser: async () => {},
+    updateUserType: async () => {},
   };
 
   return (

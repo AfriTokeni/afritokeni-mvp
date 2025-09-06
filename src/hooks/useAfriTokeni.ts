@@ -318,21 +318,6 @@ export const useAfriTokeni = () => {
     loadUserData();
   };
 
-  // Load user transactions using TransactionService
-  const loadTransactions = useCallback(async () => {
-    if (!user?.user?.id) return [];
-    
-    try {
-      const userTransactions = TransactionService.getUserTransactions(user.user.id);
-      return userTransactions.map(tx => ({
-        ...tx,
-        description: tx.description || 'Transaction'
-      }));
-    } catch (error) {
-      console.error('Error loading transactions:', error);
-      return [];
-    }
-  }, [user?.user?.id]);
 
   // Get nearby agents
   const getNearbyAgents = useCallback(async (lat: number, lng: number, radius: number = 5, includeStatuses?: ('available' | 'busy' | 'cash_out' | 'offline')[]) => {
@@ -343,6 +328,7 @@ export const useAfriTokeni = () => {
       return [];
     }
   }, []);
+
 
   // Process SMS command
   const processSMSCommand = useCallback(async (command: string) => {

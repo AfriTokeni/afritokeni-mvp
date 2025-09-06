@@ -7,7 +7,8 @@ import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { DataService } from '../../services/dataService';
 import { BalanceService } from '../../services/BalanceService';
-import type { Agent, WithdrawStep } from './types';
+import type { WithdrawStep } from './types';
+import { Agent as DBAgent } from '../../services/dataService';
 
 const WithdrawPage: React.FC = () => {
   // Real balance calculation from transactions
@@ -19,7 +20,7 @@ const WithdrawPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<WithdrawStep>('amount');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<DBAgent | null>(null);
   const [withdrawalCode, setWithdrawalCode] = useState<string>('');
   const [finalLocalAmount, setFinalLocalAmount] = useState<number>(0);
   const [finalBtcAmount, setFinalBtcAmount] = useState<string>('');
@@ -71,7 +72,7 @@ const WithdrawPage: React.FC = () => {
     return code;
   };
 
-  const handleAgentSelect = async (agent: Agent) => {
+  const handleAgentSelect = async (agent: DBAgent) => {
     if (!user.user?.id) {
       setTransactionError('User not authenticated');
       return;

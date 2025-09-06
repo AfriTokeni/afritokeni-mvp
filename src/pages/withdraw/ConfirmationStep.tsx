@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check, MapPin, Phone, Clock } from 'lucide-react';
 import { formatCurrencyAmount } from '../../types/currency';
-import type { Agent } from './types';
+import { Agent as DBAgent } from '../../services/dataService';
 
 interface ConfirmationStepProps {
   localAmount: number;
@@ -10,7 +10,7 @@ interface ConfirmationStepProps {
   userCurrency: string;
   fee: number;
   userLocation: [number, number] | null;
-  selectedAgent?: Agent;
+  selectedAgent?: DBAgent;
   withdrawalCode: string;
   onMakeAnotherWithdrawal?: () => void;
 }
@@ -132,25 +132,25 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                   <MapPin className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-neutral-900 text-sm sm:text-base lg:text-lg break-words">{selectedAgent.name}</h4>
-                  <p className="text-xs sm:text-sm text-neutral-600 mt-1 sm:mt-2 break-words">{selectedAgent.address}</p>
+                  <span className="text-neutral-900 font-bold text-sm sm:text-base break-words">{selectedAgent.businessName}</span>
+                  <p className="text-xs sm:text-sm text-neutral-600 mt-1 sm:mt-2 break-words">{selectedAgent.location.address}</p>
                   
                   <div className="mt-3 sm:mt-4 space-y-2 sm:space-y-3">
                     <div className="flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm">
                       <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-500 flex-shrink-0" />
-                      <span className="text-neutral-700 font-medium break-words">{selectedAgent.contact}</span>
+                      <span className="text-neutral-700 font-medium break-words">Via app</span>
                     </div>
                     
                     <div className="flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm">
                       <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-500 flex-shrink-0" />
-                      <span className="text-neutral-700 font-medium break-words">{selectedAgent.operatingHours}</span>
+                      <span className="text-neutral-700 font-medium break-words">{selectedAgent.location.address}</span>
                     </div>
                   </div>
 
                   <button
                    onClick={(e) => {
                         e.stopPropagation();
-                        handleGetDirections(selectedAgent.location);
+                        handleGetDirections([selectedAgent.location.coordinates.lat, selectedAgent.location.coordinates.lng]);
                     }}
                     className="mt-4 sm:mt-6 bg-neutral-900 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-neutral-800 text-xs sm:text-sm font-semibold transition-colors duration-200 w-full sm:w-auto"
                   >
