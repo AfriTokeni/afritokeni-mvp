@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, ArrowDown, Plus, Minus, ArrowUp } from 'lucide-react';
+import { Send, ArrowDown, Plus, Minus, ArrowUp, Bitcoin, ArrowRightLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import KYCStatusAlert from '../components/KYCStatusAlert';
@@ -84,30 +84,30 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-xl flex items-center justify-center">
-                    <span className="text-neutral-700 font-semibold text-xs sm:text-sm">USDT</span>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <Bitcoin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-neutral-900 font-medium text-sm sm:text-base">US Dollar Equivalent</p>
-                    <p className="text-neutral-500 text-xs sm:text-sm">Converted value</p>
+                    <p className="text-neutral-900 font-medium text-sm sm:text-base">Bitcoin Balance</p>
+                    <p className="text-neutral-600 text-xs sm:text-sm">Real Bitcoin wallet</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <span className="text-xl sm:text-2xl font-semibold text-neutral-900 font-mono">
-                    ${((balance?.balance || 0) * 0.00026).toFixed(2)}
+                    ₿0.00000000
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-neutral-100">
-              <span className="text-neutral-500 text-xs sm:text-sm">1 USDT = 3,846 UGX</span>
+            <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-orange-100">
+              <span className="text-neutral-600 text-xs sm:text-sm">≈ UGX 0</span>
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-600 font-medium text-sm">Live</span>
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span className="text-orange-600 font-medium text-sm">Bitcoin</span>
               </div>
             </div>
           </div>
@@ -116,7 +116,7 @@ const UserDashboard: React.FC = () => {
         {/* Quick Actions */}
         <div>
           <h2 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-4 sm:mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
             <button 
               onClick={() => navigate('/users/send')}
               className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-neutral-300"
@@ -155,6 +155,26 @@ const UserDashboard: React.FC = () => {
                 <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 group-hover:text-purple-600 transition-colors duration-200" />
               </div>
               <span className="text-neutral-900 font-medium text-xs sm:text-sm">Deposit</span>
+            </button>
+
+            <button 
+              onClick={() => navigate('/users/bitcoin')}
+              className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-orange-300"
+            >
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-orange-200 border border-transparent transition-all duration-200">
+                <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 group-hover:text-orange-700 transition-colors duration-200" />
+              </div>
+              <span className="text-neutral-900 font-medium text-xs sm:text-sm">Bitcoin</span>
+            </button>
+
+            <button 
+              onClick={() => navigate('/users/exchange')}
+              className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-blue-300"
+            >
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-200 border border-transparent transition-all duration-200">
+                <ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 group-hover:text-blue-700 transition-colors duration-200" />
+              </div>
+              <span className="text-neutral-900 font-medium text-xs sm:text-sm">Exchange</span>
             </button>
           </div>
         </div>

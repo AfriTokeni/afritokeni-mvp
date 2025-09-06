@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone, Zap, Lock } from 'lucide-react';
+import { Smartphone, Zap, Lock, Bitcoin, ArrowRightLeft, Globe } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
 
@@ -52,13 +52,13 @@ const LandingPage: React.FC = () => {
               Serving 400M+ unbanked Africans
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight leading-tight px-2 sm:px-0">
-              Banking for everyone,
+              Bitcoin meets Africa,
               <br />
-              <span className="text-gray-600">everywhere in Africa</span>
+              <span className="text-gray-600">everywhere, for everyone</span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 sm:mb-12 leading-relaxed px-4 sm:px-0">
-              Send money, check balances, and manage finances via SMS or web. 
-              Built on Internet Computer for maximum security and lowest costs.
+              Exchange Bitcoin for local African currencies via SMS or web. Real Bitcoin transactions, 
+              39 currencies supported, works with or without internet.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
               <button
@@ -74,6 +74,147 @@ const LandingPage: React.FC = () => {
               >
                 Try SMS banking
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bitcoin Exchange Section */}
+      <section className="bg-gradient-to-br from-orange-50 to-yellow-50 py-12 sm:py-16 lg:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
+              <Bitcoin className="w-3 h-3 mr-2" />
+              Real Bitcoin Integration
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4 sm:px-0">
+              Exchange Bitcoin for Local Currency
+            </h2>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
+              Convert Bitcoin to any of 39 African currencies through our agent network. Works via SMS or web.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+            {/* SMS Bitcoin Commands */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center">
+                  <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+                    <Smartphone className="w-3 h-3 mr-2" />
+                    SMS Bitcoin Commands
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">Bitcoin via SMS</h3>
+                  <p className="text-sm sm:text-base text-gray-600">Exchange Bitcoin using any phone</p>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  <Link
+                    to="/sms"
+                    state={{ command: 'BTC BAL' }}
+                    className="text-left p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-orange-200 transition-colors group"
+                  >
+                    <div className="font-mono text-orange-600 font-medium text-sm group-hover:text-orange-700">BTC BAL</div>
+                    <div className="text-gray-600 text-xs mt-1">Check Bitcoin Balance</div>
+                  </Link>
+                  
+                  <Link
+                    to="/sms"
+                    state={{ command: 'BTC RATE UGX' }}
+                    className="text-left p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-orange-200 transition-colors group"
+                  >
+                    <div className="font-mono text-orange-600 font-medium text-sm group-hover:text-orange-700">BTC RATE UGX</div>
+                    <div className="text-gray-600 text-xs mt-1">Get Exchange Rate</div>
+                  </Link>
+                  
+                  <Link
+                    to="/sms"
+                    state={{ command: 'BTC SELL 50000 UGX' }}
+                    className="text-left p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-orange-200 transition-colors group"
+                  >
+                    <div className="font-mono text-orange-600 font-medium text-sm group-hover:text-orange-700">BTC SELL 50000 UGX</div>
+                    <div className="text-gray-600 text-xs mt-1">Sell Bitcoin for Local Currency</div>
+                  </Link>
+                  
+                  <Link
+                    to="/sms"
+                    state={{ command: 'BTC BUY 100000 UGX' }}
+                    className="text-left p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-orange-200 transition-colors group"
+                  >
+                    <div className="font-mono text-orange-600 font-medium text-sm group-hover:text-orange-700">BTC BUY 100000 UGX</div>
+                    <div className="text-gray-600 text-xs mt-1">Buy Bitcoin with Local Currency</div>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Supported Currencies */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center">
+                  <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-green-50 border border-green-100 text-green-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+                    <Globe className="w-3 h-3 mr-2" />
+                    39 African Currencies
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">Continent-Wide Support</h3>
+                  <p className="text-sm sm:text-base text-gray-600">Exchange Bitcoin across all African regions</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">East Africa</div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">Uganda</span>
+                        <span className="font-mono text-xs text-gray-500">UGX</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">Kenya</span>
+                        <span className="font-mono text-xs text-gray-500">KES</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">Tanzania</span>
+                        <span className="font-mono text-xs text-gray-500">TZS</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">Rwanda</span>
+                        <span className="font-mono text-xs text-gray-500">RWF</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">West Africa</div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">Nigeria</span>
+                        <span className="font-mono text-xs text-gray-500">NGN</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">Ghana</span>
+                        <span className="font-mono text-xs text-gray-500">GHS</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">Senegal</span>
+                        <span className="font-mono text-xs text-gray-500">XOF</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">+ 32 more</span>
+                        <ArrowRightLeft className="w-3 h-3 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center pt-3 sm:pt-4 border-t border-gray-200">
+                  <Link
+                    to="/sms"
+                    className="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium text-xs sm:text-sm"
+                  >
+                    Try Bitcoin SMS commands →
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -13,12 +13,16 @@ import SendMoney from "./pages/send/SendMoney.tsx";
 import UserTransactions from "./pages/transactions/Transactions.tsx";
 import UserProfile from "./pages/profile/Profile.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
+import BitcoinPage from "./pages/users/BitcoinPage.tsx";
+import ExchangePage from "./pages/users/ExchangePage.tsx";
 
 //Agent Pages
-import AgentDashboard from "./pages/AgentDashboard.tsx";
+import AgentDashboard from './pages/AgentDashboard';
 import ProcessWithdrawal from './pages/withdraw/ProcessWithdrawal';
 import ProcessDeposit from './pages/ProcessDeposit';
 import AgentCustomers from './pages/AgentCustomers';
+import AgentBitcoinPage from './pages/agents/AgentBitcoinPage';
+import AgentExchangePage from './pages/agents/AgentExchangePage';
 import AgentSettings from './pages/AgentSettings';
 import RoleSelection from './pages/auth/RoleSelection';
 import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
@@ -71,6 +75,8 @@ const App: FC = () => {
                 <Route path="withdraw" element={<WithdrawMoney />} />
                 <Route path="profile" element={<UserProfile />} />
                 <Route path="user-kyc" element={<UserKYCPage />} />
+                <Route path="bitcoin" element={<BitcoinPage />} />
+                <Route path="exchange" element={<ExchangePage />} />
               </Routes>
             </Layout>
           } />
@@ -84,6 +90,8 @@ const App: FC = () => {
                 <Route path="deposit" element={<ProcessDeposit/>} />
                 <Route path="customers" element={<AgentCustomers/>} />
                 <Route path="transactions" element={<AgentTransactions/>} />
+                <Route path="bitcoin" element={<AgentBitcoinPage/>} />
+                <Route path="exchange" element={<AgentExchangePage/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<AgentSettings/>} />
                 <Route path="agent-kyc" element={<AgentKYCPage />} />

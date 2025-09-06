@@ -1,6 +1,7 @@
 import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { User } from '../types/auth';
+import { AfricanCurrency } from '../types/currency';
 
 
 
@@ -21,30 +22,39 @@ export interface UserDataFromJuno {
 export interface Transaction {
   id: string;
   userId: string;
-  type: 'send' | 'receive' | 'withdraw' | 'deposit';
+  type: 'send' | 'receive' | 'withdraw' | 'deposit' | 'bitcoin_to_ugx' | 'ugx_to_bitcoin' | 'bitcoin_send' | 'bitcoin_receive';
   amount: number;
   fee?: number;
-  currency: 'UGX';
+  currency: AfricanCurrency;
   recipientId?: string;
   recipientPhone?: string;
   recipientName?: string;
   agentId?: string;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'completed' | 'failed' | 'cancelled' | 'confirmed';
   smsCommand?: string;
   description?: string;
   createdAt: Date;
   completedAt?: Date;
+  // Bitcoin-specific fields
+  bitcoinAmount?: number; // in satoshis
+  exchangeRate?: number; // BTC to UGX rate
+  bitcoinTxHash?: string;
+  fromAddress?: string;
+  toAddress?: string;
+  confirmations?: number;
+  agentFee?: number; // Agent commission in UGX
   metadata?: {
     withdrawalCode?: string;
     agentLocation?: string;
     smsReference?: string;
+    exchangeMethod?: 'agent_cash' | 'agent_digital';
   };
 }
 
 export interface UserBalance {
   userId: string;
   balance: number;
-  currency: 'UGX';
+  currency: AfricanCurrency;
   lastUpdated: Date;
 }
 
