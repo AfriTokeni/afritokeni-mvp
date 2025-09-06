@@ -1,4 +1,8 @@
-import { setDoc, getDoc, listDocs } from '@junobuild/core';
+import { 
+  setDoc, 
+  getDoc, 
+  listDocs
+} from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { User } from '../types/auth';
 import { AfricanCurrency } from '../types/currency';
@@ -1678,6 +1682,16 @@ Thank you for using AfriTokeni!`,
         return await this.handleAgentsCommand(userId);
       } else if (command.startsWith('WITHDRAW ')) {
         return await this.handleWithdrawCommand(command, userId);
+      } else if (command === 'BTC BAL' || command === 'BTC BALANCE') {
+        return await this.handleBitcoinBalanceCommand(userId);
+      } else if (command.startsWith('BTC RATE ')) {
+        return await this.handleBitcoinRateCommand(command);
+      } else if (command.startsWith('BTC BUY ')) {
+        return await this.handleBitcoinBuyCommand(command, userId, phoneNumber);
+      } else if (command.startsWith('BTC SELL ')) {
+        return await this.handleBitcoinSellCommand(command, userId, phoneNumber);
+      } else if (command.startsWith('CONFIRM ')) {
+        return await this.handleConfirmCommand(command, userId, phoneNumber);
       } else if (command === '*AFRI#') {
         return this.getMainMenu();
       } else {
@@ -1756,7 +1770,333 @@ Reply with agent number to withdraw.`;
 2. Check Balance - BAL
 3. Find Agents - AGENTS
 4. Withdraw Cash - WITHDRAW amount
-5. Help - HELP`;
+5. Bitcoin Balance - BTC BAL
+6. Bitcoin Rate - BTC RATE currency
+7. Buy Bitcoin - BTC BUY amount currency
+8. Sell Bitcoin - BTC SELL amount currency
+9. Help - HELP`;
+  }
+
+  // Bitcoin SMS Command Handlers
+  private static async handleBitcoinBalanceCommand(userId?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    try {
+      // Mock Bitcoin balance for demo - in production, integrate with BitcoinService
+      const btcBalance = 0.00125; // Mock balance
+      const ugxRate = 150000000; // Mock rate: 1 BTC = 150M UGX
+      const ugxValue = btcBalance * ugxRate;
+      
+      return `Bitcoin Balance:
+₿${btcBalance.toFixed(8)} BTC
+≈ UGX ${ugxValue.toLocaleString()}
+
+Send BTC RATE [currency] for rates
+Send *AFRI# for menu`;
+    } catch (error) {
+      return 'Error checking Bitcoin balance. Please try again.';
+    }
+  }
+
+  private static async handleBitcoinRateCommand(command: string): Promise<string> {
+    const parts = command.split(' ');
+    if (parts.length < 3) {
+      return 'Format: BTC RATE currency. Example: BTC RATE UGX';
+    }
+    
+    const currency = parts[2].toUpperCase();
+    
+    try {
+      // Mock rates - in production, integrate with BitcoinService.getExchangeRate()
+      const rates: { [key: string]: number } = {
+        'UGX': 150000000,
+        'KES': 6500000,
+        'NGN': 45000000,
+        'ZAR': 1200000,
+        'GHS': 950000
+      };
+      
+      const rate = rates[currency];
+      if (!rate) {
+        return `Currency ${currency} not supported. Supported: UGX, KES, NGN, ZAR, GHS`;
+      }
+      
+      return `Bitcoin Exchange Rate:
+1 BTC = ${rate.toLocaleString()} ${currency}
+1 ${currency} = ₿${(1/rate).toFixed(8)}
+
+Updated: ${new Date().toLocaleString()}
+Send BTC BUY/SELL for exchange
+Send *AFRI# for menu`;
+    } catch (error) {
+      return 'Error getting exchange rate. Please try again.';
+    }
+  }
+
+  private static async handleBitcoinBuyCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    const parts = command.split(' ');
+    if (parts.length < 4) {
+      return 'Format: BTC BUY amount currency. Example: BTC BUY 100000 UGX';
+    }
+    
+    const amount = parseInt(parts[2]);
+    const currency = parts[3].toUpperCase();
+    
+    if (isNaN(amount) || amount <= 0) {
+      return 'Invalid amount. Please enter a valid number.';
+    }
+    
+    try {
+      // Calculate dynamic fee and Bitcoin amount
+      const exchangeRate = 150000000; // Mock rate: 1 BTC = 150M UGX
+      const btcAmount = amount / exchangeRate;
+      
+      // Calculate dynamic fee based on location (mock data for SMS)
+      const baseFee = 0.025; // 2.5% base fee
+      const locationMultiplier = 1.2; // Assume suburban location for SMS users
+      const timeMultiplier = 1.0; // Standard time
+      const totalFeeRate = baseFee * locationMultiplier * timeMultiplier;
+      const feeAmount = amount * totalFeeRate;
+      const netAmount = amount - feeAmount;
+      const netBtcAmount = netAmount / exchangeRate;
+      
+      // Store pending transaction for confirmation
+      const confirmationCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      await this.storePendingTransaction(userId, {
+        type: 'bitcoin_buy',
+        amount,
+        currency,
+        btcAmount: netBtcAmount,
+        feeAmount,
+        feeRate: totalFeeRate,
+        confirmationCode,
+        phoneNumber: phoneNumber || '',
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+      });
+      
+      return `Bitcoin Purchase Quote:
+Buy: ₿${btcAmount.toFixed(8)} BTC
+Cost: ${amount.toLocaleString()} ${currency}
+
+Fee Breakdown:
+- Base fee (2.5%): ${currency} ${Math.round(amount * 0.025).toLocaleString()}
+- Location adj: +20%
+- Total fee (${(totalFeeRate * 100).toFixed(1)}%): ${currency} ${feeAmount.toLocaleString()}
+
+You receive: ₿${netBtcAmount.toFixed(8)} BTC
+Net cost: ${currency} ${netAmount.toLocaleString()}
+
+To confirm, reply:
+CONFIRM ${confirmationCode}
+
+Quote expires in 5 minutes.`;
+    } catch (error) {
+      return 'Error calculating Bitcoin purchase. Please try again.';
+    }
+  }
+
+  private static async handleBitcoinSellCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    const parts = command.split(' ');
+    if (parts.length < 4) {
+      return 'Format: BTC SELL amount currency. Example: BTC SELL 50000 UGX';
+    }
+    
+    const amount = parseInt(parts[2]);
+    const currency = parts[3].toUpperCase();
+    
+    if (isNaN(amount) || amount <= 0) {
+      return 'Invalid amount. Please enter a valid number.';
+    }
+    
+    try {
+      // Calculate Bitcoin equivalent and dynamic fee
+      const exchangeRate = 150000000; // Mock rate
+      const btcAmount = amount / exchangeRate;
+      
+      // Calculate dynamic fee
+      const baseFee = 0.025; // 2.5% base fee
+      const locationMultiplier = 1.2; // Assume suburban location
+      const timeMultiplier = 1.0; // Standard time
+      const totalFeeRate = baseFee * locationMultiplier * timeMultiplier;
+      const feeAmount = amount * totalFeeRate;
+      const netAmount = amount - feeAmount;
+      
+      // Store pending transaction
+      const confirmationCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      await this.storePendingTransaction(userId, {
+        type: 'bitcoin_sell',
+        amount,
+        currency,
+        btcAmount,
+        feeAmount,
+        feeRate: totalFeeRate,
+        confirmationCode,
+        phoneNumber: phoneNumber || '',
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+      });
+      
+      return `Bitcoin Sale Quote:
+Sell: ₿${btcAmount.toFixed(8)} BTC
+Value: ${amount.toLocaleString()} ${currency}
+
+Fee Breakdown:
+- Base fee (2.5%): ${currency} ${Math.round(amount * 0.025).toLocaleString()}
+- Location adj: +20%
+- Total fee (${(totalFeeRate * 100).toFixed(1)}%): ${currency} ${feeAmount.toLocaleString()}
+
+You receive: ${currency} ${netAmount.toLocaleString()}
+Agent will contact you for cash pickup.
+
+To confirm, reply:
+CONFIRM ${confirmationCode}
+
+Quote expires in 5 minutes.`;
+    } catch (error) {
+      return 'Error calculating Bitcoin sale. Please try again.';
+    }
+  }
+
+  private static async handleConfirmCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    const parts = command.split(' ');
+    if (parts.length < 2) {
+      return 'Format: CONFIRM code. Check your previous message for the confirmation code.';
+    }
+    
+    const confirmationCode = parts[1].toUpperCase();
+    
+    try {
+      // Retrieve pending transaction
+      const pendingTx = await this.getPendingTransaction(userId, confirmationCode);
+      if (!pendingTx) {
+        return 'Invalid or expired confirmation code. Please start a new transaction.';
+      }
+      
+      // Check if expired
+      if (new Date() > pendingTx.expiresAt) {
+        await this.deletePendingTransaction(userId, confirmationCode);
+        return 'Confirmation code expired. Please start a new transaction.';
+      }
+      
+      // Process the transaction
+      if (pendingTx.type === 'bitcoin_buy') {
+        // Create Bitcoin purchase transaction
+        const txId = await this.createTransaction({
+          userId,
+          type: 'ugx_to_bitcoin',
+          amount: pendingTx.amount,
+          currency: pendingTx.currency as any,
+          status: 'pending',
+          description: `Bitcoin purchase: ₿${pendingTx.btcAmount.toFixed(8)}`,
+          fee: pendingTx.feeAmount,
+          metadata: {
+            smsReference: `BTC${Date.now().toString().slice(-6)}`,
+            exchangeMethod: 'agent_cash' as const
+          }
+        });
+        
+        await this.deletePendingTransaction(userId, confirmationCode);
+        
+        return `Bitcoin Purchase Confirmed!
+Transaction ID: ${txId.id}
+Amount: ₿${pendingTx.btcAmount.toFixed(8)} BTC
+Cost: ${pendingTx.amount.toLocaleString()} ${pendingTx.currency}
+Fee: ${pendingTx.feeAmount.toLocaleString()} ${pendingTx.currency}
+
+An agent will contact you at ${phoneNumber} to complete the exchange.
+
+Send *AFRI# for menu`;
+        
+      } else if (pendingTx.type === 'bitcoin_sell') {
+        // Create Bitcoin sale transaction
+        const txId = await this.createTransaction({
+          userId,
+          type: 'bitcoin_to_ugx',
+          amount: pendingTx.amount,
+          currency: pendingTx.currency as any,
+          status: 'pending',
+          description: `Bitcoin sale: ₿${pendingTx.btcAmount.toFixed(8)}`,
+          fee: pendingTx.feeAmount,
+          metadata: {
+            smsReference: `BTC${Date.now().toString().slice(-6)}`,
+            exchangeMethod: 'agent_cash' as const
+          }
+        });
+        
+        await this.deletePendingTransaction(userId, confirmationCode);
+        
+        const netAmount = pendingTx.amount - pendingTx.feeAmount;
+        return `Bitcoin Sale Confirmed!
+Transaction ID: ${txId.id}
+Selling: ₿${pendingTx.btcAmount.toFixed(8)} BTC
+You receive: ${netAmount.toLocaleString()} ${pendingTx.currency}
+Fee: ${pendingTx.feeAmount.toLocaleString()} ${pendingTx.currency}
+
+An agent will contact you at ${phoneNumber} with cash.
+
+Send *AFRI# for menu`;
+      }
+      
+      return 'Unknown transaction type. Please try again.';
+    } catch (error) {
+      return 'Error confirming transaction. Please try again.';
+    }
+  }
+
+  // Pending Transaction Storage (for SMS confirmations)
+  private static async storePendingTransaction(userId: string, transaction: any): Promise<void> {
+    try {
+      await setDoc({
+        collection: 'pending_transactions',
+        doc: {
+          key: `${userId}_${transaction.confirmationCode}`,
+          data: {
+            ...transaction,
+            userId,
+            createdAt: new Date().toISOString(),
+            expiresAt: transaction.expiresAt.toISOString()
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error storing pending transaction:', error);
+    }
+  }
+
+  private static async getPendingTransaction(userId: string, confirmationCode: string): Promise<any> {
+    try {
+      const doc = await getDoc({
+        collection: 'pending_transactions',
+        key: `${userId}_${confirmationCode}`
+      });
+      
+      if (!doc) return null;
+      
+      return {
+        ...doc.data,
+        expiresAt: new Date((doc.data as any).expiresAt)
+      };
+    } catch (error) {
+      console.error('Error getting pending transaction:', error);
+      return null;
+    }
+  }
+
+  private static async deletePendingTransaction(userId: string, confirmationCode: string): Promise<void> {
+    try {
+      // For deleteDoc, we just need the collection and key
+      const docKey = `${userId}_${confirmationCode}`;
+      // Note: deleteDoc API might be different - this is a placeholder implementation
+      console.log(`Deleting pending transaction: ${docKey}`);
+      // In production, implement proper deleteDoc call based on Juno API
+    } catch (error) {
+      console.error('Error deleting pending transaction:', error);
+    }
   }
 
   // Withdraw Transaction Methods

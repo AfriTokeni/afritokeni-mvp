@@ -46,8 +46,71 @@ const SMSUI: React.FC = () => {
       } else {
         // Demo mode - show example responses
         const demoResponses: { [key: string]: string } = {
-          '*AFRI#': 'Welcome to AfriTokeni!\n1. Check Balance\n2. Send Money\n3. Find Agents\n4. Transaction History\nReply with number',
+          '*AFRI#': `*AFRI# - AfriTokeni Menu
+1. Send Money - SEND amount phone
+2. Check Balance - BAL
+3. Find Agents - AGENTS
+4. Withdraw Cash - WITHDRAW amount
+5. Bitcoin Balance - BTC BAL
+6. Bitcoin Rate - BTC RATE currency
+7. Buy Bitcoin - BTC BUY amount currency
+8. Sell Bitcoin - BTC SELL amount currency
+9. Help - HELP`,
           'BAL': 'Your balance:\nUGX 450,000\nUSDT 118.42\n\nLast updated: Just now',
+          'BTC BAL': `Bitcoin Balance:
+₿0.00125000 BTC
+≈ UGX 187,500
+
+Send BTC RATE [currency] for rates
+Send *AFRI# for menu`,
+          'BTC RATE UGX': `Bitcoin Exchange Rate:
+1 BTC = 150,000,000 UGX
+1 UGX = ₿0.00000001
+
+Updated: ${new Date().toLocaleString()}
+Send BTC BUY/SELL for exchange
+Send *AFRI# for menu`,
+          'BTC BUY 100000 UGX': `Bitcoin Purchase Quote:
+Buy: ₿0.00066667 BTC
+Cost: 100,000 UGX
+
+Fee Breakdown:
+- Base fee (2.5%): UGX 2,500
+- Location adj: +20%
+- Total fee (3.0%): UGX 3,000
+
+You receive: ₿0.00064667 BTC
+Net cost: UGX 97,000
+
+To confirm, reply:
+CONFIRM ABC123
+
+Quote expires in 5 minutes.`,
+          'BTC SELL 50000 UGX': `Bitcoin Sale Quote:
+Sell: ₿0.00033333 BTC
+Value: 50,000 UGX
+
+Fee Breakdown:
+- Base fee (2.5%): UGX 1,250
+- Location adj: +20%
+- Total fee (3.0%): UGX 1,500
+
+You receive: UGX 48,500
+Agent will contact you for cash pickup.
+
+To confirm, reply:
+CONFIRM XYZ789
+
+Quote expires in 5 minutes.`,
+          'CONFIRM ABC123': `Bitcoin Purchase Confirmed!
+Transaction ID: BTC001234
+Amount: ₿0.00064667 BTC
+Cost: 100,000 UGX
+Fee: 3,000 UGX
+
+An agent will contact you at +256701234567 to complete the exchange.
+
+Send *AFRI# for menu`,
           'AGENTS': 'Nearby agents:\n1. Sarah - Kampala Central (500m)\n2. John - Nakawa Market (1.2km)\n3. Grace - Wandegeya (2.1km)\nReply with number for details',
           'SEND': 'To send money, use:\nSEND [amount] [phone]\nExample: SEND 10000 256701234567',
           '1': 'Your balance:\nUGX 450,000\nUSDT 118.42\n\nSend *AFRI# for main menu'
@@ -262,20 +325,50 @@ const SMSUI: React.FC = () => {
               <h3 className="font-semibold text-neutral-900 mb-3 sm:mb-4 text-sm sm:text-base">Quick Commands:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { cmd: '*AFRI#', desc: 'Main Menu' },
-                  { cmd: 'BAL', desc: 'Check Balance' },
-                  { cmd: 'AGENTS', desc: 'Find Agents' },
-                  { cmd: 'SEND 10000 256701234567', desc: 'Send Money' }
+                  { cmd: '*AFRI#', desc: 'Main Menu', category: 'basic' },
+                  { cmd: 'BAL', desc: 'Check Balance', category: 'basic' },
+                  { cmd: 'AGENTS', desc: 'Find Agents', category: 'basic' },
+                  { cmd: 'SEND 10000 256701234567', desc: 'Send Money', category: 'basic' },
+                  { cmd: 'BTC BAL', desc: 'Bitcoin Balance', category: 'bitcoin' },
+                  { cmd: 'BTC RATE UGX', desc: 'Bitcoin Rate', category: 'bitcoin' },
+                  { cmd: 'BTC BUY 100000 UGX', desc: 'Buy Bitcoin', category: 'bitcoin' },
+                  { cmd: 'BTC SELL 50000 UGX', desc: 'Sell Bitcoin', category: 'bitcoin' }
                 ].map((item) => (
                   <button
                     key={item.cmd}
                     onClick={() => setSmsMessage(item.cmd)}
-                    className="text-left p-3 bg-neutral-50 hover:bg-neutral-100 rounded-xl border border-neutral-200 hover:border-neutral-300 transition-colors cursor-pointer"
+                    className={`text-left p-3 rounded-xl border transition-colors cursor-pointer ${
+                      item.category === 'bitcoin' 
+                        ? 'bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-300' 
+                        : 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 hover:border-neutral-300'
+                    }`}
                   >
-                    <div className="font-mono text-neutral-900 font-semibold text-xs sm:text-sm break-all">{item.cmd}</div>
-                    <div className="text-neutral-600 text-xs mt-1">{item.desc}</div>
+                    <div className={`font-mono font-semibold text-xs sm:text-sm break-all ${
+                      item.category === 'bitcoin' ? 'text-orange-900' : 'text-neutral-900'
+                    }`}>
+                      {item.cmd}
+                    </div>
+                    <div className={`text-xs mt-1 ${
+                      item.category === 'bitcoin' ? 'text-orange-600' : 'text-neutral-600'
+                    }`}>
+                      {item.desc}
+                    </div>
                   </button>
                 ))}
+              </div>
+              
+              {/* Bitcoin Commands Info */}
+              <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-orange-800 font-semibold text-sm">Bitcoin SMS Commands</p>
+                    <p className="text-orange-700 text-xs mt-1">
+                      All Bitcoin transactions show dynamic fees based on your location and service level. 
+                      You'll receive a quote with fee breakdown before confirming any transaction.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -88,10 +88,10 @@ const TariffPage: React.FC = () => {
 
   const getColorClasses = (color: string) => {
     const colors = {
-      green: 'text-green-700 bg-green-50 border-green-200',
-      blue: 'text-blue-700 bg-blue-50 border-blue-200',
-      yellow: 'text-yellow-700 bg-yellow-50 border-yellow-200',
-      red: 'text-red-700 bg-red-50 border-red-200'
+      green: 'text-neutral-700 bg-neutral-50 border-neutral-200',
+      blue: 'text-neutral-700 bg-neutral-50 border-neutral-200',
+      yellow: 'text-neutral-700 bg-neutral-50 border-neutral-200',
+      red: 'text-neutral-700 bg-neutral-50 border-neutral-200'
     };
     return colors[color as keyof typeof colors] || colors.green;
   };
@@ -102,7 +102,7 @@ const TariffPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <Calculator className="w-8 h-8 text-blue-600" />
+            <Calculator className="w-8 h-8 text-neutral-900" />
             <h1 className="text-4xl font-bold text-neutral-900">Smart Pricing System</h1>
           </div>
           <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
@@ -113,7 +113,7 @@ const TariffPage: React.FC = () => {
 
         {/* Navigation */}
         <div className="flex justify-center mb-8">
-          <div className="bg-neutral-100 p-1 rounded-lg">
+          <div className="bg-neutral-100 p-1 rounded-lg flex">
             {[
               { id: 'overview', label: 'Overview', icon: Info },
               { id: 'calculator', label: 'Calculator', icon: Calculator },
@@ -124,7 +124,7 @@ const TariffPage: React.FC = () => {
                 onClick={() => setActiveSection(id as any)}
                 className={`px-6 py-3 rounded-md font-semibold transition-colors duration-200 flex items-center space-x-2 ${
                   activeSection === id
-                    ? 'bg-white text-blue-600 shadow-sm'
+                    ? 'bg-white text-neutral-900 shadow-sm'
                     : 'text-neutral-600 hover:text-neutral-900'
                 }`}
               >
@@ -139,21 +139,21 @@ const TariffPage: React.FC = () => {
         {activeSection === 'overview' && (
           <div className="space-y-12">
             {/* Key Benefits */}
-            <div className="bg-gradient-to-br from-blue-50 to-green-50 border border-blue-200 p-8 rounded-xl">
+            <div className="bg-neutral-50 border border-neutral-200 p-8 rounded-xl">
               <h2 className="text-2xl font-bold text-neutral-900 mb-6 text-center">Why Smart Pricing?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <Shield className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                  <Shield className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-neutral-900 mb-2">Fair Compensation</h3>
                   <p className="text-neutral-600">Agents traveling to remote areas receive higher fees for their extra effort and costs.</p>
                 </div>
                 <div className="text-center">
-                  <Users className="w-12 h-12 text-green-600 mx-auto mb-4" />
+                  <Users className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-neutral-900 mb-2">Better Coverage</h3>
                   <p className="text-neutral-600">Incentivizes agents to serve underbanked communities in remote villages.</p>
                 </div>
                 <div className="text-center">
-                  <CheckCircle className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+                  <CheckCircle className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-neutral-900 mb-2">Transparent Pricing</h3>
                   <p className="text-neutral-600">Clear, predictable fees based on distance, location, and service level.</p>
                 </div>
@@ -163,7 +163,7 @@ const TariffPage: React.FC = () => {
             {/* Location-Based Pricing */}
             <div>
               <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center space-x-2">
-                <MapPin className="w-6 h-6 text-blue-600" />
+                <MapPin className="w-6 h-6 text-neutral-700" />
                 <span>Location-Based Pricing</span>
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -192,7 +192,7 @@ const TariffPage: React.FC = () => {
             {/* Service Level Pricing */}
             <div>
               <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center space-x-2">
-                <Zap className="w-6 h-6 text-yellow-600" />
+                <Zap className="w-6 h-6 text-neutral-700" />
                 <span>Service Level Pricing</span>
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -212,7 +212,7 @@ const TariffPage: React.FC = () => {
             {/* Time-Based Adjustments */}
             <div>
               <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center space-x-2">
-                <Clock className="w-6 h-6 text-purple-600" />
+                <Clock className="w-6 h-6 text-neutral-700" />
                 <span>Time-Based Adjustments</span>
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -233,7 +233,7 @@ const TariffPage: React.FC = () => {
               <h2 className="text-2xl font-bold text-neutral-900 mb-6 text-center">How It Works</h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">1</div>
+                  <div className="w-12 h-12 bg-neutral-900 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">1</div>
                   <h3 className="font-semibold mb-2">Base Fee</h3>
                   <p className="text-sm text-neutral-600">Platform starts with 1.5% base fee</p>
                 </div>
