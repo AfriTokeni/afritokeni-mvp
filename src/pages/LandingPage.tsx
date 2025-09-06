@@ -60,29 +60,23 @@ const LandingPage: React.FC = () => {
               39 currencies supported, works with or without internet.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+              <button
+                onClick={handleICPLogin}
+                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Start Banking Now
+              </button>
               <Link
                 to="/bitcoin-exchange"
-                className="bg-orange-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-orange-700 transition-colors"
+                className="bg-white text-gray-800 border-2 border-gray-200 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:border-orange-300 hover:bg-orange-50 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                How Bitcoin Exchange Works
+                Learn How It Works
               </Link>
-              <button
-                onClick={() => window.location.href = '/users/dashboard'}
-                className="bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-gray-800 transition-colors"
-              >
-                View User Dashboard
-              </button>
-              <button
-                onClick={() => window.location.href = '/agents/dashboard'}
-                className="bg-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-green-700 transition-colors"
-              >
-                View Agent Dashboard
-              </button>
               <Link
                 to="/sms"
-                className="border border-gray-300 text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                className="bg-gradient-to-r from-green-600 to-green-700 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Try SMS banking
+                Try SMS Banking
               </Link>
             </div>
           </div>
