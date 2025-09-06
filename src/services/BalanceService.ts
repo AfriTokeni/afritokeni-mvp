@@ -1,8 +1,4 @@
-import { Transaction } from '../types/transaction';
-
-interface UserBalance {
-  [currency: string]: number;
-}
+import { Transaction, UserBalance } from '../types/transaction';
 
 export class BalanceService {
   private static transactions: Transaction[] = [];

@@ -149,7 +149,7 @@ export class TransactionService {
       const withdrawalCode = Math.random().toString(36).substr(2, 6).toUpperCase();
 
       // Process the withdrawal transaction
-      const transaction = BalanceService.processWithdrawal(
+      BalanceService.processWithdrawal(
         userId,
         amount,
         currency,

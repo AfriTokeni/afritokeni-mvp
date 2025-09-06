@@ -286,7 +286,7 @@ const AgentDashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-neutral-100 space-y-2 sm:space-y-0">
-              <span className="text-neutral-500 text-xs sm:text-sm">From real transactions</span>
+              <span className="text-neutral-500 text-xs sm:text-sm">Ready for exchange</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-green-600 font-medium text-xs sm:text-sm">Live</span>
@@ -316,7 +316,7 @@ const AgentDashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-orange-100 space-y-2 sm:space-y-0">
-              <span className="text-neutral-600 text-xs sm:text-sm">≈ {formatCurrency(0)}</span>
+              <span className="text-neutral-600 text-xs sm:text-sm">Ready for exchange</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                 <span className="text-orange-600 font-medium text-xs sm:text-sm">Bitcoin</span>
