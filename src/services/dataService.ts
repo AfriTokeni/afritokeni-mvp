@@ -22,8 +22,10 @@ export interface UserDataFromJuno {
   createdAt: string;
 }
 
-// Transaction types for AfriTokeni
-export interface Transaction {
+import { Transaction } from '../types/transaction';
+
+// Legacy Transaction interface - keeping for backward compatibility
+export interface LegacyTransaction {
   id: string;
   userId: string;
   type: 'send' | 'receive' | 'withdraw' | 'deposit' | 'bitcoin_to_ugx' | 'ugx_to_bitcoin' | 'bitcoin_send' | 'bitcoin_receive';

@@ -16,11 +16,13 @@ export interface Transaction {
   description?: string;
   createdAt: Date;
   updatedAt?: Date;
+  completedAt?: Date;
   withdrawalCode?: string;
   depositCode?: string;
   bitcoinAddress?: string;
   exchangeRate?: number;
   location?: string;
+  metadata?: any;
 }
 
 export interface UserBalance {

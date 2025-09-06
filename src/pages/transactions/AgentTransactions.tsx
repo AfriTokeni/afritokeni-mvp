@@ -6,9 +6,10 @@ import {
   Minus,
   Search,
 } from 'lucide-react';
-import { Transaction } from '../../services/dataService';
+import { Transaction } from '../../types/transaction';
 import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
+import { normalizeTransaction, getTransactionIcon, formatDate } from '../../utils/transactionUtils';
 
 const AgentTransactions: React.FC = () => {
   const { agentTransactions, isLoading } = useAfriTokeni();
@@ -71,7 +72,7 @@ const AgentTransactions: React.FC = () => {
   const filteredTransactions = React.useMemo(() => {
     if (!agentTransactions) return [];
     
-    return agentTransactions.filter((transaction: Transaction) => {
+    return agentTransactions.filter((transaction) => {
       const description = transaction.description || '';
       const transactionId = transaction.id || '';
       
@@ -86,11 +87,16 @@ const AgentTransactions: React.FC = () => {
     });
   }, [agentTransactions, searchTerm, statusFilter, typeFilter]);
 
+  // Normalize transactions to ensure consistent data structure
+  const normalizedTransactions = React.useMemo(() => {
+    return filteredTransactions.map(transaction => normalizeTransaction(transaction));
+  }, [filteredTransactions]);
+
   // Calculate pagination
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const totalPages = Math.ceil(normalizedTransactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
+  const currentTransactions = normalizedTransactions.slice(startIndex, endIndex);
 
   // Reset to first page when filters change
   React.useEffect(() => {
@@ -203,7 +209,7 @@ const AgentTransactions: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {currentTransactions.map((transaction: Transaction) => (
+                    {currentTransactions.map((transaction) => (
                       <tr key={transaction.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 max-w-xs">
                           <div className="flex items-start">
@@ -234,7 +240,7 @@ const AgentTransactions: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(transaction.createdAt).toLocaleDateString()}
+                          {formatDate(transaction.date)}
                         </td>
                       </tr>
                     ))}
@@ -244,7 +250,7 @@ const AgentTransactions: React.FC = () => {
 
               {/* Mobile Card View */}
               <div className="lg:hidden space-y-4">
-                {currentTransactions.map((transaction: Transaction) => (
+                {currentTransactions.map((transaction) => (
                   <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center bg-gray-100 rounded-full">
