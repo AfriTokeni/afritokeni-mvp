@@ -388,13 +388,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false;
       }
       
-      // Store pending registration data
-      setVerificationState({
-        isVerifying: true,
-        phoneNumber: formattedPhone,
-        pendingUserData: formData,
-        devVerificationCode: import.meta.env.DEV ? verificationResult.verificationCode : undefined
-      });
+      // Verification state would be managed here in a real implementation
       
       // In development mode, log the verification code for testing
       if (import.meta.env.DEV && verificationResult.verificationCode) {
