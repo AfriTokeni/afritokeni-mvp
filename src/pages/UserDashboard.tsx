@@ -221,7 +221,7 @@ const UserDashboard: React.FC = () => {
                           </p>
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="text-xs text-neutral-500">{formatDate(transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : transaction.createdAt)}</p>
+                          <p className="text-xs text-neutral-500">{formatDate(transaction.createdAt)}</p>
                           <p className="text-xs text-neutral-500 capitalize">{transaction.status}</p>
                         </div>
                       </div>

@@ -1,15 +1,4 @@
-interface Transaction {
-  id: string;
-  type: 'deposit' | 'withdrawal' | 'send' | 'receive' | 'bitcoin_buy' | 'bitcoin_sell';
-  amount: number;
-  currency: string;
-  userId: string;
-  status: 'pending' | 'completed' | 'failed';
-  createdAt: Date;
-  fromUserId?: string;
-  toUserId?: string;
-  agentId?: string;
-}
+import { Transaction } from '../types/transaction';
 
 interface UserBalance {
   [currency: string]: number;
@@ -77,7 +66,7 @@ export class BalanceService {
           }
           break;
         
-        case 'withdrawal':
+        case 'withdraw':
         case 'bitcoin_buy':
           if (tx.userId === userId) {
             balance -= tx.amount;
@@ -155,7 +144,7 @@ export class BalanceService {
     }
 
     return this.addTransaction({
-      type: 'withdrawal',
+      type: 'withdraw',
       amount,
       currency,
       userId,
