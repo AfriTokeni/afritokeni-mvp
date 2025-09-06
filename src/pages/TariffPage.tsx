@@ -238,17 +238,17 @@ const TariffPage: React.FC = () => {
                   <p className="text-sm text-neutral-600">Platform starts with 1.5% base fee</p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">2</div>
+                  <div className="w-12 h-12 bg-neutral-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">2</div>
                   <h3 className="font-semibold mb-2">Distance</h3>
                   <p className="text-sm text-neutral-600">Add 0.5-5% based on kilometers</p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-yellow-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">3</div>
+                  <div className="w-12 h-12 bg-neutral-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">3</div>
                   <h3 className="font-semibold mb-2">Location</h3>
                   <p className="text-sm text-neutral-600">Apply accessibility multiplier</p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">4</div>
+                  <div className="w-12 h-12 bg-neutral-400 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">4</div>
                   <h3 className="font-semibold mb-2">Adjustments</h3>
                   <p className="text-sm text-neutral-600">Add time and urgency factors</p>
                 </div>
@@ -281,15 +281,15 @@ const TariffPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Example 1: Urban Transaction */}
-              <div className="bg-green-50 border border-green-200 p-6 rounded-xl">
+              {/* Example 1: Urban Quick */}
+              <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-xl">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-neutral-700 text-white rounded-full flex items-center justify-center">
                     <TrendingDown className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-green-800">Urban Transaction</h3>
-                    <p className="text-green-600 text-sm">Kampala City Center</p>
+                    <h3 className="text-lg font-bold text-neutral-900">Urban Quick</h3>
+                    <p className="text-neutral-600 text-sm">Kampala City Center</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -303,29 +303,29 @@ const TariffPage: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Service:</span>
-                    <span className="font-semibold">Standard</span>
+                    <span className="font-semibold">Quick</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Time:</span>
                     <span className="font-semibold">Business hours</span>
                   </div>
-                  <hr className="border-green-200" />
-                  <div className="flex justify-between text-lg font-bold text-green-800">
+                  <hr className="border-neutral-200" />
+                  <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
                     <span>2.8% (UGX 2,800)</span>
                   </div>
                 </div>
               </div>
 
-              {/* Example 2: Rural Transaction */}
-              <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-xl">
+              {/* Example 2: Rural Express */}
+              <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-xl">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-yellow-600 text-white rounded-full flex items-center justify-center">
-                    <MapPin className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-neutral-600 text-white rounded-full flex items-center justify-center">
+                    <Zap className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-yellow-800">Rural Transaction</h3>
-                    <p className="text-yellow-600 text-sm">Village in Gulu District</p>
+                    <h3 className="text-lg font-bold text-neutral-900">Rural Express</h3>
+                    <p className="text-neutral-600 text-sm">Gulu District</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -345,8 +345,8 @@ const TariffPage: React.FC = () => {
                     <span className="text-neutral-600">Time:</span>
                     <span className="font-semibold">Weekend</span>
                   </div>
-                  <hr className="border-yellow-200" />
-                  <div className="flex justify-between text-lg font-bold text-yellow-800">
+                  <hr className="border-neutral-200" />
+                  <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
                     <span>6.2% (UGX 12,400)</span>
                   </div>
@@ -354,14 +354,14 @@ const TariffPage: React.FC = () => {
               </div>
 
               {/* Example 3: Remote Emergency */}
-              <div className="bg-red-50 border border-red-200 p-6 rounded-xl">
+              <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-xl">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-neutral-500 text-white rounded-full flex items-center justify-center">
                     <TrendingUp className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-red-800">Remote Emergency</h3>
-                    <p className="text-red-600 text-sm">Mountain Village, Karamoja</p>
+                    <h3 className="text-lg font-bold text-neutral-900">Remote Emergency</h3>
+                    <p className="text-neutral-600 text-sm">Mountain Village, Karamoja</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -381,8 +381,8 @@ const TariffPage: React.FC = () => {
                     <span className="text-neutral-600">Time:</span>
                     <span className="font-semibold">Night</span>
                   </div>
-                  <hr className="border-red-200" />
-                  <div className="flex justify-between text-lg font-bold text-red-800">
+                  <hr className="border-neutral-200" />
+                  <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
                     <span>11.8% (UGX 5,900)</span>
                   </div>
@@ -390,14 +390,14 @@ const TariffPage: React.FC = () => {
               </div>
 
               {/* Example 4: Suburban Standard */}
-              <div className="bg-blue-50 border border-blue-200 p-6 rounded-xl">
+              <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-xl">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-neutral-400 text-white rounded-full flex items-center justify-center">
                     <Bitcoin className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-blue-800">Suburban Standard</h3>
-                    <p className="text-blue-600 text-sm">Entebbe Outskirts</p>
+                    <h3 className="text-lg font-bold text-neutral-900">Suburban Standard</h3>
+                    <p className="text-neutral-600 text-sm">Entebbe Outskirts</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -417,8 +417,8 @@ const TariffPage: React.FC = () => {
                     <span className="text-neutral-600">Time:</span>
                     <span className="font-semibold">Evening</span>
                   </div>
-                  <hr className="border-blue-200" />
-                  <div className="flex justify-between text-lg font-bold text-blue-800">
+                  <hr className="border-neutral-200" />
+                  <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
                     <span>4.1% (UGX 6,150)</span>
                   </div>
@@ -429,23 +429,23 @@ const TariffPage: React.FC = () => {
         )}
 
         {/* Call to Action */}
-        <div className="mt-16 bg-gradient-to-r from-blue-600 to-green-600 text-white p-8 rounded-xl text-center">
+        <div className="mt-16 bg-neutral-900 text-white p-8 rounded-xl text-center">
           <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+          <p className="text-neutral-300 mb-6 max-w-2xl mx-auto">
             Join our network of agents or start exchanging Bitcoin with transparent, fair pricing 
             that supports financial inclusion across Africa.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/auth/register"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="bg-white text-neutral-900 px-8 py-3 rounded-lg font-semibold hover:bg-neutral-100 transition-colors duration-200 flex items-center justify-center space-x-2"
             >
               <Users className="w-5 h-5" />
               <span>Become an Agent</span>
             </Link>
             <Link
               to="/auth/login"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-neutral-900 transition-colors duration-200 flex items-center justify-center space-x-2"
             >
               <Banknote className="w-5 h-5" />
               <span>Start Trading</span>
