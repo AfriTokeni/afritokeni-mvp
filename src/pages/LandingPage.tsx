@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone, Zap, Lock, Bitcoin, ArrowRightLeft, Globe } from 'lucide-react';
+import { Smartphone, Zap, Lock, Bitcoin, ArrowRightLeft, Globe, Calculator } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
 
@@ -206,12 +206,20 @@ const LandingPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="text-center pt-3 sm:pt-4 border-t border-gray-200">
+                <div className="text-center pt-3 sm:pt-4 border-t border-gray-200 space-y-2">
                   <Link
                     to="/sms"
                     className="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium text-xs sm:text-sm"
                   >
                     Try Bitcoin SMS commands →
+                  </Link>
+                  <div className="text-gray-400">•</div>
+                  <Link
+                    to="/tariff"
+                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-xs sm:text-sm"
+                  >
+                    <Calculator className="w-3 h-3 mr-1" />
+                    View Smart Pricing →
                   </Link>
                 </div>
               </div>

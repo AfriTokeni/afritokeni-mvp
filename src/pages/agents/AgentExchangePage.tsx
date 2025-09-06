@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { BitcoinService } from '../../services/bitcoinService';
+import DynamicFeeCalculator from '../../components/DynamicFeeCalculator';
 
 interface ExchangeRequest {
   id: string;
@@ -338,11 +339,14 @@ const AgentExchangePage: React.FC = () => {
 
         {activeTab === 'calculator' && (
           <div className="space-y-6">
+            {/* Dynamic Fee Calculator */}
+            <DynamicFeeCalculator />
+
             {/* Rate Calculator */}
             <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm">
               <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center space-x-2">
                 <Calculator className="w-5 h-5" />
-                <span>Exchange Rate Calculator</span>
+                <span>Simple Exchange Rate Calculator</span>
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -392,28 +396,57 @@ const AgentExchangePage: React.FC = () => {
               )}
             </div>
 
-            {/* Commission Calculator */}
-            <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-xl">
-              <h3 className="text-lg font-bold text-neutral-900 mb-4">Recommended Commission Rates</h3>
+            {/* Dynamic Commission Information */}
+            <div className="bg-gradient-to-br from-green-50 to-blue-50 border border-green-200 p-6 rounded-xl">
+              <h3 className="text-lg font-bold text-neutral-900 mb-4">Smart Commission System</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="bg-white p-4 rounded-lg border border-neutral-200">
-                  <h4 className="font-semibold text-neutral-900 mb-2">Bitcoin Purchase (Customer Buying)</h4>
-                  <p className="text-neutral-600 text-sm mb-2">Recommended: 2-3% commission</p>
+                  <h4 className="font-semibold text-green-800 mb-2">Urban Areas</h4>
+                  <p className="text-neutral-600 text-sm mb-2">Low distance, high competition</p>
                   <div className="space-y-1 text-sm">
-                    <p>Customer pays: UGX 100,000</p>
-                    <p>Your commission (2.5%): UGX 2,500</p>
-                    <p>Bitcoin value: UGX 97,500</p>
+                    <p className="font-semibold text-green-700">2.5-4% commission</p>
+                    <p className="text-neutral-600">Quick service, nearby customers</p>
                   </div>
                 </div>
 
                 <div className="bg-white p-4 rounded-lg border border-neutral-200">
-                  <h4 className="font-semibold text-neutral-900 mb-2">Bitcoin Sale (Customer Selling)</h4>
-                  <p className="text-neutral-600 text-sm mb-2">Recommended: 2-3% commission</p>
+                  <h4 className="font-semibold text-yellow-800 mb-2">Rural Areas</h4>
+                  <p className="text-neutral-600 text-sm mb-2">Medium distance, moderate effort</p>
                   <div className="space-y-1 text-sm">
-                    <p>Bitcoin value: UGX 100,000</p>
-                    <p>Your commission (2.5%): UGX 2,500</p>
-                    <p>Customer receives: UGX 97,500</p>
+                    <p className="font-semibold text-yellow-700">4-7% commission</p>
+                    <p className="text-neutral-600">Travel required, fewer agents</p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg border border-neutral-200">
+                  <h4 className="font-semibold text-red-800 mb-2">Remote Villages</h4>
+                  <p className="text-neutral-600 text-sm mb-2">Long distance, high effort</p>
+                  <div className="space-y-1 text-sm">
+                    <p className="font-semibold text-red-700">7-12% commission</p>
+                    <p className="text-neutral-600">Significant travel, exclusive service</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-2">Additional Fee Factors</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                  <div>
+                    <span className="font-semibold text-neutral-700">Express Service:</span>
+                    <p className="text-blue-600">+30% fee</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-neutral-700">Emergency:</span>
+                    <p className="text-red-600">+80% fee</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-neutral-700">Night Service:</span>
+                    <p className="text-purple-600">+40% fee</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-neutral-700">Weekend:</span>
+                    <p className="text-orange-600">+15% fee</p>
                   </div>
                 </div>
               </div>

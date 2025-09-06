@@ -36,6 +36,7 @@ import SMSUI from "./components/SMSUI.tsx";
 
 // Landing Page
 import LandingPage from "./pages/LandingPage";
+import TariffPage from "./pages/TariffPage";
 
 const App: FC = () => {
   useEffect(() => {
@@ -104,6 +105,9 @@ const App: FC = () => {
           
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
+          
+          {/* Tariff Page */}
+          <Route path="/tariff" element={<TariffPage />} />
           
           {/* Default redirects */}
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />

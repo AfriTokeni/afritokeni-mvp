@@ -455,22 +455,63 @@ export class BitcoinService {
     }
   }
 
-  // Process Bitcoin to local currency exchange through agent
+  // Process Bitcoin to local currency exchange through agent with dynamic fees
   static async processBitcoinToLocalExchange(
     userId: string,
     agentId: string,
     bitcoinAmount: number, // in satoshis
     localCurrency: AfricanCurrency,
-    exchangeMethod: 'agent_cash' | 'agent_digital'
+    exchangeMethod: 'agent_cash' | 'agent_digital',
+    customerLocation?: { latitude: number; longitude: number; accessibility: 'urban' | 'suburban' | 'rural' | 'remote' },
+    agentDistance?: number,
+    urgency: 'standard' | 'express' | 'emergency' = 'standard'
   ): Promise<{
     success: boolean;
     transaction?: BitcoinTransaction;
     message: string;
+    feeBreakdown?: any;
   }> {
     try {
       const rate = await this.getExchangeRate(localCurrency);
       const localAmount = await this.calculateLocalFromBitcoin(bitcoinAmount, localCurrency);
-      const agentFee = Math.round(localAmount * 0.02); // 2% agent fee
+      
+      // Calculate dynamic fee if location data is available
+      let agentFee: number;
+      let feeBreakdown: any = null;
+      
+      if (customerLocation && agentDistance !== undefined) {
+        const { DynamicFeeService } = await import('./dynamicFeeService');
+        const now = new Date();
+        const hour = now.getHours();
+        const timeOfDay = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : hour < 22 ? 'evening' : 'night';
+        const dayOfWeek = now.getDay() === 0 || now.getDay() === 6 ? 'weekend' : 'weekday';
+        
+        const feeCalculation = DynamicFeeService.calculateDynamicFee(
+          {
+            amount: localAmount,
+            currency: localCurrency,
+            type: 'bitcoin_sell',
+            customerLocation: {
+              latitude: customerLocation.latitude,
+              longitude: customerLocation.longitude,
+              accessibility: customerLocation.accessibility
+            },
+            urgency,
+            timeOfDay: timeOfDay as any,
+            dayOfWeek: dayOfWeek as any
+          },
+          agentDistance,
+          { latitude: 0, longitude: 0, accessibility: 'urban' } // Agent location placeholder
+        );
+        
+        agentFee = feeCalculation.totalFeeAmount;
+        feeBreakdown = feeCalculation;
+      } else {
+        // Fallback to fixed 3% fee for remote areas, 2% for others
+        const feeRate = customerLocation?.accessibility === 'remote' ? 0.03 : 0.02;
+        agentFee = Math.round(localAmount * feeRate);
+      }
+      
       const netLocalAmount = localAmount - agentFee;
 
       const transaction = await this.createBitcoinTransaction({
@@ -493,7 +534,8 @@ export class BitcoinService {
       return {
         success: true,
         transaction,
-        message: `Exchange initiated: ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC → ${formatCurrencyAmount(netLocalAmount, localCurrency)}`
+        message: `Exchange initiated: ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC → ${formatCurrencyAmount(netLocalAmount, localCurrency)}`,
+        feeBreakdown
       };
     } catch (error) {
       return {
