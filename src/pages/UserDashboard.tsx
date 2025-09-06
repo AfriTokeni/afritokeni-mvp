@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
+import { BalanceService } from '../services/BalanceService';
 import PageLayout from '../components/PageLayout';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
@@ -21,7 +22,6 @@ const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserCurrency } = useAuthentication();
   const { 
-    balance, 
     transactions
   } = useAfriTokeni();
 
@@ -32,6 +32,12 @@ const UserDashboard: React.FC = () => {
 
   const formatCurrency = (amount: number): string => {
     return formatCurrencyAmount(amount, userCurrency as any);
+  };
+
+  // Get real balance from transaction history
+  const getRealBalance = (): number => {
+    if (!currentUser?.id) return 0;
+    return BalanceService.calculateBalance(currentUser.id, userCurrency);
   };
 
   const formatDate = (dateString: string): string => {
@@ -89,7 +95,7 @@ const UserDashboard: React.FC = () => {
             </div>
             <div className="mb-4 sm:mb-6">
               <span className="text-2xl sm:text-3xl font-semibold text-neutral-900 font-mono">
-                {formatCurrency(balance?.balance || 0)}
+                {formatCurrency(getRealBalance())}
               </span>
             </div>
             <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-neutral-100">
@@ -230,7 +236,7 @@ const UserDashboard: React.FC = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-neutral-900 text-sm truncate">{transaction.description}</p>
-                        <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : transaction.createdAt)}</p>
+                        <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt)}</p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-2">

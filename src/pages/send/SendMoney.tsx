@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
+import { TransactionService } from '../../services/TransactionService';
 import { DataService } from '../../services/dataService';
 import { User as UserType } from '../../types/auth';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
@@ -38,7 +39,7 @@ interface InternationalRecipient {
 const SendMoney: React.FC = () => {
   const navigate = useNavigate();
   const { user: authUser } = useAuthentication();
-  const { balance, user, sendMoney, calculateFee } = useAfriTokeni();
+  const { balance, user, calculateFee } = useAfriTokeni();
   
   // Get user's preferred currency or default to NGN
   const currentUser = authUser.user;
@@ -192,9 +193,9 @@ const SendMoney: React.FC = () => {
   }, [recipientPhone]);
 
 
-  // Send money transaction
+  // Send money transaction using TransactionService
   const handleSendMoney = async () => {
-    if (!user || !recipient || !localAmount) return;
+    if (!user?.user?.id || !recipient || !localAmount) return;
 
     setIsProcessing(true);
     try {
@@ -204,14 +205,21 @@ const SendMoney: React.FC = () => {
       // For web users, their phone number is also stored in the email field after KYC
       const recipientPhoneNumber = recipient.email.startsWith('+') ? recipient.email : recipientPhone;
       
-      // Use the sendMoney function from the hook
-      const result = await sendMoney(sendAmount, recipientPhoneNumber, recipient);
+      // Use TransactionService for send money
+      const result = await TransactionService.processSendMoney({
+        fromUserId: user.user.id,
+        toUserPhone: recipientPhoneNumber,
+        amount: sendAmount,
+        currency: userCurrency,
+        description: `Money sent to ${recipient.firstName} ${recipient.lastName}`
+      });
       
-      if (result.success && result.transaction && result.fee !== undefined) {
+      if (result.success) {
+        const fee = calculateFee(sendAmount);
         setTransactionResult({
-          id: result.transaction.id,
+          id: result.transactionId || 'tx_' + Date.now(),
           amount: sendAmount,
-          fee: result.fee,
+          fee: fee,
           recipient: recipient,
           timestamp: new Date()
         });

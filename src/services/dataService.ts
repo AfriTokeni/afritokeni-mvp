@@ -752,16 +752,11 @@ export class DataService {
       const userBalance = await this.getUserBalance(agentKYCData.userId);
       let digitalBalance = userBalance?.balance || 0;
 
-      // If digital balance is 0, set a random figure between 100,000 and 1,000,000 UGX
-      if (digitalBalance === 0) {
-        digitalBalance = Math.floor(Math.random() * 900000) + 100000; // Random between 100,000 and 1,000,000 UGX
-        
-        // Update the balance in the balances table
-        await this.updateUserBalance(agentKYCData.userId, digitalBalance);
-      }
-
-      // 3. Generate random cash balance (as requested)
-      const cashBalance = Math.floor(Math.random() * 2000000) + 500000; // Random between 500,000 and 2,500,000 UGX
+      // Digital balance comes from real transactions only - no hardcoded amounts
+      // Agent starts with 0 balance and must receive deposits to have digital funds
+      
+      // 3. Cash balance starts at 0 - agents must deposit their own cash to start operations
+      const cashBalance = 0; // Agents start with no cash balance
 
       // 4. Create agent record in agents collection
       const agentData: Omit<Agent, 'id' | 'createdAt'> = {

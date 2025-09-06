@@ -1,7 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthentication } from '../context/AuthenticationContext';
-import { DataService, Transaction, UserBalance, Agent } from '../services/dataService';
+import { DataService } from '../services/dataService';
+import { TransactionService } from '../services/TransactionService';
 import { User } from '../types/auth';
+
+interface UserBalance {
+  balance: number;
+  currency: string;
+}
+
+interface Transaction {
+  id: string;
+  type: string;
+  amount: number;
+  currency: string;
+  description: string;
+  status: string;
+  createdAt: string;
+}
+
+interface Agent {
+  id: string;
+  name: string;
+  location: string;
+}
 
 export const useAfriTokeni = () => {
   const { user } = useAuthentication();
@@ -240,42 +262,25 @@ export const useAfriTokeni = () => {
 
   const withdrawMoney = async (
     amount: number,
+    currency: string,
     agentId?: string
   ): Promise<{ success: boolean; message: string; withdrawalCode?: string }> => {
     if (!user.user?.id) {
       return { success: false, message: 'User not authenticated' };
     }
 
-    if (!balance || balance.balance < amount) {
-      return { success: false, message: 'Insufficient balance' };
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
-      // Generate withdrawal code
-      const withdrawalCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      const result = await TransactionService.processWithdrawal(user.user.id, amount, currency, agentId);
+      
+      // Refresh data after successful withdrawal
+      if (result.success) {
+        await loadUserData();
+      }
 
-      // Create transaction
-      await DataService.createTransaction({
-        userId: user.user.id,
-        type: 'withdraw',
-        amount,
-        currency: 'UGX',
-        agentId,
-        status: 'pending',
-        description: 'Cash withdrawal',
-        metadata: {
-          withdrawalCode
-        }
-      });
-
-      return { 
-        success: true, 
-        message: `Withdrawal initiated. Code: ${withdrawalCode}`,
-        withdrawalCode
-      };
+      return result;
     } catch (err) {
       setError('Failed to initiate withdrawal');
       console.error('Error withdrawing money:', err);
@@ -317,36 +322,50 @@ export const useAfriTokeni = () => {
         message: `Successfully deposited UGX ${amount.toLocaleString()}`
       };
     } catch (err) {
-      setError('Failed to deposit money');
-      console.error('Error depositing money:', err);
-      return { success: false, message: 'Failed to deposit money' };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getNearbyAgents = async (lat: number, lng: number): Promise<Agent[]> => {
-    try {
-      return await DataService.getNearbyAgents(lat, lng);
-    } catch (err) {
-      console.error('Error getting nearby agents:', err);
-      return [];
-    }
-  };
-
-  const processSMSCommand = async (phoneNumber: string, message: string): Promise<string> => {
-    try {
-      const userId = user?.user?.id || user?.agent?.id;
-      return await DataService.processSMSCommand(phoneNumber, message, userId);
-    } catch (err) {
-      console.error('Error processing SMS command:', err);
-      return 'Sorry, there was an error processing your request.';
+      console.error('Error processing deposit:', err);
+      return { success: false, message: 'Sorry, there was an error processing your request.' };
     }
   };
 
   const refreshData = () => {
     loadUserData();
   };
+
+  // Load user transactions using TransactionService
+  const loadTransactions = useCallback(async () => {
+    if (!user?.user?.id) return [];
+    
+    try {
+      const userTransactions = TransactionService.getUserTransactions(user.user.id);
+      return userTransactions.map(tx => ({
+        ...tx,
+        description: tx.description || 'Transaction'
+      }));
+    } catch (error) {
+      console.error('Error loading transactions:', error);
+      return [];
+    }
+  }, [user?.user?.id]);
+
+  // Get nearby agents
+  const getNearbyAgents = useCallback(async () => {
+    try {
+      return await DataService.getNearbyAgents();
+    } catch (error) {
+      console.error('Error getting nearby agents:', error);
+      return [];
+    }
+  }, []);
+
+  // Process SMS command
+  const processSMSCommand = useCallback(async (command: string) => {
+    try {
+      return await DataService.processSMSCommand(command, user?.user?.id || '');
+    } catch (error) {
+      console.error('Error processing SMS command:', error);
+      return 'Error processing command';
+    }
+  }, [user?.user?.id]);
 
   // Agent status management
   const updateAgentStatus = async (status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> => {

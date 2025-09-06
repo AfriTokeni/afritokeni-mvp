@@ -6,14 +6,14 @@ import ConfirmationStep from './ConfirmationStep';
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { DataService } from '../../services/dataService';
+import { BalanceService } from '../../services/BalanceService';
 import type { Agent, WithdrawStep } from './types';
 
 const WithdrawPage: React.FC = () => {
   // Real balance calculation from transactions
   const getBalanceForCurrency = (): number => {
-    // TODO: Implement real balance calculation from transaction history
-    // Balance = deposits + received transfers + bitcoin sales - withdrawals - sent transfers - bitcoin purchases
-    return 0; // Start with zero balance - users must deposit via agents
+    if (!user.user?.id) return 0;
+    return BalanceService.calculateBalance(user.user.id, userCurrency);
   };
   const { user } = useAuthentication();
   const [currentStep, setCurrentStep] = useState<WithdrawStep>('amount');
