@@ -335,9 +335,9 @@ export const useAfriTokeni = () => {
   }, [user?.user?.id]);
 
   // Get nearby agents
-  const getNearbyAgents = useCallback(async () => {
+  const getNearbyAgents = useCallback(async (lat: number, lng: number, radius: number = 5, includeStatuses?: ('available' | 'busy' | 'cash_out' | 'offline')[]) => {
     try {
-      return await DataService.getNearbyAgents();
+      return await DataService.getNearbyAgents(lat, lng, radius, includeStatuses);
     } catch (error) {
       console.error('Error getting nearby agents:', error);
       return [];

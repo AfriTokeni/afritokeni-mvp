@@ -102,8 +102,6 @@ const AgentStep: React.FC<AgentStepProps> = ({
   transactionError,
 }) => {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
-  const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<DBAgent | null>(null);
   const [agents, setAgents] = useState<DBAgent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -129,10 +127,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
   }, [userLocation]);
 
   const handleMarkerClick = (agent: DBAgent) => {
-    setSelectedAgent(agent);
-    if (window.innerWidth < 768) {
-      setIsMobileDialogOpen(true);
-    }
+    onAgentSelect(agent);
   };
 
   const availableAgents = agents.filter(agent => agent.digitalBalance > 0);
@@ -302,23 +297,24 @@ const AgentStep: React.FC<AgentStepProps> = ({
                 {availableAgents.map((agent) => (
                   <li
                     key={agent.id}
-                    className="p-3 sm:p-6 hover:bg-neutral-50 transition-colors duration-200"
+                    className="p-3 sm:p-4 lg:p-6 hover:bg-neutral-50 transition-colors duration-200 cursor-pointer"
+                    onClick={() => onAgentSelect(agent)}
                   >
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-3 sm:space-y-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-neutral-900 break-words">{agent.name}</h3>
-                        <p className="text-neutral-600 text-xs sm:text-sm mt-1 break-words">{agent.locationName}</p>
+                        <h3 className="font-bold text-sm sm:text-base lg:text-lg mb-1">{agent.businessName}</h3>
+                        <p className="text-neutral-600 text-xs sm:text-sm mt-1 break-words">{agent.location.address}</p>
                         <div className="mt-2 sm:mt-3 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                           <span className="text-neutral-600 font-medium text-xs">
                             {userLocation
                               ? calculateDistance(
                                   userLocation[0], userLocation[1],
-                                  agent.location[0], agent.location[1]
+                                  agent.location.coordinates.lat, agent.location.coordinates.lng
                                 )
                               : 'Distance unknown'}
                           </span>
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            agent.status === 'online'
+                            agent.status === 'available'
                               ? 'bg-green-100 text-green-800'
                               : agent.status === 'busy'
                               ? 'bg-yellow-100 text-yellow-800'
@@ -326,14 +322,20 @@ const AgentStep: React.FC<AgentStepProps> = ({
                           }`}>
                             {agent.status}
                           </span>
+                          <span className="text-neutral-600 font-medium text-xs">
+                            {agent.digitalBalance?.toLocaleString()} {userCurrency || 'UGX'}
+                          </span>
                         </div>
                         <p className="text-xs text-neutral-600 mt-2 font-mono">
-                          Available: <span className="font-bold">{agent.availableBalance.toLocaleString()} {userCurrency || 'UGX'}</span>
+                          Available: <span className="font-bold">{agent.digitalBalance.toLocaleString()} {userCurrency || 'UGX'}</span>
                         </p>
                       </div>
                       <button
-                        onClick={() => onAgentSelect(agent)}
-                        disabled={agent.status !== 'online' || isCreatingTransaction}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAgentSelect(agent);
+                        }}
+                        disabled={agent.status !== 'available' || isCreatingTransaction}
                         className="w-full sm:w-auto sm:ml-4 bg-neutral-900 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200 font-semibold text-xs sm:text-sm lg:text-base"
                       >
                         {isCreatingTransaction ? 'Creating...' : 'Select'}
@@ -347,23 +349,6 @@ const AgentStep: React.FC<AgentStepProps> = ({
         )}
       </div>
 
-      {/* Mobile Agent Details Dialog */}
-      {selectedAgent && isMobileDialogOpen && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-          <div className="bg-white w-full rounded-t-3xl p-3 sm:p-6 max-h-[70vh] overflow-y-auto border-t shadow-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-base sm:text-lg lg:text-xl font-semibold">Agent Details</h3>
-              <button
-                onClick={() => setIsMobileDialogOpen(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            {renderAgentDetails(selectedAgent)}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
