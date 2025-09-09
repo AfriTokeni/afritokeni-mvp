@@ -12,6 +12,10 @@ import UserDashboard from "./pages/UserDashboard.tsx";
 import SendMoney from "./pages/send/SendMoney.tsx";
 import UserTransactions from "./pages/transactions/Transactions.tsx";
 import UserProfile from "./pages/profile/Profile.tsx";
+import AccountSettings from "./pages/profile/AccountSettings.tsx";
+import SecurityPrivacy from "./pages/profile/SecurityPrivacy.tsx";
+import TransactionLimits from "./pages/profile/TransactionLimits.tsx";
+import HelpSupport from "./pages/profile/HelpSupport.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
 import DepositPage from "./pages/deposit/DepositPage.tsx";
 import BitcoinPage from "./pages/users/BitcoinPage.tsx";
@@ -46,7 +50,7 @@ const App: FC = () => {
     const initJuno = async () => {
       try {
         await initSatellite({
-          satelliteId: junoConfig.satellite.ids?.production || "dkk74-oyaaa-aaaal-askxq-cai",
+          satelliteId: junoConfig.satellite.ids?.development || "atbka-rp777-77775-aaaaq-cai",
           workers: {
             auth: true,
           },
@@ -79,6 +83,10 @@ const App: FC = () => {
                 <Route path="history" element={<UserTransactions />} />
                 <Route path="withdraw" element={<WithdrawMoney />} />
                 <Route path="profile" element={<UserProfile />} />
+                <Route path="profile/account-settings" element={<AccountSettings />} />
+                <Route path="profile/security-privacy" element={<SecurityPrivacy />} />
+                <Route path="profile/transaction-limits" element={<TransactionLimits />} />
+                <Route path="profile/help-support" element={<HelpSupport />} />
                 <Route path="user-kyc" element={<UserKYCPage />} />
                 <Route path="bitcoin" element={<BitcoinPage />} />
                 <Route path="bitcoin/deposit" element={<BitcoinDepositPage />} />
