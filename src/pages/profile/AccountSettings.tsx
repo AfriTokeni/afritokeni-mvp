@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, User, Mail, Phone, MapPin, Globe, Save, X } from 'lucide-react';
+import { ArrowLeft, User, Mail, Globe, Save, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
-import { formatCurrencyAmount, AfricanCurrency, getActiveCurrencies } from '../../types/currency';
+import { AfricanCurrency, getActiveCurrencies } from '../../types/currency';
 import { DataService } from '../../services/dataService';
 
 const AccountSettings: React.FC = () => {
   const { user, authMethod } = useAuthentication();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -33,7 +32,7 @@ const AccountSettings: React.FC = () => {
         firstName: currentUser.firstName || '',
         lastName: currentUser.lastName || '',
         email: currentUser.email || '',
-        phone: currentUser.phone || '',
+        phone: (currentUser as any).phone || '',
         preferredCurrency: (currentUser.preferredCurrency as AfricanCurrency) || 'UGX',
         location: currentUser.location || { country: '', city: '' }
       });
@@ -83,7 +82,7 @@ const AccountSettings: React.FC = () => {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as object),
           [child]: value
         }
       }));

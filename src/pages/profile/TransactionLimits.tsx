@@ -3,8 +3,7 @@ import { ArrowLeft, CreditCard, DollarSign, Bitcoin, AlertCircle, Save } from 'l
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
-import { formatCurrencyAmount, AfricanCurrency, getActiveCurrencies } from '../../types/currency';
-import { DataService } from '../../services/dataService';
+import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 
 interface TransactionLimits {
   daily: {
@@ -25,9 +24,8 @@ interface TransactionLimits {
 }
 
 const TransactionLimits: React.FC = () => {
-  const { user, authMethod } = useAuthentication();
+  const { user } = useAuthentication();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

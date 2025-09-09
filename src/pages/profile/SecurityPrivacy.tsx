@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Shield, Lock, Eye, EyeOff, Key, Smartphone, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Eye, EyeOff, Smartphone, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
