@@ -141,7 +141,7 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleInputChange}
-              placeholder="+256701234567 or 0701234567"
+                                placeholder="+256 700 123 456"
               className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
               }`}

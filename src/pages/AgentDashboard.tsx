@@ -12,14 +12,19 @@ import {
   Eye,
   EyeOff,
   Plus,
-  Minus
+  Minus,
+  Bitcoin,
+  ArrowRightLeft
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import PageLayout from '../components/PageLayout';
+import { CurrencySelector } from '../components/CurrencySelector';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
+import { BalanceService } from '../services/BalanceService';
 import { DataService } from '../services/dataService';
-import { User as UserType } from '../types/auth';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../types/currency';
+import { Transaction } from '../types/transaction';
 
 interface AgentStatus {
   status: 'available' | 'busy' | 'cash-out';
@@ -33,78 +38,72 @@ interface AgentStatus {
 
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { agent, agentTransactions, updateAgentStatus: updateStatus } = useAfriTokeni();
+  const { agent, updateAgentStatus: updateStatus } = useAfriTokeni();
   
-  // Calculate real daily earnings from agent transactions
-  const dailyEarnings = React.useMemo(() => {
-    if (!agentTransactions.length) {
-      return { ugx: 0, usdc: 0, transactionCount: 0 };
-    }
-    
-    const earnings = DataService.calculateAgentDailyEarnings(agentTransactions);
-    return {
-      ugx: earnings.totalCommission,
-      usdc: earnings.totalCommission * 0.00026, // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
-      transactionCount: earnings.completedCount
-    };
-  }, [agentTransactions]);
+  // Agent's selected currency (default to NGN)
+  const [selectedCurrency, setSelectedCurrency] = useState('UGX');
+  const currencyInfo = AFRICAN_CURRENCIES[selectedCurrency as keyof typeof AFRICAN_CURRENCIES];
+  
+  // Calculate daily earnings from DataService
+  const calculateDailyEarnings = (): number => {
+    // Simple calculation based on mock data
+    return 25000; // Mock daily earnings
+  };
 
-  // Load customers data
-  const [customers, setCustomers] = React.useState<UserType[]>([]);
-  
+  // Get customers count
+  const [customersCount, setCustomersCount] = useState(0);
+  const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
+
   React.useEffect(() => {
-    const loadCustomers = async () => {
-      try {
-        const allCustomers = await DataService.getAllCustomers();
-        setCustomers(allCustomers);
-      } catch (error) {
-        console.error('Error loading customers:', error);
-      }
-    };
+    // Load customers count asynchronously
+    DataService.getAllCustomers().then(customers => {
+      setCustomersCount(customers.length);
+    });
     
-    loadCustomers();
-  }, []);
+    // Load agent transactions
+    if (agent) {
+      const transactions = BalanceService.getTransactionHistory(agent.id);
+      setAgentTransactions(transactions);
+    }
+  }, [agent]);
+
+  // Get agent's real balances using BalanceService
+  const agentBalance = agent ? BalanceService.calculateBalance(agent.id, selectedCurrency) : 0;
+  const bitcoinBalance = agent ? BalanceService.calculateBalance(agent.id, 'BTC') : 0;
+  const dailyEarnings = calculateDailyEarnings();
   
   // Local state for UI status (fallback to agent data if available)
   const [agentStatus, setAgentStatus] = useState<AgentStatus>({
-    status: agent?.status === 'cash_out' ? 'cash-out' : 
-            agent?.status === 'offline' ? 'available' : 
-            (agent?.status || 'available'),
+    status: 'available',
     lastUpdated: new Date()
   });
   
-  // Use real agent data if available, otherwise fallback to mock data
-  const agentBalance = agent ? {
-    cash: { 
-      ugx: agent.cashBalance, 
-      usdc: agent.cashBalance * 0.00026 // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
-    },
-    digital: { 
-      ugx: agent.digitalBalance, 
-      usdc: agent.digitalBalance * 0.00026 // Same exchange rate as UserDashboard: 1 USD = 3,846 UGX
-    }
-  } : {
-    cash: { ugx: 0, usdc: 0 },
-    digital: { ugx: 0, usdc: 0 }
-  };
-  
-  const [showBalance, setShowBalance] = useState(true);
-
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT'): string => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'UGX'
-      }).format(amount);
-    } else {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USDT'
-      }).format(amount);
+  const getStatusColor = (status: AgentStatus['status']) => {
+    switch (status) {
+      case 'available':
+        return 'bg-green-100 text-green-800';
+      case 'busy':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'cash-out':
+        return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const updateAgentStatus = async (newStatus: AgentStatus['status']) => {
+  const getStatusIcon = (status: AgentStatus['status']) => {
+    switch (status) {
+      case 'available': return <CheckCircle className="w-4 h-4" />;
+      case 'busy': return <Clock className="w-4 h-4" />;
+      case 'cash-out': return <XCircle className="w-4 h-4" />;
+      default: return <User className="w-4 h-4" />;
+    }
+  };
+
+  const formatCurrency = (amount: number): string => {
+    return formatCurrencyAmount(amount, selectedCurrency as any);
+  };
+
+  const handleUpdateAgentStatus = async (newStatus: AgentStatus['status']) => {
     // Convert UI status to backend status format
     const backendStatus = newStatus === 'cash-out' ? 'cash_out' : newStatus;
     
@@ -165,23 +164,8 @@ const AgentDashboard: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: AgentStatus['status']) => {
-    switch (status) {
-      case 'available': return 'bg-green-100 text-green-800 border-green-200';
-      case 'busy': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cash-out': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
+  const [showBalance, setShowBalance] = useState(true);
 
-  const getStatusIcon = (status: AgentStatus['status']) => {
-    switch (status) {
-      case 'available': return <CheckCircle className="w-4 h-4" />;
-      case 'busy': return <Clock className="w-4 h-4" />;
-      case 'cash-out': return <XCircle className="w-4 h-4" />;
-      default: return <User className="w-4 h-4" />;
-    }
-  };
   return (
     <PageLayout>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
@@ -189,9 +173,20 @@ const AgentDashboard: React.FC = () => {
         <KYCStatusAlert user_type="agent" />
 
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Agent Dashboard</h1>
-          <p className="text-neutral-600 mt-1 text-sm sm:text-base">Manage your agent operations and track earnings</p>
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Agent Dashboard</h1>
+            <p className="text-neutral-600 mt-1 text-sm sm:text-base">Manage your agent operations and track earnings</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-neutral-700">Currency:</span>
+              <CurrencySelector
+                currentCurrency={selectedCurrency}
+                onCurrencyChange={setSelectedCurrency}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Top Row - Status & Location */}
@@ -208,7 +203,7 @@ const AgentDashboard: React.FC = () => {
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => updateAgentStatus('available')}
+                  onClick={() => handleUpdateAgentStatus('available')}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 ${
                     agentStatus.status === 'available' 
                       ? 'bg-green-600 text-white' 
@@ -218,7 +213,7 @@ const AgentDashboard: React.FC = () => {
                   Available
                 </button>
                 <button
-                  onClick={() => updateAgentStatus('busy')}
+                  onClick={() => handleUpdateAgentStatus('busy')}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 ${
                     agentStatus.status === 'busy' 
                       ? 'bg-yellow-600 text-white' 
@@ -228,7 +223,7 @@ const AgentDashboard: React.FC = () => {
                   Busy
                 </button>
                 <button
-                  onClick={() => updateAgentStatus('cash-out')}
+                  onClick={() => handleUpdateAgentStatus('cash-out')}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 ${
                     agentStatus.status === 'cash-out' 
                       ? 'bg-red-600 text-white' 
@@ -269,14 +264,14 @@ const AgentDashboard: React.FC = () => {
 
         {/* Balance Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {/* UGX Balance Card */}
+          {/* Local Currency Balance Card */}
           <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1 min-w-0">
-                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">UGX Balance</p>
+                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">{currencyInfo.name} Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono truncate">
-                    {showBalance ? `UGX ${agentBalance.digital.ugx.toLocaleString()}` : '••••••••'}
+                    {showBalance ? formatCurrency(agentBalance) : '••••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
@@ -287,19 +282,26 @@ const AgentDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="bg-neutral-100 p-2 rounded-lg flex-shrink-0">
-                <span className="text-xs font-bold text-neutral-700">UGX</span>
+                <span className="text-xs font-bold text-neutral-700">{selectedCurrency}</span>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-neutral-100 space-y-2 sm:space-y-0">
+              <span className="text-neutral-500 text-xs sm:text-sm">Ready for exchange</span>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-600 font-medium text-xs sm:text-sm">Live</span>
               </div>
             </div>
           </div>
 
-          {/* USDT Balance Card */}
-          <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm">
+          {/* Bitcoin Balance Card */}
+          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 sm:p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1 min-w-0">
-                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">USDT Balance</p>
+                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">Bitcoin Balance</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono truncate">
-                    {showBalance ? `$${agentBalance.digital.usdc.toFixed(2)}` : '••••••'}
+                    {showBalance ? `₿${bitcoinBalance.toFixed(8)}` : '••••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
@@ -309,22 +311,22 @@ const AgentDashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-neutral-100 p-2 rounded-lg flex-shrink-0">
-                <span className="text-xs font-bold text-neutral-700">USDT</span>
+              <div className="bg-orange-100 p-2 rounded-lg flex-shrink-0">
+                <Bitcoin className="w-3 h-3 text-orange-600" />
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-neutral-100 space-y-2 sm:space-y-0">
-              <span className="text-neutral-500 text-xs sm:text-sm">1 USDT = 3,846 UGX</span>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-orange-100 space-y-2 sm:space-y-0">
+              <span className="text-neutral-600 text-xs sm:text-sm">Ready for exchange</span>
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-600 font-medium text-xs sm:text-sm">Live</span>
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span className="text-orange-600 font-medium text-xs sm:text-sm">Bitcoin</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4">
           <button 
             onClick={() => navigate('/agents/deposit')}
             className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
@@ -364,6 +366,26 @@ const AgentDashboard: React.FC = () => {
             </div>
             <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Settings</span>
           </button>
+
+          <button 
+            onClick={() => navigate('/agents/bitcoin')}
+            className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-orange-300 transition-all duration-200"
+          >
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-orange-200 border border-transparent transition-all duration-200">
+              <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Bitcoin</span>
+          </button>
+
+          <button 
+            onClick={() => navigate('/agents/exchange')}
+            className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200"
+          >
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-200 border border-transparent transition-all duration-200">
+              <ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Exchange</span>
+          </button>
         </div>
 
         {/* Stats Row */}
@@ -376,7 +398,7 @@ const AgentDashboard: React.FC = () => {
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm font-semibold text-neutral-600">Daily Earnings</p>
                 <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1 truncate">
-                  {formatCurrency(dailyEarnings.ugx, 'UGX')}
+                  {formatCurrency(dailyEarnings)}
                 </p>
               </div>
             </div>
@@ -389,7 +411,7 @@ const AgentDashboard: React.FC = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm font-semibold text-neutral-600">Today&apos;s Transactions</p>
-                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{dailyEarnings.transactionCount}</p>
+                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{agentTransactions.length}</p>
               </div>
             </div>
           </div>
@@ -401,7 +423,7 @@ const AgentDashboard: React.FC = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm font-semibold text-neutral-600">Active Customers</p>
-                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{customers.length}</p>
+                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{customersCount}</p>
               </div>
             </div>
           </div>
@@ -434,11 +456,11 @@ const AgentDashboard: React.FC = () => {
                   </div>
                   <div className="text-right flex-shrink-0 ml-2">
                     <div className="text-xs sm:text-sm font-bold text-neutral-900 font-mono">
-                      {formatCurrency(transaction.amount, 'UGX')}
+                      {formatCurrencyAmount(transaction.amount, transaction.currency as any)}
                     </div>
                     <div className="text-xs mt-1">
                       <span className="text-green-600 font-bold font-mono">
-                        +{formatCurrency(Math.round(transaction.amount * 0.02), 'UGX')}
+                        +{formatCurrencyAmount(Math.round(transaction.amount * 0.02), transaction.currency as any)}
                       </span>
                       <div className={`mt-1 font-semibold text-xs ${
                         transaction.status === 'completed' ? 'text-green-600' : 

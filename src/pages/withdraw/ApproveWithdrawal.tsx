@@ -3,6 +3,7 @@ import { CheckCircle, User, Phone, MapPin, Clock, AlertCircle } from 'lucide-rea
 import { WithdrawalRequest } from './ProcessWithdrawal';
 import { DataService } from '../../services/dataService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
 
 interface ApproveWithdrawalProps {
   withdrawal: WithdrawalRequest;
@@ -17,17 +18,8 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
   const [codeError, setCodeError] = useState('');
   const [cashGiven, setCashGiven] = useState(false);
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT') => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
-        style: 'currency',
-        currency: 'UGX',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(amount);
-    } else {
-      return `$${amount.toFixed(2)}`;
-    }
+  const formatCurrency = (amount: number, currency: string) => {
+    return formatCurrencyAmount(amount, currency as keyof typeof AFRICAN_CURRENCIES);
   };
 
   const getTimeAgo = (date: Date) => {
@@ -111,7 +103,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
             <h3 className="text-base sm:text-lg font-semibold text-green-800 mb-3">Transaction Summary</h3>
             <div className="space-y-2 text-xs sm:text-sm text-green-700">
               <p><strong>Customer:</strong> {withdrawal.userName}</p>
-              <p><strong>Amount:</strong> <span className="font-mono">{formatCurrency(withdrawal.amount.ugx, 'UGX')}</span></p>
+              <p><strong>Amount:</strong> <span className="font-mono">{formatCurrency(withdrawal.amount.local, withdrawal.amount.currency)}</span></p>
               <p><strong>Withdrawal Code:</strong> <span className="font-mono">{withdrawal.withdrawalCode}</span></p>
               <p><strong>Completed:</strong> {new Date().toLocaleString()}</p>
             </div>
@@ -155,10 +147,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
           
           <div className="text-left sm:text-right">
             <div className="text-xl sm:text-2xl font-bold text-neutral-900 font-mono">
-              {formatCurrency(withdrawal.amount.ugx, 'UGX')}
-            </div>
-            <div className="text-xs sm:text-sm text-neutral-600 font-mono">
-              ≈ {formatCurrency(withdrawal.amount.usdc, 'USDT')}
+              {formatCurrency(withdrawal.amount.local, withdrawal.amount.currency)}
             </div>
           </div>
         </div>
@@ -203,7 +192,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
                 className="rounded border-amber-300 text-amber-600 focus:ring-amber-500 mt-1"
               />
               <span className="ml-2 text-xs sm:text-sm text-amber-800">
-                I confirm that I have given <span className="font-mono font-semibold">{formatCurrency(withdrawal.amount.ugx, 'UGX')}</span> cash to the customer
+                I confirm that I have given <span className="font-mono font-semibold">{formatCurrency(withdrawal.amount.local, withdrawal.amount.currency)}</span> cash to the customer
               </span>
             </label>
           </div>

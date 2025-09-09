@@ -7,7 +7,8 @@ import {
   Search,
   Filter,
 } from 'lucide-react';
-import { Transaction } from '../../services/dataService';
+import { Transaction } from '../../types/transaction';
+import { normalizeTransaction } from '../../utils/transactionUtils';
 import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
@@ -15,6 +16,11 @@ import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 
 const UserTransactions: React.FC = () => {
   const { transactions, isLoading } = useAfriTokeni();
+  
+  // Normalize transactions to match expected interface
+  const normalizedTransactions = React.useMemo(() => {
+    return transactions.map(normalizeTransaction);
+  }, [transactions]);
 
   // Loading state
   if (isLoading) {
@@ -124,7 +130,12 @@ const UserTransactions: React.FC = () => {
 
         {/* Transactions List */}
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 divide-y divide-neutral-100">
-          {transactions.map((transaction) => (
+          {normalizedTransactions.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-neutral-500">No transactions yet</p>
+            </div>
+          ) : (
+            normalizedTransactions.map((transaction) => (
             <div key={transaction.id} className="p-4 sm:p-6 hover:bg-neutral-50 transition-colors duration-200">
               {/* Mobile Layout */}
               <div className="block sm:hidden">
@@ -203,7 +214,8 @@ const UserTransactions: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       </div>
     </PageLayout>

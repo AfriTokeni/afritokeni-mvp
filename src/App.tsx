@@ -13,12 +13,19 @@ import SendMoney from "./pages/send/SendMoney.tsx";
 import UserTransactions from "./pages/transactions/Transactions.tsx";
 import UserProfile from "./pages/profile/Profile.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
+import DepositPage from "./pages/deposit/DepositPage.tsx";
+import BitcoinPage from "./pages/users/BitcoinPage.tsx";
+import ExchangePage from "./pages/users/ExchangePage.tsx";
+import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
+import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
 
 //Agent Pages
-import AgentDashboard from "./pages/AgentDashboard.tsx";
+import AgentDashboard from './pages/AgentDashboard';
 import ProcessWithdrawal from './pages/withdraw/ProcessWithdrawal';
-import ProcessDeposit from './pages/ProcessDeposit';
+import ProcessDeposits from './pages/agents/ProcessDeposits';
 import AgentCustomers from './pages/AgentCustomers';
+import AgentBitcoinPage from './pages/agents/AgentBitcoinPage';
+import AgentExchangePage from './pages/agents/AgentExchangePage';
 import AgentSettings from './pages/AgentSettings';
 import RoleSelection from './pages/auth/RoleSelection';
 import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
@@ -32,13 +39,14 @@ import SMSUI from "./components/SMSUI.tsx";
 
 // Landing Page
 import LandingPage from "./pages/LandingPage";
+import TariffPage from "./pages/TariffPage";
 
 const App: FC = () => {
   useEffect(() => {
     const initJuno = async () => {
       try {
         await initSatellite({
-          satelliteId: junoConfig.satellite.ids?.production || "dkk74-oyaaa-aaaal-askxq-cai",
+          satelliteId: junoConfig.satellite.ids?.development || "uxrrr-q7777-77774-qaaaq-cai",
           workers: {
             auth: true,
           },
@@ -67,10 +75,14 @@ const App: FC = () => {
               <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
+                <Route path="deposit" element={<DepositPage />} />
                 <Route path="history" element={<UserTransactions />} />
                 <Route path="withdraw" element={<WithdrawMoney />} />
                 <Route path="profile" element={<UserProfile />} />
                 <Route path="user-kyc" element={<UserKYCPage />} />
+                <Route path="bitcoin" element={<BitcoinPage />} />
+                <Route path="bitcoin/deposit" element={<BitcoinDepositPage />} />
+                <Route path="exchange" element={<ExchangePage />} />
               </Routes>
             </Layout>
           } />
@@ -81,9 +93,11 @@ const App: FC = () => {
               <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
                 <Route path="withdraw" element={<ProcessWithdrawal/>} />
-                <Route path="deposit" element={<ProcessDeposit/>} />
+                <Route path="deposit" element={<ProcessDeposits/>} />
                 <Route path="customers" element={<AgentCustomers/>} />
                 <Route path="transactions" element={<AgentTransactions/>} />
+                <Route path="bitcoin" element={<AgentBitcoinPage/>} />
+                <Route path="exchange" element={<AgentExchangePage/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<AgentSettings/>} />
                 <Route path="agent-kyc" element={<AgentKYCPage />} />
@@ -96,6 +110,12 @@ const App: FC = () => {
           
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
+          
+          {/* Bitcoin Exchange Info Page */}
+          <Route path="/bitcoin-exchange" element={<BitcoinExchangePage />} />
+          
+          {/* Tariff Page */}
+          <Route path="/tariff" element={<TariffPage />} />
           
           {/* Default redirects */}
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />

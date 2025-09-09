@@ -11,8 +11,8 @@ export interface WithdrawalRequest {
   userName: string;
   userPhone: string;
   amount: {
-    ugx: number;
-    usdc: number;
+    local: number;
+    currency: string; // Dynamic African currency (NGN, KES, GHS, etc.)
   };
   withdrawalCode: string;
   requestedAt: Date;

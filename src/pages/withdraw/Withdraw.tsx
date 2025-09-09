@@ -4,27 +4,49 @@ import AmountStep from './AmountStep';
 import AgentStep from './AgentStep';
 import ConfirmationStep from './ConfirmationStep';
 import PageLayout from '../../components/PageLayout';
-import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { DataService } from '../../services/dataService';
-import type { Agent, WithdrawStep } from './types';
+import { BalanceService } from '../../services/BalanceService';
+import type { WithdrawStep } from './types';
+import { Agent as DBAgent } from '../../services/dataService';
 
 const WithdrawPage: React.FC = () => {
-  const { balance } = useAfriTokeni();
+  // Real balance calculation from transactions
+  const getBalanceForCurrency = (): number => {
+    if (!user.user?.id) return 0;
+    return BalanceService.calculateBalance(user.user.id, userCurrency);
+  };
   const { user } = useAuthentication();
   const [currentStep, setCurrentStep] = useState<WithdrawStep>('amount');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<DBAgent | null>(null);
   const [withdrawalCode, setWithdrawalCode] = useState<string>('');
-  const [finalUgxAmount, setFinalUgxAmount] = useState<number>(0);
-  const [finalUsdcAmount, setFinalUsdcAmount] = useState<number>(0);
+  const [finalLocalAmount, setFinalLocalAmount] = useState<number>(0);
+  const [finalBtcAmount, setFinalBtcAmount] = useState<string>('');
+  const [withdrawType, setWithdrawType] = useState<'cash' | 'bitcoin'>('cash');
   const [withdrawalFee, setWithdrawalFee] = useState<number>(0);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
 
-  // Exchange rate (mock)
-  const exchangeRate = 3750; // 1 USDC = 3750 UGX
+  // Get user's preferred currency or default to UGX
+  const currentUser = user.user;
+  const defaultCurrency = currentUser?.preferredCurrency || 'UGX';
+  const [userCurrency, setUserCurrency] = useState<string>(defaultCurrency);
+  
+  // Mock Bitcoin exchange rate - would be live in production
+  const getBtcExchangeRate = (currency: string) => {
+    const rates: Record<string, number> = {
+      'NGN': 67500000, // 1 BTC = 67.5M NGN
+      'KES': 6450000,  // 1 BTC = 6.45M KES
+      'GHS': 540000,   // 1 BTC = 540K GHS
+      'ZAR': 774000,   // 1 BTC = 774K ZAR
+      'EGP': 1333000   // 1 BTC = 1.33M EGP
+    };
+    return rates[currency] || 67500000;
+  };
+  
+  const exchangeRate = getBtcExchangeRate(userCurrency);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -50,7 +72,7 @@ const WithdrawPage: React.FC = () => {
     return code;
   };
 
-  const handleAgentSelect = async (agent: Agent) => {
+  const handleAgentSelect = async (agent: DBAgent) => {
     if (!user.user?.id) {
       setTransactionError('User not authenticated');
       return;
@@ -66,7 +88,7 @@ const WithdrawPage: React.FC = () => {
       // Create withdraw transaction in Juno backend
       await DataService.createWithdrawTransaction(
         user.user.id,
-        finalUgxAmount,
+        finalLocalAmount,
         agent.id,
         code,
         withdrawalFee
@@ -87,8 +109,9 @@ const WithdrawPage: React.FC = () => {
     setCurrentStep('amount');
     setSelectedAgent(null);
     setWithdrawalCode('');
-    setFinalUgxAmount(0);
-    setFinalUsdcAmount(0);
+    setFinalLocalAmount(0);
+    setFinalBtcAmount('');
+    setWithdrawType('cash');
     setTransactionError(null);
     setIsCreatingTransaction(false);
   };
@@ -98,7 +121,7 @@ const WithdrawPage: React.FC = () => {
   return (
     <PageLayout>
       <div className="max-w-4xl mx-auto px-2 sm:px-6 lg:px-8">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-6 sm:mb-8">Withdraw Cash</h1>
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-6 sm:mb-8">Withdraw Money</h1>
         
         {/* Step Indicator */}
         <div className="mb-6 sm:mb-8 flex items-center justify-center">
@@ -134,13 +157,15 @@ const WithdrawPage: React.FC = () => {
         {currentStep === 'amount' && (
           <AmountStep
             exchangeRate={exchangeRate}
-            userBalance={balance?.balance || 0}
-            onContinue={(ugxAmount: string, usdcAmount: string, fee: number) => {
+            userBalance={getBalanceForCurrency()}
+            onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin', selectedCurrency: string) => {
               // Store the amounts for the confirmation step
-              setFinalUgxAmount(parseFloat(ugxAmount) || 0);
-              setFinalUsdcAmount(parseFloat(usdcAmount) || 0);
+              setFinalLocalAmount(parseFloat(localAmount) || 0);
+              setFinalBtcAmount(btcAmount);
+              setWithdrawType(withdrawType);
               setWithdrawalFee(fee);
-              setCurrentStep('agent');
+              setUserCurrency(selectedCurrency);
+              setCurrentStep(withdrawType === 'cash' ? 'agent' : 'confirmation');
             }}
           />
         )}
@@ -148,21 +173,24 @@ const WithdrawPage: React.FC = () => {
           <AgentStep
             userLocation={userLocation}
             locationError={locationError}
-            ugxAmount={finalUgxAmount}
-            usdcAmount={finalUsdcAmount}
+            localAmount={finalLocalAmount}
+            btcAmount={finalBtcAmount}
+            userCurrency={userCurrency}
             onBackToAmount={() => setCurrentStep('amount')}
             onAgentSelect={handleAgentSelect}
             isCreatingTransaction={isCreatingTransaction}
             transactionError={transactionError}
           />
         )}
-        {currentStep === 'confirmation' && selectedAgent && (
+        {currentStep === 'confirmation' && (withdrawType === 'cash' ? selectedAgent : true) && (
           <ConfirmationStep
-            ugxAmount={finalUgxAmount}
-            usdcAmount={finalUsdcAmount}
+            localAmount={finalLocalAmount}
+            btcAmount={finalBtcAmount}
+            withdrawType={withdrawType}
+            userCurrency={userCurrency}
             fee={withdrawalFee}
             userLocation={userLocation}
-            selectedAgent={selectedAgent}
+            selectedAgent={selectedAgent || undefined}
             withdrawalCode={withdrawalCode}
             onMakeAnotherWithdrawal={handleMakeAnotherWithdrawal}
           />

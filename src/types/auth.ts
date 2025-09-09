@@ -66,6 +66,11 @@ export interface User {
   pin?: string; // USSD PIN for mobile users
   createdAt?: Date; // Optional since Juno handles timestamps automatically
   junoUser?: any; // Juno User object
+  preferredCurrency?: string; // African currency code (NGN, GHS, KES, etc.)
+  location?: {
+    country: string;
+    city: string;
+  };
 }
 
 export interface AuthContextType {
@@ -76,11 +81,12 @@ export interface AuthContextType {
   };
   
   authMethod: 'sms' | 'web';
+  updateUserCurrency: (currency: string) => void;
+  isAuthenticated: boolean;
   
   login: (formData: LoginFormData, method?: 'sms' | 'web') => Promise<boolean>;
   register: (formData: RegisterFormData) => Promise<boolean>;
   logout: (userTypeToLogout?: 'user' | 'agent') => Promise<void>;
-  isLoading: boolean;
   // SMS verification methods
   verifyRegistrationCode: (code: string) => Promise<boolean>;
   cancelVerification: () => void;

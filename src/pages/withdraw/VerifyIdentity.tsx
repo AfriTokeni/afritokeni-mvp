@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, AlertTriangle, User, Phone, CreditCard, MapPin, Clock } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
 
 interface VerifyIdentityProps {
   withdrawal: WithdrawalRequest;
@@ -15,17 +16,8 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
     customerPresence: false
   });
 
-  const formatCurrency = (amount: number, currency: 'UGX' | 'USDT') => {
-    if (currency === 'UGX') {
-      return new Intl.NumberFormat('en-UG', {
-        style: 'currency',
-        currency: 'UGX',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(amount);
-    } else {
-      return `$${amount.toFixed(2)}`;
-    }
+  const formatCurrency = (amount: number, currency: string) => {
+    return formatCurrencyAmount(amount, currency as keyof typeof AFRICAN_CURRENCIES);
   };
 
   const getTimeAgo = (date: Date) => {
@@ -81,7 +73,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
       description: 'Verify the customer knows the exact amount they are withdrawing',
       details: [
         'Ask the customer to state the withdrawal amount',
-        'Confirm they understand the UGX equivalent',
+        'Confirm they understand the local currency amount',
         'Ensure they have the withdrawal code ready'
       ]
     },
@@ -128,10 +120,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
           
           <div className="text-left sm:text-right">
             <div className="text-xl sm:text-2xl font-bold text-gray-800">
-              {formatCurrency(withdrawal.amount.ugx, 'UGX')}
-            </div>
-            <div className="text-xs sm:text-sm text-gray-600">
-              ≈ {formatCurrency(withdrawal.amount.usdc, 'USDT')}
+              {formatCurrency(withdrawal.amount.local, withdrawal.amount.currency)}
             </div>
             <div className="text-xs text-gray-500 mt-1">
               Code: <span className="font-mono font-medium">{withdrawal.withdrawalCode}</span>

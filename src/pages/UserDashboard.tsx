@@ -1,38 +1,55 @@
 import React from 'react';
-import { Send, ArrowDown, Plus, Minus, ArrowUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthentication } from '../context/AuthenticationContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
-import KYCStatusAlert from '../components/KYCStatusAlert';
+import { BalanceService } from '../services/BalanceService';
 import PageLayout from '../components/PageLayout';
-import { Transaction } from '../services/dataService';
+import KYCStatusAlert from '../components/KYCStatusAlert';
+import { CurrencySelector } from '../components/CurrencySelector';
+import { 
+  Send, 
+  Bitcoin,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  Plus
+} from 'lucide-react';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../types/currency';
 
 
 
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user, updateUserCurrency } = useAuthentication();
   const { 
-    balance, 
     transactions
   } = useAfriTokeni();
 
+  // Get user's preferred currency or default to UGX
+  const currentUser = user.user;
+  const userCurrency = currentUser?.preferredCurrency || 'UGX';
+  const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
 
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-UG', {
-      style: 'currency',
-      currency: 'UGX'
-    }).format(amount);
+    return formatCurrencyAmount(amount, userCurrency as any);
   };
 
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  // Get real balance from transaction history
+  const getRealBalance = (): number => {
+    if (!currentUser?.id) return 0;
+    return BalanceService.calculateBalance(currentUser.id, userCurrency);
+  };
+
+  const formatDate = (date: Date | string): string => {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric'
     });
   };
 
-  const getTransactionIcon = (type: Transaction['type']): React.ReactElement => {
+  const getTransactionIcon = (type: string): React.ReactElement => {
     switch (type) {
       case 'send':
         return <ArrowUp className="w-4 h-4 text-red-500" />;
@@ -49,31 +66,37 @@ const UserDashboard: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
 
         {/* KYC Status Alert */}
         <KYCStatusAlert user_type="user" />
 
         {/* Balance Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-xl flex items-center justify-center">
-                    <span className="text-neutral-700 font-semibold text-xs sm:text-sm">UGX</span>
+                    <span className="text-neutral-700 font-semibold text-xs sm:text-sm">{userCurrency}</span>
                   </div>
                   <div>
-                    <p className="text-neutral-900 font-medium text-sm sm:text-base">Ugandan Shilling</p>
+                    <p className="text-neutral-900 font-medium text-sm sm:text-base">{currencyInfo.name}</p>
                     <p className="text-neutral-500 text-xs sm:text-sm">Primary balance</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-xl sm:text-2xl font-semibold text-neutral-900 font-mono">
-                    {formatCurrency(balance?.balance || 0)}
-                  </span>
-                </div>
               </div>
+              <CurrencySelector 
+                currentCurrency={userCurrency}
+                onCurrencyChange={(currency) => {
+                  updateUserCurrency(currency);
+                }}
+              />
+            </div>
+            <div className="mb-4 sm:mb-6">
+              <span className="text-2xl sm:text-3xl font-semibold text-neutral-900 font-mono">
+                {formatCurrency(getRealBalance())}
+              </span>
             </div>
             <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-neutral-100">
               <span className="text-neutral-500 text-xs sm:text-sm">Available Balance</span>
@@ -84,30 +107,30 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-xl flex items-center justify-center">
-                    <span className="text-neutral-700 font-semibold text-xs sm:text-sm">USDT</span>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <Bitcoin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-neutral-900 font-medium text-sm sm:text-base">US Dollar Equivalent</p>
-                    <p className="text-neutral-500 text-xs sm:text-sm">Converted value</p>
+                    <p className="text-neutral-900 font-medium text-sm sm:text-base">Bitcoin Balance</p>
+                    <p className="text-neutral-600 text-xs sm:text-sm">Bitcoin wallet</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <span className="text-xl sm:text-2xl font-semibold text-neutral-900 font-mono">
-                    ${((balance?.balance || 0) * 0.00026).toFixed(2)}
+                    ₿0.00000000
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-neutral-100">
-              <span className="text-neutral-500 text-xs sm:text-sm">1 USDT = 3,846 UGX</span>
+            <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-orange-100">
+              <span className="text-neutral-600 text-xs sm:text-sm">≈ {formatCurrency(0)}</span>
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-600 font-medium text-sm">Live</span>
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span className="text-orange-600 font-medium text-sm">Bitcoin</span>
               </div>
             </div>
           </div>
@@ -115,58 +138,62 @@ const UserDashboard: React.FC = () => {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-4 sm:mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <h2 className="text-2xl font-bold text-neutral-900 mb-6">Quick Actions</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button 
-              onClick={() => navigate('/users/send')}
-              className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-neutral-300"
+              onClick={() => navigate('/users/deposit')}
+              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-green-200"
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-                <Send className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 group-hover:text-blue-600 transition-colors duration-200" />
+              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-all duration-200">
+                <Plus className="w-6 h-6 text-green-600 transition-colors duration-200" />
               </div>
-              <span className="text-neutral-900 font-medium text-xs sm:text-sm">Send Money</span>
+              <span className="text-neutral-900 font-semibold text-sm">Deposit Cash</span>
+              <p className="text-neutral-500 text-xs mt-1">Add money via agents</p>
             </button>
 
             <button 
-              onClick={() => navigate('/users/receive')}
-              className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-neutral-300"
+              onClick={() => navigate('/users/send')}
+              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-blue-200"
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-green-50 group-hover:border-green-100 border border-transparent transition-all duration-200">
-                <ArrowDown className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 group-hover:text-green-600 transition-colors duration-200" />
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition-all duration-200">
+                <Send className="w-6 h-6 text-blue-600 transition-colors duration-200" />
               </div>
-              <span className="text-neutral-900 font-medium text-xs sm:text-sm">Receive</span>
+              <span className="text-neutral-900 font-semibold text-sm">Send Money</span>
+              <p className="text-neutral-500 text-xs mt-1">Transfer to contacts</p>
             </button>
 
             <button 
               onClick={() => navigate('/users/withdraw')}
-              className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-neutral-300"
+              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-red-200"
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-orange-50 group-hover:border-orange-100 border border-transparent transition-all duration-200">
-                <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 group-hover:text-orange-600 transition-colors duration-200" />
+              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-red-100 transition-all duration-200">
+                <Minus className="w-6 h-6 text-red-600 transition-colors duration-200" />
               </div>
-              <span className="text-neutral-900 font-medium text-xs sm:text-sm">Withdraw</span>
+              <span className="text-neutral-900 font-semibold text-sm">Withdraw Cash</span>
+              <p className="text-neutral-500 text-xs mt-1">Get cash from agents</p>
             </button>
 
             <button 
-              onClick={() => navigate('/users/deposit')}
-              className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-neutral-300"
+              onClick={() => navigate('/users/bitcoin')}
+              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-orange-200"
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-purple-50 group-hover:border-purple-100 border border-transparent transition-all duration-200">
-                <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 group-hover:text-purple-600 transition-colors duration-200" />
+              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-100 transition-all duration-200">
+                <Bitcoin className="w-6 h-6 text-orange-600 transition-colors duration-200" />
               </div>
-              <span className="text-neutral-900 font-medium text-xs sm:text-sm">Deposit</span>
+              <span className="text-neutral-900 font-semibold text-sm">Bitcoin Exchange</span>
+              <p className="text-neutral-500 text-xs mt-1">Convert BTC to cash</p>
             </button>
           </div>
         </div>
 
         {/* Recent Transactions */}
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
-          <div className="p-4 sm:p-6 border-b border-neutral-100">
+          <div className="p-6 border-b border-neutral-100">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg sm:text-xl font-semibold text-neutral-900">Recent Transactions</h3>
+              <h3 className="text-2xl font-bold text-neutral-900">Recent Transactions</h3>
               <button 
                 onClick={() => navigate('/users/history')}
-                className="text-neutral-600 text-xs sm:text-sm font-medium hover:text-neutral-900 transition-colors px-2 sm:px-4 py-2 rounded-lg hover:bg-neutral-50"
+                className="text-neutral-600 text-sm font-medium hover:text-neutral-900 transition-colors px-4 py-2 rounded-lg hover:bg-neutral-50"
               >
                 View All
               </button>
@@ -194,7 +221,7 @@ const UserDashboard: React.FC = () => {
                           </p>
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="text-xs text-neutral-500">{formatDate(transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : transaction.createdAt)}</p>
+                          <p className="text-xs text-neutral-500">{formatDate(transaction.createdAt)}</p>
                           <p className="text-xs text-neutral-500 capitalize">{transaction.status}</p>
                         </div>
                       </div>
@@ -209,7 +236,7 @@ const UserDashboard: React.FC = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-neutral-900 text-sm truncate">{transaction.description}</p>
-                        <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : transaction.createdAt)}</p>
+                        <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt)}</p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-2">

@@ -93,7 +93,9 @@ const isActive = (path:string) => location.pathname.startsWith(path);
       {/* Mobile Brand Header */}
       <div className="md:hidden bg-white border-b border-neutral-200 px-3 py-3 safe-area-inset-top">
         <div className="flex items-center justify-between">
-          <AfriTokeniLogo size="md" />
+          <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
+            <AfriTokeniLogo size="md" />
+          </button>
         </div>
       </div>
 
@@ -255,7 +257,9 @@ const isActive = (path:string) => location.pathname.startsWith(path);
       <nav className="hidden md:flex fixed left-0 top-0 h-full w-72 bg-white border-r border-neutral-200 flex-col shadow-sm">
         {/* Brand Section */}
         <div className="px-6 py-6 border-b border-neutral-200">
-          <AfriTokeniLogo/>
+          <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
+            <AfriTokeniLogo/>
+          </button>
         </div>
         
         {/* Navigation Links */}

@@ -35,7 +35,7 @@ const SMSInterface: React.FC = () => {
     try {
       if (currentUser) {
         // Authenticated user - use real SMS processing
-        const result = await processSMSCommand(phoneNumber, command);
+        const result = await processSMSCommand(command);
         setResponse(result);
       } else {
         // Demo mode - show example responses
