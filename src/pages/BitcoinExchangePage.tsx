@@ -179,7 +179,7 @@ const BitcoinExchangePage: React.FC = () => {
                 </p>
                 <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
                   <p className="text-sm text-neutral-700">
-                    <strong>Example:</strong> Exchange 0.001 BTC → Receive ≈₦43,875 (after 2.5% agent fee)
+                    <strong>Example:</strong> Exchange 0.001 BTC → Receive UGX 43,875 (after 2.5% agent fee)
                   </p>
                 </div>
               </div>
@@ -199,7 +199,7 @@ const BitcoinExchangePage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-neutral-900">John Mukasa</p>
-                      <p className="text-sm text-neutral-600">Lagos, Nigeria • 4.9★ • 2.5% fee</p>
+                      <p className="text-sm text-neutral-600">Kampala, Uganda • 4.9★ • 2.5% fee</p>
                     </div>
                     <div className="text-green-600 text-sm font-medium">Online</div>
                   </div>
@@ -290,7 +290,7 @@ const BitcoinExchangePage: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm text-emerald-800 font-medium">You receive:</p>
-                      <p className="text-lg font-bold text-emerald-900">₦43,875 cash</p>
+                      <p className="text-lg font-bold text-emerald-900">UGX 43,875 cash</p>
                     </div>
                   </div>
                 </div>
@@ -395,7 +395,7 @@ const BitcoinExchangePage: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold text-neutral-900 mb-2">Can I use this with SMS/feature phones?</h3>
               <p className="text-neutral-600">
-                Yes! You can initiate Bitcoin exchanges using SMS commands like "BTC SELL 100000 NGN". 
+                Yes! You can initiate Bitcoin exchanges using SMS commands like "BTC SELL 100000 UGX". 
                 However, you'll still need a Bitcoin wallet to send the actual Bitcoin to our escrow address.
               </p>
             </div>
