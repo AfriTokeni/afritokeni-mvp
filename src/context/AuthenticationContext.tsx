@@ -211,8 +211,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           userType: 'user',
           isVerified: true,
           kycStatus: 'not_started',
-          preferredCurrency: 'NGN',
-          location: { country: 'NG', city: 'Lagos' },
+          preferredCurrency: 'UGX',
+          location: { country: 'UGX', city: 'Kampala' },
           createdAt: new Date()
         };
 
