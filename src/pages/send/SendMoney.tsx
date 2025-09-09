@@ -41,9 +41,9 @@ const SendMoney: React.FC = () => {
   const { user: authUser } = useAuthentication();
   const { balance, user, calculateFee } = useAfriTokeni();
   
-  // Get user's preferred currency or default to NGN
+  // Get user's preferred currency or default to UGX
   const currentUser = authUser.user;
-  const userCurrency = currentUser?.preferredCurrency || 'NGN';
+  const userCurrency = currentUser?.preferredCurrency || 'UGX';
   const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
   
   const [sendType, setSendType] = useState<'user' | 'bitcoin' | 'international' | null>(null);
@@ -55,7 +55,7 @@ const SendMoney: React.FC = () => {
     lastName: '',
     phone: '',
     country: '',
-    currency: 'NGN'
+    currency: 'UGX'
   });
   const [usdAmount, setUsdAmount] = useState<string>('');
   const [sendStep, setSendStep] = useState<number>(0); // Start at 0 for type selection
@@ -378,7 +378,7 @@ const SendMoney: React.FC = () => {
                       type="tel"
                       value={internationalRecipient.phone}
                       onChange={(e) => setInternationalRecipient({...internationalRecipient, phone: e.target.value})}
-                      placeholder="+234 801 234 5678"
+                      placeholder="+256 701 234 5678"
                       className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>

@@ -25,9 +25,9 @@ const UserDashboard: React.FC = () => {
     transactions
   } = useAfriTokeni();
 
-  // Get user's preferred currency or default to NGN
+  // Get user's preferred currency or default to UGX
   const currentUser = user.user;
-  const userCurrency = currentUser?.preferredCurrency || 'NGN';
+  const userCurrency = currentUser?.preferredCurrency || 'UGX';
   const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
 
   const formatCurrency = (amount: number): string => {

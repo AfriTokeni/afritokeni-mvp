@@ -29,9 +29,9 @@ const WithdrawPage: React.FC = () => {
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
 
-  // Get user's preferred currency or default to NGN
+  // Get user's preferred currency or default to UGX
   const currentUser = user.user;
-  const defaultCurrency = currentUser?.preferredCurrency || 'NGN';
+  const defaultCurrency = currentUser?.preferredCurrency || 'UGX';
   const [userCurrency, setUserCurrency] = useState<string>(defaultCurrency);
   
   // Mock Bitcoin exchange rate - would be live in production

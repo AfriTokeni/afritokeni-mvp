@@ -25,7 +25,7 @@ const DepositPage: React.FC = () => {
   const { user } = useAuthentication();
   const [step, setStep] = useState<'amount' | 'agent' | 'confirmation'>('amount');
   const [amount, setAmount] = useState<string>('');
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(user.user?.preferredCurrency || 'NGN');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(user.user?.preferredCurrency || 'UGX');
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [depositCode, setDepositCode] = useState<string>('');
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -202,9 +202,9 @@ const DepositPage: React.FC = () => {
               Deposit Amount
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 font-medium">
+              {/* <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 font-medium">
                 {currencyInfo?.symbol}
-              </span>
+              </span> */}
               <input
                 type="number"
                 id="amount"

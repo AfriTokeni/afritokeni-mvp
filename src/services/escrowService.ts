@@ -317,7 +317,7 @@ export class EscrowService {
       {
         id: 'agent_1',
         name: 'John Mukasa',
-        location: 'Lagos, Nigeria',
+        location: 'Kampala, Uganda',
         bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
         rating: 4.9,
         totalTransactions: 150,

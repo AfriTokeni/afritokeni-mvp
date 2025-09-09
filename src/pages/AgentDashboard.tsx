@@ -41,7 +41,7 @@ const AgentDashboard: React.FC = () => {
   const { agent, updateAgentStatus: updateStatus } = useAfriTokeni();
   
   // Agent's selected currency (default to NGN)
-  const [selectedCurrency, setSelectedCurrency] = useState('NGN');
+  const [selectedCurrency, setSelectedCurrency] = useState('UGX');
   const currencyInfo = AFRICAN_CURRENCIES[selectedCurrency as keyof typeof AFRICAN_CURRENCIES];
   
   // Calculate daily earnings from DataService
