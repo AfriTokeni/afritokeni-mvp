@@ -21,7 +21,7 @@ const BitcoinDepositPage: React.FC = () => {
   const [step, setStep] = useState<'amount' | 'agent' | 'deposit' | 'confirm'>('amount');
   const [btcAmount, setBtcAmount] = useState('');
   const [localAmount, setLocalAmount] = useState('');
-  const [selectedCurrency, setSelectedCurrency] = useState<AfricanCurrency>('NGN');
+  const [selectedCurrency, setSelectedCurrency] = useState<AfricanCurrency>('UGX');
   const [selectedAgent, setSelectedAgent] = useState<EscrowAgent | null>(null);
   const [escrowTransaction, setEscrowTransaction] = useState<EscrowTransaction | null>(null);
   const [exchangeRate, setExchangeRate] = useState(0);
