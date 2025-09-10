@@ -1,16 +1,13 @@
 import React from 'react';
 import { User, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { AgentSettingsData } from './types';
 
 interface AgentProfileProps {
-  agent: any;
-  agentData: AgentSettingsData;
-  onSettingChange: (key: keyof AgentSettingsData, value: any) => void;
-  onStatusChange: (status: 'available' | 'busy' | 'cash_out' | 'offline') => void;
+  agentData: any;
+  onSettingChange: (key: string, value: any) => void;
+  onStatusChange: (status: string) => void;
   expanded: boolean;
   onToggle: () => void;
-  selectedCurrency: string;
 }
 
 const AgentProfile: React.FC<AgentProfileProps> = ({
@@ -18,8 +15,7 @@ const AgentProfile: React.FC<AgentProfileProps> = ({
   onSettingChange,
   onStatusChange,
   expanded,
-  onToggle,
-  selectedCurrency
+  onToggle
 }) => {
   const { agent } = useAfriTokeni();
 

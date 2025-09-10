@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
 import { DataService } from '../../services/dataService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
+import { AFRICAN_CURRENCIES } from '../../types/currency';
 
 interface AgentSettings {
   commissionRate: number;
@@ -104,7 +104,7 @@ const AgentSettings: React.FC = () => {
     };
     
     initializeAgent();
-  }, [agent, user?.agent, refreshData]);
+  }, [agent, user?.agent]);
 
   const handleStatusChange = async (newStatus: 'available' | 'busy' | 'cash_out' | 'offline') => {
     setSaving(true);
@@ -182,9 +182,6 @@ const AgentSettings: React.FC = () => {
   }
 
 
-  const formatCurrency = (amount: number): string => {
-    return formatCurrencyAmount(amount, settings.preferredCurrency as any);
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -254,10 +251,10 @@ const AgentSettings: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center space-x-2 px-6 py-4 text-sm font-semibold border-b-2 transition-colors duration-200 whitespace-nowrap ${
+                  className={`flex items-center space-x-2 px-6 py-4 text-sm font-semibold border-b-2 transition-all duration-200 whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600 bg-blue-50'
-                      : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
+                      ? 'border-black text-white bg-gradient-to-r from-neutral-900 to-black shadow-lg transform scale-105 rounded-lg'
+                      : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 hover:shadow-sm rounded-lg'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -286,8 +283,8 @@ const AgentSettings: React.FC = () => {
                     disabled={saving}
                     className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                       settings.status === status
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50'
+                        ? 'border-black bg-black text-white'
+                        : 'border-neutral-200 bg-white text-neutral-700 hover:border-black hover:bg-neutral-50'
                     } disabled:opacity-50`}
                   >
                     <div className="text-sm font-semibold capitalize">{status.replace('_', ' ')}</div>
@@ -580,11 +577,11 @@ const AgentSettings: React.FC = () => {
         )}
 
         {/* Save Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-6">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors duration-200"
+            className="flex items-center space-x-2 bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors duration-200"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save Settings'}</span>
