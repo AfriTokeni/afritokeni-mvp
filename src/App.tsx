@@ -30,7 +30,7 @@ import ProcessDeposits from './pages/agents/ProcessDeposits';
 import AgentCustomers from './pages/AgentCustomers';
 import AgentBitcoinPage from './pages/agents/AgentBitcoinPage';
 import AgentExchangePage from './pages/agents/AgentExchangePage';
-import AgentSettings from './pages/AgentSettings';
+import AgentSettings from './pages/agent-settings';
 import RoleSelection from './pages/auth/RoleSelection';
 import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
 
