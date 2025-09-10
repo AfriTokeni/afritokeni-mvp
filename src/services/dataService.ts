@@ -805,14 +805,19 @@ export class DataService {
   // Get agent by userId
   static async getAgentByUserId(userId: string): Promise<Agent | null> {
     try {
+      console.log('getAgentByUserId called with userId:', userId);
       const docs = await listDocs({
         collection: 'agents'
       });
+      console.log('Found agents in database:', docs.items.length);
+      console.log('Agent docs:', docs.items.map(doc => ({ key: doc.key, userId: (doc.data as Agent).userId })));
 
       // Find agent with matching userId
       for (const doc of docs.items) {
         const agentData = doc.data as Agent;
+        console.log('Checking agent:', agentData.userId, 'against:', userId);
         if (agentData.userId === userId) {
+          console.log('Found matching agent!');
           return {
             ...agentData,
             createdAt: agentData.createdAt ? new Date(agentData.createdAt) : new Date()
@@ -820,6 +825,7 @@ export class DataService {
         }
       }
 
+      console.log('No matching agent found for userId:', userId);
       return null;
     } catch (error) {
       console.error('Error getting agent by userId:', error);
@@ -869,10 +875,19 @@ export class DataService {
   // Update agent status by userId (convenience method)
   static async updateAgentStatusByUserId(userId: string, status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> {
     try {
+      console.log('updateAgentStatusByUserId called with userId:', userId);
       const agent = await this.getAgentByUserId(userId);
-      if (!agent) return false;
+      console.log('getAgentByUserId result:', agent);
       
-      return await this.updateAgentStatus(agent.id, status);
+      if (!agent) {
+        console.error('No agent found for userId:', userId);
+        return false;
+      }
+      
+      console.log('Calling updateAgentStatus with agentId:', agent.id);
+      const result = await this.updateAgentStatus(agent.id, status);
+      console.log('updateAgentStatus result:', result);
+      return result;
     } catch (error) {
       console.error('Error updating agent status by userId:', error);
       return false;

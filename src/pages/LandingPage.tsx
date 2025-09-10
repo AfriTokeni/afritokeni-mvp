@@ -74,9 +74,9 @@ const LandingPage: React.FC = () => {
             </div>
             <button
               onClick={handleICPLogin}
-              className="bg-black text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
+              className="bg-black text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-all duration-200 cursor-pointer transform hover:scale-105 shadow-sm hover:shadow-md"
             >
-              Sign in
+              Sign in →
             </button>
           </div>
         </div>
@@ -96,25 +96,25 @@ const LandingPage: React.FC = () => {
               <span className="text-gray-600">everywhere, for everyone</span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 sm:mb-12 leading-relaxed px-4 sm:px-0">
-              Exchange Bitcoin for local African currencies via SMS or web. Real Bitcoin transactions, 
+              Exchange Bitcoin for local African currencies via SMS or web. Bitcoin transactions, 
               39 currencies supported, works with or without internet.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
               <button
                 onClick={handleICPLogin}
-                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="bg-black text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 Start Banking Now
               </button>
               <Link
                 to="/bitcoin-exchange"
-                className="bg-white text-gray-800 border-2 border-gray-200 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:border-orange-300 hover:bg-orange-50 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="bg-white text-gray-800 border-2 border-gray-200 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:border-gray-400 hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 Learn How It Works
               </Link>
               <Link
                 to="/sms"
-                className="bg-gradient-to-r from-green-600 to-green-700 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="bg-gray-800 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:bg-gray-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 Try SMS Banking
               </Link>
@@ -148,7 +148,7 @@ const LandingPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubscribing || !email}
-                    className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isSubscribing ? 'Subscribing...' : 'Subscribe'}
                   </button>
@@ -182,7 +182,7 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-12 sm:mb-16">
             <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-orange-50 border border-orange-100 text-orange-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
               <Bitcoin className="w-3 h-3 mr-2" />
-              Real Bitcoin Integration
+              Bitcoin Integration
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4 sm:px-0">
               Bitcoin Banking for Africa
