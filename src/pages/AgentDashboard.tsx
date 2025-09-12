@@ -14,7 +14,9 @@ import {
   Plus,
   Minus,
   Bitcoin,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Wallet,
+  ArrowUpCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import KYCStatusAlert from '../components/KYCStatusAlert';
@@ -23,7 +25,7 @@ import { CurrencySelector } from '../components/CurrencySelector';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import { BalanceService } from '../services/BalanceService';
 import { DataService } from '../services/dataService';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../types/currency';
+import { formatCurrencyAmount } from '../types/currency';
 import { Transaction } from '../types/transaction';
 
 interface AgentStatus {
@@ -40,9 +42,8 @@ const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { agent, updateAgentStatus: updateStatus } = useAfriTokeni();
   
-  // Agent's selected currency (default to NGN)
+  // Agent's selected currency (default to UGX)
   const [selectedCurrency, setSelectedCurrency] = useState('UGX');
-  const currencyInfo = AFRICAN_CURRENCIES[selectedCurrency as keyof typeof AFRICAN_CURRENCIES];
   
   // Calculate daily earnings from DataService
   const calculateDailyEarnings = (): number => {
@@ -67,8 +68,7 @@ const AgentDashboard: React.FC = () => {
     }
   }, [agent]);
 
-  // Get agent's real balances using BalanceService
-  const agentBalance = agent ? BalanceService.calculateBalance(agent.id, selectedCurrency) : 0;
+  // Get agent's Bitcoin balance using BalanceService
   const bitcoinBalance = agent ? BalanceService.calculateBalance(agent.id, 'BTC') : 0;
   const dailyEarnings = calculateDailyEarnings();
   
@@ -263,15 +263,15 @@ const AgentDashboard: React.FC = () => {
         </div>
 
         {/* Balance Cards Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {/* Local Currency Balance Card */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          {/* Cash Balance Card */}
           <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1 min-w-0">
-                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">{currencyInfo.name} Balance</p>
+                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">Cash Balance (Earnings)</p>
                 <div className="flex items-center space-x-3 mt-3">
                   <span className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono truncate">
-                    {showBalance ? formatCurrency(agentBalance) : '••••••••'}
+                    {showBalance ? formatCurrency(agent?.cashBalance || 0) : '••••••••'}
                   </span>
                   <button 
                     onClick={() => setShowBalance(!showBalance)}
@@ -281,16 +281,52 @@ const AgentDashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-neutral-100 p-2 rounded-lg flex-shrink-0">
-                <span className="text-xs font-bold text-neutral-700">{selectedCurrency}</span>
+              <div className="bg-green-100 p-2 rounded-lg flex-shrink-0">
+                <Wallet className="w-3 h-3 text-green-600" />
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-neutral-100 space-y-2 sm:space-y-0">
-              <span className="text-neutral-500 text-xs sm:text-sm">Ready for exchange</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-600 font-medium text-xs sm:text-sm">Live</span>
+              <span className="text-neutral-500 text-xs sm:text-sm">Available for settlement</span>
+              <button
+                onClick={() => navigate('/agents/settlement')}
+                className="text-green-600 hover:text-green-700 font-medium text-xs sm:text-sm transition-colors"
+              >
+                Withdraw →
+              </button>
+            </div>
+          </div>
+
+          {/* Digital Balance Card */}
+          <div className="bg-white border border-neutral-200 p-4 sm:p-6 rounded-xl shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-neutral-600 text-xs sm:text-sm font-semibold">Digital Balance (Operations)</p>
+                <div className="flex items-center space-x-3 mt-3">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono truncate">
+                    {showBalance ? formatCurrency(agent?.digitalBalance || 0) : '••••••••'}
+                  </span>
+                  <button 
+                    onClick={() => setShowBalance(!showBalance)}
+                    className="text-neutral-400 hover:text-neutral-600 transition-colors duration-200 flex-shrink-0"
+                  >
+                    {showBalance ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+                  </button>
+                </div>
               </div>
+              <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                <CreditCard className="w-3 h-3 text-blue-600" />
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t border-neutral-100 space-y-2 sm:space-y-0">
+              <span className="text-neutral-500 text-xs sm:text-sm">
+                {(agent?.digitalBalance || 0) < 100000 ? 'Low balance - fund account' : 'Ready for deposits'}
+              </span>
+              <button
+                onClick={() => navigate('/agents/funding')}
+                className="text-blue-600 hover:text-blue-700 font-medium text-xs sm:text-sm transition-colors"
+              >
+                Add Funds →
+              </button>
             </div>
           </div>
 
@@ -326,7 +362,7 @@ const AgentDashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions Row */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
           <button 
             onClick={() => navigate('/agents/deposit')}
             className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
@@ -345,6 +381,26 @@ const AgentDashboard: React.FC = () => {
               <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
             </div>
             <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Withdrawal</span>
+          </button>
+
+          <button 
+            onClick={() => navigate('/agents/funding')}
+            className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200"
+          >
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-200 border border-transparent transition-all duration-200">
+              <ArrowUpCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Fund Account</span>
+          </button>
+
+          <button 
+            onClick={() => navigate('/agents/settlement')}
+            className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-green-300 transition-all duration-200"
+          >
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-green-200 border border-transparent transition-all duration-200">
+              <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Settlement</span>
           </button>
 
           <button 
@@ -379,10 +435,10 @@ const AgentDashboard: React.FC = () => {
 
           <button 
             onClick={() => navigate('/agents/exchange')}
-            className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200"
+            className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-purple-300 transition-all duration-200"
           >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-200 border border-transparent transition-all duration-200">
-              <ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-purple-200 border border-transparent transition-all duration-200">
+              <ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             </div>
             <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Exchange</span>
           </button>
