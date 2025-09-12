@@ -33,6 +33,8 @@ import AgentExchangePage from './pages/agents/AgentExchangePage';
 import AgentSettings from './pages/agent-settings';
 import RoleSelection from './pages/auth/RoleSelection';
 import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
+import AgentFunding from './pages/agent-liquidity/AgentFunding';
+import AgentSettlement from './pages/agent-liquidity/AgentSettlement';
 
 // Auth Pages - Only KYC pages needed
 import UserKYCPage from "./pages/auth/UserKYCPage";
@@ -108,6 +110,8 @@ const App: FC = () => {
                 <Route path="exchange" element={<AgentExchangePage/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<AgentSettings/>} />
+                <Route path="funding" element={<AgentFunding/>} />
+                <Route path="settlement" element={<AgentSettlement/>} />
                 <Route path="agent-kyc" element={<AgentKYCPage />} />
               </Routes>
             </Layout>
