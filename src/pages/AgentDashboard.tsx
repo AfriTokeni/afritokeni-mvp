@@ -1,49 +1,41 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Users, 
-  CreditCard, 
   TrendingUp, 
+  Users, 
   MapPin, 
-  Clock,
-  User,
-  CheckCircle,
-  XCircle,
-  Navigation,
+  Plus, 
+  Minus, 
+  Bitcoin,
   Eye,
   EyeOff,
-  Plus,
-  Minus,
-  Bitcoin,
-  ArrowRightLeft,
   Wallet,
-  ArrowUpCircle
+  CreditCard,
+  ArrowUpCircle,
+  ArrowRightLeft,
+  X
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import KYCStatusAlert from '../components/KYCStatusAlert';
+import { BalanceService } from '../services/BalanceService';
+import { formatCurrencyAmount } from '../types/currency';
 import PageLayout from '../components/PageLayout';
+import AgentStatusIndicator from '../components/AgentStatusIndicator';
+import LiquidityAlert from '../components/LiquidityAlert';
+import NotificationSystem from '../components/NotificationSystem';
+import { useNotifications } from '../hooks/useNotifications';
 import { CurrencySelector } from '../components/CurrencySelector';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
-import { BalanceService } from '../services/BalanceService';
 import { DataService } from '../services/dataService';
-import { formatCurrencyAmount } from '../types/currency';
 import { Transaction } from '../types/transaction';
 
-interface AgentStatus {
-  status: 'available' | 'busy' | 'cash-out';
-  location?: {
-    latitude: number;
-    longitude: number;
-    address: string;
-  };
-  lastUpdated: Date;
-}
 
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { agent, updateAgentStatus: updateStatus } = useAfriTokeni();
-  
-  // Agent's selected currency (default to UGX)
-  const [selectedCurrency, setSelectedCurrency] = useState('UGX');
+  const { agent } = useAfriTokeni();
+  const [showBalance, setShowBalance] = useState(true);
+  const [currentLocation, setCurrentLocation] = useState<string>('Kampala, Uganda');
+  const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
+  const [showVerificationAlert, setShowVerificationAlert] = useState(true);
+  const { notifications, dismissNotification } = useNotifications();
   
   // Calculate daily earnings from DataService
   const calculateDailyEarnings = (): number => {
@@ -72,62 +64,54 @@ const AgentDashboard: React.FC = () => {
   const bitcoinBalance = agent ? BalanceService.calculateBalance(agent.id, 'BTC') : 0;
   const dailyEarnings = calculateDailyEarnings();
   
-  // Local state for UI status (fallback to agent data if available)
-  const [agentStatus, setAgentStatus] = useState<AgentStatus>({
-    status: 'available',
-    lastUpdated: new Date()
-  });
-  
-  const getStatusColor = (status: AgentStatus['status']) => {
-    switch (status) {
-      case 'available':
-        return 'bg-green-100 text-green-800';
-      case 'busy':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cash-out':
-        return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusIcon = (status: AgentStatus['status']) => {
-    switch (status) {
-      case 'available': return <CheckCircle className="w-4 h-4" />;
-      case 'busy': return <Clock className="w-4 h-4" />;
-      case 'cash-out': return <XCircle className="w-4 h-4" />;
-      default: return <User className="w-4 h-4" />;
-    }
-  };
 
   const formatCurrency = (amount: number): string => {
-    return formatCurrencyAmount(amount, selectedCurrency as any);
+    return formatCurrencyAmount(amount, 'UGX');
   };
 
-  const handleUpdateAgentStatus = async (newStatus: AgentStatus['status']) => {
-    // Convert UI status to backend status format
-    const backendStatus = newStatus === 'cash-out' ? 'cash_out' : newStatus;
+  // Check for liquidity alerts
+  const checkLiquidityAlerts = () => {
+    if (!agent) return [];
     
-    try {
-      // Update in backend if we have the updateStatus function
-      if (updateStatus) {
-        const success = await updateStatus(backendStatus as 'available' | 'busy' | 'cash_out' | 'offline');
-        if (!success) {
-          alert('Failed to update status. Please try again.');
-          return;
-        }
-      }
-      
-      // Update local state
-      setAgentStatus(prev => ({
-        ...prev,
-        status: newStatus,
-        lastUpdated: new Date()
-      }));
-    } catch (error) {
-      console.error('Error updating agent status:', error);
-      alert('Failed to update status. Please try again.');
+    const alerts = [];
+    const digitalBalance = agent.digitalBalance || 0;
+    const cashBalance = agent.cashBalance || 0;
+    
+    // Digital balance alerts
+    if (digitalBalance < 50000) {
+      alerts.push({
+        type: 'critical_digital' as const,
+        balance: digitalBalance,
+        threshold: 50000
+      });
+    } else if (digitalBalance < 100000) {
+      alerts.push({
+        type: 'low_digital' as const,
+        balance: digitalBalance,
+        threshold: 100000
+      });
     }
+    
+    // Cash balance alerts
+    if (cashBalance < 25000) {
+      alerts.push({
+        type: 'critical_cash' as const,
+        balance: cashBalance,
+        threshold: 25000
+      });
+    } else if (cashBalance < 50000) {
+      alerts.push({
+        type: 'low_cash' as const,
+        balance: cashBalance,
+        threshold: 50000
+      });
+    }
+    
+    return alerts;
   };
+
+  const liquidityAlerts = checkLiquidityAlerts();
+
 
   const updateLocation = async () => {
     if (!navigator.geolocation) {
@@ -136,6 +120,7 @@ const AgentDashboard: React.FC = () => {
     }
 
     try {
+      setIsUpdatingLocation(true);
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
@@ -149,11 +134,8 @@ const AgentDashboard: React.FC = () => {
       // Mock reverse geocoding - in real app, use a geocoding service
       const mockAddress = `Kampala, Uganda (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
       
-      setAgentStatus(prev => ({
-        ...prev,
-        location: { latitude, longitude, address: mockAddress },
-        lastUpdated: new Date()
-      }));
+      setCurrentLocation(mockAddress);
+      setIsUpdatingLocation(false);
       
       // Here you would send the coordinates to your backend
       console.log('Sending location to backend:', { latitude, longitude });
@@ -161,16 +143,45 @@ const AgentDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error getting location:', error);
       alert('Unable to get your location. Please check your browser permissions.');
+      setIsUpdatingLocation(false);
     }
   };
 
-  const [showBalance, setShowBalance] = useState(true);
-
   return (
     <PageLayout>
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
-        {/* KYC Status Alert */}
-        <KYCStatusAlert user_type="agent" />
+      <NotificationSystem 
+        notifications={notifications}
+        onDismiss={dismissNotification}
+      />
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Agent Verification Status */}
+        {showVerificationAlert && (
+          agent?.isActive ? (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 relative">
+              <div className="flex items-center justify-between">
+                <p className="text-green-800 text-sm">✓ Agent verified and active</p>
+                <button
+                  onClick={() => setShowVerificationAlert(false)}
+                  className="text-green-600 hover:text-green-800 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 relative">
+              <div className="flex items-center justify-between">
+                <p className="text-yellow-800 text-sm">⚠ Agent verification pending</p>
+                <button
+                  onClick={() => setShowVerificationAlert(false)}
+                  className="text-yellow-600 hover:text-yellow-800 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )
+        )}
 
         {/* Header */}
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
@@ -182,85 +193,77 @@ const AgentDashboard: React.FC = () => {
             <div className="flex items-center space-x-2">
               <span className="text-sm font-medium text-neutral-700">Currency:</span>
               <CurrencySelector
-                currentCurrency={selectedCurrency}
-                onCurrencyChange={setSelectedCurrency}
+                currentCurrency="UGX"
+                onCurrencyChange={() => {}}
               />
             </div>
           </div>
         </div>
 
-        {/* Top Row - Status & Location */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          {/* Agent Status Control */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-3">
-                <span className="text-xs sm:text-sm font-semibold text-neutral-700">Status:</span>
-                <div className={`flex items-center space-x-2 px-3 py-2 rounded-full border ${getStatusColor(agentStatus.status)}`}>
-                  {getStatusIcon(agentStatus.status)}
-                  <span className="text-xs sm:text-sm font-semibold capitalize">{agentStatus.status.replace('-', ' ')}</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => handleUpdateAgentStatus('available')}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 ${
-                    agentStatus.status === 'available' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                  }`}
-                >
-                  Available
-                </button>
-                <button
-                  onClick={() => handleUpdateAgentStatus('busy')}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 ${
-                    agentStatus.status === 'busy' 
-                      ? 'bg-yellow-600 text-white' 
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                  }`}
-                >
-                  Busy
-                </button>
-                <button
-                  onClick={() => handleUpdateAgentStatus('cash-out')}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 ${
-                    agentStatus.status === 'cash-out' 
-                      ? 'bg-red-600 text-white' 
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                  }`}
-                >
-                  Cash Out
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Location Update Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-4">
-                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-500 flex-shrink-0" />
-                <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-neutral-900">Location</h3>
-                  <p className="text-xs text-neutral-600 mt-1 truncate">
-                    {agentStatus.location 
-                      ? `Updated ${agentStatus.lastUpdated.toLocaleTimeString()}`
-                      : 'Not set'
-                    }
+        {/* Agent Status and Location */}
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-2">
+                <AgentStatusIndicator 
+                  status={agent?.status || 'available'}
+                  isActive={agent?.isActive || true}
+                  size="lg"
+                />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-neutral-900">Agent Status</h2>
+                  <p className="text-neutral-600 text-sm sm:text-base">
+                    {agent?.status === 'available' && 'Currently available for transactions'}
+                    {agent?.status === 'busy' && 'Currently busy with other transactions'}
+                    {agent?.status === 'cash_out' && 'Currently out of cash'}
+                    {agent?.status === 'offline' && 'Currently offline'}
+                    {!agent?.status && 'Status unknown'}
                   </p>
                 </div>
               </div>
-              <button
-                onClick={updateLocation}
-                className="flex items-center justify-center space-x-2 px-4 py-2 bg-neutral-900 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-neutral-800 transition-colors duration-200 w-full sm:w-auto"
-              >
-                <Navigation className="w-4 h-4" />
-                <span>Update</span>
-              </button>
+              <div className="flex items-center space-x-2 text-neutral-600">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm truncate">
+                    {isUpdatingLocation ? (
+                      <span className="text-blue-600">Updating location...</span>
+                    ) : (
+                      currentLocation
+                    )}
+                  </p>
+                </div>
+              </div>
             </div>
+            <button
+              onClick={updateLocation}
+              className="flex items-center justify-center space-x-2 px-4 py-2 bg-neutral-900 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-neutral-800 transition-colors duration-200 w-full sm:w-auto"
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Update</span>
+            </button>
           </div>
         </div>
+
+        {/* Liquidity Alerts */}
+        {liquidityAlerts.length > 0 && (
+          <div className="space-y-3">
+            {liquidityAlerts.map((alert, index) => (
+              <LiquidityAlert
+                key={index}
+                type={alert.type}
+                currentBalance={alert.balance}
+                threshold={alert.threshold}
+                onActionClick={() => {
+                  if (alert.type.includes('digital')) {
+                    navigate('/agents/funding');
+                  } else {
+                    navigate('/agents/settlement');
+                  }
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Balance Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
@@ -361,94 +364,116 @@ const AgentDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Actions Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
-          <button 
-            onClick={() => navigate('/agents/deposit')}
-            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Deposit</span>
-          </button>
+        {/* Quick Actions - Reorganized by Category */}
+        <div className="space-y-6">
+          {/* Transaction Processing */}
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-700 mb-3">Transaction Processing</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <button 
+                onClick={() => navigate('/agents/deposit')}
+                className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Process Deposits</span>
+              </button>
 
-          <button 
-            onClick={() => navigate('/agents/withdraw')}
-            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Withdrawal</span>
-          </button>
+              <button 
+                onClick={() => navigate('/agents/withdraw')}
+                className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Process Withdrawals</span>
+              </button>
 
-          <button 
-            onClick={() => navigate('/agents/funding')}
-            className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-200 border border-transparent transition-all duration-200">
-              <ArrowUpCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Fund Account</span>
-          </button>
+              <button 
+                onClick={() => navigate('/agents/customers')}
+                className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Manage Customers</span>
+              </button>
 
-          <button 
-            onClick={() => navigate('/agents/settlement')}
-            className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-green-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-green-200 border border-transparent transition-all duration-200">
-              <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+              <button 
+                onClick={() => navigate('/agents/settings')}
+                className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Agent Settings</span>
+              </button>
             </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Settlement</span>
-          </button>
+          </div>
 
-          <button 
-            onClick={() => navigate('/agents/customers')}
-            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Customers</span>
-          </button>
+          {/* Liquidity Management */}
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-700 mb-3">Liquidity Management</h3>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <button 
+                onClick={() => navigate('/agents/funding')}
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <ArrowUpCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Fund Digital Balance</span>
+                <p className="text-xs text-neutral-600 mt-1">Add operational funds</p>
+              </button>
 
-          <button 
-            onClick={() => navigate('/agents/settings')}
-            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-neutral-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200">
-              <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
+              <button 
+                onClick={() => navigate('/agents/settlement')}
+                className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-green-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Withdraw Earnings</span>
+                <p className="text-xs text-neutral-600 mt-1">Cash out commissions</p>
+              </button>
             </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Settings</span>
-          </button>
+          </div>
 
-          <button 
-            onClick={() => navigate('/agents/bitcoin')}
-            className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-orange-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-orange-200 border border-transparent transition-all duration-200">
-              <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Bitcoin</span>
-          </button>
+          {/* Bitcoin Services */}
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-700 mb-3">Bitcoin Services</h3>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <button 
+                onClick={() => navigate('/agents/bitcoin')}
+                className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-orange-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Bitcoin Wallet</span>
+                <p className="text-xs text-neutral-600 mt-1">Manage Bitcoin funds</p>
+              </button>
 
-          <button 
-            onClick={() => navigate('/agents/exchange')}
-            className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-purple-300 transition-all duration-200"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-purple-200 border border-transparent transition-all duration-200">
-              <ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+              <button 
+                onClick={() => navigate('/agents/exchange')}
+                className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-purple-300 transition-all duration-200"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Exchange Center</span>
+                <p className="text-xs text-neutral-600 mt-1">Bitcoin ↔ Cash trades</p>
+              </button>
             </div>
-            <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Exchange</span>
-          </button>
+          </div>
         </div>
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-neutral-200">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200 flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
               </div>
               <div className="min-w-0">
@@ -462,7 +487,7 @@ const AgentDashboard: React.FC = () => {
 
           <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-neutral-200">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200 flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
               </div>
               <div className="min-w-0">
@@ -474,7 +499,7 @@ const AgentDashboard: React.FC = () => {
 
           <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-neutral-200">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:border-blue-100 border border-transparent transition-all duration-200 flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Users className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
               </div>
               <div className="min-w-0">

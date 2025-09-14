@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, User, Star, Plus, CheckCircle } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
+import TransactionCodeDisplay from '../../components/TransactionCodeDisplay';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { CurrencySelector } from '../../components/CurrencySelector';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
@@ -346,9 +347,16 @@ const DepositPage: React.FC = () => {
           {/* Instructions */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-semibold text-blue-900 mb-2">Next Steps:</h4>
-            <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+            <TransactionCodeDisplay
+              code={depositCode}
+              title="Your Deposit Code"
+              description="Show this code to the agent when making your deposit"
+              className="mb-6"
+            />
+            
+            <ol className="list-decimal list-inside space-y-2 text-sm text-neutral-700">
               <li>Bring your cash to the agent's location</li>
-              <li>Show your deposit code: <span className="font-mono font-bold">{depositCode}</span></li>
+              <li>Show your deposit code or QR code to the agent</li>
               <li>Agent will verify and add money to your account</li>
               <li>You'll receive a confirmation notification</li>
             </ol>
