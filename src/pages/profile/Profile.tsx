@@ -6,6 +6,7 @@ import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { formatCurrencyAmount, AfricanCurrency, getActiveCurrencies } from '../../types/currency';
 import { DataService } from '../../services/dataService';
+import { NotificationService } from '../../services/notificationService';
 
 interface UserData {
   id: string;
@@ -166,6 +167,23 @@ const UserProfile: React.FC = () => {
         throw new Error('Failed to update user profile');
       }
       
+      // Send profile update notification
+      try {
+        const currentUser = user.user || user.agent;
+        if (currentUser) {
+          await NotificationService.sendNotification(currentUser, {
+            userId: currentUser.id,
+            type: 'deposit', // Using deposit type as closest match for account updates
+            amount: 0,
+            currency: editForm.preferredCurrency,
+            transactionId: `profile-${Date.now()}`,
+            message: `Profile updated successfully. Name: ${editForm.firstName} ${editForm.lastName}, Currency: ${editForm.preferredCurrency}`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send profile update notification:', notificationError);
+      }
+
       // Update local state
       setUserData({
         ...userData,

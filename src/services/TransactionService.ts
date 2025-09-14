@@ -1,4 +1,6 @@
 import { BalanceService } from './BalanceService';
+import { NotificationService } from './notificationService';
+import { DataService } from './dataService';
 
 interface SendMoneyRequest {
   fromUserId: string;
@@ -40,6 +42,38 @@ export class TransactionService {
         request.currency
       );
 
+      // Send notifications to both sender and recipient
+      try {
+        const [senderUser, recipientUser] = await Promise.all([
+          DataService.getUserByKey(request.fromUserId),
+          DataService.getUserByKey(toUserId)
+        ]);
+
+        if (senderUser) {
+          await NotificationService.sendNotification(senderUser, {
+            userId: request.fromUserId,
+            type: 'withdrawal',
+            amount: request.amount,
+            currency: request.currency,
+            transactionId: transaction.id,
+            message: `Money sent to ${request.toUserPhone}`
+          });
+        }
+
+        if (recipientUser) {
+          await NotificationService.sendNotification(recipientUser, {
+            userId: toUserId,
+            type: 'deposit',
+            amount: request.amount,
+            currency: request.currency,
+            transactionId: transaction.id,
+            message: `Money received from ${senderUser?.firstName || 'user'}`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send transaction notifications:', notificationError);
+      }
+
       return {
         success: true,
         message: 'Money sent successfully',
@@ -71,6 +105,40 @@ export class TransactionService {
         request.currency,
         request.agentId
       );
+
+      // Send withdrawal notifications
+      try {
+        const [user, agent] = await Promise.all([
+          DataService.getUserByKey(request.userId),
+          DataService.getUserByKey(request.agentId)
+        ]);
+
+        // Notify user of withdrawal request
+        if (user) {
+          await NotificationService.sendNotification(user, {
+            userId: request.userId,
+            type: 'withdrawal',
+            amount: request.amount,
+            currency: request.currency,
+            transactionId: transaction.id,
+            message: `Withdrawal request processed. Code: ${request.withdrawalCode}`
+          });
+        }
+
+        // Notify agent of new withdrawal request
+        if (agent) {
+          await NotificationService.sendNotification(agent, {
+            userId: request.agentId,
+            type: 'agent_match',
+            amount: request.amount,
+            currency: request.currency,
+            transactionId: transaction.id,
+            message: `New withdrawal request: ${request.amount} ${request.currency}. Code: ${request.withdrawalCode}`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send withdrawal notifications:', notificationError);
+      }
 
       return {
         success: true,
@@ -155,6 +223,23 @@ export class TransactionService {
         currency,
         agentId || 'agent_default'
       );
+
+      // Send withdrawal notification to user
+      try {
+        const user = await DataService.getUserByKey(userId);
+        if (user) {
+          await NotificationService.sendNotification(user, {
+            userId,
+            type: 'withdrawal',
+            amount,
+            currency,
+            transactionId: withdrawalCode,
+            message: `Withdrawal request created. Show code ${withdrawalCode} to agent to collect cash.`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send withdrawal notification:', notificationError);
+      }
 
       return {
         success: true,

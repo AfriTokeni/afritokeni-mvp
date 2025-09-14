@@ -3,6 +3,7 @@ import { ArrowLeft, DollarSign, CreditCard, Building2, Smartphone, AlertCircle, 
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
+import { NotificationService } from '../../services/notificationService';
 import PageLayout from '../../components/PageLayout';
 
 type FundingMethod = 'bank_transfer' | 'mobile_money' | 'cash_deposit';
@@ -138,11 +139,45 @@ const AgentFunding: React.FC = () => {
               }
             });
 
+            // Send funding completion notification
+            try {
+              const agentUser = await DataService.getUserByKey(user.agent!.id);
+              if (agentUser) {
+                await NotificationService.sendNotification(agentUser, {
+                  userId: user.agent!.id,
+                  type: 'deposit',
+                  amount: fundingAmount,
+                  currency: 'UGX',
+                  transactionId: reference,
+                  message: `Funding completed! UGX ${fundingAmount.toLocaleString()} added to your digital balance.`
+                });
+              }
+            } catch (notificationError) {
+              console.error('Failed to send funding completion notification:', notificationError);
+            }
+
             await refreshData();
           } catch (error) {
             console.error('Error processing funding:', error);
           }
         }, 2000);
+      }
+
+      // Send funding request notification
+      try {
+        const agentUser = await DataService.getUserByKey(user.agent!.id);
+        if (agentUser) {
+          await NotificationService.sendNotification(agentUser, {
+            userId: user.agent!.id,
+            type: 'deposit',
+            amount: fundingAmount,
+            currency: 'UGX',
+            transactionId: reference,
+            message: `Funding request submitted: ${fundingMethods.find(m => m.id === selectedMethod)?.name} - UGX ${fundingAmount.toLocaleString()}`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send funding notification:', notificationError);
       }
 
       setFundingReference(reference);

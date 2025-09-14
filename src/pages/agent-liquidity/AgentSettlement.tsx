@@ -3,6 +3,7 @@ import { ArrowLeft, DollarSign, Building2, Smartphone, Clock, CheckCircle, XCirc
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
+import { NotificationService } from '../../services/notificationService';
 import PageLayout from '../../components/PageLayout';
 
 type SettlementMethod = 'bank_transfer' | 'mobile_money';
@@ -195,10 +196,44 @@ const AgentSettlement: React.FC = () => {
                 autoProcessed: true
               }
             });
+
+            // Send settlement completion notification
+            try {
+              const agentUser = await DataService.getUserByKey(user.agent!.id);
+              if (agentUser) {
+                await NotificationService.sendNotification(agentUser, {
+                  userId: user.agent!.id,
+                  type: 'withdrawal',
+                  amount: settlementAmount,
+                  currency: 'UGX',
+                  transactionId: reference,
+                  message: `Settlement completed! UGX ${settlementAmount.toLocaleString()} transferred to your ${selectedMethod.replace('_', ' ')}.`
+                });
+              }
+            } catch (notificationError) {
+              console.error('Failed to send settlement completion notification:', notificationError);
+            }
           } catch (error) {
             console.error('Error completing settlement:', error);
           }
         }, 3000);
+      }
+
+      // Send settlement request notification
+      try {
+        const agentUser = await DataService.getUserByKey(user.agent!.id);
+        if (agentUser) {
+          await NotificationService.sendNotification(agentUser, {
+            userId: user.agent!.id,
+            type: 'withdrawal',
+            amount: settlementAmount,
+            currency: 'UGX',
+            transactionId: reference,
+            message: `Settlement request submitted: UGX ${settlementAmount.toLocaleString()} via ${selectedMethod.replace('_', ' ')}`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send settlement notification:', notificationError);
       }
 
       // Add to local settlements list

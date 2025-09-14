@@ -1,5 +1,7 @@
-import { uploadFile, setDoc, getDoc, listDocs } from '@junobuild/core';
+import { setDoc, uploadFile, listDocs, getDoc } from '@junobuild/core';
 import { nanoid } from 'nanoid';
+import { NotificationService } from './notificationService';
+import { DataService } from './dataService';
 import { UserKYCData } from '../types/auth';
 
 export interface KYCSubmission {
@@ -15,6 +17,7 @@ export interface KYCSubmission {
   status: 'pending' | 'approved' | 'rejected';
   submittedAt: string;
   reviewedAt?: string;
+  adminNotes?: string;
   reviewedBy?: string;
   rejectionReason?: string;
   notes?: string;
@@ -81,6 +84,21 @@ export class KYCService {
           data: submission,
         },
       });
+
+      // Send notification to user about KYC submission
+      try {
+        const user = await DataService.getUserByKey(userId);
+        if (user) {
+          await NotificationService.sendNotification(user, {
+            userId,
+            type: 'kyc_update',
+            status: 'submitted',
+            message: 'Your KYC verification has been submitted and is under review.'
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send KYC submission notification:', notificationError);
+      }
 
       return { success: true, submissionId };
     } catch (error) {
@@ -172,6 +190,66 @@ export class KYCService {
     } catch (error) {
       console.error('Failed to review KYC:', error);
       return { success: false, error: 'Failed to review KYC submission' };
+    }
+  }
+
+  /**
+   * Update KYC status (admin function)
+   */
+  static async updateKYCStatus(
+    submissionId: string,
+    status: 'approved' | 'rejected',
+    adminNotes?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const doc = await getDoc({
+        collection: this.KYC_COLLECTION,
+        key: submissionId,
+      });
+
+      if (!doc) {
+        return { success: false, error: 'KYC submission not found' };
+      }
+
+      const submission = doc.data as KYCSubmission;
+      const updatedSubmission: KYCSubmission = {
+        ...submission,
+        status,
+        adminNotes,
+        reviewedAt: new Date().toISOString(),
+      };
+
+      await setDoc({
+        collection: this.KYC_COLLECTION,
+        doc: {
+          key: submissionId,
+          data: updatedSubmission,
+        },
+      });
+
+      // Send notification to user about KYC status update
+      try {
+        const user = await DataService.getUserByKey(submission.userId);
+        if (user) {
+          const message = status === 'approved' 
+            ? 'Congratulations! Your KYC verification has been approved. You can now access all platform features.'
+            : `Your KYC verification was not approved. ${adminNotes || 'Please contact support for more information.'}`;
+
+          await NotificationService.sendNotification(user, {
+            userId: submission.userId,
+            type: 'kyc_update',
+            status,
+            message
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send KYC status notification:', notificationError);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to update KYC status:', error);
+      return { success: false, error: 'Failed to update KYC status' };
     }
   }
 
