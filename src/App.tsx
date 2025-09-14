@@ -119,6 +119,7 @@ const App: FC = () => {
           
           {/* Auth Routes */}
           <Route path="/auth/role-selection" element={<RoleSelection />} />
+          <Route path="/auth/user-kyc" element={<UserKYCPage />} />
           
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />

@@ -404,9 +404,19 @@ const UserProfile: React.FC = () => {
 
             {/* KYC Status Card */}
             <div className="bg-neutral-50 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <Shield className="w-4 h-4 text-neutral-600" />
-                <span className="text-sm font-medium text-neutral-700">KYC Status</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <Shield className="w-4 h-4 text-neutral-600" />
+                  <span className="text-sm font-medium text-neutral-700">KYC Status</span>
+                </div>
+                {(userData.kycStatus === 'not_started' || userData.kycStatus === 'rejected') && (
+                  <button
+                    onClick={() => navigate('/auth/user-kyc')}
+                    className="text-xs px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    {userData.kycStatus === 'rejected' ? 'Retry KYC' : 'Start KYC'}
+                  </button>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 <div className={`w-2 h-2 rounded-full ${
@@ -418,6 +428,21 @@ const UserProfile: React.FC = () => {
                   {userData.kycStatus.replace('_', ' ')}
                 </span>
               </div>
+              {userData.kycStatus === 'not_started' && (
+                <p className="text-xs text-neutral-500 mt-1">
+                  Complete KYC verification to unlock full features
+                </p>
+              )}
+              {userData.kycStatus === 'pending' && (
+                <p className="text-xs text-yellow-600 mt-1">
+                  Your documents are being reviewed (24-48 hours)
+                </p>
+              )}
+              {userData.kycStatus === 'rejected' && (
+                <p className="text-xs text-red-600 mt-1">
+                  KYC was rejected. Please submit new documents.
+                </p>
+              )}
             </div>
 
             {/* Email */}
