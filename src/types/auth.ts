@@ -1,7 +1,7 @@
 export interface LoginFormData {
   emailOrPhone: string;
   password: string;
-  userType: 'user' | 'agent';
+  userType: 'user' | 'agent' | 'admin';
 }
 
 export interface RegisterFormData {
@@ -60,7 +60,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  userType: 'user' | 'agent';
+  userType: 'user' | 'agent' | 'admin';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
   pin?: string; // USSD PIN for mobile users
@@ -78,6 +78,7 @@ export interface AuthContextType {
   user: {
     user: User | null;
     agent: User | null;
+    admin: User | null;
   };
   
   authMethod: 'sms' | 'web';
@@ -86,7 +87,7 @@ export interface AuthContextType {
   
   login: (formData: LoginFormData, method?: 'sms' | 'web') => Promise<boolean>;
   register: (formData: RegisterFormData) => Promise<boolean>;
-  logout: (userTypeToLogout?: 'user' | 'agent') => Promise<void>;
+  logout: (userTypeToLogout?: 'user' | 'agent' | 'admin') => Promise<void>;
   // SMS verification methods
   verifyRegistrationCode: (code: string) => Promise<boolean>;
   cancelVerification: () => void;
@@ -98,7 +99,7 @@ export interface AuthContextType {
   // User update method
   updateUser: (updatedUser: User) => Promise<void>;
   // User type update method (for role selection)
-  updateUserType: (newUserType: 'user' | 'agent', currentUserType: 'user' | 'agent') => Promise<void>;
+  updateUserType: (newUserType: 'user' | 'agent' | 'admin', currentUserType: 'user' | 'agent' | 'admin') => Promise<void>;
 }
 
 export interface LocationSuggestion {

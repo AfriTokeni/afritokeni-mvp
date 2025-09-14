@@ -40,6 +40,11 @@ import AgentSettlement from './pages/agent-liquidity/AgentSettlement';
 import UserKYCPage from "./pages/auth/UserKYCPage";
 import AgentKYCPage from "./pages/auth/AgentKYCPage";
 
+// Admin Pages
+import KYCAdmin from './pages/admin/KYCAdmin';
+import AdminLogin from './pages/auth/AdminLogin';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
+
 // SMS Interface
 import SMSUI from "./components/SMSUI.tsx";
 
@@ -120,6 +125,14 @@ const App: FC = () => {
           {/* Auth Routes */}
           <Route path="/auth/role-selection" element={<RoleSelection />} />
           <Route path="/auth/user-kyc" element={<UserKYCPage />} />
+          <Route path="/auth/admin-login" element={<AdminLogin />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/kyc" element={
+            <AdminProtectedRoute>
+              <KYCAdmin />
+            </AdminProtectedRoute>
+          } />
           
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
