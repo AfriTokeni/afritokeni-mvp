@@ -54,8 +54,8 @@ const UserKYC: React.FC<UserKYCProps> = ({ onSubmit, isLoading = false }) => {
 
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
-    } else if (!/^\+256\d{9}$/.test(formData.phoneNumber) && !/^0\d{9}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'Please enter a valid Ugandan phone number';
+    } else if (!/^\+\d{1,4}\d{6,14}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Please enter a valid international phone number (e.g., +1234567890)';
     }
 
     // Document fields are now optional - no validation required
