@@ -1,5 +1,3 @@
-import { Resend } from 'resend';
-
 export interface NotificationData {
   userId: string;
   type: 'deposit' | 'withdrawal' | 'bitcoin_exchange' | 'kyc_update' | 'agent_match';
@@ -21,29 +19,17 @@ export interface User {
 }
 
 export class NotificationService {
-  private static resend: Resend | null = null;
-
-  private static initResend() {
-    if (!this.resend) {
-      const apiKey = process.env.RESEND_API_KEY;
-      if (apiKey) {
-        this.resend = new Resend(apiKey);
-      }
-    }
-    return this.resend;
-  }
-
-  // Send notification based on user's preferred method
+  // Send notification - uses direct API calls for production
   static async sendNotification(user: User, notification: NotificationData) {
     try {
-      // For web users with email, send email
+      // For web users with email, send email via direct API call
       if (user.email && user.authMethod === 'web') {
         await this.sendEmailNotification(user, notification);
       }
       
-      // For SMS users or users without email, send SMS
+      // For SMS users, simulate for now (can integrate real SMS gateway)
       if (user.phone && (!user.email || user.authMethod === 'sms')) {
-        await this.sendSMSNotification(user, notification);
+        this.sendSMSNotification(user, notification);
       }
 
       console.log(`Notification sent to user ${user.id} for ${notification.type}`);
@@ -52,37 +38,65 @@ export class NotificationService {
     }
   }
 
-  // Email notifications using Resend
+  // Send email notification using Resend API
   private static async sendEmailNotification(user: User, notification: NotificationData) {
-    const resend = this.initResend();
-    if (!resend) {
-      console.warn('Resend not configured, skipping email notification');
-      return;
+    const startTime = Date.now();
+    console.log(`🔄 [EMAIL] Starting notification send to ${user.email} (type: ${notification.type})`);
+    
+    try {
+      // Use environment variables for API key
+      const apiKey = import.meta.env.VITE_RESEND_API_KEY || process.env.RESEND_API_KEY;
+      const emailDomain = import.meta.env.VITE_EMAIL_FROM_DOMAIN || process.env.EMAIL_FROM_DOMAIN || "afritokeni.com";
+      
+      if (!apiKey) {
+        console.error(`❌ [EMAIL] No API key found in environment variables`);
+        console.log(`📧 [EMAIL] Fallback: Simulating email for ${user.email}: ${notification.type}`);
+        return;
+      }
+
+      const { subject, html } = this.generateEmailContent(user, notification);
+      
+      console.log(`📧 [EMAIL] Sending real email with Resend API`);
+      console.log(`📧 [EMAIL] Subject: "${subject}"`);
+      console.log(`📧 [EMAIL] To: ${user.email}`);
+
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `AfriTokeni <noreply@${emailDomain}>`,
+          to: [user.email],
+          subject,
+          html
+        })
+      });
+
+      const duration = Date.now() - startTime;
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error(`❌ [EMAIL] Resend API error (${response.status}):`, errorData);
+        console.error(`❌ [EMAIL] Duration: ${duration}ms`);
+        throw new Error(`Resend API error: ${errorData.message || response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(`✅ [EMAIL] Successfully sent to ${user.email} in ${duration}ms`);
+      console.log(`✅ [EMAIL] Message ID: ${result.id}`);
+      console.log(`✅ [EMAIL] Type: ${notification.type}`);
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`❌ [EMAIL] Failed to send notification after ${duration}ms`);
+      console.error(`❌ [EMAIL] User: ${user.email}, Type: ${notification.type}`);
+      console.error(`❌ [EMAIL] Error details:`, error);
+      
+      // Fallback simulation
+      console.log(`📧 [EMAIL] Fallback simulation for ${user.email}: ${notification.type}`);
     }
-
-    const emailDomain = process.env.EMAIL_FROM_DOMAIN || "resend.dev";
-    const { subject, html } = this.generateEmailContent(user, notification);
-
-    await resend.emails.send({
-      from: `AfriTokeni <noreply@${emailDomain}>`,
-      to: [user.email!],
-      subject,
-      html
-    });
-  }
-
-  // SMS notifications (simulated for now, ready for real SMS gateway)
-  private static async sendSMSNotification(user: User, notification: NotificationData) {
-    const message = this.generateSMSContent(user, notification);
-    
-    // TODO: Replace with real SMS gateway integration
-    console.log(`📱 SMS to ${user.phone}: ${message}`);
-    
-    // For real implementation, integrate with SMS providers like:
-    // - Twilio
-    // - Africa's Talking
-    // - Clickatell
-    // - Local SMS gateways
   }
 
   // Generate email content based on notification type
@@ -93,72 +107,51 @@ export class NotificationService {
       case 'deposit':
         return {
           subject: `✅ Deposit Confirmed - ${notification.amount} ${notification.currency}`,
-          html: this.createEmailTemplate(
-            `Deposit Successful!`,
-            `Your deposit of <strong>${notification.amount} ${notification.currency}</strong> has been confirmed and added to your account.`,
-            `Transaction ID: ${notification.transactionId}`,
-            name
-          )
+          html: `<h2>Hi ${name}!</h2><p>Your deposit of <strong>${notification.amount} ${notification.currency}</strong> has been confirmed.</p><p>Transaction ID: ${notification.transactionId}</p>`
         };
 
       case 'withdrawal':
         return {
           subject: `💸 Withdrawal Processed - ${notification.amount} ${notification.currency}`,
-          html: this.createEmailTemplate(
-            `Withdrawal Completed`,
-            `Your withdrawal of <strong>${notification.amount} ${notification.currency}</strong> has been processed successfully.`,
-            `Please collect your cash from the agent. Transaction ID: ${notification.transactionId}`,
-            name
-          )
+          html: `<h2>Hi ${name}!</h2><p>Your withdrawal of <strong>${notification.amount} ${notification.currency}</strong> has been processed.</p><p>Transaction ID: ${notification.transactionId}</p>`
         };
 
       case 'bitcoin_exchange':
         return {
           subject: `₿ Bitcoin Exchange - ${notification.amount} BTC`,
-          html: this.createEmailTemplate(
-            `Bitcoin Exchange Update`,
-            `Your Bitcoin exchange of <strong>${notification.amount} BTC</strong> is ${notification.status}.`,
-            notification.agentName ? `Agent: ${notification.agentName}` : `Transaction ID: ${notification.transactionId}`,
-            name
-          )
+          html: `<h2>Hi ${name}!</h2><p>Your Bitcoin exchange of <strong>${notification.amount} BTC</strong> is ${notification.status}.</p>`
         };
 
       case 'kyc_update':
         return {
           subject: `🔐 KYC Status Update`,
-          html: this.createEmailTemplate(
-            `KYC Verification Update`,
-            `Your KYC verification status has been updated to: <strong>${notification.status}</strong>`,
-            notification.message || 'Please check your dashboard for more details.',
-            name
-          )
+          html: `<h2>Hi ${name}!</h2><p>Your KYC verification status: <strong>${notification.status}</strong></p><p>${notification.message || ''}</p>`
         };
 
       case 'agent_match':
         return {
           subject: `🤝 Agent Match Found`,
-          html: this.createEmailTemplate(
-            `Agent Match Found!`,
-            `We found an agent for your transaction: <strong>${notification.agentName}</strong>`,
-            `Amount: ${notification.amount} ${notification.currency}`,
-            name
-          )
+          html: `<h2>Hi ${name}!</h2><p>Agent found: <strong>${notification.agentName}</strong></p><p>Amount: ${notification.amount} ${notification.currency}</p>`
         };
 
       default:
         return {
           subject: 'AfriTokeni Account Update',
-          html: this.createEmailTemplate(
-            'Account Update',
-            notification.message || 'Your account has been updated.',
-            '',
-            name
-          )
+          html: `<h2>Hi ${name}!</h2><p>${notification.message || 'Your account has been updated.'}</p>`
         };
     }
   }
 
-  // Generate SMS content (concise for SMS limits)
+  // SMS notifications (simulated for now)
+  private static sendSMSNotification(user: User, notification: NotificationData) {
+    const message = this.generateSMSContent(user, notification);
+    console.log(`📱 [SMS] Sending to ${user.phone}: ${message}`);
+    
+    // TODO: Integrate with real SMS gateway
+    // For production, integrate with providers like Twilio, Africa's Talking, etc.
+  }
+
+  // Generate SMS content based on notification type
   private static generateSMSContent(user: User, notification: NotificationData): string {
     const name = user.firstName || 'User';
     
