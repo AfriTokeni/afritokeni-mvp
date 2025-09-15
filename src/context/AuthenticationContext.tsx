@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useRef,
+  use,
 } from "react";
 import {
   authSubscribe,
@@ -272,35 +273,35 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         storeUserData(userData, "web");
         console.log("Loaded existing user from Juno:", userData);
       } else {
-        // New user, create profile (this would typically redirect to registration)
-        console.log("New Juno user detected, would redirect to registration");
-        // For now, we'll create a basic user profile
-        const newUser: User = {
-          id: junoUser.key,
-          firstName: "New",
-          lastName: "User",
-          email: junoUser.key + "@afritokeni.com",
-          userType: "user",
-          isVerified: true,
-          kycStatus: "not_started",
-          preferredCurrency: "UGX",
-          location: { country: "UGX", city: "Kampala" },
-          createdAt: new Date(),
-        };
+        // // New user, create profile (this would typically redirect to registration)
+        // console.log("New Juno user detected, would redirect to registration");
+        // // For now, we'll create a basic user profile
+        // const newUser: User = {
+        //   id: junoUser.key,
+        //   firstName: "New",
+        //   lastName: "User",
+        //   email: junoUser.key + "@afritokeni.com",
+        //   userType: "user",
+        //   isVerified: true,
+        //   kycStatus: "not_started",
+        //   preferredCurrency: "UGX",
+        //   location: { country: "UGX", city: "Kampala" },
+        //   createdAt: new Date(),
+        // };
 
-        // Save to Juno datastore
-        await setDoc({
-          collection: "users",
-          doc: {
-            key: junoUser.key,
-            data: newUser,
-          },
-        });
+        // // Save to Juno datastore
+        // await setDoc({
+        //   collection: "users",
+        //   doc: {
+        //     key: junoUser.key,
+        //     data: newUser,
+        //   },
+        // });
 
-        setUser({ user: newUser, agent: null, admin: null });
-        setAuthMethod("web");
-        storeUserData(newUser, "web");
-        console.log("Created new user profile:", newUser);
+        // setUser({ user: newUser, agent: null, admin: null });
+        // setAuthMethod("web");
+        // storeUserData(newUser, "web");
+        // console.log("Created new user profile:", newUser);
       }
     } catch (error) {
       console.error("Error loading/creating user from Juno:", error);
@@ -320,21 +321,24 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const { checkAndRedirectUser } = useRoleBasedAuth();
+  const { checkAndRedirectUser, isUserCreatedSuccess } = useRoleBasedAuth();
   // Keep a ref of latest checker to avoid re-subscribing when its identity changes
   const checkAndRedirectRef = useRef(checkAndRedirectUser);
   useEffect(() => {
     checkAndRedirectRef.current = checkAndRedirectUser;
   }, [checkAndRedirectUser]);
 
-  // Initialize user from stored data and subscribe to Juno auth changes
   useEffect(() => {
-    const storedData = getStoredUserData();
+     const storedData = getStoredUserData();
     if (storedData) {
       setUser({ ...storedData.user, admin: null });
       setAuthMethod(storedData.authMethod);
       console.log("Restored user from storage:", storedData.user);
     }
+  }, []);
+
+  // Initialize user from stored data and subscribe to Juno auth changes
+  useEffect(() => {
 
     // Subscribe to Juno authentication state changes
     const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
@@ -353,7 +357,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [isUserCreatedSuccess]);
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (
