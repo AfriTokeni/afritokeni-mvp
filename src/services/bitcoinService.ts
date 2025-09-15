@@ -1,8 +1,15 @@
 import { nanoid } from 'nanoid';
-import { AfricanCurrency, formatCurrencyAmount } from '../types/currency';
+import { AfricanCurrency } from '../types/currency';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory } from 'ecpair';
+import { NotificationService } from './notificationService';
+import { DataService } from './dataService';
+
+// Helper function for currency formatting
+const formatCurrencyAmount = (amount: number, currency: string): string => {
+  return `${amount.toFixed(2)} ${currency}`;
+};
 
 // Bitcoin wallet and transaction interfaces
 export interface BitcoinWallet {
@@ -122,6 +129,23 @@ export class BitcoinService {
       balance: 0,
       createdAt: new Date()
     };
+
+    // Send notification for Bitcoin wallet creation
+    try {
+      const user = await DataService.getUserByKey(userId);
+      if (user) {
+        await NotificationService.sendNotification(user, {
+          userId,
+          type: 'bitcoin_exchange',
+          amount: 0,
+          currency: 'BTC',
+          transactionId: wallet.id,
+          message: `Bitcoin wallet created. Address: ${address.substring(0, 8)}...`
+        });
+      }
+    } catch (notificationError) {
+      console.error('Failed to send Bitcoin wallet notification:', notificationError);
+    }
 
     // In production, store in Juno datastore
     // For now, return the wallet object
@@ -531,16 +555,82 @@ export class BitcoinService {
         }
       });
 
+      // Send notifications to user and agent
+      try {
+        const [user, agent] = await Promise.all([
+          DataService.getUserByKey(userId),
+          DataService.getUserByKey(agentId)
+        ]);
+
+        if (user) {
+          await NotificationService.sendNotification(user, {
+            userId,
+            type: 'bitcoin_exchange',
+            amount: this.satoshisToBtc(bitcoinAmount),
+            currency: 'BTC',
+            status: 'initiated',
+            transactionId: transaction.id,
+            message: `Bitcoin exchange initiated for ${formatCurrencyAmount(netLocalAmount, localCurrency)}`
+          });
+        }
+
+        if (agent) {
+          await NotificationService.sendNotification(agent, {
+            userId: agentId,
+            type: 'agent_match',
+            amount: netLocalAmount,
+            currency: localCurrency,
+            transactionId: transaction.id,
+            message: `New Bitcoin exchange request: ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send Bitcoin exchange notifications:', notificationError);
+      }
+
+      // Send notifications for local to Bitcoin exchange
+      try {
+        const [user, agent] = await Promise.all([
+          DataService.getUserByKey(userId),
+          DataService.getUserByKey(agentId)
+        ]);
+
+        if (user) {
+          await NotificationService.sendNotification(user, {
+            userId,
+            type: 'bitcoin_exchange',
+            amount: this.satoshisToBtc(bitcoinAmount),
+            currency: 'BTC',
+            status: 'initiated',
+            transactionId: transaction.id,
+            message: `Bitcoin purchase initiated with ${formatCurrencyAmount(localAmount, localCurrency)}`
+          });
+        }
+
+        if (agent) {
+          await NotificationService.sendNotification(agent, {
+            userId: agentId,
+            type: 'agent_match',
+            amount: localAmount,
+            currency: localCurrency,
+            transactionId: transaction.id,
+            message: `New Bitcoin purchase request: ${formatCurrencyAmount(localAmount, localCurrency)} → ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send Bitcoin purchase notifications:', notificationError);
+      }
+
       return {
         success: true,
         transaction,
-        message: `Exchange initiated: ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC → ${formatCurrencyAmount(netLocalAmount, localCurrency)}`,
+        message: `Bitcoin exchange successful! ${bitcoinAmount} satoshis exchanged for ${netLocalAmount.toLocaleString()} ${localCurrency}`,
         feeBreakdown
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to process Bitcoin exchange'
+        message: error instanceof Error ? error.message : 'Bitcoin exchange failed'
       };
     }
   }

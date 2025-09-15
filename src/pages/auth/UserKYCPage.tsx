@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import UserKYC from '../../components/UserKYC';
-import { UserKYCData, User } from '../../types/auth';
+import { UserKYCData } from '../../types/auth';
 import { DataService } from '../../services/dataService';
+import { KYCService } from '../../services/kycService';
 
 const UserKYCPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,102 +20,48 @@ const UserKYCPage: React.FC = () => {
         data.phoneNumber : 
         `+256${data.phoneNumber.replace(/^0/, '')}`;
 
-      // Check for existing user ID from localStorage or context
-      let existingUserId: string | null = null;
-      
-      // First check if user is already logged in and has an ID
-      if (user.user?.id) {
-        existingUserId = user.user.id;
+      // Get current user ID
+      const currentUser = user.user;
+      if (!currentUser?.id) {
+        throw new Error('User must be logged in to submit KYC');
       }
 
-      // Check authentication method - if no current user, default to web
-      const authMethod = user.user ? 'web' : 'web'; // Default to web for logged in users
+      // Submit KYC using the new KYCService with document upload
+      const kycResult = await KYCService.submitKYC(currentUser.id, data);
       
-      // Create user in Juno datastore with existing ID or generate new one
-      // If user already exists, update their information instead of creating new
-      let finalUser;
-      if (existingUserId && user.user) {
-        let existingUser: User | null = null;
-        
-        if (authMethod === 'web') {
-          // For web users, look up by user ID
-          existingUser = await DataService.getWebUserById(existingUserId);
-        } else {
-          // For SMS users, look up by phone number
-          existingUser = await DataService.getUser(formattedPhone);
-        }
-        
-        if (existingUser) {
-          // Update existing user with new information
-          const updateKey = authMethod === 'web' ? existingUserId : formattedPhone;
-          const updateSuccess = await DataService.updateUser(updateKey, {
-            firstName: data.firstName,
-            lastName: data.lastName,
-            kycStatus: 'pending',
-            // After KYC, all users (web and SMS) store phone number in email field for financial operations
-            email: formattedPhone
-          });
-          
-          if (updateSuccess) {
-            finalUser = {
-              ...existingUser,
-              firstName: data.firstName,
-              lastName: data.lastName,
-              kycStatus: 'pending' as const,
-              // After KYC, all users store phone number in email field
-              email: formattedPhone
-            };
-          } else {
-            throw new Error('Failed to update existing user');
-          }
-        } else {
-          // Create new user with existing ID and appropriate auth method
-          finalUser = await DataService.createUser({
-            id: existingUserId,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: formattedPhone, // After KYC, all users store phone number in email field
-            userType: 'user',
-            kycStatus: 'pending',
-            authMethod: authMethod as 'sms' | 'web'
-          });
-        }
-      } else {
-        // Create completely new user
-        finalUser = await DataService.createUser({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: formattedPhone,
-          userType: 'user',
-          kycStatus: 'pending',
-          authMethod: 'sms' // Default for users without existing ID
-        });
+      if (!kycResult.success) {
+        throw new Error(kycResult.error || 'Failed to submit KYC');
       }
 
-      // Initialize user balance (only if it's a new user or balance doesn't exist)
-      await DataService.initializeUserData(finalUser.id);
-
-      // Update authentication context with new user information
-      // The updateUser method will handle storing the data with the correct keys
-      await updateUser({
-        id: finalUser.id,
-        firstName: finalUser.firstName,
-        lastName: finalUser.lastName,
-        email: formattedPhone, // After KYC, all users have phone number in email field
-        userType: 'user',
+      // Update user's KYC status in the main user record
+      const updateSuccess = await DataService.updateUser(currentUser.id, {
+        firstName: data.firstName,
+        lastName: data.lastName,
         kycStatus: 'pending',
-        isVerified: false,
-        createdAt: new Date()
+        email: formattedPhone // Store phone number for financial operations
+      });
+      
+      if (!updateSuccess) {
+        console.warn('Failed to update user record, but KYC was submitted successfully');
+      }
+
+      // Update authentication context
+      await updateUser({
+        ...currentUser,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: formattedPhone,
+        kycStatus: 'pending',
       });
 
-      console.log('User KYC submitted:', { ...data, user: finalUser });
+      console.log('KYC submitted successfully with ID:', kycResult.submissionId);
       
       // Show success message and redirect
-      alert('KYC verification submitted successfully! We will review your documents and notify you within 24-48 hours.');
+      alert('KYC verification submitted successfully! Your documents have been uploaded securely and will be reviewed within 24-48 hours.');
       navigate('/users/dashboard');
     } catch (error) {
       console.error('KYC submission failed:', error);
-      alert('Failed to submit KYC verification. Please try again.');
+      alert(`Failed to submit KYC verification: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }

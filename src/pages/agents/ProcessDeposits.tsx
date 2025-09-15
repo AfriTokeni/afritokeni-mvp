@@ -3,6 +3,8 @@ import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle } from 'l
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount } from '../../types/currency';
+import { NotificationService } from '../../services/notificationService';
+import { DataService } from '../../services/dataService';
 
 interface DepositRequest {
   id: string;
@@ -114,6 +116,40 @@ const ProcessDeposits: React.FC = () => {
       setVerificationCode('');
       setError('');
       
+      // Send notifications to both agent and user
+      try {
+        const [agentUser, customerUser] = await Promise.all([
+          DataService.getUserByKey(user.agent?.id || user.user?.id || ''),
+          DataService.getUserByKey(request.userId)
+        ]);
+
+        // Notify agent of successful deposit processing
+        if (agentUser) {
+          await NotificationService.sendNotification(agentUser, {
+            userId: agentUser.id,
+            type: 'deposit',
+            amount: request.amount.local,
+            currency: request.amount.currency,
+            transactionId: request.id,
+            message: `Deposit processed successfully for ${request.userName}. Commission earned.`
+          });
+        }
+
+        // Notify customer of deposit confirmation
+        if (customerUser) {
+          await NotificationService.sendNotification(customerUser, {
+            userId: request.userId,
+            type: 'deposit',
+            amount: request.amount.local,
+            currency: request.amount.currency,
+            transactionId: request.id,
+            message: `Your cash deposit has been confirmed and added to your account.`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send deposit notifications:', notificationError);
+      }
+
       // Show success message
       alert(`Deposit completed! ${formatCurrencyAmount(request.amount.local, request.amount.currency as any)} credited to ${request.userName}'s account.`);
     } catch (error) {

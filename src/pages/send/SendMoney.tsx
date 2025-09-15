@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Check,
   Phone,
-  DollarSign,
-  ArrowLeft,
   User,
-  Loader2,
+  Bitcoin,
   Globe,
-  Bitcoin
+  ArrowLeft,
+  Coins,
+  Loader2,
+  DollarSign
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
@@ -55,7 +56,7 @@ const SendMoney: React.FC = () => {
     lastName: '',
     phone: '',
     country: '',
-    currency: 'UGX'
+    currency: userCurrency
   });
   const [usdAmount, setUsdAmount] = useState<string>('');
   const [sendStep, setSendStep] = useState<number>(0); // Start at 0 for type selection
@@ -71,6 +72,25 @@ const SendMoney: React.FC = () => {
 
   const formatCurrency = (amount: number): string => {
     return formatCurrencyAmount(amount, userCurrency as any);
+  };
+
+  // Validation functions
+  const isAmountValid = (amount: string): boolean => {
+    const numAmount = parseFloat(amount);
+    return !isNaN(numAmount) && numAmount > 0 && numAmount <= (balance?.balance || 0);
+  };
+
+  const getAmountValidationClass = (amount: string): string => {
+    if (!amount) return 'border-neutral-300';
+    return isAmountValid(amount) ? 'border-green-500' : 'border-red-500';
+  };
+
+  const getAmountValidationMessage = (amount: string): string => {
+    if (!amount) return '';
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) return 'Please enter a valid amount';
+    if (numAmount > (balance?.balance || 0)) return 'Insufficient balance';
+    return '';
   };
 
   // Mock exchange rates - would be live in production
@@ -341,7 +361,7 @@ const SendMoney: React.FC = () => {
                     First Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                     <input
                       type="text"
                       value={internationalRecipient.firstName}
@@ -357,7 +377,7 @@ const SendMoney: React.FC = () => {
                     Last Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                     <input
                       type="text"
                       value={internationalRecipient.lastName}
@@ -373,7 +393,7 @@ const SendMoney: React.FC = () => {
                     Phone Number
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                     <input
                       type="tel"
                       value={internationalRecipient.phone}
@@ -392,7 +412,7 @@ const SendMoney: React.FC = () => {
                     Country & Currency
                   </label>
                   <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                     <select
                       value={internationalRecipient.currency}
                       onChange={(e) => {
@@ -536,18 +556,25 @@ const SendMoney: React.FC = () => {
                     {userCurrency} ({currencyInfo.name})
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
+                    <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
                     <input
                       type="number"
                       value={localAmount}
                       onChange={(e) => setLocalAmount(e.target.value)}
                       placeholder="10,000"
-                      className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200"
+                      className={`w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border ${getAmountValidationClass(localAmount)} rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200`}
                     />
                   </div>
-                  <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-neutral-500">
-                    Available: {formatCurrency(balance?.balance || 0)}
-                  </p>
+                  <div className="mt-1 sm:mt-2 flex justify-between items-center">
+                    <p className="text-xs sm:text-sm text-neutral-500">
+                      Available: {formatCurrency(balance?.balance || 0)}
+                    </p>
+                    {getAmountValidationMessage(localAmount) && (
+                      <p className="text-xs sm:text-sm text-red-500 font-medium">
+                        {getAmountValidationMessage(localAmount)}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
@@ -567,8 +594,8 @@ const SendMoney: React.FC = () => {
 
               <button
                 onClick={() => setSendStep(2)}
-                disabled={!recipientPhone || !recipient || !localAmount}
-                className="w-full bg-neutral-900 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200"
+                disabled={!recipientPhone || !recipient || !localAmount || !isAmountValid(localAmount) || isProcessing}
+                className="w-full bg-neutral-900 text-white py-2.5 sm:py-3 px-4 rounded-lg font-medium hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
               >
                 Continue
               </button>

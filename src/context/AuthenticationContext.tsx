@@ -43,11 +43,12 @@ interface AuthProviderProps {
 interface IUser {
   agent: User | null;
   user: User | null;
+  admin: User | null;
 }
 
 // Hybrid authentication for AfriTokeni - SMS for users without internet, ICP for web users
 const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<IUser>({ agent: null, user: null });
+  const [user, setUser] = useState<IUser>({ agent: null, user: null, admin: null });
   const [authMethod, setAuthMethod] = useState<"sms" | "web">("web");
 
   // Helper function to store user data with separate keys for users and agents
@@ -77,7 +78,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Helper function to clear user data from both storages
-  const clearUserData = (userType?: "user" | "agent") => {
+  const clearUserData = (userType?: "user" | "agent" | "admin") => {
     // If specific user type provided, clear only that type
     if (userType) {
       const userKey = `afritokeni_${userType}`;
@@ -112,7 +113,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } else {
       // Clear all data (for complete logout scenarios)
-      ["user", "agent"].forEach((type) => {
+      ["user", "agent", "admin"].forEach((type) => {
         const userKey = `afritokeni_${type}`;
         const methodKey = `afritokeni_${type}_auth_method`;
 
@@ -229,14 +230,14 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       // Also check for existing role to determine correct userType
-      let userRole: "user" | "agent" = "user"; // default
+      let userRole: "user" | "agent" | "admin" = "user"; // default
       try {
         const roleDoc = await getDoc({
           collection: "user_roles",
           key: junoUser.key,
         });
         if (roleDoc?.data) {
-          const roleData = roleDoc.data as { role: "user" | "agent" };
+          const roleData = roleDoc.data as { role: "user" | "agent" | "admin" };
           userRole = roleData.role;
         }
       } catch {
@@ -259,10 +260,14 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // const stored_agent = userData.userType === 'agent' ? userData : null;
         // const stored_user = userData.userType === 'user' ? userData : null;
 
-        setUser({
-          ...user,
-          [userRole]: afritokeniUser,
-        });
+        if (userRole === 'admin') {
+          setUser({ user: null, agent: null, admin: afritokeniUser });
+        } else {
+          setUser({
+            ...user,
+            [userRole]: afritokeniUser,
+          });
+        }
         setAuthMethod("web");
         storeUserData(userData, "web");
         console.log("Loaded existing user from Juno:", userData);
@@ -292,7 +297,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           },
         });
 
-        setUser({ user: newUser, agent: null });
+        setUser({ user: newUser, agent: null, admin: null });
         setAuthMethod("web");
         storeUserData(newUser, "web");
         console.log("Created new user profile:", newUser);
@@ -326,7 +331,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const storedData = getStoredUserData();
     if (storedData) {
-      setUser(storedData.user);
+      setUser({ ...storedData.user, admin: null });
       setAuthMethod(storedData.authMethod);
       console.log("Restored user from storage:", storedData.user);
     }
@@ -342,7 +347,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         loadOrCreateUserFromJuno(junoUser);
       } else {
         // User is not authenticated
-        setUser({ user: null, agent: null });
+        setUser({ user: null, agent: null, admin: null });
         setAuthMethod("web");
       }
     });
@@ -415,18 +420,39 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
             firstName: newUser.firstName,
             lastName: newUser.lastName,
             email: formattedPhone, // Phone number for SMS users
-            userType: newUser.userType,
+            userType: newUser.userType as 'user' | 'agent',
             kycStatus: newUser.kycStatus,
             authMethod: "sms", // Important: specify this is an SMS user
           });
 
           existingUser = newUser;
         }
+        
+        // Handle admin login differently - admins use web authentication only
+        if (formData.userType === 'admin') {
+          // For admin login, check if user exists in database with admin role
+          try {
+            const adminUser = await DataService.getUser(formData.emailOrPhone);
+            if (adminUser && adminUser.userType === 'admin') {
+              setUser({ user: null, agent: null, admin: adminUser });
+              setAuthMethod("web");
+              storeUserData(adminUser, "web");
+              return true;
+            } else {
+              console.error("Admin user not found or invalid role");
+              return false;
+            }
+          } catch (error) {
+            console.error("Admin login failed:", error);
+            return false;
+          }
+        }
+        
         const stored_agent =
           existingUser.userType == "agent" ? existingUser : null;
         const stored_user =
           existingUser.userType == "user" ? existingUser : null;
-        setUser({ user: stored_user, agent: stored_agent });
+        setUser({ user: stored_user, agent: stored_agent, admin: null });
         setAuthMethod("sms");
         storeUserData(existingUser, "sms");
 
@@ -502,9 +528,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Helper to cancel verification process
 
-  const logout = async (userTypeToLogout?: "user" | "agent") => {
+  const logout = async (userTypeToLogout?: "user" | "agent" | "admin") => {
     try {
-      let targetUserType: "user" | "agent" | undefined = userTypeToLogout;
+      let targetUserType: "user" | "agent" | "admin" | undefined = userTypeToLogout;
 
       // If no specific user type provided, determine based on current context
       if (!targetUserType) {
@@ -519,6 +545,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           targetUserType = "user";
         } else if (user.agent) {
           targetUserType = "agent";
+        } else if (user.admin) {
+          targetUserType = "admin";
         }
       }
 
@@ -547,7 +575,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       clearUserData(targetUserType);
 
       // If no users remain, reset auth method and redirect
-      const remainingUser = targetUserType === "user" ? user.agent : user.user;
+      const remainingUser = targetUserType === "user" ? (user.agent || user.admin) : 
+                           targetUserType === "agent" ? (user.user || user.admin) : 
+                           (user.user || user.agent);
       if (!remainingUser) {
         setAuthMethod("web");
         window.location.href = "/";
@@ -563,7 +593,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         clearUserData(userTypeToLogout);
 
         const remainingUser =
-          userTypeToLogout === "user" ? user.agent : user.user;
+          userTypeToLogout === "user" ? (user.agent || user.admin) :
+          userTypeToLogout === "agent" ? (user.user || user.admin) :
+          (user.user || user.agent);
         if (!remainingUser) {
           setAuthMethod("web");
           window.location.href = "/";
@@ -579,7 +611,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     register,
     updateUserCurrency,
-    isAuthenticated: user.user !== null || user.agent !== null,
+    isAuthenticated: user.user !== null || user.agent !== null || user.admin !== null,
     verifyRegistrationCode: async () => false,
     cancelVerification: () => {},
     isVerifying: false,

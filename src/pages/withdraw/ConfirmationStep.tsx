@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Copy, Check, MapPin, Phone, Clock } from 'lucide-react';
+import React from 'react';
+import { Check, MapPin, Phone, Clock } from 'lucide-react';
 import { formatCurrencyAmount } from '../../types/currency';
 import { Agent as DBAgent } from '../../services/dataService';
+import TransactionCodeDisplay from '../../components/TransactionCodeDisplay';
 
 interface ConfirmationStepProps {
   localAmount: number;
@@ -26,17 +27,6 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   withdrawalCode,
   onMakeAnotherWithdrawal
 }) => {
-  const [codeCopied, setCodeCopied] = useState(false);
-
-  const handleCopyCode = async () => {
-    try {
-      await navigator.clipboard.writeText(withdrawalCode);
-      setCodeCopied(true);
-      setTimeout(() => setCodeCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
 
     const handleGetDirections = (agentLocation: [number, number]) => {
     if (!userLocation) return;
@@ -48,33 +38,20 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
     <div className="space-y-4 sm:space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-6 lg:p-8">
         <div className="text-center mb-6 sm:mb-8">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-            <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
           </div>
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900">Your Withdrawal Code is Ready</h2>
-          <p className="text-neutral-600 mt-2 text-xs sm:text-sm lg:text-base px-4">Show this 6-digit code to the agent to complete your withdrawal</p>
+          <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2">Withdrawal Confirmed!</h2>
+          <p className="text-neutral-600 text-sm sm:text-base">Your withdrawal request has been processed</p>
         </div>
 
         {/* Withdrawal Code */}
-        <div className="bg-neutral-50 rounded-xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-neutral-200">
-          <div className="text-center">
-            <p className="text-xs sm:text-sm font-medium text-neutral-600 mb-2 sm:mb-3">Withdrawal Code</p>
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-              <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-mono font-bold text-neutral-900 tracking-wider">
-                {withdrawalCode}
-              </span>
-              <button
-                onClick={handleCopyCode}
-                className="p-1.5 sm:p-2 text-neutral-500 hover:text-neutral-900 transition-colors duration-200"
-                title="Copy code"
-              >
-                {codeCopied ? <Check className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" /> : <Copy className="w-5 h-5 sm:w-6 sm:h-6" />}
-              </button>
-            </div>
-            {codeCopied && (
-              <p className="text-green-600 text-sm mt-2 font-medium">Code copied to clipboard!</p>
-            )}
-          </div>
+        <div className="mb-6">
+          <TransactionCodeDisplay
+            code={withdrawalCode}
+            title="Your Withdrawal Code"
+            description="Show this code or QR code to the agent to receive your cash"
+          />
         </div>
 
         {/* Transaction Summary */}

@@ -58,11 +58,23 @@ export default defineConfig({
           write: "public",
           memory: "stable",
         },
+        {
+          collection: "kyc_submissions",
+          read: "managed",
+          write: "managed",
+          memory: "stable",
+        },
       ],
       storage: [
         {
           collection: "images",
           read: "managed",
+          write: "managed",
+          memory: "stable",
+        },
+        {
+          collection: "kyc_documents",
+          read: "public",
           write: "managed",
           memory: "stable",
         },
