@@ -1,6 +1,47 @@
 // Secure Juno serverless function for email notifications
 // Environment variables are only accessible on the backend
 
+// Import Resend (would be imported from 'resend' in a real implementation)
+interface ResendAPI {
+  emails: {
+    send: (emailData: {
+      from: string;
+      to: string[];
+      subject: string;
+      html: string;
+    }) => Promise<void>;
+  };
+}
+
+interface User {
+  id: string;
+  email?: string;
+  phone?: string;
+  firstName?: string;
+  lastName?: string;
+  authMethod?: 'sms' | 'web';
+}
+
+interface Notification {
+  type: 'deposit' | 'withdrawal' | 'bitcoin_exchange' | 'kyc_update' | 'agent_match';
+  amount?: number;
+  currency?: string;
+  agentName?: string;
+  status?: string;
+  transactionId?: string;
+  message?: string;
+}
+
+declare const resend: ResendAPI | undefined;
+
+// For Juno serverless environment
+declare const process: {
+  env: {
+    RESEND_API_KEY?: string;
+    EMAIL_FROM_DOMAIN?: string;
+  };
+};
+
 interface NotificationRequest {
   userId: string;
   type: 'deposit' | 'withdrawal' | 'bitcoin_exchange' | 'kyc_update' | 'agent_match';
@@ -62,11 +103,11 @@ export async function sendNotification(data: NotificationRequest) {
     return { success: true, message: 'Notification sent successfully' };
   } catch (error) {
     console.error('Failed to send notification:', error);
-    return { success: false, message: error.message };
+    return { success: false, message: error instanceof Error ? error.message : 'Unknown error occurred' };
   }
-});
+}
 
-function generateEmailContent(user: any, notification: any) {
+function generateEmailContent(user: User, notification: Notification) {
   const name = user.firstName || 'User';
   
   switch (notification.type) {
@@ -138,7 +179,7 @@ function generateEmailContent(user: any, notification: any) {
   }
 }
 
-function generateSMSContent(user: any, notification: any): string {
+function generateSMSContent(user: User, notification: Notification): string {
   const name = user.firstName || 'User';
   
   switch (notification.type) {
