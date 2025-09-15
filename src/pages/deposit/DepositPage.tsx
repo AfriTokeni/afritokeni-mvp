@@ -9,19 +9,6 @@ import { AFRICAN_CURRENCIES, formatCurrencyAmount, type AfricanCurrency } from '
 import type { Agent } from '../withdraw/types';
 import { DataService } from '../../services/dataService';
 
-interface DepositRequest {
-  id: string;
-  userId: string;
-  agentId: string;
-  amount: {
-    local: number;
-    currency: string;
-  };
-  depositCode: string;
-  status: 'pending' | 'confirmed' | 'completed';
-  createdAt: Date;
-}
-
 const DepositPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthentication();
@@ -167,23 +154,16 @@ const DepositPage: React.FC = () => {
       // Generate 6-digit deposit code
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       
-      const depositRequest: DepositRequest = {
-        id: `dep_${Date.now()}`,
-        userId: user.user.id,
-        agentId: agent.id,
-        amount: {
-          local: parseFloat(amount),
-          currency: selectedCurrency
-        },
-        depositCode: code,
-        status: 'pending',
-        createdAt: new Date()
-      };
-
-      // In production, this would create the deposit request in the backend
-      // For now, we'll simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Deposit request created:', depositRequest);
+      // Create the deposit request using DataService
+      const requestId = await DataService.createDepositRequest(
+        user.user.id,
+        agent.id,
+        parseFloat(amount),
+        selectedCurrency,
+        code
+      );
+      
+      console.log('Deposit request created with ID:', requestId);
       
       setDepositCode(code);
       setStep('confirmation');
