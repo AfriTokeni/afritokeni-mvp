@@ -46,6 +46,30 @@ const LandingPage: React.FC = () => {
           }
         }
       });
+
+      // Send welcome email using NotificationService
+      console.log('📧 Sending welcome email to:', email);
+      try {
+        const { NotificationService } = await import('../services/notificationService');
+        
+        // Create a user object for the notification
+        const user = {
+          id: nanoid(),
+          email: email.toLowerCase().trim(),
+          firstName: 'Subscriber',
+          authMethod: 'web' as const
+        };
+
+        // Send subscription welcome notification
+        await NotificationService.sendNotification(user, {
+          userId: user.id,
+          type: 'subscription_welcome'
+        });
+        
+        console.log('✅ Welcome email sent successfully');
+      } catch (emailError) {
+        console.warn('⚠️ Welcome email failed to send, but subscription was saved:', emailError);
+      }
       
       setSubscriptionStatus('success');
       setEmail('');
@@ -129,7 +153,7 @@ const LandingPage: React.FC = () => {
                     Stay Updated
                   </h3>
                   <p className="text-gray-600">
-                    Get the latest updates on AfriTokeni's launch and new features
+                    Get the latest updates on AfriTokeni&apos;s launch and new features
                   </p>
                 </div>
                 
@@ -157,7 +181,7 @@ const LandingPage: React.FC = () => {
                 {subscriptionStatus === 'success' && (
                   <div className="mt-4 flex items-center justify-center text-green-600">
                     <CheckCircle className="w-5 h-5 mr-2" />
-                    <span>Successfully subscribed! Thank you for your interest.</span>
+                    <span>Successfully subscribed! Check your email for a welcome message.</span>
                   </div>
                 )}
                 
