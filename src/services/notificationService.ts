@@ -45,8 +45,8 @@ export class NotificationService {
     
     try {
       // Use environment variables for API key
-      const apiKey = import.meta.env.VITE_RESEND_API_KEY || process.env.RESEND_API_KEY;
-      const emailDomain = import.meta.env.VITE_EMAIL_FROM_DOMAIN || process.env.EMAIL_FROM_DOMAIN || "afritokeni.com";
+      const apiKey = import.meta.env.VITE_RESEND_API_KEY;
+      const emailDomain = import.meta.env.VITE_EMAIL_FROM_DOMAIN || "afritokeni.com";
       
       if (!apiKey) {
         console.error(`❌ [EMAIL] No API key found in environment variables`);
@@ -174,41 +174,6 @@ export class NotificationService {
       default:
         return `AfriTokeni: Hi ${name}, ${notification.message || 'account updated'}. Check your dashboard.`;
     }
-  }
-
-  // Email template wrapper
-  private static createEmailTemplate(title: string, message: string, details: string, name: string): string {
-    return `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1a1a1a; margin-bottom: 10px;">AfriTokeni</h1>
-          <p style="color: #666; font-size: 14px;">Secure Financial Services for Africa</p>
-        </div>
-        
-        <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
-          <h2 style="color: #1a1a1a; margin-bottom: 15px;">Hi ${name}!</h2>
-          <h3 style="color: #1a1a1a; margin-bottom: 15px;">${title}</h3>
-          <p style="color: #444; line-height: 1.6; margin-bottom: 15px;">
-            ${message}
-          </p>
-          ${details ? `<p style="color: #666; font-size: 14px; margin-bottom: 0;">${details}</p>` : ''}
-        </div>
-        
-        <div style="text-align: center; margin-bottom: 25px;">
-          <a href="https://afritokeni.com" 
-             style="display: inline-block; background: #1a1a1a; color: white; padding: 12px 25px; 
-                    text-decoration: none; border-radius: 6px; font-weight: 500;">
-            View Dashboard
-          </a>
-        </div>
-        
-        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
-          <p style="color: #999; font-size: 12px;">
-            This is an automated message from AfriTokeni. Please do not reply to this email.
-          </p>
-        </div>
-      </div>
-    `;
   }
 
   // Bulk notifications for multiple users
