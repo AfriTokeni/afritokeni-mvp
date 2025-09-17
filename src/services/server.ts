@@ -19,7 +19,7 @@
 // - New users must set up PIN before accessing services
 // ========================================
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
@@ -27,17 +27,38 @@ import AfricasTalking from 'africastalking';
 import { WebhookDataService as DataService } from './webHookServices.js';
 import type { 
   NotificationRequest, 
-  NotificationResponse, 
   NotificationData,
   User,
   EmailContent 
 } from '../types/notification.js';
 
+// Node.js process declaration
+declare const process: {
+  env: {
+    [key: string]: string | undefined;
+    PORT?: string;
+    VITE_PORT?: string;
+    RESEND_API_KEY?: string;
+    EMAIL_FROM_DOMAIN?: string;
+    AT_USERNAME?: string;
+    AT_API_KEY?: string;
+    AT_SHORT_CODE?: string;
+    NODE_ENV?: string;
+  };
+  on: (event: string, listener: Function) => void;
+  exit: (code?: number) => void;
+  cwd: () => string;
+};
 
+// Configure dotenv with explicit path
+import { fileURLToPath } from 'url';
+import path from 'path';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-
-dotenv.config();
+// Load environment variables from project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Types for our server
 interface USSDSession {
@@ -72,14 +93,25 @@ interface VerificationData {
 
 // AfricasTalking configuration
 const credentials = {
-    username: process.env.VITE_AT_USERNAME || "",
-    apiKey: process.env.VITE_AT_API_KEY || ""
+    username: process.env.AT_USERNAME || "sandbox",
+    apiKey: process.env.AT_API_KEY || ""
 };
-const africastalking = AfricasTalking(credentials);
-const sms = africastalking.SMS;
+
+// Initialize AfricasTalking only if we have valid credentials
+let africastalking: ReturnType<typeof AfricasTalking> | null = null;
+let sms: any = null;
+
+if (credentials.username && credentials.apiKey) {
+  try {
+    africastalking = AfricasTalking(credentials);
+    sms = africastalking.SMS;
+  } catch (error) {
+    console.error('❌ Failed to initialize AfricasTalking:', error);
+  }
+}
 
 const app = express();
-const PORT = process.env.VITE_PORT || 3001;
+
 
 // Middleware
 app.use(cors());
@@ -859,7 +891,7 @@ const sendSMS = async (phoneNumber: string, message: string) => {
 };
 
 // Route to send SMS verification code
-app.post('/api/send-sms', async (req, res) => {
+app.post('/api/send-sms', async (req: Request, res: Response) => {
   try {
     const { phoneNumber, message, verificationCode, userId } = req.body;
     
@@ -905,7 +937,7 @@ app.post('/api/send-sms', async (req, res) => {
 });
 
 // Route to verify SMS code
-app.post('/api/verify-code', (req, res) => {
+app.post('/api/verify-code', (req: Request, res: Response) => {
     console.log('🔍 Verifying code...');
   try {
     const { phoneNumber, code } = req.body;
@@ -964,7 +996,7 @@ app.post('/api/verify-code', (req, res) => {
 });
 
 // Route to handle incoming SMS (webhook from AfricasTalking)
-app.post('/api/webhook/sms', (req, res) => {
+app.post('/api/webhook/sms', (req: Request, res: Response) => {
   try {
     const { from, text } = req.body;
     
@@ -981,7 +1013,7 @@ app.post('/api/webhook/sms', (req, res) => {
 });
 
 // Route to handle USSD requests (webhook from AfricasTalking)
-app.post('/api/ussd', async (req, res) => {
+app.post('/api/ussd', async (req: Request, res: Response) => {
   try {
     const { sessionId, phoneNumber, text } = req.body;
     
@@ -1033,7 +1065,7 @@ app.post('/api/ussd', async (req, res) => {
 });
 
 // Development endpoint for PIN management
-app.post('/api/dev/pins/clear', async (_req, res) => {
+app.post('/api/dev/pins/clear', async (_req: Request, res: Response) => {
   if (process.env.NODE_ENV !== 'production') {
     // Clear in-memory sessions
     ussdSessions.clear();
@@ -1051,7 +1083,7 @@ app.post('/api/dev/pins/clear', async (_req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', async (_req, res) => {
+app.get('/health', async (_req: Request, res: Response) => {
   try {
     // Get PIN count from DataService if available
     try {
@@ -1089,7 +1121,7 @@ app.get('/health', async (_req, res) => {
 // ========================================
 
 // Send notification endpoint
-app.post('/api/send-notification', async (req, res) => {
+app.post('/api/send-notification', async (req: Request, res: Response) => {
   const startTime = Date.now();
   
   try {
@@ -1118,8 +1150,8 @@ app.post('/api/send-notification', async (req, res) => {
       });
     }
 
-    let emailResult = null;
-    let smsResult = null;
+    let emailResult: { id: string; status: string } | null = null;
+    let smsResult: { simulated: boolean; phone: string; message: string } | null = null;
 
     // Only send email if user has email and uses web auth
     if (request.user.email && request.user.authMethod === 'web') {
@@ -1151,7 +1183,7 @@ app.post('/api/send-notification', async (req, res) => {
           throw new Error(`Resend API error: ${errorData}`);
         }
 
-        const result = await response.json() as any;
+        const result = await response.json() as { id: string; [key: string]: unknown };
         emailResult = {
           id: result.id,
           status: 'sent'
@@ -1160,11 +1192,12 @@ app.post('/api/send-notification', async (req, res) => {
         console.log(`✅ [SERVER] Email sent successfully`);
         console.log(`✅ [SERVER] Message ID: ${result.id}`);
         
-      } catch (emailError: any) {
+      } catch (emailError: unknown) {
         console.error(`❌ [SERVER] Email sending failed:`, emailError);
+        const errorMessage = emailError instanceof Error ? emailError.message : 'Unknown error occurred';
         return res.status(500).json({
           success: false,
-          message: `Failed to send email: ${emailError.message}`,
+          message: `Failed to send email: ${errorMessage}`,
           error: 'EMAIL_SEND_ERROR'
         });
       }
@@ -1196,13 +1229,14 @@ app.post('/api/send-notification', async (req, res) => {
       }
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = Date.now() - startTime;
     console.error(`❌ [SERVER] Failed to send notification after ${duration}ms:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     
     res.status(500).json({ 
       success: false, 
-      message: `Internal server error: ${error.message}`,
+      message: `Internal server error: ${errorMessage}`,
       error: 'INTERNAL_ERROR'
     });
   }
@@ -1344,7 +1378,7 @@ function createEmailTemplate(title: string, message: string, details: string, na
 }
 
 // Root endpoint
-app.get('/', (_req, res) => {
+app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'AfriTokeni SMS & USSD Webhook Server (TypeScript)',
     version: '2.0.0',
@@ -1360,7 +1394,9 @@ app.get('/', (_req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+const PORT = parseInt(process.env.PORT || process.env.VITE_PORT || '3001', 10);
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 AfriTokeni SMS & USSD Webhook Server (TypeScript) running on port ${PORT}`);
   console.log(`📱 SMS Service: ${credentials.username ? '✅ Configured' : '❌ Not configured'}`);
   console.log(`📞 USSD Service: ✅ Active`);
