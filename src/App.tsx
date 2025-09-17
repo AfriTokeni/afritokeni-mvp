@@ -57,7 +57,7 @@ const App: FC = () => {
     const initJuno = async () => {
       try {
         await initSatellite({
-          satelliteId: junoConfig.satellite.ids?.development || "atbka-rp777-77775-aaaaq-cai",
+          satelliteId: junoConfig.satellite.ids?.production || "dkk74-oyaaa-aaaal-askxq-cai",
           workers: {
             auth: true,
           },

@@ -25,6 +25,13 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import AfricasTalking from 'africastalking';
 import { WebhookDataService as DataService } from './webHookServices.js';
+import type { 
+  NotificationRequest, 
+  NotificationResponse, 
+  NotificationData,
+  User,
+  EmailContent 
+} from '../types/notification.js';
 
 
 
@@ -1077,6 +1084,265 @@ app.get('/health', async (_req, res) => {
   }
 });
 
+// ========================================
+// Notification API Endpoint
+// ========================================
+
+// Send notification endpoint
+app.post('/api/send-notification', async (req, res) => {
+  const startTime = Date.now();
+  
+  try {
+    const request: NotificationRequest = req.body;
+    console.log(`🔄 [SERVER] Processing notification for user ${request.user.id} (type: ${request.notification.type})`);
+
+    // Validate input
+    if (!request.user || !request.notification || !request.notification.type) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: user and notification type are required',
+        error: 'VALIDATION_ERROR'
+      });
+    }
+
+    // Secure API key access from server environment
+    const apiKey = process.env.RESEND_API_KEY;
+    const emailDomain = process.env.EMAIL_FROM_DOMAIN || "afritokeni.com";
+    
+    if (!apiKey) {
+      console.error(`❌ [SERVER] RESEND_API_KEY not found in environment variables`);
+      return res.status(500).json({
+        success: false,
+        message: 'Email service not configured',
+        error: 'MISSING_API_KEY'
+      });
+    }
+
+    let emailResult = null;
+    let smsResult = null;
+
+    // Only send email if user has email and uses web auth
+    if (request.user.email && request.user.authMethod === 'web') {
+      console.log(`📧 [SERVER] Sending email to ${request.user.email}...`);
+      
+      try {
+        const { subject, html } = generateEmailContent(request.user, request.notification);
+
+        const emailPayload = {
+          from: `AfriTokeni <noreply@${emailDomain}>`,
+          to: [request.user.email],
+          subject,
+          html
+        };
+
+        console.log(`📧 [SERVER] Calling Resend API...`);
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(emailPayload)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error(`❌ [SERVER] Resend API error (${response.status}):`, errorData);
+          throw new Error(`Resend API error: ${errorData}`);
+        }
+
+        const result = await response.json() as any;
+        emailResult = {
+          id: result.id,
+          status: 'sent'
+        };
+        
+        console.log(`✅ [SERVER] Email sent successfully`);
+        console.log(`✅ [SERVER] Message ID: ${result.id}`);
+        
+      } catch (emailError: any) {
+        console.error(`❌ [SERVER] Email sending failed:`, emailError);
+        return res.status(500).json({
+          success: false,
+          message: `Failed to send email: ${emailError.message}`,
+          error: 'EMAIL_SEND_ERROR'
+        });
+      }
+    }
+
+    // For SMS users, log for now (integrate real SMS gateway here)
+    if (request.user.phone && (!request.user.email || request.user.authMethod === 'sms')) {
+      const smsMessage = generateSMSContent(request.user, request.notification);
+      console.log(`📱 [SERVER] SMS notification prepared for ${request.user.phone}`);
+      console.log(`📱 [SERVER] Message: ${smsMessage}`);
+      
+      // TODO: Integrate real SMS gateway here
+      smsResult = { 
+        simulated: true, 
+        phone: request.user.phone, 
+        message: smsMessage 
+      };
+    }
+
+    const totalDuration = Date.now() - startTime;
+    console.log(`✅ [SERVER] Notification processing completed in ${totalDuration}ms`);
+
+    res.json({ 
+      success: true, 
+      message: 'Notification sent successfully',
+      results: { 
+        email: emailResult,
+        sms: smsResult
+      }
+    });
+    
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    console.error(`❌ [SERVER] Failed to send notification after ${duration}ms:`, error);
+    
+    res.status(500).json({ 
+      success: false, 
+      message: `Internal server error: ${error.message}`,
+      error: 'INTERNAL_ERROR'
+    });
+  }
+});
+
+// Helper functions for email content generation
+function generateEmailContent(user: User, notification: NotificationData): EmailContent {
+  const name = user.firstName || 'User';
+  
+  switch (notification.type) {
+    case 'subscription_welcome':
+      return {
+        subject: `🎉 Welcome to AfriTokeni! Your Journey to Bitcoin Banking Begins`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 10px;">Welcome to AfriTokeni</h1>
+              <p style="color: #666; font-size: 14px;">Bitcoin Banking for Everyone in Africa</p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+              <h2 style="color: #1a1a1a; margin-bottom: 15px;">Hi ${name}!</h2>
+              <p style="color: #444; line-height: 1.6; margin-bottom: 15px;">
+                Thank you for subscribing to AfriTokeni updates! You're now part of a revolutionary movement to bring Bitcoin banking to every African.
+              </p>
+              <p style="color: #444; line-height: 1.6; margin-bottom: 15px;">
+                We'll keep you updated on:
+              </p>
+              <ul style="color: #444; margin-left: 20px; margin-bottom: 15px;">
+                <li>Platform launch updates</li>
+                <li>New currency support</li>
+                <li>SMS banking features</li>
+                <li>Security enhancements</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 25px;">
+              <a href="https://www.afritokeni.com" 
+                 style="display: inline-block; background: #1a1a1a; color: white; padding: 12px 25px; 
+                        text-decoration: none; border-radius: 6px; font-weight: 500;">
+                Explore AfriTokeni
+              </a>
+            </div>
+            
+            <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+              <p style="color: #999; font-size: 12px;">
+                This is an automated welcome message from AfriTokeni.
+              </p>
+            </div>
+          </div>
+        `
+      };
+      
+    case 'deposit':
+      return {
+        subject: `✅ Deposit Confirmed - ${notification.amount} ${notification.currency}`,
+        html: createEmailTemplate(
+          'Deposit Confirmed',
+          `Your deposit of <strong>${notification.amount} ${notification.currency}</strong> has been confirmed.`,
+          `Transaction ID: ${notification.transactionId}`,
+          name
+        )
+      };
+
+    case 'withdrawal':
+      return {
+        subject: `💸 Withdrawal Processed - ${notification.amount} ${notification.currency}`,
+        html: createEmailTemplate(
+          'Withdrawal Processed',
+          `Your withdrawal of <strong>${notification.amount} ${notification.currency}</strong> has been processed.`,
+          `Transaction ID: ${notification.transactionId}`,
+          name
+        )
+      };
+
+    default:
+      return {
+        subject: 'AfriTokeni Account Update',
+        html: createEmailTemplate(
+          'Account Update',
+          notification.message || 'Your account has been updated.',
+          '',
+          name
+        )
+      };
+  }
+}
+
+function generateSMSContent(user: User, notification: NotificationData): string {
+  const name = user.firstName || 'User';
+  
+  switch (notification.type) {
+    case 'subscription_welcome':
+      return `AfriTokeni: Hi ${name}, welcome to Bitcoin banking for Africa! You'll receive platform updates via SMS. Start banking at afritokeni.com`;
+      
+    case 'deposit':
+      return `AfriTokeni: Hi ${name}, your deposit of ${notification.amount} ${notification.currency} is confirmed. Balance updated. ID: ${notification.transactionId}`;
+
+    case 'withdrawal':
+      return `AfriTokeni: Hi ${name}, withdrawal of ${notification.amount} ${notification.currency} processed. Collect from agent. ID: ${notification.transactionId}`;
+
+    default:
+      return `AfriTokeni: Hi ${name}, ${notification.message || 'account updated'}. Check your dashboard at afritokeni.com`;
+  }
+}
+
+function createEmailTemplate(title: string, message: string, details: string, name: string): string {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #1a1a1a; margin-bottom: 10px;">AfriTokeni</h1>
+        <p style="color: #666; font-size: 14px;">Secure Financial Services for Africa</p>
+      </div>
+      
+      <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+        <h2 style="color: #1a1a1a; margin-bottom: 15px;">Hi ${name}!</h2>
+        <h3 style="color: #1a1a1a; margin-bottom: 15px;">${title}</h3>
+        <p style="color: #444; line-height: 1.6; margin-bottom: 15px;">
+          ${message}
+        </p>
+        ${details ? `<p style="color: #666; font-size: 14px; margin-bottom: 0;">${details}</p>` : ''}
+      </div>
+      
+      <div style="text-align: center; margin-bottom: 25px;">
+        <a href="https://afritokeni.com" 
+           style="display: inline-block; background: #1a1a1a; color: white; padding: 12px 25px; 
+                  text-decoration: none; border-radius: 6px; font-weight: 500;">
+          View Dashboard
+        </a>
+      </div>
+      
+      <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+        <p style="color: #999; font-size: 12px;">
+          This is an automated message from AfriTokeni. Please do not reply to this email.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
 // Root endpoint
 app.get('/', (_req, res) => {
   res.json({
@@ -1088,6 +1354,7 @@ app.get('/', (_req, res) => {
       'POST /api/verify-code',
       'POST /api/webhook/sms',
       'POST /api/ussd',
+      'POST /api/send-notification',
       'GET /health'
     ]
   });
