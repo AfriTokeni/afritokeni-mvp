@@ -17,17 +17,6 @@ export class NotificationService {
         notification
       };
 
-  // Send email notification using Resend API
-  private static async sendEmailNotification(user: User, notification: NotificationData) {
-    const startTime = Date.now();
-    console.log(`🔄 [EMAIL] Starting notification send to ${user.email} (type: ${notification.type})`);
-    
-    try {
-      // Use environment variables for API key
-      const apiKey = import.meta.env.VITE_RESEND_API_KEY;
-      const emailDomain = import.meta.env.VITE_EMAIL_FROM_DOMAIN || "afritokeni.com";
-
-      
       // Call the server-side API endpoint
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const response = await fetch(`${apiUrl}/api/send-notification`, {
