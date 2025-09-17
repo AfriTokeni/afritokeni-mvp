@@ -4,13 +4,11 @@ import React, {
   useState,
   useEffect,
   useRef,
-  use,
 } from "react";
 import {
   authSubscribe,
   signIn,
   signOut,
-  setDoc,
   getDoc,
   type User as JunoUser,
 } from "@junobuild/core";
