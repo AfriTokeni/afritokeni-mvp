@@ -24,6 +24,22 @@ export interface UserDataFromJuno {
 
 import { Transaction } from '../types/transaction';
 
+// Deposit Request interface
+export interface DepositRequest {
+  id: string;
+  userId: string;
+  agentId: string;
+  amount: number;
+  currency: string;
+  depositCode: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+  userName?: string; // Added when fetching with user info
+  userPhone?: string; // Added when fetching with user info
+  userLocation?: string; // Added when fetching with user info
+}
+
 // Legacy Transaction interface - keeping for backward compatibility
 export interface LegacyTransaction {
   id: string;
@@ -2286,6 +2302,190 @@ Send *AFRI# for menu`;
     } catch (error) {
       console.error('Error getting pending withdrawals:', error);
       return [];
+    }
+  }
+
+  // Deposit Request Management Methods
+  static async createDepositRequest(
+    userId: string,
+    agentId: string,
+    amount: number,
+    currency: string,
+    depositCode: string
+  ): Promise<string> {
+    try {
+      const now = new Date();
+      const requestId = `dep_${nanoid()}`;
+      
+      const depositRequest = {
+        id: requestId,
+        userId,
+        agentId,
+        amount,
+        currency,
+        depositCode,
+        status: 'pending',
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString()
+      };
+
+      await setDoc({
+        collection: 'deposit_requests',
+        doc: {
+          key: requestId,
+          data: depositRequest,
+          version: 1n
+        }
+      });
+
+      console.log(`Created deposit request ${requestId} for user ${userId}`);
+      return requestId;
+    } catch (error) {
+      console.error('Error creating deposit request:', error);
+      throw error;
+    }
+  }
+
+  static async getAgentDepositRequests(agentId: string, status?: string): Promise<DepositRequest[]> {
+    try {
+      const docs = await listDocs({
+        collection: 'deposit_requests'
+      });
+
+      if (!docs.items) {
+        return [];
+      }
+
+      const requests = docs.items
+        .map(doc => doc.data as DepositRequest)
+        .filter(request => {
+          const matchesAgent = request.agentId === agentId;
+          const matchesStatus = !status || request.status === status;
+          return matchesAgent && matchesStatus;
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      // Enhance requests with user information
+      const enhancedRequests = await Promise.all(
+        requests.map(async (request) => {
+          try {
+            const user = await this.getUserByKey(request.userId);
+            return {
+              ...request,
+              userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+              userPhone: user?.email || 'Unknown Phone', // email field contains phone for SMS users
+              userLocation: 'Unknown Location' // Would need to enhance with actual location data
+            };
+          } catch (error) {
+            console.error(`Error getting user info for ${request.userId}:`, error);
+            return {
+              ...request,
+              userName: 'Unknown User',
+              userPhone: 'Unknown Phone',
+              userLocation: 'Unknown Location'
+            };
+          }
+        })
+      );
+
+      console.log(`Retrieved ${enhancedRequests.length} deposit requests for agent ${agentId}`);
+      return enhancedRequests;
+    } catch (error) {
+      console.error('Error getting agent deposit requests:', error);
+      throw error;
+    }
+  }
+
+  static async updateDepositRequestStatus(
+    requestId: string, 
+    status: 'pending' | 'confirmed' | 'completed' | 'rejected'
+  ): Promise<boolean> {
+    try {
+      const existingDoc = await getDoc({
+        collection: 'deposit_requests',
+        key: requestId
+      });
+
+      if (!existingDoc?.data) {
+        throw new Error('Deposit request not found');
+      }
+
+      const updatedRequest = {
+        ...existingDoc.data,
+        status,
+        updatedAt: new Date().toISOString()
+      };
+
+      await setDoc({
+        collection: 'deposit_requests',
+        doc: {
+          key: requestId,
+          data: updatedRequest,
+          version: existingDoc.version || 1n
+        }
+      });
+
+      console.log(`Updated deposit request ${requestId} status to ${status}`);
+      return true;
+    } catch (error) {
+      console.error('Error updating deposit request status:', error);
+      return false;
+    }
+  }
+
+  static async processDepositRequest(
+    requestId: string,
+    agentId: string,
+    processedBy?: string
+  ): Promise<{ success: boolean; transactionId?: string; error?: string }> {
+    try {
+      // Get the deposit request
+      const requestDoc = await getDoc({
+        collection: 'deposit_requests',
+        key: requestId
+      });
+
+      if (!requestDoc?.data) {
+        return { success: false, error: 'Deposit request not found' };
+      }
+
+      const request = requestDoc.data as DepositRequest;
+
+      if (request.status !== 'confirmed') {
+        return { success: false, error: 'Deposit request is not in confirmed status' };
+      }
+
+      if (request.agentId !== agentId) {
+        return { success: false, error: 'Agent not authorized for this deposit request' };
+      }
+
+      // Create the deposit transaction
+      const transaction = await this.createTransaction({
+        userId: request.userId,
+        type: 'deposit',
+        amount: request.amount,
+        currency: request.currency as AfricanCurrency,
+        agentId: agentId,
+        status: 'completed',
+        description: `Cash deposit via agent - Code: ${request.depositCode}`,
+        metadata: {
+          depositRequestId: requestId,
+          depositCode: request.depositCode,
+          processedBy: processedBy || agentId
+        }
+      });
+
+      // Update user balance
+      await this.updateUserBalance(request.userId, request.amount);
+
+      // Mark deposit request as completed
+      await this.updateDepositRequestStatus(requestId, 'completed');
+
+      console.log(`Successfully processed deposit request ${requestId}, transaction ${transaction.id}`);
+      return { success: true, transactionId: transaction.id };
+    } catch (error) {
+      console.error('Error processing deposit request:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 }

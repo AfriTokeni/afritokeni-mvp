@@ -1,25 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, User, Star, Plus, CheckCircle } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import TransactionCodeDisplay from '../../components/TransactionCodeDisplay';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { CurrencySelector } from '../../components/CurrencySelector';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
 import type { Agent } from '../withdraw/types';
-
-interface DepositRequest {
-  id: string;
-  userId: string;
-  agentId: string;
-  amount: {
-    local: number;
-    currency: string;
-  };
-  depositCode: string;
-  status: 'pending' | 'confirmed' | 'completed';
-  createdAt: Date;
-}
+import { DataService } from '../../services/dataService';
 
 const DepositPage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,57 +20,98 @@ const DepositPage: React.FC = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string>('');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
 
   const currencyInfo = AFRICAN_CURRENCIES[selectedCurrency as keyof typeof AFRICAN_CURRENCIES];
+
+  // Load agents function using real datastore data
+  const loadAgents = useCallback(async () => {
+    if (!userLocation) {
+      console.log('User location not available yet');
+      return;
+    }
+
+    setIsLoadingAgents(true);
+    setError('');
+    
+    try {
+      // Get nearby agents from the datastore
+      // Radius of 10km, include available and busy agents
+      const nearbyAgents = await DataService.getNearbyAgents(
+        userLocation.lat, 
+        userLocation.lng, 
+        10, 
+        ['available', 'busy']
+      );
+
+      // Transform the Agent data from datastore to the UI Agent type
+      const transformedAgents: Agent[] = nearbyAgents.map(dbAgent => ({
+        id: dbAgent.id,
+        name: dbAgent.businessName || `Agent ${dbAgent.id.slice(0, 8)}`,
+        location: `${dbAgent.location.city}, ${dbAgent.location.state}`,
+        phone: '+256700000000', // Would need to get from user data
+        rating: 4.5, // Default rating - would be calculated from reviews
+        available: dbAgent.status === 'available'
+      }));
+
+      console.log(`Loaded ${transformedAgents.length} agents from datastore`);
+      setAgents(transformedAgents);
+
+      if (transformedAgents.length === 0) {
+        setError('No agents available in your area. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Failed to load agents:', error);
+      setError('Failed to load agents. Please try again.');
+      
+      // Fallback to mock data if datastore fails
+      const fallbackAgents: Agent[] = [
+        {
+          id: 'agent_fallback_1',
+          name: 'Local Agent',
+          location: 'Kampala Central',
+          phone: '+256700123456',
+          rating: 4.5,
+          available: true
+        }
+      ];
+      setAgents(fallbackAgents);
+    } finally {
+      setIsLoadingAgents(false);
+    }
+  }, [userLocation]);
 
   // Get user location for nearby agents
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('User location:', position.coords.latitude, position.coords.longitude);
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserLocation(location);
+          console.log('User location:', location);
         },
         (error) => {
           console.error('Location error:', error);
+          // Set default location (Kampala, Uganda) if geolocation fails
+          setUserLocation({ lat: 0.3476, lng: 32.5825 });
         }
       );
+    } else {
+      // Set default location if geolocation is not supported
+      setUserLocation({ lat: 0.3476, lng: 32.5825 });
     }
   }, []);
 
-  // Load agents when step changes to agent selection
+  // Load agents when step changes to agent selection and location is available
   useEffect(() => {
-    if (step === 'agent') {
+    if (step === 'agent' && userLocation) {
       loadAgents();
     }
-  }, [step]);
-
-  const loadAgents = async () => {
-    try {
-      // Mock agents data - in production this would be a real API call
-      const mockAgents: Agent[] = [
-        {
-          id: 'agent_1',
-          name: 'John Doe',
-          location: 'Kampala Central',
-          phone: '+256700123456',
-          rating: 4.8,
-          available: true
-        },
-        {
-          id: 'agent_2', 
-          name: 'Mary Smith',
-          location: 'Nakawa Division',
-          phone: '+256700654321',
-          rating: 4.9,
-          available: true
-        }
-      ];
-      setAgents(mockAgents);
-    } catch (error) {
-      console.error('Failed to load agents:', error);
-      setError('Failed to load agents. Please try again.');
-    }
-  };
+  }, [step, userLocation, loadAgents]);
 
   const validateAmount = (): boolean => {
     const numAmount = parseFloat(amount);
@@ -93,12 +122,12 @@ const DepositPage: React.FC = () => {
     }
     
     if (numAmount < 1000) {
-      setError(`Minimum deposit amount is ${formatCurrencyAmount(1000, selectedCurrency as any)}`);
+      setError(`Minimum deposit amount is ${formatCurrencyAmount(1000, selectedCurrency as AfricanCurrency)}`);
       return false;
     }
     
     if (numAmount > 1000000) {
-      setError(`Maximum deposit amount is ${formatCurrencyAmount(1000000, selectedCurrency as any)}`);
+      setError(`Maximum deposit amount is ${formatCurrencyAmount(1000000, selectedCurrency as AfricanCurrency)}`);
       return false;
     }
     
@@ -125,23 +154,16 @@ const DepositPage: React.FC = () => {
       // Generate 6-digit deposit code
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       
-      const depositRequest: DepositRequest = {
-        id: `dep_${Date.now()}`,
-        userId: user.user.id,
-        agentId: agent.id,
-        amount: {
-          local: parseFloat(amount),
-          currency: selectedCurrency
-        },
-        depositCode: code,
-        status: 'pending',
-        createdAt: new Date()
-      };
-
-      // In production, this would create the deposit request in the backend
-      // For now, we'll simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Deposit request created:', depositRequest);
+      // Create the deposit request using DataService
+      const requestId = await DataService.createDepositRequest(
+        user.user.id,
+        agent.id,
+        parseFloat(amount),
+        selectedCurrency,
+        code
+      );
+      
+      console.log('Deposit request created with ID:', requestId);
       
       setDepositCode(code);
       setStep('confirmation');
@@ -219,8 +241,8 @@ const DepositPage: React.FC = () => {
               />
             </div>
             <p className="text-xs text-neutral-500 mt-2">
-              Minimum: {formatCurrencyAmount(1000, selectedCurrency as any)} • 
-              Maximum: {formatCurrencyAmount(1000000, selectedCurrency as any)}
+              Minimum: {formatCurrencyAmount(1000, selectedCurrency as AfricanCurrency)} • 
+              Maximum: {formatCurrencyAmount(1000000, selectedCurrency as AfricanCurrency)}
             </p>
           </div>
 
@@ -250,12 +272,20 @@ const DepositPage: React.FC = () => {
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-neutral-900 mb-2">Select Agent</h2>
           <p className="text-neutral-600">
-            Choose an agent to deposit {formatCurrencyAmount(parseFloat(amount), selectedCurrency as any)}
+            Choose an agent to deposit {formatCurrencyAmount(parseFloat(amount), selectedCurrency as AfricanCurrency)}
           </p>
         </div>
 
-        <div className="grid gap-4">
-          {agents.map((agent) => (
+        {isLoadingAgents ? (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center space-x-2 text-neutral-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-neutral-900"></div>
+              <span>Finding nearby agents...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {agents.map((agent) => (
             <div
               key={agent.id}
               className="border border-neutral-200 rounded-lg p-4 hover:border-neutral-300 transition-colors cursor-pointer"
@@ -290,7 +320,8 @@ const DepositPage: React.FC = () => {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
         {isCreating && (
           <div className="text-center mt-6">
@@ -331,7 +362,7 @@ const DepositPage: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-neutral-600">Amount</span>
-                <span className="font-semibold">{formatCurrencyAmount(parseFloat(amount), selectedCurrency as any)}</span>
+                <span className="font-semibold">{formatCurrencyAmount(parseFloat(amount), selectedCurrency as AfricanCurrency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-neutral-600">Agent</span>
@@ -355,10 +386,10 @@ const DepositPage: React.FC = () => {
             />
             
             <ol className="list-decimal list-inside space-y-2 text-sm text-neutral-700">
-              <li>Bring your cash to the agent's location</li>
+              <li>Bring your cash to the agent&apos;s location</li>
               <li>Show your deposit code or QR code to the agent</li>
               <li>Agent will verify and add money to your account</li>
-              <li>You'll receive a confirmation notification</li>
+              <li>You&apos;ll receive a confirmation notification</li>
             </ol>
           </div>
 
