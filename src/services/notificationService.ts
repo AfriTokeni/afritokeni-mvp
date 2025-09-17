@@ -18,7 +18,7 @@ export class NotificationService {
       };
 
       // Call the server-side API endpoint
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://afritokeni-production.up.railway.app';
       const response = await fetch(`${apiUrl}/api/send-notification`, {
         method: 'POST',
         headers: {
