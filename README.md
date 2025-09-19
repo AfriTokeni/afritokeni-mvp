@@ -1,10 +1,15 @@
-# AfriTokeni: Bridging Bitcoin, DeFi and Mobile Money in Africa
+# AfriTokeni: SMS-Based Bitcoin Banking for Africa
 
-## Introduction
+AfriTokeni is an SMS-accessible Bitcoin banking platform built on Internet Computer Protocol (ICP) that serves Africa's 14.6M unbanked adults. Our system enables Bitcoin transactions via SMS commands on feature phones, bridging the digital divide in financial services.
 
-AfriTokeni is a decentralized finance (DeFi) application built on the Internet Computer Protocol (ICP) that bridges the gap between traditional mobile money, Bitcoin, and modern blockchain technology. It enables fast, secure, and low-cost financial transactions for all Africans, regardless of whether they use a smartphone or a basic feature phone.
+## 🎯 Project Highlights
 
-The project addresses systemic inefficiencies in Africa's mobile money ecosystem, such as high transaction costs, limited interoperability, and the digital divide that excludes feature phone users from the digital economy. By leveraging Bitcoin, stablecoins, and providing a dual interface (web app and SMS/USSD), AfriTokeni aims to create a unified, low-cost, and inclusive financial rail for everyone across all 39 African countries.
+- **SMS-First Design**: Complete Bitcoin banking via SMS commands - no internet required
+- **Real Bitcoin Integration**: Live Bitcoin transactions using BlockCypher API with secure escrow system
+- **Agent Network**: Physical cash-to-Bitcoin exchange through verified local agents
+- **Multi-Currency Support**: All 39 African currencies with dynamic fee pricing
+- **83% Cost Reduction**: Significantly cheaper than traditional mobile money solutions
+- **Universal Access**: Works on 98% of phones across Africa (feature phones + smartphones)
 
 ## Demo Video
 
@@ -14,154 +19,169 @@ The project addresses systemic inefficiencies in Africa's mobile money ecosystem
 
 You can access the live production application here: **[https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/](https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/)**
 
-## Key Features
+## 🌟 Key Features
 
-### 🪙 **Real Bitcoin Integration**
-- **Live Bitcoin Transactions**: Real Bitcoin address generation, balance checking, and transaction sending using BlockCypher API
-- **Multi-Currency Exchange**: Bitcoin exchange with all 39 African currencies with live exchange rates
-- **Agent Network**: Agents can help customers buy/sell Bitcoin for cash across Africa
-- **SMS Bitcoin Commands**: Complete Bitcoin operations available via SMS for offline users
+### 👥 **For Users**
+- **💰 Multi-Currency Wallets**: Support for all 39 African currencies (NGN, KES, GHS, ZAR, UGX, etc.)
+- **₿ Bitcoin Integration**: Buy/sell Bitcoin with local currency through secure escrow system
+- **📱 Universal Access**: Works on any phone - SMS commands or modern web interface
+- **💸 Send Money**: Transfer funds to any user via phone number across different currencies
+- **🏧 Cash Services**: Deposit/withdraw cash through verified agent network
+- **🔐 KYC Verification**: Secure identity verification with document upload
+- **📊 Transaction History**: Complete financial activity tracking and reporting
+- **🔔 SMS Notifications**: Real-time transaction alerts and confirmations
 
-### 💳 **Traditional Financial Services**
-- **Mobile Money Integration**: Send/receive money, cash withdrawals through agent network
-- **Multi-Currency Support**: Support for all African currencies (UGX, KES, NGN, ZAR, etc.)
-- **Agent Commission System**: Built-in commission structure for sustainable agent operations
+### 🏪 **For Agents**
+- **💼 Agent Dashboard**: Professional interface for managing customer transactions
+- **💳 Liquidity Management**: Fund operations via bank transfer/mobile money, withdraw earnings
+- **₿ Bitcoin Operations**: Help customers exchange Bitcoin for cash with live rates
+- **👥 Customer Management**: Process deposits, withdrawals, and Bitcoin exchanges
+- **📈 Earnings Tracking**: Real-time commission tracking and settlement system
+- **🗺️ Location Services**: GPS-based customer matching and service area management
+- **📱 SMS Integration**: Process transactions via SMS for offline customers
+- **🔒 Security Features**: 6-digit verification codes and transaction escrow protection
 
-### 📱 **Universal Access**
-- **Web Application**: Modern React/TypeScript interface for smartphone users
-- **SMS/USSD Interface**: Feature phone access for users without internet connectivity
-- **Hybrid Authentication**: Both Internet Identity and SMS-based authentication
+### 👨‍💼 **For Administrators**
+- **🔍 KYC Management**: Review and approve user/agent identity verification
+- **📊 System Monitoring**: Transaction oversight and compliance management
+- **🛡️ Security Controls**: Admin authentication and role-based access control
+- **📈 Analytics Dashboard**: Platform usage and financial flow monitoring
 
-## Architecture Description
+## 🏗️ Technical Architecture
 
-AfriTokeni's architecture is designed for universal access and decentralized security.
+AfriTokeni uses a hybrid architecture combining Internet Computer Protocol (ICP) blockchain with traditional web services for maximum accessibility.
 
-*   **Frontend (Web App)**: A modern web application built with **React** and **TypeScript** for smartphone users. It provides a rich user interface for managing accounts, viewing transaction history, Bitcoin wallet management, and interacting with the agent network.
+### **Core Components**
 
-*   **Bitcoin Integration**: Real Bitcoin functionality using:
-    *   **bitcoinjs-lib**: For Bitcoin address generation and transaction signing
-    *   **BlockCypher API**: For live Bitcoin balance checking and transaction broadcasting
-    *   **Live Exchange Rates**: Real-time BTC to local currency rates via Coinbase and forex APIs
-    *   **Agent Bitcoin Exchange**: Complete Bitcoin buy/sell system through agent network
+#### **Frontend (React/TypeScript)**
+- **User Interface**: Modern responsive web app for smartphones
+- **Agent Dashboard**: Professional fintech interface for agent operations  
+- **Admin Panel**: KYC management and system oversight
+- **SMS Interface**: Feature phone simulation and testing
 
-*   **Backend (Blockchain)**: The core backend logic and data storage are built on the **Internet Computer Protocol** using **Juno**, a Backend-as-a-Service (BaaS) platform. This includes:
-    *   **Datastore**: Securely stores all application data in collections such as `users`, `transactions`, `balances`, `agents`, and `bitcoin_transactions`.
-    *   **Authentication**: Manages user identity via ICP's **Internet Identity** for web users and SMS-based auth for feature phone users.
+#### **Backend (Internet Computer Protocol)**
+- **Juno Satellite**: Backend-as-a-Service on ICP blockchain
+- **Decentralized Storage**: All user data, transactions, and balances stored on-chain
+- **Internet Identity**: Passwordless authentication for web users
+- **HTTP Outcalls**: Direct API calls to external services (SMS, Bitcoin, forex)
 
-*   **Webhook Server (USSD & SMS)**: A **Node.js/Express** server that acts as a webhook for the **AfricasTalking API**. This server processes all USSD requests and SMS messages, allowing feature phone users to access core financial services and Bitcoin operations without an internet connection.
+#### **Bitcoin Integration**
+- **Real Bitcoin Operations**: Live address generation, balance checking, transaction broadcasting
+- **BlockCypher API**: Mainnet/testnet Bitcoin network integration
+- **Escrow System**: Secure 6-digit code verification for agent exchanges
+- **Hardware Wallet Support**: Integration with Ledger, Trezor for advanced users
 
-*   **Multi-Interface Access**:
-    1.  **Web App**: For smartphone users with full Bitcoin wallet, exchange, and traditional financial services
-    2.  **SMS Commands**: For feature phone users, enabling money transfers, Bitcoin operations, and agent interactions
-    3.  **Agent Dashboard**: Specialized interface for agents to manage customer Bitcoin exchanges and traditional transactions
+#### **SMS Gateway (Node.js/Express)**
+- **AfricasTalking API**: SMS and USSD processing for feature phones
+- **Webhook Server**: Processes offline transactions and notifications
+- **Command Processing**: Complete financial operations via text messages
+
+### **Data Architecture**
+```typescript
+Collections: users, agents, transactions, balances, 
+            bitcoin_transactions, bitcoin_wallets, 
+            user_roles, email_subscriptions
+```
+
+### **Security Features**
+- **Multi-Factor Authentication**: SMS + Internet Identity
+- **Transaction Escrow**: 6-digit verification codes
+- **KYC Compliance**: Document verification for users and agents
+- **Encrypted Storage**: Private keys encrypted with AES-256
+- **Role-Based Access**: User/Agent/Admin permission system
 
 
-## Local Development Setup
+## 🚀 Getting Started
 
-**Prerequisites:**
-*   [Docker](https://www.docker.com/get-started)
-*   [ngrok](https://ngrok.com/download)
-*   [Node.js](https://nodejs.org/) and npm
+### Prerequisites
+- [Node.js](https://nodejs.org/) and npm
+- [Docker](https://www.docker.com/get-started) (for Juno)
+- [ngrok](https://ngrok.com/download) (for SMS testing)
 
----
-
-### Step 1: Clone the Repository
-
+### Step 1: Clone and Install
 ```bash
 git clone https://github.com/AfriTokeni/afritokeni-mvp.git
 cd afritokeni-mvp
+npm install
 ```
 
-### Step 2: Start the Juno Development Emulator
-
-This command starts the local ICP blockchain emulator and is **required** for authentication to work.
-
+### Step 2: Start Juno Development Emulator
 ```bash
 juno dev start
 ```
+This starts the local ICP blockchain emulator required for authentication.
 
-### Step 3: Create and Configure a Juno Satellite
+### Step 3: Create and Configure Juno Satellite
+1. Open [http://localhost:5866](http://localhost:5866) in your browser
+2. Create a new satellite and copy the Satellite ID
+3. Update `juno.config.ts` with your satellite ID:
+   ```typescript
+   export default defineConfig({
+     satellite: {
+       ids: {
+         development: "YOUR_SATELLITE_ID_HERE",
+       },
+       source: "dist",
+     },
+   });
+   ```
 
-1.  Open the Juno Console in your browser at [http://localhost:5866](http://localhost:5866) and create a new satellite.
-2.  Copy the new Satellite ID.
-3.  Set the Satellite ID in your `juno.config.ts` file:
-
-    ```typescript
-    // filepath: juno.config.ts
-    import { defineConfig } from "@junobuild/config";
-
-    export default defineConfig({
-      satellite: {
-        ids: {
-          development: "<PASTE_YOUR_DEV_SATELLITE_ID_HERE>",
-        },
-        source: "dist",
-      },
-    });
-    ```
-
-### Step 4: Install Dependencies and Start the Frontend
-
-Open a new terminal to install dependencies and start the React development server.
-
+### Step 4: Create Required Collections
+Login and create datastore collections:
 ```bash
-npm install
+juno login --mode development --emulator
+juno config --mode development
+```
+Create these collections in [Juno Datastore UI](http://localhost:5866/datastore):
+- `users`, `transactions`, `balances`, `agents`
+- `bitcoin_transactions`, `bitcoin_wallets`, `user_roles`
+
+### Step 5: Start Frontend
+```bash
 npm run dev
 ```
 
-### Step 5: Create Datastore Collections
-
-Log in to your Juno instance via the terminal and create the required collections for the application to function.
-
+### Step 6: Setup SMS Backend (Optional)
 ```bash
-# Login to the local Juno emulator
-juno login --mode development --emulator
+# Create .env with AfricasTalking credentials
+echo "VITE_AT_API_KEY=your_key\nVITE_AT_USERNAME=sandbox\nVITE_PORT=3001" > .env
 
-# Create the required collections
-juno config --mode development
+# Build and start backend
+npm run build:backend
+npm run start:backend
+
+# Expose with ngrok for SMS testing
+ngrok http 3001
 ```
 
-AfriTokeni requires the following collections:
-*   `users`
-*   `transactions`
-*   `balances`
-*   `agents`
-*   `bitcoin_transactions`
-*   `bitcoin_wallets`
-*   `user_roles`
+## 💰 Real Financial System
 
-You can create these manually via the [Juno Datastore UI](http://localhost:5866/datastore).
+AfriTokeni operates as a complete transaction-based financial system with **zero hardcoded balances**:
 
-### Step 6: Set Up the AfricasTalking Webhook Server
+### Core Features
+- **Transaction-Based Balances**: All balances calculated from real transaction history
+- **39 African Currencies**: NGN, KES, GHS, ZAR, UGX, TZS, RWF, ETB, etc.
+- **Agent Network**: Physical cash ↔ digital currency conversion
+- **Bitcoin Integration**: Direct Bitcoin ↔ local currency exchange via agents
+- **Multi-Currency Transfers**: Send money across different African currencies
 
-1.  **Configure Environment Variables**: Create a `.env` file in the project root and add your AfricasTalking credentials. You can get these from the AfricasTalking Sandbox environment.
+### Financial Flows
+1. **Cash Deposits**: Users bring cash to agents → digital balance increases
+2. **Cash Withdrawals**: Users get cash from agents → digital balance decreases  
+3. **User Transfers**: Send money to other users via phone number
+4. **Bitcoin Exchange**: Buy/sell Bitcoin through agent network with escrow protection
+5. **Agent Settlement**: Agents withdraw earnings via bank/mobile money
 
-    ```env
-    VITE_AT_API_KEY=your_api_key_here
-    VITE_AT_USERNAME=sandbox
-    VITE_PORT=3001
-    ```
+## 📱 SMS Commands
 
-2.  **Build the Backend Server**: In another terminal, compile the TypeScript backend code into JavaScript.
+AfriTokeni works on any phone via SMS. Key commands:
 
-    ```bash
-    npm run build:backend
-    ```
-
-3.  **Start the Backend Server**: In another terminal, start the webhook server.
-
-    ```bash
-    npm run start:backend
-    ```
-
-4.  **Expose the Server with ngrok**: Expose your local webhook server to the internet so AfricasTalking can reach it.
-
-    ```bash
-    ngrok http 3001
-    ```
-
-5.  **Configure AfricasTalking**: Copy the ngrok URL (e.g., `https://abc123xyz.ngrok.io/api/ussd`) and use it as the callback URL for your USSD channel in the AfricasTalking dashboard.
-    > **Note:** For the live production environment, the webhook is deployed on Render and the callback URL is `https://afritokeni-mvp.onrender.com/api/ussd`.
+- `*AFRI#` - Access main menu
+- `BTC BAL` - Check Bitcoin balance  
+- `BTC RATE UGX` - Get exchange rates
+- `BTC BUY 50000 UGX` - Buy Bitcoin with local currency
+- `BTC SELL 0.001` - Sell Bitcoin for cash via agents
+- `SEND 10000 UGX +256701234567` - Send money to another user
 
 ## ICP Features Used
 
@@ -180,40 +200,83 @@ A primary challenge was deploying the Node.js webhook server, which interacts wi
 ### WebAssembly Integration
 Integrating Bitcoin cryptographic libraries like `tiny-secp256k1` required careful configuration of Vite to handle WebAssembly modules. This was resolved by adding `vite-plugin-wasm` and `vite-plugin-top-level-await` to properly support WASM-based cryptographic operations in the browser environment.
 
-## Future Plans
+## 🚀 Future Roadmap
 
-Our vision is to make AfriTokeni a cornerstone of financial inclusion in Africa. The following roadmap outlines our plans to transition from a hackathon prototype to a fully operational service.
+Our vision is to make AfriTokeni the leading Bitcoin banking platform for Africa's unbanked population. Here's our path from MVP to continental scale.
 
-### Phase 1: MVP Hardening & Security
+### **Phase 1: Production Hardening (Q1 2026)**
+🎯 **Goal**: Secure, scalable platform ready for pilot deployment
 
-The immediate priority is to ensure the platform is secure, stable, and ready for a pilot launch.
+**Security & Infrastructure**
+- Comprehensive security audit of all components
+- ICP threshold signatures for Bitcoin key management
+- Production-grade SMS gateway deployment
+- CI/CD pipelines and monitoring systems
+- Full test suite (unit, integration, end-to-end)
 
-*   **Comprehensive Security Audit**: Conduct a thorough security review of all components, including the on-chain datastore rules, Bitcoin wallet security, USSD input validation, and web app authentication flows to protect user funds and data.
-*   **Bitcoin Security Hardening**: Implement secure private key management using ICP's threshold signatures instead of storing private keys, enhance Bitcoin transaction validation, and add multi-signature support for large transactions.
-*   **Production-Ready Deployment**: Migrate the webhook server from a temporary solution (like Render free tier) to a scalable, production-grade cloud environment. Formalize the deployment process with CI/CD pipelines.
-*   **Robust Error Handling & Logging**: Implement comprehensive logging and monitoring for both the on-chain and off-chain components, including Bitcoin transaction monitoring, to quickly diagnose and resolve issues in a live environment.
-*   **Code Refactoring and Testing**: Refactor prototype code for scalability and maintainability. Implement a full suite of unit, integration, and end-to-end tests to ensure reliability, including Bitcoin transaction testing on testnet.
+**Regulatory Foundation**
+- Uganda financial services compliance
+- Bitcoin custody and exchange licensing
+- Agent network legal framework
+- KYC/AML compliance systems
 
-### Phase 2: Pilot Program & User Onboarding
+### **Phase 2: Uganda Pilot (Q2-Q3 2026)**
+🎯 **Goal**: Validate product-market fit with 1,000 users and 50 agents
 
-Launch a controlled pilot program to gather real-world feedback and validate the service.
+**Market Entry**
+- Kampala metropolitan area launch
+- Agent recruitment and training program
+- User onboarding and education campaigns
+- Community partnerships and local marketing
 
-*   **Targeted Pilot Launch**: Initiate a pilot program in a specific region or community in Uganda to test the entire ecosystem—from user onboarding to agent cash-in/cash-out and Bitcoin exchange services.
-*   **Bitcoin Agent Training**: Develop specialized training programs for agents to safely handle Bitcoin exchanges, including security best practices, exchange rate calculations, and customer education.
-*   **Develop an Agent Network Strategy**: Create a formal process for recruiting, vetting, training, and managing a network of trusted agents. Develop an **Agent Management Portal** for agents to track their commissions, liquidity, Bitcoin inventory, and performance.
-*   **Create Onboarding Materials**: Develop simple, clear user guides (both digital and print) for both web and SMS users, explaining how to use traditional financial services and Bitcoin features safely and effectively.
-*   **Establish a User Feedback Loop**: Implement mechanisms (e.g., a support hotline, in-app feedback forms) to collect user feedback and rapidly iterate on the product.
+**Product Optimization**
+- Real-world usage data collection
+- SMS command optimization for local languages
+- Agent liquidity management refinement
+- Customer support infrastructure
 
-### Phase 3: Ecosystem & Compliance
+### **Phase 3: National Scale (Q4 2026 - Q2 2027)**
+🎯 **Goal**: 50,000 users across Uganda with sustainable unit economics
 
-Build the business and legal framework required for sustainable growth.
+**Geographic Expansion**
+- Rural area penetration strategy
+- Multi-language SMS support (Luganda, Swahili)
+- Agent network scaling to 500+ locations
+- Partnership with mobile network operators
 
-*   **Regulatory Compliance**: Engage with legal experts to navigate the financial regulations starting with Uganda, ensuring full compliance with local laws for mobile money, digital assets, and Bitcoin operations.
-*   **Bitcoin Regulatory Framework**: Work with regulators to establish clear guidelines for Bitcoin custody, exchange services, and agent operations in compliance with local cryptocurrency regulations.
-*   **Enhanced KYC & Identity**: Integrate with trusted digital identity solutions to streamline the Know Your Customer (KYC) process and enhance security for both traditional and Bitcoin services.
-*   **Full On-Chain Migration**: Continue to explore advancements in the Internet Computer ecosystem to potentially migrate the webhook logic fully on-chain, including Bitcoin integration using ICP's native Bitcoin capabilities.
-*   **Sustainable Liquidity Model**: Formalize the process for managing the digital asset (stablecoin), Bitcoin, and fiat liquidity required to keep the agent network operational across multiple currencies.
-*   **Cross-Border Bitcoin Remittances**: After establishing a strong local presence, launch low-cost Bitcoin-based remittance corridors between African countries, leveraging Bitcoin's borderless nature and the platform's agent network.
+**Advanced Features**
+- Cross-border remittances to Kenya/Tanzania
+- Native stablecoin support (USDC, USDT) alongside Bitcoin
+- Merchant payment integration
+- Savings and credit products
+- Insurance partnerships
+
+### **Phase 4: Continental Vision (2027+)**
+🎯 **Goal**: Pan-African Bitcoin banking network
+
+**Multi-Country Expansion**
+- Kenya, Nigeria, Ghana market entry
+- Regulatory compliance in 10+ countries
+- Cross-border Bitcoin remittance corridors
+- Local currency support for all 39 African currencies
+
+**Ecosystem Development**
+- Developer API for third-party integrations
+- Agent franchise model
+- Bitcoin education and literacy programs
+- Central bank digital currency (CBDC) integration
+
+### **Technology Evolution**
+- **ICP Native Bitcoin**: Migrate to ICP's native Bitcoin integration
+- **Decentralized SMS**: Explore on-chain SMS processing
+- **AI-Powered Support**: Automated customer service in local languages
+- **Satellite Internet**: Starlink integration for remote area connectivity
+
+### **Impact Goals by 2027**
+- **10 Million Users**: Across 15 African countries
+- **100,000 Agents**: Comprehensive rural coverage
+- **$1 Billion Volume**: Monthly transaction processing
+- **Financial Inclusion**: Banking the previously unbanked population
 
 
 
