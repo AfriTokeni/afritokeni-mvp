@@ -1,0 +1,103 @@
+import React from 'react';
+import { CurrencySelector } from '../../components/CurrencySelector';
+import { formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
+import { AmountStepProps } from '../../types/depositTypes';
+
+const AmountStep: React.FC<AmountStepProps> = ({
+  amount,
+  selectedCurrency,
+  error,
+  onAmountChange,
+  onCurrencyChange,
+  onContinue,
+  onError,
+}) => {
+  const handleAmountContinue = () => {
+    const amountValue = parseFloat(amount);
+    
+    if (!amount || amountValue <= 0) {
+      onError('Please enter a valid amount');
+      return;
+    }
+    
+    if (amountValue < 1000) {
+      onError('Minimum deposit amount is ' + formatCurrencyAmount(1000, selectedCurrency as AfricanCurrency));
+      return;
+    }
+    
+    if (amountValue > 1000000) {
+      onError('Maximum deposit amount is ' + formatCurrencyAmount(1000000, selectedCurrency as AfricanCurrency));
+      return;
+    }
+    
+    onContinue();
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 sm:p-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-neutral-900 mb-2">Deposit Money</h2>
+          <p className="text-neutral-600">Enter the amount you want to deposit</p>
+        </div>
+
+        <div className="space-y-6">
+          {/* Currency Selection */}
+          <div>
+            <label htmlFor="currency" className="block text-sm font-medium text-neutral-700 mb-3">
+              Select Currency
+            </label>
+            <div className="relative">
+              <CurrencySelector
+                currentCurrency={selectedCurrency}
+                onCurrencyChange={onCurrencyChange}
+              />
+            </div>
+          </div>
+
+          {/* Amount Input */}
+          <div>
+            <label htmlFor="amount" className="block text-sm font-medium text-neutral-700 mb-3">
+              Deposit Amount
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                id="amount"
+                value={amount}
+                onChange={(e) => {
+                  onAmountChange(e.target.value);
+                  onError('');
+                }}
+                placeholder="0.00"
+                className="w-full pl-8 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200 font-mono text-lg"
+              />
+            </div>
+            <p className="text-xs text-neutral-500 mt-2">
+              Minimum: {formatCurrencyAmount(1000, selectedCurrency as AfricanCurrency)} • 
+              Maximum: {formatCurrencyAmount(1000000, selectedCurrency as AfricanCurrency)}
+            </p>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Continue Button */}
+          <button
+            onClick={handleAmountContinue}
+            disabled={!amount}
+            className="w-full bg-neutral-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-neutral-800 transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed"
+          >
+            Find Nearby Agents
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AmountStep;
