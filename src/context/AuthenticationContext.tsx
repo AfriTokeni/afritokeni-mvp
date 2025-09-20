@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useRef,
+  useCallback,
 } from "react";
 import {
   authSubscribe,
@@ -99,9 +100,10 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const updatedCurrentUserType = { ...currentUserType };
         delete updatedCurrentUserType[userType];
 
-        // If no user types remain, remove the key entirely
+        // If no user types remain, remove the key entirely and clear user creation status
         if (Object.keys(updatedCurrentUserType).length === 0) {
           localStorage.removeItem("afritokeni_current_user_type");
+          localStorage.removeItem("afritokeni_user_created_status"); // Clear user creation status on complete logout
         } else {
           // Otherwise, update with the remaining user types
           localStorage.setItem(
@@ -120,8 +122,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.removeItem(methodKey);
       });
 
-      // Clear current user type indicators
+      // Clear current user type indicators and user creation status
       localStorage.removeItem("afritokeni_current_user_type");
+      localStorage.removeItem("afritokeni_user_created_status"); // Clear user creation status on complete logout
     }
   };
 
@@ -219,7 +222,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // SMS verification states
 
   // Load or create user from Juno authentication
-  const loadOrCreateUserFromJuno = async (junoUser: JunoUser) => {
+  const loadOrCreateUserFromJuno = useCallback(async (junoUser: JunoUser) => {
     let afritokeniUser: User;
     try {
       // Try to load existing user profile from Juno datastore
@@ -261,15 +264,14 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (userRole === 'admin') {
           setUser({ user: null, agent: null, admin: afritokeniUser });
+        } else if (userRole === 'agent') {
+          setUser({ user: null, agent: afritokeniUser, admin: null });
         } else {
-          setUser({
-            ...user,
-            [userRole]: afritokeniUser,
-          });
+          setUser({ user: afritokeniUser, agent: null, admin: null });
         }
         setAuthMethod("web");
-        storeUserData(userData, "web");
-        console.log("Loaded existing user from Juno:", userData);
+        storeUserData(afritokeniUser, "web");
+        console.log("Loaded existing user from Juno:", afritokeniUser);
       } else {
         // // New user, create profile (this would typically redirect to registration)
         // console.log("New Juno user detected, would redirect to registration");
@@ -304,7 +306,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Error loading/creating user from Juno:", error);
     }
-  };
+  }, []);  // useCallback dependency array
 
   // Update user currency preference
   const updateUserCurrency = (currency: string) => {
@@ -326,6 +328,26 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAndRedirectRef.current = checkAndRedirectUser;
   }, [checkAndRedirectUser]);
 
+  // Also track localStorage changes directly for more reliable state management
+  const [userCreatedStatus, setUserCreatedStatus] = useState(() => 
+    localStorage.getItem('afritokeni_user_created_status') || 'idle'
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const currentStatus = localStorage.getItem('afritokeni_user_created_status') || 'idle';
+      setUserCreatedStatus(currentStatus);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    const interval = setInterval(handleStorageChange, 100);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
   useEffect(() => {
      const storedData = getStoredUserData();
     if (storedData) {
@@ -337,7 +359,6 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize user from stored data and subscribe to Juno auth changes
   useEffect(() => {
-
     // Subscribe to Juno authentication state changes
     const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
       console.log("Juno auth state changed:", junoUser);
@@ -355,7 +376,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return unsubscribe;
-  }, [isUserCreatedSuccess]);
+  }, [loadOrCreateUserFromJuno, isUserCreatedSuccess, userCreatedStatus]); // Re-run when user creation succeeds
 
   // Hybrid login - SMS for users without internet, ICP for web users
   const login = async (
@@ -366,7 +387,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (method === "web") {
         console.log("Web login initiated - using Juno/ICP Internet Identity");
         // Use Juno/ICP Internet Identity authentication for web users
-        await signIn();
+        await signIn({ internet_identity: {} });
         return true;
       } else if (method === "sms") {
         // SMS-based authentication for users without internet (feature phones)
@@ -564,7 +585,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (authMethod === "web" && user[targetUserType]) {
         // Use Juno signOut for web users
         console.log("Signing out web user via Juno");
-        await signOut();
+        await signOut({windowReload: false});
       }
 
       // Clear only the specified user type from state
@@ -582,6 +603,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
                            (user.user || user.agent);
       if (!remainingUser) {
         setAuthMethod("web");
+        // Clear user creation status on complete logout (success case)
+        localStorage.removeItem("afritokeni_user_created_status");
         window.location.href = "/";
       }
     } catch (error) {
@@ -600,6 +623,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           (user.user || user.agent);
         if (!remainingUser) {
           setAuthMethod("web");
+          // Clear user creation status on complete logout (error case)
+          localStorage.removeItem("afritokeni_user_created_status");
           window.location.href = "/";
         }
       }
