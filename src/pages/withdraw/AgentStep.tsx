@@ -126,6 +126,27 @@ const AgentStep: React.FC<AgentStepProps> = ({
     fetchNearbyAgents();
   }, [userLocation]);
 
+  // Fix popup z-index to ensure visibility above map
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .leaflet-popup-pane {
+        z-index: 1000 !important;
+      }
+      .leaflet-popup {
+        z-index: 1000 !important;
+      }
+      .leaflet-popup-content-wrapper {
+        z-index: 1001 !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const handleMarkerClick = (agent: DBAgent) => {
     onAgentSelect(agent);
   };
