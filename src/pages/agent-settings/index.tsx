@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
-import { DataService } from '../../services/dataService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { AFRICAN_CURRENCIES } from '../../types/currency';
 
@@ -39,7 +38,7 @@ interface AgentSettings {
 }
 
 const AgentSettings: React.FC = () => {
-  const { user, agent, updateAgentStatus, refreshData } = useAfriTokeni();
+  const { user, agent, updateAgentStatus } = useAfriTokeni();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,48 +62,19 @@ const AgentSettings: React.FC = () => {
     locationSharing: true
   });
 
+  console.log('AgentSettings render - user:', user, 'agent:', agent)
+
   // Load agent settings when agent data is available
   useEffect(() => {
-    const initializeAgent = async () => {
-      if (user?.agent && !agent) {
-        // Create agent record if it doesn't exist
-        console.log('Creating agent record for user:', user.agent.id);
-        try {
-          const newAgent = await DataService.createAgent({
-            userId: user.agent.id,
-            businessName: `${user.agent.firstName || 'Agent'} ${user.agent.lastName || 'User'}`,
-            location: {
-              country: 'Uganda',
-              state: 'Central',
-              city: 'Kampala',
-              address: 'Default Location',
-              coordinates: { lat: 0.3476, lng: 32.5825 }
-            },
-            isActive: true,
-            status: 'available',
-            cashBalance: 0,
-            digitalBalance: 0,
-            commissionRate: 2.5
-          });
-          console.log('Created agent record:', newAgent);
-          // Refresh data to load the new agent
-          await refreshData();
-        } catch (error) {
-          console.error('Error creating agent record:', error);
-        }
-      }
-      
-      if (agent) {
-        setSettings(prev => ({
-          ...prev,
-          status: (agent as any)?.status || 'available',
-          commissionRate: (agent as any)?.commissionRate || 2.5
-        }));
-      }
-    };
-    
-    initializeAgent();
-  }, [agent, user?.agent]);
+    // Simply load agent settings if agent exists, no creation logic here
+    if (agent) {
+      setSettings(prev => ({
+        ...prev,
+        status: (agent as any)?.status || 'available',
+        commissionRate: (agent as any)?.commissionRate || 2.5
+      }));
+    }
+  }, [agent]);
 
   const handleStatusChange = async (newStatus: 'available' | 'busy' | 'cash_out' | 'offline') => {
     setSaving(true);
