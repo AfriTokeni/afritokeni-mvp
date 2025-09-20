@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, Phone, Star, Clock, Search, Users, Map, List } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { listDocs } from '@junobuild/core';
 import PageLayout from '../../components/PageLayout';
 
 interface Agent {
@@ -126,68 +125,17 @@ const AgentMapPage: React.FC = () => {
     }
   };
 
-  // Load agents data from Juno datastore
+  // Load agents data
   useEffect(() => {
     const loadAgents = async () => {
       try {
         setLoading(true);
-        console.log('Loading agents from Juno datastore...');
-        
-        // Get agents from Juno datastore
-        const result = await listDocs({
-          collection: 'agents'
-        });
-        
-        console.log('Raw agent docs:', result);
-        
-        // Transform Juno docs to Agent interface
-        const agentsData = result.items.map((doc: any) => {
-          const data = doc.data;
-          return {
-            id: doc.key,
-            userId: data.userId || '',
-            businessName: data.businessName || 'Unknown Agent',
-            location: {
-              country: data.location?.country || 'Uganda',
-              state: data.location?.state || 'Central',
-              city: data.location?.city || 'Kampala',
-              address: data.location?.address || 'Address not available',
-              coordinates: {
-                lat: data.location?.coordinates?.lat || (0.3476 + (Math.random() - 0.5) * 0.1),
-                lng: data.location?.coordinates?.lng || (32.5825 + (Math.random() - 0.5) * 0.1)
-              }
-            },
-            isActive: data.status === 'available' || data.status === 'online',
-            cashBalance: data.cashBalance || 0,
-            digitalBalance: data.digitalBalance || 0,
-            commissionRate: data.commissionRate || 0.025,
-            createdAt: data.createdAt || new Date().toISOString()
-          };
-        });
-        
-        console.log('Transformed agents:', agentsData);
+        // Load agents from JSON file for now
+        const response = await fetch('/data/agents.json');
+        const agentsData = await response.json();
         setAgents(agentsData);
-        
-        // If no agents found, fall back to mock data for demo
-        if (agentsData.length === 0) {
-          console.log('No agents found in datastore, loading mock data...');
-          const response = await fetch('/data/agents.json');
-          const mockData = await response.json();
-          setAgents(mockData);
-        }
-        
       } catch (error) {
         console.error('Error loading agents:', error);
-        
-        // Fallback to mock data if Juno fails
-        try {
-          console.log('Falling back to mock data...');
-          const response = await fetch('/data/agents.json');
-          const mockData = await response.json();
-          setAgents(mockData);
-        } catch (fallbackError) {
-          console.error('Error loading fallback data:', fallbackError);
-        }
       } finally {
         setLoading(false);
       }
