@@ -64,6 +64,12 @@ export default defineConfig({
           write: "managed",
           memory: "stable",
         },
+        {
+          collection: "deposit_requests",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
       ],
       storage: [
         {
