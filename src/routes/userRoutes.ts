@@ -6,6 +6,7 @@ import {
   Banknote,
   User,
   LayoutDashboard,
+  MapPin,
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 
@@ -29,6 +30,12 @@ export const user_desktop_routes: Route[] = [
         path: "/users/send",
         label: "Send Money",
         icon: Send,
+    },
+    {
+        id: "agents" as RouteID,
+        path: "/users/agents",
+        label: "Find Agents",
+        icon: MapPin,
     },
     {
         id: "history" as RouteID,
@@ -62,6 +69,12 @@ export const user_mobile_routes: Route[] = [
     path: "/users/send",
     label: "Send",
     icon: Send,
+  },
+  {
+    id: "agents" as RouteID,
+    path: "/users/agents",
+    label: "Agents",
+    icon: MapPin,
   },
   {
     id: "history" as RouteID,

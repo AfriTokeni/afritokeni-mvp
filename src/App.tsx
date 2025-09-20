@@ -22,6 +22,7 @@ import BitcoinPage from "./pages/users/BitcoinPage.tsx";
 import ExchangePage from "./pages/users/ExchangePage.tsx";
 import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
 import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
+import AgentMapPage from "./pages/users/AgentMapPage.tsx";
 
 //Agent Pages
 import AgentDashboard from './pages/AgentDashboard';
@@ -87,6 +88,7 @@ const App: FC = () => {
               <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
+                <Route path="agents" element={<AgentMapPage />} />
                 <Route path="deposit" element={<DepositPage />} />
                 <Route path="history" element={<UserTransactions />} />
                 <Route path="withdraw" element={<WithdrawMoney />} />
