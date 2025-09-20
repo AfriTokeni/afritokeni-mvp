@@ -687,6 +687,13 @@ export class DataService {
 
   // Agent operations
   static async createAgent(agent: Omit<Agent, 'id' | 'createdAt'>): Promise<Agent> {
+    // First check if an agent already exists for this userId to prevent duplicates
+    const existingAgent = await this.getAgentByUserId(agent.userId);
+    if (existingAgent) {
+      console.warn(`Agent already exists for userId ${agent.userId}, returning existing agent instead of creating duplicate`);
+      return existingAgent;
+    }
+
     const now = new Date();
     const newAgent: Agent = {
       ...agent,
@@ -714,6 +721,7 @@ export class DataService {
       }
     });
 
+    console.log(`Successfully created new agent with ID ${newAgent.id} for userId ${agent.userId}`);
     return newAgent;
   }
 
@@ -776,19 +784,48 @@ export class DataService {
       // 3. Cash balance starts at 0 - agents must deposit their own cash to start operations
       const cashBalance = 0; // Agents start with no cash balance
 
-      // 4. Create agent record in agents collection
-      const agentData: Omit<Agent, 'id' | 'createdAt'> = {
-        userId: agentKYCData.userId,
-        businessName: agentKYCData.businessName || `${agentKYCData.firstName} ${agentKYCData.lastName} Agent`,
-        location: agentKYCData.location,
-        isActive: true,
-        status: 'available', // Default status when agent is created
-        cashBalance: cashBalance,
-        digitalBalance: digitalBalance,
-        commissionRate: 0.02 // Default 2% commission rate
-      };
+      // 4. Create or update agent record in agents collection
+      // First check if agent already exists to prevent duplication
+      const existingAgent = await this.getAgentByUserId(agentKYCData.userId);
+      
+      let newAgent: Agent;
+      
+      if (existingAgent) {
+        console.log(`Agent already exists for userId ${agentKYCData.userId}, updating KYC data instead of creating duplicate`);
+        
+        // Update the existing agent with KYC completion data
+        // Use the specific update methods available
+        await this.updateAgentStatus(existingAgent.id, 'available'); // Activate agent after KYC
+        
+        // Update balances if needed
+        await this.updateAgentBalance(existingAgent.id, {
+          cashBalance: cashBalance,
+          digitalBalance: digitalBalance
+        });
+        
+        // Get the updated agent record to return
+        const updatedAgent = await this.getAgentByUserId(agentKYCData.userId);
+        if (!updatedAgent) {
+          throw new Error('Failed to retrieve updated agent after KYC completion');
+        }
+        newAgent = updatedAgent;
+        
+      } else {
+        console.log(`Creating new agent for userId ${agentKYCData.userId} - no existing agent found`);
+        
+        const agentData: Omit<Agent, 'id' | 'createdAt'> = {
+          userId: agentKYCData.userId,
+          businessName: agentKYCData.businessName || `${agentKYCData.firstName} ${agentKYCData.lastName} Agent`,
+          location: agentKYCData.location,
+          isActive: true,
+          status: 'available', // Default status when agent is created
+          cashBalance: cashBalance,
+          digitalBalance: digitalBalance,
+          commissionRate: 0.02 // Default 2% commission rate
+        };
 
-      const newAgent = await this.createAgent(agentData);
+        newAgent = await this.createAgent(agentData);
+      }
 
       // 5. Initialize user balance if it doesn't exist (but don't override the random balance we just set)
       if (!userBalance && digitalBalance === 0) {
@@ -2437,7 +2474,7 @@ Send *AFRI# for menu`;
     requestId: string,
     agentId: string,
     processedBy?: string
-  ): Promise<{ success: boolean; transactionId?: string; error?: string }> {
+  ): Promise<{ success: boolean; transactionId?: string; userTransactionId?: string; error?: string }> {
     try {
       // Get the deposit request
       const requestDoc = await getDoc({
@@ -2451,16 +2488,29 @@ Send *AFRI# for menu`;
 
       const request = requestDoc.data as DepositRequest;
 
-      if (request.status !== 'confirmed') {
-        return { success: false, error: 'Deposit request is not in confirmed status' };
+      if (request.status !== 'pending' && request.status !== 'confirmed') {
+        return { success: false, error: 'Deposit request is not available for processing' };
       }
 
       if (request.agentId !== agentId) {
         return { success: false, error: 'Agent not authorized for this deposit request' };
       }
 
-      // Create the deposit transaction
-      const transaction = await this.createTransaction({
+      // Get current user and agent balances
+      const userBalance = await this.getUserBalance(request.userId);
+      const agent = await this.getAgent(agentId);
+      
+      if (!agent) {
+        return { success: false, error: 'Agent not found' };
+      }
+
+      // Check if agent has sufficient digital balance
+      if (agent.digitalBalance < request.amount) {
+        return { success: false, error: 'Insufficient agent digital balance' };
+      }
+
+      // Create the user deposit transaction (user receives money)
+      const userTransaction = await this.createTransaction({
         userId: request.userId,
         type: 'deposit',
         amount: request.amount,
@@ -2475,17 +2525,133 @@ Send *AFRI# for menu`;
         }
       });
 
-      // Update user balance
-      await this.updateUserBalance(request.userId, request.amount);
+      // Create the agent transaction (agent sends money to user)
+      const agentTransaction = await this.createTransaction({
+        userId: agent.userId,
+        type: 'send',
+        amount: request.amount,
+        currency: request.currency as AfricanCurrency,
+        recipientId: request.userId,
+        agentId: agentId,
+        status: 'completed',
+        description: `Deposit facilitation - Code: ${request.depositCode}`,
+        metadata: {
+          depositRequestId: requestId,
+          depositCode: request.depositCode,
+          processedBy: processedBy || agentId
+        }
+      });
+
+      // Update user balance (increase)
+      const currentUserBalance = userBalance?.balance || 0;
+      await this.updateUserBalance(request.userId, currentUserBalance + request.amount);
+
+      // Update agent digital balance (decrease)
+      await this.updateAgentBalance(agentId, {
+        digitalBalance: agent.digitalBalance - request.amount
+      });
 
       // Mark deposit request as completed
       await this.updateDepositRequestStatus(requestId, 'completed');
 
-      console.log(`Successfully processed deposit request ${requestId}, transaction ${transaction.id}`);
-      return { success: true, transactionId: transaction.id };
+      // Send SMS notification to user
+      try {
+        const user = await this.getUserByKey(request.userId);
+        if (user?.email && user.email.match(/^\d+$/)) { // Check if email is a phone number
+          await this.sendDepositSuccessSMS(
+            user.email, 
+            request.amount, 
+            request.currency, 
+            request.depositCode
+          );
+        }
+      } catch (smsError) {
+        console.warn('Failed to send SMS notification:', smsError);
+        // Don't fail the transaction if SMS fails
+      }
+
+      console.log(`Successfully processed deposit request ${requestId}, user transaction ${userTransaction.id}, agent transaction ${agentTransaction.id}`);
+      return { 
+        success: true, 
+        transactionId: agentTransaction.id, 
+        userTransactionId: userTransaction.id 
+      };
     } catch (error) {
       console.error('Error processing deposit request:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  // SMS Notification Methods
+  static async sendDepositSuccessSMS(
+    phoneNumber: string,
+    amount: number,
+    currency: string,
+    depositCode: string
+  ): Promise<void> {
+    try {
+      const message = `Deposit successful! You received ${currency} ${amount.toLocaleString()} via AfriTokeni. Code: ${depositCode}. Your balance has been updated.`;
+      
+      // Log the SMS message to datastore
+      await this.logSMSMessage({
+        phoneNumber,
+        message,
+        direction: 'outbound',
+        status: 'pending',
+        command: 'DEPOSIT_SUCCESS'
+      });
+
+      // Here you would integrate with actual SMS service (Twilio, etc.)
+      console.log(`SMS sent to ${phoneNumber}: ${message}`);
+    } catch (error) {
+      console.error('Error sending deposit success SMS:', error);
+      throw error;
+    }
+  }
+
+  // Get deposit request by code (for agent lookup)
+  static async getDepositRequestByCode(depositCode: string): Promise<DepositRequest | null> {
+    try {
+      const allRequests = await listDocs({
+        collection: 'deposit_requests'
+      });
+
+      if (!allRequests.items) return null;
+
+      for (const doc of allRequests.items) {
+        const request = doc.data as DepositRequest;
+        if (request.depositCode === depositCode && request.status === 'pending') {
+          return request;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error getting deposit request by code:', error);
+      return null;
+    }
+  }
+
+  // Confirm deposit request (agent confirms they can fulfill it)
+  static async confirmDepositRequest(requestId: string, agentId: string): Promise<boolean> {
+    try {
+      const requestDoc = await getDoc({
+        collection: 'deposit_requests',
+        key: requestId
+      });
+
+      if (!requestDoc?.data) return false;
+
+      const request = requestDoc.data as DepositRequest;
+      
+      if (request.agentId !== agentId || request.status !== 'pending') {
+        return false;
+      }
+
+      return await this.updateDepositRequestStatus(requestId, 'confirmed');
+    } catch (error) {
+      console.error('Error confirming deposit request:', error);
+      return false;
     }
   }
 }
