@@ -1,6 +1,7 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { getDoc, setDoc, type User as JunoUser } from '@junobuild/core';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { faker } from '@faker-js/faker';
 import { DataService } from '../services/dataService';
 
 export type UserRole = 'user' | 'agent';
@@ -13,12 +14,34 @@ interface RoleData {
 
 export const useRoleBasedAuth = () => {
   const [isCheckingRole, setIsCheckingRole] = useState(false);
-  const [isUserCreated, setIsUserCreated] = useState('idle');
+  const [isUserCreated, setIsUserCreated] = useState(() => {
+    // Initialize from localStorage to persist across navigation
+    return localStorage.getItem('afritokeni_user_created_status') || 'idle';
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const inFlightRef = useRef(false);
   const lastHandledUserKeyRef = useRef<string | null>(null);
   const lastNavigatedPathRef = useRef<string | null>(null);
+
+  // Keep state synchronized with localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const currentStatus = localStorage.getItem('afritokeni_user_created_status') || 'idle';
+      setIsUserCreated(currentStatus);
+    };
+
+    // Listen for storage events (changes from other tabs/windows)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also check localStorage periodically in case it was updated in the same tab
+    const interval = setInterval(handleStorageChange, 100);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   const checkAndRedirectUser = useCallback(async (junoUser: JunoUser) => {
     if (inFlightRef.current || lastHandledUserKeyRef.current === junoUser.key) {
@@ -82,6 +105,7 @@ export const useRoleBasedAuth = () => {
 
   const setUserRole = useCallback(async (junoUser: JunoUser, role: UserRole) => {
     setIsUserCreated('loading');
+    localStorage.setItem('afritokeni_user_created_status', 'loading');
     try {
       let existingRoleData;
       try {
@@ -112,10 +136,16 @@ export const useRoleBasedAuth = () => {
       });
 
       // New web user, create profile using ID as key
+      // Generate realistic names for better UX
+      const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
+      
+      console.log(`Generated user profile: ${firstName} ${lastName} (${role})`);
+      
       const afritokeniUser = {
           id: junoUser.key,
-          firstName: 'ICP',
-          lastName: 'User',
+          firstName,
+          lastName,
           email: junoUser.key, // Use key as identifier for web users
           userType: role, // Use determined role
           isVerified: true,
@@ -134,7 +164,36 @@ export const useRoleBasedAuth = () => {
           authMethod: 'web' // Important: specify this is a web user
         });
 
+        // If user selected agent role, also create the Agent record immediately
+        if (role === 'agent') {
+          console.log('Creating Agent record for new agent user:', afritokeniUser.id);
+          try {
+            const newAgent = await DataService.createAgent({
+              userId: afritokeniUser.id,
+              businessName: `${afritokeniUser.firstName} ${afritokeniUser.lastName} Agent Service`,
+              location: {
+                country: 'Uganda',
+                state: 'Central', 
+                city: 'Kampala',
+                address: 'Default Location',
+                coordinates: { lat: 0.3476, lng: 32.5825 }
+              },
+              isActive: true,
+              status: 'available',
+              cashBalance: 0,
+              digitalBalance: 0,
+              commissionRate: 2.5
+            });
+            console.log('Successfully created Agent record at role selection:', newAgent);
+          } catch (agentError) {
+            console.error('Error creating Agent record during role selection:', agentError);
+            // Don't fail the entire process if agent creation fails
+            // Agent can be created later through KYC completion
+          }
+        }
+
         setIsUserCreated('success');
+        localStorage.setItem('afritokeni_user_created_status', 'success');
 
       // Redirect based on selected role
       const target = role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
@@ -148,6 +207,7 @@ export const useRoleBasedAuth = () => {
     } catch (error) {
       console.error('Error setting user role:', error);
       setIsUserCreated('error');
+      localStorage.setItem('afritokeni_user_created_status', 'error');
       throw error;
     }
   }, [location.pathname, navigate]);
@@ -169,13 +229,25 @@ export const useRoleBasedAuth = () => {
     }
   }, []);
 
-  const isUserCreatedSuccess = isUserCreated === 'success';
+  // Always get the most current value from localStorage
+  const getCurrentUserCreatedStatus = useCallback(() => {
+    return localStorage.getItem('afritokeni_user_created_status') || 'idle';
+  }, []);
+
+  const isUserCreatedSuccess = isUserCreated === 'success' || getCurrentUserCreatedStatus() === 'success';
+
+  // Function to reset user creation status (useful after successful operations)
+  const resetUserCreatedStatus = useCallback(() => {
+    setIsUserCreated('idle');
+    localStorage.setItem('afritokeni_user_created_status', 'idle');
+  }, []);
 
   return {
     isCheckingRole,
     checkAndRedirectUser,
     setUserRole,
     getUserRole,
-    isUserCreatedSuccess
+    isUserCreatedSuccess,
+    resetUserCreatedStatus
   };
 };
