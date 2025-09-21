@@ -3,6 +3,14 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { ArrowLeft } from 'lucide-react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
+
+// Fix for default Leaflet icon paths in Vite/Webpack
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 import { DataService, Agent as DBAgent } from '../../services/dataService';
 
 interface AgentStepProps {
@@ -147,10 +155,6 @@ const AgentStep: React.FC<AgentStepProps> = ({
     };
   }, []);
 
-  const handleMarkerClick = (agent: DBAgent) => {
-    onAgentSelect(agent);
-  };
-
   const availableAgents = agents.filter(agent => agent.digitalBalance > 0);
 
   const renderAgentDetails = (agent: DBAgent) => (
@@ -289,14 +293,11 @@ const AgentStep: React.FC<AgentStepProps> = ({
                 <Popup>Your Location</Popup>
               </Marker>
               {availableAgents.map((agent) => (
-                                  <Marker
-                    key={agent.id}
-                    position={[agent.location.coordinates.lat, agent.location.coordinates.lng]}
-                    icon={createAgentIcon(agent.status)}
-                    eventHandlers={{
-                      click: () => handleMarkerClick(agent),
-                    }}
-                  >
+                <Marker
+                  key={agent.id}
+                  position={[agent.location.coordinates.lat, agent.location.coordinates.lng]}
+                  icon={createAgentIcon(agent.status)}
+                >
                   <Popup className="hidden md:block">
                     {renderAgentDetails(agent)}
                   </Popup>
@@ -318,8 +319,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
                 {availableAgents.map((agent) => (
                   <li
                     key={agent.id}
-                    className="p-3 sm:p-4 lg:p-6 hover:bg-neutral-50 transition-colors duration-200 cursor-pointer"
-                    onClick={() => onAgentSelect(agent)}
+                    className="p-3 sm:p-4 lg:p-6 hover:bg-neutral-50 transition-colors duration-200"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex-1 min-w-0">
