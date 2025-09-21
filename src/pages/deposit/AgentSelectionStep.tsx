@@ -4,6 +4,14 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
+
+// Fix for default Leaflet icon paths in Vite/Webpack
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 import { AgentSelectionStepProps } from '../../types/depositTypes';
 import { Agent } from '../../services/dataService';
 
@@ -27,11 +35,32 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
     index === self.findIndex(a => a.id === agent.id)
   );
   
-  // Debug log to track agent duplication
+  // Debug log to track agent duplication and map rendering
   console.log('AgentSelectionStep rendered with agents:', agents.length, 'unique:', uniqueAgents.length);
   if (agents.length !== uniqueAgents.length) {
     console.warn('Duplicate agents detected!', agents.map(a => a.id));
   }
+  
+  // Map rendering debug
+  useEffect(() => {
+    console.log('🗺️ View mode changed to:', viewMode);
+    console.log('🗺️ User location:', userLocation);
+    
+    if (viewMode === 'map') {
+      // Give the map container time to render then check if Leaflet is working
+      setTimeout(() => {
+        const mapContainers = document.querySelectorAll('.leaflet-container');
+        console.log('🗺️ Found Leaflet containers:', mapContainers.length);
+        if (mapContainers.length === 0) {
+          console.error('🗺️ No Leaflet containers found - map may not be rendering');
+        } else {
+          console.log('🗺️ Map container found, checking tiles...');
+          const tiles = document.querySelectorAll('.leaflet-tile');
+          console.log('🗺️ Found tiles:', tiles.length);
+        }
+      }, 1000);
+    }
+  }, [viewMode, userLocation]);
 
   // State for custom popup that bypasses leaflet z-index issues
   const [popupAgent, setPopupAgent] = useState<Agent | null>(null);
@@ -299,12 +328,19 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             ))}
           </div>
         ) : (
-          <div className="h-96 w-full relative z-0">
+          <div className="h-96 w-full relative z-0" style={{ minHeight: '384px' }}>
             <MapContainer
-              center={userLocation || [0, 0]}
+              center={userLocation || [0.3476, 32.5825]} // Default to Kampala if no user location
               zoom={13}
-              style={{ height: '100%', width: '100%', position: 'relative', zIndex: 1 }}
-              className="rounded-lg"
+              style={{ 
+                height: '100%', 
+                width: '100%', 
+                minHeight: '384px', 
+                position: 'relative', 
+                zIndex: 1,
+                borderRadius: '0.5rem'
+              }}
+              className="leaflet-map-container"
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
