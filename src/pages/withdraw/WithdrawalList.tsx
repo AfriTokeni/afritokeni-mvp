@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, CreditCard, Search } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
-import { DataService } from '../../services/dataService';
-import { Transaction } from '../../types/transaction';
+import { DataService, WithdrawalRequest as DataServiceWithdrawalRequest } from '../../services/dataService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { User as UserType } from '../../types/auth';
-import { listDocs } from '@junobuild/core';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
 
 interface WithdrawalListProps {
@@ -19,112 +16,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Function to convert Transaction to WithdrawalRequest - handles both SMS and web users
-  const convertTransactionToWithdrawalRequest = async (transaction: Transaction): Promise<WithdrawalRequest | null> => {
-    try {
-      // First, try to get user directly by ID (works for web users)
-      let user: UserType | null = await DataService.getUserByKey(transaction.userId);
-      
-      if (!user) {
-        // If not found, this might be an SMS user where transaction.userId is the user.id
-        // but the user is stored with phone number as key. Search through all users.
-        console.log(`User not found by key ${transaction.userId}, searching all users...`);
-        
-        try {
-          // Get all users and find the one with matching ID
-          const allUsersResult = await listDocs({
-            collection: 'users'
-          });
-          
-          const foundUserDoc = allUsersResult.items.find((doc) => {
-            const userData = doc.data as UserType;
-            return userData.id === transaction.userId;
-          });
-          
-          if (foundUserDoc) {
-            const userData = foundUserDoc.data as UserType;
-            user = {
-              id: userData.id,
-              firstName: userData.firstName,
-              lastName: userData.lastName,
-              email: userData.email,
-              userType: userData.userType,
-              isVerified: userData.isVerified,
-              kycStatus: userData.kycStatus,
-              pin: userData.pin,
-              createdAt: userData.createdAt ? 
-                (userData.createdAt instanceof Date ? userData.createdAt : new Date(userData.createdAt)) : 
-                new Date()
-            };
-            
-            console.log(`Found SMS user with ID ${transaction.userId}:`, {
-              userId: user.id,
-              email: user.email, // This contains the phone number for SMS users
-              userType: user.userType
-            });
-          }
-        } catch (searchError) {
-          console.error('Error searching all users:', searchError);
-        }
-      }
 
-      if (!user) {
-        console.log(`User not found for transaction ${transaction.id} with userId: ${transaction.userId}`);
-        return null;
-      }
-
-      // Determine if this is an SMS user by checking if email field contains a phone number
-      // For SMS users, the email field contains the phone number
-      const isSMSUser = /^\+?[1-9]\d{1,14}$/.test(user.email);
-      console.log(`Processing ${isSMSUser ? 'SMS' : 'Web'} user transaction:`, {
-        transactionId: transaction.id,
-        userId: transaction.userId,
-        userEmail: user.email,
-        userType: user.userType,
-        isSMSUser
-      });
-      
-      // Determine user phone number
-      let userPhone: string;
-      if (isSMSUser) {
-        // For SMS users, the email field contains the phone number
-        userPhone = user.email.startsWith('+') ? user.email : `+${user.email}`;
-      } else {
-        // For web users, email field contains actual email
-        userPhone = user.email && user.email.includes('@') ? user.email : (user.email || 'Unknown');
-      }
-
-      // Build user name from available data
-      let userName: string;
-      if (user.firstName && user.lastName) {
-        userName = `${user.firstName} ${user.lastName}`;
-      } else if (user.firstName) {
-        userName = user.firstName;
-      } else if (user.lastName) {
-        userName = user.lastName;
-      } else {
-        userName = isSMSUser ? `SMS User (${userPhone})` : 'Unknown User';
-      }
-
-      return {
-        id: transaction.id,
-        userName: userName,
-        userPhone: userPhone,
-        amount: {
-          local: transaction.amount,
-          currency: 'UGX' // This should be dynamic based on user's preferred currency
-        },
-        withdrawalCode: transaction?.metadata?.withdrawalCode || '', 
-        requestedAt: transaction.createdAt instanceof Date ? transaction.createdAt : new Date(transaction.createdAt),
-        status: transaction.status as 'pending' | 'verified' | 'approved' | 'completed' | 'rejected',
-        userNationalId: 'N/A', // Not available in User type
-        location: 'N/A' // Not available in User type
-      };
-    } catch (error) {
-      console.error('Error converting transaction:', error);
-      return null;
-    }
-  };
 
   // Fetch real withdrawal requests
   useEffect(() => {
@@ -136,21 +28,29 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
 
       try {
         setLoading(true);
-        // Get pending withdrawals for this agent
-        const pendingTransactions = await DataService.getPendingWithdrawals(agent.id);
+        // Get withdrawal requests for this agent with optional status filter
+        const statusFilter = filterStatus === 'all' ? undefined : filterStatus;
+        const withdrawalRequests = await DataService.getAgentWithdrawalRequests(agent.id, statusFilter);
 
-        console.log(`Pending transactions for agent ${agent.id}:`, pendingTransactions);
-
-        // Convert transactions to withdrawal requests
-        const withdrawalRequestPromises = pendingTransactions.map(convertTransactionToWithdrawalRequest);
-        const withdrawalRequestsResults = await Promise.all(withdrawalRequestPromises);
+        console.log(`Withdrawal requests for agent ${agent.id} with status ${statusFilter}:`, withdrawalRequests);
         
-        // Filter out null results
-        const validWithdrawalRequests = withdrawalRequestsResults.filter(
-          (request): request is WithdrawalRequest => request !== null
-        );
+        // Convert dataService format to UI format
+        const uiWithdrawalRequests = withdrawalRequests.map((dsRequest: DataServiceWithdrawalRequest): WithdrawalRequest => ({
+          id: dsRequest.id,
+          userName: dsRequest.userName || 'Unknown User',
+          userPhone: dsRequest.userPhone || 'Unknown Phone',
+          amount: {
+            local: dsRequest.amount,
+            currency: dsRequest.currency
+          },
+          withdrawalCode: dsRequest.withdrawalCode,
+          requestedAt: new Date(dsRequest.createdAt),
+          status: dsRequest.status === 'confirmed' ? 'verified' : dsRequest.status,
+          userNationalId: 'N/A',
+          location: dsRequest.userLocation || 'N/A'
+        }));
         
-        setWithdrawalRequests(validWithdrawalRequests);
+        setWithdrawalRequests(uiWithdrawalRequests);
       } catch (error) {
         console.error('Error fetching withdrawal requests:', error);
         setWithdrawalRequests([]);
@@ -160,7 +60,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
     };
 
     fetchWithdrawalRequests();
-  }, [agent?.id]);
+  }, [agent?.id, filterStatus]);
 
   const formatCurrency = (amount: number, currency: string) => {
     return formatCurrencyAmount(amount, currency as keyof typeof AFRICAN_CURRENCIES);
@@ -224,6 +124,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
           <option value="pending">Pending</option>
           <option value="verified">Verified</option>
           <option value="approved">Approved</option>
+          <option value="completed">Completed</option>
         </select>
       </div>
 
