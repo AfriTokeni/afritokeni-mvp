@@ -5,18 +5,31 @@ import AgentStep from './AgentStep';
 import ConfirmationStep from './ConfirmationStep';
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
-import { BalanceService } from '../../services/BalanceService';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
 import type { WithdrawStep } from './types';
 import { Agent as DBAgent } from '../../services/dataService';
 
 const WithdrawPage: React.FC = () => {
-  // Real balance calculation from transactions
-  const getBalanceForCurrency = (): number => {
-    if (!user.user?.id) return 0;
-    return BalanceService.calculateBalance(user.user.id, userCurrency);
-  };
   const { user } = useAuthentication();
+  const { balance, refreshData } = useAfriTokeni();
+
+  // Refresh data when withdraw page loads to ensure latest balance
+  // useEffect(() => {
+  //   if (user?.user?.id) {
+  //     console.log('💰 WithdrawPage - Refreshing data for user:', user.user.id);
+  //     console.log('💰 WithdrawPage - Current balance:', balance);
+  //     refreshData();
+  //   }
+  // }, [user?.user?.id, refreshData, balance]);
+  
+  // Real balance calculation from datastore
+  const getBalanceForCurrency = (): number => {
+    if (!balance) return 0;
+    // Return the balance if it matches the user's currency, otherwise return 0
+    return balance.currency === userCurrency ? balance.balance : 0;
+  };
   const [currentStep, setCurrentStep] = useState<WithdrawStep>('amount');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -29,10 +42,15 @@ const WithdrawPage: React.FC = () => {
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
 
-  // Get user's preferred currency or default to UGX
+  // Get user's preferred currency or default to UGX (same as dashboard)
   const currentUser = user.user;
-  const defaultCurrency = currentUser?.preferredCurrency || 'UGX';
-  const [userCurrency, setUserCurrency] = useState<string>(defaultCurrency);
+  const userCurrency = currentUser?.preferredCurrency || 'UGX';
+  const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
+
+  // Format currency using the same system as dashboard
+  const formatCurrency = (amount: number): string => {
+    return formatCurrencyAmount(amount, userCurrency as any);
+  };
   
   // Mock Bitcoin exchange rate - would be live in production
   const getBtcExchangeRate = (currency: string) => {
@@ -85,11 +103,12 @@ const WithdrawPage: React.FC = () => {
       // Generate withdrawal code
       const code = generateWithdrawalCode();
       
-      // Create withdraw transaction in Juno backend
-      await DataService.createWithdrawTransaction(
+      // Create withdrawal request in Juno backend
+      await DataService.createWithdrawalRequest(
         user.user.id,
-        finalLocalAmount,
         agent.id,
+        finalLocalAmount,
+        userCurrency,
         code,
         withdrawalFee
       );
@@ -158,13 +177,14 @@ const WithdrawPage: React.FC = () => {
           <AmountStep
             exchangeRate={exchangeRate}
             userBalance={getBalanceForCurrency()}
-            onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin', selectedCurrency: string) => {
+            preferredCurrency={userCurrency}
+            onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin', _selectedCurrency: string) => {
               // Store the amounts for the confirmation step
               setFinalLocalAmount(parseFloat(localAmount) || 0);
               setFinalBtcAmount(btcAmount);
               setWithdrawType(withdrawType);
               setWithdrawalFee(fee);
-              setUserCurrency(selectedCurrency);
+              // Note: selectedCurrency is now ignored since we use user's preferred currency
               setCurrentStep(withdrawType === 'cash' ? 'agent' : 'confirmation');
             }}
           />
