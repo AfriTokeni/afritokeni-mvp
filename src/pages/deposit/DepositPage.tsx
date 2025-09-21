@@ -61,9 +61,11 @@ const DepositPage: React.FC = () => {
   // Load nearby agents
   const loadNearbyAgents = useCallback(async () => {
     if (!userLocation) {
-      console.log('No user location available');
+      console.log('No user location available, cannot load agents');
       return;
     }
+
+    console.log('User location available:', userLocation);
 
     // Prevent duplicate loading
     if (isLoadingAgents) {
@@ -105,11 +107,19 @@ const DepositPage: React.FC = () => {
           },
           (error) => {
             console.error('Error getting location:', error);
-            updateState({ error: 'Failed to get your location. Please enable location services.' });
+            console.log('Using default location (Kampala, Uganda) as fallback');
+            // Use Kampala, Uganda as default location when geolocation fails
+            const defaultLocation: [number, number] = [0.3476, 32.5825]; // Kampala coordinates
+            updateFormData({ userLocation: defaultLocation });
+            updateState({ error: 'Using default location. For better results, please enable location services.' });
           }
         );
       } else {
-        updateState({ error: 'Geolocation is not supported by this browser.' });
+        console.log('Geolocation not supported, using default location (Kampala, Uganda)');
+        // Use Kampala, Uganda as default location when geolocation is not supported
+        const defaultLocation: [number, number] = [0.3476, 32.5825]; // Kampala coordinates
+        updateFormData({ userLocation: defaultLocation });
+        updateState({ error: 'Geolocation not supported. Using default location (Kampala, Uganda).' });
       }
     };
 
