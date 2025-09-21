@@ -40,6 +40,23 @@ export interface DepositRequest {
   userLocation?: string; // Added when fetching with user info
 }
 
+// Withdrawal Request interface
+export interface WithdrawalRequest {
+  id: string;
+  userId: string;
+  agentId: string;
+  amount: number;
+  currency: string;
+  withdrawalCode: string;
+  fee: number;
+  status: 'pending' | 'confirmed' | 'completed' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+  userName?: string; // Added when fetching with user info
+  userPhone?: string; // Added when fetching with user info
+  userLocation?: string; // Added when fetching with user info
+}
+
 // Legacy Transaction interface - keeping for backward compatibility
 export interface LegacyTransaction {
   id: string;
@@ -260,10 +277,12 @@ export class DataService {
 
       const updatedUser = { ...existingUser, ...updates };
       
-      // Convert Date fields to ISO strings for Juno storage
+      // Convert Date fields to ISO strings for Juno storage - handle both Date objects and strings
       const dataForJuno = {
         ...updatedUser,
-        createdAt: updatedUser.createdAt?.toISOString() || new Date().toISOString()
+        createdAt: updatedUser.createdAt 
+          ? (updatedUser.createdAt instanceof Date ? updatedUser.createdAt.toISOString() : String(updatedUser.createdAt))
+          : new Date().toISOString()
       };
 
       // Use the same key for updates with current version
@@ -371,11 +390,13 @@ export class DataService {
       createdAt: now
     };
 
-    // Convert Date fields to ISO strings
+    // Convert Date fields to ISO strings - handle both Date objects and strings
     const dataForJuno = {
       ...newTransaction,
       createdAt: now.toISOString(),
-      completedAt: newTransaction.completedAt ? newTransaction.completedAt.toISOString() : undefined
+      completedAt: newTransaction.completedAt 
+        ? (newTransaction.completedAt instanceof Date ? newTransaction.completedAt.toISOString() : String(newTransaction.completedAt))
+        : undefined
     };
 
     const existingDoc = await getDoc({
@@ -583,11 +604,11 @@ export class DataService {
 
       const updated = { ...existing, ...updates };
 
-      // Convert Date fields to ISO strings
+      // Convert Date fields to ISO strings - handle both Date objects and strings
       const dataForJuno = {
         ...updated,
-        createdAt: updated.createdAt ? updated.createdAt.toISOString() : undefined,
-        completedAt: updated.completedAt ? updated.completedAt.toISOString() : undefined
+        createdAt: updated.createdAt ? (updated.createdAt instanceof Date ? updated.createdAt.toISOString() : String(updated.createdAt)) : undefined,
+        completedAt: updated.completedAt ? (updated.completedAt instanceof Date ? updated.completedAt.toISOString() : String(updated.completedAt)) : undefined
       };
 
       const existingDoc = await getDoc({
@@ -782,7 +803,8 @@ export class DataService {
       // Agent starts with 0 balance and must receive deposits to have digital funds
       
       // 3. Cash balance starts at 0 - agents must deposit their own cash to start operations
-      const cashBalance = 0; // Agents start with no cash balance
+      // For development/testing, give agents some initial cash
+      const cashBalance = 50000; // 50k UGX for testing - change to 0 for production
 
       // 4. Create or update agent record in agents collection
       // First check if agent already exists to prevent duplication
@@ -1006,44 +1028,121 @@ export class DataService {
     }
   }
 
+  // Agent Cash Deposit Methods
+  static async depositCashToAgent(agentId: string, amount: number, description?: string): Promise<boolean> {
+    try {
+      console.log(`💰 Agent ${agentId} depositing ${amount} cash`);
+      
+      const agent = await this.getAgent(agentId);
+      if (!agent) {
+        throw new Error('Agent not found');
+      }
+
+      // Update agent's cash balance
+      const success = await this.updateAgentBalance(agentId, {
+        cashBalance: agent.cashBalance + amount
+      });
+
+      if (success && description) {
+        console.log(`💰 Cash deposit successful: ${description}`);
+      }
+
+      return success;
+    } catch (error) {
+      console.error('Error depositing cash to agent:', error);
+      return false;
+    }
+  }
+
+  // Development/Testing helper - give agent initial cash balance
+  static async initializeAgentCashForTesting(agentId: string, initialCashAmount: number = 10000): Promise<boolean> {
+    try {
+      console.log(`🧪 [DEV] Initializing agent ${agentId} with ${initialCashAmount} cash for testing`);
+      return await this.depositCashToAgent(agentId, initialCashAmount, `Initial cash balance for testing`);
+    } catch (error) {
+      console.error('Error initializing agent cash for testing:', error);
+      return false;
+    }
+  }
+
   static async getNearbyAgents(lat: number, lng: number, radius: number = 5, includeStatuses?: ('available' | 'busy' | 'cash_out' | 'offline')[]): Promise<Agent[]> {
     try {
+      console.log('🔍 getNearbyAgents called with:', { lat, lng, radius, includeStatuses });
+      
       const docs = await listDocs({
         collection: 'agents'
       });
       
+      console.log('📊 Total agents in collection:', docs.items.length);
+      
       // Default to only available agents if no statuses specified
       const allowedStatuses = includeStatuses || ['available'];
+      console.log('✅ Allowed statuses:', allowedStatuses);
       
-      return docs.items
-        .map(doc => doc.data as Agent)
-        .filter(agent => {
-          if (!agent.isActive) return false;
-          if (!allowedStatuses.includes(agent.status)) return false;
-          
-          // Simple distance calculation (not precise but good for demo)
-          const agentLat = agent.location.coordinates.lat;
-          const agentLng = agent.location.coordinates.lng;
-          const distance = Math.sqrt(
-            Math.pow(lat - agentLat, 2) + Math.pow(lng - agentLng, 2)
-          );
-          
-          return distance <= radius;
-        })
-        .sort((a, b) => {
-          // Sort by distance (simplified)
-          const distA = Math.sqrt(
-            Math.pow(lat - a.location.coordinates.lat, 2) + 
-            Math.pow(lng - a.location.coordinates.lng, 2)
-          );
-          const distB = Math.sqrt(
-            Math.pow(lat - b.location.coordinates.lat, 2) + 
-            Math.pow(lng - b.location.coordinates.lng, 2)
-          );
-          return distA - distB;
+      const allAgents = docs.items.map(doc => doc.data as Agent);
+      console.log('👥 All agents:', allAgents.map(a => ({ 
+        id: a.id, 
+        businessName: a.businessName, 
+        status: a.status, 
+        isActive: a.isActive,
+        location: a.location?.coordinates 
+      })));
+      
+      const filteredAgents = allAgents.filter(agent => {
+        console.log(`🔍 Checking agent ${agent.businessName}:`, { 
+          isActive: agent.isActive, 
+          status: agent.status, 
+          statusAllowed: allowedStatuses.includes(agent.status),
+          coordinates: agent.location?.coordinates
         });
+        
+        if (!agent.isActive) {
+          console.log(`❌ Agent ${agent.businessName} is not active`);
+          return false;
+        }
+        if (!allowedStatuses.includes(agent.status)) {
+          console.log(`❌ Agent ${agent.businessName} status ${agent.status} not in allowed statuses`);
+          return false;
+        }
+        
+        // Simple distance calculation (not precise but good for demo)
+        const agentLat = agent.location.coordinates.lat;
+        const agentLng = agent.location.coordinates.lng;
+        const distance = Math.sqrt(
+          Math.pow(lat - agentLat, 2) + Math.pow(lng - agentLng, 2)
+        );
+        
+        console.log(`📏 Agent ${agent.businessName} distance: ${distance.toFixed(4)} (radius: ${radius})`);
+        const withinRadius = distance <= radius;
+        if (!withinRadius) {
+          console.log(`❌ Agent ${agent.businessName} outside radius`);
+        } else {
+          console.log(`✅ Agent ${agent.businessName} within radius`);
+        }
+        
+        return withinRadius;
+      });
+      
+      console.log('🎯 Filtered agents (within radius and active):', filteredAgents.length);
+      
+      const sortedAgents = filteredAgents.sort((a, b) => {
+        // Sort by distance (simplified)
+        const distA = Math.sqrt(
+          Math.pow(lat - a.location.coordinates.lat, 2) + 
+          Math.pow(lng - a.location.coordinates.lng, 2)
+        );
+        const distB = Math.sqrt(
+          Math.pow(lat - b.location.coordinates.lat, 2) + 
+          Math.pow(lng - b.location.coordinates.lng, 2)
+        );
+        return distA - distB;
+      });
+      
+      console.log('🏆 Final nearby agents:', sortedAgents.map(a => ({ id: a.id, businessName: a.businessName })));
+      return sortedAgents;
+      
     } catch (error) {
-      console.error('Error getting nearby agents:', error);
+      console.error('❌ Error getting nearby agents:', error);
       return [];
     }
   }
@@ -1256,8 +1355,8 @@ export class DataService {
 
       const dataForJuno = {
         ...updatedSession,
-        createdAt: updatedSession.createdAt.toISOString(),
-        lastActivity: updatedSession.lastActivity.toISOString()
+        createdAt: updatedSession.createdAt instanceof Date ? updatedSession.createdAt.toISOString() : String(updatedSession.createdAt),
+        lastActivity: updatedSession.lastActivity instanceof Date ? updatedSession.lastActivity.toISOString() : String(updatedSession.lastActivity)
       };
 
       await setDoc({
@@ -2124,7 +2223,7 @@ Send *AFRI# for menu`;
             ...transaction,
             userId,
             createdAt: new Date().toISOString(),
-            expiresAt: transaction.expiresAt.toISOString()
+            expiresAt: transaction.expiresAt instanceof Date ? transaction.expiresAt.toISOString() : String(transaction.expiresAt)
           }
         }
       });
@@ -2196,8 +2295,10 @@ Send *AFRI# for menu`;
           key: transaction.id,
           data: {
             ...transaction,
-            createdAt: transaction.createdAt.toISOString(),
-            completedAt: transaction.completedAt ? transaction.completedAt.toISOString() : undefined
+            createdAt: transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt),
+            completedAt: transaction.completedAt 
+              ? (transaction.completedAt instanceof Date ? transaction.completedAt.toISOString() : String(transaction.completedAt))
+              : undefined
           }
         }
       });
@@ -2238,7 +2339,7 @@ Send *AFRI# for menu`;
       const transaction = transactionDoc.data as Transaction;
       
       // Verify the withdrawal code
-      if (transaction.metadata?.withdrawalCode !== verificationCode) {
+      if (transaction.withdrawalCode !== verificationCode) {
         throw new Error('Invalid withdrawal code');
       }
 
@@ -2268,8 +2369,9 @@ Send *AFRI# for menu`;
       }
 
       // Check if agent has sufficient cash balance
+      console.log(`🏦 Agent balance check (completeWithdraw): cashBalance=${agent.cashBalance}, withdrawal amount=${transaction.amount}, digitalBalance=${agent.digitalBalance}`);
       if (agent.cashBalance < transaction.amount) {
-        throw new Error('Agent has insufficient cash balance');
+        throw new Error(`Agent has insufficient cash balance. Agent has ${agent.cashBalance}, needs ${transaction.amount}`);
       }
 
       const agentDigitalReceives = transaction.amount + (transaction.fee || 0); // Agent receives user's digital payment including fee
@@ -2279,26 +2381,10 @@ Send *AFRI# for menu`;
         digitalBalance: agent.digitalBalance + agentDigitalReceives // Agent receives digital payment + fee
       });
 
-      // Update transaction status
-      const updatedTransaction = {
-        ...transaction,
+      // Update transaction status to completed
+      await this.updateTransaction(transactionId, {
         status: 'completed' as const,
         completedAt: new Date()
-      };
-
-      await setDoc({
-        collection: 'transactions',
-        doc: {
-          key: transactionId,
-          data: {
-            ...updatedTransaction,
-            createdAt: transaction.createdAt instanceof Date 
-              ? transaction.createdAt.getTime().toString()
-              : transaction.createdAt,
-            completedAt: updatedTransaction.completedAt.getTime().toString()
-          },
-          version: transactionDoc?.version ? transactionDoc.version : 1n
-        }
       });
 
       // Send completion SMS to user (log it for now)
@@ -2385,11 +2471,25 @@ Send *AFRI# for menu`;
 
   static async getAgentDepositRequests(agentId: string, status?: string): Promise<DepositRequest[]> {
     try {
+      console.log('🔍 getAgentDepositRequests called with:', { agentId, status });
       const docs = await listDocs({
         collection: 'deposit_requests'
       });
+      
+      console.log('🔍 Retrieved docs from deposit_requests collection:', docs);
+      console.log('🔍 Number of docs.items:', docs.items?.length || 0);
+      
+      // Log all deposit requests for debugging
+      if (docs.items && docs.items.length > 0) {
+        console.log('🔍 All deposit requests in datastore:');
+        docs.items.forEach((doc, index) => {
+          const request = doc.data as DepositRequest;
+          console.log(`  ${index + 1}. ID: ${request.id}, AgentID: ${request.agentId}, UserID: ${request.userId}, Status: ${request.status}`);
+        });
+      }
 
       if (!docs.items) {
+        console.log('🔍 No docs.items found, returning empty array');
         return [];
       }
 
@@ -2398,9 +2498,12 @@ Send *AFRI# for menu`;
         .filter(request => {
           const matchesAgent = request.agentId === agentId;
           const matchesStatus = !status || request.status === status;
+          console.log(`🔍 Filtering request ${request.id}: agentId=${request.agentId}, targetAgentId=${agentId}, matchesAgent=${matchesAgent}, status=${request.status}, targetStatus=${status}, matchesStatus=${matchesStatus}`);
           return matchesAgent && matchesStatus;
         })
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+      console.log(`🔍 After filtering: ${requests.length} requests match the criteria`);
 
       // Enhance requests with user information
       const enhancedRequests = await Promise.all(
@@ -2582,6 +2685,250 @@ Send *AFRI# for menu`;
     }
   }
 
+  // Withdrawal Transaction Management Methods (using transactions collection)
+  static async createWithdrawalRequest(
+    userId: string,
+    agentId: string,
+    amount: number,
+    currency: string,
+    withdrawalCode: string,
+    fee: number
+  ): Promise<string> {
+    try {
+      const transactionData = {
+        userId,
+        type: 'withdraw' as const,
+        amount,
+        fee,
+        currency,
+        agentId,
+        status: 'pending' as const,
+        withdrawalCode,
+        description: `Withdrawal request for ${amount} ${currency}`
+      };
+
+      const transaction = await this.createTransaction(transactionData);
+      console.log(`Created withdrawal transaction ${transaction.id} for user ${userId}`);
+      return transaction.id;
+    } catch (error) {
+      console.error('Error creating withdrawal transaction:', error);
+      throw error;
+    }
+  }
+
+  static async getAgentWithdrawalRequests(agentId: string, status?: string): Promise<WithdrawalRequest[]> {
+    try {
+      console.log('🔍 getAgentWithdrawalRequests called with:', { agentId, status });
+      const docs = await listDocs({
+        collection: 'transactions'
+      });
+      
+      console.log('🔍 Retrieved docs from transactions collection:', docs);
+      console.log('🔍 Number of docs.items:', docs.items?.length || 0);
+      
+      if (!docs.items) {
+        console.log('🔍 No docs.items found, returning empty array');
+        return [];
+      }
+
+      // Filter for withdrawal transactions for this agent
+      const withdrawalTransactions = docs.items
+        .map(doc => doc.data as Transaction)
+        .filter(transaction => {
+          const isWithdrawal = transaction.type === 'withdraw';
+          const matchesAgent = transaction.agentId === agentId;
+          const matchesStatus = !status || transaction.status === status;
+          console.log(`🔍 Filtering transaction ${transaction.id}: type=${transaction.type}, agentId=${transaction.agentId}, targetAgentId=${agentId}, matchesAgent=${matchesAgent}, status=${transaction.status}, targetStatus=${status}, matchesStatus=${matchesStatus}`);
+          return isWithdrawal && matchesAgent && matchesStatus;
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+      console.log(`🔍 After filtering: ${withdrawalTransactions.length} withdrawal transactions match the criteria`);
+
+      // Convert transactions to WithdrawalRequest format and enhance with user information
+      const enhancedRequests = await Promise.all(
+        withdrawalTransactions.map(async (transaction) => {
+          try {
+            const user = await this.getUserByKey(transaction.userId);
+            return {
+              id: transaction.id,
+              userId: transaction.userId,
+              agentId: transaction.agentId || '',
+              amount: transaction.amount,
+              currency: transaction.currency,
+              withdrawalCode: transaction.withdrawalCode || '',
+              fee: transaction.fee || 0,
+              status: transaction.status as 'pending' | 'confirmed' | 'completed' | 'rejected',
+              createdAt: transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt),
+              updatedAt: transaction.updatedAt ? (transaction.updatedAt instanceof Date ? transaction.updatedAt.toISOString() : String(transaction.updatedAt)) : (transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt)),
+              userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+              userPhone: user?.email || 'Unknown Phone', // email field contains phone for SMS users
+              userLocation: 'Unknown Location' // Would need to enhance with actual location data
+            } as WithdrawalRequest;
+          } catch (error) {
+            console.error(`Error getting user info for ${transaction.userId}:`, error);
+            return {
+              id: transaction.id,
+              userId: transaction.userId,
+              agentId: transaction.agentId || '',
+              amount: transaction.amount,
+              currency: transaction.currency,
+              withdrawalCode: transaction.withdrawalCode || '',
+              fee: transaction.fee || 0,
+              status: transaction.status as 'pending' | 'confirmed' | 'completed' | 'rejected',
+              createdAt: transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt),
+              updatedAt: transaction.updatedAt ? (transaction.updatedAt instanceof Date ? transaction.updatedAt.toISOString() : String(transaction.updatedAt)) : (transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt)),
+              userName: 'Unknown User',
+              userPhone: 'Unknown Phone',
+              userLocation: 'Unknown Location'
+            } as WithdrawalRequest;
+          }
+        })
+      );
+
+      console.log(`Retrieved ${enhancedRequests.length} withdrawal requests for agent ${agentId}`);
+      return enhancedRequests;
+    } catch (error) {
+      console.error('Error getting agent withdrawal requests:', error);
+      throw error;
+    }
+  }
+
+  static async updateWithdrawalRequestStatus(
+    requestId: string, 
+    status: 'pending' | 'confirmed' | 'completed' | 'rejected'
+  ): Promise<boolean> {
+    try {
+      // Update the transaction status instead of withdrawal_requests
+      const transaction = await this.updateTransaction(requestId, {
+        status: status as 'pending' | 'completed' | 'failed' | 'cancelled' | 'confirmed',
+        updatedAt: new Date()
+      });
+
+      console.log(`Updated withdrawal transaction ${requestId} status to ${status}`);
+      return !!transaction;
+    } catch (error) {
+      console.error('Error updating withdrawal transaction status:', error);
+      return false;
+    }
+  }
+
+  static async processWithdrawalRequest(
+    requestId: string,
+    agentId: string,
+    processedBy?: string
+  ): Promise<{ success: boolean; transactionId?: string; userTransactionId?: string; error?: string }> {
+    try {
+      // Get the withdrawal transaction
+      const transactionDoc = await getDoc({
+        collection: 'transactions',
+        key: requestId
+      });
+
+      if (!transactionDoc?.data) {
+        return { success: false, error: 'Withdrawal transaction not found' };
+      }
+
+      const transaction = transactionDoc.data as Transaction;
+
+      if (transaction.type !== 'withdraw') {
+        return { success: false, error: 'Transaction is not a withdrawal' };
+      }
+
+      if (transaction.status !== 'pending' && transaction.status !== 'confirmed') {
+        return { success: false, error: 'Withdrawal transaction is not available for processing' };
+      }
+
+      if (transaction.agentId !== agentId) {
+        return { success: false, error: 'Agent not authorized for this withdrawal transaction' };
+      }
+
+      // Get current user and agent balances
+      const userBalance = await this.getUserBalance(transaction.userId);
+      const agent = await this.getAgent(agentId);
+      
+      if (!agent) {
+        return { success: false, error: 'Agent not found' };
+      }
+
+      // Check if user has sufficient balance
+      if (!userBalance || userBalance.balance < transaction.amount) {
+        return { success: false, error: 'Insufficient user balance' };
+      }
+
+      // Check if agent has sufficient cash balance
+      console.log(`🏦 Agent balance check: cashBalance=${agent.cashBalance}, withdrawal amount=${transaction.amount}, digitalBalance=${agent.digitalBalance}`);
+      if (agent.cashBalance < transaction.amount) {
+        return { success: false, error: `Insufficient agent cash balance. Agent has ${agent.cashBalance}, needs ${transaction.amount}` };
+      }
+
+      // Update the existing withdrawal transaction to completed status
+      await this.updateTransaction(requestId, {
+        status: 'completed',
+        completedAt: new Date(),
+        description: `Cash withdrawal completed via agent - Code: ${transaction.withdrawalCode}`,
+        metadata: {
+          ...transaction.metadata,
+          processedBy: processedBy || agentId,
+          completedAt: new Date().toISOString()
+        }
+      });
+
+      // Create the agent transaction (agent receives money for facilitation)
+      const agentTransaction = await this.createTransaction({
+        userId: agent.userId,
+        type: 'receive',
+        amount: transaction.amount,
+        currency: transaction.currency,
+        fromUserId: transaction.userId,
+        agentId: agentId,
+        status: 'completed',
+        description: `Withdrawal facilitation - Code: ${transaction.withdrawalCode}`,
+        metadata: {
+          originalWithdrawalId: requestId,
+          withdrawalCode: transaction.withdrawalCode,
+          processedBy: processedBy || agentId
+        }
+      });
+
+      // Update user balance (decrease)
+      const currentUserBalance = userBalance.balance;
+      await this.updateUserBalance(transaction.userId, currentUserBalance - (transaction.amount + (transaction.fee || 0)));
+
+      // Update agent cash balance (decrease) and digital balance (increase)
+      await this.updateAgentBalance(agentId, {
+        cashBalance: agent.cashBalance - transaction.amount,
+        digitalBalance: agent.digitalBalance + transaction.amount
+      });
+
+      // Send SMS notification to user
+      try {
+        const user = await this.getUserByKey(transaction.userId);
+        if (user?.email && user.email.match(/^\d+$/)) { // Check if email is a phone number
+          await this.sendWithdrawalSuccessSMS(
+            user.email, 
+            transaction.amount, 
+            transaction.currency, 
+            transaction.withdrawalCode || ''
+          );
+        }
+      } catch (smsError) {
+        console.warn('Failed to send SMS notification:', smsError);
+        // Don't fail the transaction if SMS fails
+      }
+
+      console.log(`Successfully processed withdrawal transaction ${requestId}, agent transaction ${agentTransaction.id}`);
+      return { 
+        success: true, 
+        transactionId: agentTransaction.id, 
+        userTransactionId: requestId // The original withdrawal transaction ID
+      };
+    } catch (error) {
+      console.error('Error processing withdrawal request:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
   // SMS Notification Methods
   static async sendDepositSuccessSMS(
     phoneNumber: string,
@@ -2605,6 +2952,32 @@ Send *AFRI# for menu`;
       console.log(`SMS sent to ${phoneNumber}: ${message}`);
     } catch (error) {
       console.error('Error sending deposit success SMS:', error);
+      throw error;
+    }
+  }
+
+  static async sendWithdrawalSuccessSMS(
+    phoneNumber: string,
+    amount: number,
+    currency: string,
+    withdrawalCode: string
+  ): Promise<void> {
+    try {
+      const message = `Withdrawal successful! You withdrew ${currency} ${amount.toLocaleString()} via AfriTokeni. Code: ${withdrawalCode}. Your balance has been updated.`;
+      
+      // Log the SMS message to datastore
+      await this.logSMSMessage({
+        phoneNumber,
+        message,
+        direction: 'outbound',
+        status: 'pending',
+        command: 'WITHDRAWAL_SUCCESS'
+      });
+
+      // Here you would integrate with actual SMS service (Twilio, etc.)
+      console.log(`SMS sent to ${phoneNumber}: ${message}`);
+    } catch (error) {
+      console.error('Error sending withdrawal success SMS:', error);
       throw error;
     }
   }
