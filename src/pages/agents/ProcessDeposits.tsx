@@ -35,14 +35,28 @@ const ProcessDeposits: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('pending');
 
   const loadDepositRequests = useCallback(async () => {
-    const agentId = user?.agent?.id || user?.user?.id;
-    if (!agentId) {
-      console.error('No agent user ID available');
+    const userId = user?.agent?.id || user?.user?.id;
+    
+    if (!userId) {
+      console.error('No user ID available');
       return;
     }
 
     setLoading(true);
     try {
+      // First, get the agent record for this user to get the actual agent ID
+      console.log('🏦 ProcessDeposits - Looking up agent record for user ID:', userId);
+      const agentRecord = await DataService.getAgentByUserId(userId);
+      
+      if (!agentRecord) {
+        console.error('No agent record found for user ID:', userId);
+        setDepositRequests([]);
+        return;
+      }
+      
+      console.log('🏦 ProcessDeposits - Found agent record:', agentRecord);
+      const agentId = agentRecord.id;
+      
       // Convert filter to status for API call
       const statusFilter = filter === 'all' ? undefined : filter;
       const rawRequests = await DataService.getAgentDepositRequests(agentId, statusFilter);
@@ -99,12 +113,24 @@ const ProcessDeposits: React.FC = () => {
   const handleConfirmDeposit = async (request: DepositRequest) => {
     setIsProcessing(true);
     try {
-      const agentId = user?.agent?.id || user?.user?.id;
-      if (!agentId) {
-        throw new Error('No agent ID available');
+      const userId = user?.agent?.id || user?.user?.id;
+      if (!userId) {
+        throw new Error('No user ID available');
       }
 
+      // Get the agent record to get the correct agent ID
+      console.log('🏦 handleConfirmDeposit - Looking up agent record for user ID:', userId);
+      const agentRecord = await DataService.getAgentByUserId(userId);
+      
+      if (!agentRecord) {
+        throw new Error('Agent record not found');
+      }
+      
+      console.log('🏦 handleConfirmDeposit - Found agent record:', agentRecord);
+      const agentId = agentRecord.id;
+
       // Process the deposit using DataService
+      console.log('🏦 handleConfirmDeposit - Processing deposit with agentId:', agentId);
       const result = await DataService.processDepositRequest(request.id, agentId, agentId);
       
       if (!result.success) {
