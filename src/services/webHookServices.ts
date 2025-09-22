@@ -25,6 +25,19 @@ interface UserDataFromJuno {
   createdAt: string;
 }
 
+// Deposit Request interface for USSD/SMS deposit requests
+export interface DepositRequest {
+  id: string;
+  userId: string;
+  agentId: string;
+  amount: number;
+  currency: string;
+  depositCode: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Transaction types for AfriTokeni
 export interface Transaction {
   id: string;
@@ -749,6 +762,75 @@ export class WebhookDataService {
       }
     }
 
+    // Get user transaction history
+    static async getUserTransactions(phoneNumber: string, limit: number = 5): Promise<Transaction[]> {
+      console.log(`Getting transaction history for ${phoneNumber}, limit: ${limit}`);
+      try {
+        // Find the user first to get their ID
+        const user = await this.findUserByPhoneNumber(phoneNumber);
+        if (!user) {
+          console.log(`No user found for phone number: ${phoneNumber}`);
+          return [];
+        }
+
+        console.log(`Found user: ${user.firstName} ${user.lastName} (ID: ${user.id})`);
+
+        // Get all transactions from the collection
+        const transactionsResponse = await listDocs({
+          collection: 'transactions',
+          satellite
+        });
+
+        if (!transactionsResponse || !transactionsResponse.items) {
+          console.log('No transactions found in collection');
+          return [];
+        }
+
+        console.log(`Found ${transactionsResponse.items.length} total transactions in collection`);
+
+        // Filter transactions for this user and sort by creation date (newest first)
+        const userTransactions: Transaction[] = transactionsResponse.items
+          .filter(item => {
+            const data = item.data as any;
+            // Match by userId OR userPhone (for backward compatibility)
+            return data.userId === user.id || 
+                   data.userPhone === phoneNumber || 
+                   data.userPhone === `+${phoneNumber}` ||
+                   data.userPhone === phoneNumber.replace('+', '');
+          })
+          .map(item => {
+            const data = item.data as any;
+            return {
+              id: data.id,
+              userId: data.userId,
+              type: data.type,
+              amount: data.amount,
+              fee: data.fee || 0,
+              currency: data.currency || 'UGX',
+              recipientId: data.recipientId,
+              recipientPhone: data.recipientPhone,
+              recipientName: data.recipientName,
+              agentId: data.agentId,
+              status: data.status,
+              smsCommand: data.smsCommand,
+              description: data.description,
+              createdAt: new Date(data.createdAt),
+              completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+              metadata: data.metadata
+            } as Transaction;
+          })
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // Sort by newest first
+          .slice(0, limit); // Take only the requested number
+
+        console.log(`Found ${userTransactions.length} transactions for user ${user.firstName} ${user.lastName}`);
+        return userTransactions;
+
+      } catch (error) {
+        console.error('Error getting user transactions:', error);
+        return [];
+      }
+    }
+
     // Verify user PIN
     static async verifyUserPin(phoneNumber: string, pin: string): Promise<boolean> {
       console.log(`Verifying PIN for ${phoneNumber}: ${pin}`);
@@ -762,6 +844,48 @@ export class WebhookDataService {
       } catch (error) {
         console.error('Error verifying user PIN:', error);
         return false;
+      }
+    }
+
+    // Create deposit request for USSD/SMS users
+    static async createDepositRequest(
+      userId: string,
+      agentId: string,
+      amount: number,
+      currency: string,
+      depositCode: string
+    ): Promise<string> {
+      try {
+        const now = new Date();
+        const requestId = `dep_${nanoid()}`;
+        
+        const depositRequest: DepositRequest = {
+          id: requestId,
+          userId,
+          agentId,
+          amount,
+          currency,
+          depositCode,
+          status: 'pending',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        };
+
+        await setDoc({
+          collection: 'deposit_requests',
+          doc: {
+            key: requestId,
+            data: depositRequest,
+            version: 1n
+          },
+          satellite
+        });
+
+        console.log(`✅ Created deposit request ${requestId} for user ${userId}, agent ${agentId}, amount ${amount} ${currency}`);
+        return requestId;
+      } catch (error) {
+        console.error('❌ Error creating deposit request:', error);
+        throw error;
       }
     }
 }
