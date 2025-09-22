@@ -3,8 +3,8 @@ import { defineConfig } from "@junobuild/config";
 export default defineConfig({
   satellite: {
     ids: {
-      development: "a5dhi-k7777-77775-aaabq-cai",
-      production: "a5dhi-k7777-77775-aaabq-cai"
+      development: "uxrrr-q7777-77774-qaaaq-cai",
+      production: "dkk74-oyaaa-aaaal-askxq-cai"
     },
     source: "dist",
     predeploy: ["npm run build"],
@@ -62,6 +62,12 @@ export default defineConfig({
           collection: "kyc_submissions",
           read: "managed",
           write: "managed",
+          memory: "stable",
+        },
+        {
+          collection: "deposit_requests",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
       ],

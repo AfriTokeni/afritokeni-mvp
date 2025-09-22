@@ -28,6 +28,7 @@ import AgentMapPage from "./pages/users/AgentMapPage.tsx";
 import AgentDashboard from './pages/AgentDashboard';
 import ProcessWithdrawal from './pages/withdraw/ProcessWithdrawal';
 import ProcessDeposits from './pages/agents/ProcessDeposits';
+import ProcessWithdrawals from './pages/agents/ProcessWithdrawals';
 import AgentCustomers from './pages/AgentCustomers';
 import AgentBitcoinPage from './pages/agents/AgentBitcoinPage';
 import AgentExchangePage from './pages/agents/AgentExchangePage';
@@ -58,7 +59,7 @@ const App: FC = () => {
     const initJuno = async () => {
       try {
         await initSatellite({
-          satelliteId: junoConfig.satellite.ids?.development || "atbka-rp777-77775-aaaaq-cai",
+          satelliteId: junoConfig.satellite.ids?.production || "dkk74-oyaaa-aaaal-askxq-cai",
           workers: {
             auth: true,
           },
@@ -110,6 +111,8 @@ const App: FC = () => {
               <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
                 <Route path="withdraw" element={<ProcessWithdrawal/>} />
+                <Route path="process-deposits" element={<ProcessDeposits/>} />
+                <Route path="process-withdrawals" element={<ProcessWithdrawals/>} />
                 <Route path="deposit" element={<ProcessDeposits/>} />
                 <Route path="customers" element={<AgentCustomers/>} />
                 <Route path="transactions" element={<AgentTransactions/>} />

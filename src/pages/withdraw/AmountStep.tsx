@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { DollarSign, AlertCircle, Bitcoin } from 'lucide-react';
-import { useAuthentication } from '../../context/AuthenticationContext';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
-import { CurrencySelector } from '../../components/CurrencySelector';
+import { AFRICAN_CURRENCIES, formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
 
 interface AmountStepProps {
   exchangeRate: number; // BTC to local currency rate
   userBalance: number; // User's current balance in local currency
+  preferredCurrency: string; // User's preferred currency from profile
   onContinue: (localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin', selectedCurrency: string) => void;
   initialLocalAmount?: string;
   initialBtcAmount?: string;
@@ -15,20 +14,18 @@ interface AmountStepProps {
 const AmountStep: React.FC<AmountStepProps> = ({
   exchangeRate,
   userBalance,
+  preferredCurrency,
   onContinue,
   initialLocalAmount = '',
   initialBtcAmount = ''
 }) => {
-  const { user } = useAuthentication();
   const [localAmount, setLocalAmount] = useState<string>(initialLocalAmount);
   const [btcAmount, setBtcAmount] = useState<string>(initialBtcAmount);
   const [withdrawType, setWithdrawType] = useState<'cash' | 'bitcoin'>('cash');
   const [error, setError] = useState<string>('');
   
-  // Get user's preferred currency or default to NGN
-  const currentUser = user.user;
-  const defaultCurrency = currentUser?.preferredCurrency || 'NGN';
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(defaultCurrency);
+  // Use the user's preferred currency passed as prop (consistent with dashboard)
+  const selectedCurrency = preferredCurrency;
   const currencyInfo = AFRICAN_CURRENCIES[selectedCurrency as keyof typeof AFRICAN_CURRENCIES];
 
   // Calculate 1% fee
@@ -42,12 +39,12 @@ const AmountStep: React.FC<AmountStepProps> = ({
     const totalRequired = amount + fee;
     
     if (totalRequired > userBalance) {
-      setError(`Insufficient balance. You need ${formatCurrencyAmount(totalRequired, selectedCurrency as any)} (including 1% fee) but only have ${formatCurrencyAmount(userBalance, selectedCurrency as any)}`);
+      setError(`Insufficient balance. You need ${formatCurrencyAmount(totalRequired, selectedCurrency as AfricanCurrency)} (including 1% fee) but only have ${formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency)}`);
       return false;
     }
     
     if (amount < 1000) {
-      setError(`Minimum withdrawal amount is ${formatCurrencyAmount(1000, selectedCurrency as any)}`);
+      setError(`Minimum withdrawal amount is ${formatCurrencyAmount(1000, selectedCurrency as AfricanCurrency)}`);
       return false;
     }
     
@@ -104,7 +101,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
       <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
           <span className="text-xs sm:text-sm font-medium text-blue-700">Current Balance:</span>
-          <span className="text-sm sm:text-base lg:text-lg font-bold text-blue-900 font-mono">{formatCurrencyAmount(userBalance, selectedCurrency as any)}</span>
+          <span className="text-sm sm:text-base lg:text-lg font-bold text-blue-900 font-mono">{formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency)}</span>
         </div>
       </div>
 
@@ -172,21 +169,16 @@ const AmountStep: React.FC<AmountStepProps> = ({
       </div>
 
       <div className="space-y-4 sm:space-y-6">
-        {/* Currency Selection */}
+        {/* Currency Display */}
         <div>
           <div className="flex items-center justify-between mb-2 sm:mb-3">
             <label className="block text-xs sm:text-sm font-medium text-neutral-700">
-              Select Currency
+              Currency
             </label>
-            <CurrencySelector
-              currentCurrency={selectedCurrency}
-              onCurrencyChange={(currency) => {
-                setSelectedCurrency(currency);
-                setLocalAmount('');
-                setBtcAmount('');
-                setError('');
-              }}
-            />
+            <div className="flex items-center space-x-2">
+              <span className="font-medium text-neutral-900">{selectedCurrency}</span>
+              <span className="text-xs text-neutral-500">({currencyInfo.name})</span>
+            </div>
           </div>
           <div className="flex items-center space-x-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-neutral-200">
@@ -264,7 +256,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
             <div className="text-xs sm:text-sm space-y-2">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-neutral-700">Withdrawal Amount:</span>
-                <span className="font-mono font-bold text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(currentAmount, selectedCurrency as any)}</span>
+                <span className="font-mono font-bold text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(currentAmount, selectedCurrency as AfricanCurrency)}</span>
               </div>
               {withdrawType === 'bitcoin' && btcAmount && (
                 <div className="flex justify-between items-center">
@@ -274,17 +266,17 @@ const AmountStep: React.FC<AmountStepProps> = ({
               )}
               <div className="flex justify-between items-center">
                 <span className="font-medium text-neutral-700">Transaction Fee (1%):</span>
-                <span className="font-mono font-bold text-red-600 text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(currentFee, selectedCurrency as any)}</span>
+                <span className="font-mono font-bold text-red-600 text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(currentFee, selectedCurrency as AfricanCurrency)}</span>
               </div>
               <div className="pt-2 border-t border-neutral-200">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-neutral-700">Total Required:</span>
-                  <span className="font-mono font-bold text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(totalRequired, selectedCurrency as any)}</span>
+                  <span className="font-mono font-bold text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(totalRequired, selectedCurrency as AfricanCurrency)}</span>
                 </div>
               </div>
               {withdrawType === 'bitcoin' && (
                 <div className="pt-2 border-t border-neutral-200">
-                  <p className="text-xs text-neutral-500">Exchange rate: 1 BTC = {formatCurrencyAmount(exchangeRate, selectedCurrency as any)}</p>
+                  <p className="text-xs text-neutral-500">Exchange rate: 1 BTC = {formatCurrencyAmount(exchangeRate, selectedCurrency as AfricanCurrency)}</p>
                 </div>
               )}
             </div>

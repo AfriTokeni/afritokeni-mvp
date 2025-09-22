@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
-import { BalanceService } from '../services/BalanceService';
 import PageLayout from '../components/PageLayout';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
@@ -22,7 +21,9 @@ const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserCurrency } = useAuthentication();
   const { 
-    transactions
+    transactions,
+    balance,
+    refreshData
   } = useAfriTokeni();
 
   // Get user's preferred currency or default to UGX
@@ -34,11 +35,34 @@ const UserDashboard: React.FC = () => {
     return formatCurrencyAmount(amount, userCurrency as any);
   };
 
-  // Get real balance from transaction history
+  // Get real balance from datastore
   const getRealBalance = (): number => {
-    if (!currentUser?.id) return 0;
-    return BalanceService.calculateBalance(currentUser.id, userCurrency);
+    if (!balance) return 0;
+    // Return the balance if it matches the user's currency, otherwise return 0
+    return balance.currency === userCurrency ? balance.balance : 0;
   };
+
+  // // Refresh data when dashboard mounts to ensure latest balance
+  // useEffect(() => {
+  //   if (currentUser?.id) {
+  //     console.log('💰 UserDashboard - Refreshing data for user:', currentUser.id);
+  //     console.log('💰 UserDashboard - Current balance:', balance);
+  //     refreshData();
+  //   }
+  // }, [currentUser?.id, refreshData, balance]);
+
+  // Also refresh when user navigates back to dashboard
+  useEffect(() => {
+    const handleFocus = () => {
+      if (currentUser?.id) {
+        console.log('💰 UserDashboard - Window focused, refreshing data');
+        refreshData();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [currentUser?.id, refreshData]);
 
   const formatDate = (date: Date | string): string => {
     const dateObj = date instanceof Date ? date : new Date(date);

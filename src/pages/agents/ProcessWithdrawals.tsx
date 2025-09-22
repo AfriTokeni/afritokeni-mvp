@@ -1,41 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Minus } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
-import { DataService } from '../../services/dataService';
+import { DataService, WithdrawalRequest } from '../../services/dataService';
 
-
-
-interface DepositRequest {
-  id: string;
-  userId: string;
-  userName: string;
-  userPhone: string;
-  agentId: string;
-  amount: {
-    local: number;
-    currency: string;
-  };
-  depositCode: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'rejected';
-  createdAt: Date;
-  userLocation?: string;
-}
-
-const ProcessDeposits: React.FC = () => {
+const ProcessWithdrawals: React.FC = () => {
   const { user } = useAuthentication();
-  const [depositRequests, setDepositRequests] = useState<DepositRequest[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<DepositRequest | null>(null);
-  const [verificationCodes, setVerificationCodes] = useState<{[requestId: string]: string}>({});
+  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<WithdrawalRequest | null>(null);
+  const [verificationCode, setVerificationCode] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('pending');
 
-  const loadDepositRequests = useCallback(async () => {
+  const loadWithdrawalRequests = useCallback(async () => {
     const userId = user?.agent?.id || user?.user?.id;
+    console.log('🏦 ProcessWithdrawals - Current user:', user);
+    console.log('🏦 ProcessWithdrawals - User ID:', userId);
+    console.log('🏦 ProcessWithdrawals - Filter:', filter);
     
     if (!userId) {
       console.error('No user ID available');
@@ -45,73 +30,62 @@ const ProcessDeposits: React.FC = () => {
     setLoading(true);
     try {
       // First, get the agent record for this user to get the actual agent ID
-      console.log('🏦 ProcessDeposits - Looking up agent record for user ID:', userId);
+      console.log('🏦 ProcessWithdrawals - Looking up agent record for user ID:', userId);
       const agentRecord = await DataService.getAgentByUserId(userId);
       
       if (!agentRecord) {
         console.error('No agent record found for user ID:', userId);
-        setDepositRequests([]);
+        setWithdrawalRequests([]);
         return;
       }
       
-      console.log('🏦 ProcessDeposits - Found agent record:', agentRecord);
+      console.log('🏦 ProcessWithdrawals - Found agent record:', agentRecord);
       const agentId = agentRecord.id;
       
       // Convert filter to status for API call
       const statusFilter = filter === 'all' ? undefined : filter;
-      const rawRequests = await DataService.getAgentDepositRequests(agentId, statusFilter);
+      console.log('🏦 ProcessWithdrawals - Calling getAgentWithdrawalRequests with:', { agentId, statusFilter });
+      const rawRequests = await DataService.getAgentWithdrawalRequests(agentId, statusFilter);
+      console.log('🏦 ProcessWithdrawals - Raw requests received:', rawRequests);
       
-      // Transform the requests to match the component's expected structure
-      const transformedRequests = rawRequests.map(request => ({
-        ...request,
-        amount: {
-          local: request.amount,
-          currency: request.currency
-        },
-        createdAt: new Date(request.createdAt),
-        userName: request.userName || 'Unknown User',
-        userPhone: request.userPhone || 'Unknown Phone',
-        userLocation: request.userLocation || 'Unknown Location'
-      }));
-      
-      setDepositRequests(transformedRequests);
+      // Use the requests as-is since they already match the WithdrawalRequest interface
+      setWithdrawalRequests(rawRequests);
     } catch (error) {
-      console.error('Error loading deposit requests:', error);
-      setDepositRequests([]);
+      console.error('Error loading withdrawal requests:', error);
+      setWithdrawalRequests([]);
     } finally {
       setLoading(false);
     }
   }, [user, filter]);
 
-  // Load deposit requests for this agent
+  // Load withdrawal requests for this agent
   useEffect(() => {
-    loadDepositRequests();
-  }, [loadDepositRequests]);
+    loadWithdrawalRequests();
+  }, [loadWithdrawalRequests]);
 
-  const handleVerifyCode = async (request: DepositRequest) => {
-    const currentCode = verificationCodes[request.id] || '';
-    if (currentCode === request.depositCode) {
+  const handleVerifyCode = async (request: WithdrawalRequest) => {
+    if (verificationCode === request.withdrawalCode) {
       try {
         // Update request status to confirmed
-        const success = await DataService.updateDepositRequestStatus(request.id, 'confirmed');
+        const success = await DataService.updateWithdrawalRequestStatus(request.id, 'confirmed');
         if (success) {
           setSelectedRequest(request);
           setError('');
           // Reload to show updated status
-          await loadDepositRequests();
+          await loadWithdrawalRequests();
         } else {
-          setError('Failed to confirm deposit request. Please try again.');
+          setError('Failed to confirm withdrawal request. Please try again.');
         }
       } catch (error) {
-        console.error('Error confirming deposit:', error);
-        setError('Failed to confirm deposit request. Please try again.');
+        console.error('Error confirming withdrawal:', error);
+        setError('Failed to confirm withdrawal request. Please try again.');
       }
     } else {
-      setError('Invalid deposit code. Please check and try again.');
+      setError('Invalid withdrawal code. Please check and try again.');
     }
   };
 
-  const handleConfirmDeposit = async (request: DepositRequest) => {
+  const handleConfirmWithdrawal = async (request: WithdrawalRequest) => {
     setIsProcessing(true);
     try {
       const userId = user?.agent?.id || user?.user?.id;
@@ -120,29 +94,29 @@ const ProcessDeposits: React.FC = () => {
       }
 
       // Get the agent record to get the correct agent ID
-      console.log('🏦 handleConfirmDeposit - Looking up agent record for user ID:', userId);
+      console.log('🏦 handleConfirmWithdrawal - Looking up agent record for user ID:', userId);
       const agentRecord = await DataService.getAgentByUserId(userId);
       
       if (!agentRecord) {
         throw new Error('Agent record not found');
       }
       
-      console.log('🏦 handleConfirmDeposit - Found agent record:', agentRecord);
+      console.log('🏦 handleConfirmWithdrawal - Found agent record:', agentRecord);
       const agentId = agentRecord.id;
 
-      // Process the deposit using DataService
-      console.log('🏦 handleConfirmDeposit - Processing deposit with agentId:', agentId);
-      const result = await DataService.processDepositRequest(request.id, agentId, agentId);
+      // Process the withdrawal using DataService
+      console.log('🏦 handleConfirmWithdrawal - Processing withdrawal with agentId:', agentId);
+      const result = await DataService.processWithdrawalRequest(request.id, agentId, agentId);
       
       if (!result.success) {
-        throw new Error(result.error || 'Failed to process deposit');
+        throw new Error(result.error || 'Failed to process withdrawal');
       }
       
-      // Reload deposit requests to reflect the updated status
-      await loadDepositRequests();
+      // Reload withdrawal requests to reflect the updated status
+      await loadWithdrawalRequests();
       
       setSelectedRequest(null);
-      setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
+      setVerificationCode('');
       setError('');
       
       // Send notifications to both agent and user
@@ -152,67 +126,70 @@ const ProcessDeposits: React.FC = () => {
           DataService.getUserByKey(request.userId)
         ]);
 
-        // Notify agent of successful deposit processing
+        // Notify agent of successful withdrawal processing
         if (agentUser) {
           await NotificationService.sendNotification(agentUser, {
             userId: agentUser.id,
-            type: 'deposit',
-            amount: request.amount.local,
-            currency: request.amount.currency,
+            type: 'withdrawal',
+            amount: request.amount,
+            currency: request.currency,
             transactionId: request.id,
-            message: `Deposit processed successfully for ${request.userName}. Commission earned.`
+            message: `Withdrawal processed successfully for ${request.userName}. Commission earned.`
           });
         }
 
-        // Notify customer of deposit confirmation
+        // Notify customer of withdrawal confirmation
         if (customerUser) {
-          await NotificationService.sendNotification(customerUser, {
+          await DataService.createTransaction({
             userId: request.userId,
-            type: 'deposit',
-            amount: request.amount.local,
-            currency: request.amount.currency,
-            transactionId: request.id,
-            message: `Your cash deposit has been confirmed and added to your account.`
+            amount: request.amount,
+            currency: 'UGX',
+            status: 'completed',
+            type: 'withdraw',
+            agentId: user.agent?.id || '',
+            description: `Withdrawal completed by agent ${user.agent?.firstName || 'Unknown'} ${user.agent?.lastName || 'Agent'}`
           });
+
+          // Note: We'll add notification creation when the method is implemented in DataService
         }
       } catch (notificationError) {
-        console.error('Failed to send deposit notifications:', notificationError);
+        console.error('Failed to send withdrawal notifications:', notificationError);
       }
 
       // Show success message
-      alert(`Deposit completed! ${formatCurrencyAmount(request.amount.local, request.amount.currency as AfricanCurrency)} credited to ${request.userName}'s account.`);
+      alert(`Withdrawal completed! ${formatCurrencyAmount(request.amount, request.currency as AfricanCurrency)} debited from ${request.userName}'s account.`);
     } catch (error) {
-      console.error('Failed to process deposit:', error);
-      setError('Failed to process deposit. Please try again.');
+      console.error('Failed to process withdrawal:', error);
+      setError('Failed to process withdrawal. Please try again.');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleRejectDeposit = async (request: DepositRequest) => {
+  const handleRejectWithdrawal = async (request: WithdrawalRequest) => {
     setIsProcessing(true);
     try {
-      const success = await DataService.updateDepositRequestStatus(request.id, 'rejected');
+      const success = await DataService.updateWithdrawalRequestStatus(request.id, 'rejected');
       
       if (success) {
-        // Reload deposit requests to reflect the updated status
-        await loadDepositRequests();
+        // Reload withdrawal requests to reflect the updated status
+        await loadWithdrawalRequests();
         
         setSelectedRequest(null);
-        setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
+        setVerificationCode('');
         setError('');
       } else {
-        throw new Error('Failed to update deposit request status');
+        throw new Error('Failed to update withdrawal request status');
       }
     } catch (error) {
-      console.error('Failed to reject deposit:', error);
-      setError('Failed to reject deposit. Please try again.');
+      console.error('Failed to reject withdrawal:', error);
+      setError('Failed to reject withdrawal. Please try again.');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const filteredRequests = depositRequests.filter(request => {
+  const filteredRequests = withdrawalRequests.filter(request => {
     if (filter === 'all') return true;
     return request.status === filter;
   });
@@ -252,8 +229,8 @@ const ProcessDeposits: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Process Deposits</h1>
-          <p className="text-neutral-600">Manage customer cash deposits and digital balance credits</p>
+          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Process Withdrawals</h1>
+          <p className="text-neutral-600">Manage customer cash withdrawals and digital balance debits</p>
         </div>
 
         {/* Filter Tabs */}
@@ -271,25 +248,25 @@ const ProcessDeposits: React.FC = () => {
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 <span className="ml-2 text-xs bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded-full">
-                  {tab === 'all' ? depositRequests.length : depositRequests.filter(r => r.status === tab).length}
+                  {tab === 'all' ? withdrawalRequests.length : withdrawalRequests.filter(r => r.status === tab).length}
                 </span>
               </button>
             ))}
           </div>
 
-          {/* Deposit Requests List */}
+          {/* Withdrawal Requests List */}
           <div className="space-y-4">
             {loading ? (
               <div className="text-center py-12">
                 <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-neutral-600">Loading deposit requests...</p>
+                <p className="text-neutral-600">Loading withdrawal requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
               <div className="text-center py-12">
-                <Clock className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">No deposit requests</h3>
+                <Minus className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-neutral-900 mb-2">No withdrawal requests</h3>
                 <p className="text-neutral-600">
-                  {filter === 'pending' ? 'No pending deposits at the moment.' : `No ${filter} deposits found.`}
+                  {filter === 'pending' ? 'No pending withdrawals at the moment.' : `No ${filter} withdrawals found.`}
                 </p>
               </div>
             ) : (
@@ -320,20 +297,25 @@ const ProcessDeposits: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-neutral-900 font-mono">
-                        {formatCurrencyAmount(request.amount.local, request.amount.currency as AfricanCurrency)}
+                      <div className="text-2xl font-bold text-red-600 font-mono">
+                        -{formatCurrencyAmount(request.amount, request.currency as AfricanCurrency)}
                       </div>
                       <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md border text-xs font-medium ${getStatusColor(request.status)}`}>
                         {getStatusIcon(request.status)}
                         <span className="capitalize">{request.status}</span>
                       </div>
+                      {request.fee > 0 && (
+                        <div className="text-xs text-neutral-500 mt-1">
+                          Fee: {formatCurrencyAmount(request.fee, request.currency as AfricanCurrency)}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-neutral-600">
-                      <span>Deposit Code: </span>
-                      <span className="font-mono font-semibold text-neutral-900">{request.depositCode}</span>
+                      <span>Withdrawal Code: </span>
+                      <span className="font-mono font-semibold text-neutral-900">{request.withdrawalCode}</span>
                       <span className="ml-4">
                         {new Date(request.createdAt).toLocaleString()}
                       </span>
@@ -345,15 +327,15 @@ const ProcessDeposits: React.FC = () => {
                           <div className="flex items-center space-x-2">
                             <input
                               type="text"
-                              placeholder="Enter deposit code"
-                              value={verificationCodes[request.id] || ''}
-                              onChange={(e) => setVerificationCodes(prev => ({ ...prev, [request.id]: e.target.value }))}
+                              placeholder="Enter withdrawal code"
+                              value={verificationCode}
+                              onChange={(e) => setVerificationCode(e.target.value)}
                               className="px-3 py-1 border border-neutral-300 rounded text-sm font-mono"
                               maxLength={6}
                             />
                             <button
                               onClick={() => handleVerifyCode(request)}
-                              disabled={!(verificationCodes[request.id] || '')}
+                              disabled={!verificationCode}
                               className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-neutral-300"
                             >
                               Verify
@@ -365,9 +347,9 @@ const ProcessDeposits: React.FC = () => {
                       {request.status === 'confirmed' && selectedRequest?.id === request.id && (
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => handleConfirmDeposit(request)}
+                            onClick={() => handleConfirmWithdrawal(request)}
                             disabled={isProcessing}
-                            className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:bg-neutral-300 flex items-center space-x-1"
+                            className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:bg-neutral-300 flex items-center space-x-1"
                           >
                             {isProcessing ? (
                               <>
@@ -377,14 +359,14 @@ const ProcessDeposits: React.FC = () => {
                             ) : (
                               <>
                                 <CheckCircle className="w-4 h-4" />
-                                <span>Complete Deposit</span>
+                                <span>Complete Withdrawal</span>
                               </>
                             )}
                           </button>
                           <button
-                            onClick={() => handleRejectDeposit(request)}
+                            onClick={() => handleRejectWithdrawal(request)}
                             disabled={isProcessing}
-                            className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:bg-neutral-300 flex items-center space-x-1"
+                            className="px-4 py-2 bg-neutral-600 text-white rounded text-sm hover:bg-neutral-700 disabled:bg-neutral-300 flex items-center space-x-1"
                           >
                             <XCircle className="w-4 h-4" />
                             <span>Reject</span>
@@ -410,18 +392,18 @@ const ProcessDeposits: React.FC = () => {
         )}
 
         {/* Instructions */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-900 mb-3">Deposit Process:</h3>
-          <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-            <li>Customer shows you their deposit code</li>
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+          <h3 className="font-semibold text-orange-900 mb-3">Withdrawal Process:</h3>
+          <ol className="text-sm text-orange-800 space-y-2 list-decimal list-inside">
+            <li>Customer shows you their withdrawal code</li>
             <li>Verify the code matches the request</li>
-            <li>Collect the cash amount from customer</li>
-            <li>Complete the deposit to credit their digital balance</li>
+            <li>Provide the cash amount to customer</li>
+            <li>Complete the withdrawal to debit their digital balance</li>
             <li>Customer receives confirmation notification</li>
           </ol>
-          <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-            <p className="text-sm text-blue-900 font-medium">
-              ⚠️ Always verify the deposit code before accepting cash. Rejected deposits cannot be reversed.
+          <div className="mt-4 p-3 bg-orange-100 rounded-lg">
+            <p className="text-sm text-orange-900 font-medium">
+              ⚠️ Always verify the withdrawal code before providing cash. Rejected withdrawals cannot be reversed.
             </p>
           </div>
         </div>
@@ -430,4 +412,4 @@ const ProcessDeposits: React.FC = () => {
   );
 };
 
-export default ProcessDeposits;
+export default ProcessWithdrawals;

@@ -84,7 +84,7 @@ export interface AuthContextType {
   authMethod: 'sms' | 'web';
   updateUserCurrency: (currency: string) => void;
   isAuthenticated: boolean;
-  
+  isLoading: boolean;
   login: (formData: LoginFormData, method?: 'sms' | 'web') => Promise<boolean>;
   register: (formData: RegisterFormData) => Promise<boolean>;
   logout: (userTypeToLogout?: 'user' | 'agent' | 'admin') => Promise<void>;

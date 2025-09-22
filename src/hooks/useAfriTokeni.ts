@@ -21,6 +21,10 @@ export const useAfriTokeni = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('useAfriTokeni - user:', user);
+
+
+
 
   const loadUserData = useCallback(async () => {
     // Check if we have any user logged in
