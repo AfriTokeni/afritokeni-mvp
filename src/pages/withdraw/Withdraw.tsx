@@ -7,13 +7,13 @@ import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
+
 import type { WithdrawStep } from './types';
 import { Agent as DBAgent } from '../../services/dataService';
 
 const WithdrawPage: React.FC = () => {
   const { user } = useAuthentication();
-  const { balance, refreshData } = useAfriTokeni();
+  const { balance } = useAfriTokeni();
 
   // Refresh data when withdraw page loads to ensure latest balance
   // useEffect(() => {
@@ -45,12 +45,6 @@ const WithdrawPage: React.FC = () => {
   // Get user's preferred currency or default to UGX (same as dashboard)
   const currentUser = user.user;
   const userCurrency = currentUser?.preferredCurrency || 'UGX';
-  const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
-
-  // Format currency using the same system as dashboard
-  const formatCurrency = (amount: number): string => {
-    return formatCurrencyAmount(amount, userCurrency as any);
-  };
   
   // Mock Bitcoin exchange rate - would be live in production
   const getBtcExchangeRate = (currency: string) => {
@@ -178,7 +172,7 @@ const WithdrawPage: React.FC = () => {
             exchangeRate={exchangeRate}
             userBalance={getBalanceForCurrency()}
             preferredCurrency={userCurrency}
-            onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin', _selectedCurrency: string) => {
+            onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin') => {
               // Store the amounts for the confirmation step
               setFinalLocalAmount(parseFloat(localAmount) || 0);
               setFinalBtcAmount(btcAmount);
