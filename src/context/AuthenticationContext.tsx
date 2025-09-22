@@ -50,6 +50,7 @@ interface IUser {
 const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<IUser>({ agent: null, user: null, admin: null });
   const [authMethod, setAuthMethod] = useState<"sms" | "web">("web");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Helper function to store user data with separate keys for users and agents
   const storeUserData = (userData: User, method: "sms" | "web") => {
@@ -384,10 +385,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     method: "sms" | "web" = "web",
   ): Promise<boolean> => {
     try {
+      setIsLoading(true);
       if (method === "web") {
         console.log("Web login initiated - using Juno/ICP Internet Identity");
         // Use Juno/ICP Internet Identity authentication for web users
-        await signIn({ internet_identity: {} });
+        await signIn();
         return true;
       } else if (method === "sms") {
         // SMS-based authentication for users without internet (feature phones)
@@ -487,6 +489,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Login error:", error);
       return false;
     } finally {
+      setIsLoading(false);
     }
   };
 
@@ -545,7 +548,6 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Registration error:", error);
       return false;
-    } finally {
     }
   };
 
@@ -585,7 +587,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (authMethod === "web" && user[targetUserType]) {
         // Use Juno signOut for web users
         console.log("Signing out web user via Juno");
-        await signOut({windowReload: false});
+        await signOut();
       }
 
       // Clear only the specified user type from state
@@ -639,6 +641,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     updateUserCurrency,
     isAuthenticated: user.user !== null || user.agent !== null || user.admin !== null,
+    isLoading,
     verifyRegistrationCode: async () => false,
     cancelVerification: () => {},
     isVerifying: false,
