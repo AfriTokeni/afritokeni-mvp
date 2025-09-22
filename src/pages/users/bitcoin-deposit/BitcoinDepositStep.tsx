@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { QrCode, Copy, CheckCircle, Shield, AlertCircle, ArrowLeft } from 'lucide-react';
 import { AfricanCurrency } from '../../../types/currency';
-import { Agent, EscrowTransaction } from '../../../services/escrowService';
+import { Agent } from '../../../services/dataService';
+import { EscrowTransaction } from '../../../services/escrowService';
 
 interface BitcoinDepositStepProps {
   selectedAgent: Agent | null;
@@ -75,16 +76,16 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
             <span className="text-orange-600 font-semibold">
-              {selectedAgent.name.split(' ').map((n: string) => n[0]).join('')}
+              {selectedAgent.businessName.split(' ').map((n: string) => n[0]).join('')}
             </span>
           </div>
           <div>
-            <h3 className="font-semibold text-neutral-900">{selectedAgent.name}</h3>
-            <p className="text-sm text-neutral-600">{selectedAgent.location}</p>
+            <h3 className="font-semibold text-neutral-900">{selectedAgent.businessName}</h3>
+            <p className="text-sm text-neutral-600">{selectedAgent.location.address}</p>
             <div className="flex items-center text-sm text-yellow-500">
-              <span className="font-medium">{selectedAgent.rating}</span>
+              <span className="font-medium">4.0</span>
               <span className="ml-1">★</span>
-              <span className="ml-2 text-neutral-600">• {selectedAgent.fee}% fee</span>
+              <span className="ml-2 text-neutral-600">• {selectedAgent.commissionRate}% fee</span>
             </div>
           </div>
         </div>
@@ -130,7 +131,7 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
             <div>
               <span className="text-neutral-600">You&apos;ll receive:</span>
               <div className="font-mono font-semibold text-green-600">
-                {formatCurrency(parseFloat(localAmount) * (1 - selectedAgent.fee / 100), selectedCurrency)}
+                {formatCurrency(parseFloat(localAmount) * (1 - selectedAgent.commissionRate / 100), selectedCurrency)}
               </div>
             </div>
           </div>
