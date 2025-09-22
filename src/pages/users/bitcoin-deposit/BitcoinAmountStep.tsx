@@ -84,16 +84,18 @@ const BitcoinAmountStep: React.FC<BitcoinAmountStepProps> = ({
           </div>
         </div>
 
-        {btcAmount && (
+        {exchangeRate > 0 && (
           <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex items-center justify-between text-sm">
               <span className="text-neutral-600">Exchange rate:</span>
               <span className="font-mono">1 BTC = {formatCurrency(exchangeRate, selectedCurrency)}</span>
             </div>
-            <div className="flex items-center justify-between text-sm mt-1">
-              <span className="text-neutral-600">Agent fee (≈2.5%):</span>
-              <span className="font-mono">≈ {formatCurrency(parseFloat(localAmount) * 0.025, selectedCurrency)}</span>
-            </div>
+            {btcAmount && localAmount && (
+              <div className="flex items-center justify-between text-sm mt-1">
+                <span className="text-neutral-600">Agent fee (≈2.5%):</span>
+                <span className="font-mono">≈ {formatCurrency(parseFloat(localAmount || '0') * 0.025, selectedCurrency)}</span>
+              </div>
+            )}
           </div>
         )}
 
