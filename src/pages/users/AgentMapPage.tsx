@@ -574,7 +574,7 @@ const AgentMapPage: React.FC = () => {
                           </div>
                           <div>
                             <span className="text-neutral-500">Fee:</span>
-                            <div className="font-mono font-semibold">{(agent.commissionRate * 100).toFixed(1)}%</div>
+                            <div className="font-mono font-semibold">{agent.commissionRate > 0 ? agent.commissionRate : (agent.commissionRate * 100).toFixed(1)}%</div>
                           </div>
                         </div>
                         <button
@@ -605,7 +605,7 @@ const AgentMapPage: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-neutral-500">Commission:</span>
-                    <p className="font-mono text-neutral-900">{(selectedAgent.commissionRate * 100).toFixed(1)}%</p>
+                    <p className="font-mono text-neutral-900">{selectedAgent.commissionRate > 0 ? selectedAgent.commissionRate : (selectedAgent.commissionRate * 100).toFixed(1)}%</p>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
