@@ -28,7 +28,7 @@ const ProcessDeposits: React.FC = () => {
   const { user } = useAuthentication();
   const [depositRequests, setDepositRequests] = useState<DepositRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<DepositRequest | null>(null);
-  const [verificationCode, setVerificationCode] = useState<string>('');
+  const [verificationCodes, setVerificationCodes] = useState<{[requestId: string]: string}>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -89,7 +89,8 @@ const ProcessDeposits: React.FC = () => {
   }, [loadDepositRequests]);
 
   const handleVerifyCode = async (request: DepositRequest) => {
-    if (verificationCode === request.depositCode) {
+    const currentCode = verificationCodes[request.id] || '';
+    if (currentCode === request.depositCode) {
       try {
         // Update request status to confirmed
         const success = await DataService.updateDepositRequestStatus(request.id, 'confirmed');
@@ -141,7 +142,7 @@ const ProcessDeposits: React.FC = () => {
       await loadDepositRequests();
       
       setSelectedRequest(null);
-      setVerificationCode('');
+      setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
       setError('');
       
       // Send notifications to both agent and user
@@ -198,7 +199,7 @@ const ProcessDeposits: React.FC = () => {
         await loadDepositRequests();
         
         setSelectedRequest(null);
-        setVerificationCode('');
+        setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
         setError('');
       } else {
         throw new Error('Failed to update deposit request status');
@@ -345,14 +346,14 @@ const ProcessDeposits: React.FC = () => {
                             <input
                               type="text"
                               placeholder="Enter deposit code"
-                              value={verificationCode}
-                              onChange={(e) => setVerificationCode(e.target.value)}
+                              value={verificationCodes[request.id] || ''}
+                              onChange={(e) => setVerificationCodes(prev => ({ ...prev, [request.id]: e.target.value }))}
                               className="px-3 py-1 border border-neutral-300 rounded text-sm font-mono"
                               maxLength={6}
                             />
                             <button
                               onClick={() => handleVerifyCode(request)}
-                              disabled={!verificationCode}
+                              disabled={!(verificationCodes[request.id] || '')}
                               className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-neutral-300"
                             >
                               Verify
