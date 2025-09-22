@@ -64,7 +64,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 interface USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance';
+  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
   data: {
     amount?: number;
     withdrawAmount?: number;
@@ -126,7 +126,7 @@ const ussdSessions = new Map<string, USSDSession>();
 class USSDSessionImpl implements USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance';
+  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
   data: Record<string, any>;
   step: number;
   lastActivity: number;
@@ -256,7 +256,7 @@ async function sendSMSNotification(phoneNumber: string, message: string): Promis
     const response = await sms.send({
       to: phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`,
       message: message,
-      from: process.env.VITE_AT_SHORT_CODE || "AfriTokeni"
+      from: process.env.AT_SHORT_CODE || "22948"
     });
     console.log("SMS sent successfully:", response);
     return response;
@@ -282,7 +282,9 @@ Please select an option:
 2. Check Balance
 3. Withdraw Money
 4. Transaction History
-5. Help`);
+5. Deposit Money
+6. Bitcoin Services
+7. Help`);
     } else {
       // User doesn't have PIN - set it up
       session.currentMenu = 'pin_setup';
@@ -335,7 +337,9 @@ Please select an option:
 2. Check Balance
 3. Withdraw Money
 4. Transaction History
-5. Help`);
+5. Deposit Money
+6. Bitcoin Services
+7. Help`);
       } else {
         // PIN save failed, retry
         session.step = 1;
@@ -359,7 +363,9 @@ Please select an option:
 2. Check Balance
 3. Withdraw Money
 4. Transaction History
-5. Help`);
+5. Deposit Money
+6. Bitcoin Services
+7. Help`);
   }
 
   console.log(`Main menu input: ${input}`);
@@ -382,17 +388,27 @@ Please select an option:
       return continueSession('Withdraw Money\nEnter amount (UGX):');
     
     case '4':
-      return endSession(`Last 5 Transactions:
-
-1. Received: UGX 200,000 - 25/08/2025
-2. Sent: UGX 150,000 - 24/08/2025  
-3. Withdraw: UGX 100,000 - 23/08/2025
-4. Received: UGX 300,000 - 22/08/2025
-5. Sent: UGX 50,000 - 21/08/2025
-
-Thank you for using AfriTokeni!`);
+      session.currentMenu = 'transaction_history';
+      session.step = 1;
+      return continueSession('Transaction History\nEnter your 4-digit PIN:');
     
     case '5':
+      session.currentMenu = 'deposit';
+      session.step = 1;
+      return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
+    
+    case '6':
+      session.currentMenu = 'bitcoin';
+      session.step = 1;
+      return continueSession(`Bitcoin Services
+Please select an option:
+1. BTC Balance
+2. BTC Rate
+3. Buy BTC
+4. Sell BTC
+0. Back to Main Menu`);
+    
+    case '7':
       return endSession('Help: Call +256700000000 for support\nSMS: help to 6969');
     
     default:
@@ -401,7 +417,9 @@ Thank you for using AfriTokeni!`);
 2. Check Balance
 3. Withdraw Money
 4. Transaction History
-5. Help`);
+5. Deposit Money
+6. Bitcoin Services
+7. Help`);
   }
 }
 
@@ -454,6 +472,627 @@ Thank you for using AfriTokeni!`);
       session.currentMenu = 'main';
       session.step = 0;
       return handleMainMenu('', session);
+  }
+}
+
+async function handleTransactionHistory(input: string, session: USSDSession): Promise<string> {
+  console.log(`Transaction history input: ${input}`);
+  const inputParts = input.split('*');
+  const sanitized_input = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // PIN verification step
+      if (!/^\d{4}$/.test(sanitized_input)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      // Verify PIN
+      const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // PIN is correct, get transaction history
+      try {
+        console.log(`Getting transaction history for ${session.phoneNumber}`);
+        const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
+        
+        if (transactions.length === 0) {
+          return endSession(`Transaction History:
+
+No transactions found.
+
+To start using AfriTokeni, send money or make a deposit through an agent.
+
+Thank you for using AfriTokeni!`);
+        }
+
+        let transactionList = `Last ${transactions.length} Transactions:\n\n`;
+        
+        transactions.forEach((tx, index) => {
+          const date = tx.createdAt.toLocaleDateString('en-GB');
+          let description = '';
+          
+          switch (tx.type) {
+            case 'send':
+              description = `Sent: UGX ${tx.amount.toLocaleString()}`;
+              if (tx.fee && tx.fee > 0) {
+                description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+              }
+              break;
+            case 'receive':
+              description = `Received: UGX ${tx.amount.toLocaleString()}`;
+              break;
+            case 'withdraw':
+              description = `Withdraw: UGX ${tx.amount.toLocaleString()}`;
+              if (tx.fee && tx.fee > 0) {
+                description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+              }
+              break;
+            case 'deposit':
+              description = `Deposit: UGX ${tx.amount.toLocaleString()}`;
+              break;
+            default:
+              description = `${tx.type}: UGX ${tx.amount.toLocaleString()}`;
+          }
+          
+          transactionList += `${index + 1}. ${description} - ${date}\n`;
+          
+          // Add status if not completed
+          if (tx.status !== 'completed') {
+            transactionList += `   Status: ${tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}\n`;
+          }
+        });
+
+        transactionList += `\nThank you for using AfriTokeni!`;
+        
+        return endSession(transactionList);
+      } catch (error) {
+        console.error('Error getting transaction history:', error);
+        return endSession(`Transaction History:
+
+Unable to retrieve transaction history at the moment. Please try again later.
+
+Thank you for using AfriTokeni!`);
+      }
+    }
+    
+    default:
+      session.currentMenu = 'main';
+      session.step = 0;
+      return handleMainMenu('', session);
+  }
+}
+
+async function handleDeposit(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // Step 1: Enter deposit amount
+      if (!currentInput) {
+        return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
+      }
+      
+      const amount = parseInt(currentInput);
+      if (isNaN(amount) || amount <= 0) {
+        return continueSession('Invalid amount.\nEnter amount to deposit (UGX):');
+      }
+      
+      if (amount < 1000) {
+        return continueSession('Minimum deposit: UGX 1,000\nEnter amount to deposit (UGX):');
+      }
+      
+      if (amount > 5000000) {
+        return continueSession('Maximum deposit: UGX 5,000,000\nEnter amount to deposit (UGX):');
+      }
+
+      session.data.depositAmount = amount;
+      session.step = 2;
+      
+      // Get list of available agents
+      console.log('Getting available agents for deposit...');
+      try {
+        const agents = await DataService.getAvailableAgents();
+        
+        if (agents.length === 0) {
+          return endSession('No agents available at the moment. Please try again later.');
+        }
+        
+        // Display only the first 2 agents
+        const displayAgents = agents.slice(0, 2);
+        session.data.availableAgents = displayAgents;
+        
+        let agentList = `Select an agent for deposit:
+Amount: UGX ${amount.toLocaleString()}
+
+`;
+        
+        displayAgents.forEach((agent, index) => {
+          agentList += `${index + 1}. ${agent.businessName}
+   ${agent.location.city}, ${agent.location.address}
+`;
+        });
+        
+        agentList += '\n0. Cancel deposit';
+        
+        return continueSession(agentList);
+        
+      } catch (error) {
+        console.error('Error getting agents:', error);
+        return endSession('Unable to get agents. Please try again later.');
+      }
+    }
+    
+    case 2: {
+      // Step 2: Agent selection
+      const agentChoice = parseInt(currentInput);
+      
+      if (agentChoice === 0) {
+        return endSession('Deposit cancelled.\n\nThank you for using AfriTokeni!');
+      }
+      
+      const agents = session.data.availableAgents;
+      if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
+        return continueSession('Invalid selection. Choose agent number or 0 to cancel:');
+      }
+      
+      const selectedAgent = agents[agentChoice - 1];
+      session.data.selectedAgent = selectedAgent;
+      session.step = 3;
+      
+      const depositAmount = session.data.depositAmount || 0;
+      
+      return continueSession(`Selected Agent:
+${selectedAgent.businessName}
+${selectedAgent.location.city}, ${selectedAgent.location.address}
+
+Deposit Amount: UGX ${depositAmount.toLocaleString()}
+
+Enter your 4-digit PIN to confirm:`);
+    }
+    
+    case 3: {
+      // Step 3: PIN verification and deposit code generation
+      if (!currentInput || currentInput.length !== 4) {
+        session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+        
+        if (session.data.pinAttempts >= 3) {
+          return endSession('Too many incorrect PIN attempts. Deposit cancelled for security.');
+        }
+        
+        return continueSession(`Invalid PIN format. Enter 4-digit PIN:
+Attempts remaining: ${3 - session.data.pinAttempts}`);
+      }
+      
+      console.log(`Verifying PIN for deposit: ${session.phoneNumber}`);
+      try {
+        const pinValid = await DataService.verifyUserPin(session.phoneNumber, currentInput);
+        
+        if (!pinValid) {
+          session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+          
+          if (session.data.pinAttempts >= 3) {
+            return endSession('Incorrect PIN. Too many attempts. Deposit cancelled for security.');
+          }
+          
+          return continueSession(`Incorrect PIN. Try again:
+Attempts remaining: ${3 - session.data.pinAttempts}`);
+        }
+        
+        // Generate deposit code
+        const depositCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.depositCode = depositCode;
+        
+        console.log(`Creating deposit request for ${session.phoneNumber}`);
+        
+        // Get user to get their ID
+        const user = await DataService.findUserByPhoneNumber(session.phoneNumber);
+        if (!user) {
+          return endSession('User not found. Please try again later.');
+        }
+        
+        const depositAmount = session.data.depositAmount || 0;
+        const selectedAgent = session.data.selectedAgent;
+        
+        if (!selectedAgent) {
+          return endSession('Agent not selected. Please try again.');
+        }
+        
+        // Create pending deposit request in datastore
+        let depositId: string;
+        try {
+          depositId = await DataService.createDepositRequest(
+            user.id,
+            selectedAgent.id,
+            depositAmount,
+            'UGX',
+            depositCode
+          );
+          session.data.depositId = depositId;
+          console.log(`✅ Deposit request ${depositId} created successfully`);
+        } catch (createError) {
+          console.error('❌ Failed to create deposit request:', createError);
+          return endSession('Failed to create deposit request. Please try again later.');
+        }
+        
+        // Send SMS with deposit details
+        const smsMessage = `AfriTokeni Deposit
+Code: ${depositCode}
+Amount: UGX ${depositAmount.toLocaleString()}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location.city}
+Valid: 24 hours
+Deposit ID: ${depositId}
+
+Give this code and cash to the agent to complete deposit.`;
+
+        console.log(`Sending deposit SMS to ${session.phoneNumber}`);
+
+        try {
+          await sendSMSNotification(session.phoneNumber, smsMessage);
+        } catch (smsError) {
+          console.error('SMS sending failed:', smsError);
+          // Continue even if SMS fails
+        }
+        
+        return endSession(`✅ Deposit Request Created!
+
+Code: ${depositCode}
+Amount: UGX ${depositAmount.toLocaleString()}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location.city}
+
+Valid for 24 hours. Give this code and cash to the agent to complete your deposit.
+
+SMS sent with details.
+Deposit ID: ${depositId}
+
+Thank you for using AfriTokeni!`);
+        
+      } catch (error) {
+        console.error('Error verifying PIN or creating deposit:', error);
+        return endSession('Unable to process deposit. Please try again later.');
+      }
+    }
+    
+    default:
+      // Reset to main menu if something goes wrong
+      session.currentMenu = 'main';
+      session.step = 0;
+      return handleMainMenu('', session);
+  }
+}
+
+async function handleBitcoin(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  if (!currentInput) {
+    return continueSession(`Bitcoin Services
+Please select an option:
+1. BTC Balance
+2. BTC Rate
+3. Buy BTC
+4. Sell BTC
+0. Back to Main Menu`);
+  }
+  
+  switch (currentInput) {
+    case '1':
+      session.currentMenu = 'btc_balance';
+      session.step = 1;
+      return continueSession('BTC Balance\nEnter your 4-digit PIN:');
+    
+    case '2':
+      session.currentMenu = 'btc_rate';
+      session.step = 1;
+      return continueSession('BTC Rate\nEnter your 4-digit PIN:');
+    
+    case '3':
+      session.currentMenu = 'btc_buy';
+      session.step = 1;
+      return continueSession('Buy BTC\nEnter UGX amount to spend:');
+    
+    case '4':
+      session.currentMenu = 'btc_sell';
+      session.step = 1;
+      return continueSession('Sell BTC\nEnter BTC amount to sell:');
+    
+    case '0':
+      session.currentMenu = 'main';
+      session.step = 0;
+      return handleMainMenu('', session);
+    
+    default:
+      return continueSession(`Invalid option. Please try again:
+1. BTC Balance
+2. BTC Rate
+3. Buy BTC
+4. Sell BTC
+0. Back to Main Menu`);
+  }
+}
+
+async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const sanitized_input = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // PIN verification step
+      if (!/^\d{4}$/.test(sanitized_input)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      // Verify PIN
+      const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // Get BTC balance (mock implementation)
+      try {
+        // In a real implementation, this would get actual BTC balance from datastore
+        const btcBalance = 0.00125; // Mock BTC balance
+        const btcRateUGX = 150000000; // Mock rate: 1 BTC = 150M UGX
+        const ugxEquivalent = btcBalance * btcRateUGX;
+        
+        return endSession(`Your Bitcoin Balance
+
+₿${btcBalance.toFixed(8)} BTC
+≈ UGX ${ugxEquivalent.toLocaleString()}
+
+Current Rate: 1 BTC = UGX ${btcRateUGX.toLocaleString()}
+
+Thank you for using AfriTokeni!`);
+        
+      } catch (error) {
+        console.error('Error retrieving BTC balance:', error);
+        return endSession(`Error retrieving BTC balance.
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+      }
+    }
+    
+    default:
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return handleBitcoin('', session);
+  }
+}
+
+async function handleBTCRate(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const sanitized_input = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // PIN verification step
+      if (!/^\d{4}$/.test(sanitized_input)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      // Verify PIN
+      const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // Display current BTC rate
+      try {
+        // Mock BTC rate - in real implementation, this would fetch from exchange API
+        const btcRateUGX = 150000000; // 1 BTC = 150M UGX
+        const lastUpdated = new Date().toLocaleString();
+        
+        return endSession(`Bitcoin Exchange Rate
+
+1 BTC = UGX ${btcRateUGX.toLocaleString()}
+1 UGX = ₿${(1/btcRateUGX).toFixed(10)}
+
+Last Updated: ${lastUpdated}
+
+Rates include platform fees
+Buy/Sell spreads may apply
+
+Thank you for using AfriTokeni!`);
+        
+      } catch (error) {
+        console.error('Error retrieving BTC rate:', error);
+        return endSession(`Error retrieving BTC rate.
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+      }
+    }
+    
+    default:
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return handleBitcoin('', session);
+  }
+}
+
+async function handleBTCBuy(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // Enter UGX amount to spend
+      if (!currentInput) {
+        return continueSession('Buy BTC\nEnter UGX amount to spend:');
+      }
+      
+      const ugxAmount = parseInt(currentInput);
+      if (isNaN(ugxAmount) || ugxAmount <= 0) {
+        return continueSession('Invalid amount.\nEnter UGX amount to spend:');
+      }
+      
+      if (ugxAmount < 10000) {
+        return continueSession('Minimum purchase: UGX 10,000\nEnter UGX amount to spend:');
+      }
+      
+      // Calculate BTC amount and fees
+      const btcRate = 150000000; // Mock rate
+      const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
+      const netAmount = ugxAmount - fee;
+      const btcAmount = netAmount / btcRate;
+      
+      session.data.ugxAmount = ugxAmount;
+      session.data.btcAmount = btcAmount;
+      session.data.fee = fee;
+      session.step = 2;
+      
+      return continueSession(`BTC Purchase Quote
+
+Spend: UGX ${ugxAmount.toLocaleString()}
+Fee (2.5%): UGX ${fee.toLocaleString()}
+Net: UGX ${netAmount.toLocaleString()}
+Receive: ₿${btcAmount.toFixed(8)} BTC
+
+Rate: 1 BTC = UGX ${btcRate.toLocaleString()}
+
+Enter PIN to confirm:`);
+    }
+    
+    case 2: {
+      // PIN verification and purchase
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // Process BTC purchase (mock implementation)
+      const ugxAmount = session.data.ugxAmount || 0;
+      const btcAmount = session.data.btcAmount || 0;
+      const fee = session.data.fee || 0;
+      const transactionId = `btc_buy_${Date.now()}`;
+      
+      // Check user balance
+      const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
+      if (!userBalance || userBalance.balance < ugxAmount) {
+        const currentBalance = userBalance ? userBalance.balance : 0;
+        return endSession(`Insufficient balance!
+Your balance: UGX ${currentBalance.toLocaleString()}
+Required: UGX ${ugxAmount.toLocaleString()}
+
+Thank you for using AfriTokeni!`);
+      }
+      
+      return endSession(`✅ BTC Purchase Successful!
+
+Purchased: ₿${btcAmount.toFixed(8)} BTC
+Cost: UGX ${ugxAmount.toLocaleString()}
+Fee: UGX ${fee.toLocaleString()}
+Transaction ID: ${transactionId}
+
+BTC added to your wallet.
+
+Thank you for using AfriTokeni!`);
+    }
+    
+    default:
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return handleBitcoin('', session);
+  }
+}
+
+async function handleBTCSell(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // Enter BTC amount to sell
+      if (!currentInput) {
+        return continueSession('Sell BTC\nEnter BTC amount to sell (e.g., 0.001):');
+      }
+      
+      const btcAmount = parseFloat(currentInput);
+      if (isNaN(btcAmount) || btcAmount <= 0) {
+        return continueSession('Invalid amount.\nEnter BTC amount to sell (e.g., 0.001):');
+      }
+      
+      if (btcAmount < 0.0001) {
+        return continueSession('Minimum sale: ₿0.0001 BTC\nEnter BTC amount to sell:');
+      }
+      
+      // Calculate UGX amount and fees
+      const btcRate = 150000000; // Mock rate
+      const ugxGross = btcAmount * btcRate;
+      const fee = Math.round(ugxGross * 0.025); // 2.5% fee
+      const ugxNet = ugxGross - fee;
+      
+      session.data.btcAmount = btcAmount;
+      session.data.ugxGross = ugxGross;
+      session.data.ugxNet = ugxNet;
+      session.data.fee = fee;
+      session.step = 2;
+      
+      return continueSession(`BTC Sale Quote
+
+Sell: ₿${btcAmount.toFixed(8)} BTC
+Gross: UGX ${ugxGross.toLocaleString()}
+Fee (2.5%): UGX ${fee.toLocaleString()}
+You receive: UGX ${ugxNet.toLocaleString()}
+
+Rate: 1 BTC = UGX ${btcRate.toLocaleString()}
+
+Enter PIN to confirm:`);
+    }
+    
+    case 2: {
+      // PIN verification and sale
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // Process BTC sale (mock implementation)
+      const btcAmount = session.data.btcAmount || 0;
+      const ugxNet = session.data.ugxNet || 0;
+      const fee = session.data.fee || 0;
+      const transactionId = `btc_sell_${Date.now()}`;
+      
+      // Mock BTC balance check
+      const userBTCBalance = 0.00125; // Mock balance
+      if (userBTCBalance < btcAmount) {
+        return endSession(`Insufficient BTC balance!
+Your BTC balance: ₿${userBTCBalance.toFixed(8)} BTC
+Required: ₿${btcAmount.toFixed(8)} BTC
+
+Thank you for using AfriTokeni!`);
+      }
+      
+      return endSession(`✅ BTC Sale Successful!
+
+Sold: ₿${btcAmount.toFixed(8)} BTC
+Received: UGX ${ugxNet.toLocaleString()}
+Fee: UGX ${fee.toLocaleString()}
+Transaction ID: ${transactionId}
+
+UGX added to your balance.
+
+Thank you for using AfriTokeni!`);
+    }
+    
+    default:
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return handleBitcoin('', session);
   }
 }
 
@@ -689,7 +1328,9 @@ Thank you for using AfriTokeni!`);
           return endSession('No agents available at the moment. Please try again later.');
         }
         
-        session.data.availableAgents = agents;
+        // Display only the first 2 agents
+        const displayAgents = agents.slice(0, 2);
+        session.data.availableAgents = displayAgents;
         
         let agentList = `Select an agent:
 Amount: UGX ${amount.toLocaleString()}
@@ -698,7 +1339,7 @@ Total: UGX ${totalRequired.toLocaleString()}
 
 `;
         
-        agents.forEach((agent, index) => {
+        displayAgents.forEach((agent, index) => {
           agentList += `${index + 1}. ${agent.businessName}
    ${agent.location.city}, ${agent.location.address}
 `;
@@ -1038,6 +1679,27 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
         break;
       case 'check_balance':
         response = await handleCheckBalance(text, session);
+        break;
+      case 'transaction_history':
+        response = await handleTransactionHistory(text, session);
+        break;
+      case 'deposit':
+        response = await handleDeposit(text, session);
+        break;
+      case 'bitcoin':
+        response = await handleBitcoin(text, session);
+        break;
+      case 'btc_balance':
+        response = await handleBTCBalance(text, session);
+        break;
+      case 'btc_rate':
+        response = await handleBTCRate(text, session);
+        break;
+      case 'btc_buy':
+        response = await handleBTCBuy(text, session);
+        break;
+      case 'btc_sell':
+        response = await handleBTCSell(text, session);
         break;
       case 'withdraw':
         response = await handleWithdraw(text, session);
