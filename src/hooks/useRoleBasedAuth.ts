@@ -140,7 +140,6 @@ export const useRoleBasedAuth = () => {
       const firstName = faker.person.firstName();
       const lastName = faker.person.lastName();
       
-      console.log(`Generated user profile: ${firstName} ${lastName} (${role})`);
       
       const afritokeniUser = {
           id: junoUser.key,
@@ -168,15 +167,122 @@ export const useRoleBasedAuth = () => {
         if (role === 'agent') {
           console.log('Creating Agent record for new agent user:', afritokeniUser.id);
           try {
+            // Diverse locations around Kampala for realistic agent distribution
+            const kampalaNearbyLocations = [
+              {
+                city: 'Kampala',
+                address: 'Garden City Shopping Mall, Yusuf Lule Road',
+                coordinates: { lat: 0.3354, lng: 32.5713 }
+              },
+              {
+                city: 'Kampala', 
+                address: 'Acacia Mall, Kisementi',
+                coordinates: { lat: 0.3402, lng: 32.5932 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Downtown Kampala, Kampala Road',
+                coordinates: { lat: 0.3136, lng: 32.5811 }
+              },
+              {
+                city: 'Entebbe',
+                address: 'Entebbe Main Street',
+                coordinates: { lat: 0.0564, lng: 32.4646 }
+              },
+              {
+                city: 'Wakiso',
+                address: 'Wakiso Town Council',
+                coordinates: { lat: 0.4044, lng: 32.4594 }
+              },
+              {
+                city: 'Mukono', 
+                address: 'Mukono Main Road',
+                coordinates: { lat: 0.3533, lng: 32.7553 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Wandegeya Market Area',
+                coordinates: { lat: 0.3354, lng: 32.5666 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Ntinda Shopping Complex',
+                coordinates: { lat: 0.3676, lng: 32.6108 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Bukoto Street, Kamwokya',
+                coordinates: { lat: 0.3515, lng: 32.5926 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Najjanankumbi Trading Center', 
+                coordinates: { lat: 0.2567, lng: 32.5234 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Bweyogerere Commercial Area',
+                coordinates: { lat: 0.3789, lng: 32.6756 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Kansanga Shopping Center',
+                coordinates: { lat: 0.2896, lng: 32.6045 }
+              },
+              {
+                city: 'Kampala', 
+                address: 'Nansana Main Road',
+                coordinates: { lat: 0.3686, lng: 32.5234 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Kireka Trading Center',
+                coordinates: { lat: 0.3432, lng: 32.6567 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Kabalagala Commercial Strip',
+                coordinates: { lat: 0.2987, lng: 32.5934 }
+              },
+              {
+                city: 'Jinja',
+                address: 'Jinja Central Market',
+                coordinates: { lat: 0.4314, lng: 33.2041 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Makerere University Area',
+                coordinates: { lat: 0.3354, lng: 32.5666 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Owino Market, Downtown',
+                coordinates: { lat: 0.3101, lng: 32.5776 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Bugolobi Commercial Plaza',
+                coordinates: { lat: 0.3201, lng: 32.6123 }
+              },
+              {
+                city: 'Kampala',
+                address: 'Lubaga Cathedral Hill',
+                coordinates: { lat: 0.2987, lng: 32.5456 }
+              }
+            ];
+
+            // Randomly select a location from the array
+            const randomLocation = kampalaNearbyLocations[Math.floor(Math.random() * kampalaNearbyLocations.length)];
+
             const newAgent = await DataService.createAgent({
               userId: afritokeniUser.id,
               businessName: `${afritokeniUser.firstName} ${afritokeniUser.lastName} Agent Service`,
               location: {
                 country: 'Uganda',
                 state: 'Central', 
-                city: 'Kampala',
-                address: 'Default Location',
-                coordinates: { lat: 0.3476, lng: 32.5825 }
+                city: randomLocation.city,
+                address: randomLocation.address,
+                coordinates: randomLocation.coordinates
               },
               isActive: true,
               status: 'available',
