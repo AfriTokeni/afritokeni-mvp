@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { AfricanCurrency } from '../../../types/currency';
-import { Agent } from '../../../services/escrowService';
+import { Agent } from '../../../services/dataService';
 
 // Fix for default Leaflet icon paths
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,32 +97,31 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
     return distance < 1 ? `${(distance * 1000).toFixed(0)} meters` : `${distance.toFixed(1)} km`;
   };
 
-  const formatDistanceForAgent = (): string => {
+  const formatDistance = (agent: Agent): string => {
     if (!userLocation) return '';
-    // Default coordinates for now - will be replaced with actual agent coordinates
-    const agentLat = 0.3476;
-    const agentLng = 32.5825;
     const distance = parseFloat(calculateDistance(
       userLocation[0],
       userLocation[1],
-      agentLat,
-      agentLng
+      agent.location.coordinates.lat,
+      agent.location.coordinates.lng
     ).replace(' km', '').replace(' meters', ''));
     
-    if (calculateDistance(userLocation[0], userLocation[1], agentLat, agentLng).includes('meters')) {
+    if (calculateDistance(userLocation[0], userLocation[1], agent.location.coordinates.lat, agent.location.coordinates.lng).includes('meters')) {
       return `${Math.round(distance)}m`;
     }
     return `${distance.toFixed(1)}km`;
   };
 
-  const formatCurrency = (amount: number, currency: AfricanCurrency): string => {
-    return new Intl.NumberFormat('en', {
-      style: 'currency',
-      currency: currency === 'XOF' || currency === 'XAF' ? 'XOF' : currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
+  const formatBalance = (amount: number): string => {
+    if (amount >= 1000000) {
+      return `${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `${(amount / 1000).toFixed(0)}K`;
+    }
+    return amount.toString();
   };
+
+
 
   // Handle marker clicks to show custom popup
   const handleMarkerClick = (agent: Agent, event: L.LeafletMouseEvent) => {
@@ -158,65 +157,71 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <h3 className="font-semibold text-neutral-900 mb-1">
-            {agent.name}
+            {agent.businessName}
           </h3>
           <div className="flex items-center text-sm text-neutral-600 mb-2">
             <MapPin className="h-4 w-4 mr-1" />
-            {agent.location}
+            {agent.location.address}
           </div>
           {userLocation && (
             <div className="flex items-center text-sm text-neutral-500">
               <Navigation className="h-4 w-4 mr-1" />
-              {formatDistanceForAgent()} away
+              {formatDistance(agent)} away
             </div>
           )}
         </div>
-        <div className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          Online
+        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+          agent.status === 'available'
+            ? 'bg-green-100 text-green-800' 
+            : agent.status === 'busy'
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-neutral-100 text-neutral-600'
+        }`}>
+          {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
         </div>
       </div>
 
       {/* Agent Stats */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Rating</p>
-          <div className="flex items-center">
-            <Star className="h-4 w-4 text-yellow-400 fill-current" />
-            <span className="ml-1 font-semibold text-neutral-900">{agent.rating}</span>
-          </div>
+          <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
+          <p className="font-mono font-semibold text-neutral-900">
+            {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
+          </p>
         </div>
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Fee</p>
+          <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
           <p className="font-mono font-semibold text-neutral-900">
-            {agent.fee}%
+            {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
           </p>
         </div>
       </div>
 
-      {/* Transaction Details */}
-      <div className="space-y-2 mb-4 text-sm">
-        <div className="flex justify-between">
-          <span className="text-neutral-600">You send:</span>
-          <span className="font-mono">₿{btcAmount}</span>
+      {/* Rating (Mock) */}
+      <div className="flex items-center mb-4">
+        <div className="flex items-center">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`h-4 w-4 ${
+                star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+              }`}
+            />
+          ))}
         </div>
-        <div className="flex justify-between">
-          <span className="text-neutral-600">You receive:</span>
-          <span className="font-mono text-green-600">
-            {formatCurrency(parseFloat(localAmount) * (1 - agent.fee / 100), selectedCurrency)}
-          </span>
-        </div>
+        <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
       </div>
 
       {/* Services */}
       <div className="flex flex-wrap gap-2 mb-4">
-        <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-          Bitcoin Exchange
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+          Cash Deposit
         </span>
         <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-          Cash Pickup
+          Withdrawal
         </span>
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-          Escrow Protected
+        <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+          Bitcoin Exchange
         </span>
       </div>
 
@@ -228,7 +233,7 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
             onAgentSelect(agent);
           }}
           disabled={isCreating}
-          className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+          className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
           {isCreating ? 'Creating...' : 'Select Agent'}
         </button>
@@ -295,65 +300,111 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
             </div>
           </div>
         ) : viewMode === 'list' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {agents.map((agent) => (
               <div
                 key={agent.id}
-                className={`bg-white border border-neutral-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer ${
-                  selectedAgent?.id === agent.id ? 'ring-2 ring-orange-500' : ''
+                className={`bg-white rounded-xl shadow-sm border border-neutral-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                  selectedAgent?.id === agent.id ? 'ring-2 ring-blue-500' : ''
                 }`}
-                onClick={() => onAgentSelect(agent)}
+                onClick={() => {
+                  if (selectedAgent?.id === agent.id) {
+                    // Deselect if clicking the same agent
+                    onAgentSelect(agent);
+                  } else {
+                    // Select the new agent
+                    onAgentSelect(agent);
+                  }
+                }}
               >
                 {/* Agent Header */}
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                      <span className="text-orange-600 font-semibold">
-                        {agent.name.split(' ').map((n: string) => n[0]).join('')}
-                      </span>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-neutral-900 mb-1">
+                      {agent.businessName}
+                    </h3>
+                    <div className="flex items-center text-sm text-neutral-600 mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {agent.location.address}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-neutral-900">{agent.name}</h3>
-                      <p className="text-sm text-neutral-600">{agent.location}</p>
-                      {userLocation && (
-                        <div className="flex items-center text-sm text-neutral-500">
-                          <Navigation className="h-4 w-4 mr-1" />
-                          {formatDistanceForAgent()} away
-                        </div>
-                      )}
-                    </div>
+                    {userLocation && (
+                      <div className="flex items-center text-sm text-neutral-500">
+                        <Navigation className="h-4 w-4 mr-1" />
+                        {formatDistance(agent)} away
+                      </div>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-1 text-yellow-500 mb-1">
-                      <span className="text-sm font-medium">{agent.rating}</span>
-                      <Star className="w-4 h-4 fill-current" />
-                    </div>
-                    <div className="text-xs text-green-600 font-medium">{agent.fee}% fee</div>
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    agent.status === 'available'
+                      ? 'bg-green-100 text-green-800' 
+                      : agent.status === 'busy'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-neutral-100 text-neutral-600'
+                  }`}>
+                    {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
                   </div>
                 </div>
 
-                {/* Transaction Preview */}
-                <div className="space-y-2 text-sm mb-4">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">You send:</span>
-                    <span className="font-mono">₿{btcAmount}</span>
+                {/* Agent Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
+                    <p className="font-mono font-semibold text-neutral-900">
+                      {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">You receive:</span>
-                    <span className="font-mono text-green-600">
-                      {formatCurrency(parseFloat(localAmount) * (1 - agent.fee / 100), selectedCurrency)}
-                    </span>
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
+                    <p className="font-mono font-semibold text-neutral-900">
+                      {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
+                    </p>
                   </div>
+                </div>
+
+                {/* Rating (Mock) */}
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
                 </div>
 
                 {/* Services */}
                 <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    Cash Deposit
+                  </span>
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    Withdrawal
+                  </span>
                   <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
                     Bitcoin Exchange
                   </span>
-                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                    Cash Pickup
-                  </span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Select Agent button clicked', agent);
+                      onAgentSelect(agent);
+                    }}
+                    disabled={isCreating}
+                    className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    {isCreating ? 'Creating...' : 'Select Agent'}
+                  </button>
+                  <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+                    <Phone className="h-4 w-4" />
+                  </button>
                 </div>
 
                 {/* Expanded Details */}
@@ -370,11 +421,20 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                       <div>
                         <p className="text-xs text-neutral-500 mb-1">Services Available</p>
                         <ul className="text-sm text-neutral-700 space-y-1">
-                          <li>• Bitcoin to cash exchange</li>
-                          <li>• Secure escrow protection</li>
-                          <li>• ID verification required</li>
-                          <li>• Same-day processing</li>
+                          <li>• Cash deposits and withdrawals</li>
+                          <li>• Bitcoin buying and selling</li>
+                          <li>• Money transfers</li>
+                          <li>• Account verification</li>
                         </ul>
+                      </div>
+                      <div>
+                        <p className="text-xs text-neutral-500 mb-1">Available Balance</p>
+                        <p className="text-sm text-neutral-700">
+                          Digital: {agent.digitalBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
+                        </p>
+                        <p className="text-sm text-neutral-700">
+                          Cash: {agent.cashBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -411,8 +471,8 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                 {agents.map((agent) => (
                   <Marker
                     key={agent.id}
-                    position={[0.3476, 32.5825]} // Default coordinates for now
-                    icon={createAgentIcon(true)}
+                    position={[agent.location.coordinates.lat, agent.location.coordinates.lng]}
+                    icon={createAgentIcon(agent.status === 'available')}
                     eventHandlers={{
                       click: (event) => {
                         handleMarkerClick(agent, event);
