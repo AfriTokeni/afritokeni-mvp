@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import { MessageSquare, Send, Phone, Loader2 } from 'lucide-react';
@@ -10,7 +10,10 @@ const SMSUI: React.FC = () => {
     authMethod, 
     register, 
     verifyRegistrationCode, 
-    isVerifying
+    isVerifying,
+    verificationPhoneNumber,
+    cancelVerification,
+    isLoading 
   } = useAuthentication();
   const { processSMSCommand } = useAfriTokeni();
   const location = useLocation();
@@ -19,24 +22,9 @@ const SMSUI: React.FC = () => {
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [verificationCode, setVerificationCode] = useState('')
-  const [isRegistering, setIsRegistering] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
-  // Auto-run command if passed from landing page
-  useEffect(() => {
-    const state = location.state as { command?: string };
-    if (state?.command) {
-      setSmsMessage(state.command);
-      // Auto-execute the command after a brief delay
-      setTimeout(() => {
-        if (state.command) {
-          executeCommand(state.command);
-        }
-      }, 500);
-    }
-  }, [location.state]);
-
-  const executeCommand = async (command: string) => {
+    const executeCommand = useCallback(async (command: string) => {
     setIsProcessing(true);
     try {
       if (user) {
@@ -134,7 +122,15 @@ Send *AFRI# for menu`,
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [user, processSMSCommand]);
+
+  // Auto-run command if passed from landing page
+  useEffect(() => {
+    const state = location.state as { command?: string };
+    if (state?.command) {
+      executeCommand(state.command);
+    }
+  }, [location.state, executeCommand]);
 
   const handleSMSRegistration = async () => {
     if (!phoneNumber) {
@@ -142,7 +138,6 @@ Send *AFRI# for menu`,
       return;
     }
     
-    setIsRegistering(true);
     try {
       const success = await register({
         firstName:'SMS',
@@ -155,13 +150,12 @@ Send *AFRI# for menu`,
       
       if (success) {
         setResponse(`Verification code sent to ${phoneNumber}. Please enter the code below.`);
+        setPhoneNumber(''); // Clear phone input to focus on verification
       } else {
         setResponse('Failed to send verification code. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setResponse('Error occurred during registration. Please try again.');
-    } finally {
-      setIsRegistering(false);
     }
   };
 
@@ -176,12 +170,12 @@ Send *AFRI# for menu`,
       const success = await verifyRegistrationCode(verificationCode);
       
       if (success) {
-        const currentUser = user?.user;
-        setResponse(`Welcome to AfriTokeni, ${currentUser?.firstName} ${currentUser?.lastName}! Registration complete. Send *AFRI# for menu.`);
+        setResponse('Welcome to AfriTokeni! Registration complete. Send *AFRI# for menu.');
+        setVerificationCode(''); // Clear the verification code
       } else {
         setResponse('Invalid verification code. Please try again.');
       }
-    } catch (_error) {
+    } catch {
       setResponse('Error occurred during verification. Please try again.');
     } finally {
       setIsVerifyingCode(false);
@@ -197,6 +191,14 @@ Send *AFRI# for menu`,
   const verifyCode = (
     <>
         <div className="space-y-4 sm:space-y-6">
+            {/* Show the phone number for which verification is being done */}
+            {verificationPhoneNumber && (
+              <div className="bg-neutral-50 border border-neutral-200 p-3 rounded-xl">
+                <p className="text-sm text-neutral-700">
+                  Verification code sent to: <span className="font-semibold text-neutral-900">{verificationPhoneNumber}</span>
+                </p>
+              </div>
+            )}
             <div>
                 <label className="block text-sm font-semibold text-neutral-900 mb-2 sm:mb-3">
                     Verification Code
@@ -210,16 +212,24 @@ Send *AFRI# for menu`,
                 />
             </div> 
         </div>
-        <button
-            onClick={handleCodeVerification}
-            disabled={!verificationCode || isVerifyingCode}
-            className="w-full bg-neutral-900 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm cursor-pointer text-sm sm:text-base"
-        >
-            <div className="flex items-center justify-center gap-2">
-              {isVerifyingCode && <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
-              {isVerifyingCode ? 'Verifying...' : 'Verify Code'}
-            </div>
-        </button>
+        <div className="space-y-3">
+          <button
+              onClick={handleCodeVerification}
+              disabled={!verificationCode || isVerifyingCode}
+              className="w-full bg-neutral-900 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm cursor-pointer text-sm sm:text-base"
+          >
+              <div className="flex items-center justify-center gap-2">
+                {isVerifyingCode && <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
+                {isVerifyingCode ? 'Verifying...' : 'Verify Code'}
+              </div>
+          </button>
+          <button
+              onClick={cancelVerification}
+              className="w-full bg-neutral-100 text-neutral-900 py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-neutral-200 transition-colors duration-200 font-medium text-sm sm:text-base"
+          >
+              Cancel Verification
+          </button>
+        </div>
     </>
   )
 
@@ -239,7 +249,7 @@ Send *AFRI# for menu`,
         
         <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8">
           <div className="space-y-4 sm:space-y-6">
-            {/* Phone Number Input */}
+            {/* Phone Number Input or Verification Code Input */}
             {isVerifying ? verifyCode : <>
              <div>
               <label className="block text-sm font-semibold text-neutral-900 mb-2 sm:mb-3">
@@ -261,12 +271,12 @@ Send *AFRI# for menu`,
             {!user.user && (
               <button
                 onClick={handleSMSRegistration}
-                disabled={!phoneNumber || isRegistering}
+                disabled={!phoneNumber || isLoading}
                 className="w-full bg-neutral-900 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors duration-200 shadow-sm cursor-pointer text-sm sm:text-base"
               >
                 <div className="flex items-center justify-center gap-2">
-                  {isRegistering && <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
-                  {isRegistering ? 'Sending SMS...' : 'Register/Login via SMS'}
+                  {isLoading && <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
+                  {isLoading ? 'Sending SMS...' : 'Register/Login via SMS'}
                 </div>
               </button>
             )}
@@ -365,7 +375,7 @@ Send *AFRI# for menu`,
                     <p className="text-orange-800 font-semibold text-sm">Bitcoin SMS Commands</p>
                     <p className="text-orange-700 text-xs mt-1">
                       All Bitcoin transactions show dynamic fees based on your location and service level. 
-                      You'll receive a quote with fee breakdown before confirming any transaction.
+                      You&apos;ll receive a quote with fee breakdown before confirming any transaction.
                     </p>
                   </div>
                 </div>
