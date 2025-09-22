@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Bitcoin, ArrowRight, CheckCircle, QrCode } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout';
 import { BitcoinService } from '../../services/bitcoinService';
-import { EscrowService, Agent, EscrowTransaction } from '../../services/escrowService';
+import { EscrowService, EscrowTransaction } from '../../services/escrowService';
+import { Agent, DataService } from '../../services/dataService';
 import { AfricanCurrency } from '../../types/currency';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import {
@@ -40,6 +41,31 @@ const BitcoinDepositPage: React.FC = () => {
   // Get agents from escrow service
   const [availableAgents, setAvailableAgents] = useState<Agent[]>([]);
 
+  const loadAvailableAgents = useCallback(async () => {
+    setIsLoadingAgents(true);
+    try {
+      // Use user location if available, otherwise default to Kampala
+      const lat = userLocation?.[0] || 0.3476;
+      const lng = userLocation?.[1] || 32.5825;
+      const agents = await DataService.getNearbyAgents(lat, lng, 50, ['available', 'busy']); // 50km radius
+      setAvailableAgents(agents);
+    } catch (error) {
+      console.error('Error loading agents:', error);
+    } finally {
+      setIsLoadingAgents(false);
+    }
+  }, [userLocation]);
+
+  const loadExchangeRate = useCallback(async () => {
+    try {
+      const rate = await BitcoinService.getExchangeRate(selectedCurrency);
+      setExchangeRate(rate.btcToLocal);
+    } catch (error) {
+      console.error('Error loading exchange rate:', error);
+      setExchangeRate(45000000); // Fallback rate
+    }
+  }, [selectedCurrency]);
+
   useEffect(() => {
     loadExchangeRate();
     loadAvailableAgents();
@@ -51,7 +77,7 @@ const BitcoinDepositPage: React.FC = () => {
       setSelectedAgent(state.selectedAgent);
       setStep('deposit');
     }
-  }, [location.state, selectedCurrency]);
+  }, [location.state, selectedCurrency, loadExchangeRate, loadAvailableAgents]);
 
   // Get user location for agent selection
   useEffect(() => {
@@ -72,29 +98,14 @@ const BitcoinDepositPage: React.FC = () => {
     }
   }, []);
 
-  const loadAvailableAgents = async () => {
-    setIsLoadingAgents(true);
-    try {
-      const agents = await EscrowService.getAvailableAgents();
-      setAvailableAgents(agents);
-    } catch (error) {
-      console.error('Error loading agents:', error);
-    } finally {
-      setIsLoadingAgents(false);
+  // Recalculate amounts when exchange rate changes
+  useEffect(() => {
+    if (btcAmount && parseFloat(btcAmount) > 0 && exchangeRate > 0) {
+      const btcNum = parseFloat(btcAmount);
+      const localValue = Math.round(btcNum * exchangeRate);
+      setLocalAmount(localValue.toString());
     }
-  };
-
-  const loadExchangeRate = async () => {
-    try {
-      const rate = await BitcoinService.getExchangeRate(selectedCurrency);
-      setExchangeRate(rate.btcToLocal);
-    } catch (error) {
-      console.error('Error loading exchange rate:', error);
-      setExchangeRate(45000000); // Fallback rate
-    }
-  };
-
-
+  }, [exchangeRate, btcAmount]);
 
   const handleBtcAmountChange = (value: string) => {
     setBtcAmount(value);
@@ -115,6 +126,25 @@ const BitcoinDepositPage: React.FC = () => {
       setBtcAmount(btcValue);
     } else {
       setBtcAmount('');
+    }
+  };
+
+  const handleCurrencyChange = async (currency: AfricanCurrency) => {
+    setSelectedCurrency(currency);
+    // Reload exchange rate for new currency and recalculate amounts
+    try {
+      const rate = await BitcoinService.getExchangeRate(currency);
+      setExchangeRate(rate.btcToLocal);
+      
+      // Recalculate local amount if BTC amount exists
+      if (btcAmount && parseFloat(btcAmount) > 0) {
+        const btcNum = parseFloat(btcAmount);
+        const localValue = Math.round(btcNum * rate.btcToLocal);
+        setLocalAmount(localValue.toString());
+      }
+    } catch (error) {
+      console.error('Error loading exchange rate for currency change:', error);
+      setExchangeRate(45000000); // Fallback rate
     }
   };
 
@@ -192,7 +222,7 @@ const BitcoinDepositPage: React.FC = () => {
             exchangeRate={exchangeRate}
             onBtcAmountChange={handleBtcAmountChange}
             onLocalAmountChange={handleLocalAmountChange}
-            onCurrencyChange={setSelectedCurrency}
+            onCurrencyChange={handleCurrencyChange}
             onNext={() => setStep('agent')}
           />
         )}
@@ -226,7 +256,7 @@ const BitcoinDepositPage: React.FC = () => {
           <BitcoinConfirmStep
             selectedAgent={selectedAgent}
             transactionId={transactionId}
-            onViewTransactions={() => navigate('/users/transactions')}
+            onViewTransactions={() => navigate('/users/history')}
             onMakeAnother={() => {
               setStep('amount');
               setBtcAmount('');
