@@ -3,8 +3,8 @@ import { defineConfig } from "@junobuild/config";
 export default defineConfig({
   satellite: {
     ids: {
-      development: "atbka-rp777-77775-aaaaq-cai",
-      production: "dkk74-oyaaa-aaaal-askxq-cai"
+      development: "a5dhi-k7777-77775-aaabq-cai",
+      production: "a5dhi-k7777-77775-aaabq-cai"
     },
     source: "dist",
     predeploy: ["npm run build"],
