@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, User, Star, List, MapIcon as Map, X } from 'lucide-react';
+import { MapPin, Star, List, MapIcon as Map, X, Navigation, Phone, Clock } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -112,33 +112,25 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
     });
   };
 
-  const createAgentIcon = (status: string) => {
-    let bgColor = 'bg-gray-500';
-    if (status === 'available') bgColor = 'bg-green-500';
-    if (status === 'busy') bgColor = 'bg-yellow-500';
-    if (status === 'offline') bgColor = 'bg-red-500';
-
+  const createAgentIcon = (isActive: boolean) => {
+    const bgColor = isActive ? 'bg-green-500' : 'bg-neutral-400';
+    
     return L.divIcon({
       html: `
-        <div class="relative">
-          <div class="flex items-center justify-center w-10 h-10 ${bgColor} rounded-full text-white shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark-icon lucide-landmark">
-              <path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/>
-              <path d="M14 18v-7"/>
-              <path d="M18 18v-7"/>
-              <path d="M3 22h18"/>
-              <path d="M6 18v-7"/>
-            </svg>
-          </div>
-          <div class="absolute -bottom-1 left-3 w-4 h-4 ${bgColor} rounded-full border-2 border-white"></div>
+        <div class="relative flex items-center justify-center w-8 h-8 ${bgColor} rounded-full text-white border-2 border-white shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
         </div>
       `,
       className: 'bg-transparent border-none',
-      iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -40]
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
     });
   };
+
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
     const R = 6371;
@@ -153,6 +145,30 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
     return distance < 1 ? `${(distance * 1000).toFixed(0)} meters` : `${distance.toFixed(1)} km`;
   };
 
+  const formatDistance = (agent: Agent): string => {
+    if (!userLocation) return '';
+    const distance = parseFloat(calculateDistance(
+      userLocation[0],
+      userLocation[1],
+      agent.location.coordinates.lat,
+      agent.location.coordinates.lng
+    ).replace(' km', '').replace(' meters', ''));
+    
+    if (calculateDistance(userLocation[0], userLocation[1], agent.location.coordinates.lat, agent.location.coordinates.lng).includes('meters')) {
+      return `${Math.round(distance)}m`;
+    }
+    return `${distance.toFixed(1)}km`;
+  };
+
+  const formatBalance = (amount: number): string => {
+    if (amount >= 1000000) {
+      return `${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `${(amount / 1000).toFixed(0)}K`;
+    }
+    return amount.toString();
+  };
+
   const CenterMap = ({ center }: { center: [number, number] }) => {
     const map = useMap();
     useEffect(() => {
@@ -162,53 +178,93 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
   };
 
   const renderAgentDetails = (agent: typeof agents[0]) => (
-    <div className="max-w-xs">
-      <h3 className="font-bold text-sm sm:text-base lg:text-lg mb-2">{agent.businessName}</h3>
-      <div className="space-y-2 text-xs sm:text-sm">
-        <p>
-          <span className="font-semibold">Status:</span>{' '}
-          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-            agent.status === 'available'
-              ? 'bg-green-100 text-green-800'
-              : agent.status === 'busy'
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {agent.status}
-          </span>
-        </p>
-        <p>
-          <span className="font-semibold">Location:</span> {agent.location.address}
-        </p>
-        <p>
-          <span className="font-semibold">Distance:</span>{' '}
-          {userLocation
-            ? calculateDistance(
-                userLocation[0], userLocation[1],
-                agent.location.coordinates.lat, agent.location.coordinates.lng
-              )
-            : 'Unknown'}
-        </p>
-        <p>
-          <span className="font-semibold">Contact:</span> Via app
-        </p>
-        <p>
-          <span className="font-semibold">Operating Hours:</span> Business hours vary
-        </p>
-        <p>
-          <span className="font-semibold">Available Balance:</span> {agent.digitalBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
-        </p>
+    <div className="min-w-48">
+      {/* Agent Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <h3 className="font-semibold text-neutral-900 mb-1">
+            {agent.businessName}
+          </h3>
+          <div className="flex items-center text-sm text-neutral-600 mb-2">
+            <MapPin className="h-4 w-4 mr-1" />
+            {agent.location.address}
+          </div>
+          {userLocation && (
+            <div className="flex items-center text-sm text-neutral-500">
+              <Navigation className="h-4 w-4 mr-1" />
+              {formatDistance(agent)} away
+            </div>
+          )}
+        </div>
+        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+          agent.status === 'available'
+            ? 'bg-green-100 text-green-800' 
+            : agent.status === 'busy'
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-neutral-100 text-neutral-600'
+        }`}>
+          {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
+        </div>
       </div>
-      <div className="mt-3 flex space-x-2">
+
+      {/* Agent Stats */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
+          <p className="font-mono font-semibold text-neutral-900">
+            {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
+          <p className="font-mono font-semibold text-neutral-900">
+            {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
+          </p>
+        </div>
+      </div>
+
+      {/* Rating (Mock) */}
+      <div className="flex items-center mb-4">
+        <div className="flex items-center">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`h-4 w-4 ${
+                star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+              }`}
+            />
+          ))}
+        </div>
+        <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+      </div>
+
+      {/* Services */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+          Cash Deposit
+        </span>
+        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+          Withdrawal
+        </span>
+        <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+          Bitcoin Exchange
+        </span>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-2">
         <button
           onClick={(e) => {
             e.stopPropagation();
             onCreateDepositRequest(agent);
           }}
           disabled={isCreating}
-          className="flex-1 px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed text-xs font-semibold transition-colors duration-200"
+          className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
           {isCreating ? 'Creating...' : 'Select Agent'}
+        </button>
+        <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+          <Phone className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -262,68 +318,145 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             </div>
           </div>
         ) : viewMode === 'list' ? (
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {uniqueAgents.map((agent) => (
               <div
                 key={agent.id}
-                className={`border rounded-lg p-4 transition-colors ${
-                  selectedAgent?.id === agent.id 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-neutral-200 hover:border-neutral-300'
+                className={`bg-white rounded-xl shadow-sm border border-neutral-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                  selectedAgent?.id === agent.id ? 'ring-2 ring-blue-500' : ''
                 }`}
+                onClick={() => {
+                  if (selectedAgent?.id === agent.id) {
+                    // Deselect if clicking the same agent
+                    onAgentSelect(agent);
+                  } else {
+                    // Select the new agent
+                    onAgentSelect(agent);
+                  }
+                }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-neutral-600" />
+                {/* Agent Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-neutral-900 mb-1">
+                      {agent.businessName}
+                    </h3>
+                    <div className="flex items-center text-sm text-neutral-600 mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {agent.location.address}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-neutral-900">{agent.businessName}</h3>
-                      <div className="flex items-center space-x-4 text-sm text-neutral-600">
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="w-4 h-4" />
-                          <span>{agent.location.address}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-yellow-500" />
-                          <span>4.5/5</span>
-                        </div>
-                        {userLocation && (
-                          <div className="flex items-center space-x-1">
-                            <span className="text-xs">
-                              {calculateDistance(
-                                userLocation[0], 
-                                userLocation[1], 
-                                agent.location.coordinates.lat, 
-                                agent.location.coordinates.lng
-                              )}
-                            </span>
-                          </div>
-                        )}
+                    {userLocation && (
+                      <div className="flex items-center text-sm text-neutral-500">
+                        <Navigation className="h-4 w-4 mr-1" />
+                        {formatDistance(agent)} away
                       </div>
-                    </div>
+                    )}
                   </div>
-                  <div className="flex flex-col items-end space-y-2">
-                    <div className="text-right">
-                      <p className="text-sm text-neutral-600">Available</p>
-                      <div className="flex items-center space-x-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-600">Online</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('Select Agent button clicked', agent);
-                        onCreateDepositRequest(agent);
-                      }}
-                      disabled={isCreating}
-                      className="px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed text-sm font-medium transition-colors"
-                    >
-                      {isCreating ? 'Creating...' : 'Select Agent'}
-                    </button>
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    agent.status === 'available'
+                      ? 'bg-green-100 text-green-800' 
+                      : agent.status === 'busy'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-neutral-100 text-neutral-600'
+                  }`}>
+                    {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
                   </div>
                 </div>
+
+                {/* Agent Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
+                    <p className="font-mono font-semibold text-neutral-900">
+                      {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
+                    <p className="font-mono font-semibold text-neutral-900">
+                      {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rating (Mock) */}
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+                </div>
+
+                {/* Services */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    Cash Deposit
+                  </span>
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    Withdrawal
+                  </span>
+                  <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                    Bitcoin Exchange
+                  </span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Select Agent button clicked', agent);
+                      onCreateDepositRequest(agent);
+                    }}
+                    disabled={isCreating}
+                    className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    {isCreating ? 'Creating...' : 'Select Agent'}
+                  </button>
+                  <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+                    <Phone className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Expanded Details */}
+                {selectedAgent?.id === agent.id && (
+                  <div className="mt-4 pt-4 border-t border-neutral-200">
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs text-neutral-500 mb-1">Operating Hours</p>
+                        <div className="flex items-center text-sm text-neutral-700">
+                          <Clock className="h-4 w-4 mr-2" />
+                          Mon-Sat: 8:00 AM - 8:00 PM
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-neutral-500 mb-1">Services Available</p>
+                        <ul className="text-sm text-neutral-700 space-y-1">
+                          <li>• Cash deposits and withdrawals</li>
+                          <li>• Bitcoin buying and selling</li>
+                          <li>• Money transfers</li>
+                          <li>• Account verification</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-xs text-neutral-500 mb-1">Available Balance</p>
+                        <p className="text-sm text-neutral-700">
+                          Digital: {agent.digitalBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
+                        </p>
+                        <p className="text-sm text-neutral-700">
+                          Cash: {agent.cashBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -360,7 +493,7 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                 <Marker
                   key={agent.id}
                   position={[agent.location.coordinates.lat, agent.location.coordinates.lng]}
-                  icon={createAgentIcon('available')}
+                  icon={createAgentIcon(agent.status === 'available')}
                   eventHandlers={{
                     click: (event) => {
                       handleMarkerClick(agent, event);
