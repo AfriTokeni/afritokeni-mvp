@@ -431,7 +431,7 @@ const AgentMapPage: React.FC = () => {
                 <div>
                   <p className="text-xs text-neutral-500 mb-1">Commission</p>
                   <p className="font-mono font-semibold text-neutral-900">
-                    {(agent.commissionRate * 100).toFixed(1)}%
+                    {(agent.commissionRate > 0 ? agent.commissionRate : agent.commissionRate * 100).toFixed(1)}%
                   </p>
                 </div>
               </div>
