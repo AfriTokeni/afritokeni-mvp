@@ -31,8 +31,8 @@ interface BitcoinAgentStepProps {
 const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
   agents,
   selectedAgent,
-  btcAmount,
-  localAmount,
+  btcAmount: _btcAmount,
+  localAmount: _localAmount,
   selectedCurrency,
   userLocation,
   isLoading,
