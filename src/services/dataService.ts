@@ -803,8 +803,8 @@ export class DataService {
       // Agent starts with 0 balance and must receive deposits to have digital funds
       
       // 3. Cash balance starts at 0 - agents must deposit their own cash to start operations
-      // For development/testing, give agents some initial cash
-      const cashBalance = 50000; // 50k UGX for testing - change to 0 for production
+      // For development/testing, give agents some initial cash (set via env AGENT_INITIAL_CASH_BALANCE, defaults to 0 for production)
+      const cashBalance = Number(process.env.AGENT_INITIAL_CASH_BALANCE ?? 0);
 
       // 4. Create or update agent record in agents collection
       // First check if agent already exists to prevent duplication
