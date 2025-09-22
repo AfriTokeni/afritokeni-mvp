@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle, Clock, ArrowRight } from 'lucide-react';
-import { Agent } from '../../../services/escrowService';
+import { Agent } from '../../../services/dataService';
 
 interface BitcoinConfirmStepProps {
   selectedAgent: Agent | null;
@@ -40,7 +40,7 @@ const BitcoinConfirmStep: React.FC<BitcoinConfirmStepProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-neutral-600">Agent:</span>
-            <span className="font-medium">{selectedAgent?.name}</span>
+            <span className="font-medium">{selectedAgent?.businessName}</span>
           </div>
         </div>
 
@@ -50,15 +50,15 @@ const BitcoinConfirmStep: React.FC<BitcoinConfirmStepProps> = ({
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                 <span className="text-orange-600 font-semibold">
-                  {selectedAgent.name.split(' ').map((n: string) => n[0]).join('')}
+                  {selectedAgent.businessName.split(' ').map((n: string) => n[0]).join('')}
                 </span>
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-neutral-900">{selectedAgent.name}</h4>
-                <p className="text-sm text-neutral-600">{selectedAgent.location}</p>
+                <h4 className="font-semibold text-neutral-900">{selectedAgent.businessName}</h4>
+                <p className="text-sm text-neutral-600">{selectedAgent.location.address}</p>
                 <div className="flex items-center text-sm">
-                  <span className="text-yellow-500">{selectedAgent.rating} ★</span>
-                  <span className="ml-2 text-neutral-600">• {selectedAgent.fee}% fee</span>
+                  <span className="text-yellow-500">4.0 ★</span>
+                  <span className="ml-2 text-neutral-600">• {selectedAgent.commissionRate}% fee</span>
                 </div>
               </div>
             </div>
