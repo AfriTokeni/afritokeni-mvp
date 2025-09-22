@@ -875,7 +875,7 @@ const sendSMS = async (phoneNumber: string, message: string) => {
         await sms.send({
             to: phoneNumber,
             message, 
-            from: process.env.VITE_AT_SHORT_CODE || "AfriTokeni"
+            senderId: process.env.AT_SHORT_CODE || "22948"
         });
         return {
             status: 'Success',
