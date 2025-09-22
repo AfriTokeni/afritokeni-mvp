@@ -383,7 +383,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
                   <Marker
                     key={agent.id}
                     position={[agent.location.coordinates.lat, agent.location.coordinates.lng]}
-                    icon={createAgentIcon(agent.status)}
+                    icon={createAgentIcon(agent.status === 'available')}
                     eventHandlers={{
                       click: (e) => handleMarkerClick(agent, e)
                     }}
