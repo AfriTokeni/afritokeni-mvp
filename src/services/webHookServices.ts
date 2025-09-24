@@ -8,7 +8,7 @@ import type { SatelliteOptions } from "@junobuild/core";
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
-  satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
+  satelliteId: "atbka-rp777-77775-aaaaq-cai",
   container: true
 };
 
@@ -23,6 +23,19 @@ interface UserDataFromJuno {
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
   pin?: string;
   createdAt: string;
+}
+
+// Deposit Request interface for USSD/SMS deposit requests
+export interface DepositRequest {
+  id: string;
+  userId: string;
+  agentId: string;
+  amount: number;
+  currency: string;
+  depositCode: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Transaction types for AfriTokeni
@@ -749,6 +762,75 @@ export class WebhookDataService {
       }
     }
 
+    // Get user transaction history
+    static async getUserTransactions(phoneNumber: string, limit: number = 5): Promise<Transaction[]> {
+      console.log(`Getting transaction history for ${phoneNumber}, limit: ${limit}`);
+      try {
+        // Find the user first to get their ID
+        const user = await this.findUserByPhoneNumber(phoneNumber);
+        if (!user) {
+          console.log(`No user found for phone number: ${phoneNumber}`);
+          return [];
+        }
+
+        console.log(`Found user: ${user.firstName} ${user.lastName} (ID: ${user.id})`);
+
+        // Get all transactions from the collection
+        const transactionsResponse = await listDocs({
+          collection: 'transactions',
+          satellite
+        });
+
+        if (!transactionsResponse || !transactionsResponse.items) {
+          console.log('No transactions found in collection');
+          return [];
+        }
+
+        console.log(`Found ${transactionsResponse.items.length} total transactions in collection`);
+
+        // Filter transactions for this user and sort by creation date (newest first)
+        const userTransactions: Transaction[] = transactionsResponse.items
+          .filter(item => {
+            const data = item.data as any;
+            // Match by userId OR userPhone (for backward compatibility)
+            return data.userId === user.id || 
+                   data.userPhone === phoneNumber || 
+                   data.userPhone === `+${phoneNumber}` ||
+                   data.userPhone === phoneNumber.replace('+', '');
+          })
+          .map(item => {
+            const data = item.data as any;
+            return {
+              id: data.id,
+              userId: data.userId,
+              type: data.type,
+              amount: data.amount,
+              fee: data.fee || 0,
+              currency: data.currency || 'UGX',
+              recipientId: data.recipientId,
+              recipientPhone: data.recipientPhone,
+              recipientName: data.recipientName,
+              agentId: data.agentId,
+              status: data.status,
+              smsCommand: data.smsCommand,
+              description: data.description,
+              createdAt: new Date(data.createdAt),
+              completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+              metadata: data.metadata
+            } as Transaction;
+          })
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // Sort by newest first
+          .slice(0, limit); // Take only the requested number
+
+        console.log(`Found ${userTransactions.length} transactions for user ${user.firstName} ${user.lastName}`);
+        return userTransactions;
+
+      } catch (error) {
+        console.error('Error getting user transactions:', error);
+        return [];
+      }
+    }
+
     // Verify user PIN
     static async verifyUserPin(phoneNumber: string, pin: string): Promise<boolean> {
       console.log(`Verifying PIN for ${phoneNumber}: ${pin}`);
@@ -762,6 +844,258 @@ export class WebhookDataService {
       } catch (error) {
         console.error('Error verifying user PIN:', error);
         return false;
+      }
+    }
+
+    // Create deposit request for USSD/SMS users
+    static async createDepositRequest(
+      userId: string,
+      agentId: string,
+      amount: number,
+      currency: string,
+      depositCode: string
+    ): Promise<string> {
+      try {
+        const now = new Date();
+        const requestId = `dep_${nanoid()}`;
+        
+        const depositRequest: DepositRequest = {
+          id: requestId,
+          userId,
+          agentId,
+          amount,
+          currency,
+          depositCode,
+          status: 'pending',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        };
+
+        await setDoc({
+          collection: 'deposit_requests',
+          doc: {
+            key: requestId,
+            data: depositRequest,
+            version: 1n
+          },
+          satellite
+        });
+
+        console.log(`✅ Created deposit request ${requestId} for user ${userId}, agent ${agentId}, amount ${amount} ${currency}`);
+        return requestId;
+      } catch (error) {
+        console.error('❌ Error creating deposit request:', error);
+        throw error;
+      }
+    }
+
+    // Get deposit requests for an agent
+    static async getAgentDepositRequests(agentId: string, status?: string): Promise<DepositRequest[]> {
+      try {
+        console.log('🔍 getAgentDepositRequests called with:', { agentId, status });
+        const docs = await listDocs({
+          collection: 'deposit_requests',
+          satellite
+        });
+        
+        console.log('🔍 Retrieved docs from deposit_requests collection:', docs);
+        console.log('🔍 Number of docs.items:', docs.items?.length || 0);
+        
+        // Log all deposit requests for debugging
+        if (docs.items && docs.items.length > 0) {
+          console.log('🔍 All deposit requests in datastore:');
+          docs.items.forEach((doc, index) => {
+            const request = doc.data as DepositRequest;
+            console.log(`  ${index + 1}. ID: ${request.id}, AgentID: ${request.agentId}, UserID: ${request.userId}, Status: ${request.status}`);
+          });
+        }
+
+        if (!docs.items) {
+          console.log('🔍 No docs.items found, returning empty array');
+          return [];
+        }
+
+        const requests = docs.items
+          .map(doc => doc.data as DepositRequest)
+          .filter(request => {
+            const matchesAgent = request.agentId === agentId;
+            const matchesStatus = !status || request.status === status;
+            console.log(`🔍 Filtering request ${request.id}: agentId=${request.agentId}, targetAgentId=${agentId}, matchesAgent=${matchesAgent}, status=${request.status}, targetStatus=${status}, matchesStatus=${matchesStatus}`);
+            return matchesAgent && matchesStatus;
+          })
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          
+        console.log(`🔍 After filtering: ${requests.length} requests match the criteria`);
+
+        // Enhance requests with user information
+        const enhancedRequests = await Promise.all(
+          requests.map(async (request) => {
+            try {
+              const user = await this.getUserByKey(request.userId);
+              return {
+                ...request,
+                userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+                userPhone: user?.email || 'Unknown Phone', // email field contains phone for SMS users
+                userLocation: 'Unknown Location' // Would need to enhance with actual location data
+              };
+            } catch (error) {
+              console.error(`Error getting user info for ${request.userId}:`, error);
+              return {
+                ...request,
+                userName: 'Unknown User',
+                userPhone: 'Unknown Phone',
+                userLocation: 'Unknown Location'
+              };
+            }
+          })
+        );
+
+        console.log(`Retrieved ${enhancedRequests.length} deposit requests for agent ${agentId}`);
+        return enhancedRequests;
+      } catch (error) {
+        console.error('Error getting agent deposit requests:', error);
+        throw error;
+      }
+    }
+
+    // Update deposit request status
+    static async updateDepositRequestStatus(
+      requestId: string, 
+      status: 'pending' | 'confirmed' | 'completed' | 'rejected'
+    ): Promise<boolean> {
+      try {
+        const existingDoc = await getDoc({
+          collection: 'deposit_requests',
+          key: requestId,
+          satellite
+        });
+
+        if (!existingDoc?.data) {
+          throw new Error('Deposit request not found');
+        }
+
+        const updatedRequest = {
+          ...existingDoc.data,
+          status,
+          updatedAt: new Date().toISOString()
+        };
+
+        await setDoc({
+          collection: 'deposit_requests',
+          doc: {
+            key: requestId,
+            data: updatedRequest,
+            version: existingDoc.version || 1n
+          },
+          satellite
+        });
+
+        console.log(`Updated deposit request ${requestId} status to ${status}`);
+        return true;
+      } catch (error) {
+        console.error('Error updating deposit request status:', error);
+        return false;
+      }
+    }
+
+    // Get deposit request by code (for agent lookup)
+    static async getDepositRequestByCode(depositCode: string): Promise<DepositRequest | null> {
+      try {
+        const allRequests = await listDocs({
+          collection: 'deposit_requests',
+          satellite
+        });
+
+        if (!allRequests.items) return null;
+
+        for (const doc of allRequests.items) {
+          const request = doc.data as DepositRequest;
+          if (request.depositCode === depositCode && request.status === 'pending') {
+            return request;
+          }
+        }
+
+        return null;
+      } catch (error) {
+        console.error('Error getting deposit request by code:', error);
+        return null;
+      }
+    }
+
+    // Get agent by user ID (needed for ProcessDeposits component)
+    static async getAgentByUserId(userId: string): Promise<Agent | null> {
+      try {
+        // In webhook service, we assume the userId is also the agentId for agents
+        // This is a simplified implementation - in production you'd have proper agent-user mapping
+        const agents = await this.getAvailableAgents();
+        
+        // For now, return the first agent as a placeholder
+        // In production, you'd implement proper user-to-agent mapping
+        if (agents.length > 0) {
+          return {
+            ...agents[0],
+            userId: userId
+          };
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('Error getting agent by user ID:', error);
+        return null;
+      }
+    }
+
+    // Process deposit request (simplified implementation)
+    static async processDepositRequest(
+      requestId: string,
+      agentId: string,
+      processedBy?: string
+    ): Promise<{ success: boolean; transactionId?: string; userTransactionId?: string; error?: string }> {
+      try {
+        // Get the deposit request
+        const requestDoc = await getDoc({
+          collection: 'deposit_requests',
+          key: requestId,
+          satellite
+        });
+
+        if (!requestDoc?.data) {
+          return { success: false, error: 'Deposit request not found' };
+        }
+
+        const request = requestDoc.data as DepositRequest;
+
+        if (request.status !== 'pending' && request.status !== 'confirmed') {
+          return { success: false, error: 'Deposit request is not available for processing' };
+        }
+
+        if (request.agentId !== agentId) {
+          return { success: false, error: 'Agent not authorized for this deposit request' };
+        }
+
+        // Create a simple transaction record for the deposit
+        const userTransactionId = `dep_tx_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        
+        // For now, we'll just create a simple transaction ID
+        // In production, you'd store the actual transaction in the datastore
+
+        // Update user balance (increase)
+        const userBalance = await this.getUserBalance(request.userId);
+        const currentUserBalance = userBalance?.balance || 0;
+        await this.updateUserBalance(request.userId, currentUserBalance + request.amount);
+
+        // Mark deposit request as completed
+        await this.updateDepositRequestStatus(requestId, 'completed');
+
+        console.log(`Successfully processed deposit request ${requestId}, user transaction ${userTransactionId}`);
+        return { 
+          success: true, 
+          transactionId: `agent_${requestId}`, 
+          userTransactionId: userTransactionId || undefined 
+        };
+      } catch (error) {
+        console.error('Error processing deposit request:', error);
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
       }
     }
 }

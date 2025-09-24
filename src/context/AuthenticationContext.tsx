@@ -48,6 +48,11 @@ interface IUser {
 
 // Hybrid authentication for AfriTokeni - SMS for users without internet, ICP for web users
 const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  // Verification states
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationPhoneNumber, setVerificationPhoneNumber] = useState<string | null>(null);
+  const [pendingUserData, setPendingUserData] = useState<RegisterFormData | null>(null);
+  const [sentVerificationCode, setSentVerificationCode] = useState<string | null>(null);
   const [user, setUser] = useState<IUser>({ agent: null, user: null, admin: null });
   const [authMethod, setAuthMethod] = useState<"sms" | "web">("web");
   const [isLoading, setIsLoading] = useState(false);
@@ -496,6 +501,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // SMS-based registration for users without internet
   const register = async (formData: RegisterFormData): Promise<boolean> => {
     try {
+      setIsLoading(true);
+      
       // Step 1: Send SMS with verification code to formData.email (phone)
       const formattedPhone = SMSService.formatPhoneNumber(formData.email);
 
@@ -533,7 +540,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false;
       }
 
-      // Verification state would be managed here in a real implementation
+      // Store verification state
+      setIsVerifying(true);
+      setVerificationPhoneNumber(formattedPhone);
+      setPendingUserData(formData);
+      setSentVerificationCode(verificationResult.verificationCode || null);
 
       // In development mode, log the verification code for testing
       if (import.meta.env.DEV && verificationResult.verificationCode) {
@@ -548,10 +559,97 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Registration error:", error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Helper to cancel verification process
+  // Verify the SMS code and complete registration
+  const verifyRegistrationCode = async (code: string): Promise<boolean> => {
+    if (!isVerifying || !verificationPhoneNumber || !pendingUserData) {
+      console.error("No verification in progress");
+      return false;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Verify the code (in development, we can use the stored code, in production this would be server-side)
+      const isValidCode = sentVerificationCode === code || 
+                         (import.meta.env.DEV && code === "123456"); // Dev fallback
+
+      if (!isValidCode) {
+        console.error("Invalid verification code");
+        return false;
+      }
+
+      // Create the user account
+      const userData = {
+        id: nanoid(),
+        firstName: pendingUserData.firstName,
+        lastName: pendingUserData.lastName,
+        email: verificationPhoneNumber, // phone number stored as email for SMS users
+        userType: pendingUserData.userType as "agent" | "user", // Ensure correct type
+        createdAt: new Date(),
+        currency: "UGX", // Default currency
+        balance: 0,
+        bitcoinBalance: 0,
+        kycStatus: "pending" as const,
+        isVerified: true, // SMS verification completed
+        authMethod: "sms" as const,
+      } as User;
+
+      try {
+        // Store user in Juno datastore
+        const createdUser = await DataService.createUser({
+          id: userData.id,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email, // phone number
+          userType: userData.userType as "agent" | "user",
+          kycStatus: userData.kycStatus,
+          authMethod: "sms"
+        });
+        
+        // Update authentication state
+        const stored_agent = createdUser.userType === "agent" ? createdUser : null;
+        const stored_user = createdUser.userType === "user" ? createdUser : null;
+        
+        setUser({ 
+          user: stored_user, 
+          agent: stored_agent, 
+          admin: null 
+        });
+        setAuthMethod("sms");
+        storeUserData(createdUser, "sms");
+
+        // Clear verification state
+        setIsVerifying(false);
+        setVerificationPhoneNumber(null);
+        setPendingUserData(null);
+        setSentVerificationCode(null);
+
+        console.log("User registration completed successfully");
+        return true;
+      } catch (error) {
+        console.error("Failed to create user account:", error);
+        return false;
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cancel verification process
+  const cancelVerification = () => {
+    setIsVerifying(false);
+    setVerificationPhoneNumber(null);
+    setPendingUserData(null);
+    setSentVerificationCode(null);
+  };
 
   const logout = async (userTypeToLogout?: "user" | "agent" | "admin") => {
     try {
@@ -642,10 +740,10 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateUserCurrency,
     isAuthenticated: user.user !== null || user.agent !== null || user.admin !== null,
     isLoading,
-    verifyRegistrationCode: async () => false,
-    cancelVerification: () => {},
-    isVerifying: false,
-    verificationPhoneNumber: null,
+    verifyRegistrationCode,
+    cancelVerification,
+    isVerifying,
+    verificationPhoneNumber,
     updateUser: async () => {},
     updateUserType: async () => {},
   };
