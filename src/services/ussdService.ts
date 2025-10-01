@@ -3,8 +3,9 @@
  * Provides interactive menu system for feature phones
  */
 
-import { DataService } from './dataService';
-import { BitcoinService } from './bitcoinService';
+import { SMSDataAdapter } from './smsDataAdapter';
+import { getCurrencyFromPhone } from '../utils/africanPhoneNumbers';
+import { AfricanCurrency } from '../types/currency';
 
 export interface USSDRequest {
   sessionId: string;
@@ -27,13 +28,9 @@ interface USSDSession {
 }
 
 export class USSDService {
-  private dataService: DataService;
-  private bitcoinService: BitcoinService;
   private sessions: Map<string, USSDSession>;
 
   constructor() {
-    this.dataService = new DataService();
-    this.bitcoinService = new BitcoinService();
     this.sessions = new Map();
   }
 
@@ -80,7 +77,7 @@ export class USSDService {
    * Show main menu
    */
   private async showMainMenu(session: USSDSession): Promise<USSDResponse> {
-    const user = await this.dataService.getUserByPhone(session.phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(session.phoneNumber);
 
     if (!user) {
       return {
@@ -91,11 +88,11 @@ export class USSDService {
       };
     }
 
-    const balance = await this.dataService.getBalance(user.id);
+    const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
 
     return {
-      response: `CON AfriTokeni - ${user.name}
-Balance: ${balance.toLocaleString()} UGX
+      response: `CON AfriTokeni - ${user.firstName} ${user.lastName}
+Balance: ${balance.toLocaleString()} ${currency}
 
 1. Check Balance
 2. Send Money
@@ -111,7 +108,7 @@ Balance: ${balance.toLocaleString()} UGX
    * Handle menu navigation
    */
   private async handleMenuNavigation(session: USSDSession, menuPath: string[]): Promise<USSDResponse> {
-    const user = await this.dataService.getUserByPhone(session.phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(session.phoneNumber);
 
     // Registration flow
     if (menuPath[0] === '1' && !user) {
@@ -182,11 +179,7 @@ Balance: ${balance.toLocaleString()} UGX
       const name = menuPath[1];
       
       // Create user
-      await this.dataService.createUser({
-        name,
-        phone: session.phoneNumber,
-        authMethod: 'sms',
-      });
+      await SMSDataAdapter.createUser(session.phoneNumber, name);
 
       return {
         response: `END Welcome to AfriTokeni, ${name}! Your account is ready. Dial *123# to access services.`,
@@ -204,12 +197,12 @@ Balance: ${balance.toLocaleString()} UGX
    * Handle balance check
    */
   private async handleBalanceCheck(session: USSDSession, user: any): Promise<USSDResponse> {
-    const balance = await this.dataService.getBalance(user.id);
-    const btcBalance = await this.bitcoinService.getBitcoinBalance(user.id);
+    const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
+    const btcBalance = await SMSDataAdapter.getBitcoinBalance(user.id);
 
     return {
       response: `END Your Balances:
-Local: ${balance.toLocaleString()} UGX
+Local: ${balance.toLocaleString()} ${currency}
 Bitcoin: ${btcBalance.toFixed(8)} BTC`,
       continueSession: false,
     };
@@ -233,7 +226,7 @@ Bitcoin: ${btcBalance.toFixed(8)} BTC`,
       session.data.recipientPhone = recipientPhone;
 
       // Verify recipient exists
-      const recipient = await this.dataService.getUserByPhone(recipientPhone);
+      const recipient = await SMSDataAdapter.getUserByPhone(recipientPhone);
       if (!recipient) {
         return {
           response: 'END Recipient not found. They need to register first.',
@@ -241,10 +234,10 @@ Bitcoin: ${btcBalance.toFixed(8)} BTC`,
         };
       }
 
-      session.data.recipientName = recipient.name;
+      session.data.recipientName = `${recipient.firstName} ${recipient.lastName}`;
 
       return {
-        response: `CON Send to: ${recipient.name}\nEnter amount (UGX):`,
+        response: `CON Send to: ${recipient.firstName} ${recipient.lastName}\nEnter amount:`,
         continueSession: true,
       };
     }
@@ -275,21 +268,21 @@ Send ${amount.toLocaleString()} UGX to ${session.data.recipientName}
     // Step 4: Execute
     if (menuPath.length === 4) {
       if (menuPath[3] === '1') {
-        const balance = await this.dataService.getBalance(user.id);
+        const { amount: balance, currency: userCurrency } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
         const amount = session.data.amount;
 
         if (balance < amount) {
           return {
-            response: `END Insufficient balance. Your balance: ${balance.toLocaleString()} UGX`,
+            response: `END Insufficient balance. Your balance: ${balance.toLocaleString()} ${userCurrency}`,
             continueSession: false,
           };
         }
 
-        const recipient = await this.dataService.getUserByPhone(session.data.recipientPhone);
-        await this.dataService.transferMoney(user.id, recipient!.id, amount, 'UGX');
+        const recipient = await SMSDataAdapter.getUserByPhone(session.data.recipientPhone);
+        await SMSDataAdapter.transferMoney(user.id, recipient!.id, amount, userCurrency);
 
         return {
-          response: `END Success! Sent ${amount.toLocaleString()} UGX to ${session.data.recipientName}. New balance: ${(balance - amount).toLocaleString()} UGX`,
+          response: `END Success! Sent ${amount.toLocaleString()} ${userCurrency} to ${session.data.recipientName}. New balance: ${(balance - amount).toLocaleString()} ${userCurrency}`,
           continueSession: false,
         };
       } else {
@@ -312,7 +305,7 @@ Send ${amount.toLocaleString()} UGX to ${session.data.recipientName}
   private async handleWithdraw(session: USSDSession, menuPath: string[], user: any): Promise<USSDResponse> {
     // Step 1: Enter amount
     if (menuPath.length === 1) {
-      const balance = await this.dataService.getBalance(user.id);
+      const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
       return {
         response: `CON Withdraw Cash
 Balance: ${balance.toLocaleString()} UGX
@@ -333,7 +326,7 @@ Enter amount to withdraw:`,
         };
       }
 
-      const balance = await this.dataService.getBalance(user.id);
+      const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
       if (balance < amount) {
         return {
           response: `END Insufficient balance. Your balance: ${balance.toLocaleString()} UGX`,
@@ -359,7 +352,7 @@ Amount: ${amount.toLocaleString()} UGX
         const amount = session.data.withdrawAmount;
         const withdrawalCode = this.generateWithdrawalCode();
 
-        await this.dataService.createWithdrawalRequest({
+        await SMSDataAdapter.createWithdrawalRequest({
           userId: user.id,
           amount,
           currency: 'UGX',
@@ -406,16 +399,17 @@ Show this code to any AfriTokeni agent. Valid for 24 hours.`,
 
     // Check BTC Balance
     if (menuPath[1] === '1') {
-      const btcBalance = await this.bitcoinService.getBitcoinBalance(user.id);
-      const rate = await this.bitcoinService.getExchangeRate('UGX');
-      const ugxValue = btcBalance * rate;
+      const btcBalance = await SMSDataAdapter.getBitcoinBalance(user.id);
+      const currency = getCurrencyFromPhone(session.phoneNumber) || 'UGX';
+      const rate = await SMSDataAdapter.getBitcoinRate(currency as AfricanCurrency);
+      const localValue = btcBalance * rate;
 
       return {
         response: `END Bitcoin Balance:
 ${btcBalance.toFixed(8)} BTC
-≈ ${ugxValue.toLocaleString()} UGX
+≈ ${localValue.toLocaleString()} ${currency}
 
-Rate: 1 BTC = ${rate.toLocaleString()} UGX`,
+Rate: 1 BTC = ${rate.toLocaleString()} ${currency}`,
         continueSession: false,
       };
     }
@@ -432,10 +426,11 @@ Rate: 1 BTC = ${rate.toLocaleString()} UGX`,
 
     // Exchange Rate
     if (menuPath[1] === '4') {
-      const rate = await this.bitcoinService.getExchangeRate('UGX');
+      const currency = getCurrencyFromPhone(session.phoneNumber) || 'UGX';
+      const rate = await SMSDataAdapter.getBitcoinRate(currency as AfricanCurrency);
       return {
         response: `END Bitcoin Rate:
-1 BTC = ${rate.toLocaleString()} UGX
+1 BTC = ${rate.toLocaleString()} ${currency}
 
 Updated: ${new Date().toLocaleTimeString()}`,
         continueSession: false,
@@ -448,7 +443,7 @@ Updated: ${new Date().toLocaleTimeString()}`,
   /**
    * Handle Bitcoin buy
    */
-  private async handleBitcoinBuy(session: USSDSession, subPath: string[], user: any): Promise<USSDResponse> {
+  private async handleBitcoinBuy(_session: USSDSession, subPath: string[], _user: any): Promise<USSDResponse> {
     if (subPath.length === 0) {
       return {
         response: 'CON Enter amount in UGX to spend:',
@@ -481,9 +476,9 @@ Visit nearest agent to complete purchase.`,
   /**
    * Handle Bitcoin sell
    */
-  private async handleBitcoinSell(session: USSDSession, subPath: string[], user: any): Promise<USSDResponse> {
+  private async handleBitcoinSell(_session: USSDSession, subPath: string[], _user: any): Promise<USSDResponse> {
     if (subPath.length === 0) {
-      const btcBalance = await this.bitcoinService.getBitcoinBalance(user.id);
+      const btcBalance = await SMSDataAdapter.getBitcoinBalance(_user.id);
       return {
         response: `CON Your BTC: ${btcBalance.toFixed(8)}
 Enter BTC amount to sell:`,
@@ -517,7 +512,7 @@ Visit nearest agent to complete sale.`,
    * Handle transaction history
    */
   private async handleHistory(session: USSDSession, user: any): Promise<USSDResponse> {
-    const transactions = await this.dataService.getRecentTransactions(user.id, 5);
+    const transactions = await SMSDataAdapter.getRecentTransactions(user.id, 5);
 
     if (transactions.length === 0) {
       return {
@@ -527,7 +522,7 @@ Visit nearest agent to complete sale.`,
     }
 
     let response = 'END Recent Transactions:\n';
-    transactions.forEach((txn, index) => {
+    transactions.forEach((txn: any, index: number) => {
       response += `${index + 1}. ${txn.type} ${txn.amount.toLocaleString()} ${txn.currency}\n`;
     });
 

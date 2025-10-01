@@ -111,10 +111,11 @@ export class SMSDataAdapter {
   }
 
   /**
-   * Get Bitcoin exchange rate
+   * Get Bitcoin exchange rate (returns BTC to local currency rate)
    */
   static async getBitcoinRate(currency: AfricanCurrency): Promise<number> {
-    return await BitcoinService.getExchangeRate(currency);
+    const exchangeRate = await BitcoinService.getExchangeRate(currency);
+    return exchangeRate.btcToLocal;
   }
 
   /**
