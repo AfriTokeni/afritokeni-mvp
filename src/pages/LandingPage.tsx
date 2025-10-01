@@ -212,8 +212,41 @@ const LandingPage: React.FC = () => {
               Bitcoin Banking for Africa
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
-              Exchange Bitcoin for any of 39 African currencies. Works on any phone - SMS or web interface.
+              Exchange Bitcoin for 39 African currencies. SMS + USSD (*123#) or web - works on any phone.
             </p>
+            <div className="mt-8 px-4 max-w-4xl mx-auto">
+              <div className="flex flex-wrap justify-center gap-3 mb-3">
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇰🇪 Kenya
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇳🇬 Nigeria
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇺🇬 Uganda
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇹🇿 Tanzania
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇷🇼 Rwanda
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇿🇦 South Africa
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇿🇲 Zambia
+                </span>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 shadow-sm">
+                  🇲🇼 Malawi
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-sm text-blue-700 font-medium shadow-sm">
+                  +31 more (SMS + web)
+                </span>
+              </div>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
@@ -226,45 +259,37 @@ const LandingPage: React.FC = () => {
                     SMS Interface
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Any Phone Works</h3>
-                  <p className="text-gray-600">Bitcoin banking via text messages - no internet required</p>
+                  <p className="text-gray-600">SMS commands or USSD menu - no internet required</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3">
-                  <Link
-                    to="/sms"
-                    state={{ command: '*AFRI#' }}
-                    className="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-blue-200 transition-colors group"
-                  >
-                    <div className="font-mono text-blue-600 font-medium text-sm group-hover:text-blue-700">*AFRI#</div>
-                    <div className="text-gray-600 text-xs mt-1">Main Menu</div>
-                  </Link>
-                  
-                  <Link
-                    to="/sms"
-                    state={{ command: 'BTC BAL' }}
-                    className="text-center p-4 bg-orange-50 hover:bg-orange-100 rounded-xl border border-orange-200 hover:border-orange-300 transition-colors group"
-                  >
-                    <div className="font-mono text-orange-600 font-medium text-sm group-hover:text-orange-700">BTC BAL</div>
-                    <div className="text-gray-600 text-xs mt-1">Check Balance</div>
-                  </Link>
-                  
-                  <Link
-                    to="/sms"
-                    state={{ command: 'BTC RATE UGX' }}
-                    className="text-center p-4 bg-orange-50 hover:bg-orange-100 rounded-xl border border-orange-200 hover:border-orange-300 transition-colors group"
-                  >
-                    <div className="font-mono text-orange-600 font-medium text-sm group-hover:text-orange-700">BTC RATE</div>
-                    <div className="text-gray-600 text-xs mt-1">Live Rates</div>
-                  </Link>
-                  
-                  <Link
-                    to="/sms"
-                    state={{ command: 'BTC BUY 50000 UGX' }}
-                    className="text-center p-4 bg-orange-50 hover:bg-orange-100 rounded-xl border border-orange-200 hover:border-orange-300 transition-colors group"
-                  >
-                    <div className="font-mono text-orange-600 font-medium text-sm group-hover:text-orange-700">BTC BUY</div>
-                    <div className="text-gray-600 text-xs mt-1">Buy Bitcoin</div>
-                  </Link>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">SMS Commands</div>
+                    <div className="inline-flex items-center px-2 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium">
+                      or dial *123#
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="font-mono text-blue-600 font-medium text-xs">REG John Doe</div>
+                      <div className="text-gray-500 text-xs mt-1">Register</div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="font-mono text-blue-600 font-medium text-xs">BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">Balance</div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">Bitcoin</div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BUY</div>
+                      <div className="text-gray-500 text-xs mt-1">Buy BTC</div>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="text-center pt-4 border-t border-gray-200">
@@ -281,7 +306,7 @@ const LandingPage: React.FC = () => {
             {/* Web Interface */}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 lg:p-8">
               <div className="space-y-6">
-                <div className="text-center">
+                <div className="text-center pt-2">
                   <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-50 border border-green-100 text-green-700 text-sm font-medium mb-4">
                     <Globe className="w-4 h-4 mr-2" />
                     Web Interface
