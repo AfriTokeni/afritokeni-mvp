@@ -4,9 +4,9 @@
  */
 
 import { getSMSGateway } from './africasTalkingSMSGateway';
-import { DataService } from './dataService';
-import { BitcoinService } from './bitcoinService';
-import { DynamicFeeService } from './dynamicFeeService';
+import { SMSDataAdapter } from './smsDataAdapter';
+import { getCurrencyFromPhone } from '../utils/africanPhoneNumbers';
+import { AfricanCurrency } from '../types/currency';
 
 export interface SMSCommand {
   phoneNumber: string;
@@ -123,7 +123,7 @@ export class SMSCommandProcessor {
     const name = parts.slice(1).join(' ');
     
     // Check if user already exists
-    const existingUser = await DataService.getUser(phoneNumber);
+    const existingUser = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (existingUser) {
       return {
         success: false,
@@ -132,13 +132,7 @@ export class SMSCommandProcessor {
     }
 
     // Create new user
-    await DataService.createUser({
-      firstName: name.split(' ')[0] || name,
-      lastName: name.split(' ').slice(1).join(' ') || '',
-      email: phoneNumber, // Phone stored as email for SMS users
-      userType: 'user',
-      kycStatus: 'not_started',
-    });
+    await SMSDataAdapter.createUser(phoneNumber, name);
 
     return {
       success: true,
@@ -150,7 +144,7 @@ export class SMSCommandProcessor {
    * Handle balance check
    */
   private async handleBalanceCheck(phoneNumber: string): Promise<SMSCommandResponse> {
-    const user = await DataService.getUserByPhone(phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!user) {
       return {
         success: false,
@@ -158,12 +152,12 @@ export class SMSCommandProcessor {
       };
     }
 
-    const balance = await DataService.getBalance(user.id);
-    const formattedBalance = balance.toLocaleString();
+    const { amount, currency } = await SMSDataAdapter.getBalance(user.id, phoneNumber);
+    const formattedBalance = amount.toLocaleString();
 
     return {
       success: true,
-      reply: `AfriTokeni Balance:\n${formattedBalance} UGX\n\nSend HELP for more options.`,
+      reply: `AfriTokeni Balance:\n${formattedBalance} ${currency}\n\nSend HELP for more options.`,
     };
   }
 
@@ -171,7 +165,7 @@ export class SMSCommandProcessor {
    * Handle Bitcoin balance check
    */
   private async handleBitcoinBalance(phoneNumber: string): Promise<SMSCommandResponse> {
-    const user = await DataService.getUserByPhone(phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!user) {
       return {
         success: false,
@@ -179,13 +173,14 @@ export class SMSCommandProcessor {
       };
     }
 
-    const btcBalance = await BitcoinService.getBitcoinBalance(user.id);
-    const rate = await BitcoinService.getExchangeRate('UGX');
+    const btcBalance = await SMSDataAdapter.getBitcoinBalance(user.id);
+    const currency = getCurrencyFromPhone(phoneNumber) || 'UGX';
+    const rate = await SMSDataAdapter.getBitcoinRate(currency as AfricanCurrency);
     const ugxValue = btcBalance * rate;
 
     return {
       success: true,
-      reply: `Bitcoin Balance:\n${btcBalance.toFixed(8)} BTC\n≈ ${ugxValue.toLocaleString()} UGX\n\nRate: 1 BTC = ${rate.toLocaleString()} UGX`,
+      reply: `Bitcoin Balance:\n${btcBalance.toFixed(8)} BTC\n≈ ${ugxValue.toLocaleString()} ${currency}\n\nRate: 1 BTC = ${rate.toLocaleString()} ${currency}`,
     };
   }
 
@@ -198,7 +193,7 @@ export class SMSCommandProcessor {
     const currency = parts.length > 2 ? parts[2] : 'UGX';
 
     try {
-      const rate = await BitcoinService.getExchangeRate(currency);
+      const rate = await SMSDataAdapter.getBitcoinRate(currency as AfricanCurrency);
       return {
         success: true,
         reply: `Bitcoin Rate:\n1 BTC = ${rate.toLocaleString()} ${currency}\n\nLast updated: ${new Date().toLocaleTimeString()}`,
@@ -234,7 +229,7 @@ export class SMSCommandProcessor {
       };
     }
 
-    const sender = await DataService.getUserByPhone(phoneNumber);
+    const sender = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!sender) {
       return {
         success: false,
@@ -242,7 +237,7 @@ export class SMSCommandProcessor {
       };
     }
 
-    const recipient = await DataService.getUserByPhone(recipientPhone);
+    const recipient = await SMSDataAdapter.getUserByPhone(recipientPhone);
     if (!recipient) {
       return {
         success: false,
@@ -251,7 +246,7 @@ export class SMSCommandProcessor {
     }
 
     // Check balance
-    const balance = await DataService.getBalance(sender.id);
+    const { amount: balance, currency } = await SMSDataAdapter.getBalance(sender.id, phoneNumber);
     if (balance < amount) {
       return {
         success: false,
@@ -260,7 +255,7 @@ export class SMSCommandProcessor {
     }
 
     // Process transfer
-    await DataService.transferMoney(sender.id, recipient.id, amount, 'UGX');
+    await SMSDataAdapter.transferMoney(sender.id, recipient.id, amount, currency);
 
     // Send notifications
     await this.smsGateway.sendTransactionNotification(
@@ -276,12 +271,12 @@ export class SMSCommandProcessor {
       'received',
       amount,
       'UGX',
-      (await DataService.getBalance(recipient.id))
+      (await SMSDataAdapter.getBalance(recipient.id)).amount
     );
 
     return {
       success: true,
-      reply: `Sent ${amount.toLocaleString()} UGX to ${recipient.name}. New balance: ${(balance - amount).toLocaleString()} UGX`,
+      reply: `Sent ${amount.toLocaleString()} ${currency} to ${recipient.firstName} ${recipient.lastName}. New balance: ${(balance - amount).toLocaleString()} ${currency}`,
     };
   }
 
@@ -308,7 +303,7 @@ export class SMSCommandProcessor {
       };
     }
 
-    const user = await DataService.getUserByPhone(phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!user) {
       return {
         success: false,
@@ -316,25 +311,21 @@ export class SMSCommandProcessor {
       };
     }
 
-    // Calculate dynamic fee
-    const feeCalculation = await DynamicFeeService.calculateFee({
-      amount,
-      currency,
-      userLocation: user.location || { lat: 0.3476, lng: 32.5825 }, // Default to Kampala
-      agentLocation: { lat: 0.3476, lng: 32.5825 }, // Mock agent location
-      urgency: 'standard',
-    });
+    // Calculate fee (simplified - 2.5% standard fee)
+    const feePercent = 2.5;
+    const feeAmount = amount * (feePercent / 100);
+    const total = amount + feeAmount;
 
     const confirmationCode = this.generateConfirmationCode();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     // Store pending transaction
-    await DataService.storePendingTransaction({
+    await SMSDataAdapter.storePendingTransaction({
       userId: user.id,
       type: 'bitcoin_buy',
       amount,
-      currency,
-      fee: feeCalculation.totalFee,
+      currency: currency as AfricanCurrency,
+      fee: feePercent,
       confirmationCode,
       expiresAt,
     });
@@ -343,7 +334,7 @@ export class SMSCommandProcessor {
       success: true,
       requiresConfirmation: true,
       confirmationCode,
-      reply: `Bitcoin Purchase Quote:\nAmount: ${amount.toLocaleString()} ${currency}\nFee: ${feeCalculation.totalFee}% (${feeCalculation.breakdown.join(', ')})\nTotal: ${(amount * (1 + feeCalculation.totalFee / 100)).toLocaleString()} ${currency}\n\nReply: CONFIRM ${confirmationCode}\nExpires in 5 minutes`,
+      reply: `Bitcoin Purchase Quote:\nAmount: ${amount.toLocaleString()} ${currency}\nFee: ${feePercent}%\nTotal: ${total.toLocaleString()} ${currency}\n\nReply: CONFIRM ${confirmationCode}\nExpires in 5 minutes`,
     };
   }
 
@@ -362,7 +353,7 @@ export class SMSCommandProcessor {
     const amount = parseFloat(parts[2]);
     const currency = parts.length > 3 ? parts[3] : 'UGX';
 
-    const user = await DataService.getUserByPhone(phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!user) {
       return {
         success: false,
@@ -370,14 +361,9 @@ export class SMSCommandProcessor {
       };
     }
 
-    // Calculate fee and generate confirmation
-    const feeCalculation = await DynamicFeeService.calculateFee({
-      amount,
-      currency,
-      userLocation: user.location || { lat: 0.3476, lng: 32.5825 },
-      agentLocation: { lat: 0.3476, lng: 32.5825 },
-      urgency: 'standard',
-    });
+    // Calculate fee (simplified - 2.5% standard fee)
+    const feePercent = 2.5;
+    const youReceive = amount * (1 - feePercent / 100);
 
     const confirmationCode = this.generateConfirmationCode();
 
@@ -385,7 +371,7 @@ export class SMSCommandProcessor {
       success: true,
       requiresConfirmation: true,
       confirmationCode,
-      reply: `Bitcoin Sale Quote:\nAmount: ${amount} BTC\nFee: ${feeCalculation.totalFee}%\nYou receive: ${(amount * (1 - feeCalculation.totalFee / 100)).toFixed(8)} BTC worth\n\nReply: CONFIRM ${confirmationCode}\nExpires in 5 minutes`,
+      reply: `Bitcoin Sale Quote:\nAmount: ${amount} BTC\nFee: ${feePercent}%\nYou receive: ${youReceive.toFixed(8)} BTC worth in ${currency}\n\nReply: CONFIRM ${confirmationCode}\nExpires in 5 minutes`,
     };
   }
 
@@ -410,7 +396,7 @@ export class SMSCommandProcessor {
       };
     }
 
-    const user = await DataService.getUserByPhone(phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!user) {
       return {
         success: false,
@@ -418,7 +404,7 @@ export class SMSCommandProcessor {
       };
     }
 
-    const balance = await DataService.getBalance(user.id);
+    const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, phoneNumber);
     if (balance < amount) {
       return {
         success: false,
@@ -430,7 +416,7 @@ export class SMSCommandProcessor {
     const withdrawalCode = this.generateWithdrawalCode();
 
     // Create withdrawal request
-    await DataService.createWithdrawalRequest({
+    await SMSDataAdapter.createWithdrawalRequest({
       userId: user.id,
       amount,
       currency: 'UGX',
@@ -460,7 +446,7 @@ export class SMSCommandProcessor {
 
     const code = parts[1];
 
-    const user = await DataService.getUserByPhone(phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!user) {
       return {
         success: false,
@@ -469,7 +455,7 @@ export class SMSCommandProcessor {
     }
 
     // Retrieve and execute pending transaction
-    const pending = await DataService.getPendingTransaction(user.id, code);
+    const pending = await SMSDataAdapter.getPendingTransaction(user.id, code);
     if (!pending) {
       return {
         success: false,
@@ -479,7 +465,7 @@ export class SMSCommandProcessor {
 
     // Execute the transaction based on type
     // This would integrate with actual Bitcoin/payment processing
-    await DataService.executePendingTransaction(pending.id);
+    await SMSDataAdapter.executePendingTransaction(pending.id);
 
     return {
       success: true,
@@ -511,7 +497,7 @@ HELP - Show this menu`,
    * Handle transaction history
    */
   private async handleHistory(phoneNumber: string): Promise<SMSCommandResponse> {
-    const user = await DataService.getUserByPhone(phoneNumber);
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
     if (!user) {
       return {
         success: false,
@@ -519,7 +505,7 @@ HELP - Show this menu`,
       };
     }
 
-    const transactions = await DataService.getRecentTransactions(user.id, 5);
+    const transactions = await SMSDataAdapter.getRecentTransactions(user.id, 5);
 
     if (transactions.length === 0) {
       return {
@@ -529,7 +515,7 @@ HELP - Show this menu`,
     }
 
     let reply = 'Recent Transactions:\n';
-    transactions.forEach((txn, index) => {
+    transactions.forEach((txn: any, index: number) => {
       reply += `${index + 1}. ${txn.type} ${txn.amount} ${txn.currency} - ${new Date(txn.timestamp).toLocaleDateString()}\n`;
     });
 
