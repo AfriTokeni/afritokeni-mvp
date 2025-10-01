@@ -110,8 +110,12 @@ export class AfricasTalkingSMSGateway {
    * Send verification code SMS
    */
   async sendVerificationCode(phoneNumber: string, code: string, userName?: string): Promise<SMSResponse> {
+    const { getCountryInfo } = require('../utils/africanPhoneNumbers');
+    const country = getCountryInfo(phoneNumber);
+    const flag = country ? country.flag : '🌍';
+    
     const greeting = userName ? `${userName}, ` : '';
-    const message = `${greeting}Your AfriTokeni verification code is: ${code}. Valid for 10 minutes. Do not share this code.`;
+    const message = `${flag} ${greeting}Your AfriTokeni verification code is: ${code}. Valid for 10 minutes. Do not share this code.`;
 
     return this.sendSMS({
       to: phoneNumber,
@@ -198,42 +202,37 @@ export class AfricasTalkingSMSGateway {
   }
 
   /**
-   * Format phone number to E.164 format for Uganda
+   * Format phone number to E.164 format (Pan-African)
+   * Uses utility functions for proper country detection
    */
-  static formatPhoneNumber(phone: string): string {
-    // Remove all non-numeric characters
-    const cleaned = phone.replace(/\D/g, '');
-    
-    // If starts with 256 (Uganda country code), it's already formatted
-    if (cleaned.startsWith('256')) {
-      return `+${cleaned}`;
-    }
-    
-    // If starts with 0, replace with Uganda country code
-    if (cleaned.startsWith('0')) {
-      return `+256${cleaned.substring(1)}`;
-    }
-    
-    // If 9 digits, assume it's a Ugandan number without leading 0
-    if (cleaned.length === 9) {
-      return `+256${cleaned}`;
-    }
-    
-    // If already has + at start, return as is
-    if (phone.startsWith('+')) {
-      return phone;
-    }
-    
-    // Default to adding Uganda country code
-    return `+256${cleaned}`;
+  static formatPhoneNumber(phone: string, defaultCountryCode?: string): string {
+    // Import is at top of file
+    const { formatPhoneNumber } = require('../utils/africanPhoneNumbers');
+    return formatPhoneNumber(phone, defaultCountryCode);
   }
 
   /**
-   * Validate phone number format
+   * Validate phone number format (Pan-African)
    */
   static isValidPhoneNumber(phone: string): boolean {
-    const phoneRegex = /^\+[1-9]\d{1,14}$/;
-    return phoneRegex.test(phone);
+    const { isValidPhoneNumber } = require('../utils/africanPhoneNumbers');
+    return isValidPhoneNumber(phone);
+  }
+  
+  /**
+   * Get currency from phone number
+   */
+  static getCurrencyFromPhone(phone: string): string | null {
+    const { getCurrencyFromPhone } = require('../utils/africanPhoneNumbers');
+    return getCurrencyFromPhone(phone);
+  }
+  
+  /**
+   * Check if phone has full SMS/USSD support
+   */
+  static hasFullSMSSupport(phone: string): boolean {
+    const { hasFullSMSSupport } = require('../utils/africanPhoneNumbers');
+    return hasFullSMSSupport(phone);
   }
 }
 
