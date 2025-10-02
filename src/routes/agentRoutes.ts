@@ -5,7 +5,8 @@ import {
   LucideIcon,
   Banknote,
   Home,
-  LayoutDashboard
+  LayoutDashboard,
+  Zap
 } from 'lucide-react';
 
 export interface Route {
@@ -33,6 +34,12 @@ export const agent_desktop_routes: Route[] = [
     path: '/agents/process-withdrawals',
     label: 'Process Withdrawals',
     icon: Banknote,
+  },
+  {
+    id: 'lightning',
+    path: '/agents/lightning',
+    label: 'Lightning Network',
+    icon: Zap,
   },
   {
     id: 'customers',
@@ -66,6 +73,12 @@ export const agent_mobile_routes: Route[] = [
     path: '/agents/process-withdrawals',
     label: 'Withdrawals',
     icon: Banknote,
+  },
+  {
+    id: 'lightning',
+    path: '/agents/lightning',
+    label: 'Lightning',
+    icon: Zap,
   },
   {
     id: 'customers',

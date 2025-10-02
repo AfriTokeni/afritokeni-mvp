@@ -1049,7 +1049,7 @@ export class WebhookDataService {
     static async processDepositRequest(
       requestId: string,
       agentId: string,
-      processedBy?: string
+      _processedBy?: string
     ): Promise<{ success: boolean; transactionId?: string; userTransactionId?: string; error?: string }> {
       try {
         // Get the deposit request

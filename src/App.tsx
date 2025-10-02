@@ -19,6 +19,7 @@ import HelpSupport from "./pages/profile/HelpSupport.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
 import DepositPage from "./pages/deposit/DepositPage.tsx";
 import BitcoinPage from "./pages/users/BitcoinPage.tsx";
+import LightningPage from "./pages/users/LightningPage.tsx";
 import ExchangePage from "./pages/users/ExchangePage.tsx";
 import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
 import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
@@ -31,6 +32,7 @@ import ProcessDeposits from './pages/agents/ProcessDeposits';
 import ProcessWithdrawals from './pages/agents/ProcessWithdrawals';
 import AgentCustomers from './pages/AgentCustomers';
 import AgentBitcoinPage from './pages/agents/AgentBitcoinPage';
+import AgentLightningPage from './pages/agents/AgentLightningPage';
 import AgentExchangePage from './pages/agents/AgentExchangePage';
 import AgentSettings from './pages/agent-settings';
 import RoleSelection from './pages/auth/RoleSelection';
@@ -94,6 +96,7 @@ const App: FC = () => {
                 <Route path="user-kyc" element={<UserKYCPage />} />
                 <Route path="bitcoin" element={<BitcoinPage />} />
                 <Route path="bitcoin/deposit" element={<BitcoinDepositPage />} />
+                <Route path="lightning" element={<LightningPage />} />
                 <Route path="exchange" element={<ExchangePage />} />
               </Routes>
             </Layout>
@@ -111,6 +114,7 @@ const App: FC = () => {
                 <Route path="customers" element={<AgentCustomers/>} />
                 <Route path="transactions" element={<AgentTransactions/>} />
                 <Route path="bitcoin" element={<AgentBitcoinPage/>} />
+                <Route path="lightning" element={<AgentLightningPage/>} />
                 <Route path="exchange" element={<AgentExchangePage/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<AgentSettings/>} />
