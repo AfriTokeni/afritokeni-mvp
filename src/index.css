@@ -2,6 +2,22 @@
 @import "tailwindcss";
 @import 'leaflet/dist/leaflet.css';
 
+/* Ensure Leaflet maps display properly */
+/* .leaflet-map-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  background: #f8f9fa;
+}
+
+.leaflet-tile-pane {
+  opacity: 1 !important;
+} */
+
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;

@@ -47,9 +47,6 @@ import KYCAdmin from './pages/admin/KYCAdmin';
 import AdminLogin from './pages/auth/AdminLogin';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 
-// SMS Interface
-import SMSUI from "./components/SMSUI.tsx";
-
 // Landing Page
 import LandingPage from "./pages/LandingPage";
 import TariffPage from "./pages/TariffPage";
@@ -78,9 +75,6 @@ const App: FC = () => {
       <AuthenticationProvider>
         <Routes>
           {/* Auth Routes - Only Juno/ICP authentication used */}
-          
-          {/* SMS Interface Demo */}
-          <Route path="/sms" element={<SMSUI />} />
     
           {/* User Routes */}
           <Route path="/users/*" element={
