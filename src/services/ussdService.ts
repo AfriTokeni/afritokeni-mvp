@@ -54,8 +54,8 @@ export class USSDService {
       this.sessions.set(sessionId, session);
     }
 
-    // Parse user input
-    const input = text.split('*').pop() || '';
+    // Parse user input (for future use)
+    // const input = text.split('*').pop() || '';
 
     // Route to appropriate menu handler
     try {
@@ -312,7 +312,7 @@ Send ${amount.toLocaleString()} UGX to ${session.data.recipientName}
   private async handleWithdraw(session: USSDSession, menuPath: string[], user: any): Promise<USSDResponse> {
     // Step 1: Enter amount
     if (menuPath.length === 1) {
-      const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
+      const { amount: balance } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
       return {
         response: `CON Withdraw Cash
 Balance: ${balance.toLocaleString()} UGX
@@ -333,7 +333,7 @@ Enter amount to withdraw:`,
         };
       }
 
-      const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
+      const { amount: balance } = await SMSDataAdapter.getBalance(user.id, session.phoneNumber);
       if (balance < amount) {
         return {
           response: `END Insufficient balance. Your balance: ${balance.toLocaleString()} UGX`,
@@ -518,7 +518,7 @@ Visit nearest agent to complete sale.`,
   /**
    * Handle transaction history
    */
-  private async handleHistory(session: USSDSession, user: any): Promise<USSDResponse> {
+  private async handleHistory(_session: USSDSession, user: any): Promise<USSDResponse> {
     const transactions = await SMSDataAdapter.getRecentTransactions(user.id, 5);
 
     if (transactions.length === 0) {
@@ -585,7 +585,7 @@ Instant Bitcoin transfers!
   /**
    * Handle Lightning send
    */
-  private async handleLightningSend(session: USSDSession, subPath: string[], user: any): Promise<USSDResponse> {
+  private async handleLightningSend(session: USSDSession, subPath: string[], _user: any): Promise<USSDResponse> {
     // Step 1: Enter recipient phone
     if (subPath.length === 0) {
       return {
@@ -657,7 +657,7 @@ Instant Bitcoin transfers!
   /**
    * Handle Lightning invoice creation
    */
-  private async handleLightningInvoice(session: USSDSession, subPath: string[], user: any): Promise<USSDResponse> {
+  private async handleLightningInvoice(session: USSDSession, subPath: string[], _user: any): Promise<USSDResponse> {
     // Step 1: Enter amount
     if (subPath.length === 0) {
       return {

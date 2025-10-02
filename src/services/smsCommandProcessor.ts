@@ -445,7 +445,7 @@ export class SMSCommandProcessor {
       };
     }
 
-    const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, phoneNumber);
+    const { amount: balance } = await SMSDataAdapter.getBalance(user.id, phoneNumber);
     if (balance < amount) {
       return {
         success: false,
