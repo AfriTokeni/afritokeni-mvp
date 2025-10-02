@@ -4,6 +4,7 @@
  */
 
 import { SMSDataAdapter } from './smsDataAdapter';
+import { SMSLightningCommands } from './smsLightningCommands';
 import { getCurrencyFromPhone } from '../utils/africanPhoneNumbers';
 import { AfricanCurrency } from '../types/currency';
 
@@ -98,8 +99,9 @@ Balance: ${balance.toLocaleString()} ${currency}
 2. Send Money
 3. Withdraw Cash
 4. Bitcoin Services
-5. Transaction History
-6. Help`,
+5. Lightning Network ⚡
+6. Transaction History
+7. Help`,
       continueSession: true,
     };
   }
@@ -148,13 +150,18 @@ Balance: ${balance.toLocaleString()} ${currency}
       return await this.handleBitcoinMenu(session, menuPath, user);
     }
 
-    // Transaction History
+    // Lightning Network
     if (menuPath[0] === '5') {
+      return await this.handleLightningMenu(session, menuPath, user);
+    }
+
+    // Transaction History
+    if (menuPath[0] === '6') {
       return await this.handleHistory(session, user);
     }
 
     // Help
-    if (menuPath[0] === '6') {
+    if (menuPath[0] === '7') {
       return this.showHelp();
     }
 
@@ -459,14 +466,14 @@ Updated: ${new Date().toLocaleTimeString()}`,
       };
     }
 
-    const rate = await this.bitcoinService.getExchangeRate('UGX');
-    const btcAmount = amount / rate;
+    const exchangeRate = await SMSDataAdapter.getBitcoinRate('UGX');
+    const btcAmount = amount / exchangeRate;
 
     return {
       response: `END Bitcoin Purchase:
 Spend: ${amount.toLocaleString()} UGX
 Receive: ${btcAmount.toFixed(8)} BTC
-Rate: ${rate.toLocaleString()} UGX/BTC
+Rate: ${exchangeRate.toLocaleString()} UGX/BTC
 
 Visit nearest agent to complete purchase.`,
       continueSession: false,
@@ -494,14 +501,14 @@ Enter BTC amount to sell:`,
       };
     }
 
-    const rate = await this.bitcoinService.getExchangeRate('UGX');
-    const ugxAmount = btcAmount * rate;
+    const exchangeRate = await SMSDataAdapter.getBitcoinRate('UGX');
+    const ugxAmount = btcAmount * exchangeRate;
 
     return {
       response: `END Bitcoin Sale:
 Sell: ${btcAmount.toFixed(8)} BTC
 Receive: ${ugxAmount.toLocaleString()} UGX
-Rate: ${rate.toLocaleString()} UGX/BTC
+Rate: ${exchangeRate.toLocaleString()} UGX/BTC
 
 Visit nearest agent to complete sale.`,
       continueSession: false,
@@ -533,6 +540,182 @@ Visit nearest agent to complete sale.`,
   }
 
   /**
+   * Handle Lightning Network menu
+   */
+  private async handleLightningMenu(session: USSDSession, menuPath: string[], user: any): Promise<USSDResponse> {
+    if (menuPath.length === 1) {
+      return {
+        response: `CON ⚡ Lightning Network
+Instant Bitcoin transfers!
+
+1. Send Lightning Payment
+2. Create Invoice
+3. Lightning Info
+4. Back`,
+        continueSession: true,
+      };
+    }
+
+    // Send Lightning Payment
+    if (menuPath[1] === '1') {
+      return await this.handleLightningSend(session, menuPath.slice(2), user);
+    }
+
+    // Create Invoice
+    if (menuPath[1] === '2') {
+      return await this.handleLightningInvoice(session, menuPath.slice(2), user);
+    }
+
+    // Lightning Info
+    if (menuPath[1] === '3') {
+      const response = await SMSLightningCommands.processCommand({
+        command: 'LN',
+        phoneNumber: session.phoneNumber,
+        params: [],
+      });
+      return {
+        response: `END ${response.message}`,
+        continueSession: false,
+      };
+    }
+
+    return await this.showMainMenu(session);
+  }
+
+  /**
+   * Handle Lightning send
+   */
+  private async handleLightningSend(session: USSDSession, subPath: string[], user: any): Promise<USSDResponse> {
+    // Step 1: Enter recipient phone
+    if (subPath.length === 0) {
+      return {
+        response: 'CON Enter recipient phone:\n(Format: +256700123456)',
+        continueSession: true,
+      };
+    }
+
+    // Step 2: Enter amount
+    if (subPath.length === 1) {
+      const recipientPhone = subPath[0];
+      session.data.lnRecipient = recipientPhone;
+
+      return {
+        response: 'CON Enter amount:',
+        continueSession: true,
+      };
+    }
+
+    // Step 3: Enter currency
+    if (subPath.length === 2) {
+      const amount = parseFloat(subPath[1]);
+      if (isNaN(amount) || amount <= 0) {
+        return {
+          response: 'END Invalid amount.',
+          continueSession: false,
+        };
+      }
+      session.data.lnAmount = amount;
+
+      return {
+        response: `CON Select currency:
+1. NGN
+2. KES
+3. UGX
+4. ZAR`,
+        continueSession: true,
+      };
+    }
+
+    // Step 4: Confirm and execute
+    if (subPath.length === 3) {
+      const currencyMap: { [key: string]: AfricanCurrency } = {
+        '1': 'NGN',
+        '2': 'KES',
+        '3': 'UGX',
+        '4': 'ZAR',
+      };
+      const currency = currencyMap[subPath[2]] || 'UGX';
+
+      const response = await SMSLightningCommands.processCommand({
+        command: 'LN SEND',
+        phoneNumber: session.phoneNumber,
+        params: ['LN', 'SEND', session.data.lnRecipient, session.data.lnAmount.toString(), currency],
+      });
+
+      return {
+        response: `END ${response.message}`,
+        continueSession: false,
+      };
+    }
+
+    return {
+      response: 'END Error processing Lightning payment.',
+      continueSession: false,
+    };
+  }
+
+  /**
+   * Handle Lightning invoice creation
+   */
+  private async handleLightningInvoice(session: USSDSession, subPath: string[], user: any): Promise<USSDResponse> {
+    // Step 1: Enter amount
+    if (subPath.length === 0) {
+      return {
+        response: 'CON Enter amount to receive:',
+        continueSession: true,
+      };
+    }
+
+    // Step 2: Select currency
+    if (subPath.length === 1) {
+      const amount = parseFloat(subPath[0]);
+      if (isNaN(amount) || amount <= 0) {
+        return {
+          response: 'END Invalid amount.',
+          continueSession: false,
+        };
+      }
+      session.data.lnInvoiceAmount = amount;
+
+      return {
+        response: `CON Select currency:
+1. NGN
+2. KES
+3. UGX
+4. ZAR`,
+        continueSession: true,
+      };
+    }
+
+    // Step 3: Create invoice
+    if (subPath.length === 2) {
+      const currencyMap: { [key: string]: AfricanCurrency } = {
+        '1': 'NGN',
+        '2': 'KES',
+        '3': 'UGX',
+        '4': 'ZAR',
+      };
+      const currency = currencyMap[subPath[1]] || 'UGX';
+
+      const response = await SMSLightningCommands.processCommand({
+        command: 'LN INVOICE',
+        phoneNumber: session.phoneNumber,
+        params: ['LN', 'INVOICE', session.data.lnInvoiceAmount.toString(), currency],
+      });
+
+      return {
+        response: `END ${response.message}`,
+        continueSession: false,
+      };
+    }
+
+    return {
+      response: 'END Error creating Lightning invoice.',
+      continueSession: false,
+    };
+  }
+
+  /**
    * Show help
    */
   private showHelp(): USSDResponse {
@@ -544,6 +727,7 @@ SMS Commands:
 - SEND [phone] [amount]
 - WITHDRAW [amount]
 - BTC BAL: Bitcoin balance
+- LN: Lightning Network
 - HELP: Show commands
 
 Support: +256700000000`,

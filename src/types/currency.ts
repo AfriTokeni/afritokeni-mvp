@@ -5,6 +5,7 @@ export type AfricanCurrency =
   | 'KES' // Kenyan Shilling
   | 'TZS' // Tanzanian Shilling
   | 'RWF' // Rwandan Franc
+  | 'BIF' // Burundian Franc
   | 'ETB' // Ethiopian Birr
   | 'SOS' // Somali Shilling
   
@@ -15,6 +16,7 @@ export type AfricanCurrency =
   | 'SLL' // Sierra Leonean Leone
   | 'LRD' // Liberian Dollar
   | 'GMD' // Gambian Dalasi
+  | 'GNF' // Guinean Franc
   
   // Central Africa
   | 'XAF' // Central African CFA Franc (Cameroon, Central African Republic, Chad, Republic of the Congo, Equatorial Guinea, Gabon)
@@ -39,6 +41,7 @@ export type AfricanCurrency =
   | 'DZD' // Algerian Dinar
   | 'LYD' // Libyan Dinar
   | 'SDG' // Sudanese Pound
+  | 'MRU' // Mauritanian Ouguiya
   
   // Other
   | 'MUR' // Mauritian Rupee
@@ -67,6 +70,7 @@ export const AFRICAN_CURRENCIES: Record<AfricanCurrency, CurrencyInfo> = {
   KES: { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh', country: 'Kenya', region: 'East Africa', decimals: 2, isActive: true },
   TZS: { code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh', country: 'Tanzania', region: 'East Africa', decimals: 2, isActive: true },
   RWF: { code: 'RWF', name: 'Rwandan Franc', symbol: 'RF', country: 'Rwanda', region: 'East Africa', decimals: 0, isActive: true },
+  BIF: { code: 'BIF', name: 'Burundian Franc', symbol: 'FBu', country: 'Burundi', region: 'East Africa', decimals: 0, isActive: true },
   ETB: { code: 'ETB', name: 'Ethiopian Birr', symbol: 'Br', country: 'Ethiopia', region: 'East Africa', decimals: 2, isActive: true },
   SOS: { code: 'SOS', name: 'Somali Shilling', symbol: 'Sh', country: 'Somalia', region: 'East Africa', decimals: 2, isActive: false },
   
@@ -77,6 +81,7 @@ export const AFRICAN_CURRENCIES: Record<AfricanCurrency, CurrencyInfo> = {
   SLL: { code: 'SLL', name: 'Sierra Leonean Leone', symbol: 'Le', country: 'Sierra Leone', region: 'West Africa', decimals: 2, isActive: true },
   LRD: { code: 'LRD', name: 'Liberian Dollar', symbol: 'L$', country: 'Liberia', region: 'West Africa', decimals: 2, isActive: true },
   GMD: { code: 'GMD', name: 'Gambian Dalasi', symbol: 'D', country: 'Gambia', region: 'West Africa', decimals: 2, isActive: true },
+  GNF: { code: 'GNF', name: 'Guinean Franc', symbol: 'FG', country: 'Guinea', region: 'West Africa', decimals: 0, isActive: true },
   
   // Central Africa
   XAF: { code: 'XAF', name: 'Central African CFA Franc', symbol: 'FCFA', country: 'CEMAC', region: 'Central Africa', decimals: 0, isActive: true },
@@ -101,6 +106,7 @@ export const AFRICAN_CURRENCIES: Record<AfricanCurrency, CurrencyInfo> = {
   DZD: { code: 'DZD', name: 'Algerian Dinar', symbol: 'DA', country: 'Algeria', region: 'North Africa', decimals: 2, isActive: true },
   LYD: { code: 'LYD', name: 'Libyan Dinar', symbol: 'LD', country: 'Libya', region: 'North Africa', decimals: 3, isActive: false },
   SDG: { code: 'SDG', name: 'Sudanese Pound', symbol: '£SD', country: 'Sudan', region: 'North Africa', decimals: 2, isActive: false },
+  MRU: { code: 'MRU', name: 'Mauritanian Ouguiya', symbol: 'UM', country: 'Mauritania', region: 'North Africa', decimals: 2, isActive: true },
   
   // Island Nations
   MUR: { code: 'MUR', name: 'Mauritian Rupee', symbol: '₨', country: 'Mauritius', region: 'Island Nations', decimals: 2, isActive: true },
@@ -154,13 +160,13 @@ export function parseCurrencyAmount(amountString: string, currency: AfricanCurre
 // Get currency by country code (ISO 3166-1 alpha-2)
 export function getCurrencyByCountry(countryCode: string): CurrencyInfo | null {
   const countryToCurrency: Record<string, AfricanCurrency> = {
-    'UG': 'UGX', 'KE': 'KES', 'TZ': 'TZS', 'RW': 'RWF', 'ET': 'ETB', 'SO': 'SOS',
-    'NG': 'NGN', 'GH': 'GHS', 'SL': 'SLL', 'LR': 'LRD', 'GM': 'GMD',
+    'UG': 'UGX', 'KE': 'KES', 'TZ': 'TZS', 'RW': 'RWF', 'BI': 'BIF', 'ET': 'ETB', 'SO': 'SOS',
+    'NG': 'NGN', 'GH': 'GHS', 'SL': 'SLL', 'LR': 'LRD', 'GM': 'GMD', 'GN': 'GNF',
     'CM': 'XAF', 'CF': 'XAF', 'TD': 'XAF', 'CG': 'XAF', 'GQ': 'XAF', 'GA': 'XAF',
     'CD': 'CDF', 'AO': 'AOA',
     'ZA': 'ZAR', 'BW': 'BWP', 'SZ': 'SZL', 'LS': 'LSL', 'NA': 'NAD', 
     'ZM': 'ZMW', 'ZW': 'ZWL', 'MW': 'MWK', 'MZ': 'MZN',
-    'EG': 'EGP', 'MA': 'MAD', 'TN': 'TND', 'DZ': 'DZD', 'LY': 'LYD', 'SD': 'SDG',
+    'EG': 'EGP', 'MA': 'MAD', 'TN': 'TND', 'DZ': 'DZD', 'LY': 'LYD', 'SD': 'SDG', 'MR': 'MRU',
     'MU': 'MUR', 'SC': 'SCR', 'CV': 'CVE', 'ST': 'STN', 'KM': 'KMF', 
     'DJ': 'DJF', 'ER': 'ERN', 'MG': 'MGA',
     // CFA Franc countries
