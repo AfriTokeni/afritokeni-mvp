@@ -7,6 +7,7 @@ import {
   User,
   LayoutDashboard,
   MapPin,
+  Zap,
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 
@@ -30,6 +31,12 @@ export const user_desktop_routes: Route[] = [
         path: "/users/send",
         label: "Send Money",
         icon: Send,
+    },
+    {
+        id: "lightning" as RouteID,
+        path: "/users/lightning",
+        label: "Lightning Network",
+        icon: Zap,
     },
     {
         id: "agents" as RouteID,
@@ -69,6 +76,12 @@ export const user_mobile_routes: Route[] = [
     path: "/users/send",
     label: "Send",
     icon: Send,
+  },
+  {
+    id: "lightning" as RouteID,
+    path: "/users/lightning",
+    label: "Lightning",
+    icon: Zap,
   },
   {
     id: "agents" as RouteID,

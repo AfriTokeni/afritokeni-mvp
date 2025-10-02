@@ -32,6 +32,7 @@ import ProcessDeposits from './pages/agents/ProcessDeposits';
 import ProcessWithdrawals from './pages/agents/ProcessWithdrawals';
 import AgentCustomers from './pages/AgentCustomers';
 import AgentBitcoinPage from './pages/agents/AgentBitcoinPage';
+import AgentLightningPage from './pages/agents/AgentLightningPage';
 import AgentExchangePage from './pages/agents/AgentExchangePage';
 import AgentSettings from './pages/agent-settings';
 import RoleSelection from './pages/auth/RoleSelection';
@@ -119,6 +120,7 @@ const App: FC = () => {
                 <Route path="customers" element={<AgentCustomers/>} />
                 <Route path="transactions" element={<AgentTransactions/>} />
                 <Route path="bitcoin" element={<AgentBitcoinPage/>} />
+                <Route path="lightning" element={<AgentLightningPage/>} />
                 <Route path="exchange" element={<AgentExchangePage/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<AgentSettings/>} />
