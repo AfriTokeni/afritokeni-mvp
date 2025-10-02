@@ -1,6 +1,6 @@
 import React from 'react';
 import { CurrencySelector } from '../../components/CurrencySelector';
-import { formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
+import { formatCurrencyAmount,AFRICAN_CURRENCIES, type AfricanCurrency } from '../../types/currency';
 import { AmountStepProps } from '../../types/depositTypes';
 
 const AmountStep: React.FC<AmountStepProps> = ({
@@ -12,6 +12,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
   onContinue,
   onError,
 }) => {
+  const currencyInfo = AFRICAN_CURRENCIES[selectedCurrency as keyof typeof AFRICAN_CURRENCIES];
   const handleAmountContinue = () => {
     const amountValue = parseFloat(amount);
     
@@ -43,7 +44,34 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
         <div className="space-y-6">
           {/* Currency Selection */}
-          <div>
+
+                    <div>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-sm font-medium text-neutral-700">
+                Select Currency
+              </label>
+             <CurrencySelector
+                currentCurrency={selectedCurrency}
+                onCurrencyChange={onCurrencyChange}
+              />
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-neutral-200">
+                <span className="text-neutral-700 font-semibold text-xs">
+                  {selectedCurrency}
+                </span>
+              </div>
+              <div>
+                <p className="text-neutral-900 font-medium text-sm">
+                  {currencyInfo?.name}
+                </p>
+                <p className="text-neutral-500 text-xs">
+                  {currencyInfo?.symbol} • {currencyInfo?.country}
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* <div>
             <label htmlFor="currency" className="block text-sm font-medium text-neutral-700 mb-3">
               Select Currency
             </label>
@@ -53,7 +81,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
                 onCurrencyChange={onCurrencyChange}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Amount Input */}
           <div>
