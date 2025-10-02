@@ -19,6 +19,7 @@ import HelpSupport from "./pages/profile/HelpSupport.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
 import DepositPage from "./pages/deposit/DepositPage.tsx";
 import BitcoinPage from "./pages/users/BitcoinPage.tsx";
+import LightningPage from "./pages/users/LightningPage.tsx";
 import ExchangePage from "./pages/users/ExchangePage.tsx";
 import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
 import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
@@ -100,6 +101,7 @@ const App: FC = () => {
                 <Route path="user-kyc" element={<UserKYCPage />} />
                 <Route path="bitcoin" element={<BitcoinPage />} />
                 <Route path="bitcoin/deposit" element={<BitcoinDepositPage />} />
+                <Route path="lightning" element={<LightningPage />} />
                 <Route path="exchange" element={<ExchangePage />} />
               </Routes>
             </Layout>

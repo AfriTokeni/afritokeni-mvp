@@ -120,8 +120,8 @@ const LandingPage: React.FC = () => {
               <span className="text-gray-600">everywhere, for everyone</span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 sm:mb-12 leading-relaxed px-4 sm:px-0">
-              Exchange Bitcoin for local African currencies via SMS or web. Bitcoin transactions, 
-              39 currencies supported, works with or without internet.
+              Instant Bitcoin transfers via Lightning Network. Send money in under 1 second with $0.001 fees.
+              39 African currencies, SMS or web, works with or without internet.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
               <button
@@ -194,6 +194,116 @@ const LandingPage: React.FC = () => {
                 <p className="text-xs text-gray-500 text-center mt-4">
                   We respect your privacy. Unsubscribe at any time.
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Lightning Network Section */}
+      <section className="bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 py-12 sm:py-16 lg:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm font-medium mb-4">
+              <Zap className="w-4 h-4 mr-2" />
+              Lightning Network
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              Instant Bitcoin Transfers
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+              Send Bitcoin in under 1 second with fees less than $0.001. The future of payments is here.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12">
+            {/* Speed */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                &lt; 1 Second
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Instant transfers. No waiting for blockchain confirmations.
+              </p>
+              <div className="text-sm text-gray-500">
+                vs 10-60 min on-chain
+              </div>
+            </div>
+
+            {/* Cost */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <span className="text-2xl font-bold text-white">$</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                $0.001 Fee
+              </h3>
+              <p className="text-gray-600 mb-4">
+                99% cheaper than traditional Bitcoin transactions.
+              </p>
+              <div className="text-sm text-gray-500">
+                vs $5-20 on-chain
+              </div>
+            </div>
+
+            {/* Perfect for Africa */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Globe className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                Perfect for Daily Use
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Ideal for small payments, remittances, and everyday transactions.
+              </p>
+              <div className="text-sm text-gray-500">
+                Optimized for &lt;$50
+              </div>
+            </div>
+          </div>
+
+          {/* SMS Lightning Commands */}
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-3xl mx-auto">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Lightning via SMS
+              </h3>
+              <p className="text-gray-600">
+                Send instant Bitcoin payments from any phone - no internet required
+              </p>
+            </div>
+            
+            <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
+              <div className="text-green-400 mb-2">$ Send instant payment:</div>
+              <div className="text-white mb-4">LN SEND +234... 5000 NGN</div>
+              
+              <div className="text-green-400 mb-2">$ Create Lightning invoice:</div>
+              <div className="text-white mb-4">LN INVOICE 10000 UGX</div>
+              
+              <div className="text-yellow-400 mb-2">⚡ Response (instant):</div>
+              <div className="text-gray-300">
+                ✓ Sent 5,000 NGN<br/>
+                ✓ Fee: $0.001<br/>
+                ✓ Time: 0.8 seconds
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Instant</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Cheap</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>No Internet</span>
               </div>
             </div>
           </div>
