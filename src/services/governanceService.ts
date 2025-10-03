@@ -47,7 +47,7 @@ export class GovernanceService {
   private static readonly QUORUM_PERCENTAGE = 10; // 10% of tokens must vote
   private static readonly PASS_THRESHOLD = 50; // 50% yes votes to pass
   private static readonly VOTING_PERIOD_DAYS = 7;
-  private static readonly MIN_TOKENS_TO_PROPOSE = 1000; // Need 1000 AFRI to create proposal
+  public static readonly MIN_TOKENS_TO_PROPOSE = 1000; // Need 1000 AFRI to create proposal
 
   /**
    * Create a new governance proposal via SNS

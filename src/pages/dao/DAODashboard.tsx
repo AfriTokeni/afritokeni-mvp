@@ -8,6 +8,7 @@ import { Vote as VoteIcon, TrendingUp, Users, Coins, Plus, CheckCircle, XCircle,
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
 import { GovernanceService, Proposal } from '../../services/governanceService';
+import CreateProposalModal from '../../components/CreateProposalModal';
 
 const DAODashboard: React.FC = () => {
   const { user } = useAuthentication();
@@ -15,6 +16,7 @@ const DAODashboard: React.FC = () => {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -175,7 +177,10 @@ const DAODashboard: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-neutral-900">Active Proposals</h2>
-            <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
               <Plus className="w-4 h-4" />
               Create Proposal
             </button>
@@ -355,6 +360,15 @@ const DAODashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Create Proposal Modal */}
+      <CreateProposalModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        userId={user?.user?.id || ''}
+        userTokens={tokenBalance?.balance || 0}
+        onSuccess={loadData}
+      />
     </div>
   );
 };
