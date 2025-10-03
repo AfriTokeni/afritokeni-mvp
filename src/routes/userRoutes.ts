@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   MapPin,
   Vote,
+  Trophy,
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 
@@ -43,6 +44,12 @@ export const user_desktop_routes: Route[] = [
         path: "/users/dao",
         label: "DAO Governance",
         icon: Vote,
+    },
+    {
+        id: "leaderboard" as RouteID,
+        path: "/users/leaderboard",
+        label: "Leaderboard",
+        icon: Trophy,
     },
     {
         id: "agents" as RouteID,
