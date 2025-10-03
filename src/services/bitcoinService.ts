@@ -171,10 +171,10 @@ export class BitcoinService {
           
           // Map African currencies to their forex codes
           const currencyMap: Record<AfricanCurrency, string> = {
-            'NGN': 'NGN', 'KES': 'KES', 'TZS': 'TZS', 'RWF': 'RWF', 'ETB': 'ETB', 'UGX': 'UGX',
-            'GHS': 'GHS', 'XOF': 'XOF', 'XAF': 'XAF', 'CDF': 'CDF',
+            'NGN': 'NGN', 'KES': 'KES', 'TZS': 'TZS', 'RWF': 'RWF', 'BIF': 'BIF', 'ETB': 'ETB', 'UGX': 'UGX',
+            'GHS': 'GHS', 'GNF': 'GNF', 'XOF': 'XOF', 'XAF': 'XAF', 'CDF': 'CDF',
             'AOA': 'AOA', 'ZAR': 'ZAR', 'BWP': 'BWP', 'EGP': 'EGP', 'MAD': 'MAD',
-            'TND': 'TND', 'DZD': 'DZD', 'MUR': 'MUR', 'SLL': 'SLL', 'LRD': 'LRD',
+            'TND': 'TND', 'DZD': 'DZD', 'MRU': 'MRU', 'MUR': 'MUR', 'SLL': 'SLL', 'LRD': 'LRD',
             'GMD': 'GMD', 'SZL': 'SZL', 'LSL': 'LSL', 'NAD': 'NAD', 'ZMW': 'ZMW',
             'ZWL': 'ZWL', 'MWK': 'MWK', 'MZN': 'MZN', 'SCR': 'SCR', 'CVE': 'CVE',
             'STN': 'STN', 'KMF': 'KMF', 'DJF': 'DJF', 'ERN': 'ERN', 'MGA': 'MGA',
@@ -187,10 +187,10 @@ export class BitcoinService {
           } else {
             // Fallback to estimated rates if not available in forex API
             const fallbackRates: Record<AfricanCurrency, number> = {
-              'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'ETB': 120,
-              'UGX': 3700, 'GHS': 15, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
+              'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'BIF': 2900, 'ETB': 120,
+              'UGX': 3700, 'GHS': 15, 'GNF': 8600, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
               'AOA': 900, 'ZAR': 18, 'BWP': 13.5, 'EGP': 49, 'MAD': 10,
-              'TND': 3.1, 'DZD': 135, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
+              'TND': 3.1, 'DZD': 135, 'MRU': 36, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
               'GMD': 67, 'SZL': 18, 'LSL': 18, 'NAD': 18, 'ZMW': 27,
               'ZWL': 25000, 'MWK': 1730, 'MZN': 64, 'SCR': 13.5, 'CVE': 101,
               'STN': 22.5, 'KMF': 450, 'DJF': 178, 'ERN': 15, 'MGA': 4500,
@@ -202,10 +202,10 @@ export class BitcoinService {
           console.warn('Forex API failed, using fallback rates:', forexError);
           // Use fallback rates
           const fallbackRates: Record<AfricanCurrency, number> = {
-            'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'ETB': 120,
-            'UGX': 3700, 'GHS': 15, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
+            'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'BIF': 2900, 'ETB': 120,
+            'UGX': 3700, 'GHS': 15, 'GNF': 8600, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
             'AOA': 900, 'ZAR': 18, 'BWP': 13.5, 'EGP': 49, 'MAD': 10,
-            'TND': 3.1, 'DZD': 135, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
+            'TND': 3.1, 'DZD': 135, 'MRU': 36, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
             'GMD': 67, 'SZL': 18, 'LSL': 18, 'NAD': 18, 'ZMW': 27,
             'ZWL': 25000, 'MWK': 1730, 'MZN': 64, 'SCR': 13.5, 'CVE': 101,
             'STN': 22.5, 'KMF': 450, 'DJF': 178, 'ERN': 15, 'MGA': 4500,
@@ -230,10 +230,10 @@ export class BitcoinService {
       const fallbackRates: Record<AfricanCurrency, number> = {
         'NGN': 65000000, 'KES': 6500000, 'UGX': 150000000, 'ZAR': 1200000,
         'GHS': 800000, 'EGP': 3200000, 'MAD': 650000, 'TZS': 150000000,
-        'RWF': 85000000, 'ETB': 7500000, 'XOF': 40000000, 'XAF': 40000000,
+        'RWF': 85000000, 'BIF': 145000000, 'ETB': 7500000, 'XOF': 40000000, 'XAF': 40000000,
         'CDF': 180000000, 'AOA': 55000000, 'BWP': 900000, 'TND': 200000,
-        'DZD': 8800000, 'MUR': 3000000, 'BTC': 1, 'SLL': 1200000000,
-        'LRD': 12000000, 'GMD': 4200000, 'SZL': 1200000, 'LSL': 1200000,
+        'DZD': 8800000, 'MRU': 2400000, 'MUR': 3000000, 'BTC': 1, 'SLL': 1200000000,
+        'LRD': 12000000, 'GMD': 4200000, 'GNF': 540000000, 'SZL': 1200000, 'LSL': 1200000,
         'NAD': 1200000, 'ZMW': 18000000, 'ZWL': 32000000000, 'MWK': 85000000,
         'MZN': 4200000, 'SCR': 900000, 'CVE': 6800000, 'STN': 1500000,
         'KMF': 30000000, 'DJF': 12000000, 'ERN': 1000000, 'MGA': 300000000,

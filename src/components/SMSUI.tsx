@@ -43,7 +43,8 @@ const SMSUI: React.FC = () => {
 6. Bitcoin Rate - BTC RATE currency
 7. Buy Bitcoin - BTC BUY amount currency
 8. Sell Bitcoin - BTC SELL amount currency
-9. Help - HELP`,
+9. Lightning Network - LN
+10. Help - HELP`,
           'BAL': 'Your balance:\nUGX 450,000\nUSDT 118.42\n\nLast updated: Just now',
           'BTC BAL': `Bitcoin Balance:
 ₿0.00125000 BTC
@@ -99,6 +100,40 @@ Fee: 3,000 UGX
 An agent will contact you at +256701234567 to complete the exchange.
 
 Send *AFRI# for menu`,
+          'LN': `⚡ Lightning Network
+
+INSTANT Bitcoin transfers!
+Fee: ~$0.001 (99% cheaper)
+Speed: < 1 second
+
+Commands:
+LN SEND +234... 5000 NGN
+LN INVOICE 10000 UGX
+LN PAY [invoice]
+
+Network: 80,000 channels
+Avg Fee: $0.001`,
+          'LN SEND +256701234567 5000 UGX': `⚡ INSTANT Transfer Complete!
+
+Sent: 5,000 UGX
+To: +256701234567
+Fee: $0.001
+Time: < 1 second
+
+Balance updated instantly!
+
+Send *AFRI# for menu`,
+          'LN INVOICE 10000 UGX': `⚡ Lightning Invoice Created!
+
+Amount: 10,000 UGX
+≈ ₿0.00006667 BTC
+
+Invoice:
+lnbc66670n1p3xk7m8...
+
+Expires: ${new Date(Date.now() + 3600000).toLocaleTimeString()}
+
+Share this invoice to receive instant payment!`,
           'AGENTS': 'Nearby agents:\n1. Sarah - Kampala Central (500m)\n2. John - Nakawa Market (1.2km)\n3. Grace - Wandegeya (2.1km)\nReply with number for details',
           'SEND': 'To send money, use:\nSEND [amount] [phone]\nExample: SEND 10000 256701234567',
           '1': 'Your balance:\nUGX 450,000\nUSDT 118.42\n\nSend *AFRI# for main menu'
@@ -342,7 +377,10 @@ Send *AFRI# for menu`,
                   { cmd: 'BTC BAL', desc: 'Bitcoin Balance', category: 'bitcoin' },
                   { cmd: 'BTC RATE UGX', desc: 'Bitcoin Rate', category: 'bitcoin' },
                   { cmd: 'BTC BUY 100000 UGX', desc: 'Buy Bitcoin', category: 'bitcoin' },
-                  { cmd: 'BTC SELL 50000 UGX', desc: 'Sell Bitcoin', category: 'bitcoin' }
+                  { cmd: 'BTC SELL 50000 UGX', desc: 'Sell Bitcoin', category: 'bitcoin' },
+                  { cmd: 'LN', desc: 'Lightning Info', category: 'lightning' },
+                  { cmd: 'LN SEND +256701234567 5000 UGX', desc: 'Lightning Send', category: 'lightning' },
+                  { cmd: 'LN INVOICE 10000 UGX', desc: 'Lightning Invoice', category: 'lightning' }
                 ].map((item) => (
                   <button
                     key={item.cmd}
@@ -350,16 +388,18 @@ Send *AFRI# for menu`,
                     className={`text-left p-3 rounded-xl border transition-colors cursor-pointer ${
                       item.category === 'bitcoin' 
                         ? 'bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-300' 
+                        : item.category === 'lightning'
+                        ? 'bg-yellow-50 hover:bg-yellow-100 border-yellow-200 hover:border-yellow-300'
                         : 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 hover:border-neutral-300'
                     }`}
                   >
                     <div className={`font-mono font-semibold text-xs sm:text-sm break-all ${
-                      item.category === 'bitcoin' ? 'text-orange-900' : 'text-neutral-900'
+                      item.category === 'bitcoin' ? 'text-orange-900' : item.category === 'lightning' ? 'text-yellow-900' : 'text-neutral-900'
                     }`}>
                       {item.cmd}
                     </div>
                     <div className={`text-xs mt-1 ${
-                      item.category === 'bitcoin' ? 'text-orange-600' : 'text-neutral-600'
+                      item.category === 'bitcoin' ? 'text-orange-600' : item.category === 'lightning' ? 'text-yellow-600' : 'text-neutral-600'
                     }`}>
                       {item.desc}
                     </div>
@@ -376,6 +416,20 @@ Send *AFRI# for menu`,
                     <p className="text-orange-700 text-xs mt-1">
                       All Bitcoin transactions show dynamic fees based on your location and service level. 
                       You&apos;ll receive a quote with fee breakdown before confirming any transaction.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Lightning Network Info */}
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-yellow-800 font-semibold text-sm">⚡ Lightning Network</p>
+                    <p className="text-yellow-700 text-xs mt-1">
+                      Instant Bitcoin transfers with sub-second confirmation and ~$0.001 fees. 
+                      Perfect for daily transactions under $50. Works via SMS with no internet required.
                     </p>
                   </div>
                 </div>

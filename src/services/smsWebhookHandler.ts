@@ -36,7 +36,7 @@ export class SMSWebhookHandler {
     this.router.post('/sms/delivery', this.handleDeliveryReport.bind(this));
 
     // Health check
-    this.router.get('/health', (req, res) => {
+    this.router.get('/health', (_req, res) => {
       res.json({ status: 'ok', service: 'AfriTokeni SMS Gateway' });
     });
   }
@@ -46,7 +46,7 @@ export class SMSWebhookHandler {
    */
   private async handleIncomingSMS(req: Request, res: Response): Promise<void> {
     try {
-      const { from, to, text, date, id, linkId } = req.body;
+      const { from, text, date, id } = req.body;
 
       console.log('Incoming SMS:', { from, text, date, id });
 

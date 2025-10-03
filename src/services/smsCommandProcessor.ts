@@ -5,6 +5,7 @@
 
 import { getSMSGateway } from './africasTalkingSMSGateway';
 import { SMSDataAdapter } from './smsDataAdapter';
+import { SMSLightningCommands } from './smsLightningCommands';
 import { getCurrencyFromPhone } from '../utils/africanPhoneNumbers';
 import { AfricanCurrency } from '../types/currency';
 
@@ -81,6 +82,46 @@ export class SMSCommandProcessor {
       // Confirmation
       if (normalizedMessage.startsWith('CONFIRM ')) {
         return await this.handleConfirmation(phoneNumber, message);
+      }
+
+      // Lightning Network commands
+      if (normalizedMessage === 'LN' || normalizedMessage === 'LIGHTNING') {
+        const response = await SMSLightningCommands.processCommand({
+          command: 'LN',
+          phoneNumber,
+          params: [],
+        });
+        return { success: response.success, reply: response.message };
+      }
+
+      if (normalizedMessage.startsWith('LN SEND ')) {
+        const parts = message.trim().split(' ');
+        const response = await SMSLightningCommands.processCommand({
+          command: 'LN SEND',
+          phoneNumber,
+          params: parts,
+        });
+        return { success: response.success, reply: response.message };
+      }
+
+      if (normalizedMessage.startsWith('LN INVOICE ')) {
+        const parts = message.trim().split(' ');
+        const response = await SMSLightningCommands.processCommand({
+          command: 'LN INVOICE',
+          phoneNumber,
+          params: parts,
+        });
+        return { success: response.success, reply: response.message };
+      }
+
+      if (normalizedMessage.startsWith('LN PAY ')) {
+        const parts = message.trim().split(' ');
+        const response = await SMSLightningCommands.processCommand({
+          command: 'LN PAY',
+          phoneNumber,
+          params: parts,
+        });
+        return { success: response.success, reply: response.message };
       }
 
       // Help
@@ -404,7 +445,7 @@ export class SMSCommandProcessor {
       };
     }
 
-    const { amount: balance, currency } = await SMSDataAdapter.getBalance(user.id, phoneNumber);
+    const { amount: balance } = await SMSDataAdapter.getBalance(user.id, phoneNumber);
     if (balance < amount) {
       return {
         success: false,
@@ -484,10 +525,19 @@ REG [Name] - Register
 BAL - Check balance
 SEND [Phone] [Amount] - Send money
 WITHDRAW [Amount] - Withdraw cash
+
+Bitcoin:
 BTC BAL - Bitcoin balance
 BTC RATE [Currency] - BTC rate
 BTC BUY [Amount] [Currency] - Buy BTC
 BTC SELL [Amount] - Sell BTC
+
+Lightning ⚡:
+LN - Lightning info
+LN SEND [Phone] [Amount] [Currency]
+LN INVOICE [Amount] [Currency]
+LN PAY [invoice]
+
 HISTORY - Recent transactions
 HELP - Show this menu`,
     };
