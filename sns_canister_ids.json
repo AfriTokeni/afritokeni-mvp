@@ -1,17 +1,7 @@
 {
-  "sns_governance": {
-    "ic": "liut4-taaaa-aaaac-qceca-cai"
-  },
-  "sns_index": {
-    "ic": "lpvvi-6yaaa-aaaac-qcecq-cai"
-  },
-  "sns_ledger": {
-    "ic": "lgw6u-iqaaa-aaaac-qceda-cai"
-  },
-  "sns_root": {
-    "ic": "lbxya-fiaaa-aaaac-qcedq-cai"
-  },
-  "sns_swap": {
-    "ic": "kmz4o-kaaaa-aaaac-qceea-cai"
-  }
+  "governance_canister_id": "kly22-hyaaa-aaaac-qceeq-cai",
+  "index_canister_id": "kc3rg-rqaaa-aaaac-qcefa-cai",
+  "ledger_canister_id": "kf2xs-4iaaa-aaaac-qcefq-cai",
+  "root_canister_id": "kq5g7-5aaaa-aaaac-qcega-cai",
+  "swap_canister_id": "kx4al-qyaaa-aaaac-qcegq-cai"
 }

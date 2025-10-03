@@ -5,7 +5,7 @@ name: AfriTokeni DAO
 description: >
     First SMS-accessible Bitcoin banking for Africa with DAO governance.
 
-logo: public/afriTokeni.svg
+logo: afriTokeni.png
 url: https://www.afritokeni.com/
 NnsProposal:
     title: "Proposal to Create AfriTokeni SNS - First SMS-Accessible DAO"
@@ -15,13 +15,14 @@ NnsProposal:
 fallback_controller_principals:
     - icjnv-sun2n-xwa4k-pagqz-5xhjn-ul2uf-njoee-gr5v2-espqh-bwmfd-zqe
 
-dapp_canisters: []
+dapp_canisters:
+    - dkk74-oyaaa-aaaal-askxq-cai
 
 Token:
     name: AfriTokeni Governance Token
     symbol: AFRI
     transaction_fee: 10_000 e8s
-    logo: public/afriTokeni.svg
+    logo: afriTokeni.png
 
 Proposals:
     rejection_fee: 1 token
@@ -53,43 +54,37 @@ Distribution:
     Neurons:
 
         - principal: icjnv-sun2n-xwa4k-pagqz-5xhjn-ul2uf-njoee-gr5v2-espqh-bwmfd-zqe
-          stake: 15 tokens
-          memo: 42
-          # TODO: Add support for non-integer numbers in duration strings?
-          dissolve_delay: 1 years
-          vesting_period: 1 year 1 second
+          stake: 100_000_000 tokens
+          memo: 0
+          dissolve_delay: 6 months
+          vesting_period: 0 seconds
 
         - principal: icjnv-sun2n-xwa4k-pagqz-5xhjn-ul2uf-njoee-gr5v2-espqh-bwmfd-zqe
-          stake: 14.9 tokens
-          dissolve_delay: 52 weeks
-          vesting_period: 53 weeks
+          stake: 150_000_000 tokens
+          memo: 1
+          dissolve_delay: 1 year
+          vesting_period: 1 year
 
     InitialBalances:
-        treasury: 60 tokens
-        swap: 40 tokens
+        treasury: 0 tokens
+        swap: 750_000_000 tokens
 
-    # Optional, but highly recommended. This is a literal
-    # checksum.
-    total: 129.9 tokens # 60 + 40 + 15 + 14.9
+    total: 1_000_000_000 tokens
 
 Swap:
-    minimum_participants: 50
+    minimum_participants: 1
 
-    minimum_direct_participation_icp: 113 tokens
-    maximum_direct_participation_icp: 64990 tokens
+    minimum_direct_participation_icp: 10 tokens
+    maximum_direct_participation_icp: 1000 tokens
 
-    minimum_participant_icp: 650 tokens
-    maximum_participant_icp: 6500 tokens
+    minimum_participant_icp: 1 token
+    maximum_participant_icp: 100 tokens
 
-    confirmation_text: Hello, world?
-
-    restricted_countries:
-        - US
-        - CH
-
+    confirmation_text: I confirm my participation in the AfriTokeni SNS swap and understand the risks.
+ 
     VestingSchedule:
-        events: 9
-        interval: 17 days
+        events: 3
+        interval: 3 months
 
     start_time: 12:00 UTC
     duration: 7 days
