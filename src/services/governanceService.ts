@@ -3,6 +3,8 @@
  * Manages DAO proposals, voting, and execution
  */
 
+import { Actor, HttpAgent } from '@dfinity/agent';
+
 export type ProposalType = 'fee_adjustment' | 'currency_addition' | 'agent_standards' | 'treasury' | 'other';
 export type ProposalStatus = 'active' | 'passed' | 'rejected' | 'executed';
 export type VoteChoice = 'yes' | 'no' | 'abstain';
