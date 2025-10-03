@@ -1,0 +1,17 @@
+{
+  "sns_governance": {
+    "ic": "liut4-taaaa-aaaac-qceca-cai"
+  },
+  "sns_index": {
+    "ic": "lpvvi-6yaaa-aaaac-qcecq-cai"
+  },
+  "sns_ledger": {
+    "ic": "lgw6u-iqaaa-aaaac-qceda-cai"
+  },
+  "sns_root": {
+    "ic": "lbxya-fiaaa-aaaac-qcedq-cai"
+  },
+  "sns_swap": {
+    "ic": "kmz4o-kaaaa-aaaac-qceea-cai"
+  }
+}
