@@ -7,7 +7,7 @@ import {
   User,
   LayoutDashboard,
   MapPin,
-  Zap,
+  Vote,
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 
@@ -35,8 +35,14 @@ export const user_desktop_routes: Route[] = [
     {
         id: "lightning" as RouteID,
         path: "/users/lightning",
-        label: "Lightning Network",
-        icon: Zap,
+        label: "Send Bitcoin",
+        icon: Send,
+    },
+    {
+        id: "dao" as RouteID,
+        path: "/users/dao",
+        label: "DAO Governance",
+        icon: Vote,
     },
     {
         id: "agents" as RouteID,
@@ -80,8 +86,14 @@ export const user_mobile_routes: Route[] = [
   {
     id: "lightning" as RouteID,
     path: "/users/lightning",
-    label: "Lightning",
-    icon: Zap,
+    label: "Bitcoin",
+    icon: Send,
+  },
+  {
+    id: "dao" as RouteID,
+    path: "/users/dao",
+    label: "DAO",
+    icon: Vote,
   },
   {
     id: "agents" as RouteID,

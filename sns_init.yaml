@@ -1,0 +1,114 @@
+# AfriTokeni SNS Configuration
+# Service Nervous System for DAO Governance
+
+# Token Configuration
+Token:
+  name: AfriTokeni Governance Token
+  symbol: AFRI
+  transaction_fee: 10_000 e8s  # 0.0001 AFRI
+  logo: data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDAiIGZpbGw9IiNGRjZCMDAiLz48L3N2Zz4=
+
+# Governance Configuration
+Governance:
+  # Proposal parameters
+  proposal_reject_cost: 1_000_000_000 e8s  # 10 AFRI to prevent spam
+  neuron_minimum_stake: 100_000_000 e8s    # 1 AFRI minimum to create neuron
+  
+  # Voting parameters
+  neuron_minimum_dissolve_delay_to_vote: 2_592_000  # 30 days in seconds
+  max_dissolve_delay: 31_536_000  # 1 year in seconds
+  max_neuron_age_for_age_bonus: 15_768_000  # 6 months
+  
+  # Voting rewards
+  voting_reward_parameters:
+    initial_reward_rate: 2.5  # 2.5% annual rewards
+    final_reward_rate: 1.0    # 1% after 8 years
+    reward_rate_transition_duration: 252_288_000  # 8 years in seconds
+
+# Initial Token Distribution
+# Total: 1 Billion AFRI tokens
+Distribution:
+  Neurons:
+    # Community Allocation (45% = 450M AFRI)
+    
+    # Agents (25% = 250M AFRI)
+    - controller: AGENT_PRINCIPAL_ID
+      stake: 250_000_000_000_000 e8s  # 250M AFRI
+      memo: 0
+      dissolve_delay: 15_768_000  # 6 months
+      vesting_period: 0
+    
+    # Users (20% = 200M AFRI)
+    - controller: USER_PRINCIPAL_ID
+      stake: 200_000_000_000_000 e8s  # 200M AFRI
+      memo: 1
+      dissolve_delay: 7_776_000  # 3 months
+      vesting_period: 0
+    
+    # Investor Allocation (20% = 200M AFRI)
+    
+    # Seed Round (5% = 50M AFRI)
+    - controller: SEED_INVESTOR_PRINCIPAL_ID
+      stake: 50_000_000_000_000 e8s  # 50M AFRI
+      memo: 2
+      dissolve_delay: 31_536_000  # 1 year lock
+      vesting_period: 31_536_000  # 1 year vesting
+    
+    # Private Sale (10% = 100M AFRI)
+    - controller: PRIVATE_SALE_PRINCIPAL_ID
+      stake: 100_000_000_000_000 e8s  # 100M AFRI
+      memo: 3
+      dissolve_delay: 15_768_000  # 6 months lock
+      vesting_period: 15_768_000  # 6 months vesting
+    
+    # Public Sale via SNS Swap (5% = 50M AFRI)
+    # This will be distributed through the SNS swap mechanism
+    
+    # Treasury/DAO (20% = 200M AFRI)
+    - controller: TREASURY_PRINCIPAL_ID
+      stake: 200_000_000_000_000 e8s  # 200M AFRI
+      memo: 4
+      dissolve_delay: 31_536_000  # 1 year
+      vesting_period: 0
+    
+    # Team (10% = 100M AFRI)
+    - controller: TEAM_PRINCIPAL_ID
+      stake: 100_000_000_000_000 e8s  # 100M AFRI
+      memo: 5
+      dissolve_delay: 31_536_000  # 1 year cliff
+      vesting_period: 63_072_000  # 2 year vesting
+    
+    # Advisors/Partners (5% = 50M AFRI)
+    - controller: ADVISOR_PRINCIPAL_ID
+      stake: 50_000_000_000_000 e8s  # 50M AFRI
+      memo: 6
+      dissolve_delay: 15_768_000  # 6 months
+      vesting_period: 31_536_000  # 1 year vesting
+
+# Swap Configuration (for initial distribution)
+Swap:
+  minimum_participants: 1
+  minimum_icp: 1_000_000_000 e8s  # 10 ICP minimum
+  maximum_icp: 100_000_000_000 e8s  # 1000 ICP maximum
+  minimum_participant_icp: 100_000_000 e8s  # 1 ICP per participant
+  maximum_participant_icp: 10_000_000_000 e8s  # 100 ICP per participant
+  confirmation_text: |
+    I confirm my understanding of the risks and terms of participating in this SNS swap.
+  restricted_countries: []
+
+# Dapp Canisters (AfriTokeni canisters to be controlled by SNS)
+DappCanisters:
+  - AFRITOKENI_BACKEND_CANISTER_ID
+
+# Fallback Controllers (in case SNS fails)
+FallbackControllers:
+  - DEVELOPER_PRINCIPAL_ID
+
+# SNS Metadata
+SnsMetadata:
+  url: https://afritokeni.com
+  name: AfriTokeni DAO
+  description: |
+    AfriTokeni is the first SMS-accessible Bitcoin banking platform for Africa, 
+    governed by the community through the AFRI token. Vote on fees, new currencies, 
+    agent standards, and treasury management - all via SMS or web.

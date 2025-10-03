@@ -24,6 +24,7 @@ import ExchangePage from "./pages/users/ExchangePage.tsx";
 import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
 import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
 import AgentMapPage from "./pages/users/AgentMapPage.tsx";
+import DAODashboard from "./pages/dao/DAODashboard.tsx";
 
 //Agent Pages
 import AgentDashboard from './pages/AgentDashboard';
@@ -98,6 +99,7 @@ const App: FC = () => {
                 <Route path="bitcoin/deposit" element={<BitcoinDepositPage />} />
                 <Route path="lightning" element={<LightningPage />} />
                 <Route path="exchange" element={<ExchangePage />} />
+                <Route path="dao" element={<DAODashboard />} />
               </Routes>
             </Layout>
           } />
