@@ -1,10 +1,10 @@
 /**
- * Lightning Network Page
- * User interface for instant Bitcoin transfers via Lightning
+ * Bitcoin Transfer Page
+ * Unified interface for Bitcoin transfers (auto-routes between Lightning/on-chain)
  */
 
 import React, { useState, useEffect } from 'react';
-import { Zap, Send, QrCode, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Bitcoin, Send, QrCode, Clock, CheckCircle, AlertCircle, Zap } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { LightningService, LightningInvoice } from '../../services/lightningService';
 import { BitcoinRoutingService } from '../../services/bitcoinRoutingService';
@@ -20,6 +20,7 @@ const LightningPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [routingMethod, setRoutingMethod] = useState<'lightning' | 'onchain' | null>(null);
 
   const [stats, setStats] = useState({
     lightningTransfers: 0,
@@ -53,19 +54,15 @@ const LightningPage: React.FC = () => {
     try {
       const amountNum = parseFloat(amount);
       
-      // Check routing
+      // Auto-decide routing method
       const routing = await BitcoinRoutingService.decideRouting({
         amount: amountNum,
         currency,
       });
 
-      if (routing.method === 'onchain') {
-        setError(`Amount too large for Lightning (>$50). Use regular Bitcoin transfer.`);
-        setLoading(false);
-        return;
-      }
+      setRoutingMethod(routing.method);
 
-      // Execute Lightning transfer
+      // Execute transfer with automatic routing
       await BitcoinRoutingService.executeTransfer({
         fromUserId: user?.user?.id || '',
         toUserId: recipientPhone,
@@ -78,7 +75,10 @@ const LightningPage: React.FC = () => {
       setAmount('');
       setRecipientPhone('');
       
-      setTimeout(() => setSuccess(false), 5000);
+      setTimeout(() => {
+        setSuccess(false);
+        setRoutingMethod(null);
+      }, 5000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Transfer failed');
     } finally {
@@ -119,11 +119,11 @@ const LightningPage: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white" />
+            <Bitcoin className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Lightning Network</h1>
-            <p className="text-gray-600">Instant Bitcoin transfers</p>
+            <h1 className="text-3xl font-bold text-gray-900">Send Bitcoin</h1>
+            <p className="text-gray-600">Auto-optimized for speed and cost</p>
           </div>
         </div>
 
@@ -155,7 +155,7 @@ const LightningPage: React.FC = () => {
           }`}
         >
           <Send className="w-4 h-4 inline mr-2" />
-          Send Lightning
+          Send Bitcoin
         </button>
         <button
           onClick={() => setActiveTab('receive')}
@@ -166,14 +166,14 @@ const LightningPage: React.FC = () => {
           }`}
         >
           <QrCode className="w-4 h-4 inline mr-2" />
-          Receive Lightning
+          Receive Bitcoin
         </button>
       </div>
 
       {/* Send Tab */}
       {activeTab === 'send' && (
         <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Instant Payment</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Bitcoin Payment</h2>
 
           <div className="space-y-4">
             <div>
@@ -223,12 +223,21 @@ const LightningPage: React.FC = () => {
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2 text-gray-700">
-                  <Zap className="w-4 h-4 text-yellow-600" />
-                  <span>Lightning Network</span>
+                  {routingMethod === 'lightning' ? (
+                    <><Zap className="w-4 h-4 text-yellow-600" /><span>Instant Transfer</span></>
+                  ) : routingMethod === 'onchain' ? (
+                    <><Bitcoin className="w-4 h-4 text-orange-600" /><span>On-chain Transfer</span></>
+                  ) : (
+                    <><Zap className="w-4 h-4 text-yellow-600" /><span>Auto-optimized</span></>
+                  )}
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold text-gray-900">Fee: ~$0.001</div>
-                  <div className="text-gray-600">Time: &lt;1 second</div>
+                  <div className="font-semibold text-gray-900">
+                    {routingMethod === 'lightning' ? 'Fee: ~$0.001' : routingMethod === 'onchain' ? 'Fee: ~$5-10' : 'Best rate selected'}
+                  </div>
+                  <div className="text-gray-600">
+                    {routingMethod === 'lightning' ? 'Time: <1 second' : routingMethod === 'onchain' ? 'Time: 10-60 min' : 'Instant or secure'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -243,7 +252,9 @@ const LightningPage: React.FC = () => {
             {success && (
               <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700">
                 <CheckCircle className="w-5 h-5" />
-                <span>⚡ Payment sent instantly!</span>
+                <span>
+                  {routingMethod === 'lightning' ? '⚡ Payment sent instantly!' : '🔗 Bitcoin transfer initiated!'}
+                </span>
               </div>
             )}
 
@@ -259,8 +270,8 @@ const LightningPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Zap className="w-5 h-5" />
-                  Send Instantly
+                  <Send className="w-5 h-5" />
+                  Send Bitcoin
                 </>
               )}
             </button>
@@ -271,7 +282,7 @@ const LightningPage: React.FC = () => {
       {/* Receive Tab */}
       {activeTab === 'receive' && (
         <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Receive Lightning Payment</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Receive Bitcoin Payment</h2>
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -309,7 +320,7 @@ const LightningPage: React.FC = () => {
               disabled={loading}
               className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-4 rounded-xl font-semibold hover:from-yellow-500 hover:to-orange-600 transition-all disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Lightning Invoice'}
+              {loading ? 'Creating...' : 'Create Payment Request'}
             </button>
 
             {invoice && (
@@ -359,7 +370,7 @@ const LightningPage: React.FC = () => {
       {/* How It Works */}
       <div className="mt-8 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border border-yellow-200">
         <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
-          How Lightning Network Works
+          How Auto-Optimized Bitcoin Transfers Work
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -367,9 +378,9 @@ const LightningPage: React.FC = () => {
             <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-3">
               <span className="text-white font-bold">1</span>
             </div>
-            <h4 className="font-semibold text-gray-900 mb-2">Create Invoice</h4>
+            <h4 className="font-semibold text-gray-900 mb-2">Enter Details</h4>
             <p className="text-sm text-gray-600">
-              Generate Lightning invoice with amount and currency
+              Just enter recipient and amount - we handle the rest
             </p>
           </div>
 
@@ -377,9 +388,9 @@ const LightningPage: React.FC = () => {
             <div className="w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center mx-auto mb-3">
               <span className="text-white font-bold">2</span>
             </div>
-            <h4 className="font-semibold text-gray-900 mb-2">Instant Payment</h4>
+            <h4 className="font-semibold text-gray-900 mb-2">Auto-Route</h4>
             <p className="text-sm text-gray-600">
-              Payment routes through Lightning channels in milliseconds
+              System picks best method: instant Lightning or secure on-chain
             </p>
           </div>
 
@@ -387,9 +398,9 @@ const LightningPage: React.FC = () => {
             <div className="w-12 h-12 bg-red-400 rounded-full flex items-center justify-center mx-auto mb-3">
               <span className="text-white font-bold">3</span>
             </div>
-            <h4 className="font-semibold text-gray-900 mb-2">Confirmed</h4>
+            <h4 className="font-semibold text-gray-900 mb-2">Delivered</h4>
             <p className="text-sm text-gray-600">
-              Both parties receive instant confirmation
+              Optimized for speed and cost automatically
             </p>
           </div>
         </div>
@@ -398,7 +409,7 @@ const LightningPage: React.FC = () => {
       {/* Comparison */}
       <div className="mt-8 bg-white rounded-2xl p-8 border border-gray-200">
         <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
-          Lightning vs Traditional Bitcoin
+          Transfer Methods Comparison
         </h3>
         
         <div className="overflow-x-auto">
@@ -441,13 +452,13 @@ const LightningPage: React.FC = () => {
         <h3 className="font-semibold text-gray-900 mb-3">📱 Use via SMS (No Internet)</h3>
         <div className="space-y-2 font-mono text-sm">
           <div className="text-gray-700">
-            <span className="text-blue-600">LN SEND</span> +234... 5000 NGN
+            <span className="text-blue-600">BTC SEND</span> +234... 5000 NGN - Auto-optimized transfer
           </div>
           <div className="text-gray-700">
-            <span className="text-blue-600">LN INVOICE</span> 10000 UGX
+            <span className="text-blue-600">BTC BAL</span> - Check Bitcoin balance
           </div>
           <div className="text-gray-700">
-            <span className="text-blue-600">LN</span> - Show Lightning info
+            <span className="text-blue-600">*AFRI#</span> - Show all commands
           </div>
         </div>
       </div>
