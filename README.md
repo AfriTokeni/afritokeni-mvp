@@ -48,9 +48,12 @@ You can access the live production application here: **[https://dkk74-oyaaa-aaaa
 - **🛡️ Security Controls**: Admin authentication and role-based access control
 - **📈 Analytics Dashboard**: Platform usage and financial flow monitoring
 
-## 🏛️ DAO Governance (SNS)
+## 🏛️ DAO Governance (SNS) - LIVE ON IC MAINNET!
 
-**AfriTokeni is governed by a live SNS DAO on IC mainnet!**
+**AfriTokeni is governed by a fully functional SNS DAO on Internet Computer mainnet!**
+
+### **🎉 WORLD'S FIRST SMS-ACCESSIBLE DAO**
+Unbanked Africans can participate in on-chain governance via feature phones - no internet required!
 
 ### **Live SNS Canisters:**
 - **Governance**: `kly22-hyaaa-aaaac-qceeq-cai`
@@ -64,14 +67,48 @@ You can access the live production application here: **[https://dkk74-oyaaa-aaaa
 - **Distribution**: 250M neurons, 750M swap
 - **Symbol**: AFRI
 - **Standard**: ICRC-1 (SNS)
+- **Minimum to Propose**: 1,000 AFRI
+
+### **Complete DAO Features:**
+
+#### **Create Proposals** (Web & SMS)
+- 5 proposal types: Fee Adjustment, Currency Addition, Agent Standards, Treasury, Other
+- Real SNS governance integration via `manage_neuron` calls
+- Proposals stored on-chain in SNS governance canister
+- Minimum 1,000 AFRI tokens required
+
+#### **Vote on Proposals** (Web & SMS)
+- Vote Yes/No/Abstain on active proposals
+- Real SNS neuron voting via `manage_neuron` with `RegisterVote`
+- Votes recorded on-chain in SNS governance
+- Real-time vote tallies from SNS
+
+#### **View & Track**
+- Live proposals fetched from SNS governance canister
+- Leaderboard showing top AFRI holders (from SNS neurons)
+- Track your AFRI token earnings
+- Real-time voting progress and results
 
 ### **How to Participate:**
-- **Vote via Web**: Visit `/users/dao` in the app
-- **Vote via SMS**: Send `VOTE YES PROP-001` (no internet required!)
-- **Check Balance**: `AFRI BAL` via SMS
-- **View Proposals**: `PROPOSALS` via SMS
 
-**🎉 First SMS-accessible DAO in history!** Unbanked Africans can now participate in on-chain governance via feature phones.
+#### **Via Web:**
+- **Create Proposal**: Visit `/users/dao` → Click "Create Proposal"
+- **Vote**: Click Yes/No/Abstain on any active proposal
+- **View Leaderboard**: Navigate to `/users/leaderboard`
+- **Check Balance**: Dashboard shows your AFRI tokens
+
+#### **Via SMS (No Internet!):**
+- **Vote**: `VOTE YES PROP-001`
+- **Check Balance**: `AFRI BAL`
+- **View Proposals**: `PROPOSALS`
+- **Create Proposal**: `PROPOSE [type] [title] [description]`
+
+### **Technical Implementation:**
+- Real SNS governance canister integration using `@dfinity/agent`
+- ICRC-1 ledger for token balances and transfers
+- SNS neuron staking for voting power
+- Fallback to local storage if SNS calls fail
+- Complete IDL definitions for all SNS methods
 
 ## 🏗️ Technical Architecture
 
