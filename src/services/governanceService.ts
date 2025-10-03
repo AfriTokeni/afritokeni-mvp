@@ -59,10 +59,14 @@ export class GovernanceService {
       throw new Error(`Need at least ${this.MIN_TOKENS_TO_PROPOSE} AFRI tokens to create proposal`);
     }
 
+    // SNS Governance Canister from environment
+    const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+    
     // TODO: Create proposal via SNS governance canister
+    // Requires @dfinity/agent and SNS governance interface
     // const governance = Actor.createActor(governanceIdl, {
     //   agent,
-    //   canisterId: SNS_GOVERNANCE_CANISTER_ID,
+    //   canisterId: SNS_GOVERNANCE_CANISTER,
     // });
     // const proposalId = await governance.manage_neuron({
     //   command: [{

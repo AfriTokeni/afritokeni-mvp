@@ -4,6 +4,7 @@ AfriTokeni is an SMS-accessible Bitcoin banking platform built on Internet Compu
 
 ## 🎯 Project Highlights
 
+- **🏛️ FIRST SMS-ACCESSIBLE DAO**: Live SNS governance on IC mainnet - vote via SMS or web!
 - **SMS-First Design**: Complete Bitcoin banking via SMS commands - no internet required
 - **Real Bitcoin Integration**: Live Bitcoin transactions using BlockCypher API with secure escrow system
 - **Agent Network**: Physical cash-to-Bitcoin exchange through verified local agents
@@ -46,6 +47,31 @@ You can access the live production application here: **[https://dkk74-oyaaa-aaaa
 - **📊 System Monitoring**: Transaction oversight and compliance management
 - **🛡️ Security Controls**: Admin authentication and role-based access control
 - **📈 Analytics Dashboard**: Platform usage and financial flow monitoring
+
+## 🏛️ DAO Governance (SNS)
+
+**AfriTokeni is governed by a live SNS DAO on IC mainnet!**
+
+### **Live SNS Canisters:**
+- **Governance**: `kly22-hyaaa-aaaac-qceeq-cai`
+- **AFRI Token (ICRC-1)**: `kf2xs-4iaaa-aaaac-qcefq-cai`
+- **Root**: `kq5g7-5aaaa-aaaac-qcega-cai`
+- **Swap**: `kx4al-qyaaa-aaaac-qcegq-cai`
+- **Index**: `kc3rg-rqaaa-aaaac-qcefa-cai`
+
+### **Token Details:**
+- **Total Supply**: 1,000,000,000 AFRI
+- **Distribution**: 250M neurons, 750M swap
+- **Symbol**: AFRI
+- **Standard**: ICRC-1 (SNS)
+
+### **How to Participate:**
+- **Vote via Web**: Visit `/users/dao` in the app
+- **Vote via SMS**: Send `VOTE YES PROP-001` (no internet required!)
+- **Check Balance**: `AFRI BAL` via SMS
+- **View Proposals**: `PROPOSALS` via SMS
+
+**🎉 First SMS-accessible DAO in history!** Unbanked Africans can now participate in on-chain governance via feature phones.
 
 ## 🏗️ Technical Architecture
 

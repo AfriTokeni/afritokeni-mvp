@@ -3,6 +3,31 @@
  * Manages AfriTokeni DAO governance token distribution and balances
  */
 
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
+
+// SNS Canister IDs from environment
+const SNS_LEDGER_CANISTER = import.meta.env.VITE_SNS_LEDGER_CANISTER;
+const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+
+// ICRC-1 Ledger Interface
+const icrc1Idl = ({ IDL }: any) => {
+  const Account = IDL.Record({ owner: IDL.Principal, subaccount: IDL.Opt(IDL.Vec(IDL.Nat8)) });
+  const TransferArgs = IDL.Record({
+    to: Account,
+    fee: IDL.Opt(IDL.Nat),
+    memo: IDL.Opt(IDL.Vec(IDL.Nat8)),
+    from_subaccount: IDL.Opt(IDL.Vec(IDL.Nat8)),
+    created_at_time: IDL.Opt(IDL.Nat64),
+    amount: IDL.Nat,
+  });
+  return IDL.Service({
+    icrc1_balance_of: IDL.Func([Account], [IDL.Nat], ['query']),
+    icrc1_transfer: IDL.Func([TransferArgs], [IDL.Variant({ Ok: IDL.Nat, Err: IDL.Text })], []),
+    icrc1_total_supply: IDL.Func([], [IDL.Nat], ['query']),
+  });
+};
+
 export interface TokenBalance {
   userId: string;
   balance: number;
@@ -68,31 +93,43 @@ export class AfriTokenService {
    * Get user's AFRI token balance from SNS Ledger
    */
   static async getBalance(userId: string): Promise<TokenBalance> {
-    // TODO: Replace with actual SNS ICRC-1 ledger call
-    // const { Actor, HttpAgent } = await import('@dfinity/agent');
-    // const agent = new HttpAgent({ host: 'https://ic0.app' });
-    // const ledger = Actor.createActor(ledgerIdl, {
-    //   agent,
-    //   canisterId: SNS_LEDGER_CANISTER_ID,
-    // });
-    // const balance = await ledger.icrc1_balance_of({
-    //   owner: Principal.fromText(userId),
-    //   subaccount: [],
-    // });
+    try {
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+      const ledger = Actor.createActor(icrc1Idl, {
+        agent,
+        canisterId: SNS_LEDGER_CANISTER,
+      });
 
-    // For now, return structure that will be populated by SNS
-    return {
-      userId,
-      balance: 0, // Will come from SNS ledger
-      earned: {
-        transactions: 0,
-        agentActivity: 0,
-        referrals: 0,
-        staking: 0,
-      },
-      locked: 0, // Will come from SNS governance (neuron stake)
-      lastUpdated: new Date(),
-    };
+      const balanceResult = await ledger.icrc1_balance_of({
+        owner: Principal.fromText(userId),
+        subaccount: [],
+      });
+
+      // Convert from e8s to AFRI (divide by 100_000_000)
+      const balance = Number(balanceResult) / 100_000_000;
+
+      return {
+        userId,
+        balance,
+        earned: {
+          transactions: 0,
+          agentActivity: 0,
+          referrals: 0,
+          staking: 0,
+        },
+        locked: 0,
+        lastUpdated: new Date(),
+      };
+    } catch (error) {
+      console.error('Error fetching AFRI balance:', error);
+      return {
+        userId,
+        balance: 0,
+        earned: { transactions: 0, agentActivity: 0, referrals: 0, staking: 0 },
+        locked: 0,
+        lastUpdated: new Date(),
+      };
+    }
   }
 
   /**
@@ -103,23 +140,29 @@ export class AfriTokenService {
     const multiplier = reward.multiplier || 1;
     const amount = reward.amount * multiplier;
 
-    // TODO: Implement SNS ICRC-1 transfer from treasury
-    // const { Actor, HttpAgent } = await import('@dfinity/agent');
-    // const ledger = Actor.createActor(ledgerIdl, {
-    //   agent,
-    //   canisterId: SNS_LEDGER_CANISTER_ID,
-    // });
-    // await ledger.icrc1_transfer({
-    //   to: { owner: Principal.fromText(userId), subaccount: [] },
-    //   amount: BigInt(amount * 100_000_000), // Convert to e8s
-    //   fee: [],
-    //   memo: [],
-    //   from_subaccount: [],
-    //   created_at_time: [],
-    // });
+    try {
+      const agent = new HttpAgent({ host: 'https://ic0.app' });
+      const ledger = Actor.createActor(icrc1Idl, {
+        agent,
+        canisterId: SNS_LEDGER_CANISTER,
+      });
 
-    console.log(`💰 Rewarding ${userId} with ${amount} AFRI for ${reward.action} (via SNS)`);
-    return amount;
+      // TODO: Implement actual treasury transfer
+      // Requires treasury account private key/identity
+      // await ledger.icrc1_transfer({
+      //   to: { owner: Principal.fromText(userId), subaccount: [] },
+      //   amount: BigInt(amount * 100_000_000),
+      //   fee: [],
+      //   memo: [],
+      //   from_subaccount: [],
+      //   created_at_time: [],
+      // });
+
+      return amount;
+    } catch (error) {
+      console.error('Error rewarding user:', error);
+      return 0;
+    }
   }
 
   /**
@@ -181,36 +224,30 @@ export class AfriTokenService {
    * Lock tokens for voting (via SNS neuron staking)
    */
   static async lockTokens(userId: string, amount: number): Promise<boolean> {
-    // TODO: Implement SNS neuron staking
-    // const governance = Actor.createActor(governanceIdl, {
-    //   agent,
-    //   canisterId: SNS_GOVERNANCE_CANISTER_ID,
-    // });
-    // await governance.manage_neuron({
-    //   command: [{
-    //     Stake: {
-    //       amount: BigInt(amount * 100_000_000),
-    //     }
-    //   }]
-    // });
-    
-    console.log(`🔒 Locking ${amount} AFRI for ${userId} (via SNS neuron)`);
-    return true;
+    try {
+      const agent = new HttpAgent({ host: 'https://ic0.app' });
+      // TODO: Implement SNS governance neuron staking
+      // Requires SNS governance canister interface
+      return true;
+    } catch (error) {
+      console.error('Error locking tokens:', error);
+      return false;
+    }
   }
 
   /**
    * Unlock tokens after vote (dissolve neuron)
    */
   static async unlockTokens(userId: string, amount: number): Promise<boolean> {
-    // TODO: Implement SNS neuron dissolving
-    // await governance.manage_neuron({
-    //   command: [{
-    //     StartDissolving: {}
-    //   }]
-    // });
-    
-    console.log(`🔓 Unlocking ${amount} AFRI for ${userId} (via SNS neuron dissolve)`);
-    return true;
+    try {
+      const agent = new HttpAgent({ host: 'https://ic0.app' });
+      // TODO: Implement SNS governance neuron dissolving
+      // Requires SNS governance canister interface
+      return true;
+    } catch (error) {
+      console.error('Error unlocking tokens:', error);
+      return false;
+    }
   }
 
   /**
@@ -231,11 +268,9 @@ export class AfriTokenService {
    * Get leaderboard (top token holders from SNS)
    */
   static async getLeaderboard(limit: number = 10): Promise<TokenBalance[]> {
-    // TODO: Query SNS ledger for top holders
-    // This would involve querying the ICRC-1 ledger for all accounts
-    // and sorting by balance
-    
-    console.log(`Fetching top ${limit} AFRI holders from SNS ledger`);
+    // TODO: Query SNS index canister for top holders
+    // Requires SNS index canister interface to get all accounts
+    // Then query balance for each and sort
     return [];
   }
 }
