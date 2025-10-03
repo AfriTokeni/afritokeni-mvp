@@ -17,6 +17,8 @@ const DAODashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [totalHolders, setTotalHolders] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -31,6 +33,11 @@ const DAODashboard: React.FC = () => {
       }
       const activeProposals = await GovernanceService.getActiveProposals();
       setProposals(activeProposals);
+      
+      // Load real leaderboard data
+      const leaderboardData = await AfriTokenService.getLeaderboard(10);
+      setLeaderboard(leaderboardData);
+      setTotalHolders(leaderboardData.length);
     } catch (error) {
       console.error('Error loading DAO data:', error);
     } finally {
@@ -131,8 +138,10 @@ const DAODashboard: React.FC = () => {
               <Users className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-neutral-900">1.2M</div>
-              <div className="text-sm text-neutral-600">Total Holders</div>
+              <div className="text-2xl font-bold text-neutral-900">
+                {totalHolders > 0 ? totalHolders.toLocaleString() : '—'}
+              </div>
+              <div className="text-sm text-neutral-600">Token Holders</div>
             </div>
           </div>
         </div>
@@ -330,34 +339,48 @@ const DAODashboard: React.FC = () => {
       {activeTab === 'leaderboard' && (
         <div className="bg-white rounded-xl p-6 border border-neutral-200">
           <h3 className="text-lg font-bold text-neutral-900 mb-4">Top Token Holders</h3>
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((rank) => (
-              <div key={rank} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                    rank === 1 ? 'bg-yellow-400 text-yellow-900' :
-                    rank === 2 ? 'bg-gray-300 text-gray-700' :
-                    rank === 3 ? 'bg-orange-400 text-orange-900' :
-                    'bg-neutral-200 text-neutral-600'
-                  }`}>
-                    {rank}
+          {leaderboard.length === 0 ? (
+            <div className="text-center py-8 text-neutral-500">
+              Loading leaderboard data...
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {leaderboard.map((holder, index) => {
+                const rank = index + 1;
+                const totalSupply = AfriTokenService.getTotalSupply();
+                const percentage = ((holder.balance / totalSupply) * 100).toFixed(2);
+                
+                return (
+                  <div key={index} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                        rank === 1 ? 'bg-yellow-400 text-yellow-900' :
+                        rank === 2 ? 'bg-gray-300 text-gray-700' :
+                        rank === 3 ? 'bg-orange-400 text-orange-900' :
+                        'bg-neutral-200 text-neutral-600'
+                      }`}>
+                        {rank}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-neutral-900">{holder.userId}</div>
+                        <div className="text-sm text-neutral-500">
+                          {holder.locked > 0 ? `${holder.locked.toLocaleString()} locked` : 'Token Holder'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-neutral-900">
+                        {holder.balance.toLocaleString()} AFRI
+                      </div>
+                      <div className="text-sm text-neutral-500">
+                        {percentage}% of supply
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-semibold text-neutral-900">User {rank}</div>
-                    <div className="text-sm text-neutral-500">Agent/User</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-neutral-900">
-                    {(15000 - rank * 1000).toLocaleString()} AFRI
-                  </div>
-                  <div className="text-sm text-neutral-500">
-                    {((15000 - rank * 1000) / 10000).toFixed(1)}% of supply
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
