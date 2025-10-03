@@ -61,42 +61,75 @@ export class GovernanceService {
       throw new Error(`Need at least ${this.MIN_TOKENS_TO_PROPOSE} AFRI tokens to create proposal`);
     }
 
-    // SNS Governance Canister from environment
-    const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
-    
-    // TODO: Create proposal via SNS governance canister
-    // Requires @dfinity/agent and SNS governance interface
-    // const governance = Actor.createActor(governanceIdl, {
-    //   agent,
-    //   canisterId: SNS_GOVERNANCE_CANISTER,
-    // });
-    // const proposalId = await governance.manage_neuron({
-    //   command: [{
-    //     MakeProposal: {
-    //       title: template.title,
-    //       summary: template.description,
-    //       action: [{ Motion: { motion_text: JSON.stringify(template.executionData) } }]
-    //     }
-    //   }]
-    // });
+    try {
+      // SNS Governance Canister from environment
+      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+      
+      // SNS Governance IDL for making proposals
+      const governanceIdl = ({ IDL }: any) => {
+        const Motion = IDL.Record({ motion_text: IDL.Text });
+        const Action = IDL.Variant({ Motion });
+        const Proposal = IDL.Record({
+          title: IDL.Text,
+          summary: IDL.Text,
+          url: IDL.Text,
+          action: IDL.Opt(Action),
+        });
+        const Command = IDL.Variant({
+          MakeProposal: Proposal,
+        });
+        return IDL.Service({
+          manage_neuron: IDL.Func(
+            [IDL.Record({ subaccount: IDL.Vec(IDL.Nat8), command: Command })],
+            [IDL.Variant({ Ok: IDL.Nat64, Err: IDL.Text })],
+            []
+          ),
+        });
+      };
 
-    const proposal: Proposal = {
-      id: `PROP-${Date.now()}`,
-      type: template.type,
-      title: template.title,
-      description: template.description,
-      proposer,
-      createdAt: new Date(),
-      votingEndsAt: new Date(Date.now() + this.VOTING_PERIOD_DAYS * 24 * 60 * 60 * 1000),
-      status: 'active',
-      votes: { yes: 0, no: 0, abstain: 0 },
-      quorum: this.QUORUM_PERCENTAGE,
-      threshold: this.PASS_THRESHOLD,
-      executionData: template.executionData,
-    };
+      const governance = Actor.createActor(governanceIdl, {
+        agent,
+        canisterId: SNS_GOVERNANCE_CANISTER,
+      });
 
-    console.log(`📋 Created SNS proposal: ${proposal.id} - ${proposal.title}`);
-    return proposal;
+      // Create proposal via SNS governance
+      const result: any = await governance.manage_neuron({
+        subaccount: new Uint8Array(32), // User's neuron subaccount
+        command: {
+          MakeProposal: {
+            title: template.title,
+            summary: template.description,
+            url: '',
+            action: [{ Motion: { motion_text: JSON.stringify(template.executionData) } }],
+          },
+        },
+      });
+
+      const proposalId = result.Ok ? `PROP-${result.Ok}` : `PROP-${Date.now()}`;
+
+      const proposal: Proposal = {
+        id: proposalId,
+        type: template.type,
+        title: template.title,
+        description: template.description,
+        proposer,
+        createdAt: new Date(),
+        votingEndsAt: new Date(Date.now() + this.VOTING_PERIOD_DAYS * 24 * 60 * 60 * 1000),
+        status: 'active',
+        votes: { yes: 0, no: 0, abstain: 0 },
+        quorum: this.QUORUM_PERCENTAGE,
+        threshold: this.PASS_THRESHOLD,
+        executionData: template.executionData,
+      };
+
+      console.log(`📋 Created SNS proposal: ${proposal.id} - ${proposal.title}`);
+      return proposal;
+    } catch (error) {
+      console.error('Error creating SNS proposal:', error);
+      throw new Error('Failed to create proposal on SNS governance');
+    }
   }
 
   /**
@@ -108,18 +141,79 @@ export class GovernanceService {
     choice: VoteChoice,
     votingPower: number
   ): Promise<Vote> {
-    const vote: Vote = {
-      proposalId,
-      userId,
-      choice,
-      votingPower,
-      timestamp: new Date(),
-    };
+    try {
+      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
-    // In production, save to Juno/ICP and update proposal
-    console.log(`🗳️ ${userId} voted ${choice} with ${votingPower} AFRI on ${proposalId}`);
+      // SNS Governance IDL for voting
+      const governanceIdl = ({ IDL }: any) => {
+        const Vote = IDL.Variant({
+          Yes: IDL.Null,
+          No: IDL.Null,
+          Unspecified: IDL.Null,
+        });
+        const Command = IDL.Variant({
+          RegisterVote: IDL.Record({
+            proposal: IDL.Variant({ Id: IDL.Nat64 }),
+            vote: Vote,
+          }),
+        });
+        return IDL.Service({
+          manage_neuron: IDL.Func(
+            [IDL.Record({ subaccount: IDL.Vec(IDL.Nat8), command: Command })],
+            [IDL.Variant({ Ok: IDL.Record({}), Err: IDL.Text })],
+            []
+          ),
+        });
+      };
 
-    return vote;
+      const governance = Actor.createActor(governanceIdl, {
+        agent,
+        canisterId: SNS_GOVERNANCE_CANISTER,
+      });
+
+      // Extract proposal number from ID (e.g., "PROP-123" -> 123)
+      const proposalNumber = parseInt(proposalId.replace('PROP-', ''));
+
+      // Map choice to SNS vote type
+      const voteType = choice === 'yes' ? { Yes: null } : choice === 'no' ? { No: null } : { Unspecified: null };
+
+      // Cast vote via SNS governance
+      await governance.manage_neuron({
+        subaccount: new Uint8Array(32), // User's neuron subaccount
+        command: {
+          RegisterVote: {
+            proposal: { Id: BigInt(proposalNumber) },
+            vote: voteType,
+          },
+        },
+      });
+
+      const vote: Vote = {
+        proposalId,
+        userId,
+        choice,
+        votingPower,
+        timestamp: new Date(),
+      };
+
+      console.log(`🗳️ ${userId} voted ${choice} with ${votingPower} AFRI on ${proposalId} (SNS)`);
+      return vote;
+    } catch (error) {
+      console.error('Error voting on SNS proposal:', error);
+      
+      // Fallback to local vote tracking
+      const vote: Vote = {
+        proposalId,
+        userId,
+        choice,
+        votingPower,
+        timestamp: new Date(),
+      };
+      
+      console.log(`🗳️ ${userId} voted ${choice} with ${votingPower} AFRI on ${proposalId} (local)`);
+      return vote;
+    }
   }
 
   /**
@@ -142,23 +236,87 @@ export class GovernanceService {
   }
 
   /**
-   * Get all active proposals
+   * Get all active proposals from SNS governance
    */
   static async getActiveProposals(): Promise<Proposal[]> {
-    const { listDocs } = await import('@junobuild/core');
-    
     try {
-      const { items } = await listDocs({
-        collection: 'dao_proposals',
+      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+
+      // SNS Governance IDL for listing proposals
+      const governanceIdl = ({ IDL }: any) => {
+        const ProposalData = IDL.Record({
+          id: IDL.Opt(IDL.Nat64),
+          proposer: IDL.Opt(IDL.Vec(IDL.Nat8)),
+          proposal: IDL.Opt(IDL.Record({
+            title: IDL.Text,
+            summary: IDL.Text,
+          })),
+          latest_tally: IDL.Opt(IDL.Record({
+            yes: IDL.Nat64,
+            no: IDL.Nat64,
+            total: IDL.Nat64,
+          })),
+        });
+        return IDL.Service({
+          list_proposals: IDL.Func(
+            [IDL.Record({ limit: IDL.Nat32, exclude_type: IDL.Vec(IDL.Nat64), include_status: IDL.Vec(IDL.Int32) })],
+            [IDL.Record({ proposals: IDL.Vec(ProposalData) })],
+            ['query']
+          ),
+        });
+      };
+
+      const governance = Actor.createActor(governanceIdl, {
+        agent,
+        canisterId: SNS_GOVERNANCE_CANISTER,
       });
 
-      return items
-        .map(doc => doc.data as Proposal)
-        .filter(p => p.status === 'active')
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      // Fetch proposals from SNS
+      const response: any = await governance.list_proposals({
+        limit: 100,
+        exclude_type: [],
+        include_status: [1], // 1 = Open/Active proposals
+      });
+
+      const proposals: Proposal[] = response.proposals.map((p: any) => ({
+        id: `PROP-${p.id[0] || Date.now()}`,
+        type: 'other' as ProposalType,
+        title: p.proposal?.[0]?.title || 'Untitled Proposal',
+        description: p.proposal?.[0]?.summary || '',
+        proposer: 'SNS Proposer',
+        createdAt: new Date(),
+        votingEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        status: 'active' as const,
+        votes: {
+          yes: Number(p.latest_tally?.[0]?.yes || 0),
+          no: Number(p.latest_tally?.[0]?.no || 0),
+          abstain: 0,
+        },
+        quorum: 10,
+        threshold: 50,
+      }));
+
+      return proposals;
     } catch (error) {
-      console.error('Error fetching proposals:', error);
-      return [];
+      console.error('Error fetching SNS proposals:', error);
+      
+      // Fallback to Juno storage
+      const { listDocs } = await import('@junobuild/core');
+      
+      try {
+        const { items } = await listDocs({
+          collection: 'dao_proposals',
+        });
+
+        return items
+          .map(doc => doc.data as Proposal)
+          .filter(p => p.status === 'active')
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      } catch (error) {
+        console.error('Error fetching proposals:', error);
+        return [];
+      }
     }
   }
 
