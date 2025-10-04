@@ -1,14 +1,38 @@
 import React from 'react';
 import { Bitcoin, Shield, Users, Clock, CheckCircle, AlertTriangle, Smartphone, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
+import { useAuthentication } from '../context/AuthenticationContext';
+import { LoginFormData } from '../types/auth';
+import PublicHeader from '../components/PublicHeader';
+import PublicFooter from '../components/PublicFooter';
 
 const BitcoinExchangePage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, login } = useAuthentication();
+
+  const handleStartExchange = async () => {
+    if (user.user) {
+      // Already authenticated as user, go to exchange
+      navigate('/users/bitcoin/deposit');
+    } else {
+      // Not authenticated, trigger ICP login
+      try {
+        await login({} as LoginFormData, 'web');
+        // After login, user will be redirected by AuthContext
+      } catch (error) {
+        console.error('Login failed:', error);
+      }
+    }
+  };
+
+  const handleBecomeAgent = () => {
+    navigate('/become-agent');
+  };
 
   return (
-    <PageLayout>
-      <div className="max-w-4xl mx-auto space-y-12">
+    <div className="min-h-screen bg-gray-50">
+      <PublicHeader />
+      <div className="max-w-4xl mx-auto space-y-12 py-12">
         {/* Hero Section */}
         <div className="text-center space-y-6">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-sm font-medium mb-4">
@@ -23,13 +47,13 @@ const BitcoinExchangePage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <button
-              onClick={() => navigate('/users/bitcoin/deposit')}
+              onClick={handleStartExchange}
               className="bg-orange-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
             >
-              Start Exchange
+              {user.user ? 'Start Exchange' : 'Sign In to Exchange'}
             </button>
             <button
-              onClick={() => navigate('/auth/role-selection')}
+              onClick={handleBecomeAgent}
               className="bg-neutral-100 text-neutral-700 px-8 py-3 rounded-lg font-medium hover:bg-neutral-200 transition-colors"
             >
               Become an Agent
@@ -428,21 +452,22 @@ const BitcoinExchangePage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => navigate('/users/bitcoin/deposit')}
+              onClick={handleStartExchange}
               className="bg-white text-orange-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
             >
-              Start Your Exchange
+              {user.user ? 'Start Your Exchange' : 'Sign In to Exchange'}
             </button>
             <button
-              onClick={() => navigate('/auth/role-selection')}
-              className="bg-orange-700 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-800 transition-colors border border-orange-500"
+              onClick={handleBecomeAgent}
+              className="bg-white text-orange-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
             >
               Become an Agent
             </button>
           </div>
         </div>
       </div>
-    </PageLayout>
+      <PublicFooter />
+    </div>
   );
 };
 
