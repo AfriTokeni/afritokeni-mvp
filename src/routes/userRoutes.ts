@@ -6,6 +6,9 @@ import {
   History,
   User,
   MapPin,
+  Vote,
+  Trophy,
+} from 'lucide-react';
   LayoutDashboard,
   Banknote,
 } from "lucide-react";
@@ -37,6 +40,18 @@ export const user_desktop_routes: Route[] = [
         path: "/users/lightning",
         label: "Send Bitcoin",
         icon: Send,
+    },
+    {
+        id: "dao" as RouteID,
+        path: "/users/dao",
+        label: "DAO Governance",
+        icon: Vote,
+    },
+    {
+        id: "leaderboard" as RouteID,
+        path: "/users/leaderboard",
+        label: "Leaderboard",
+        icon: Trophy,
     },
     {
         id: "agents" as RouteID,
@@ -80,6 +95,14 @@ export const user_mobile_routes: Route[] = [
   {
     id: "lightning" as RouteID,
     path: "/users/lightning",
+    label: "Bitcoin",
+    icon: Send,
+  },
+  {
+    id: "dao" as RouteID,
+    path: "/users/dao",
+    label: "DAO",
+    icon: Vote,
     label: "Send Bitcoin",
     icon: Send,
   },

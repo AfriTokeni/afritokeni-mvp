@@ -129,6 +129,21 @@ export class SMSCommandProcessor {
         return { success: response.success, reply: response.message };
       }
 
+      // DAO Governance - Check AFRI balance
+      if (normalizedMessage === 'AFRI' || normalizedMessage === 'AFRI BAL') {
+        return await this.handleAfriBalance(phoneNumber);
+      }
+
+      // DAO Governance - Vote on proposal
+      if (normalizedMessage.startsWith('VOTE ')) {
+        return await this.handleVote(phoneNumber, message);
+      }
+
+      // DAO Governance - List proposals
+      if (normalizedMessage === 'PROPOSALS' || normalizedMessage === 'DAO') {
+        return await this.handleProposals();
+      }
+
       // Help
       if (normalizedMessage === 'HELP' || normalizedMessage === '*AFRI#') {
         return this.handleHelp();
@@ -604,11 +619,15 @@ BTC BUY [Amount] [Currency] - Buy BTC
 BTC SELL [Amount] - Sell BTC
 BTC SEND [Phone] [Amount] [Currency] - Send BTC (auto-optimized)
 
+DAO Governance:
+AFRI - Check AFRI token balance
+PROPOSALS - List active proposals
+VOTE [YES/NO] [PROP-ID] - Vote on proposal
+
 HISTORY - Recent transactions
 HELP - Show this menu`,
     };
   }
-
   /**
    * Handle transaction history
    */
@@ -653,5 +672,140 @@ HELP - Show this menu`,
    */
   private generateWithdrawalCode(): string {
     return `WD-${Math.floor(100000 + Math.random() * 900000)}`;
+  }
+
+  /**
+   * Handle AFRI token balance check
+   */
+  private async handleAfriBalance(phoneNumber: string): Promise<SMSCommandResponse> {
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
+    if (!user) {
+      return {
+        success: false,
+        reply: 'Account not found. Register with: REG [Your Name]',
+      };
+    }
+
+    // Import dynamically to avoid circular deps
+    const { AfriTokenService } = await import('./afriTokenService');
+    const balance = await AfriTokenService.getBalance(user.id);
+
+    return {
+      success: true,
+      reply: `🪙 AFRI Token Balance
+
+Total: ${balance.balance.toLocaleString()} AFRI
+
+Earned from:
+- Transactions: ${balance.earned.transactions.toLocaleString()}
+- Agent Activity: ${balance.earned.agentActivity.toLocaleString()}
+- Referrals: ${balance.earned.referrals.toLocaleString()}
+- Staking: ${balance.earned.staking.toLocaleString()}
+
+Locked in votes: ${balance.locked.toLocaleString()}
+
+Send PROPOSALS to see active votes`,
+    };
+  }
+
+  /**
+   * Handle voting on proposals
+   * Format: VOTE [YES/NO/ABSTAIN] [PROPOSAL-ID]
+   */
+  private async handleVote(phoneNumber: string, message: string): Promise<SMSCommandResponse> {
+    const parts = message.trim().toUpperCase().split(' ');
+    if (parts.length < 3) {
+      return {
+        success: false,
+        reply: 'Format: VOTE [YES/NO/ABSTAIN] [PROPOSAL-ID]\nExample: VOTE YES PROP-001',
+      };
+    }
+
+    const choice = parts[1].toLowerCase();
+    const proposalId = parts[2];
+
+    if (!['yes', 'no', 'abstain'].includes(choice)) {
+      return {
+        success: false,
+        reply: 'Invalid choice. Use: YES, NO, or ABSTAIN',
+      };
+    }
+
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
+    if (!user) {
+      return {
+        success: false,
+        reply: 'Account not found. Register with: REG [Your Name]',
+      };
+    }
+
+    // Import services
+    const { AfriTokenService } = await import('./afriTokenService');
+    const { GovernanceService } = await import('./governanceService');
+
+    const balance = await AfriTokenService.getBalance(user.id);
+    
+    if (balance.balance === 0) {
+      return {
+        success: false,
+        reply: 'You need AFRI tokens to vote. Earn tokens by using AfriTokeni!',
+      };
+    }
+
+    try {
+      await GovernanceService.vote(proposalId, user.id, choice as 'yes' | 'no' | 'abstain', balance.balance);
+
+      return {
+        success: true,
+        reply: `✓ Vote Recorded!
+
+Proposal: ${proposalId}
+Your vote: ${choice.toUpperCase()}
+Voting power: ${balance.balance.toLocaleString()} AFRI
+
+Send PROPOSALS to see results`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        reply: `Failed to vote: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+  }
+
+  /**
+   * Handle listing active proposals
+   */
+  private async handleProposals(): Promise<SMSCommandResponse> {
+    const { GovernanceService } = await import('./governanceService');
+    const proposals = await GovernanceService.getActiveProposals();
+
+    if (proposals.length === 0) {
+      return {
+        success: true,
+        reply: 'No active proposals at the moment.',
+      };
+    }
+
+    let reply = '📋 Active Proposals:\n\n';
+    
+    proposals.slice(0, 3).forEach((proposal, index) => {
+      const totalVotes = proposal.votes.yes + proposal.votes.no;
+      const yesPercent = totalVotes > 0 ? Math.round((proposal.votes.yes / totalVotes) * 100) : 0;
+      
+      reply += `${index + 1}. ${proposal.id}\n`;
+      reply += `${proposal.title}\n`;
+      reply += `YES: ${yesPercent}% | NO: ${100 - yesPercent}%\n`;
+      reply += `Vote: VOTE YES ${proposal.id}\n\n`;
+    });
+
+    if (proposals.length > 3) {
+      reply += `...and ${proposals.length - 3} more\n`;
+    }
+
+    return {
+      success: true,
+      reply: reply.trim(),
+    };
   }
 }
