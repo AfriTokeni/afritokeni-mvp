@@ -3,10 +3,10 @@ import { FC, useEffect } from "react";
 import junoConfig from "../juno.config";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import { AuthenticationProvider } from "./context/AuthenticationContext.tsx";
+import { UserbackProvider } from "./context/UserbackContext.tsx";
 import Layout from "./components/Layout.tsx";
 import { user_desktop_routes, user_mobile_routes } from "./routes/userRoutes.ts";
 import { agent_desktop_routes, agent_mobile_routes } from "./routes/agentRoutes.ts";
-import Userback from "@userback/widget";
 
 // User Pages
 import UserDashboard from "./pages/UserDashboard.tsx";
@@ -70,21 +70,14 @@ const App: FC = () => {
       }
     };
     
-    const initUserback = async () => {
-      const token = import.meta.env.VITE_USERBACK_TOKEN;
-      if (token) {
-        await Userback(token);
-      }
-    };
-    
     initJuno();
-    initUserback();
   }, []);
 
   return (
     <BrowserRouter>
-      <AuthenticationProvider>
-        <Routes>
+      <UserbackProvider>
+        <AuthenticationProvider>
+          <Routes>
           {/* Auth Routes - Only Juno/ICP authentication used */}
     
           {/* User Routes */}
@@ -158,7 +151,8 @@ const App: FC = () => {
           {/* Default redirects */}
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />
         </Routes>
-      </AuthenticationProvider>
+        </AuthenticationProvider>
+      </UserbackProvider>
     </BrowserRouter>
   );
 };
