@@ -6,7 +6,13 @@ import Userback from "@userback/widget";
 
 // Initialize Userback
 const initUserback = async () => {
-  const token = "A-bke5ah6cBwLt6mQwA9kQhOX0d";
+  const token = import.meta.env.VITE_USERBACK_TOKEN;
+  
+  if (!token) {
+    console.warn('Userback token not found in .env');
+    return;
+  }
+  
   await Userback(token);
   console.log("✅ Userback initialized");
 };
