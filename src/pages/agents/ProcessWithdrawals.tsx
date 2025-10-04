@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Minus } from 'lucide-react';
-import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
@@ -205,7 +204,7 @@ const ProcessWithdrawals: React.FC = () => {
       case 'rejected':
         return <XCircle className="w-5 h-5 text-red-500" />;
       default:
-        return <Clock className="w-5 h-5 text-neutral-500" />;
+        return <Clock className="w-5 h-5 text-gray-500" />;
     }
   };
 
@@ -220,34 +219,33 @@ const ProcessWithdrawals: React.FC = () => {
       case 'rejected':
         return 'text-red-600 bg-red-50 border-red-200';
       default:
-        return 'text-neutral-600 bg-neutral-50 border-neutral-200';
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
   return (
-    <PageLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Process Withdrawals</h1>
-          <p className="text-neutral-600">Manage customer cash withdrawals and digital balance debits</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Process Withdrawals</h1>
+          <p className="text-gray-600">Manage customer cash withdrawals and digital balance debits</p>
         </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <div className="flex space-x-1 bg-neutral-100 rounded-lg p-1 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 mb-6">
             {(['all', 'pending', 'confirmed', 'completed'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   filter === tab
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                <span className="ml-2 text-xs bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded-full">
+                <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
                   {tab === 'all' ? withdrawalRequests.length : withdrawalRequests.filter(r => r.status === tab).length}
                 </span>
               </button>
@@ -259,13 +257,13 @@ const ProcessWithdrawals: React.FC = () => {
             {loading ? (
               <div className="text-center py-12">
                 <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-neutral-600">Loading withdrawal requests...</p>
+                <p className="text-gray-600">Loading withdrawal requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
               <div className="text-center py-12">
-                <Minus className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">No withdrawal requests</h3>
-                <p className="text-neutral-600">
+                <Minus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No withdrawal requests</h3>
+                <p className="text-gray-600">
                   {filter === 'pending' ? 'No pending withdrawals at the moment.' : `No ${filter} withdrawals found.`}
                 </p>
               </div>
@@ -273,16 +271,16 @@ const ProcessWithdrawals: React.FC = () => {
               filteredRequests.map((request) => (
                 <div
                   key={request.id}
-                  className="border border-neutral-200 rounded-lg p-4 hover:border-neutral-300 transition-colors"
+                  className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-neutral-600" />
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-gray-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-neutral-900">{request.userName}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-neutral-600">
+                        <h3 className="font-semibold text-gray-900">{request.userName}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <div className="flex items-center space-x-1">
                             <Phone className="w-4 h-4" />
                             <span>{request.userPhone}</span>
@@ -305,7 +303,7 @@ const ProcessWithdrawals: React.FC = () => {
                         <span className="capitalize">{request.status}</span>
                       </div>
                       {request.fee > 0 && (
-                        <div className="text-xs text-neutral-500 mt-1">
+                        <div className="text-xs text-gray-500 mt-1">
                           Fee: {formatCurrencyAmount(request.fee, request.currency as AfricanCurrency)}
                         </div>
                       )}
@@ -313,9 +311,9 @@ const ProcessWithdrawals: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-neutral-600">
+                    <div className="text-sm text-gray-600">
                       <span>Withdrawal Code: </span>
-                      <span className="font-mono font-semibold text-neutral-900">{request.withdrawalCode}</span>
+                      <span className="font-mono font-semibold text-gray-900">{request.withdrawalCode}</span>
                       <span className="ml-4">
                         {new Date(request.createdAt).toLocaleString()}
                       </span>
@@ -330,13 +328,13 @@ const ProcessWithdrawals: React.FC = () => {
                               placeholder="Enter withdrawal code"
                               value={verificationCode}
                               onChange={(e) => setVerificationCode(e.target.value)}
-                              className="px-3 py-1 border border-neutral-300 rounded text-sm font-mono"
+                              className="px-3 py-1 border border-gray-300 rounded text-sm font-mono"
                               maxLength={6}
                             />
                             <button
                               onClick={() => handleVerifyCode(request)}
                               disabled={!verificationCode}
-                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-neutral-300"
+                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-300"
                             >
                               Verify
                             </button>
@@ -349,7 +347,7 @@ const ProcessWithdrawals: React.FC = () => {
                           <button
                             onClick={() => handleConfirmWithdrawal(request)}
                             disabled={isProcessing}
-                            className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:bg-neutral-300 flex items-center space-x-1"
+                            className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:bg-gray-300 flex items-center space-x-1"
                           >
                             {isProcessing ? (
                               <>
@@ -366,7 +364,7 @@ const ProcessWithdrawals: React.FC = () => {
                           <button
                             onClick={() => handleRejectWithdrawal(request)}
                             disabled={isProcessing}
-                            className="px-4 py-2 bg-neutral-600 text-white rounded text-sm hover:bg-neutral-700 disabled:bg-neutral-300 flex items-center space-x-1"
+                            className="px-4 py-2 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 disabled:bg-gray-300 flex items-center space-x-1"
                           >
                             <XCircle className="w-4 h-4" />
                             <span>Reject</span>
@@ -407,8 +405,7 @@ const ProcessWithdrawals: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
-    </PageLayout>
+    </div>
   );
 };
 
