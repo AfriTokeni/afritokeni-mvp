@@ -200,6 +200,21 @@ A primary challenge was deploying the Node.js webhook server, which interacts wi
 ### WebAssembly Integration
 Integrating Bitcoin cryptographic libraries like `tiny-secp256k1` required careful configuration of Vite to handle WebAssembly modules. This was resolved by adding `vite-plugin-wasm` and `vite-plugin-top-level-await` to properly support WASM-based cryptographic operations in the browser environment.
 
+### User Feedback & Bug Reporting
+AfriTokeni integrates **Userback.io** for in-app feedback collection, bug reporting, and user insights. This allows users to:
+- Report bugs with screenshots and screen recordings
+- Provide feature requests and feedback
+- Rate their experience
+- All without leaving the application
+
+**Setup:**
+1. Sign up at [userback.io](https://userback.io/)
+2. Get your widget token from Settings → Widget
+3. Add to `.env`: `VITE_USERBACK_TOKEN=your_token_here`
+4. The widget automatically appears in the bottom-right corner
+
+This helps us continuously improve the platform based on real user feedback from both web and SMS users.
+
 ## 🚀 Future Roadmap
 
 Our vision is to make AfriTokeni the leading Bitcoin banking platform for Africa's unbanked population. Here's our path from MVP to continental scale.

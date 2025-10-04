@@ -6,6 +6,7 @@ import { AuthenticationProvider } from "./context/AuthenticationContext.tsx";
 import Layout from "./components/Layout.tsx";
 import { user_desktop_routes, user_mobile_routes } from "./routes/userRoutes.ts";
 import { agent_desktop_routes, agent_mobile_routes } from "./routes/agentRoutes.ts";
+import UserbackWidget from "./components/UserbackWidget.tsx";
 
 // User Pages
 import UserDashboard from "./pages/UserDashboard.tsx";
@@ -75,6 +76,7 @@ const App: FC = () => {
   return (
     <BrowserRouter>
       <AuthenticationProvider>
+        <UserbackWidget />
         <Routes>
           {/* Auth Routes - Only Juno/ICP authentication used */}
     
