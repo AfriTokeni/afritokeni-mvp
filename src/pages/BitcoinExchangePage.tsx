@@ -14,10 +14,11 @@ const BitcoinExchangePage: React.FC = () => {
       // Already authenticated, go to exchange
       navigate('/users/bitcoin/deposit');
     } else {
-      // Not authenticated, trigger ICP login
+      // Not authenticated, trigger ICP login then redirect
       try {
         await login({} as LoginFormData, 'web');
-        // After login, AuthContext will handle routing
+        // After successful login, redirect to exchange
+        navigate('/users/bitcoin/deposit');
       } catch (error) {
         console.error('Login failed:', error);
       }

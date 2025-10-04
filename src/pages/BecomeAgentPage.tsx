@@ -9,13 +9,17 @@ const BecomeAgentPage: React.FC = () => {
 
   const handleGetStarted = async () => {
     if (!user) {
-      // Trigger ICP login
+      // Trigger ICP login, then redirect to role selection
       try {
         await login({} as LoginFormData, 'web');
-        // After login, user will be redirected based on role
+        // After successful ICP login, go to role selection
+        window.location.href = '/auth/role-selection';
       } catch (error) {
         console.error('Login failed:', error);
       }
+    } else {
+      // Already logged in, go to role selection or agent dashboard
+      window.location.href = '/auth/role-selection';
     }
   };
 

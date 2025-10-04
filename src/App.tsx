@@ -48,6 +48,7 @@ import AgentKYCPage from "./pages/auth/AgentKYCPage";
 import KYCAdmin from './pages/admin/KYCAdmin';
 import AdminLogin from './pages/auth/AdminLogin';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Landing Page
 import LandingPage from "./pages/LandingPage";
@@ -82,8 +83,9 @@ const App: FC = () => {
     
           {/* User Routes */}
           <Route path="/users/*" element={
-            <Layout desktop_routes={user_desktop_routes} mobile_routes={user_mobile_routes} user_type="user">
-              <Routes>
+            <ProtectedRoute requiredRole="user">
+              <Layout desktop_routes={user_desktop_routes} mobile_routes={user_mobile_routes} user_type="user">
+                <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
                 <Route path="agents" element={<AgentMapPage />} />
@@ -102,12 +104,14 @@ const App: FC = () => {
                 <Route path="exchange" element={<ExchangePage />} />
               </Routes>
             </Layout>
+            </ProtectedRoute>
           } />
           
           {/* Agent Routes */}
           <Route path="/agents/*" element={
-            <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes} user_type="agent">
-              <Routes>
+            <ProtectedRoute requiredRole="agent">
+              <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes} user_type="agent">
+                <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
                 <Route path="withdraw" element={<ProcessWithdrawal/>} />
                 <Route path="process-deposits" element={<ProcessDeposits/>} />
@@ -125,6 +129,7 @@ const App: FC = () => {
                 <Route path="agent-kyc" element={<AgentKYCPage />} />
               </Routes>
             </Layout>
+            </ProtectedRoute>
           } />
           
           {/* Auth Routes */}
