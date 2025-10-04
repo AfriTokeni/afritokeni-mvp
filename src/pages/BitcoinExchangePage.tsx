@@ -1,9 +1,10 @@
 import React from 'react';
 import { Bitcoin, Shield, Users, Clock, CheckCircle, AlertTriangle, Smartphone, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
+import PublicHeader from '../components/PublicHeader';
+import PublicFooter from '../components/PublicFooter';
 
 const BitcoinExchangePage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +30,9 @@ const BitcoinExchangePage: React.FC = () => {
   };
 
   return (
-    <PageLayout>
-      <div className="max-w-4xl mx-auto space-y-12">
+    <div className="min-h-screen bg-gray-50">
+      <PublicHeader />
+      <div className="max-w-4xl mx-auto space-y-12 py-12">
         {/* Hero Section */}
         <div className="text-center space-y-6">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-sm font-medium mb-4">
@@ -464,7 +466,8 @@ const BitcoinExchangePage: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+      <PublicFooter />
+    </div>
   );
 };
 

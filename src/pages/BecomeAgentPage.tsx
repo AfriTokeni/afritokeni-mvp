@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Users, DollarSign, MapPin, Shield, TrendingUp, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Users, DollarSign, MapPin, Shield, TrendingUp, CheckCircle } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
+import PublicHeader from '../components/PublicHeader';
+import PublicFooter from '../components/PublicFooter';
 
 const BecomeAgentPage: React.FC = () => {
   const { user, login } = useAuthentication();
@@ -112,23 +113,7 @@ const BecomeAgentPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center">
-              <img src="/afriTokeni.svg" alt="AfriTokeni" className="h-5 w-auto" />
-            </Link>
-            <Link
-              to="/bitcoin-exchange"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* Hero */}
@@ -281,6 +266,8 @@ const BecomeAgentPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <PublicFooter />
     </div>
   );
 };

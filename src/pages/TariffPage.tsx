@@ -14,8 +14,9 @@ import {
   Banknote
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
 import DynamicFeeCalculator from '../components/DynamicFeeCalculator';
+import PublicHeader from '../components/PublicHeader';
+import PublicFooter from '../components/PublicFooter';
 
 const TariffPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<'overview' | 'calculator' | 'examples'>('overview');
@@ -97,8 +98,9 @@ const TariffPage: React.FC = () => {
   };
 
   return (
-    <PageLayout>
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <PublicHeader />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
@@ -453,7 +455,8 @@ const TariffPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+      <PublicFooter />
+    </div>
   );
 };
 

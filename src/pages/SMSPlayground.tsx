@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone, Send, ArrowLeft, Zap, CheckCircle } from 'lucide-react';
+import { Smartphone, Send } from 'lucide-react';
+import PublicHeader from '../components/PublicHeader';
+import PublicFooter from '../components/PublicFooter';
 
 interface Message {
   type: 'sent' | 'received';
@@ -112,27 +114,11 @@ const SMSPlayground: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <PublicHeader />
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center space-x-3">
-              <img src="/afriTokeni.svg" alt="AfriTokeni" className="h-5 w-auto" />
-            </Link>
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-        {/* Hero */}
-        <div className="text-center mb-12">
+          {/* Hero */}
+          <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
             <Smartphone className="w-4 h-4" />
             Interactive SMS Demo
@@ -211,6 +197,7 @@ const SMSPlayground: React.FC = () => {
                 ))}
               </div>
             </div>
+
           </div>
 
           {/* Commands Reference */}
@@ -237,47 +224,33 @@ const SMSPlayground: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            {/* Features */}
-            <div className="mt-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Why SMS Banking?</h3>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-gray-900">Works Offline</p>
-                    <p className="text-sm text-gray-600">No internet or smartphone needed</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Zap className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-gray-900">Instant Transfers</p>
-                    <p className="text-sm text-gray-600">Lightning Network under 1 second</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-gray-900">Any Phone</p>
-                    <p className="text-sm text-gray-600">Feature phones, smartphones, anything</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="mt-12 text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg"
-          >
-            Start Banking Now
-          </Link>
+        {/* CTA Section - Identical to Bitcoin Exchange */}
+        <div className="mt-12 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-12 text-center text-white">
+          <h2 className="text-3xl font-bold mb-4">Ready to Try SMS Banking?</h2>
+          <p className="text-xl mb-6 opacity-90">
+            Join thousands using AfriTokeni on any phone - no internet required
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+            >
+              Start Banking Now
+            </Link>
+            <Link
+              to="/become-agent"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+            >
+              Become an Agent
+            </Link>
+          </div>
+        </div>
         </div>
       </div>
+      <PublicFooter />
     </div>
   );
 };
