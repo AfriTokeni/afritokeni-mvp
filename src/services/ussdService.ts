@@ -636,14 +636,17 @@ Instant Bitcoin transfers!
       };
       const currency = currencyMap[subPath[2]] || 'UGX';
 
-      const response = await SMSLightningCommands.processCommand({
-        command: 'LN SEND',
+      // Use unified BTC SEND command (auto-routes between Lightning/on-chain)
+      const { SMSCommandProcessor } = await import('./smsCommandProcessor');
+      const processor = new SMSCommandProcessor();
+      const response = await processor['processCommand']({
         phoneNumber: session.phoneNumber,
-        params: ['LN', 'SEND', session.data.lnRecipient, session.data.lnAmount.toString(), currency],
+        message: `BTC SEND ${session.data.lnRecipient} ${session.data.lnAmount} ${currency}`,
+        timestamp: new Date(),
       });
 
       return {
-        response: `END ${response.message}`,
+        response: `END ${response.reply}`,
         continueSession: false,
       };
     }
