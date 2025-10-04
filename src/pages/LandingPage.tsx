@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone, Zap, Lock, Bitcoin, Globe, Mail, CheckCircle } from 'lucide-react';
+import { Smartphone, Zap, Lock, Bitcoin, Globe, CheckCircle } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
 import { setDoc } from '@junobuild/core';
@@ -89,19 +89,29 @@ const LandingPage: React.FC = () => {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-               <img src="/afriTokeni.svg" alt="AfriTokeni Logo" className="h-4 sm:h-5 w-auto" />
-              {/* <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-              <h1 className="text-xl font-semibold text-gray-900">AfriTokeni</h1> */}
-            </div>
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="flex items-center">
+              <img src="/afriTokeni.svg" alt="AfriTokeni" className="h-5 w-auto" />
+            </Link>
+            
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+              <Link to="/bitcoin-exchange" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                How It Works
+              </Link>
+              <Link to="/tariff" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Pricing
+              </Link>
+              <Link to="/sms" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Try SMS
+              </Link>
+            </nav>
+
             <button
               onClick={handleICPLogin}
-              className="bg-black text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-all duration-200 cursor-pointer transform hover:scale-105 shadow-sm hover:shadow-md"
+              className="bg-black text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all duration-200 transform hover:scale-105"
             >
-              Sign in →
+              Sign In
             </button>
           </div>
         </div>
@@ -115,87 +125,28 @@ const LandingPage: React.FC = () => {
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
               Starting in Africa. Coming to the world.
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight leading-tight px-2 sm:px-0">
-              Bitcoin meets Africa,
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
+              Bitcoin Banking
               <br />
-              <span className="text-gray-600">everywhere, for everyone</span>
+              <span className="text-gray-600">for Everyone</span>
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 sm:mb-12 leading-relaxed px-4 sm:px-0">
-              Instant Bitcoin transfers via Lightning Network. Send money in under 1 second with $0.001 fees.
-              39 African currencies, SMS or web, works with or without internet.
+            <p className="text-xl sm:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
+              Send money instantly via SMS or web. Works on any phone, with or without internet. 
+              39 African currencies supported.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleICPLogin}
-                className="bg-black text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="bg-black text-white px-10 py-5 rounded-xl text-lg font-semibold hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 Start Banking Now
               </button>
               <Link
-                to="/bitcoin-exchange"
-                className="bg-white text-gray-800 border-2 border-gray-200 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:border-gray-400 hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                Learn How It Works
-              </Link>
-              <Link
                 to="/sms"
-                className="bg-gray-800 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:bg-gray-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="bg-white text-gray-900 border-2 border-gray-300 px-10 py-5 rounded-xl text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Try SMS Banking
+                Try SMS Demo →
               </Link>
-            </div>
-            
-            {/* Email Subscription Box */}
-            <div className="mt-12 sm:mt-16">
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 max-w-2xl mx-auto">
-                <div className="text-center mb-6">
-                  <Mail className="w-8 h-8 text-orange-600 mx-auto mb-3" />
-                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
-                    Stay Updated
-                  </h3>
-                  <p className="text-gray-600">
-                    Get the latest updates on AfriTokeni&apos;s launch and new features
-                  </p>
-                </div>
-                
-                <form onSubmit={handleEmailSubscription} className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email address"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
-                      disabled={isSubscribing}
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSubscribing || !email}
-                    className="px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isSubscribing ? 'Subscribing...' : 'Subscribe'}
-                  </button>
-                </form>
-                
-                {subscriptionStatus === 'success' && (
-                  <div className="mt-4 flex items-center justify-center text-green-600">
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    <span>Successfully subscribed! Check your email for a welcome message.</span>
-                  </div>
-                )}
-                
-                {subscriptionStatus === 'error' && (
-                  <div className="mt-4 text-center text-red-600">
-                    <span>Please enter a valid email address.</span>
-                  </div>
-                )}
-                
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  We respect your privacy. Unsubscribe at any time.
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -540,17 +491,70 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 sm:py-12">
+      <footer className="bg-gray-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center">
-            {/* <div className="w-28 h-28 sm:w-30 sm:h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4 p-3">
-                <img src="/afriTokeni.svg" alt="AfriTokeni Logo" className="h-4 sm:h-5 w-auto" />
-            </div> */}
-            <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">AfriTokeni</h3>
-            <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 px-4 sm:px-0">Banking for everyone, everywhere in Africa</p>
-            <div className="text-xs sm:text-sm text-gray-500">
-              © 2025 AfriTokeni. Built on Internet Computer Protocol.
+          <div className="grid md:grid-cols-2 gap-12 mb-12">
+            {/* Newsletter */}
+            <div>
+              <h3 className="text-2xl font-bold mb-4">Stay Updated</h3>
+              <p className="text-gray-400 mb-6">
+                Get the latest updates on AfriTokeni's launch and new features
+              </p>
+              <form onSubmit={handleEmailSubscription} className="flex gap-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-white focus:border-transparent outline-none text-white placeholder-gray-500"
+                  disabled={isSubscribing}
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isSubscribing || !email}
+                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSubscribing ? '...' : 'Subscribe'}
+                </button>
+              </form>
+              {subscriptionStatus === 'success' && (
+                <div className="mt-3 flex items-center text-green-400 text-sm">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  <span>Successfully subscribed!</span>
+                </div>
+              )}
+              {subscriptionStatus === 'error' && (
+                <div className="mt-3 text-red-400 text-sm">
+                  Please enter a valid email address.
+                </div>
+              )}
             </div>
+
+            {/* Links */}
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <h4 className="font-semibold mb-4">Product</h4>
+                <ul className="space-y-3 text-gray-400">
+                  <li><Link to="/bitcoin-exchange" className="hover:text-white transition-colors">How It Works</Link></li>
+                  <li><Link to="/tariff" className="hover:text-white transition-colors">Pricing</Link></li>
+                  <li><Link to="/sms" className="hover:text-white transition-colors">SMS Demo</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Company</h4>
+                <ul className="space-y-3 text-gray-400">
+                  <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+            <p>© 2025 AfriTokeni. Built on Internet Computer Protocol.</p>
+            <p className="mt-2">Starting in Africa. Coming to the world.</p>
           </div>
         </div>
       </footer>
