@@ -49,10 +49,8 @@ export const useRoleBasedAuth = () => {
       return;
     }
     
-    // Only skip if we already handled this user AND we're on the correct page
-    const isOnCorrectPage = location.pathname.includes('/dashboard') || location.pathname === '/auth/role-selection';
-    if (lastHandledUserKeyRef.current === junoUser.key && isOnCorrectPage) {
-      console.log('Skipping check - already handled this user and on correct page');
+    // Skip if we already handled this user (protected routes will handle authorization)
+    if (lastHandledUserKeyRef.current === junoUser.key) {
       return;
     }
     
