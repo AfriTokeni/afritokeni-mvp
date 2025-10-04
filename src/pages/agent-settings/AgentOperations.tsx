@@ -31,18 +31,18 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
       <button
         onClick={onToggle}
         className="w-full p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 rounded-t-xl"
       >
         <div className="flex items-center space-x-3">
           <Clock className="w-5 h-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-neutral-900">Operations & Limits</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Operations & Limits</h2>
         </div>
         {expanded ? 
-          <ChevronUp className="w-5 h-5 text-neutral-400" /> : 
-          <ChevronDown className="w-5 h-5 text-neutral-400" />
+          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+          <ChevronDown className="w-5 h-5 text-gray-400" />
         }
       </button>
       
@@ -50,10 +50,10 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
         <div className="px-6 pb-6 space-y-6">
           {/* Operating Hours */}
           <div>
-            <h3 className="text-sm font-medium text-neutral-700 mb-3">Operating Hours</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Operating Hours</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-neutral-600 mb-1">Start Time</label>
+                <label className="block text-xs text-gray-600 mb-1">Start Time</label>
                 <input
                   type="time"
                   value={agentData.operatingHours.start}
@@ -61,11 +61,11 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
                     ...agentData.operatingHours,
                     start: e.target.value
                   })}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-xs text-neutral-600 mb-1">End Time</label>
+                <label className="block text-xs text-gray-600 mb-1">End Time</label>
                 <input
                   type="time"
                   value={agentData.operatingHours.end}
@@ -73,7 +73,7 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
                     ...agentData.operatingHours,
                     end: e.target.value
                   })}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -81,7 +81,7 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
 
           {/* Operating Days */}
           <div>
-            <h3 className="text-sm font-medium text-neutral-700 mb-3">Operating Days</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Operating Days</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {daysOfWeek.map((day) => (
                 <button
@@ -90,7 +90,7 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
                   className={`p-2 rounded-lg border text-sm font-medium transition-colors ${
                     agentData.operatingDays.includes(day)
                       ? 'bg-blue-100 text-blue-700 border-blue-300'
-                      : 'border-neutral-300 text-neutral-600 hover:bg-neutral-50'
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   {day.slice(0, 3)}
@@ -101,11 +101,11 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
 
           {/* Commission Rate */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Commission Rate (%)
             </label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="number"
                 min="0"
@@ -113,11 +113,11 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
                 step="0.1"
                 value={agentData.commissionRate}
                 onChange={(e) => onSettingChange('commissionRate', parseFloat(e.target.value))}
-                className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="2.5"
               />
             </div>
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               Recommended: 2-3% for urban areas, 4-7% for rural areas
             </p>
           </div>
@@ -125,7 +125,7 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
           {/* Cash Limits */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Maximum Cash Limit ({selectedCurrency})
               </label>
               <input
@@ -134,15 +134,15 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
                 step="10000"
                 value={agentData.maxCashLimit}
                 onChange={(e) => onSettingChange('maxCashLimit', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                 placeholder="500000"
               />
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 Maximum: {formatCurrencyAmount(agentData.maxCashLimit, selectedCurrency as any)}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Low Cash Threshold ({selectedCurrency})
               </label>
               <input
@@ -151,10 +151,10 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
                 step="10000"
                 value={agentData.lowCashThreshold}
                 onChange={(e) => onSettingChange('lowCashThreshold', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                 placeholder="50000"
               />
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 Alert at: {formatCurrencyAmount(agentData.lowCashThreshold, selectedCurrency as any)}
               </p>
             </div>
