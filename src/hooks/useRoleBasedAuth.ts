@@ -44,11 +44,23 @@ export const useRoleBasedAuth = () => {
   }, []);
 
   const checkAndRedirectUser = useCallback(async (junoUser: JunoUser) => {
-    if (inFlightRef.current || lastHandledUserKeyRef.current === junoUser.key) {
+    if (inFlightRef.current) {
+      console.log('Skipping check - already in flight');
       return;
     }
+    
+    // Only skip if we already handled this user AND we're on the correct page
+    const isOnCorrectPage = location.pathname.includes('/dashboard') || location.pathname === '/auth/role-selection';
+    if (lastHandledUserKeyRef.current === junoUser.key && isOnCorrectPage) {
+      console.log('Skipping check - already handled this user and on correct page');
+      return;
+    }
+    
     inFlightRef.current = true;
     setIsCheckingRole(true);
+    
+    console.log('🔍 Checking role for user:', junoUser.key);
+    
     try {
       // Add retry logic for network issues
       let roleDoc;
@@ -56,15 +68,18 @@ export const useRoleBasedAuth = () => {
       
       while (retries > 0) {
         try {
+          console.log(`Attempting to fetch role from user_roles collection (${retries} retries left)...`);
           roleDoc = await getDoc({
             collection: 'user_roles',
             key: junoUser.key
           });
+          console.log('✅ Successfully fetched role doc:', roleDoc);
           break; // Success, exit retry loop
         } catch (fetchError) {
           retries--;
+          console.error(`❌ Error fetching role (${retries} retries left):`, fetchError);
           if (retries === 0) throw fetchError;
-          console.warn(`Retrying getDoc, ${retries} attempts left:`, fetchError);
+          console.warn(`Retrying getDoc, ${retries} attempts left...`);
           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
         }
       }
@@ -72,16 +87,19 @@ export const useRoleBasedAuth = () => {
       if (roleDoc?.data) {
         // User has existing role, redirect accordingly
         const roleData = roleDoc.data as RoleData;
+        console.log('👤 User has existing role:', roleData.role);
         
         // Skip login update for now to avoid version issues
         // Just redirect based on role
         const target = roleData.role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
+        console.log(`➡️ Redirecting to ${target}`);
         if (location.pathname !== target) {
           navigate(target, { replace: true });
           lastNavigatedPathRef.current = target;
         }
       } else {
         // New user - need to determine role
+        console.log('🆕 New user detected - redirecting to role selection');
         const target = '/auth/role-selection';
         if (location.pathname !== target) {
           navigate(target, { replace: true });
@@ -89,8 +107,10 @@ export const useRoleBasedAuth = () => {
         }
       }
     } catch (error) {
-      console.error('Error checking user role:', error);
+      console.error('❌ Error checking user role:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       // For new users or on error, go to role selection
+      console.log('⚠️ Error occurred - redirecting to role selection as fallback');
       const target = '/auth/role-selection';
       if (location.pathname !== target) {
         navigate(target, { replace: true });
@@ -100,6 +120,7 @@ export const useRoleBasedAuth = () => {
       lastHandledUserKeyRef.current = junoUser.key;
       inFlightRef.current = false;
       setIsCheckingRole(false);
+      console.log('✅ Role check complete');
     }
   }, [location.pathname, navigate]);
 
