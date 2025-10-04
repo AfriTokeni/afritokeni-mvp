@@ -113,7 +113,7 @@ const LandingPage: React.FC = () => {
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Serving 400M+ unbanked Africans
+              Starting in Africa. Coming to the world.
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight leading-tight px-2 sm:px-0">
               Bitcoin meets Africa,
