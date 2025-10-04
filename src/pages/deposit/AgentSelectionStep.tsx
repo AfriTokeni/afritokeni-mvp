@@ -113,7 +113,7 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
   };
 
   const createAgentIcon = (isActive: boolean) => {
-    const bgColor = isActive ? 'bg-green-500' : 'bg-neutral-400';
+    const bgColor = isActive ? 'bg-green-500' : 'bg-gray-400';
     
     return L.divIcon({
       html: `
@@ -182,15 +182,15 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
       {/* Agent Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="font-semibold text-neutral-900 mb-1">
+          <h3 className="font-semibold text-gray-900 mb-1">
             {agent.businessName}
           </h3>
-          <div className="flex items-center text-sm text-neutral-600 mb-2">
+          <div className="flex items-center text-sm text-gray-600 mb-2">
             <MapPin className="h-4 w-4 mr-1" />
             {agent.location.address}
           </div>
           {userLocation && (
-            <div className="flex items-center text-sm text-neutral-500">
+            <div className="flex items-center text-sm text-gray-500">
               <Navigation className="h-4 w-4 mr-1" />
               {formatDistance(agent)} away
             </div>
@@ -201,7 +201,7 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             ? 'bg-green-100 text-green-800' 
             : agent.status === 'busy'
             ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-neutral-100 text-neutral-600'
+            : 'bg-gray-100 text-gray-600'
         }`}>
           {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
         </div>
@@ -210,14 +210,14 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
       {/* Agent Stats */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
-          <p className="font-mono font-semibold text-neutral-900">
+          <p className="text-xs text-gray-500 mb-1">Digital Balance</p>
+          <p className="font-mono font-semibold text-gray-900">
             {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
           </p>
         </div>
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
-          <p className="font-mono font-semibold text-neutral-900">
+          <p className="text-xs text-gray-500 mb-1">Cash Available</p>
+          <p className="font-mono font-semibold text-gray-900">
             {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
           </p>
         </div>
@@ -230,12 +230,12 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             <Star
               key={star}
               className={`h-4 w-4 ${
-                star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+                star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
               }`}
             />
           ))}
         </div>
-        <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+        <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
       </div>
 
       {/* Services */}
@@ -259,11 +259,11 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             onCreateDepositRequest(agent);
           }}
           disabled={isCreating}
-          className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+          className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
           {isCreating ? 'Creating...' : 'Select Agent'}
         </button>
-        <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
           <Phone className="h-4 w-4" />
         </button>
       </div>
@@ -272,10 +272,10 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 sm:p-8">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-neutral-900 mb-2">Select Agent</h2>
-          <p className="text-neutral-600">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Agent</h2>
+          <p className="text-gray-600">
             Choose an agent to deposit {formatCurrencyAmount(parseFloat(amount), selectedCurrency as AfricanCurrency)}
           </p>
         </div>
@@ -312,8 +312,8 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
 
         {isLoadingAgents ? (
           <div className="text-center py-8">
-            <div className="inline-flex items-center space-x-2 text-neutral-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-neutral-900"></div>
+            <div className="inline-flex items-center space-x-2 text-gray-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
               <span>Finding nearby agents...</span>
             </div>
           </div>
@@ -322,7 +322,7 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             {uniqueAgents.map((agent) => (
               <div
                 key={agent.id}
-                className={`bg-white rounded-xl shadow-sm border border-neutral-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                   selectedAgent?.id === agent.id ? 'ring-2 ring-blue-500' : ''
                 }`}
                 onClick={() => {
@@ -338,15 +338,15 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                 {/* Agent Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-neutral-900 mb-1">
+                    <h3 className="font-semibold text-gray-900 mb-1">
                       {agent.businessName}
                     </h3>
-                    <div className="flex items-center text-sm text-neutral-600 mb-2">
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
                       <MapPin className="h-4 w-4 mr-1" />
                       {agent.location.address}
                     </div>
                     {userLocation && (
-                      <div className="flex items-center text-sm text-neutral-500">
+                      <div className="flex items-center text-sm text-gray-500">
                         <Navigation className="h-4 w-4 mr-1" />
                         {formatDistance(agent)} away
                       </div>
@@ -357,7 +357,7 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                       ? 'bg-green-100 text-green-800' 
                       : agent.status === 'busy'
                       ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-neutral-100 text-neutral-600'
+                      : 'bg-gray-100 text-gray-600'
                   }`}>
                     {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
                   </div>
@@ -366,14 +366,14 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                 {/* Agent Stats */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
-                    <p className="font-mono font-semibold text-neutral-900">
+                    <p className="text-xs text-gray-500 mb-1">Digital Balance</p>
+                    <p className="font-mono font-semibold text-gray-900">
                       {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
-                    <p className="font-mono font-semibold text-neutral-900">
+                    <p className="text-xs text-gray-500 mb-1">Cash Available</p>
+                    <p className="font-mono font-semibold text-gray-900">
                       {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
                     </p>
                   </div>
@@ -386,12 +386,12 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                       <Star
                         key={star}
                         className={`h-4 w-4 ${
-                          star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+                          star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+                  <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
                 </div>
 
                 {/* Services */}
@@ -416,29 +416,29 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                       onCreateDepositRequest(agent);
                     }}
                     disabled={isCreating}
-                    className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {isCreating ? 'Creating...' : 'Select Agent'}
                   </button>
-                  <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
                     <Phone className="h-4 w-4" />
                   </button>
                 </div>
 
                 {/* Expanded Details */}
                 {selectedAgent?.id === agent.id && (
-                  <div className="mt-4 pt-4 border-t border-neutral-200">
+                  <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="space-y-3">
                       <div>
-                        <p className="text-xs text-neutral-500 mb-1">Operating Hours</p>
-                        <div className="flex items-center text-sm text-neutral-700">
+                        <p className="text-xs text-gray-500 mb-1">Operating Hours</p>
+                        <div className="flex items-center text-sm text-gray-700">
                           <Clock className="h-4 w-4 mr-2" />
                           Mon-Sat: 8:00 AM - 8:00 PM
                         </div>
                       </div>
                       <div>
-                        <p className="text-xs text-neutral-500 mb-1">Services Available</p>
-                        <ul className="text-sm text-neutral-700 space-y-1">
+                        <p className="text-xs text-gray-500 mb-1">Services Available</p>
+                        <ul className="text-sm text-gray-700 space-y-1">
                           <li>• Cash deposits and withdrawals</li>
                           <li>• Bitcoin buying and selling</li>
                           <li>• Money transfers</li>
@@ -446,11 +446,11 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                         </ul>
                       </div>
                       <div>
-                        <p className="text-xs text-neutral-500 mb-1">Available Balance</p>
-                        <p className="text-sm text-neutral-700">
+                        <p className="text-xs text-gray-500 mb-1">Available Balance</p>
+                        <p className="text-sm text-gray-700">
                           Digital: {agent.digitalBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
                         </p>
-                        <p className="text-sm text-neutral-700">
+                        <p className="text-sm text-gray-700">
                           Cash: {agent.cashBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
                         </p>
                       </div>
@@ -507,8 +507,8 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
 
         {isCreating && (
           <div className="text-center mt-6">
-            <div className="inline-flex items-center space-x-2 text-neutral-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-neutral-900"></div>
+            <div className="inline-flex items-center space-x-2 text-gray-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
               <span>Creating deposit request...</span>
             </div>
           </div>

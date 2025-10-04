@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Edit3, Save, ChevronDown, ChevronUp, Check, CreditCard, Shield, Phone, Mail, Calendar, HelpCircle, MessageCircle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { formatCurrencyAmount, AfricanCurrency, getActiveCurrencies } from '../../types/currency';
@@ -294,98 +293,98 @@ const UserProfile: React.FC = () => {
   // Show loading state
   if (loading) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
             <div className="animate-pulse">
               <div className="flex flex-col items-center text-center space-y-4 mb-6">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-neutral-200 rounded-full"></div>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gray-200 rounded-full"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-6 lg:h-8 bg-neutral-200 rounded w-48 mx-auto"></div>
-                  <div className="h-4 lg:h-6 bg-neutral-200 rounded w-32 mx-auto"></div>
-                  <div className="h-3 lg:h-5 bg-neutral-200 rounded w-36 mx-auto"></div>
+                  <div className="h-6 lg:h-8 bg-gray-200 rounded w-48 mx-auto"></div>
+                  <div className="h-4 lg:h-6 bg-gray-200 rounded w-32 mx-auto"></div>
+                  <div className="h-3 lg:h-5 bg-gray-200 rounded w-36 mx-auto"></div>
                 </div>
               </div>
               <div className="space-y-3">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-12 lg:h-14 bg-neutral-100 rounded-lg"></div>
+                  <div key={i} className="h-12 lg:h-14 bg-gray-100 rounded-lg"></div>
                 ))}
               </div>
             </div>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   // Show error state
   if (error) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
             <div className="text-center py-8 lg:py-12">
               <div className="text-red-500 mb-2 text-2xl lg:text-3xl">⚠️</div>
-              <h2 className="text-lg lg:text-xl font-semibold text-neutral-900 mb-2">Failed to Load Profile Data</h2>
-              <p className="text-neutral-600 mb-4 text-sm lg:text-base">{error}</p>
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-2">Failed to Load Profile Data</h2>
+              <p className="text-gray-600 mb-4 text-sm lg:text-base">{error}</p>
               <button 
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 lg:px-6 lg:py-3 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600 transition-colors text-sm lg:text-base"
+                className="px-4 py-2 lg:px-6 lg:py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm lg:text-base"
               >
                 Retry
               </button>
             </div>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   // Show main content if userData is available
   if (!userData) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
             <div className="text-center py-8 lg:py-12">
-              <div className="text-neutral-400 mb-2 text-2xl lg:text-3xl">👤</div>
-              <h2 className="text-lg lg:text-xl font-semibold text-neutral-900 mb-2">No Profile Data Found</h2>
-              <p className="text-neutral-600 text-sm lg:text-base">Please complete your profile setup.</p>
+              <div className="text-gray-400 mb-2 text-2xl lg:text-3xl">👤</div>
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-2">No Profile Data Found</h2>
+              <p className="text-gray-600 text-sm lg:text-base">Please complete your profile setup.</p>
             </div>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="mb-4 sm:mb-6 px-2 sm:px-0">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900">Profile</h1>
-          <p className="text-sm sm:text-base text-neutral-600 mt-1">Manage your account and preferences</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Profile</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your account and preferences</p>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
           {/* Profile Header */}
           <div className="flex flex-col items-center text-center space-y-4 mb-6 sm:mb-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-neutral-100 rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 text-neutral-600" />
+            <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gray-100 rounded-full flex items-center justify-center">
+              <User className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 text-gray-600" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-center space-x-2 mb-2">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">{userData.name}</h2>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{userData.name}</h2>
                 <button 
                   onClick={() => setIsEditing(!isEditing)}
-                  className="p-1 hover:bg-neutral-100 rounded-lg transition-colors"
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Edit Profile"
                 >
-                  <Edit3 className="w-4 h-4 text-neutral-500" />
+                  <Edit3 className="w-4 h-4 text-gray-500" />
                 </button>
               </div>
-              <p className="text-neutral-600 text-sm sm:text-base lg:text-lg mb-1">
+              <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-1">
                 {userData.location ? `${userData.location.city}, ${userData.location.country}` : 'Location not set'}
               </p>
               <div className="flex items-center justify-center space-x-2 mb-2">
@@ -410,22 +409,22 @@ const UserProfile: React.FC = () => {
           {/* Profile Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {/* Balance Card */}
-            <div className="bg-neutral-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-2">
-                <CreditCard className="w-4 h-4 text-neutral-600" />
-                <span className="text-sm font-medium text-neutral-700">Current Balance</span>
+                <CreditCard className="w-4 h-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">Current Balance</span>
               </div>
-              <p className="text-2xl font-bold font-mono text-neutral-900">
+              <p className="text-2xl font-bold font-mono text-gray-900">
                 {formatCurrencyAmount(userData.balance, userData.currency)}
               </p>
             </div>
 
             {/* KYC Status Card */}
-            <div className="bg-neutral-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-neutral-600" />
-                  <span className="text-sm font-medium text-neutral-700">KYC Status</span>
+                  <Shield className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">KYC Status</span>
                 </div>
                 {(userData.kycStatus === 'not_started' || userData.kycStatus === 'rejected') && (
                   <button
@@ -440,14 +439,14 @@ const UserProfile: React.FC = () => {
                 <div className={`w-2 h-2 rounded-full ${
                   userData.kycStatus === 'approved' ? 'bg-green-500' :
                   userData.kycStatus === 'pending' ? 'bg-yellow-500' :
-                  userData.kycStatus === 'rejected' ? 'bg-red-500' : 'bg-neutral-400'
+                  userData.kycStatus === 'rejected' ? 'bg-red-500' : 'bg-gray-400'
                 }`}></div>
-                <span className="text-sm font-medium capitalize text-neutral-900">
+                <span className="text-sm font-medium capitalize text-gray-900">
                   {userData.kycStatus.replace('_', ' ')}
                 </span>
               </div>
               {userData.kycStatus === 'not_started' && (
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Complete KYC verification to unlock full features
                 </p>
               )}
@@ -464,26 +463,26 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Email */}
-            <div className="bg-neutral-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-2">
                 {userData.authMethod === 'sms' ? 
-                  <Phone className="w-4 h-4 text-neutral-600" /> : 
-                  <Mail className="w-4 h-4 text-neutral-600" />
+                  <Phone className="w-4 h-4 text-gray-600" /> : 
+                  <Mail className="w-4 h-4 text-gray-600" />
                 }
-                <span className="text-sm font-medium text-neutral-700">
+                <span className="text-sm font-medium text-gray-700">
                   {userData.authMethod === 'sms' ? 'Phone' : 'Email'}
                 </span>
               </div>
-              <p className="text-sm font-mono text-neutral-900">{userData.email}</p>
+              <p className="text-sm font-mono text-gray-900">{userData.email}</p>
             </div>
 
             {/* Member Since */}
-            <div className="bg-neutral-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-2">
-                <Calendar className="w-4 h-4 text-neutral-600" />
-                <span className="text-sm font-medium text-neutral-700">Member Since</span>
+                <Calendar className="w-4 h-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">Member Since</span>
               </div>
-              <p className="text-sm text-neutral-900">
+              <p className="text-sm text-gray-900">
                 {userData.joinDate.toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -495,8 +494,8 @@ const UserProfile: React.FC = () => {
 
           {/* Edit Profile Form */}
           {isEditing && (
-            <div className="bg-neutral-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Edit Profile</h3>
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Profile</h3>
               
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
@@ -507,41 +506,41 @@ const UserProfile: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* First Name */}
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     First Name
                   </label>
                   <input
                     type="text"
                     value={editForm.firstName}
                     onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter first name"
                   />
                 </div>
                 
                 {/* Last Name */}
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Last Name
                   </label>
                   <input
                     type="text"
                     value={editForm.lastName}
                     onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter last name"
                   />
                 </div>
                 
                 {/* Preferred Currency */}
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Preferred Currency
                   </label>
                   <select
                     value={editForm.preferredCurrency}
                     onChange={(e) => setEditForm({ ...editForm, preferredCurrency: e.target.value as AfricanCurrency })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     {getActiveCurrencies().map((currency) => (
                       <option key={currency.code} value={currency.code}>
@@ -553,7 +552,7 @@ const UserProfile: React.FC = () => {
                 
                 {/* Country */}
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Country
                   </label>
                   <input
@@ -563,14 +562,14 @@ const UserProfile: React.FC = () => {
                       ...editForm, 
                       location: { ...editForm.location, country: e.target.value }
                     })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter country"
                   />
                 </div>
                 
                 {/* City */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     City
                   </label>
                   <input
@@ -580,7 +579,7 @@ const UserProfile: React.FC = () => {
                       ...editForm, 
                       location: { ...editForm.location, city: e.target.value }
                     })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter city"
                   />
                 </div>
@@ -591,14 +590,14 @@ const UserProfile: React.FC = () => {
                 <button
                   onClick={handleSaveProfile}
                   disabled={saving}
-                  className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
                   onClick={handleCancelEdit}
                   disabled={saving}
-                  className="flex-1 bg-neutral-200 text-neutral-700 px-4 py-2 rounded-lg hover:bg-neutral-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -609,23 +608,23 @@ const UserProfile: React.FC = () => {
           {/* Expandable Menu Sections */}
           <div className="space-y-2 sm:space-y-3">
             {/* Account Settings */}
-            <div className="bg-neutral-50 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('accountSettings')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-neutral-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
                 <div className="flex items-center space-x-3">
-                  <User className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
-                  <span className="text-sm sm:text-base text-neutral-900">Account Settings</span>
+                  <User className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
+                  <span className="text-sm sm:text-base text-gray-900">Account Settings</span>
                 </div>
                 {expandedSections.accountSettings ? 
-                  <ChevronUp className="w-5 h-5 text-neutral-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-neutral-400" />
+                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
                 }
               </button>
               
               {expandedSections.accountSettings && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-neutral-200">
+                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
                   <div className="pt-4 space-y-4">
                     {/* Success Message */}
                     {accountSuccess && (
@@ -646,62 +645,62 @@ const UserProfile: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-2">First Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
                         <input
                           type="text"
                           value={accountForm.firstName}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, firstName: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter first name"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-2">Last Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
                         <input
                           type="text"
                           value={accountForm.lastName}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, lastName: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter last name"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-2">Email Address</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                         <input
                           type="email"
                           value={accountForm.email}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, email: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter email address"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-2">Phone Number</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                         <input
                           type="tel"
                           value={accountForm.phone}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter phone number"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-2">Country</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
                         <input
                           type="text"
                           value={accountForm.country}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, country: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter country"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-2">City</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                         <input
                           type="text"
                           value={accountForm.city}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, city: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter city"
                         />
                       </div>
@@ -709,7 +708,7 @@ const UserProfile: React.FC = () => {
                     <button 
                       onClick={handleAccountSave}
                       disabled={savingAccount}
-                      className="w-full px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                     >
                       {savingAccount ? (
                         <>
@@ -729,45 +728,45 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Security & Privacy */}
-            <div className="bg-neutral-50 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('securityPrivacy')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-neutral-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
                 <div className="flex items-center space-x-3">
-                  <Shield className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
-                  <span className="text-sm sm:text-base text-neutral-900">Security & Privacy</span>
+                  <Shield className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
+                  <span className="text-sm sm:text-base text-gray-900">Security & Privacy</span>
                 </div>
                 {expandedSections.securityPrivacy ? 
-                  <ChevronUp className="w-5 h-5 text-neutral-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-neutral-400" />
+                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
                 }
               </button>
               
               {expandedSections.securityPrivacy && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-neutral-200">
+                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
                   <div className="pt-4 space-y-4">
                     <div className="flex items-center justify-between p-3 bg-white rounded-lg">
                       <div>
-                        <h4 className="font-medium text-neutral-900">Two-Factor Authentication</h4>
-                        <p className="text-sm text-neutral-600">Add extra security to your account</p>
+                        <h4 className="font-medium text-gray-900">Two-Factor Authentication</h4>
+                        <p className="text-sm text-gray-600">Add extra security to your account</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" />
-                        <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
                       </label>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-white rounded-lg">
                       <div>
-                        <h4 className="font-medium text-neutral-900">SMS Notifications</h4>
-                        <p className="text-sm text-neutral-600">Receive transaction alerts via SMS</p>
+                        <h4 className="font-medium text-gray-900">SMS Notifications</h4>
+                        <p className="text-sm text-gray-600">Receive transaction alerts via SMS</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" defaultChecked className="sr-only peer" />
-                        <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
                       </label>
                     </div>
-                    <button className="w-full px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors">
+                    <button className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
                       Change {authMethod === 'sms' ? 'PIN' : 'Password'}
                     </button>
                   </div>
@@ -776,72 +775,72 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Transaction Limits */}
-            <div className="bg-neutral-50 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('transactionLimits')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-neutral-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
                 <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
-                  <span className="text-sm sm:text-base text-neutral-900">Transaction Limits</span>
+                  <CreditCard className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
+                  <span className="text-sm sm:text-base text-gray-900">Transaction Limits</span>
                 </div>
                 {expandedSections.transactionLimits ? 
-                  <ChevronUp className="w-5 h-5 text-neutral-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-neutral-400" />
+                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
                 }
               </button>
               
               {expandedSections.transactionLimits && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-neutral-200">
+                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
                   <div className="pt-4 space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <h4 className="font-medium text-neutral-900 mb-2">Daily Limits</h4>
+                        <h4 className="font-medium text-gray-900 mb-2">Daily Limits</h4>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Send:</span>
+                            <span className="text-gray-600">Send:</span>
                             <span className="font-medium">{formatCurrencyAmount(500000, userData?.currency || 'UGX')}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Withdraw:</span>
+                            <span className="text-gray-600">Withdraw:</span>
                             <span className="font-medium">{formatCurrencyAmount(300000, userData?.currency || 'UGX')}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Bitcoin:</span>
+                            <span className="text-gray-600">Bitcoin:</span>
                             <span className="font-medium">0.01 BTC</span>
                           </div>
                         </div>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <h4 className="font-medium text-neutral-900 mb-2">Monthly Limits</h4>
+                        <h4 className="font-medium text-gray-900 mb-2">Monthly Limits</h4>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Send:</span>
+                            <span className="text-gray-600">Send:</span>
                             <span className="font-medium">{formatCurrencyAmount(10000000, userData?.currency || 'UGX')}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Withdraw:</span>
+                            <span className="text-gray-600">Withdraw:</span>
                             <span className="font-medium">{formatCurrencyAmount(5000000, userData?.currency || 'UGX')}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Bitcoin:</span>
+                            <span className="text-gray-600">Bitcoin:</span>
                             <span className="font-medium">0.1 BTC</span>
                           </div>
                         </div>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <h4 className="font-medium text-neutral-900 mb-2">Per Transaction</h4>
+                        <h4 className="font-medium text-gray-900 mb-2">Per Transaction</h4>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Send:</span>
+                            <span className="text-gray-600">Send:</span>
                             <span className="font-medium">{formatCurrencyAmount(100000, userData?.currency || 'UGX')}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Withdraw:</span>
+                            <span className="text-gray-600">Withdraw:</span>
                             <span className="font-medium">{formatCurrencyAmount(50000, userData?.currency || 'UGX')}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Bitcoin:</span>
+                            <span className="text-gray-600">Bitcoin:</span>
                             <span className="font-medium">0.005 BTC</span>
                           </div>
                         </div>
@@ -858,45 +857,45 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Help & Support */}
-            <div className="bg-neutral-50 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('helpSupport')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-neutral-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
                 <div className="flex items-center space-x-3">
-                  <HelpCircle className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-600" />
-                  <span className="text-sm sm:text-base text-neutral-900">Help & Support</span>
+                  <HelpCircle className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
+                  <span className="text-sm sm:text-base text-gray-900">Help & Support</span>
                 </div>
                 {expandedSections.helpSupport ? 
-                  <ChevronUp className="w-5 h-5 text-neutral-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-neutral-400" />
+                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
                 }
               </button>
               
               {expandedSections.helpSupport && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-neutral-200">
+                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
                   <div className="pt-4 space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <a href="tel:+256700123456" className="bg-white p-3 rounded-lg hover:bg-neutral-50 transition-colors">
+                      <a href="tel:+256700123456" className="bg-white p-3 rounded-lg hover:bg-gray-50 transition-colors">
                         <div className="flex items-center space-x-2 mb-2">
-                          <Phone className="w-4 h-4 text-neutral-600" />
-                          <h4 className="font-medium text-neutral-900">Phone Support</h4>
+                          <Phone className="w-4 h-4 text-gray-600" />
+                          <h4 className="font-medium text-gray-900">Phone Support</h4>
                         </div>
-                        <p className="text-sm text-neutral-600">+256 700 123 456</p>
+                        <p className="text-sm text-gray-600">+256 700 123 456</p>
                       </a>
-                      <a href="sms:6789?body=HELP" className="bg-white p-3 rounded-lg hover:bg-neutral-50 transition-colors">
+                      <a href="sms:6789?body=HELP" className="bg-white p-3 rounded-lg hover:bg-gray-50 transition-colors">
                         <div className="flex items-center space-x-2 mb-2">
-                          <MessageCircle className="w-4 h-4 text-neutral-600" />
-                          <h4 className="font-medium text-neutral-900">SMS Support</h4>
+                          <MessageCircle className="w-4 h-4 text-gray-600" />
+                          <h4 className="font-medium text-gray-900">SMS Support</h4>
                         </div>
-                        <p className="text-sm text-neutral-600">Send 'HELP' to 6789</p>
+                        <p className="text-sm text-gray-600">Send 'HELP' to 6789</p>
                       </a>
-                      <a href="mailto:support@afritokeni.com" className="bg-white p-3 rounded-lg hover:bg-neutral-50 transition-colors">
+                      <a href="mailto:support@afritokeni.com" className="bg-white p-3 rounded-lg hover:bg-gray-50 transition-colors">
                         <div className="flex items-center space-x-2 mb-2">
-                          <Mail className="w-4 h-4 text-neutral-600" />
-                          <h4 className="font-medium text-neutral-900">Email Support</h4>
+                          <Mail className="w-4 h-4 text-gray-600" />
+                          <h4 className="font-medium text-gray-900">Email Support</h4>
                         </div>
-                        <p className="text-sm text-neutral-600">support@afritokeni.com</p>
+                        <p className="text-sm text-gray-600">support@afritokeni.com</p>
                       </a>
                     </div>
                     <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -931,7 +930,7 @@ const UserProfile: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

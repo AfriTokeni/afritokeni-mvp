@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bitcoin, ArrowRight, CheckCircle, QrCode } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { BitcoinService } from '../../services/bitcoinService';
 import { EscrowService, EscrowTransaction } from '../../services/escrowService';
 import { Agent, DataService } from '../../services/dataService';
@@ -181,7 +180,7 @@ const BitcoinDepositPage: React.FC = () => {
   };
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-4xl mx-auto">
         {/* Progress Steps */}
         <div className="mb-8">
@@ -198,16 +197,16 @@ const BitcoinDepositPage: React.FC = () => {
                     ? 'bg-orange-600 text-white' 
                     : index < ['amount', 'agent', 'deposit', 'confirm'].indexOf(step)
                     ? 'bg-green-600 text-white'
-                    : 'bg-neutral-200 text-neutral-500'
+                    : 'bg-gray-200 text-gray-500'
                 }`}>
                   <Icon className="w-5 h-5" />
                 </div>
                 <span className={`ml-2 text-sm font-medium ${
-                  step === key ? 'text-orange-600' : 'text-neutral-500'
+                  step === key ? 'text-orange-600' : 'text-gray-500'
                 }`}>
                   {label}
                 </span>
-                {index < 3 && <ArrowRight className="w-4 h-4 text-neutral-300 mx-4" />}
+                {index < 3 && <ArrowRight className="w-4 h-4 text-gray-300 mx-4" />}
               </div>
             ))}
           </div>
@@ -267,7 +266,7 @@ const BitcoinDepositPage: React.FC = () => {
           />
         )}
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

@@ -94,8 +94,8 @@ const AmountStep: React.FC<AmountStepProps> = ({
   const totalRequired = currentAmount + currentFee;
   const isValidAmount = currentAmount > 0 && !error;
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-6 lg:p-8">
-      <h2 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-900 mb-4 sm:mb-6">Enter Withdrawal Amount</h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 lg:p-8">
+      <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Enter Withdrawal Amount</h2>
       
       {/* Current Balance Display */}
       <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -107,7 +107,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
       {/* Withdrawal Type Selection */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-neutral-700 mb-3">What would you like to withdraw?</label>
+        <label className="block text-sm font-medium text-gray-700 mb-3">What would you like to withdraw?</label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
             type="button"
@@ -118,20 +118,20 @@ const AmountStep: React.FC<AmountStepProps> = ({
             className={`p-4 border rounded-lg text-left transition-all duration-200 ${
               withdrawType === 'cash'
                 ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                : 'border-neutral-200 hover:border-neutral-300'
+                : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <div className="flex items-start space-x-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                withdrawType === 'cash' ? 'bg-blue-100' : 'bg-neutral-100'
+                withdrawType === 'cash' ? 'bg-blue-100' : 'bg-gray-100'
               }`}>
                 <DollarSign className={`w-5 h-5 ${
-                  withdrawType === 'cash' ? 'text-blue-600' : 'text-neutral-600'
+                  withdrawType === 'cash' ? 'text-blue-600' : 'text-gray-600'
                 }`} />
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900 mb-1">Withdraw Cash</h3>
-                <p className="text-sm text-neutral-600">Get local currency cash from nearby agents</p>
+                <h3 className="font-semibold text-gray-900 mb-1">Withdraw Cash</h3>
+                <p className="text-sm text-gray-600">Get local currency cash from nearby agents</p>
               </div>
             </div>
           </button>
@@ -148,20 +148,20 @@ const AmountStep: React.FC<AmountStepProps> = ({
             className={`p-4 border rounded-lg text-left transition-all duration-200 ${
               withdrawType === 'bitcoin'
                 ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-200'
-                : 'border-neutral-200 hover:border-neutral-300'
+                : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <div className="flex items-start space-x-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                withdrawType === 'bitcoin' ? 'bg-orange-100' : 'bg-neutral-100'
+                withdrawType === 'bitcoin' ? 'bg-orange-100' : 'bg-gray-100'
               }`}>
                 <Bitcoin className={`w-5 h-5 ${
-                  withdrawType === 'bitcoin' ? 'text-orange-600' : 'text-neutral-600'
+                  withdrawType === 'bitcoin' ? 'text-orange-600' : 'text-gray-600'
                 }`} />
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900 mb-1">Convert to Bitcoin</h3>
-                <p className="text-sm text-neutral-600">Exchange local currency for Bitcoin</p>
+                <h3 className="font-semibold text-gray-900 mb-1">Convert to Bitcoin</h3>
+                <p className="text-sm text-gray-600">Exchange local currency for Bitcoin</p>
               </div>
             </div>
           </button>
@@ -172,25 +172,25 @@ const AmountStep: React.FC<AmountStepProps> = ({
         {/* Currency Display */}
         <div>
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <label className="block text-xs sm:text-sm font-medium text-neutral-700">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700">
               Currency
             </label>
             <div className="flex items-center space-x-2">
-              <span className="font-medium text-neutral-900">{selectedCurrency}</span>
-              <span className="text-xs text-neutral-500">({currencyInfo.name})</span>
+              <span className="font-medium text-gray-900">{selectedCurrency}</span>
+              <span className="text-xs text-gray-500">({currencyInfo.name})</span>
             </div>
           </div>
-          <div className="flex items-center space-x-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-neutral-200">
-              <span className="text-neutral-700 font-semibold text-xs">
+          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+              <span className="text-gray-700 font-semibold text-xs">
                 {selectedCurrency}
               </span>
             </div>
             <div>
-              <p className="text-neutral-900 font-medium text-sm">
+              <p className="text-gray-900 font-medium text-sm">
                 {currencyInfo?.name}
               </p>
-              <p className="text-neutral-500 text-xs">
+              <p className="text-gray-500 text-xs">
                 {currencyInfo?.symbol} • {currencyInfo?.country}
               </p>
             </div>
@@ -209,17 +209,17 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
         {/* Local Currency Input */}
         <div>
-          <label htmlFor="local-amount" className="block text-xs sm:text-sm font-medium text-neutral-700 mb-2 sm:mb-3">
+          <label htmlFor="local-amount" className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
             Amount in {selectedCurrency} ({currencyInfo?.name})
           </label>
           <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <input
               type="number"
               id="local-amount"
               value={localAmount}
               onChange={(e) => handleLocalAmountChange(e.target.value)}
-              className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+              className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
               placeholder="10,000"
             />
           </div>
@@ -227,11 +227,11 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
         {withdrawType === 'bitcoin' && (
           <>
-            <div className="text-center text-neutral-500 font-medium text-xs sm:text-sm lg:text-base">OR</div>
+            <div className="text-center text-gray-500 font-medium text-xs sm:text-sm lg:text-base">OR</div>
 
             {/* Bitcoin Input */}
             <div>
-              <label htmlFor="btc-amount" className="block text-xs sm:text-sm font-medium text-neutral-700 mb-2 sm:mb-3">
+              <label htmlFor="btc-amount" className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
                 Amount in Bitcoin
               </label>
               <div className="relative">
@@ -241,7 +241,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
                   id="btc-amount"
                   value={btcAmount}
                   onChange={(e) => handleBtcAmountChange(e.target.value)}
-                  className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200 text-sm sm:text-base font-mono"
+                  className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 text-sm sm:text-base font-mono"
                   placeholder="0.00232558"
                   step="0.00000001"
                 />
@@ -252,31 +252,31 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
         {/* Amount Summary */}
         {localAmount && (
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div className="text-xs sm:text-sm space-y-2">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-neutral-700">Withdrawal Amount:</span>
+                <span className="font-medium text-gray-700">Withdrawal Amount:</span>
                 <span className="font-mono font-bold text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(currentAmount, selectedCurrency as AfricanCurrency)}</span>
               </div>
               {withdrawType === 'bitcoin' && btcAmount && (
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-neutral-700">Bitcoin Equivalent:</span>
+                  <span className="font-medium text-gray-700">Bitcoin Equivalent:</span>
                   <span className="font-mono font-bold text-xs sm:text-sm lg:text-base text-orange-600">₿{parseFloat(btcAmount).toFixed(8)}</span>
                 </div>
               )}
               <div className="flex justify-between items-center">
-                <span className="font-medium text-neutral-700">Transaction Fee (1%):</span>
+                <span className="font-medium text-gray-700">Transaction Fee (1%):</span>
                 <span className="font-mono font-bold text-red-600 text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(currentFee, selectedCurrency as AfricanCurrency)}</span>
               </div>
-              <div className="pt-2 border-t border-neutral-200">
+              <div className="pt-2 border-t border-gray-200">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-neutral-700">Total Required:</span>
+                  <span className="font-medium text-gray-700">Total Required:</span>
                   <span className="font-mono font-bold text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(totalRequired, selectedCurrency as AfricanCurrency)}</span>
                 </div>
               </div>
               {withdrawType === 'bitcoin' && (
-                <div className="pt-2 border-t border-neutral-200">
-                  <p className="text-xs text-neutral-500">Exchange rate: 1 BTC = {formatCurrencyAmount(exchangeRate, selectedCurrency as AfricanCurrency)}</p>
+                <div className="pt-2 border-t border-gray-200">
+                  <p className="text-xs text-gray-500">Exchange rate: 1 BTC = {formatCurrencyAmount(exchangeRate, selectedCurrency as AfricanCurrency)}</p>
                 </div>
               )}
             </div>
@@ -286,7 +286,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
         <button
           onClick={handleContinue}
           disabled={!isValidAmount}
-          className="w-full mt-4 sm:mt-6 bg-neutral-900 text-white py-2.5 sm:py-3 px-6 rounded-lg font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200 text-xs sm:text-sm lg:text-base"
+          className="w-full mt-4 sm:mt-6 bg-gray-900 text-white py-2.5 sm:py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 text-xs sm:text-sm lg:text-base"
         >
           {withdrawType === 'cash' ? 'Continue to Select Agent' : 'Continue to Bitcoin Conversion'}
         </button>

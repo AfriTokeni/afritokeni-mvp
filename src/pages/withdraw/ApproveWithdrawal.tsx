@@ -93,8 +93,8 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
         <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">Withdrawal Completed!</h2>
-        <p className="text-sm sm:text-base text-neutral-600 mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Withdrawal Completed!</h2>
+        <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
           The withdrawal has been successfully processed and recorded.
         </p>
         
@@ -110,7 +110,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
           </div>
         </div>
 
-        <p className="text-xs sm:text-sm text-neutral-500">
+        <p className="text-xs sm:text-sm text-gray-500">
           Redirecting to withdrawal requests in a few seconds...
         </p>
       </div>
@@ -120,15 +120,15 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
   return (
     <div className="p-4 sm:p-6">
       {/* Withdrawal Details Header */}
-      <div className="bg-neutral-50 border border-neutral-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-base sm:text-lg font-semibold text-neutral-900 truncate">{withdrawal.userName}</h3>
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-neutral-600 mt-1">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{withdrawal.userName}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-600 mt-1">
                 <div className="flex items-center space-x-1">
                   <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="truncate">{withdrawal.userPhone}</span>
@@ -146,7 +146,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
           </div>
           
           <div className="text-left sm:text-right">
-            <div className="text-xl sm:text-2xl font-bold text-neutral-900 font-mono">
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 font-mono">
               {formatCurrency(withdrawal.amount.local, withdrawal.amount.currency)}
             </div>
           </div>
@@ -200,15 +200,15 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
       </div>
 
       {/* Withdrawal Code Input */}
-      <div className="bg-white border border-neutral-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
-        <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-3 sm:mb-4">Enter Withdrawal Code</h3>
-        <p className="text-xs sm:text-sm text-neutral-600 mb-3 sm:mb-4">
+      <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Enter Withdrawal Code</h3>
+        <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
           Ask the customer to provide their withdrawal code to complete the transaction.
         </p>
         
         <div className="space-y-3 sm:space-y-4">
           <div>
-            <label htmlFor="withdrawalCode" className="block text-xs sm:text-sm font-semibold text-neutral-700 mb-2">
+            <label htmlFor="withdrawalCode" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               Withdrawal Code
             </label>
             <input
@@ -217,8 +217,8 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
               value={withdrawalCode}
               onChange={handleCodeChange}
               placeholder="Enter withdrawal code"
-              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg font-mono text-base sm:text-lg tracking-wider focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-colors duration-200 ${
-                codeError ? 'border-red-300 bg-red-50' : 'border-neutral-300'
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg font-mono text-base sm:text-lg tracking-wider focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-colors duration-200 ${
+                codeError ? 'border-red-300 bg-red-50' : 'border-gray-300'
               }`}
               disabled={isProcessing}
             />
@@ -230,10 +230,10 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
             )}
           </div>
 
-          <div className="bg-neutral-50 rounded-lg p-3 sm:p-4">
-            <p className="text-xs sm:text-sm text-neutral-600">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-600">
               <strong>Expected Code:</strong> 
-              <span className="font-mono ml-2 bg-white px-2 sm:px-3 py-1 rounded border border-neutral-200 font-semibold break-all">
+              <span className="font-mono ml-2 bg-white px-2 sm:px-3 py-1 rounded border border-gray-200 font-semibold break-all">
                 {withdrawal.withdrawalCode}
               </span>
             </p>
@@ -248,8 +248,8 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
           disabled={!withdrawalCode || isProcessing || !cashGiven}
           className={`flex-1 py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base font-semibold transition-colors duration-200 flex items-center justify-center ${
             withdrawalCode && cashGiven && !isProcessing
-              ? 'w-full bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200'
-              : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+              ? 'w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           }`}
         >
           {isProcessing ? (
@@ -268,7 +268,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
 
       {/* Security Notice */}
       <div className="mt-4 sm:mt-6 text-center">
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-gray-500">
           This transaction will be recorded and cannot be reversed. 
           Ensure all details are correct before proceeding.
         </p>

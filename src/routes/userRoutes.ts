@@ -30,13 +30,7 @@ export const user_desktop_routes: Route[] = [
     {
         id: "send" as RouteID,
         path: "/users/send",
-        label: "Send Money",
-        icon: Send,
-    },
-    {
-        id: "lightning" as RouteID,
-        path: "/users/lightning",
-        label: "Send Bitcoin",
+        label: "Send",
         icon: Send,
     },
     {
@@ -88,12 +82,6 @@ export const user_mobile_routes: Route[] = [
     id: "send" as RouteID,
     path: "/users/send",
     label: "Send",
-    icon: Send,
-  },
-  {
-    id: "lightning" as RouteID,
-    path: "/users/lightning",
-    label: "Bitcoin",
     icon: Send,
   },
   {

@@ -3,7 +3,6 @@ import { MapPin, Navigation, Phone, Star, Clock, Search, Users, Map, List } from
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { listDocs } from '@junobuild/core';
-import PageLayout from '../../components/PageLayout';
 
 interface Agent {
   id: string;
@@ -53,7 +52,7 @@ const createUserIcon = () => {
 };
 
 const createAgentIcon = (isActive: boolean) => {
-  const bgColor = isActive ? 'bg-green-500' : 'bg-neutral-400';
+  const bgColor = isActive ? 'bg-green-500' : 'bg-gray-400';
   
   return L.divIcon({
     html: `
@@ -265,37 +264,37 @@ const AgentMapPage: React.FC = () => {
 
   if (loading) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">Find Nearby Agents</h1>
-          <p className="text-neutral-600">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Nearby Agents</h1>
+          <p className="text-gray-600">
             Locate AfriTokeni agents near you for cash deposits, withdrawals, and Bitcoin exchanges
           </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-neutral-900">Search & Filter Agents</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Search & Filter Agents</h2>
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-neutral-100 rounded-lg p-1">
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('list')}
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   viewMode === 'list'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <List className="h-4 w-4 mr-2" />
@@ -305,8 +304,8 @@ const AgentMapPage: React.FC = () => {
                 onClick={() => setViewMode('map')}
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   viewMode === 'map'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <Map className="h-4 w-4 mr-2" />
@@ -317,13 +316,13 @@ const AgentMapPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search agents or locations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
               />
             </div>
 
@@ -332,7 +331,7 @@ const AgentMapPage: React.FC = () => {
               <select
                 value={filterRadius}
                 onChange={(e) => setFilterRadius(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
               >
                 <option value={5}>Within 5km</option>
                 <option value={10}>Within 10km</option>
@@ -349,15 +348,15 @@ const AgentMapPage: React.FC = () => {
                 id="onlineOnly"
                 checked={showOnlineOnly}
                 onChange={(e) => setShowOnlineOnly(e.target.checked)}
-                className="h-4 w-4 text-neutral-600 focus:ring-neutral-500 border-neutral-300 rounded"
+                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
               />
-              <label htmlFor="onlineOnly" className="ml-2 text-sm text-neutral-700">
+              <label htmlFor="onlineOnly" className="ml-2 text-sm text-gray-700">
                 Online agents only
               </label>
             </div>
 
             {/* Location Status */}
-            <div className="flex items-center text-sm text-neutral-600">
+            <div className="flex items-center text-sm text-gray-600">
               <Navigation className="h-4 w-4 mr-2" />
               {locationPermission === 'granted' ? (
                 <span className="text-green-600">Location enabled</span>
@@ -371,11 +370,11 @@ const AgentMapPage: React.FC = () => {
         {/* Results Summary */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
-            <p className="text-neutral-600">
+            <p className="text-gray-600">
               Found {sortedAgents.length} agent{sortedAgents.length !== 1 ? 's' : ''} 
               {userLocation && ` within ${filterRadius}km`}
             </p>
-            <div className="flex items-center text-sm text-neutral-500">
+            <div className="flex items-center text-sm text-gray-500">
               <Users className="h-4 w-4 mr-1" />
               {sortedAgents.filter(a => a.isActive).length} online
             </div>
@@ -389,23 +388,23 @@ const AgentMapPage: React.FC = () => {
           {sortedAgents.map((agent) => (
             <div
               key={agent.id}
-              className={`bg-white rounded-xl shadow-sm border border-neutral-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
-                selectedAgent?.id === agent.id ? 'ring-2 ring-neutral-500' : ''
+              className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                selectedAgent?.id === agent.id ? 'ring-2 ring-gray-500' : ''
               }`}
               onClick={() => setSelectedAgent(selectedAgent?.id === agent.id ? null : agent)}
             >
               {/* Agent Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-neutral-900 mb-1">
+                  <h3 className="font-semibold text-gray-900 mb-1">
                     {agent.businessName}
                   </h3>
-                  <div className="flex items-center text-sm text-neutral-600 mb-2">
+                  <div className="flex items-center text-sm text-gray-600 mb-2">
                     <MapPin className="h-4 w-4 mr-1" />
                     {agent.location.address}
                   </div>
                   {userLocation && (
-                    <div className="flex items-center text-sm text-neutral-500">
+                    <div className="flex items-center text-sm text-gray-500">
                       <Navigation className="h-4 w-4 mr-1" />
                       {formatDistance(agent)} away
                     </div>
@@ -414,7 +413,7 @@ const AgentMapPage: React.FC = () => {
                 <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                   agent.isActive 
                     ? 'bg-green-100 text-green-800' 
-                    : 'bg-neutral-100 text-neutral-600'
+                    : 'bg-gray-100 text-gray-600'
                 }`}>
                   {agent.isActive ? 'Online' : 'Offline'}
                 </div>
@@ -423,14 +422,14 @@ const AgentMapPage: React.FC = () => {
               {/* Agent Stats */}
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
-                  <p className="font-mono font-semibold text-neutral-900">
+                  <p className="text-xs text-gray-500 mb-1">Cash Available</p>
+                  <p className="font-mono font-semibold text-gray-900">
                     {formatBalance(agent.cashBalance)} UGX
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Commission</p>
-                  <p className="font-mono font-semibold text-neutral-900">
+                  <p className="text-xs text-gray-500 mb-1">Commission</p>
+                  <p className="font-mono font-semibold text-gray-900">
                     {(agent.commissionRate < 1 ? agent.commissionRate * 100 : agent.commissionRate).toFixed(1)}%
                   </p>
                 </div>
@@ -443,12 +442,12 @@ const AgentMapPage: React.FC = () => {
                     <Star
                       key={star}
                       className={`h-4 w-4 ${
-                        star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+                        star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
                       }`}
                     />
                   ))}
                 </div>
-                <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+                <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
               </div>
 
               {/* Services */}
@@ -466,28 +465,28 @@ const AgentMapPage: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <button className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors duration-200">
+                <button className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-200">
                   Contact Agent
                 </button>
-                <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
                   <Phone className="h-4 w-4" />
                 </button>
               </div>
 
               {/* Expanded Details */}
               {selectedAgent?.id === agent.id && (
-                <div className="mt-4 pt-4 border-t border-neutral-200">
+                <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-neutral-500 mb-1">Operating Hours</p>
-                      <div className="flex items-center text-sm text-neutral-700">
+                      <p className="text-xs text-gray-500 mb-1">Operating Hours</p>
+                      <div className="flex items-center text-sm text-gray-700">
                         <Clock className="h-4 w-4 mr-2" />
                         Mon-Sat: 8:00 AM - 8:00 PM
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-neutral-500 mb-1">Services Available</p>
-                      <ul className="text-sm text-neutral-700 space-y-1">
+                      <p className="text-xs text-gray-500 mb-1">Services Available</p>
+                      <ul className="text-sm text-gray-700 space-y-1">
                         <li>• Cash deposits and withdrawals</li>
                         <li>• Bitcoin buying and selling</li>
                         <li>• Money transfers</li>
@@ -495,9 +494,9 @@ const AgentMapPage: React.FC = () => {
                       </ul>
                     </div>
                     <div>
-                      <p className="text-xs text-neutral-500 mb-1">Contact Information</p>
-                      <p className="text-sm text-neutral-700">+256 700 123 456</p>
-                      <p className="text-sm text-neutral-700">agent@afritokeni.com</p>
+                      <p className="text-xs text-gray-500 mb-1">Contact Information</p>
+                      <p className="text-sm text-gray-700">+256 700 123 456</p>
+                      <p className="text-sm text-gray-700">agent@afritokeni.com</p>
                     </div>
                   </div>
                 </div>
@@ -507,7 +506,7 @@ const AgentMapPage: React.FC = () => {
           </div>
         ) : (
           /* Map View */
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="h-96 rounded-lg overflow-hidden">
               <MapContainer
                 center={[userLocation?.lat || 0.3476, userLocation?.lng || 32.5825]}
@@ -529,7 +528,7 @@ const AgentMapPage: React.FC = () => {
                     <Popup>
                       <div className="text-center">
                         <div className="font-semibold text-blue-600">Your Location</div>
-                        <div className="text-sm text-neutral-600">
+                        <div className="text-sm text-gray-600">
                           {locationPermission === 'granted' ? 'Current location' : 'Default location (Kampala)'}
                         </div>
                       </div>
@@ -549,37 +548,37 @@ const AgentMapPage: React.FC = () => {
                   >
                     <Popup>
                       <div className="min-w-48">
-                        <div className="font-semibold text-neutral-900 mb-2">
+                        <div className="font-semibold text-gray-900 mb-2">
                           {agent.businessName}
                         </div>
-                        <div className="text-sm text-neutral-600 mb-2">
+                        <div className="text-sm text-gray-600 mb-2">
                           {agent.location.address}
                         </div>
                         <div className="flex items-center justify-between mb-3">
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            agent.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'
+                            agent.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
                           }`}>
                             {agent.isActive ? 'Online' : 'Offline'}
                           </span>
                           {userLocation && (
-                            <span className="text-sm text-neutral-500">
+                            <span className="text-sm text-gray-500">
                               {formatDistance(agent)} away
                             </span>
                           )}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                           <div>
-                            <span className="text-neutral-500">Cash:</span>
+                            <span className="text-gray-500">Cash:</span>
                             <div className="font-mono font-semibold">{formatBalance(agent.cashBalance)} UGX</div>
                           </div>
                           <div>
-                            <span className="text-neutral-500">Fee:</span>
+                            <span className="text-gray-500">Fee:</span>
                             <div className="font-mono font-semibold">{agent.commissionRate > 0 ? agent.commissionRate : (agent.commissionRate * 100).toFixed(1)}%</div>
                           </div>
                         </div>
                         <button
                           onClick={() => setSelectedAgent(agent)}
-                          className="w-full bg-neutral-900 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors duration-200"
+                          className="w-full bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
                         >
                           Contact Agent
                         </button>
@@ -592,29 +591,29 @@ const AgentMapPage: React.FC = () => {
             
             {/* Selected Agent Details */}
             {selectedAgent && viewMode === 'map' && (
-              <div className="mt-6 bg-neutral-50 rounded-lg p-4">
-                <h3 className="font-semibold text-neutral-900 mb-2">{selectedAgent.businessName}</h3>
+              <div className="mt-6 bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-2">{selectedAgent.businessName}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-neutral-500">Address:</span>
-                    <p className="text-neutral-900">{selectedAgent.location.address}</p>
+                    <span className="text-gray-500">Address:</span>
+                    <p className="text-gray-900">{selectedAgent.location.address}</p>
                   </div>
                   <div>
-                    <span className="text-neutral-500">Cash Available:</span>
-                    <p className="font-mono text-neutral-900">{formatBalance(selectedAgent.cashBalance)} UGX</p>
+                    <span className="text-gray-500">Cash Available:</span>
+                    <p className="font-mono text-gray-900">{formatBalance(selectedAgent.cashBalance)} UGX</p>
                   </div>
                   <div>
-                    <span className="text-neutral-500">Commission:</span>
-                    <p className="font-mono text-neutral-900">{selectedAgent.commissionRate < 1 ? (selectedAgent.commissionRate * 100).toFixed(1) : selectedAgent.commissionRate}%</p>
+                    <span className="text-gray-500">Commission:</span>
+                    <p className="font-mono text-gray-900">{selectedAgent.commissionRate < 1 ? (selectedAgent.commissionRate * 100).toFixed(1) : selectedAgent.commissionRate}%</p>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <button className="bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors duration-200">
+                  <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-200">
                     Contact Agent
                   </button>
                   <button 
                     onClick={() => setSelectedAgent(null)}
-                    className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200"
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200"
                   >
                     Close
                   </button>
@@ -627,9 +626,9 @@ const AgentMapPage: React.FC = () => {
         {/* Empty State */}
         {sortedAgents.length === 0 && (
           <div className="text-center py-12">
-            <MapPin className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-neutral-900 mb-2">No agents found</h3>
-            <p className="text-neutral-600 mb-4">
+            <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No agents found</h3>
+            <p className="text-gray-600 mb-4">
               Try adjusting your search criteria or increasing the distance radius.
             </p>
             <button
@@ -638,7 +637,7 @@ const AgentMapPage: React.FC = () => {
                 setFilterRadius(50);
                 setShowOnlineOnly(false);
               }}
-              className="bg-neutral-900 text-white px-6 py-2 rounded-lg font-medium hover:bg-neutral-800 transition-colors duration-200"
+              className="bg-gray-900 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200"
             >
               Clear Filters
             </button>
@@ -668,7 +667,7 @@ const AgentMapPage: React.FC = () => {
           </div>
         )}
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

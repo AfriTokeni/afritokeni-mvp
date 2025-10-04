@@ -12,9 +12,9 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ currentStep, step
     if (stepIndex < currentIndex) {
       return 'bg-green-500 text-white'; // Completed
     } else if (stepIndex === currentIndex) {
-      return 'bg-neutral-900 text-white'; // Current
+      return 'bg-gray-900 text-white'; // Current
     } else {
-      return 'bg-neutral-200 text-neutral-500'; // Not started
+      return 'bg-gray-200 text-gray-500'; // Not started
     }
   };
 
@@ -26,7 +26,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ currentStep, step
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getStepClassName(index)}`}>
               {step.number}
             </div>
-            <span className="ml-2 text-sm font-medium text-neutral-700">{step.label}</span>
+            <span className="ml-2 text-sm font-medium text-gray-700">{step.label}</span>
           </div>
         ))}
       </div>
