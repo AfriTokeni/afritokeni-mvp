@@ -8,7 +8,7 @@ import type { SatelliteOptions } from "@junobuild/core";
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
-  satelliteId: "atbka-rp777-77775-aaaaq-cai",
+  satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
   container: true
 };
 
