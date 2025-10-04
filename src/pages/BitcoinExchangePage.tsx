@@ -10,15 +10,14 @@ const BitcoinExchangePage: React.FC = () => {
   const { user, login } = useAuthentication();
 
   const handleStartExchange = async () => {
-    if (user) {
-      // Already authenticated, go to exchange
+    if (user.user) {
+      // Already authenticated as user, go to exchange
       navigate('/users/bitcoin/deposit');
     } else {
-      // Not authenticated, trigger ICP login then redirect
+      // Not authenticated, trigger ICP login
       try {
         await login({} as LoginFormData, 'web');
-        // After successful login, redirect to exchange
-        navigate('/users/bitcoin/deposit');
+        // After login, user will be redirected by AuthContext
       } catch (error) {
         console.error('Login failed:', error);
       }
@@ -49,7 +48,7 @@ const BitcoinExchangePage: React.FC = () => {
               onClick={handleStartExchange}
               className="bg-orange-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
             >
-              {user ? 'Start Exchange' : 'Sign In to Exchange'}
+              {user.user ? 'Start Exchange' : 'Sign In to Exchange'}
             </button>
             <button
               onClick={handleBecomeAgent}
@@ -451,14 +450,14 @@ const BitcoinExchangePage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => navigate('/users/bitcoin/deposit')}
+              onClick={handleStartExchange}
               className="bg-white text-orange-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
             >
-              Start Your Exchange
+              {user.user ? 'Start Your Exchange' : 'Sign In to Exchange'}
             </button>
             <button
-              onClick={() => navigate('/auth/role-selection')}
-              className="bg-orange-700 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-800 transition-colors border border-orange-500"
+              onClick={handleBecomeAgent}
+              className="bg-white text-orange-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
             >
               Become an Agent
             </button>
