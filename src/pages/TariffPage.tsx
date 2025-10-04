@@ -10,8 +10,7 @@ import {
   Users,
   Shield,
   CheckCircle,
-  Bitcoin,
-  Banknote
+  Bitcoin
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DynamicFeeCalculator from '../components/DynamicFeeCalculator';
@@ -100,22 +99,22 @@ const TariffPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <PublicHeader />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Calculator className="w-8 h-8 text-neutral-900" />
-            <h1 className="text-4xl font-bold text-neutral-900">Smart Pricing System</h1>
+          <div className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <Calculator className="w-4 h-4" />
+            Smart Pricing
           </div>
-          <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
-            Our dynamic fee structure ensures fair compensation for agents while providing transparent, 
-            location-based pricing for Bitcoin exchanges across Africa.
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">Transparent Pricing System</h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Fair compensation for agents with transparent, location-based pricing across Africa
           </p>
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-neutral-100 p-1 rounded-lg flex">
+        <div className="flex justify-center mb-12">
+          <div className="bg-gray-100 p-1 rounded-xl flex gap-1">
             {[
               { id: 'overview', label: 'Overview', icon: Info },
               { id: 'calculator', label: 'Calculator', icon: Calculator },
@@ -124,10 +123,10 @@ const TariffPage: React.FC = () => {
               <button
                 key={id}
                 onClick={() => setActiveSection(id as any)}
-                className={`px-6 py-3 rounded-md font-semibold transition-colors duration-200 flex items-center space-x-2 ${
+                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
                   activeSection === id
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -141,23 +140,29 @@ const TariffPage: React.FC = () => {
         {activeSection === 'overview' && (
           <div className="space-y-12">
             {/* Key Benefits */}
-            <div className="bg-neutral-50 border border-neutral-200 p-8 rounded-xl">
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6 text-center">Why Smart Pricing?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Why Smart Pricing?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center">
-                  <Shield className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">Fair Compensation</h3>
-                  <p className="text-neutral-600">Agents traveling to remote areas receive higher fees for their extra effort and costs.</p>
+                  <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Shield className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Fair Compensation</h3>
+                  <p className="text-gray-600">Agents traveling to remote areas receive higher fees for their extra effort and costs.</p>
                 </div>
                 <div className="text-center">
-                  <Users className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">Better Coverage</h3>
-                  <p className="text-neutral-600">Incentivizes agents to serve underbanked communities in remote villages.</p>
+                  <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Better Coverage</h3>
+                  <p className="text-gray-600">Incentivizes agents to serve underbanked communities in remote villages</p>
                 </div>
                 <div className="text-center">
-                  <CheckCircle className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">Transparent Pricing</h3>
-                  <p className="text-neutral-600">Clear, predictable fees based on distance, location, and service level.</p>
+                  <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Transparent Pricing</h3>
+                  <p className="text-gray-600">Clear, predictable fees based on distance, location, and service level</p>
                 </div>
               </div>
             </div>
@@ -297,7 +302,7 @@ const TariffPage: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Transaction:</span>
-                    <span className="font-semibold">UGX 100,000 → Bitcoin</span>
+                    <span className="font-semibold">NGN 50,000 → Bitcoin</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Distance:</span>
@@ -314,7 +319,7 @@ const TariffPage: React.FC = () => {
                   <hr className="border-neutral-200" />
                   <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
-                    <span>2.8% (UGX 2,800)</span>
+                    <span>2.8% (NGN 1,400)</span>
                   </div>
                 </div>
               </div>
@@ -333,7 +338,7 @@ const TariffPage: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Transaction:</span>
-                    <span className="font-semibold">UGX 200,000 → Bitcoin</span>
+                    <span className="font-semibold">KES 10,000 → Bitcoin</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Distance:</span>
@@ -350,7 +355,7 @@ const TariffPage: React.FC = () => {
                   <hr className="border-neutral-200" />
                   <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
-                    <span>6.2% (UGX 12,400)</span>
+                    <span>6.2% (KES 620)</span>
                   </div>
                 </div>
               </div>
@@ -369,7 +374,7 @@ const TariffPage: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Transaction:</span>
-                    <span className="font-semibold">UGX 50,000 → Bitcoin</span>
+                    <span className="font-semibold">GHS 500 → Bitcoin</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Distance:</span>
@@ -386,7 +391,7 @@ const TariffPage: React.FC = () => {
                   <hr className="border-neutral-200" />
                   <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
-                    <span>11.8% (UGX 5,900)</span>
+                    <span>11.8% (GHS 59)</span>
                   </div>
                 </div>
               </div>
@@ -405,7 +410,7 @@ const TariffPage: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Transaction:</span>
-                    <span className="font-semibold">Bitcoin → UGX 150,000</span>
+                    <span className="font-semibold">Bitcoin → ZAR 1,000</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Distance:</span>
@@ -422,7 +427,7 @@ const TariffPage: React.FC = () => {
                   <hr className="border-neutral-200" />
                   <div className="flex justify-between text-lg font-bold text-neutral-900">
                     <span>Total Fee:</span>
-                    <span>4.1% (UGX 6,150)</span>
+                    <span>4.1% (ZAR 41)</span>
                   </div>
                 </div>
               </div>
@@ -431,26 +436,23 @@ const TariffPage: React.FC = () => {
         )}
 
         {/* Call to Action */}
-        <div className="mt-16 bg-neutral-900 text-white p-8 rounded-xl text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-neutral-300 mb-6 max-w-2xl mx-auto">
-            Join our network of agents or start exchanging Bitcoin with transparent, fair pricing 
-            that supports financial inclusion across Africa.
+        <div className="mt-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-12 text-center text-white">
+          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+          <p className="text-xl mb-6 opacity-90">
+            Join our network of agents or start exchanging Bitcoin with transparent, fair pricing
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/auth/register"
-              className="bg-white text-neutral-900 px-8 py-3 rounded-lg font-semibold hover:bg-neutral-100 transition-colors duration-200 flex items-center justify-center space-x-2"
+              to="/become-agent"
+              className="bg-white text-purple-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
             >
-              <Users className="w-5 h-5" />
-              <span>Become an Agent</span>
+              Become an Agent
             </Link>
             <Link
-              to="/auth/login"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-neutral-900 transition-colors duration-200 flex items-center justify-center space-x-2"
+              to="/bitcoin-exchange"
+              className="bg-white text-purple-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
             >
-              <Banknote className="w-5 h-5" />
-              <span>Start Trading</span>
+              Start Exchange
             </Link>
           </div>
         </div>

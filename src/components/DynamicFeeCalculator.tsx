@@ -7,7 +7,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { DynamicFeeService, LocationData, TransactionRequest } from '../services/dynamicFeeService';
-import { AfricanCurrency } from '../types/currency';
+import { AfricanCurrency, AFRICAN_CURRENCIES } from '../types/currency';
 
 interface DynamicFeeCalculatorProps {
   onFeeCalculated?: (fee: number, breakdown: any) => void;
@@ -16,7 +16,6 @@ interface DynamicFeeCalculatorProps {
 const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalculated }) => {
   const [amount, setAmount] = useState<string>('100000');
   const [currency, setCurrency] = useState<AfricanCurrency>('UGX');
-  const [transactionType, setTransactionType] = useState<'cash_in' | 'cash_out' | 'bitcoin_buy' | 'bitcoin_sell'>('bitcoin_buy');
   const [customerLocation, setCustomerLocation] = useState<'urban' | 'suburban' | 'rural' | 'remote'>('urban');
   const [distance, setDistance] = useState<string>('5');
   const [urgency, setUrgency] = useState<'standard' | 'express' | 'emergency'>('standard');
@@ -26,7 +25,7 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
     if (amount && distance) {
       calculateFee();
     }
-  }, [amount, currency, transactionType, customerLocation, distance, urgency]);
+  }, [amount, currency, customerLocation, distance, urgency]);
 
   const calculateFee = () => {
     const amountNum = parseFloat(amount);
@@ -42,7 +41,7 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
     const request: TransactionRequest = {
       amount: amountNum,
       currency,
-      type: transactionType,
+      type: 'bitcoin_buy',
       customerLocation: {
         latitude: 0,
         longitude: 0,
@@ -88,10 +87,13 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
 
   return (
     <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm">
-      <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center space-x-2">
+      <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center space-x-2">
         <Calculator className="w-5 h-5 text-blue-600" />
-        <span>Dynamic Fee Calculator</span>
+        <span>Agent Commission Calculator</span>
       </h3>
+      <p className="text-sm text-neutral-600 mb-4">
+        Calculate agent commission based on location, distance, and service level. Agents earn higher fees for serving remote areas.
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Input Section */}
@@ -100,41 +102,32 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
             <label className="block text-sm font-semibold text-neutral-700 mb-2">
               Transaction Amount
             </label>
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
-                className="flex-1 px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value as AfricanCurrency)}
-                className="px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="UGX">UGX</option>
-                <option value="KES">KES</option>
-                <option value="NGN">NGN</option>
-                <option value="ZAR">ZAR</option>
-                <option value="GHS">GHS</option>
-              </select>
-            </div>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+              className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-neutral-700 mb-2">
-              Transaction Type
+              Currency
             </label>
             <select
-              value={transactionType}
-              onChange={(e) => setTransactionType(e.target.value as any)}
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as AfricanCurrency)}
               className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="cash_in">Cash In</option>
-              <option value="cash_out">Cash Out</option>
-              <option value="bitcoin_buy">Bitcoin Buy</option>
-              <option value="bitcoin_sell">Bitcoin Sell</option>
+              {Object.entries(AFRICAN_CURRENCIES)
+                .filter(([code]) => code !== 'BTC')
+                .sort((a, b) => a[1].name.localeCompare(b[1].name))
+                .map(([code, info]) => (
+                  <option key={code} value={code}>
+                    {code} - {info.name}
+                  </option>
+                ))}
             </select>
           </div>
 
