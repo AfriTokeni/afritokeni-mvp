@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Linkedin, Twitter } from 'lucide-react';
 
 const PublicFooter: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -82,10 +82,19 @@ const PublicFooter: React.FC = () => {
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><a href="mailto:info@afritokeni.com" className="hover:text-white transition-colors">Contact</a></li>
               </ul>
+              
+              <h4 className="font-semibold mt-6 mb-4">Follow Us</h4>
+              <div className="flex gap-4">
+                <a href="https://www.linkedin.com/company/afritokeni/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </a>
+                <a href="https://x.com/afritokeni" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                  <Twitter className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

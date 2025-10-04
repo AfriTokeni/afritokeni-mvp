@@ -55,6 +55,7 @@ import LandingPage from "./pages/LandingPage";
 import TariffPage from "./pages/TariffPage";
 import SMSPlayground from "./pages/SMSPlayground";
 import BecomeAgentPage from "./pages/BecomeAgentPage";
+import AboutPage from "./pages/AboutPage";
 
 const App: FC = () => {
   useEffect(() => {
@@ -152,6 +153,9 @@ const App: FC = () => {
           
           {/* Tariff Page */}
           <Route path="/tariff" element={<TariffPage />} />
+          
+          {/* About Page */}
+          <Route path="/about" element={<AboutPage />} />
           
           {/* SMS Playground */}
           <Route path="/sms" element={<SMSPlayground />} />
