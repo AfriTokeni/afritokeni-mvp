@@ -1,41 +1,46 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Userback from '@userback/widget';
 
 /**
  * Userback Widget Integration
  * Provides in-app feedback, bug reporting, and user insights
  * https://userback.io/
+ * 
+ * Official React package: @userback/widget
  */
 export default function UserbackWidget() {
+  const [userback, setUserback] = useState<any>(null);
+
   useEffect(() => {
-    // Load Userback script
-    const script = document.createElement('script');
-    script.src = 'https://static.userback.io/widget/v1.js';
-    script.async = true;
-    
-    script.onload = () => {
-      // Initialize Userback with your access token
-      // Get your token from: https://app.userback.io/settings/widget
-      if (window.Userback) {
-        window.Userback(import.meta.env.VITE_USERBACK_TOKEN || 'demo-token');
+    const initUserback = async () => {
+      try {
+        // Get token from environment variable
+        const token = import.meta.env.VITE_USERBACK_TOKEN;
+        
+        if (!token) {
+          console.warn('Userback token not found. Add VITE_USERBACK_TOKEN to .env');
+          return;
+        }
+
+        // Initialize Userback with token
+        const ub = await Userback(token);
+        setUserback(ub);
+        
+        console.log('Userback widget initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize Userback:', error);
       }
     };
 
-    document.body.appendChild(script);
+    initUserback();
 
+    // Cleanup on unmount
     return () => {
-      // Cleanup script on unmount
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+      if (userback) {
+        userback.destroy?.();
       }
     };
   }, []);
 
-  return null; // Widget is injected by script
-}
-
-// TypeScript declaration for Userback
-declare global {
-  interface Window {
-    Userback?: (token: string) => void;
-  }
+  return null; // Widget is injected by Userback
 }

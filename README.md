@@ -208,10 +208,21 @@ AfriTokeni integrates **Userback.io** for in-app feedback collection, bug report
 - All without leaving the application
 
 **Setup:**
-1. Sign up at [userback.io](https://userback.io/)
-2. Get your widget token from Settings → Widget
-3. Add to `.env`: `VITE_USERBACK_TOKEN=your_token_here`
-4. The widget automatically appears in the bottom-right corner
+1. Install the official React package:
+   ```bash
+   npm install @userback/widget
+   ```
+2. Sign up at [userback.io](https://userback.io/)
+3. Get your widget token from Settings → Widget
+4. Add to `.env`: `VITE_USERBACK_TOKEN=your_token_here`
+5. The widget automatically appears in the bottom-right corner
+
+**Features:**
+- Screenshot and screen recording capabilities
+- In-app bug reporting with context
+- Feature request collection
+- User satisfaction surveys
+- Session replay for debugging
 
 This helps us continuously improve the platform based on real user feedback from both web and SMS users.
 
