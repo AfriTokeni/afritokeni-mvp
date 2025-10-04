@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { User, Edit3, Save, ChevronDown, ChevronUp, Check, CreditCard, Shield, Phone, Mail, Calendar, HelpCircle, MessageCircle, LogOut, Camera } from 'lucide-react';
-import { uploadFile } from '@junobuild/core';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
@@ -386,29 +385,34 @@ const UserProfile: React.FC = () => {
       return;
     }
 
-    try {
-      setUploadingImage(true);
-      const result = await uploadFile({
-        collection: 'profile-images',
-        data: file,
-        filename: `${user.user.id}-${Date.now()}-${file.name}`
-      });
+    setUploadingImage(true);
+    
+    // Convert image to base64 data URL (avoids ad-blocker issues)
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      console.log('Image loaded, base64 length:', base64String?.length);
       
-      // Store the download URL - use fullPath for proper URL
-      const imageUrl = result.downloadUrl;
-      setProfileImage(imageUrl);
+      if (base64String) {
+        setProfileImage(base64String);
+        
+        // Save to localStorage for persistence
+        if (user.user?.id) {
+          localStorage.setItem(`profile-image-${user.user.id}`, base64String);
+          console.log('Image saved to localStorage');
+        }
+      }
       
-      // Save to localStorage for persistence
-      localStorage.setItem(`profile-image-${user.user.id}`, imageUrl);
-      
-      // TODO: Save to user profile in datastore
-      console.log('Image uploaded:', imageUrl);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Failed to upload image. Please try again.');
-    } finally {
       setUploadingImage(false);
-    }
+    };
+    
+    reader.onerror = (error) => {
+      console.error('FileReader error:', error);
+      alert('Failed to read image file');
+      setUploadingImage(false);
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   return (
