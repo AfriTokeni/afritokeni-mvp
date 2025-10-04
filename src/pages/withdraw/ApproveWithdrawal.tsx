@@ -98,7 +98,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
           The withdrawal has been successfully processed and recorded.
         </p>
         
-        <div className="bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="bg-green-50 border border-green-200 rounded-lg sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="text-center">
             <h3 className="text-base sm:text-lg font-semibold text-green-800 mb-3">Transaction Summary</h3>
             <div className="space-y-2 text-xs sm:text-sm text-green-700">
@@ -120,7 +120,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
   return (
     <div className="p-4 sm:p-6">
       {/* Withdrawal Details Header */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex items-center justify-center">
@@ -175,7 +175,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
       </div> */}
 
       {/* Cash Confirmation */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
         <div className="flex items-start space-x-3">
           <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
           <div className="flex-1">
@@ -200,7 +200,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
       </div>
 
       {/* Withdrawal Code Input */}
-      <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="bg-white border border-gray-200 rounded-lg sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Enter Withdrawal Code</h3>
         <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
           Ask the customer to provide their withdrawal code to complete the transaction.

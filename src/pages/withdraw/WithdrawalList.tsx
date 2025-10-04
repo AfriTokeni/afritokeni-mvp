@@ -156,7 +156,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
             <div
               key={request.id}
               onClick={() => onSelectWithdrawal(request)}
-              className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
+              className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
                 <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">

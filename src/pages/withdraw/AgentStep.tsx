@@ -305,7 +305,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-3 sm:p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0 mb-4 sm:mb-6">
             <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">Select Agent</h2>
@@ -427,7 +427,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
                 {availableAgents.map((agent) => (
                   <div
                     key={agent.id}
-                    className={`bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-200 cursor-pointer ${
+                    className={`bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-all duration-200 cursor-pointer ${
                       selectedAgent?.id === agent.id ? 'ring-2 ring-gray-900' : ''
                     }`}
                     onClick={() => setSelectedAgent(selectedAgent?.id === agent.id ? null : agent)}

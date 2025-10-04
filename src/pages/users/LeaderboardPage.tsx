@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
+import { Trophy, Medal, Award } from 'lucide-react';
 import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
 
 export default function LeaderboardPage() {
@@ -44,29 +44,19 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="max-w-4xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <TrendingUp className="w-8 h-8 text-orange-500" />
-            <h1 className="text-3xl font-bold text-gray-900">AFRI Token Leaderboard</h1>
-          </div>
-          <p className="text-gray-600">Top AFRI token holders in the AfriTokeni DAO</p>
-        </div>
-
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Total Supply</p>
             <p className="text-2xl font-bold font-mono text-gray-900">
               {formatNumber(totalSupply)} AFRI
             </p>
           </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Top Holders</p>
             <p className="text-2xl font-bold font-mono text-gray-900">{leaderboard.length}</p>
           </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Largest Holder</p>
             <p className="text-2xl font-bold font-mono text-gray-900">
               {leaderboard[0] ? `${getPercentage(leaderboard[0].balance)}%` : '0%'}
@@ -75,14 +65,14 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Leaderboard */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Top Token Holders</h2>
           </div>
 
           {loading ? (
             <div className="p-12 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
               <p className="mt-4 text-gray-600">Loading leaderboard...</p>
             </div>
           ) : leaderboard.length === 0 ? (
@@ -96,7 +86,7 @@ export default function LeaderboardPage() {
                 <div
                   key={index}
                   className={`p-6 flex items-center gap-4 hover:bg-gray-50 transition-colors ${
-                    index < 3 ? 'bg-gradient-to-r from-orange-50/50 to-transparent' : ''
+                    index < 3 ? 'bg-gray-50' : ''
                   }`}
                 >
                   {/* Rank */}
@@ -140,7 +130,6 @@ export default function LeaderboardPage() {
             holders who haven't staked their tokens in neurons are not displayed.
           </p>
         </div>
-      </div>
     </div>
   );
 }

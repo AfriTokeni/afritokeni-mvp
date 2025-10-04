@@ -94,20 +94,20 @@ const AmountStep: React.FC<AmountStepProps> = ({
   const totalRequired = currentAmount + currentFee;
   const isValidAmount = currentAmount > 0 && !error;
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 lg:p-8">
-      <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Enter Withdrawal Amount</h2>
+    <div className="bg-white rounded-2xl border border-gray-200 p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Withdrawal Amount</h2>
       
       {/* Current Balance Display */}
-      <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
-          <span className="text-xs sm:text-sm font-medium text-blue-700">Current Balance:</span>
-          <span className="text-sm sm:text-base lg:text-lg font-bold text-blue-900 font-mono">{formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency)}</span>
+      <div className="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium text-gray-600">Current Balance:</span>
+          <span className="text-2xl font-bold text-gray-900 font-mono">{formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency)}</span>
         </div>
       </div>
 
       {/* Withdrawal Type Selection */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">What would you like to withdraw?</label>
+        <label className="block text-sm font-semibold text-gray-900 mb-3">What would you like to withdraw?</label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
             type="button"
@@ -115,22 +115,20 @@ const AmountStep: React.FC<AmountStepProps> = ({
               setWithdrawType('cash');
               setBtcAmount('');
             }}
-            className={`p-4 border rounded-lg text-left transition-all duration-200 ${
+            className={`p-6 border-2 rounded-2xl text-left transition-all ${
               withdrawType === 'cash'
-                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                ? 'border-gray-900 bg-gray-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <div className="flex items-start space-x-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                withdrawType === 'cash' ? 'bg-blue-100' : 'bg-gray-100'
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                withdrawType === 'cash' ? 'bg-gray-100' : 'bg-gray-50'
               }`}>
-                <DollarSign className={`w-5 h-5 ${
-                  withdrawType === 'cash' ? 'text-blue-600' : 'text-gray-600'
-                }`} />
+                <DollarSign className="w-6 h-6 text-gray-900" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Withdraw Cash</h3>
+                <h3 className="font-bold text-gray-900 mb-1">Withdraw Cash</h3>
                 <p className="text-sm text-gray-600">Get local currency cash from nearby agents</p>
               </div>
             </div>
@@ -145,22 +143,18 @@ const AmountStep: React.FC<AmountStepProps> = ({
                 setBtcAmount(btcEquivalent);
               }
             }}
-            className={`p-4 border rounded-lg text-left transition-all duration-200 ${
+            className={`p-6 border-2 rounded-2xl text-left transition-all ${
               withdrawType === 'bitcoin'
-                ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-200'
+                ? 'border-gray-900 bg-gray-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <div className="flex items-start space-x-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                withdrawType === 'bitcoin' ? 'bg-orange-100' : 'bg-gray-100'
-              }`}>
-                <Bitcoin className={`w-5 h-5 ${
-                  withdrawType === 'bitcoin' ? 'text-orange-600' : 'text-gray-600'
-                }`} />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-orange-50">
+                <Bitcoin className="w-6 h-6 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Convert to Bitcoin</h3>
+                <h3 className="font-bold text-gray-900 mb-1">Convert to Bitcoin</h3>
                 <p className="text-sm text-gray-600">Exchange local currency for Bitcoin</p>
               </div>
             </div>

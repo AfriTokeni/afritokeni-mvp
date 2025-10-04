@@ -367,11 +367,13 @@ const UserProfile: React.FC = () => {
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8 mx-2 sm:mx-0">
+        <div className="bg-white rounded-2xl border border-gray-200 p-8">
           {/* Profile Header */}
-          <div className="flex flex-col items-center text-center space-y-4 mb-6 sm:mb-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gray-100 rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 text-gray-600" />
+          <div className="flex flex-col items-center text-center space-y-4 mb-8">
+            <div className="w-24 h-24 bg-gray-900 rounded-full flex items-center justify-center">
+              <span className="text-4xl font-bold text-white">
+                {userData.name.charAt(0).toUpperCase()}
+              </span>
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-center space-x-2 mb-2">

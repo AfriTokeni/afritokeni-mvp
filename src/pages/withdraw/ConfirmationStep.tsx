@@ -36,7 +36,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 lg:p-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-6 lg:p-8">
         <div className="text-center mb-6 sm:mb-8">
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
             <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
@@ -103,7 +103,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
         {selectedAgent && (
           <div className="border-t border-gray-200 pt-6 sm:pt-8">
             <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 mb-4 sm:mb-6">Agent Details</h3>
-            <div className="bg-gray-50 rounded-xl p-3 sm:p-6 border border-gray-200">
+            <div className="bg-gray-50 rounded-2xl p-3 sm:p-6 border border-gray-200">
               <div className="flex items-start space-x-3 sm:space-x-4">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-6 h-6 sm:w-7 sm:h-7 text-gray-600" />

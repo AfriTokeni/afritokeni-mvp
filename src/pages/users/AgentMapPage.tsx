@@ -274,17 +274,8 @@ const AgentMapPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Nearby Agents</h1>
-          <p className="text-gray-600">
-            Locate AfriTokeni agents near you for cash deposits, withdrawals, and Bitcoin exchanges
-          </p>
-        </div>
-
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-900">Search & Filter Agents</h2>
             {/* View Mode Toggle */}
@@ -388,7 +379,7 @@ const AgentMapPage: React.FC = () => {
           {sortedAgents.map((agent) => (
             <div
               key={agent.id}
-              className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+              className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                 selectedAgent?.id === agent.id ? 'ring-2 ring-gray-500' : ''
               }`}
               onClick={() => setSelectedAgent(selectedAgent?.id === agent.id ? null : agent)}
@@ -506,8 +497,8 @@ const AgentMapPage: React.FC = () => {
           </div>
         ) : (
           /* Map View */
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="h-96 rounded-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="h-[600px] rounded-lg overflow-hidden">
               <MapContainer
                 center={[userLocation?.lat || 0.3476, userLocation?.lng || 32.5825]}
                 zoom={13}
@@ -666,7 +657,6 @@ const AgentMapPage: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

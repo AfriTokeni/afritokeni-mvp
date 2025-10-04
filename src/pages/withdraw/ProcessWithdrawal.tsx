@@ -105,7 +105,7 @@ const ProcessWithdrawal: React.FC = () => {
         </div>
 
         {/* Step Content */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
           {currentStep === 'list' && (
             <WithdrawalList onSelectWithdrawal={handleSelectWithdrawal} />
           )}

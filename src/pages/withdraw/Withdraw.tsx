@@ -132,11 +132,8 @@ const WithdrawPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="max-w-4xl mx-auto px-2 sm:px-6 lg:px-8">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Withdraw Money</h1>
-        
         {/* Step Indicator */}
-        <div className="mb-6 sm:mb-8 flex items-center justify-center">
+        <div className="mb-8 flex items-center justify-center">
           <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
             <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : currentStep === 'agent' || currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
               <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
@@ -208,7 +205,6 @@ const WithdrawPage: React.FC = () => {
             onMakeAnotherWithdrawal={handleMakeAnotherWithdrawal}
           />
         )}
-      </div>
     </div>
   );
 };
