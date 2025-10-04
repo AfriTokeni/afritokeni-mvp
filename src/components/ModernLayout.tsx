@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import CollapsibleSidebar from './CollapsibleSidebar';
+import PublicFooter from './PublicFooter';
 import type { LucideIcon } from 'lucide-react';
 
 interface Route {
@@ -104,6 +105,9 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
         <main className="p-8">
           {children}
         </main>
+
+        {/* Footer */}
+        <PublicFooter />
       </div>
     </div>
   );
