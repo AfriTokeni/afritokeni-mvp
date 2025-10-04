@@ -131,7 +131,7 @@ const LandingPage: React.FC = () => {
               <span className="text-orange-600">in under 1 second</span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto">
-              99% cheaper fees. Works on feature phones. 1000s on any phone.
+              Lightning Network fees under $0.001. Works on any phone. 39 African currencies.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -151,8 +151,77 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Lightning Network Section */}
-      <section className="bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 py-12 sm:py-16 lg:py-20">
+      {/* Savings Comparison Table - MOVED UP */}
+      <div id="savings">
+        <SavingsComparisonTable />
+      </div>
+
+      {/* Key Differentiators - NEW SECTION */}
+      <section className="bg-white py-16 sm:py-20 lg:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+              Why AfriTokeni Wins
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              The first SMS-accessible Bitcoin platform with enterprise-grade security and community governance
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Escrow Security */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border-2 border-blue-200">
+              <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Escrow Protected</h3>
+              <p className="text-gray-700 mb-4">
+                AfriTokeni holds Bitcoin in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
+              </p>
+              <div className="text-sm font-semibold text-blue-600">Zero fraud risk</div>
+            </div>
+
+            {/* Lightning Speed */}
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200">
+              <div className="w-16 h-16 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
+              <p className="text-gray-700 mb-4">
+                Transfers complete in under 1 second. $0.001 fees. Perfect for daily payments under $100.
+              </p>
+              <div className="text-sm font-semibold text-orange-600">99% cheaper</div>
+            </div>
+
+            {/* Agent Incentives */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200">
+              <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
+                <Bitcoin className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Agent Earnings</h3>
+              <p className="text-gray-700 mb-4">
+                Agents earn 2-12% commission based on location. Remote areas pay more. Fair compensation system.
+              </p>
+              <div className="text-sm font-semibold text-green-600">Up to 12% commission</div>
+            </div>
+
+            {/* DAO Governance */}
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-purple-200">
+              <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
+                <Globe className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">DAO Governed</h3>
+              <p className="text-gray-700 mb-4">
+                Community-owned. Vote on fees, currencies, and policies via SMS. Agents and users control the platform.
+              </p>
+              <div className="text-sm font-semibold text-purple-600">Vote via SMS</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - SIMPLIFIED */}
+      <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm font-medium mb-4">
@@ -440,56 +509,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Savings Comparison Table */}
-      <div id="savings">
-        <SavingsComparisonTable />
-      </div>
-
-      {/* Features Section */}
-      <section className="bg-white py-12 sm:py-16 lg:py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4 sm:px-0">
-              Built for Africa&apos;s financial future
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
-              Combining Internet Computer security with SMS accessibility to serve every African
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            <div className="bg-white rounded-xl p-6 lg:p-8 border border-gray-200 mx-4 sm:mx-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-lg flex items-center justify-center mb-4 sm:mb-6">
-                <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">83% Lower Costs</h3>
-              <p className="text-sm sm:text-base text-gray-600">
-                Blockchain technology reduces transaction fees to just $0.0000022 compared to traditional mobile money
-              </p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 lg:p-8 border border-gray-200 mx-4 sm:mx-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-lg flex items-center justify-center mb-4 sm:mb-6">
-                <Lock className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">Bank-Grade Security</h3>
-              <p className="text-sm sm:text-base text-gray-600">
-                Internet Computer Protocol provides cryptographic security with threshold signatures and MPC key management
-              </p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 lg:p-8 border border-gray-200 mx-4 sm:mx-0 md:col-span-2 lg:col-span-1">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-lg flex items-center justify-center mb-4 sm:mb-6">
-                <Smartphone className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">Universal Access</h3>
-              <p className="text-sm sm:text-base text-gray-600">
-                Works on any phone - from feature phones to smartphones. 90%+ coverage across Africa
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-16">
