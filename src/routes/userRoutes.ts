@@ -2,14 +2,16 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Home,
   Send,
+  Bitcoin,
   History,
-  Banknote,
   User,
-  LayoutDashboard,
   MapPin,
   Vote,
   Trophy,
 } from 'lucide-react';
+  LayoutDashboard,
+  Banknote,
+} from "lucide-react";
 import { RouteID } from '../types/routes';
 
 
@@ -101,6 +103,8 @@ export const user_mobile_routes: Route[] = [
     path: "/users/dao",
     label: "DAO",
     icon: Vote,
+    label: "Send Bitcoin",
+    icon: Send,
   },
   {
     id: "agents" as RouteID,

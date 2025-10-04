@@ -50,10 +50,14 @@ import AgentKYCPage from "./pages/auth/AgentKYCPage";
 import KYCAdmin from './pages/admin/KYCAdmin';
 import AdminLogin from './pages/auth/AdminLogin';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Landing Page
 import LandingPage from "./pages/LandingPage";
 import TariffPage from "./pages/TariffPage";
+import SMSPlayground from "./pages/SMSPlayground";
+import BecomeAgentPage from "./pages/BecomeAgentPage";
+import AboutPage from "./pages/AboutPage";
 
 const App: FC = () => {
   useEffect(() => {
@@ -82,8 +86,9 @@ const App: FC = () => {
     
           {/* User Routes */}
           <Route path="/users/*" element={
-            <Layout desktop_routes={user_desktop_routes} mobile_routes={user_mobile_routes} user_type="user">
-              <Routes>
+            <ProtectedRoute requiredRole="user">
+              <Layout desktop_routes={user_desktop_routes} mobile_routes={user_mobile_routes} user_type="user">
+                <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
                 <Route path="agents" element={<AgentMapPage />} />
@@ -104,12 +109,14 @@ const App: FC = () => {
                 <Route path="leaderboard" element={<LeaderboardPage />} />
               </Routes>
             </Layout>
+            </ProtectedRoute>
           } />
           
           {/* Agent Routes */}
           <Route path="/agents/*" element={
-            <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes} user_type="agent">
-              <Routes>
+            <ProtectedRoute requiredRole="agent">
+              <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes} user_type="agent">
+                <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
                 <Route path="withdraw" element={<ProcessWithdrawal/>} />
                 <Route path="process-deposits" element={<ProcessDeposits/>} />
@@ -127,6 +134,7 @@ const App: FC = () => {
                 <Route path="agent-kyc" element={<AgentKYCPage />} />
               </Routes>
             </Layout>
+            </ProtectedRoute>
           } />
           
           {/* Auth Routes */}
@@ -149,6 +157,15 @@ const App: FC = () => {
           
           {/* Tariff Page */}
           <Route path="/tariff" element={<TariffPage />} />
+          
+          {/* About Page */}
+          <Route path="/about" element={<AboutPage />} />
+          
+          {/* SMS Playground */}
+          <Route path="/sms" element={<SMSPlayground />} />
+          
+          {/* Become an Agent */}
+          <Route path="/become-agent" element={<BecomeAgentPage />} />
           
           {/* Default redirects */}
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />

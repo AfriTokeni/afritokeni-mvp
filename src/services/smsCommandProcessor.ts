@@ -74,6 +74,11 @@ export class SMSCommandProcessor {
         return await this.handleBitcoinSell(phoneNumber, message);
       }
 
+      // Bitcoin send (unified - auto-routes between Lightning/on-chain)
+      if (normalizedMessage.startsWith('BTC SEND ')) {
+        return await this.handleBitcoinSend(phoneNumber, message);
+      }
+
       // Withdraw
       if (normalizedMessage.startsWith('WITHDRAW ') || normalizedMessage.startsWith('WD ')) {
         return await this.handleWithdraw(phoneNumber, message);
@@ -392,6 +397,72 @@ export class SMSCommandProcessor {
       confirmationCode,
       reply: `Bitcoin Purchase Quote:\nAmount: ${amount.toLocaleString()} ${currency}\nFee: ${feePercent}%\nTotal: ${total.toLocaleString()} ${currency}\n\nReply: CONFIRM ${confirmationCode}\nExpires in 5 minutes`,
     };
+  }
+
+  /**
+   * Handle Bitcoin send (unified - auto-routes between Lightning/on-chain)
+   * Format: BTC SEND [Phone] [Amount] [Currency]
+   */
+  private async handleBitcoinSend(phoneNumber: string, message: string): Promise<SMSCommandResponse> {
+    const parts = message.trim().split(' ');
+    if (parts.length < 4) {
+      return {
+        success: false,
+        reply: 'Format: BTC SEND [Phone] [Amount] [Currency]\nExample: BTC SEND +234... 5000 NGN',
+      };
+    }
+
+    const recipientPhone = parts[2];
+    const amount = parseFloat(parts[3]);
+    const currency = (parts[4] || getCurrencyFromPhone(phoneNumber)) as AfricanCurrency;
+
+    if (isNaN(amount) || amount <= 0) {
+      return {
+        success: false,
+        reply: 'Invalid amount. Please enter a valid number.',
+      };
+    }
+
+    const user = await SMSDataAdapter.getUserByPhone(phoneNumber);
+    if (!user) {
+      return {
+        success: false,
+        reply: 'Account not found. Register with: REG [Your Name]',
+      };
+    }
+
+    // Import routing service dynamically to avoid circular deps
+    const { BitcoinRoutingService } = await import('./bitcoinRoutingService');
+    
+    // Decide routing method automatically
+    const routing = await BitcoinRoutingService.decideRouting({
+      amount,
+      currency,
+    });
+
+    // Execute transfer with auto-routing
+    try {
+      const transfer = await BitcoinRoutingService.executeTransfer({
+        fromUserId: user.id,
+        toUserId: recipientPhone,
+        amount,
+        currency,
+        urgency: 'instant',
+      });
+
+      const method = routing.method === 'lightning' ? '⚡ Instant' : '🔗 On-chain';
+      const time = routing.method === 'lightning' ? '< 1 second' : routing.estimatedTime;
+      
+      return {
+        success: true,
+        reply: `${method} Bitcoin Transfer Complete!\n\nSent: ${amount.toLocaleString()} ${currency}\nTo: ${recipientPhone}\nFee: ~$${(routing.estimatedFee * 50000).toFixed(2)}\nTime: ${time}\n\nTx: ${transfer.txHash || transfer.invoice?.substring(0, 20) + '...'}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        reply: `Transfer failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
   }
 
   /**
