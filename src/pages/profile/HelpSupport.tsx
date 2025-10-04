@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, HelpCircle, MessageCircle, Phone, Mail, FileText, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 
 const HelpSupport: React.FC = () => {
   const navigate = useNavigate();
@@ -82,17 +81,17 @@ const HelpSupport: React.FC = () => {
   ];
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-6">
           <button
             onClick={() => navigate('/users/profile')}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-neutral-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <h1 className="text-2xl font-bold text-neutral-900">Help & Support</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Help & Support</h1>
         </div>
 
         {/* Quick Actions */}
@@ -101,40 +100,40 @@ const HelpSupport: React.FC = () => {
             <a
               key={index}
               href={method.action}
-              className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center space-x-3 mb-3">
-                <method.icon className="w-6 h-6 text-neutral-600" />
-                <h3 className="font-semibold text-neutral-900">{method.title}</h3>
+                <method.icon className="w-6 h-6 text-gray-600" />
+                <h3 className="font-semibold text-gray-900">{method.title}</h3>
               </div>
-              <p className="text-sm text-neutral-600 mb-2">{method.description}</p>
-              <p className="text-sm font-medium text-neutral-900">{method.value}</p>
+              <p className="text-sm text-gray-600 mb-2">{method.description}</p>
+              <p className="text-sm font-medium text-gray-900">{method.value}</p>
             </a>
           ))}
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <HelpCircle className="w-5 h-5" />
             <span>Frequently Asked Questions</span>
           </h2>
 
           <div className="space-y-3">
             {faqs.map((faq, index) => (
-              <div key={index} className="border border-neutral-200 rounded-lg">
+              <div key={index} className="border border-gray-200 rounded-lg">
                 <button
                   onClick={() => setSelectedFAQ(selectedFAQ === index ? null : index)}
-                  className="w-full px-4 py-3 text-left hover:bg-neutral-50 transition-colors flex items-center justify-between"
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center justify-between"
                 >
-                  <span className="font-medium text-neutral-900">{faq.question}</span>
-                  <span className="text-neutral-400 text-lg">
+                  <span className="font-medium text-gray-900">{faq.question}</span>
+                  <span className="text-gray-400 text-lg">
                     {selectedFAQ === index ? '−' : '+'}
                   </span>
                 </button>
                 {selectedFAQ === index && (
-                  <div className="px-4 pb-3 border-t border-neutral-200">
-                    <p className="text-sm text-neutral-600 pt-3">{faq.answer}</p>
+                  <div className="px-4 pb-3 border-t border-gray-200">
+                    <p className="text-sm text-gray-600 pt-3">{faq.answer}</p>
                   </div>
                 )}
               </div>
@@ -143,8 +142,8 @@ const HelpSupport: React.FC = () => {
         </div>
 
         {/* Resources */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <FileText className="w-5 h-5" />
             <span>Helpful Resources</span>
           </h2>
@@ -154,13 +153,13 @@ const HelpSupport: React.FC = () => {
               <a
                 key={index}
                 href={resource.link}
-                className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div>
-                  <h3 className="font-medium text-neutral-900">{resource.title}</h3>
-                  <p className="text-sm text-neutral-600">{resource.description}</p>
+                  <h3 className="font-medium text-gray-900">{resource.title}</h3>
+                  <p className="text-sm text-gray-600">{resource.description}</p>
                 </div>
-                <ExternalLink className="w-4 h-4 text-neutral-400" />
+                <ExternalLink className="w-4 h-4 text-gray-400" />
               </a>
             ))}
           </div>
@@ -190,7 +189,7 @@ const HelpSupport: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

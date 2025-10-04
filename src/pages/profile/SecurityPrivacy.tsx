@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Shield, Lock, Eye, EyeOff, Smartphone, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { DataService } from '../../services/dataService';
 
@@ -114,17 +113,17 @@ const SecurityPrivacy: React.FC = () => {
   };
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-6">
           <button
             onClick={() => navigate('/users/profile')}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-neutral-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <h1 className="text-2xl font-bold text-neutral-900">Security & Privacy</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Security & Privacy</h1>
         </div>
 
         {/* Status Messages */}
@@ -147,20 +146,20 @@ const SecurityPrivacy: React.FC = () => {
         )}
 
         {/* Authentication Security */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <Lock className="w-5 h-5" />
             <span>Authentication Security</span>
           </h2>
 
           <div className="space-y-4">
             {/* PIN/Password Change */}
-            <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
-                <h3 className="font-medium text-neutral-900">
+                <h3 className="font-medium text-gray-900">
                   {authMethod === 'sms' ? 'Change PIN' : 'Change Password'}
                 </h3>
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-gray-600">
                   {authMethod === 'sms' 
                     ? 'Update your 4-digit PIN for SMS transactions' 
                     : 'Update your account password'
@@ -169,7 +168,7 @@ const SecurityPrivacy: React.FC = () => {
               </div>
               <button
                 onClick={() => setChangingPin(!changingPin)}
-                className="px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 {changingPin ? 'Cancel' : 'Change'}
               </button>
@@ -177,9 +176,9 @@ const SecurityPrivacy: React.FC = () => {
 
             {/* PIN Change Form */}
             {changingPin && (
-              <div className="p-4 bg-neutral-50 rounded-lg space-y-4">
+              <div className="p-4 bg-gray-50 rounded-lg space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Current {authMethod === 'sms' ? 'PIN' : 'Password'}
                   </label>
                   <div className="relative">
@@ -187,7 +186,7 @@ const SecurityPrivacy: React.FC = () => {
                       type={showPins.current ? 'text' : 'password'}
                       value={pinForm.currentPin}
                       onChange={(e) => setPinForm(prev => ({ ...prev, currentPin: e.target.value }))}
-                      className="w-full px-3 py-2 pr-10 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                       placeholder={`Enter current ${authMethod === 'sms' ? 'PIN' : 'password'}`}
                     />
                     <button
@@ -201,7 +200,7 @@ const SecurityPrivacy: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     New {authMethod === 'sms' ? 'PIN' : 'Password'}
                   </label>
                   <div className="relative">
@@ -209,7 +208,7 @@ const SecurityPrivacy: React.FC = () => {
                       type={showPins.new ? 'text' : 'password'}
                       value={pinForm.newPin}
                       onChange={(e) => setPinForm(prev => ({ ...prev, newPin: e.target.value }))}
-                      className="w-full px-3 py-2 pr-10 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                       placeholder={`Enter new ${authMethod === 'sms' ? 'PIN' : 'password'}`}
                     />
                     <button
@@ -223,7 +222,7 @@ const SecurityPrivacy: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Confirm New {authMethod === 'sms' ? 'PIN' : 'Password'}
                   </label>
                   <div className="relative">
@@ -231,7 +230,7 @@ const SecurityPrivacy: React.FC = () => {
                       type={showPins.confirm ? 'text' : 'password'}
                       value={pinForm.confirmPin}
                       onChange={(e) => setPinForm(prev => ({ ...prev, confirmPin: e.target.value }))}
-                      className="w-full px-3 py-2 pr-10 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                       placeholder={`Confirm new ${authMethod === 'sms' ? 'PIN' : 'password'}`}
                     />
                     <button
@@ -247,7 +246,7 @@ const SecurityPrivacy: React.FC = () => {
                 <button
                   onClick={handlePinChange}
                   disabled={loading || !pinForm.currentPin || !pinForm.newPin || !pinForm.confirmPin}
-                  className="w-full px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Updating...' : `Update ${authMethod === 'sms' ? 'PIN' : 'Password'}`}
                 </button>
@@ -255,10 +254,10 @@ const SecurityPrivacy: React.FC = () => {
             )}
 
             {/* Two-Factor Authentication */}
-            <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
-                <h3 className="font-medium text-neutral-900">Two-Factor Authentication</h3>
-                <p className="text-sm text-neutral-600">Add an extra layer of security to your account</p>
+                <h3 className="font-medium text-gray-900">Two-Factor Authentication</h3>
+                <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -267,25 +266,25 @@ const SecurityPrivacy: React.FC = () => {
                   onChange={() => handleSecurityToggle('twoFactorEnabled')}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
               </label>
             </div>
           </div>
         </div>
 
         {/* Notification Preferences */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <Smartphone className="w-5 h-5" />
             <span>Notification Preferences</span>
           </h2>
 
           <div className="space-y-4">
             {/* SMS Notifications */}
-            <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
-                <h3 className="font-medium text-neutral-900">SMS Notifications</h3>
-                <p className="text-sm text-neutral-600">Receive transaction alerts via SMS</p>
+                <h3 className="font-medium text-gray-900">SMS Notifications</h3>
+                <p className="text-sm text-gray-600">Receive transaction alerts via SMS</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -294,15 +293,15 @@ const SecurityPrivacy: React.FC = () => {
                   onChange={() => handleSecurityToggle('smsNotifications')}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
               </label>
             </div>
 
             {/* Email Notifications */}
-            <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
-                <h3 className="font-medium text-neutral-900">Email Notifications</h3>
-                <p className="text-sm text-neutral-600">Receive account updates via email</p>
+                <h3 className="font-medium text-gray-900">Email Notifications</h3>
+                <p className="text-sm text-gray-600">Receive account updates via email</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -311,15 +310,15 @@ const SecurityPrivacy: React.FC = () => {
                   onChange={() => handleSecurityToggle('emailNotifications')}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
               </label>
             </div>
 
             {/* Transaction Alerts */}
-            <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
-                <h3 className="font-medium text-neutral-900">Transaction Alerts</h3>
-                <p className="text-sm text-neutral-600">Get notified of all transactions</p>
+                <h3 className="font-medium text-gray-900">Transaction Alerts</h3>
+                <p className="text-sm text-gray-600">Get notified of all transactions</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -328,15 +327,15 @@ const SecurityPrivacy: React.FC = () => {
                   onChange={() => handleSecurityToggle('transactionAlerts')}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
               </label>
             </div>
 
             {/* Login Alerts */}
-            <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
-                <h3 className="font-medium text-neutral-900">Login Alerts</h3>
-                <p className="text-sm text-neutral-600">Get notified of new device logins</p>
+                <h3 className="font-medium text-gray-900">Login Alerts</h3>
+                <p className="text-sm text-gray-600">Get notified of new device logins</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -345,13 +344,13 @@ const SecurityPrivacy: React.FC = () => {
                   onChange={() => handleSecurityToggle('loginAlerts')}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
               </label>
             </div>
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

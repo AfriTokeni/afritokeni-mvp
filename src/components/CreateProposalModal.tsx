@@ -25,9 +25,9 @@ export default function CreateProposalModal({
   const proposalTypes = [
     { value: 'fee_adjustment' as ProposalType, label: 'Fee Adjustment', icon: DollarSign, color: 'text-green-600' },
     { value: 'currency_addition' as ProposalType, label: 'Add Currency', icon: Globe, color: 'text-blue-600' },
-    { value: 'agent_standards' as ProposalType, label: 'Agent Standards', icon: Shield, color: 'text-purple-600' },
+    { value: 'agent_standards' as ProposalType, label: 'Agent Standards', icon: Shield, color: 'text-gray-600' },
     { value: 'treasury' as ProposalType, label: 'Treasury Management', icon: FileText, color: 'text-orange-600' },
-    { value: 'other' as ProposalType, label: 'Other', icon: Lightbulb, color: 'text-neutral-600' },
+    { value: 'other' as ProposalType, label: 'Other', icon: Lightbulb, color: 'text-gray-600' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,11 +73,11 @@ export default function CreateProposalModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-neutral-200 p-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-neutral-900">Create Proposal</h2>
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Create Proposal</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -98,7 +98,7 @@ export default function CreateProposalModal({
 
           {/* Proposal Type */}
           <div>
-            <label className="block text-sm font-semibold text-neutral-900 mb-3">
+            <label className="block text-sm font-semibold text-gray-900 mb-3">
               Proposal Type
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -111,12 +111,12 @@ export default function CreateProposalModal({
                     onClick={() => setType(proposalType.value)}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       type === proposalType.value
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-neutral-200 hover:border-neutral-300'
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <Icon className={`w-6 h-6 ${proposalType.color} mx-auto mb-2`} />
-                    <p className="text-sm font-medium text-neutral-900 text-center">
+                    <p className="text-sm font-medium text-gray-900 text-center">
                       {proposalType.label}
                     </p>
                   </button>
@@ -127,7 +127,7 @@ export default function CreateProposalModal({
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-neutral-900 mb-2">
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
               Proposal Title
             </label>
             <input
@@ -135,14 +135,14 @@ export default function CreateProposalModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Reduce transaction fees by 10%"
-              className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-neutral-900 mb-2">
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
               Description
             </label>
             <textarea
@@ -150,7 +150,7 @@ export default function CreateProposalModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Explain your proposal in detail. Include rationale, expected impact, and implementation details..."
               rows={6}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent resize-none"
               required
             />
           </div>
@@ -171,14 +171,14 @@ export default function CreateProposalModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-semibold"
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !canCreateProposal}
-              className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating...' : 'Create Proposal'}
             </button>

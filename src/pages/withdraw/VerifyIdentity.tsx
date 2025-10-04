@@ -236,7 +236,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
           disabled={!allStepsCompleted}
           className={`flex-1 py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base font-medium transition-colors ${
             allStepsCompleted
-              ? 'w-full bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors duration-200'
+              ? 'w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           }`}
         >

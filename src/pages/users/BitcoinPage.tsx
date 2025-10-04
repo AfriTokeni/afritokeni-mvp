@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bitcoin, Copy, QrCode, RefreshCw, Send, ArrowDown, TrendingDown, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { BitcoinService } from '../../services/bitcoinService';
 import { AfricanCurrency, AFRICAN_CURRENCIES } from '../../types/currency';
 
@@ -78,19 +77,19 @@ const BitcoinPage: React.FC = () => {
 
   if (loading) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 text-orange-500 animate-spin mx-auto mb-4" />
-            <p className="text-neutral-600">Loading Bitcoin wallet...</p>
+            <p className="text-gray-600">Loading Bitcoin wallet...</p>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -98,8 +97,8 @@ const BitcoinPage: React.FC = () => {
             <Bitcoin className="w-4 h-4 mr-2" />
             Real Bitcoin Integration
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">Bitcoin Wallet</h1>
-          <p className="text-neutral-600">Manage your Bitcoin and exchange for local currencies</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Bitcoin Wallet</h1>
+          <p className="text-gray-600">Manage your Bitcoin and exchange for local currencies</p>
         </div>
 
         {/* Bitcoin Balance Card */}
@@ -110,8 +109,8 @@ const BitcoinPage: React.FC = () => {
                 <Bitcoin className="w-6 h-6 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-neutral-900">Bitcoin Balance</h2>
-                <p className="text-neutral-600 text-sm">Real Bitcoin wallet</p>
+                <h2 className="text-lg font-semibold text-gray-900">Bitcoin Balance</h2>
+                <p className="text-gray-600 text-sm">Real Bitcoin wallet</p>
               </div>
             </div>
             <button
@@ -125,10 +124,10 @@ const BitcoinPage: React.FC = () => {
           
           <div className="space-y-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-neutral-900 font-mono mb-2">
+              <div className="text-3xl font-bold text-gray-900 font-mono mb-2">
                 ₿{formatBitcoin(bitcoinBalance)}
               </div>
-              <div className="text-lg text-neutral-600">
+              <div className="text-lg text-gray-600">
                 ≈ {formatCurrency(getBitcoinValueInCurrency(selectedCurrency), selectedCurrency)}
               </div>
             </div>
@@ -151,14 +150,14 @@ const BitcoinPage: React.FC = () => {
         </div>
 
         {/* Bitcoin Address Card */}
-        <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm">
+        <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-neutral-900">Your Bitcoin Address</h3>
-            <QrCode className="w-5 h-5 text-neutral-500" />
+            <h3 className="text-lg font-semibold text-gray-900">Your Bitcoin Address</h3>
+            <QrCode className="w-5 h-5 text-gray-500" />
           </div>
           
-          <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4 mb-4">
-            <div className="font-mono text-sm text-neutral-900 break-all mb-3">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+            <div className="font-mono text-sm text-gray-900 break-all mb-3">
               {bitcoinAddress}
             </div>
             <button
@@ -166,7 +165,7 @@ const BitcoinPage: React.FC = () => {
               className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 addressCopied
                   ? 'bg-green-100 text-green-700'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               <Copy className="w-4 h-4 mr-2" />
@@ -174,33 +173,33 @@ const BitcoinPage: React.FC = () => {
             </button>
           </div>
           
-          <p className="text-neutral-600 text-sm">
+          <p className="text-gray-600 text-sm">
             Send Bitcoin to this address to add funds to your wallet. Only send Bitcoin (BTC) to this address.
           </p>
         </div>
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Bitcoin Actions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Bitcoin Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={() => navigate('/users/bitcoin/send')}
-              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-blue-300"
+              className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-blue-300"
             >
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors">
                 <Send className="w-6 h-6 text-blue-600" />
               </div>
-              <span className="text-neutral-900 font-medium">Send Bitcoin</span>
+              <span className="text-gray-900 font-medium">Send Bitcoin</span>
             </button>
 
             <button
               onClick={() => navigate('/users/bitcoin/receive')}
-              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-green-300"
+              className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-green-300"
             >
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors">
                 <ArrowDown className="w-6 h-6 text-green-600" />
               </div>
-              <span className="text-neutral-900 font-medium">Receive Bitcoin</span>
+              <span className="text-gray-900 font-medium">Receive Bitcoin</span>
             </button>
 
             <button
@@ -210,8 +209,8 @@ const BitcoinPage: React.FC = () => {
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-200 transition-colors">
                 <TrendingDown className="w-6 h-6 text-orange-600" />
               </div>
-              <div className="font-semibold text-neutral-900 mb-1">Exchange Bitcoin</div>
-              <div className="text-sm text-neutral-600">Send from external wallet for cash</div>
+              <div className="font-semibold text-gray-900 mb-1">Exchange Bitcoin</div>
+              <div className="text-sm text-gray-600">Send from external wallet for cash</div>
             </button>
 
             <button
@@ -221,18 +220,18 @@ const BitcoinPage: React.FC = () => {
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors">
                 <TrendingUp className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="font-semibold text-neutral-900 mb-1">Buy Bitcoin</div>
-              <div className="text-sm text-neutral-600">Purchase with cash</div>
+              <div className="font-semibold text-gray-900 mb-1">Buy Bitcoin</div>
+              <div className="text-sm text-gray-600">Purchase with cash</div>
             </button>
 
           </div>
         </div>
 
         {/* Exchange Rates */}
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm">
-          <div className="p-6 border-b border-neutral-100">
-            <h3 className="text-lg font-semibold text-neutral-900">Live Exchange Rates</h3>
-            <p className="text-neutral-600 text-sm">Current Bitcoin prices in African currencies</p>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900">Live Exchange Rates</h3>
+            <p className="text-gray-600 text-sm">Current Bitcoin prices in African currencies</p>
           </div>
           
           <div className="p-6">
@@ -240,16 +239,16 @@ const BitcoinPage: React.FC = () => {
               {Object.entries(exchangeRates).map(([currency, rate]) => {
                 const currencyInfo = AFRICAN_CURRENCIES[currency as AfricanCurrency];
                 return (
-                  <div key={currency} className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                  <div key={currency} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <span className="font-mono text-xs bg-neutral-200 px-2 py-1 rounded">
+                        <span className="font-mono text-xs bg-gray-200 px-2 py-1 rounded">
                           {currency}
                         </span>
-                        <span className="text-sm text-neutral-600">{currencyInfo?.name}</span>
+                        <span className="text-sm text-gray-600">{currencyInfo?.name}</span>
                       </div>
                     </div>
-                    <div className="font-mono text-lg font-semibold text-neutral-900">
+                    <div className="font-mono text-lg font-semibold text-gray-900">
                       1 BTC = {formatCurrency(rate, currency as AfricanCurrency)}
                     </div>
                   </div>
@@ -266,8 +265,8 @@ const BitcoinPage: React.FC = () => {
               <span className="text-blue-600 font-semibold text-sm">SMS</span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-neutral-900 mb-2">Use Bitcoin via SMS</h3>
-              <p className="text-neutral-600 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Use Bitcoin via SMS</h3>
+              <p className="text-gray-600 mb-4">
                 You can also manage Bitcoin using SMS commands from any phone:
               </p>
               <div className="space-y-2 text-sm">
@@ -288,7 +287,7 @@ const BitcoinPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

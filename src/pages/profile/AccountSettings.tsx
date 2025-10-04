@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, User, Mail, Globe, Save, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { AfricanCurrency, getActiveCurrencies } from '../../types/currency';
 import { DataService } from '../../services/dataService';
@@ -95,21 +94,21 @@ const AccountSettings: React.FC = () => {
   };
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-6">
           <button
             onClick={() => navigate('/users/profile')}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-neutral-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <h1 className="text-2xl font-bold text-neutral-900">Account Settings</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           {/* Status Messages */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -132,34 +131,34 @@ const AccountSettings: React.FC = () => {
           {/* Personal Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <User className="w-5 h-5" />
                 <span>Personal Information</span>
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     First Name
                   </label>
                   <input
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter first name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Last Name
                   </label>
                   <input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter last name"
                   />
                 </div>
@@ -168,34 +167,34 @@ const AccountSettings: React.FC = () => {
 
             {/* Contact Information */}
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <Mail className="w-5 h-5" />
                 <span>Contact Information</span>
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
                   </label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter email address"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter phone number"
                   />
                 </div>
@@ -204,46 +203,46 @@ const AccountSettings: React.FC = () => {
 
             {/* Location & Currency */}
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <Globe className="w-5 h-5" />
                 <span>Location & Currency</span>
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Country
                   </label>
                   <input
                     type="text"
                     value={formData.location.country}
                     onChange={(e) => handleInputChange('location.country', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter country"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     City
                   </label>
                   <input
                     type="text"
                     value={formData.location.city}
                     onChange={(e) => handleInputChange('location.city', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter city"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Preferred Currency
                   </label>
                   <select
                     value={formData.preferredCurrency}
                     onChange={(e) => handleInputChange('preferredCurrency', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     {getActiveCurrencies().map((currency) => (
                       <option key={currency.code} value={currency.code}>
@@ -256,11 +255,11 @@ const AccountSettings: React.FC = () => {
             </div>
 
             {/* Save Button */}
-            <div className="flex justify-end pt-4 border-t border-neutral-200">
+            <div className="flex justify-end pt-4 border-t border-gray-200">
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
                 <span>{saving ? 'Saving...' : 'Save Changes'}</span>
@@ -269,7 +268,7 @@ const AccountSettings: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 
