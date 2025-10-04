@@ -223,15 +223,46 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* CTA to SMS Demo */}
-          <div className="text-center mt-12">
-            <Link
-              to="/sms"
-              className="inline-flex items-center gap-2 bg-orange-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-orange-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
-            >
-              <Smartphone className="w-5 h-5" />
-              Try SMS Banking Demo
-            </Link>
+          {/* SMS Lightning Commands */}
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-3xl mx-auto">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Bitcoin Transfers via SMS
+              </h3>
+              <p className="text-gray-600">
+                Send Bitcoin from any phone - auto-optimized for speed and cost
+              </p>
+            </div>
+            
+            <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
+              <div className="text-green-400 mb-2">$ Send Bitcoin (auto-optimized):</div>
+              <div className="text-white mb-4">BTC SEND +234... 5000 NGN</div>
+              
+              <div className="text-green-400 mb-2">$ Check Bitcoin balance:</div>
+              <div className="text-white mb-4">BTC BAL</div>
+              
+              <div className="text-yellow-400 mb-2">⚡ Response (instant):</div>
+              <div className="text-gray-300">
+                ✓ Instant Transfer Complete!<br/>
+                ✓ Sent: 5,000 NGN<br/>
+                ✓ Fee: $0.001 | Time: &lt;1 sec
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Auto-Optimized</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Best Rates</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>No Internet</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -2,13 +2,13 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Home,
   Send,
+  Bitcoin,
   History,
-  Banknote,
   User,
-  LayoutDashboard,
   MapPin,
-  Zap,
-} from 'lucide-react';
+  LayoutDashboard,
+  Banknote,
+} from "lucide-react";
 import { RouteID } from '../types/routes';
 
 
@@ -35,8 +35,8 @@ export const user_desktop_routes: Route[] = [
     {
         id: "lightning" as RouteID,
         path: "/users/lightning",
-        label: "Lightning Network",
-        icon: Zap,
+        label: "Send Bitcoin",
+        icon: Send,
     },
     {
         id: "agents" as RouteID,
@@ -80,8 +80,8 @@ export const user_mobile_routes: Route[] = [
   {
     id: "lightning" as RouteID,
     path: "/users/lightning",
-    label: "Lightning",
-    icon: Zap,
+    label: "Send Bitcoin",
+    icon: Send,
   },
   {
     id: "agents" as RouteID,

@@ -113,7 +113,7 @@ LN PAY [invoice]
 
 Network: 80,000 channels
 Avg Fee: $0.001`,
-          'LN SEND +256701234567 5000 UGX': `⚡ INSTANT Transfer Complete!
+          'BTC SEND +256701234567 5000 UGX': `⚡ Instant Bitcoin Transfer Complete!
 
 Sent: 5,000 UGX
 To: +256701234567
@@ -378,9 +378,7 @@ Share this invoice to receive instant payment!`,
                   { cmd: 'BTC RATE UGX', desc: 'Bitcoin Rate', category: 'bitcoin' },
                   { cmd: 'BTC BUY 100000 UGX', desc: 'Buy Bitcoin', category: 'bitcoin' },
                   { cmd: 'BTC SELL 50000 UGX', desc: 'Sell Bitcoin', category: 'bitcoin' },
-                  { cmd: 'LN', desc: 'Lightning Info', category: 'lightning' },
-                  { cmd: 'LN SEND +256701234567 5000 UGX', desc: 'Lightning Send', category: 'lightning' },
-                  { cmd: 'LN INVOICE 10000 UGX', desc: 'Lightning Invoice', category: 'lightning' }
+                  { cmd: 'BTC SEND +256701234567 5000 UGX', desc: 'Send Bitcoin', category: 'bitcoin' }
                 ].map((item) => (
                   <button
                     key={item.cmd}
