@@ -5,6 +5,7 @@ import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
 import { setDoc } from '@junobuild/core';
 import { nanoid } from 'nanoid';
+import SavingsComparisonTable from '../components/SavingsComparisonTable';
 
 const LandingPage: React.FC = () => {
   const { login } = useAuthentication();
@@ -488,6 +489,9 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Savings Comparison Table */}
+      <SavingsComparisonTable />
 
       {/* Features Section */}
       <section className="bg-white py-12 sm:py-16 lg:py-20">
