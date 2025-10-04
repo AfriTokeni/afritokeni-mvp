@@ -126,27 +126,26 @@ const LandingPage: React.FC = () => {
               Starting in Africa. Coming to the world.
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
-              Bitcoin Banking
+              Send money across Africa
               <br />
-              <span className="text-gray-600">for Everyone</span>
+              <span className="text-orange-600">in under 1 second</span>
             </h1>
-            <p className="text-xl sm:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
-              Send money instantly via SMS or web. Works on any phone, with or without internet. 
-              39 African currencies supported.
+            <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+              99% cheaper fees. Works on feature phones. 1000s on any phone.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleICPLogin}
                 className="bg-black text-white px-10 py-5 rounded-xl text-lg font-semibold hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Start Banking Now
+                Get Started
               </button>
-              <Link
-                to="/sms"
+              <a
+                href="#savings"
                 className="bg-white text-gray-900 border-2 border-gray-300 px-10 py-5 rounded-xl text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Try SMS Demo →
-              </Link>
+                See How Much You Save
+              </a>
             </div>
           </div>
         </div>
@@ -442,7 +441,9 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Savings Comparison Table */}
-      <SavingsComparisonTable />
+      <div id="savings">
+        <SavingsComparisonTable />
+      </div>
 
       {/* Features Section */}
       <section className="bg-white py-12 sm:py-16 lg:py-20">
