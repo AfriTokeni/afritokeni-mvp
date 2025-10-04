@@ -304,11 +304,11 @@ export const useRoleBasedAuth = () => {
       // Redirect based on selected role
       const target = role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
       if (location.pathname !== target) {
-        // small timeout keeps UX smooth post-write
+        // Wait for the datastore write to complete and auth context to be updated
         setTimeout(() => {
           navigate(target, { replace: true });
           lastNavigatedPathRef.current = target;
-        }, 50);
+        }, 200); // Shorter timeout since ProtectedRoute now handles loading states
       }
     } catch (error) {
       console.error('Error setting user role:', error);
