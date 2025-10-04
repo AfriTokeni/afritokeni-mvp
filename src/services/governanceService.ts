@@ -217,20 +217,67 @@ export class GovernanceService {
   }
 
   /**
-   * Get proposal by ID
+   * Get proposal by ID from SNS
    */
   static async getProposal(proposalId: string): Promise<Proposal | null> {
-    const { getDoc } = await import('@junobuild/core');
-    
     try {
-      const doc = await getDoc({
-        collection: 'dao_proposals',
-        key: proposalId,
+      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+
+      // Extract proposal number from ID
+      const proposalNumber = parseInt(proposalId.replace('PROP-', ''));
+
+      // SNS Governance IDL for getting proposal
+      const governanceIdl = ({ IDL }: any) => {
+        const ProposalData = IDL.Record({
+          id: IDL.Opt(IDL.Nat64),
+          proposal: IDL.Opt(IDL.Record({
+            title: IDL.Text,
+            summary: IDL.Text,
+          })),
+          latest_tally: IDL.Opt(IDL.Record({
+            yes: IDL.Nat64,
+            no: IDL.Nat64,
+          })),
+        });
+        return IDL.Service({
+          get_proposal: IDL.Func(
+            [IDL.Nat64],
+            [IDL.Opt(ProposalData)],
+            ['query']
+          ),
+        });
+      };
+
+      const governance = Actor.createActor(governanceIdl, {
+        agent,
+        canisterId: SNS_GOVERNANCE_CANISTER,
       });
 
-      return doc ? (doc.data as Proposal) : null;
+      const result: any = await governance.get_proposal(BigInt(proposalNumber));
+      
+      if (!result || !result[0]) return null;
+
+      const p = result[0];
+      return {
+        id: proposalId,
+        type: 'other' as ProposalType,
+        title: p.proposal?.[0]?.title || 'Untitled Proposal',
+        description: p.proposal?.[0]?.summary || '',
+        proposer: 'SNS Proposer',
+        createdAt: new Date(),
+        votingEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        status: 'active' as const,
+        votes: {
+          yes: Number(p.latest_tally?.[0]?.yes || 0),
+          no: Number(p.latest_tally?.[0]?.no || 0),
+          abstain: 0,
+        },
+        quorum: 10,
+        threshold: 50,
+      };
     } catch (error) {
-      console.error('Error fetching proposal:', error);
+      console.error('Error fetching SNS proposal:', error);
       return null;
     }
   }
@@ -300,23 +347,10 @@ export class GovernanceService {
       return proposals;
     } catch (error) {
       console.error('Error fetching SNS proposals:', error);
+      console.error('Make sure SNS canisters are deployed and VITE_SNS_GOVERNANCE_CANISTER is set');
       
-      // Fallback to Juno storage
-      const { listDocs } = await import('@junobuild/core');
-      
-      try {
-        const { items } = await listDocs({
-          collection: 'dao_proposals',
-        });
-
-        return items
-          .map(doc => doc.data as Proposal)
-          .filter(p => p.status === 'active')
-          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      } catch (error) {
-        console.error('Error fetching proposals:', error);
-        return [];
-      }
+      // Return empty array - no Juno fallback
+      return [];
     }
   }
 
