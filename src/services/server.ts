@@ -833,11 +833,13 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Get BTC balance (mock implementation)
+      // Get BTC balance and real-time rate
       try {
+        const { BitcoinRateService } = await import('./bitcoinRateService.js');
+        
         // In a real implementation, this would get actual BTC balance from datastore
         const btcBalance = 0.00125; // Mock BTC balance
-        const btcRateUGX = 150000000; // Mock rate: 1 BTC = 150M UGX
+        const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
         const ugxEquivalent = btcBalance * btcRateUGX;
         
         return endSession(`Your Bitcoin Balance
@@ -882,10 +884,10 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Display current BTC rate
+      // Display current BTC rate from CoinGecko
       try {
-        // Mock BTC rate - in real implementation, this would fetch from exchange API
-        const btcRateUGX = 150000000; // 1 BTC = 150M UGX
+        const { BitcoinRateService } = await import('./bitcoinRateService.js');
+        const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
         const lastUpdated = new Date().toLocaleString();
         
         return endSession(`Bitcoin Exchange Rate
@@ -936,8 +938,9 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
         return continueSession('Minimum purchase: UGX 10,000\nEnter UGX amount to spend:');
       }
       
-      // Calculate BTC amount and fees
-      const btcRate = 150000000; // Mock rate
+      // Calculate BTC amount and fees with real rate
+      const { BitcoinRateService } = await import('./bitcoinRateService.js');
+      const btcRate = await BitcoinRateService.getBitcoinRate('ugx');
       const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
       const netAmount = ugxAmount - fee;
       const btcAmount = netAmount / btcRate;
@@ -1026,8 +1029,9 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         return continueSession('Minimum sale: ₿0.0001 BTC\nEnter BTC amount to sell:');
       }
       
-      // Calculate UGX amount and fees
-      const btcRate = 150000000; // Mock rate
+      // Calculate UGX amount and fees with real rate
+      const { BitcoinRateService } = await import('./bitcoinRateService.js');
+      const btcRate = await BitcoinRateService.getBitcoinRate('ugx');
       const ugxGross = btcAmount * btcRate;
       const fee = Math.round(ugxGross * 0.025); // 2.5% fee
       const ugxNet = ugxGross - fee;

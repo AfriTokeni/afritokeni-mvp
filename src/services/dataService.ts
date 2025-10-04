@@ -1946,9 +1946,11 @@ Reply with agent number to withdraw.`;
     if (!userId) return 'Please register first. Send *AFRI# for menu.';
     
     try {
+      const { BitcoinRateService } = await import('./bitcoinRateService');
+      
       // Mock Bitcoin balance for demo - in production, integrate with BitcoinService
       const btcBalance = 0.00125; // Mock balance
-      const ugxRate = 150000000; // Mock rate: 1 BTC = 150M UGX
+      const ugxRate = await BitcoinRateService.getBitcoinRate('ugx');
       const ugxValue = btcBalance * ugxRate;
       
       return `Bitcoin Balance:
@@ -1971,14 +1973,10 @@ Send *AFRI# for menu`;
     const currency = parts[2].toUpperCase();
     
     try {
-      // Mock rates - in production, integrate with BitcoinService.getExchangeRate()
-      const rates: { [key: string]: number } = {
-        'UGX': 150000000,
-        'KES': 6500000,
-        'NGN': 45000000,
-        'ZAR': 1200000,
-        'GHS': 950000
-      };
+      const { BitcoinRateService } = await import('./bitcoinRateService');
+      
+      // Fetch real rates from CoinGecko
+      const rates = await BitcoinRateService.getBitcoinRates(['UGX', 'KES', 'NGN', 'ZAR', 'GHS']);
       
       const rate = rates[currency];
       if (!rate) {
@@ -2013,8 +2011,10 @@ Send *AFRI# for menu`;
     }
     
     try {
-      // Calculate dynamic fee and Bitcoin amount
-      const exchangeRate = 150000000; // Mock rate: 1 BTC = 150M UGX
+      const { BitcoinRateService } = await import('./bitcoinRateService');
+      
+      // Calculate dynamic fee and Bitcoin amount with real rate
+      const exchangeRate = await BitcoinRateService.getBitcoinRate(currency.toLowerCase());
       const btcAmount = amount / exchangeRate;
       
       // Calculate dynamic fee based on location (mock data for SMS)
@@ -2077,8 +2077,10 @@ Quote expires in 5 minutes.`;
     }
     
     try {
-      // Calculate Bitcoin equivalent and dynamic fee
-      const exchangeRate = 150000000; // Mock rate
+      const { BitcoinRateService } = await import('./bitcoinRateService');
+      
+      // Calculate Bitcoin equivalent and dynamic fee with real rate
+      const exchangeRate = await BitcoinRateService.getBitcoinRate(currency.toLowerCase());
       const btcAmount = amount / exchangeRate;
       
       // Calculate dynamic fee
