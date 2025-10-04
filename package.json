@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --force",
+    "juno:dev-start": "juno dev start",
+    "juno:dev-stop": "juno dev stop",
+    "juno:dev-publish": "juno config -m development",
+    "juno:dev-login": "juno login --mode development",
     "build": "tsc -b && vite build",
     "build:backend": "tsc --project tsconfig.backend.json",
     "start:backend": "node dist/services/server.js",
