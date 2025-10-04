@@ -16,7 +16,6 @@ import {
   Save
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { AFRICAN_CURRENCIES } from '../../types/currency';
 
@@ -126,28 +125,28 @@ const AgentSettings: React.FC = () => {
   // Check if user is authenticated as an agent
   if (!user?.agent) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-            <p className="text-neutral-600">Please log in as an agent to access settings</p>
+            <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">Please log in as an agent to access settings</p>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   // Show loading state while agent data is being fetched
   if (!agent && user?.agent) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-neutral-600">Loading agent settings...</p>
+            <p className="text-gray-600">Loading agent settings...</p>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
@@ -158,8 +157,8 @@ const AgentSettings: React.FC = () => {
       case 'available': return 'bg-green-100 text-green-800 border-green-200';
       case 'busy': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'cash_out': return 'bg-red-100 text-red-800 border-red-200';
-      case 'offline': return 'bg-neutral-100 text-neutral-800 border-neutral-200';
-      default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
+      case 'offline': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -171,20 +170,20 @@ const AgentSettings: React.FC = () => {
   ];
 
   return (
-    <PageLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/agents/dashboard')}
-              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
             >
-              <ArrowLeft className="w-5 h-5 text-neutral-600" />
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900">Agent Settings</h1>
-              <p className="text-neutral-600 mt-1">Configure your agent profile and preferences</p>
+              <h1 className="text-2xl font-bold text-gray-900">Agent Settings</h1>
+              <p className="text-gray-600 mt-1">Configure your agent profile and preferences</p>
             </div>
           </div>
           <div className={`px-3 py-2 rounded-full border ${getStatusColor(settings.status)} flex items-center space-x-2`}>
@@ -195,7 +194,7 @@ const AgentSettings: React.FC = () => {
 
         {/* Status Messages */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
             <div className="flex items-center space-x-2">
               <AlertCircle className="w-5 h-5 text-red-500" />
               <p className="text-sm text-red-600">{error}</p>
@@ -204,7 +203,7 @@ const AgentSettings: React.FC = () => {
         )}
 
         {success && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
             <div className="flex items-center space-x-2">
               <CheckCircle className="w-5 h-5 text-green-500" />
               <p className="text-sm text-green-600">{success}</p>
@@ -213,7 +212,7 @@ const AgentSettings: React.FC = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
           <div className="flex overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -223,8 +222,8 @@ const AgentSettings: React.FC = () => {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center space-x-2 px-6 py-4 text-sm font-semibold border-b-2 transition-all duration-200 whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-black text-white bg-gradient-to-r from-neutral-900 to-black shadow-lg transform scale-105 rounded-lg'
-                      : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 hover:shadow-sm rounded-lg'
+                      ? 'border-black text-white bg-gradient-to-r from-gray-900 to-black shadow-lg transform scale-105 rounded-lg'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:shadow-sm rounded-lg'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -239,8 +238,8 @@ const AgentSettings: React.FC = () => {
         {activeTab === 'general' && (
           <div className="space-y-6">
             {/* Agent Status */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <User className="w-5 h-5 text-blue-500" />
                 <span>Agent Status</span>
               </h3>
@@ -254,7 +253,7 @@ const AgentSettings: React.FC = () => {
                     className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                       settings.status === status
                         ? 'border-black bg-black text-white'
-                        : 'border-neutral-200 bg-white text-neutral-700 hover:border-black hover:bg-neutral-50'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-black hover:bg-gray-50'
                     } disabled:opacity-50`}
                   >
                     <div className="text-sm font-semibold capitalize">{status.replace('_', ' ')}</div>
@@ -264,21 +263,21 @@ const AgentSettings: React.FC = () => {
             </div>
 
             {/* Profile Information */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <Globe className="w-5 h-5 text-green-500" />
                 <span>Profile Settings</span>
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Preferred Currency
                   </label>
                   <select
                     value={settings.preferredCurrency}
                     onChange={(e) => handleSettingChange('preferredCurrency', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     {Object.entries(AFRICAN_CURRENCIES).map(([code, currency]) => (
                       <option key={code} value={code}>
@@ -289,7 +288,7 @@ const AgentSettings: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Service Radius (km)
                   </label>
                   <input
@@ -298,9 +297,9 @@ const AgentSettings: React.FC = () => {
                     max="50"
                     value={settings.serviceRadius}
                     onChange={(e) => handleSettingChange('serviceRadius', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <p className="text-xs text-neutral-500 mt-1">How far you'll travel to serve customers</p>
+                  <p className="text-xs text-gray-500 mt-1">How far you'll travel to serve customers</p>
                 </div>
               </div>
 
@@ -310,11 +309,11 @@ const AgentSettings: React.FC = () => {
                     type="checkbox"
                     checked={settings.locationSharing}
                     onChange={(e) => handleSettingChange('locationSharing', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <div>
-                    <span className="text-sm font-semibold text-neutral-700">Share Location with Customers</span>
-                    <p className="text-xs text-neutral-500">Helps customers find you for transactions</p>
+                    <span className="text-sm font-semibold text-gray-700">Share Location with Customers</span>
+                    <p className="text-xs text-gray-500">Helps customers find you for transactions</p>
                   </div>
                 </label>
               </div>
@@ -325,15 +324,15 @@ const AgentSettings: React.FC = () => {
         {activeTab === 'operations' && (
           <div className="space-y-6">
             {/* Commission & Limits */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <DollarSign className="w-5 h-5 text-green-500" />
                 <span>Commission & Limits</span>
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Commission Rate (%)
                   </label>
                   <input
@@ -343,62 +342,62 @@ const AgentSettings: React.FC = () => {
                     max="10"
                     value={settings.commissionRate}
                     onChange={(e) => handleSettingChange('commissionRate', parseFloat(e.target.value))}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <p className="text-xs text-neutral-500 mt-1">Your commission on transactions (2-3% recommended)</p>
+                  <p className="text-xs text-gray-500 mt-1">Your commission on transactions (2-3% recommended)</p>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Max Cash Limit ({settings.preferredCurrency})
                   </label>
                   <input
                     type="number"
                     value={settings.maxCashLimit}
                     onChange={(e) => handleSettingChange('maxCashLimit', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <p className="text-xs text-neutral-500 mt-1">Maximum cash you can handle per transaction</p>
+                  <p className="text-xs text-gray-500 mt-1">Maximum cash you can handle per transaction</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Minimum Transaction ({settings.preferredCurrency})
                   </label>
                   <input
                     type="number"
                     value={settings.minimumTransaction}
                     onChange={(e) => handleSettingChange('minimumTransaction', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <p className="text-xs text-neutral-500 mt-1">Smallest transaction you'll accept</p>
+                  <p className="text-xs text-gray-500 mt-1">Smallest transaction you'll accept</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Auto-Accept Limit ({settings.preferredCurrency})
                   </label>
                   <input
                     type="number"
                     value={settings.autoAcceptLimit}
                     onChange={(e) => handleSettingChange('autoAcceptLimit', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <p className="text-xs text-neutral-500 mt-1">Transactions below this amount are auto-accepted</p>
+                  <p className="text-xs text-gray-500 mt-1">Transactions below this amount are auto-accepted</p>
                 </div>
               </div>
             </div>
 
             {/* Operating Hours */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <Clock className="w-5 h-5 text-purple-500" />
                 <span>Operating Hours</span>
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Start Time
                   </label>
                   <input
@@ -408,12 +407,12 @@ const AgentSettings: React.FC = () => {
                       ...settings.operatingHours,
                       start: e.target.value
                     })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     End Time
                   </label>
                   <input
@@ -423,15 +422,15 @@ const AgentSettings: React.FC = () => {
                       ...settings.operatingHours,
                       end: e.target.value
                     })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
             </div>
 
             {/* Services */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <Bitcoin className="w-5 h-5 text-orange-500" />
                 <span>Services Offered</span>
               </h3>
@@ -442,11 +441,11 @@ const AgentSettings: React.FC = () => {
                     type="checkbox"
                     checked={settings.bitcoinEnabled}
                     onChange={(e) => handleSettingChange('bitcoinEnabled', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500 mt-1"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
                   />
                   <div>
-                    <span className="text-sm font-semibold text-neutral-700">Bitcoin Exchange Services</span>
-                    <p className="text-xs text-neutral-500">Help customers buy/sell Bitcoin for cash</p>
+                    <span className="text-sm font-semibold text-gray-700">Bitcoin Exchange Services</span>
+                    <p className="text-xs text-gray-500">Help customers buy/sell Bitcoin for cash</p>
                   </div>
                 </label>
               </div>
@@ -456,8 +455,8 @@ const AgentSettings: React.FC = () => {
 
         {activeTab === 'security' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <Shield className="w-5 h-5 text-red-500" />
                 <span>Security Settings</span>
               </h3>
@@ -468,11 +467,11 @@ const AgentSettings: React.FC = () => {
                     type="checkbox"
                     checked={settings.securityPinEnabled}
                     onChange={(e) => handleSettingChange('securityPinEnabled', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500 mt-1"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
                   />
                   <div>
-                    <span className="text-sm font-semibold text-neutral-700">Enable Security PIN</span>
-                    <p className="text-xs text-neutral-500">Require PIN for high-value transactions</p>
+                    <span className="text-sm font-semibold text-gray-700">Enable Security PIN</span>
+                    <p className="text-xs text-gray-500">Require PIN for high-value transactions</p>
                   </div>
                 </label>
 
@@ -497,8 +496,8 @@ const AgentSettings: React.FC = () => {
 
         {activeTab === 'notifications' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                 <Bell className="w-5 h-5 text-blue-500" />
                 <span>Notification Preferences</span>
               </h3>
@@ -509,11 +508,11 @@ const AgentSettings: React.FC = () => {
                     type="checkbox"
                     checked={settings.smsNotifications}
                     onChange={(e) => handleSettingChange('smsNotifications', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500 mt-1"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
                   />
                   <div>
-                    <span className="text-sm font-semibold text-neutral-700">SMS Notifications</span>
-                    <p className="text-xs text-neutral-500">Receive transaction alerts via SMS</p>
+                    <span className="text-sm font-semibold text-gray-700">SMS Notifications</span>
+                    <p className="text-xs text-gray-500">Receive transaction alerts via SMS</p>
                   </div>
                 </label>
 
@@ -522,11 +521,11 @@ const AgentSettings: React.FC = () => {
                     type="checkbox"
                     checked={settings.emailNotifications}
                     onChange={(e) => handleSettingChange('emailNotifications', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500 mt-1"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
                   />
                   <div>
-                    <span className="text-sm font-semibold text-neutral-700">Email Notifications</span>
-                    <p className="text-xs text-neutral-500">Receive daily summaries and updates via email</p>
+                    <span className="text-sm font-semibold text-gray-700">Email Notifications</span>
+                    <p className="text-xs text-gray-500">Receive daily summaries and updates via email</p>
                   </div>
                 </label>
 
@@ -551,14 +550,14 @@ const AgentSettings: React.FC = () => {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center space-x-2 bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors duration-200"
+            className="flex items-center space-x-2 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors duration-200"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save Settings'}</span>
           </button>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

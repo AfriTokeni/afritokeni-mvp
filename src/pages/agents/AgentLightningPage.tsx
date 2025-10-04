@@ -42,11 +42,11 @@ const AgentLightningPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="p-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center">
             <Zap className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -58,7 +58,7 @@ const AgentLightningPage: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm text-gray-600">Lightning Transfers</div>
             <Zap className="w-5 h-5 text-yellow-500" />
@@ -67,7 +67,7 @@ const AgentLightningPage: React.FC = () => {
           <div className="text-sm text-green-600 mt-1">+12% this week</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm text-gray-600">Total Volume</div>
             <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -76,7 +76,7 @@ const AgentLightningPage: React.FC = () => {
           <div className="text-sm text-gray-500 mt-1">NGN</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm text-gray-600">Commission Earned</div>
             <DollarSign className="w-5 h-5 text-green-500" />
@@ -85,7 +85,7 @@ const AgentLightningPage: React.FC = () => {
           <div className="text-sm text-gray-500 mt-1">NGN</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm text-gray-600">Avg Fee</div>
             <Clock className="w-5 h-5 text-purple-500" />
@@ -173,7 +173,7 @@ const AgentLightningPage: React.FC = () => {
           {recentTransfers.map((transfer) => (
             <div
               key={transfer.id}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors"
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">

@@ -8,7 +8,6 @@ import {
   Calendar,
   Loader2
 } from 'lucide-react';
-import PageLayout from '../components/PageLayout';
 import { DataService } from '../services/dataService';
 import { User as UserType } from '../types/auth';
 
@@ -139,7 +138,7 @@ const AgentCustomers: React.FC = () => {
       case 'active': return 'bg-green-100 text-green-800 border-green-200';
       case 'inactive': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'blocked': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -148,7 +147,7 @@ const AgentCustomers: React.FC = () => {
       case 'verified': return 'bg-green-100 text-green-800 border-green-200';
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -163,38 +162,38 @@ const AgentCustomers: React.FC = () => {
   });
 
   return (
-    <PageLayout>
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-6">
+    <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-neutral-900">Customers</h1>
-            <p className="text-sm sm:text-base text-neutral-600 mt-1">Manage your customer relationships</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Customers</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your customer relationships</p>
           </div>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6">
+        <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
                 placeholder="Search by name, phone, or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-sm sm:text-base"
+                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm sm:text-base"
               />
             </div>
 
             {/* Status Filter */}
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full sm:w-auto pl-9 sm:pl-10 pr-6 sm:pr-8 py-2 sm:py-2.5 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent bg-white appearance-none cursor-pointer text-sm sm:text-base"
+                className="w-full sm:w-auto pl-9 sm:pl-10 pr-6 sm:pr-8 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white appearance-none cursor-pointer text-sm sm:text-base"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -208,26 +207,26 @@ const AgentCustomers: React.FC = () => {
         {/* Customer Stats */}
         {!isLoading && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6">
+            <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-neutral-600 truncate">Total Customers</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 font-mono mt-1 lg:mt-2 truncate">{customers.length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Customers</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 font-mono mt-1 lg:mt-2 truncate">{customers.length}</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6">
+            <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-neutral-600 truncate">Active Customers</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 font-mono mt-1 lg:mt-2 truncate">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Active Customers</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 font-mono mt-1 lg:mt-2 truncate">
                   {customers.filter(c => c.status === 'active').length}
                 </p>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200 p-3 sm:p-4 lg:p-6">
+            <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-neutral-600 truncate">KYC Verified</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 font-mono mt-1 lg:mt-2 truncate">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">KYC Verified</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 font-mono mt-1 lg:mt-2 truncate">
                   {customers.filter(c => c.kycStatus === 'verified').length}
                 </p>
               </div>
@@ -236,9 +235,9 @@ const AgentCustomers: React.FC = () => {
         )}
 
         {/* Customer List */}
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-neutral-200">
-          <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-neutral-200">
-            <h2 className="text-base sm:text-lg font-semibold text-neutral-900">
+        <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200">
+          <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">
               Customer List ({filteredCustomers.length})
             </h2>
           </div>
@@ -246,9 +245,9 @@ const AgentCustomers: React.FC = () => {
           <div className="p-3 sm:p-4 lg:p-6">
             {isLoading ? (
               <div className="text-center py-8 sm:py-12">
-                <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-neutral-400 mx-auto mb-3 sm:mb-4 animate-spin" />
-                <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">Loading customers...</h3>
-                <p className="text-sm sm:text-base text-neutral-600">Please wait while we fetch your customer data.</p>
+                <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4 animate-spin" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Loading customers...</h3>
+                <p className="text-sm sm:text-base text-gray-600">Please wait while we fetch your customer data.</p>
               </div>
             ) : error ? (
               <div className="text-center py-8 sm:py-12">
@@ -264,29 +263,29 @@ const AgentCustomers: React.FC = () => {
               </div>
             ) : filteredCustomers.length === 0 ? (
               <div className="text-center py-8 sm:py-12">
-                <User className="w-8 h-8 sm:w-12 sm:h-12 text-neutral-400 mx-auto mb-3 sm:mb-4" />
-                <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">No customers found</h3>
-                <p className="text-sm sm:text-base text-neutral-600">Try adjusting your search or filter criteria.</p>
+                <User className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No customers found</h3>
+                <p className="text-sm sm:text-base text-gray-600">Try adjusting your search or filter criteria.</p>
               </div>
             ) : (
               <div className="space-y-3 sm:space-y-4">
                 {filteredCustomers.map((customer) => (
                   <div
                     key={customer.id}
-                    className="bg-white border border-neutral-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-neutral-300"
+                    className="bg-white border border-gray-200 rounded-lg sm:rounded-2xl p-3 sm:p-4 lg:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
                     onClick={() => console.log('Selected customer:', customer.name)}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                       <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
                         {/* Customer Avatar - Hidden on mobile */}
-                        <div className="hidden sm:flex w-12 h-12 bg-neutral-100 rounded-full items-center justify-center flex-shrink-0">
-                          <User className="w-6 h-6 text-neutral-600" />
+                        <div className="hidden sm:flex w-12 h-12 bg-gray-100 rounded-full items-center justify-center flex-shrink-0">
+                          <User className="w-6 h-6 text-gray-600" />
                         </div>
                         
                         {/* Customer Info */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-base sm:text-lg font-semibold text-neutral-900 truncate">{customer.name}</h3>
-                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-neutral-600 mt-1">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{customer.name}</h3>
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-600 mt-1">
                             <div className="flex items-center space-x-1">
                               <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                               <span className="truncate">{customer.phone}</span>
@@ -306,7 +305,7 @@ const AgentCustomers: React.FC = () => {
                       {/* Customer Stats and Status */}
                       <div className="text-left sm:text-right">
                         {/* Transaction Count */}
-                        <div className="text-xs text-neutral-500 mb-2">
+                        <div className="text-xs text-gray-500 mb-2">
                           {customer.totalTransactions} transactions • Last: {getTimeAgo(customer.lastTransaction)}
                         </div>
                         
@@ -328,7 +327,7 @@ const AgentCustomers: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 
