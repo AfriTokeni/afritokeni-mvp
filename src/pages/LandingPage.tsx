@@ -157,14 +157,14 @@ const LandingPage: React.FC = () => {
       </div>
 
       {/* Key Differentiators - NEW SECTION */}
-      <section className="bg-white py-16 sm:py-20 lg:py-24">
+      <section className="bg-gradient-to-b from-gray-50 to-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-              Why AfriTokeni Wins
+              How We Protect Your Money
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The first SMS-accessible Bitcoin platform with enterprise-grade security and community governance
+              Security, speed, and fair pricing. Everything traditional services lack.
             </p>
           </div>
 
@@ -174,11 +174,11 @@ const LandingPage: React.FC = () => {
               <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
                 <Lock className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Escrow Protected</h3>
-              <p className="text-gray-700 mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Escrow Protected</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
                 AfriTokeni holds Bitcoin in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
               </p>
-              <div className="text-sm font-semibold text-blue-600">Zero fraud risk</div>
+              <div className="text-sm font-semibold text-blue-600 mt-auto">Zero fraud risk</div>
             </div>
 
             {/* Lightning Speed */}
@@ -186,11 +186,11 @@ const LandingPage: React.FC = () => {
               <div className="w-16 h-16 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
-              <p className="text-gray-700 mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Lightning Fast</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
                 Transfers complete in under 1 second. $0.001 fees. Perfect for daily payments under $100.
               </p>
-              <div className="text-sm font-semibold text-orange-600">99% cheaper</div>
+              <div className="text-sm font-semibold text-orange-600 mt-auto">99% cheaper</div>
             </div>
 
             {/* Agent Incentives */}
@@ -198,11 +198,11 @@ const LandingPage: React.FC = () => {
               <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
                 <Bitcoin className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Agent Earnings</h3>
-              <p className="text-gray-700 mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Agent Earnings</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
                 Agents earn 2-12% commission based on location. Remote areas pay more. Fair compensation system.
               </p>
-              <div className="text-sm font-semibold text-green-600">Up to 12% commission</div>
+              <div className="text-sm font-semibold text-green-600 mt-auto">Up to 12% commission</div>
             </div>
 
             {/* DAO Governance */}
@@ -210,11 +210,11 @@ const LandingPage: React.FC = () => {
               <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
                 <Globe className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">DAO Governed</h3>
-              <p className="text-gray-700 mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">DAO Governed</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
                 Community-owned. Vote on fees, currencies, and policies via SMS. Agents and users control the platform.
               </p>
-              <div className="text-sm font-semibold text-purple-600">Vote via SMS</div>
+              <div className="text-sm font-semibold text-purple-600 mt-auto">Vote via SMS</div>
             </div>
           </div>
         </div>
@@ -286,46 +286,15 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* SMS Lightning Commands */}
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-3xl mx-auto">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Lightning via SMS
-              </h3>
-              <p className="text-gray-600">
-                Send instant Bitcoin payments from any phone - no internet required
-              </p>
-            </div>
-            
-            <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
-              <div className="text-green-400 mb-2">$ Send instant payment:</div>
-              <div className="text-white mb-4">LN SEND +234... 5000 NGN</div>
-              
-              <div className="text-green-400 mb-2">$ Create Lightning invoice:</div>
-              <div className="text-white mb-4">LN INVOICE 10000 UGX</div>
-              
-              <div className="text-yellow-400 mb-2">⚡ Response (instant):</div>
-              <div className="text-gray-300">
-                ✓ Sent 5,000 NGN<br/>
-                ✓ Fee: $0.001<br/>
-                ✓ Time: 0.8 seconds
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Instant</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Cheap</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>No Internet</span>
-              </div>
-            </div>
+          {/* CTA to SMS Demo */}
+          <div className="text-center mt-12">
+            <Link
+              to="/sms"
+              className="inline-flex items-center gap-2 bg-orange-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-orange-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+            >
+              <Smartphone className="w-5 h-5" />
+              Try SMS Banking Demo
+            </Link>
           </div>
         </div>
       </section>
