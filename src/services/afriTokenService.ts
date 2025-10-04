@@ -8,7 +8,6 @@ import { Principal } from '@dfinity/principal';
 
 // SNS Canister IDs from environment
 const SNS_LEDGER_CANISTER = import.meta.env.VITE_SNS_LEDGER_CANISTER;
-const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
 
 // ICRC-1 Ledger Interface
 const icrc1Idl = ({ IDL }: any) => {
@@ -224,8 +223,6 @@ export class AfriTokenService {
    */
   static async lockTokens(userId: string, amount: number): Promise<boolean> {
     try {
-      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
-      
       // Create neuron by staking AFRI tokens
       // This locks tokens in SNS governance for voting
       const amountE8s = BigInt(amount * 100_000_000);
@@ -246,8 +243,6 @@ export class AfriTokenService {
    */
   static async unlockTokens(userId: string, amount: number): Promise<boolean> {
     try {
-      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
-      
       // Start dissolving neuron to unlock tokens
       const amountE8s = BigInt(amount * 100_000_000);
       

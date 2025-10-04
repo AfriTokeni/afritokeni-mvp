@@ -15,7 +15,7 @@ const DAODashboard: React.FC = () => {
   const [tokenBalance, setTokenBalance] = useState<TokenBalance | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [totalHolders, setTotalHolders] = useState(0);

@@ -254,15 +254,30 @@ export class TransactionService {
     }
   }
 
-  // Check if user exists (mock implementation)
+  /**
+   * Find user by phone number from Juno datastore
+   */
   static async findUserByPhone(phone: string): Promise<{ id: string; name: string; phone: string } | null> {
-    // Mock user lookup - in production this would be a real database query
-    const mockUsers = [
-      { id: 'user_123456', name: 'Alice Johnson', phone: '+256700123456' },
-      { id: 'user_654321', name: 'Bob Smith', phone: '+256700654321' },
-      { id: 'user_789012', name: 'Carol Davis', phone: '+256700789012' }
-    ];
+    try {
+      const { listDocs } = await import('@junobuild/core');
+      
+      const { items } = await listDocs({
+        collection: 'users',
+      });
 
-    return mockUsers.find(user => user.phone === phone) || null;
+      const user = items.find((doc: any) => doc.data.phone === phone);
+      
+      if (!user) return null;
+
+      const userData = user.data as any;
+      return {
+        id: user.key,
+        name: userData.name || userData.email || 'User',
+        phone: userData.phone
+      };
+    } catch (error) {
+      console.error('Error finding user by phone:', error);
+      return null;
+    }
   }
 }

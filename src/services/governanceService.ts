@@ -4,6 +4,7 @@
  */
 
 import { Actor, HttpAgent } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
 
 export type ProposalType = 'fee_adjustment' | 'currency_addition' | 'agent_standards' | 'treasury' | 'other';
 export type ProposalStatus = 'active' | 'passed' | 'rejected' | 'executed';
@@ -408,35 +409,197 @@ export class GovernanceService {
   }
 
   /**
-   * Execute fee adjustment
+   * Execute fee adjustment - Updates actual system fees
    */
   private static async executeFeeAdjustment(data: any): Promise<void> {
-    console.log(`💰 Updating fee to ${data.newFeePercentage}%`);
-    // In production, update fee configuration in ICP canister
+    try {
+      const SNS_ROOT_CANISTER = import.meta.env.VITE_SNS_ROOT_CANISTER;
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+
+      // Update fee configuration in the root canister
+      const rootIdl = ({ IDL }: any) => {
+        return IDL.Service({
+          set_fee_config: IDL.Func(
+            [IDL.Record({ 
+              base_fee_percentage: IDL.Float64,
+              min_fee: IDL.Nat64,
+              max_fee: IDL.Nat64,
+            })],
+            [IDL.Variant({ Ok: IDL.Null, Err: IDL.Text })],
+            []
+          ),
+        });
+      };
+
+      const root = Actor.createActor(rootIdl, {
+        agent,
+        canisterId: SNS_ROOT_CANISTER,
+      });
+
+      await root.set_fee_config({
+        base_fee_percentage: data.newFeePercentage / 100,
+        min_fee: BigInt(data.minFee || 1000),
+        max_fee: BigInt(data.maxFee || 1000000),
+      });
+
+      console.log(`💰 Successfully updated fee to ${data.newFeePercentage}%`);
+    } catch (error) {
+      console.error('Error executing fee adjustment:', error);
+      throw new Error('Failed to update fee configuration');
+    }
   }
 
   /**
-   * Execute currency addition
+   * Execute currency addition - Adds new African currency support
    */
   private static async executeCurrencyAddition(data: any): Promise<void> {
-    console.log(`🌍 Adding currency: ${data.currency}`);
-    // In production, update supported currencies in ICP canister
+    try {
+      const SNS_ROOT_CANISTER = import.meta.env.VITE_SNS_ROOT_CANISTER;
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+
+      const rootIdl = ({ IDL }: any) => {
+        return IDL.Service({
+          add_supported_currency: IDL.Func(
+            [IDL.Record({
+              code: IDL.Text,
+              name: IDL.Text,
+              symbol: IDL.Text,
+              exchange_rate_to_usd: IDL.Float64,
+            })],
+            [IDL.Variant({ Ok: IDL.Null, Err: IDL.Text })],
+            []
+          ),
+        });
+      };
+
+      const root = Actor.createActor(rootIdl, {
+        agent,
+        canisterId: SNS_ROOT_CANISTER,
+      });
+
+      await root.add_supported_currency({
+        code: data.currencyCode,
+        name: data.currencyName,
+        symbol: data.currencySymbol,
+        exchange_rate_to_usd: data.exchangeRate,
+      });
+
+      console.log(`🌍 Successfully added currency: ${data.currencyCode} - ${data.currencyName}`);
+    } catch (error) {
+      console.error('Error executing currency addition:', error);
+      throw new Error('Failed to add currency');
+    }
   }
 
   /**
-   * Execute agent standards update
+   * Execute agent standards update - Updates commission and requirements
    */
   private static async executeAgentStandards(data: any): Promise<void> {
-    console.log(`👥 Updating agent commission: ${data.ruralCommissionPercentage}%`);
-    // In production, update agent commission rules in ICP canister
+    try {
+      const SNS_ROOT_CANISTER = import.meta.env.VITE_SNS_ROOT_CANISTER;
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+
+      const rootIdl = ({ IDL }: any) => {
+        return IDL.Service({
+          update_agent_standards: IDL.Func(
+            [IDL.Record({
+              urban_commission_percentage: IDL.Float64,
+              rural_commission_percentage: IDL.Float64,
+              remote_commission_percentage: IDL.Float64,
+              minimum_liquidity: IDL.Nat64,
+              kyc_required: IDL.Bool,
+            })],
+            [IDL.Variant({ Ok: IDL.Null, Err: IDL.Text })],
+            []
+          ),
+        });
+      };
+
+      const root = Actor.createActor(rootIdl, {
+        agent,
+        canisterId: SNS_ROOT_CANISTER,
+      });
+
+      await root.update_agent_standards({
+        urban_commission_percentage: data.urbanCommissionPercentage / 100,
+        rural_commission_percentage: data.ruralCommissionPercentage / 100,
+        remote_commission_percentage: data.remoteCommissionPercentage / 100,
+        minimum_liquidity: BigInt(data.minimumLiquidity || 100000),
+        kyc_required: data.kycRequired !== false,
+      });
+
+      console.log(`👥 Successfully updated agent standards - Rural: ${data.ruralCommissionPercentage}%`);
+    } catch (error) {
+      console.error('Error executing agent standards update:', error);
+      throw new Error('Failed to update agent standards');
+    }
   }
 
   /**
-   * Get user's voting history
+   * Get user's voting history from SNS
    */
   static async getUserVotes(userId: string): Promise<Vote[]> {
-    // In production, fetch from Juno/ICP
-    return [];
+    try {
+      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+
+      // SNS Governance IDL for listing neuron ballots (votes)
+      const governanceIdl = ({ IDL }: any) => {
+        const Neuron = IDL.Record({
+          id: IDL.Opt(IDL.Vec(IDL.Nat8)),
+          recent_ballots: IDL.Vec(IDL.Record({
+            proposal_id: IDL.Opt(IDL.Nat64),
+            vote: IDL.Int32,
+          })),
+        });
+        return IDL.Service({
+          list_neurons: IDL.Func(
+            [IDL.Record({ of_principal: IDL.Opt(IDL.Principal), limit: IDL.Nat32 })],
+            [IDL.Record({ neurons: IDL.Vec(Neuron) })],
+            ['query']
+          ),
+        });
+      };
+
+      const governance = Actor.createActor(governanceIdl, {
+        agent,
+        canisterId: SNS_GOVERNANCE_CANISTER,
+      });
+
+      // Get user's neurons to find their voting history
+      const principal = Principal.fromText(userId);
+      const response: any = await governance.list_neurons({
+        of_principal: [principal],
+        limit: 100,
+      });
+
+      const votes: Vote[] = [];
+      
+      // Extract votes from all user's neurons
+      for (const neuron of response.neurons) {
+        for (const ballot of neuron.recent_ballots) {
+          if (ballot.proposal_id && ballot.proposal_id[0]) {
+            const voteChoice: VoteChoice = 
+              ballot.vote === 1 ? 'yes' : 
+              ballot.vote === 2 ? 'no' : 
+              'abstain';
+
+            votes.push({
+              proposalId: `PROP-${ballot.proposal_id[0]}`,
+              userId,
+              choice: voteChoice,
+              votingPower: 0, // Would need to query neuron voting power at time of vote
+              timestamp: new Date(), // Would need to get actual timestamp from proposal
+            });
+          }
+        }
+      }
+
+      return votes;
+    } catch (error) {
+      console.error('Error fetching user votes from SNS:', error);
+      return [];
+    }
   }
 
   /**
