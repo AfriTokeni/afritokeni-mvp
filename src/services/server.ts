@@ -492,19 +492,22 @@ async function handleVerification(input: string, session: USSDSession): Promise<
 
 // PIN checking and setup handlers
 async function handlePinCheck(input: string, session: USSDSession): Promise<string> {
-  const sanitized_input = input.split("*")[input.split("*").length - 1];
-  console.log(`🔑 PIN check for ${session.phoneNumber}, step: ${session.step}, input: "${sanitized_input}"`);
+  console.log(`🔑 PIN check for ${session.phoneNumber}, step: ${session.step}, raw input: "${input}"`);
+  
+  // For PIN check, we want the direct input, not parsed through USSD structure
+  const pinInput = input.trim();
+  console.log(`🔑 PIN input after trim: "${pinInput}"`);
   
   switch (session.step) {
     case 1: {
       // User is entering their PIN
-      if (!sanitized_input) {
+      if (!pinInput) {
         return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
       }
       
-      if (!/^\d{4}$/.test(sanitized_input)) {
+      if (!/^\d{4}$/.test(pinInput)) {
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
-        console.log(`❌ Invalid PIN format for ${session.phoneNumber}, attempts: ${session.data.pinAttempts}`);
+        console.log(`❌ Invalid PIN format for ${session.phoneNumber}, PIN: "${pinInput}", attempts: ${session.data.pinAttempts}`);
         
         if (session.data.pinAttempts >= 3) {
           console.log(`🚫 Max PIN attempts reached for ${session.phoneNumber}`);
@@ -515,7 +518,7 @@ async function handlePinCheck(input: string, session: USSDSession): Promise<stri
       }
       
       // Verify the PIN
-      const isValidPin = await verifyUserPin(session.phoneNumber, sanitized_input);
+      const isValidPin = await verifyUserPin(session.phoneNumber, pinInput);
       console.log(`🔐 PIN verification result for ${session.phoneNumber}: ${isValidPin ? 'Valid' : 'Invalid'}`);
       
       if (isValidPin) {
@@ -558,38 +561,45 @@ Please select an option:
 }
 
 async function handlePinSetup(input: string, session: USSDSession): Promise<string> {
-  const sanitized_input = input.split("*")[1];
+  const pinInput = input.trim();
+  console.log(`🔧 PIN setup for ${session.phoneNumber}, step: ${session.step}, input: "${pinInput}"`);
+  
   switch (session.step) {
     case 1:
       // First PIN entry
-      if (!/^\d{4}$/.test(input)) {
+      if (!/^\d{4}$/.test(pinInput)) {
+        console.log(`❌ Invalid PIN format during setup for ${session.phoneNumber}: "${pinInput}"`);
         return continueSession('Invalid PIN format.\nPlease enter exactly 4 digits:');
       }
-      session.data.newPin = input;
+      session.data.newPin = pinInput;
       session.step = 2;
+      console.log(`✅ First PIN entry accepted for ${session.phoneNumber}`);
       return continueSession('Please confirm your PIN by entering it again:');
     
     case 2:
       // PIN confirmation
-      { console.log(`Confirming PIN for ${input} ${session.data.newPin}`);
+      { 
+        console.log(`🔄 Confirming PIN for ${session.phoneNumber}: "${pinInput}" vs "${session.data.newPin}"`);
 
-      if (sanitized_input !== session.data.newPin) {
-        // Reset PIN setup
-        session.step = 1;
-        session.data = {};
-        return continueSession('PINs do not match.\nPlease enter your new 4-digit PIN again:');
-      }
+        if (pinInput !== session.data.newPin) {
+          // Reset PIN setup
+          session.step = 1;
+          session.data = {};
+          console.log(`❌ PIN mismatch for ${session.phoneNumber}`);
+          return continueSession('PINs do not match.\nPlease enter your new 4-digit PIN again:');
+        }
 
-      console.log(`New PIN set for ${session.phoneNumber}`);
+        console.log(`🔑 New PIN confirmed for ${session.phoneNumber}`);
 
-      // Save PIN and proceed to main menu
-      const pinSaved = await setUserPin(session.phoneNumber, sanitized_input);
-      if (pinSaved) {
-        session.currentMenu = 'main';
-        session.step = 0;
-        session.data = {};
-        
-        return continueSession(`PIN set successfully!
+        // Save PIN and proceed to main menu
+        const pinSaved = await setUserPin(session.phoneNumber, pinInput);
+        if (pinSaved) {
+          session.currentMenu = 'main';
+          session.step = 0;
+          session.data = {};
+          console.log(`✅ PIN setup completed successfully for ${session.phoneNumber}`);
+          
+          return continueSession(`PIN set successfully!
 
 Welcome to AfriTokeni USSD Service
 Please select an option:
@@ -600,13 +610,14 @@ Please select an option:
 5. Deposit Money
 6. Bitcoin Services
 7. Help`);
-      } else {
-        // PIN save failed, retry
-        session.step = 1;
-        session.data = {};
-        return continueSession('Error saving PIN. Please try again.\nEnter your new 4-digit PIN:');
-      }
-    }  
+        } else {
+          // PIN save failed, retry
+          session.step = 1;
+          session.data = {};
+          console.log(`❌ Failed to save PIN for ${session.phoneNumber}`);
+          return continueSession('Error saving PIN. Please try again.\nEnter your new 4-digit PIN:');
+        }
+      }  
     
     default:
       session.currentMenu = 'pin_check';
