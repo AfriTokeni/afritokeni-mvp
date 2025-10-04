@@ -373,25 +373,35 @@ export class WebhookDataService {
 
   static async createOrUpdateUserPin(phoneNumber: string, pin: string, _userId?: string): Promise<boolean> {
     try {
+      console.log(`📍 createOrUpdateUserPin called with: ${phoneNumber}, PIN: ${pin}`);
+      
       // Get user by phone number (stored as email for SMS users)
       let user = await this.getUserByKey(phoneNumber);
+      console.log(`📍 User lookup result for ${phoneNumber}:`, user ? 'Found' : 'Not found');
 
-      const sanitized_input = pin.split("*")[1];
+      // Use the PIN as-is, no parsing needed since server already processes it
+      const cleanPin = pin.trim();
+      console.log(`📍 Clean PIN for storage: ${cleanPin}`);
       
       if (!user) {
+        console.log(`📍 Creating new user for ${phoneNumber} with PIN`);
         // Create new user if doesn't exist
         user = await this.createUser({
           firstName: 'USSD',
           lastName: 'User',
           email: phoneNumber,
           userType: 'user',
-          pin: sanitized_input,
+          pin: cleanPin,
           authMethod: 'sms'
         });
+        console.log(`📍 New user created successfully for ${phoneNumber}`);
         return true;
       } else {
+        console.log(`📍 Updating existing user ${phoneNumber} with PIN`);
         // Update existing user with PIN
-        return await this.updateUser(phoneNumber, { pin: pin }, 'sms');
+        const updateResult = await this.updateUser(phoneNumber, { pin: cleanPin }, 'sms');
+        console.log(`📍 PIN update result for ${phoneNumber}:`, updateResult ? 'Success' : 'Failed');
+        return updateResult;
       }
     } catch (error) {
       console.error('Error creating/updating user pin:', error);

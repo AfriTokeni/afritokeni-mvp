@@ -156,11 +156,22 @@ class USSDSessionImpl implements USSDSession {
 
 function getOrCreateSession(sessionId: string, phoneNumber: string): USSDSession {
   const cleanPhoneNumber = phoneNumber.replace('+', '');
+  console.log(`📋 Session management for ${sessionId}, phone: ${cleanPhoneNumber}`);
+  
   if (!ussdSessions.has(sessionId) || ussdSessions.get(sessionId)!.isExpired()) {
+    if (ussdSessions.has(sessionId) && ussdSessions.get(sessionId)!.isExpired()) {
+      console.log(`⏰ Session ${sessionId} expired, creating new session`);
+    } else {
+      console.log(`🆕 Creating new session ${sessionId} for ${cleanPhoneNumber}`);
+    }
     ussdSessions.set(sessionId, new USSDSessionImpl(sessionId, cleanPhoneNumber));
+  } else {
+    console.log(`♻️  Using existing session ${sessionId} for ${cleanPhoneNumber}`);
   }
+  
   const session = ussdSessions.get(sessionId)!;
   session.updateActivity();
+  console.log(`📋 Session ${sessionId} - Current menu: ${session.currentMenu}, Step: ${session.step}`);
   return session;
 }
 
@@ -264,12 +275,21 @@ function verifyVerificationCode(phoneNumber: string, inputCode: string): boolean
 
 async function hasUserPin(phoneNumber: string): Promise<boolean> {
   try {
-    console.log(`Checking if user has PIN for: ${phoneNumber}`);
+    console.log(`🔍 Checking if user has PIN for: ${phoneNumber}`);
     const userPin = await DataService.getUserPin(`+${phoneNumber}`);
-    console.log(`PIN check result for ${phoneNumber}:`, userPin ? 'PIN found' : 'No PIN found');
-    return userPin !== null && userPin.isSet;
+    console.log(`🔍 getUserPin result for ${phoneNumber}:`, userPin);
+    
+    if (userPin) {
+      console.log(`🔍 UserPin details - PIN: ${userPin.pin}, isSet: ${userPin.isSet}`);
+      const hasPin = userPin !== null && userPin.isSet;
+      console.log(`🔍 Final hasUserPin result for ${phoneNumber}: ${hasPin}`);
+      return hasPin;
+    } else {
+      console.log(`🔍 No userPin found for ${phoneNumber}`);
+      return false;
+    }
   } catch (error) {
-    console.error('Error checking user PIN:', error);
+    console.error('❌ Error checking user PIN:', error);
     return false;
   }
 }
