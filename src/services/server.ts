@@ -492,13 +492,39 @@ async function handleVerification(input: string, session: USSDSession): Promise<
 
 // PIN checking and setup handlers
 async function handlePinCheck(input: string, session: USSDSession): Promise<string> {
-  if (!input) {
-    // First time - check if user has PIN
-    if (await hasUserPin(session.phoneNumber)) {
-      // User has PIN - go directly to main menu
-      session.currentMenu = 'main';
-      session.step = 0;
-      return continueSession(`Welcome back to AfriTokeni USSD Service
+  const sanitized_input = input.split("*")[input.split("*").length - 1];
+  console.log(`🔑 PIN check for ${session.phoneNumber}, step: ${session.step}, input: "${sanitized_input}"`);
+  
+  switch (session.step) {
+    case 1: {
+      // User is entering their PIN
+      if (!sanitized_input) {
+        return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
+      }
+      
+      if (!/^\d{4}$/.test(sanitized_input)) {
+        session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+        console.log(`❌ Invalid PIN format for ${session.phoneNumber}, attempts: ${session.data.pinAttempts}`);
+        
+        if (session.data.pinAttempts >= 3) {
+          console.log(`🚫 Max PIN attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please try again later.');
+        }
+        
+        return continueSession('Invalid PIN format. Please enter exactly 4 digits:');
+      }
+      
+      // Verify the PIN
+      const isValidPin = await verifyUserPin(session.phoneNumber, sanitized_input);
+      console.log(`🔐 PIN verification result for ${session.phoneNumber}: ${isValidPin ? 'Valid' : 'Invalid'}`);
+      
+      if (isValidPin) {
+        // PIN is correct - go to main menu
+        console.log(`✅ PIN verified successfully for ${session.phoneNumber}`);
+        session.currentMenu = 'main';
+        session.step = 0;
+        session.data = {}; // Clear any temporary data
+        return continueSession(`Welcome back to AfriTokeni USSD Service
 Please select an option:
 1. Send Money
 2. Check Balance
@@ -507,16 +533,28 @@ Please select an option:
 5. Deposit Money
 6. Bitcoin Services
 7. Help`);
-    } else {
-      // User doesn't have PIN - set it up
-      session.currentMenu = 'pin_setup';
-      session.step = 1;
-      return continueSession('Welcome to AfriTokeni!\nYou need to set up a 4-digit PIN to secure your account.\nPlease enter your new PIN:');
+      } else {
+        // PIN is incorrect
+        session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+        console.log(`❌ Invalid PIN for ${session.phoneNumber}, attempts: ${session.data.pinAttempts}`);
+        
+        if (session.data.pinAttempts >= 3) {
+          console.log(`🚫 Max PIN attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please try again later.');
+        }
+        
+        const remainingAttempts = 3 - session.data.pinAttempts;
+        return continueSession(`Incorrect PIN. You have ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.\nPlease enter your 4-digit PIN:`);
+      }
     }
+    
+    default:
+      // Initialize PIN check
+      console.log(`🔑 Initializing PIN check for ${session.phoneNumber}`);
+      session.step = 1;
+      session.data.pinAttempts = 0;
+      return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
   }
-  
-  // This shouldn't be reached, but just in case
-  return continueSession('Welcome to AfriTokeni!\nPlease wait...');
 }
 
 async function handlePinSetup(input: string, session: USSDSession): Promise<string> {
