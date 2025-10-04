@@ -2,9 +2,31 @@ import React from 'react';
 import { Bitcoin, Shield, Users, Clock, CheckCircle, AlertTriangle, Smartphone, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
+import { useAuthentication } from '../context/AuthenticationContext';
+import { LoginFormData } from '../types/auth';
 
 const BitcoinExchangePage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, login } = useAuthentication();
+
+  const handleStartExchange = async () => {
+    if (user) {
+      // Already authenticated, go to exchange
+      navigate('/users/bitcoin/deposit');
+    } else {
+      // Not authenticated, trigger ICP login
+      try {
+        await login({} as LoginFormData, 'web');
+        // After login, AuthContext will handle routing
+      } catch (error) {
+        console.error('Login failed:', error);
+      }
+    }
+  };
+
+  const handleBecomeAgent = () => {
+    navigate('/become-agent');
+  };
 
   return (
     <PageLayout>
@@ -23,13 +45,13 @@ const BitcoinExchangePage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <button
-              onClick={() => navigate('/users/bitcoin/deposit')}
+              onClick={handleStartExchange}
               className="bg-orange-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
             >
-              Start Exchange
+              {user ? 'Start Exchange' : 'Sign In to Exchange'}
             </button>
             <button
-              onClick={() => navigate('/auth/role-selection')}
+              onClick={handleBecomeAgent}
               className="bg-neutral-100 text-neutral-700 px-8 py-3 rounded-lg font-medium hover:bg-neutral-200 transition-colors"
             >
               Become an Agent

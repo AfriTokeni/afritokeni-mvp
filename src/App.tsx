@@ -53,6 +53,7 @@ import AdminProtectedRoute from './components/AdminProtectedRoute';
 import LandingPage from "./pages/LandingPage";
 import TariffPage from "./pages/TariffPage";
 import SMSPlayground from "./pages/SMSPlayground";
+import BecomeAgentPage from "./pages/BecomeAgentPage";
 
 const App: FC = () => {
   useEffect(() => {
@@ -149,6 +150,9 @@ const App: FC = () => {
           
           {/* SMS Playground */}
           <Route path="/sms" element={<SMSPlayground />} />
+          
+          {/* Become an Agent */}
+          <Route path="/become-agent" element={<BecomeAgentPage />} />
           
           {/* Default redirects */}
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />
