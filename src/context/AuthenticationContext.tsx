@@ -50,10 +50,19 @@ interface IUser {
 const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Verification states
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verificationPhoneNumber, setVerificationPhoneNumber] = useState<string | null>(null);
-  const [pendingUserData, setPendingUserData] = useState<RegisterFormData | null>(null);
-  const [sentVerificationCode, setSentVerificationCode] = useState<string | null>(null);
-  const [user, setUser] = useState<IUser>({ agent: null, user: null, admin: null });
+  const [verificationPhoneNumber, setVerificationPhoneNumber] = useState<
+    string | null
+  >(null);
+  const [pendingUserData, setPendingUserData] =
+    useState<RegisterFormData | null>(null);
+  const [sentVerificationCode, setSentVerificationCode] = useState<
+    string | null
+  >(null);
+  const [user, setUser] = useState<IUser>({
+    agent: null,
+    user: null,
+    admin: null,
+  });
   const [authMethod, setAuthMethod] = useState<"sms" | "web">("web");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -268,9 +277,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // const stored_agent = userData.userType === 'agent' ? userData : null;
         // const stored_user = userData.userType === 'user' ? userData : null;
 
-        if (userRole === 'admin') {
+        if (userRole === "admin") {
           setUser({ user: null, agent: null, admin: afritokeniUser });
-        } else if (userRole === 'agent') {
+        } else if (userRole === "agent") {
           setUser({ user: null, agent: afritokeniUser, admin: null });
         } else {
           setUser({ user: afritokeniUser, agent: null, admin: null });
@@ -294,7 +303,6 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         //   location: { country: "UGX", city: "Kampala" },
         //   createdAt: new Date(),
         // };
-
         // // Save to Juno datastore
         // await setDoc({
         //   collection: "users",
@@ -303,7 +311,6 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         //     data: newUser,
         //   },
         // });
-
         // setUser({ user: newUser, agent: null, admin: null });
         // setAuthMethod("web");
         // storeUserData(newUser, "web");
@@ -312,7 +319,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Error loading/creating user from Juno:", error);
     }
-  }, []);  // useCallback dependency array
+  }, []); // useCallback dependency array
 
   // Update user currency preference
   const updateUserCurrency = (currency: string) => {
@@ -335,27 +342,28 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [checkAndRedirectUser]);
 
   // Also track localStorage changes directly for more reliable state management
-  const [userCreatedStatus, setUserCreatedStatus] = useState(() => 
-    localStorage.getItem('afritokeni_user_created_status') || 'idle'
+  const [userCreatedStatus, setUserCreatedStatus] = useState(
+    () => localStorage.getItem("afritokeni_user_created_status") || "idle",
   );
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const currentStatus = localStorage.getItem('afritokeni_user_created_status') || 'idle';
+      const currentStatus =
+        localStorage.getItem("afritokeni_user_created_status") || "idle";
       setUserCreatedStatus(currentStatus);
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
     const interval = setInterval(handleStorageChange, 100);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };
   }, []);
 
   useEffect(() => {
-     const storedData = getStoredUserData();
+    const storedData = getStoredUserData();
     if (storedData) {
       setUser({ ...storedData.user, admin: null });
       setAuthMethod(storedData.authMethod);
@@ -450,20 +458,20 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
             firstName: newUser.firstName,
             lastName: newUser.lastName,
             email: formattedPhone, // Phone number for SMS users
-            userType: newUser.userType as 'user' | 'agent',
+            userType: newUser.userType as "user" | "agent",
             kycStatus: newUser.kycStatus,
             authMethod: "sms", // Important: specify this is an SMS user
           });
 
           existingUser = newUser;
         }
-        
+
         // Handle admin login differently - admins use web authentication only
-        if (formData.userType === 'admin') {
+        if (formData.userType === "admin") {
           // For admin login, check if user exists in database with admin role
           try {
             const adminUser = await DataService.getUser(formData.emailOrPhone);
-            if (adminUser && adminUser.userType === 'admin') {
+            if (adminUser && adminUser.userType === "admin") {
               setUser({ user: null, agent: null, admin: adminUser });
               setAuthMethod("web");
               storeUserData(adminUser, "web");
@@ -477,7 +485,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
             return false;
           }
         }
-        
+
         const stored_agent =
           existingUser.userType == "agent" ? existingUser : null;
         const stored_user =
@@ -502,7 +510,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (formData: RegisterFormData): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
+
       // Step 1: Send SMS with verification code to formData.email (phone)
       const formattedPhone = SMSService.formatPhoneNumber(formData.email);
 
@@ -573,10 +581,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       setIsLoading(true);
-      
+
       // Verify the code (in development, we can use the stored code, in production this would be server-side)
-      const isValidCode = sentVerificationCode === code || 
-                         (import.meta.env.DEV && code === "123456"); // Dev fallback
+      const isValidCode =
+        sentVerificationCode === code ||
+        (import.meta.env.DEV && code === "123456"); // Dev fallback
 
       if (!isValidCode) {
         console.error("Invalid verification code");
@@ -608,17 +617,19 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: userData.email, // phone number
           userType: userData.userType as "agent" | "user",
           kycStatus: userData.kycStatus,
-          authMethod: "sms"
+          authMethod: "sms",
         });
-        
+
         // Update authentication state
-        const stored_agent = createdUser.userType === "agent" ? createdUser : null;
-        const stored_user = createdUser.userType === "user" ? createdUser : null;
-        
-        setUser({ 
-          user: stored_user, 
-          agent: stored_agent, 
-          admin: null 
+        const stored_agent =
+          createdUser.userType === "agent" ? createdUser : null;
+        const stored_user =
+          createdUser.userType === "user" ? createdUser : null;
+
+        setUser({
+          user: stored_user,
+          agent: stored_agent,
+          admin: null,
         });
         setAuthMethod("sms");
         storeUserData(createdUser, "sms");
@@ -653,7 +664,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (userTypeToLogout?: "user" | "agent" | "admin") => {
     try {
-      let targetUserType: "user" | "agent" | "admin" | undefined = userTypeToLogout;
+      let targetUserType: "user" | "agent" | "admin" | undefined =
+        userTypeToLogout;
 
       // If no specific user type provided, determine based on current context
       if (!targetUserType) {
@@ -698,9 +710,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       clearUserData(targetUserType);
 
       // If no users remain, reset auth method and redirect
-      const remainingUser = targetUserType === "user" ? (user.agent || user.admin) : 
-                           targetUserType === "agent" ? (user.user || user.admin) : 
-                           (user.user || user.agent);
+      const remainingUser =
+        targetUserType === "user"
+          ? user.agent || user.admin
+          : targetUserType === "agent"
+            ? user.user || user.admin
+            : user.user || user.agent;
       if (!remainingUser) {
         setAuthMethod("web");
         // Clear user creation status on complete logout (success case)
@@ -718,9 +733,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         clearUserData(userTypeToLogout);
 
         const remainingUser =
-          userTypeToLogout === "user" ? (user.agent || user.admin) :
-          userTypeToLogout === "agent" ? (user.user || user.admin) :
-          (user.user || user.agent);
+          userTypeToLogout === "user"
+            ? user.agent || user.admin
+            : userTypeToLogout === "agent"
+              ? user.user || user.admin
+              : user.user || user.agent;
         if (!remainingUser) {
           setAuthMethod("web");
           // Clear user creation status on complete logout (error case)
@@ -738,7 +755,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     register,
     updateUserCurrency,
-    isAuthenticated: user.user !== null || user.agent !== null || user.admin !== null,
+    isAuthenticated:
+      user.user !== null || user.agent !== null || user.admin !== null,
     isLoading,
     verifyRegistrationCode,
     cancelVerification,
