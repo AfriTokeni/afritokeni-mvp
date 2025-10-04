@@ -64,7 +64,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 interface USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
   data: {
     amount?: number;
     withdrawAmount?: number;
@@ -76,6 +76,11 @@ interface USSDSession {
     transactionId?: string;
     pinAttempts?: number;
     recipientPhoneNumber?: string;
+    // New registration fields
+    firstName?: string;
+    lastName?: string;
+    verificationCode?: string;
+    verificationAttempts?: number;
     [key: string]: any;
   };
   step: number;
@@ -126,7 +131,7 @@ const ussdSessions = new Map<string, USSDSession>();
 class USSDSessionImpl implements USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
   data: Record<string, any>;
   step: number;
   lastActivity: number;
@@ -134,7 +139,7 @@ class USSDSessionImpl implements USSDSession {
   constructor(sessionId: string, phoneNumber: string) {
     this.sessionId = sessionId;
     this.phoneNumber = phoneNumber.replace('+', '');
-    this.currentMenu = 'pin_check'; // Start with PIN check
+    this.currentMenu = 'registration_check'; // Start with registration check
     this.data = {};
     this.step = 0;
     this.lastActivity = Date.now();
@@ -190,7 +195,73 @@ setInterval(() => {
 
 
 
-// Helper functions for PIN management (integrated with DataService)
+// Helper functions for user registration and PIN management (integrated with DataService)
+
+// Check if user is registered in Juno datastore
+async function isUserRegistered(phoneNumber: string): Promise<boolean> {
+  try {
+    console.log(`Checking if user is registered for: ${phoneNumber}`);
+    const user = await DataService.findUserByPhoneNumber(`+${phoneNumber}`);
+    console.log(`Registration check result for ${phoneNumber}:`, user ? 'User found' : 'User not found');
+    return user !== null;
+  } catch (error) {
+    console.error(`Error checking user registration for ${phoneNumber}:`, error);
+    return false;
+  }
+}
+
+// Register new user in Juno datastore
+async function registerNewUser(phoneNumber: string, firstName: string, lastName: string): Promise<boolean> {
+  try {
+    console.log(`Registering new user: ${firstName} ${lastName} with phone ${phoneNumber}`);
+    await DataService.createUser({
+      firstName: firstName,
+      lastName: lastName,
+      email: `+${phoneNumber}`, // Store phone as email for SMS users
+      userType: 'user',
+      kycStatus: 'not_started',
+      authMethod: 'sms'
+    });
+    console.log(`Successfully registered user: ${phoneNumber}`);
+    return true;
+  } catch (error) {
+    console.error(`Error registering user ${phoneNumber}:`, error);
+    return false;
+  }
+}
+
+// Generate and store verification code
+function generateVerificationCode(phoneNumber: string): string {
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+  verificationCodes.set(phoneNumber, {
+    code: code,
+    userId: phoneNumber,
+    timestamp: Date.now()
+  });
+  return code;
+}
+
+// Verify the verification code
+function verifyVerificationCode(phoneNumber: string, inputCode: string): boolean {
+  const storedData = verificationCodes.get(phoneNumber);
+  if (!storedData) {
+    return false;
+  }
+  
+  // Check if code has expired (10 minutes)
+  if (Date.now() - storedData.timestamp > 10 * 60 * 1000) {
+    verificationCodes.delete(phoneNumber);
+    return false;
+  }
+  
+  const isValid = storedData.code === inputCode;
+  if (isValid) {
+    verificationCodes.delete(phoneNumber); // Clean up after successful verification
+  }
+  
+  return isValid;
+}
+
 async function hasUserPin(phoneNumber: string): Promise<boolean> {
   try {
     console.log(`Checking if user has PIN for: ${phoneNumber}`);
@@ -267,6 +338,157 @@ async function sendSMSNotification(phoneNumber: string, message: string): Promis
 }
 
 // USSD Menu Handlers
+
+// Registration check handler - first step when user dials USSD
+async function handleRegistrationCheck(input: string, session: USSDSession): Promise<string> {
+  console.log(`🔍 Registration check for ${session.phoneNumber}, input: "${input}"`);
+  
+  if (!input) {
+    // First time dialing USSD - check if user is registered
+    const isRegistered = await isUserRegistered(session.phoneNumber);
+    console.log(`📋 User ${session.phoneNumber} registration status: ${isRegistered ? 'Registered' : 'Not registered'}`);
+    
+    if (!isRegistered) {
+      // User not registered - ask for their name
+      session.currentMenu = 'user_registration';
+      session.step = 1;
+      console.log(`➡️ Redirecting ${session.phoneNumber} to registration`);
+      return continueSession('Welcome to AfriTokeni!\nYou are not registered yet.\nPlease enter your first name:');
+    } else {
+      // User is registered - check if they have a PIN
+      const hasPIN = await hasUserPin(session.phoneNumber);
+      console.log(`🔑 User ${session.phoneNumber} PIN status: ${hasPIN ? 'Has PIN' : 'No PIN'}`);
+      
+      if (!hasPIN) {
+        // User registered but no PIN - go to PIN setup
+        session.currentMenu = 'pin_setup';
+        session.step = 1;
+        console.log(`➡️ Redirecting ${session.phoneNumber} to PIN setup`);
+        return continueSession('Welcome back to AfriTokeni!\nTo secure your account, please set up a 4-digit PIN:\nEnter your new PIN:');
+      } else {
+        // User registered and has PIN - go to PIN verification
+        session.currentMenu = 'pin_check';
+        session.step = 1;
+        console.log(`➡️ Redirecting ${session.phoneNumber} to PIN verification`);
+        return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
+      }
+    }
+  }
+  
+  // This shouldn't be reached, but just in case
+  return continueSession('Welcome to AfriTokeni!\nPlease wait...');
+}
+
+// User registration handler - for new users
+async function handleUserRegistration(input: string, session: USSDSession): Promise<string> {
+  const sanitized_input = input.split("*")[input.split("*").length - 1];
+  console.log(`📝 User registration for ${session.phoneNumber}, step: ${session.step}, input: "${sanitized_input}"`);
+  
+  switch (session.step) {
+    case 1:
+      // Getting first name
+      if (!sanitized_input || sanitized_input.trim().length < 2) {
+        console.log(`❌ Invalid first name "${sanitized_input}" provided by ${session.phoneNumber}`);
+        return continueSession('Invalid name. Please enter your first name (at least 2 characters):');
+      }
+      session.data.firstName = sanitized_input.trim();
+      session.step = 2;
+      console.log(`✅ First name "${session.data.firstName}" collected for ${session.phoneNumber}`);
+      return continueSession(`Hello ${session.data.firstName}!\nNow please enter your last name:`);
+      
+    case 2: {
+      // Getting last name
+      if (!sanitized_input || sanitized_input.trim().length < 2) {
+        console.log(`❌ Invalid last name "${sanitized_input}" provided by ${session.phoneNumber}`);
+        return continueSession('Invalid name. Please enter your last name (at least 2 characters):');
+      }
+      session.data.lastName = sanitized_input.trim();
+      console.log(`✅ Last name "${session.data.lastName}" collected for ${session.phoneNumber}`);
+      
+      // Generate and send verification code
+      const verificationCode = generateVerificationCode(session.phoneNumber);
+      session.data.verificationCode = verificationCode;
+      session.data.verificationAttempts = 0;
+      console.log(`🔢 Generated verification code ${verificationCode} for ${session.phoneNumber}`);
+      
+      // Send SMS with verification code
+      try {
+        await sendSMSNotification(`+${session.phoneNumber}`, 
+          `AfriTokeni Verification: Your code is ${verificationCode}. Enter this code to complete registration.`);
+        
+        session.currentMenu = 'verification';
+        session.step = 1;
+        console.log(`📱 SMS sent successfully to ${session.phoneNumber}, moving to verification menu`);
+        return continueSession(`Thank you ${session.data.firstName} ${session.data.lastName}!\nWe've sent a verification code to your phone.\nPlease enter the 6-digit code:`);
+      } catch (error) {
+        console.error(`❌ Failed to send verification SMS to ${session.phoneNumber}:`, error);
+        return endSession('Failed to send verification code. Please try again later.');
+      }
+    }
+      
+    default:
+      console.log(`❌ Invalid registration step ${session.step} for ${session.phoneNumber}`);
+      return endSession('Registration process error. Please try again.');
+  }
+}
+
+// Verification handler - for verifying SMS code
+async function handleVerification(input: string, session: USSDSession): Promise<string> {
+  const sanitized_input = input.split("*")[input.split("*").length - 1];
+  console.log(`🔍 Verification for ${session.phoneNumber}, attempt ${(session.data.verificationAttempts || 0) + 1}, input: "${sanitized_input}"`);
+  
+  switch (session.step) {
+    case 1: {
+      // Verifying the code
+      if (!sanitized_input || sanitized_input.length !== 6) {
+        session.data.verificationAttempts = (session.data.verificationAttempts || 0) + 1;
+        console.log(`❌ Invalid code format for ${session.phoneNumber}, attempts: ${session.data.verificationAttempts}`);
+        if (session.data.verificationAttempts >= 3) {
+          console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please dial again to restart registration.');
+        }
+        return continueSession('Invalid code format. Please enter the 6-digit verification code:');
+      }
+      
+      // Verify the code
+      const isValidCode = verifyVerificationCode(session.phoneNumber, sanitized_input);
+      console.log(`🔐 Code verification result for ${session.phoneNumber}: ${isValidCode ? 'Valid' : 'Invalid'}`);
+      
+      if (!isValidCode) {
+        session.data.verificationAttempts = (session.data.verificationAttempts || 0) + 1;
+        console.log(`❌ Invalid verification code for ${session.phoneNumber}, attempts: ${session.data.verificationAttempts}`);
+        if (session.data.verificationAttempts >= 3) {
+          console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please dial again to restart registration.');
+        }
+        return continueSession('Invalid verification code. Please try again:');
+      }
+      
+      // Code is valid - register the user
+      console.log(`✅ Valid verification code for ${session.phoneNumber}, proceeding with user registration`);
+      const registrationSuccess = await registerNewUser(
+        session.phoneNumber,
+        session.data.firstName!,
+        session.data.lastName!
+      );
+      
+      if (!registrationSuccess) {
+        console.log(`❌ User registration failed for ${session.phoneNumber}`);
+        return endSession('Registration failed. Please try again later.');
+      }
+      
+      // Registration successful - now set up PIN
+      console.log(`👤 User ${session.phoneNumber} registered successfully, moving to PIN setup`);
+      session.currentMenu = 'pin_setup';
+      session.step = 1;
+      return continueSession('Verification successful!\nAccount created successfully.\nNow please set up a 4-digit PIN to secure your account:\nEnter your new PIN:');
+    }
+      
+    default:
+      console.log(`❌ Invalid verification step ${session.step} for ${session.phoneNumber}`);
+      return endSession('Verification process error. Please try again.');
+  }
+}
 
 // PIN checking and setup handlers
 async function handlePinCheck(input: string, session: USSDSession): Promise<string> {
@@ -1669,6 +1891,15 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
 
     // Route to appropriate handler based on current menu
     switch (session.currentMenu) {
+      case 'registration_check':
+        response = await handleRegistrationCheck(text, session);
+        break;
+      case 'user_registration':
+        response = await handleUserRegistration(text, session);
+        break;
+      case 'verification':
+        response = await handleVerification(text, session);
+        break;
       case 'pin_check':
         response = await handlePinCheck(text, session);
         break;
@@ -1709,7 +1940,7 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
         response = await handleWithdraw(text, session);
         break;
       default:
-        response = await handlePinCheck('', session);
+        response = await handleRegistrationCheck('', session);
     }
 
     // Clean up session if ended
