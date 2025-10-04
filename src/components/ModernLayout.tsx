@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
+import { useAuthentication } from '../context/AuthenticationContext';
 import CollapsibleSidebar from './CollapsibleSidebar';
 import type { LucideIcon } from 'lucide-react';
 
@@ -20,7 +21,24 @@ interface ModernLayoutProps {
 const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuthentication();
   const [searchQuery, setSearchQuery] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
+
+  // Load profile image and user name
+  useEffect(() => {
+    const currentUser = user.user || user.agent;
+    if (currentUser?.id) {
+      const savedImage = localStorage.getItem(`profile-image-${currentUser.id}`);
+      if (savedImage) {
+        setProfileImage(savedImage);
+      }
+      // Get first letter of name for fallback
+      const name = currentUser.firstName || currentUser.email || 'U';
+      setUserName(name);
+    }
+  }, [user]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,11 +87,15 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
             {/* User Avatar - Clickable */}
             <button
               onClick={handleAvatarClick}
-              className="w-10 h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer"
+              className="w-10 h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden"
             >
-              <span className="text-white text-sm font-semibold">
-                {userType === 'user' ? 'U' : userType === 'agent' ? 'A' : 'AD'}
-              </span>
+              {profileImage ? (
+                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white text-sm font-semibold">
+                  {userName.charAt(0).toUpperCase() || (userType === 'user' ? 'U' : userType === 'agent' ? 'A' : 'AD')}
+                </span>
+              )}
             </button>
           </div>
         </header>

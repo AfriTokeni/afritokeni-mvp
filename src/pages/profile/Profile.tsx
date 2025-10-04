@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { User, Edit3, Save, ChevronDown, ChevronUp, Check, CreditCard, Shield, Phone, Mail, Calendar, HelpCircle, MessageCircle, LogOut } from 'lucide-react';
+import { User, Edit3, Save, ChevronDown, ChevronUp, Check, CreditCard, Shield, Phone, Mail, Calendar, HelpCircle, MessageCircle, LogOut, Camera } from 'lucide-react';
+import { uploadFile } from '@junobuild/core';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
@@ -60,6 +61,18 @@ const UserProfile: React.FC = () => {
   });
   const [savingAccount, setSavingAccount] = useState(false);
   const [accountSuccess, setAccountSuccess] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  useEffect(() => {
+    // Load saved profile image from localStorage
+    if (user.user?.id) {
+      const savedImage = localStorage.getItem(`profile-image-${user.user.id}`);
+      if (savedImage) {
+        setProfileImage(savedImage);
+      }
+    }
+  }, [user.user?.id]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -357,23 +370,78 @@ const UserProfile: React.FC = () => {
     );
   }
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user.user?.id) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5242880) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      const result = await uploadFile({
+        collection: 'profile-images',
+        data: file,
+        filename: `${user.user.id}-${Date.now()}-${file.name}`
+      });
+      
+      // Store the download URL - use fullPath for proper URL
+      const imageUrl = result.downloadUrl;
+      setProfileImage(imageUrl);
+      
+      // Save to localStorage for persistence
+      localStorage.setItem(`profile-image-${user.user.id}`, imageUrl);
+      
+      // TODO: Save to user profile in datastore
+      console.log('Image uploaded:', imageUrl);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="mb-4 sm:mb-6 px-2 sm:px-0">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Profile</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your account and preferences</p>
-        </div>
 
         {/* Profile Card */}
         <div className="bg-white rounded-2xl border border-gray-200 p-8">
           {/* Profile Header */}
           <div className="flex flex-col items-center text-center space-y-4 mb-8">
-            <div className="w-24 h-24 bg-gray-900 rounded-full flex items-center justify-center">
-              <span className="text-4xl font-bold text-white">
-                {userData.name.charAt(0).toUpperCase()}
-              </span>
+            <div className="relative group">
+              <div className="w-24 h-24 bg-gray-900 rounded-full flex items-center justify-center overflow-hidden">
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-4xl font-bold text-white">
+                    {userData.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <label className="absolute bottom-0 right-0 w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors">
+                {uploadingImage ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Camera className="w-4 h-4 text-white" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploadingImage}
+                />
+              </label>
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-center space-x-2 mb-2">
@@ -931,7 +999,6 @@ const UserProfile: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
     </div>
   );
 };
