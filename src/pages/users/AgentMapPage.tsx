@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, Phone, Star, Clock, Search, Users, Map, List } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Search, MapPin, Star, Phone, Clock, List, MapIcon as Map, Navigation, Users } from 'lucide-react';
 import L from 'leaflet';
 import { listDocs } from '@junobuild/core';
+import { isDemoMode, getDemoDataPath } from '../../config/demo';
 
 interface Agent {
   id: string;
@@ -167,25 +168,27 @@ const AgentMapPage: React.FC = () => {
         console.log('Transformed agents:', agentsData);
         setAgents(agentsData);
         
-        // If no agents found, fall back to mock data for demo
-        if (agentsData.length === 0) {
-          console.log('No agents found in datastore, loading mock data...');
-          const response = await fetch('/data/agents.json');
-          const mockData = await response.json();
-          setAgents(mockData);
+        // If no agents found, fall back to demo data if in demo mode
+        if (agentsData.length === 0 && isDemoMode()) {
+          console.log('No agents found in datastore, loading demo data...');
+          const response = await fetch(getDemoDataPath('AGENTS'));
+          const demoData = await response.json();
+          setAgents(demoData);
         }
         
       } catch (error) {
         console.error('Error loading agents:', error);
         
-        // Fallback to mock data if Juno fails
-        try {
-          console.log('Falling back to mock data...');
-          const response = await fetch('/data/agents.json');
-          const mockData = await response.json();
-          setAgents(mockData);
-        } catch (fallbackError) {
-          console.error('Error loading fallback data:', fallbackError);
+        // Fallback to demo data if Juno fails and in demo mode
+        if (isDemoMode()) {
+          try {
+            console.log('Falling back to demo data...');
+            const response = await fetch(getDemoDataPath('AGENTS'));
+            const demoData = await response.json();
+            setAgents(demoData);
+          } catch (fallbackError) {
+            console.error('Error loading fallback data:', fallbackError);
+          }
         }
       } finally {
         setLoading(false);
