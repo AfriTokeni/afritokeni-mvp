@@ -201,15 +201,16 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     ) {
       try {
         const parsedUser = storedUser as User;
-
         const parsedAgentUser = storedAgentUser as User;
-        // Convert createdAt string back to Date if it exists
-        if (parsedUser.createdAt && typeof parsedUser.createdAt === "string") {
+        
+        // Convert createdAt string back to Date if it exists and user is not null
+        if (parsedUser && parsedUser.createdAt && typeof parsedUser.createdAt === "string") {
           parsedUser.createdAt = new Date(parsedUser.createdAt);
         }
 
-        // Convert createdAt string back to Date if it exists
+        // Convert createdAt string back to Date if it exists and agent user is not null
         if (
+          parsedAgentUser && 
           parsedAgentUser.createdAt &&
           typeof parsedAgentUser.createdAt === "string"
         ) {
@@ -260,8 +261,6 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } catch {
         console.log("No existing role found, defaulting to user");
       }
-
-      console.log("existing user doc", userDoc);
 
       if (userDoc?.data) {
         // User exists, load their data
@@ -748,6 +747,28 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Update user type (used during role selection)
+  const updateUserType = useCallback(async (newUserType: 'user' | 'agent' | 'admin', currentUserType: 'user' | 'agent' | 'admin') => {
+    try {
+      // Parameters are for future use when we need more sophisticated role switching
+      console.log(`Updating user type from ${currentUserType} to ${newUserType}`);
+      
+      // Force a reload of user data from Juno
+      const currentJunoUser = await new Promise<JunoUser | null>((resolve) => {
+        const unsubscribe = authSubscribe((junoUser) => {
+          unsubscribe();
+          resolve(junoUser);
+        });
+      });
+      
+      if (currentJunoUser) {
+        await loadOrCreateUserFromJuno(currentJunoUser);
+      }
+    } catch (error) {
+      console.error('Error updating user type:', error);
+    }
+  }, [loadOrCreateUserFromJuno]);
+
   const value: AuthContextType = {
     user,
     authMethod,
@@ -763,7 +784,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isVerifying,
     verificationPhoneNumber,
     updateUser: async () => {},
-    updateUserType: async () => {},
+    updateUserType: updateUserType,
   };
 
   return (
