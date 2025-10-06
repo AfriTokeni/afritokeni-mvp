@@ -235,6 +235,70 @@ AfriTokeni operates as a complete transaction-based financial system with **zero
 4. **Bitcoin Exchange**: Buy/sell Bitcoin through agent network with escrow protection
 5. **Agent Settlement**: Agents withdraw earnings via bank/mobile money
 
+## 💵 Platform Revenue Model
+
+AfriTokeni generates **real revenue** (not theoretical accounting) through these streams:
+
+### **1. Agent Settlement Fees** (Primary Revenue)
+When agents withdraw their earned commissions:
+- **Fee**: 2% of settlement amount
+- **Example**: Agent withdraws 1,000,000 UGX → Platform keeps 20,000 UGX, Agent receives 980,000 UGX
+- **Frequency**: Weekly/monthly agent payouts
+- **Revenue**: Real money transferred to platform bank account
+
+### **2. Agent Liquidity Fees** (Secondary Revenue)
+When agents fund their operational balance:
+- **Fee**: 1% of funding amount
+- **Example**: Agent deposits 5,000,000 UGX → Platform keeps 50,000 UGX, Agent gets 4,950,000 UGX digitalBalance
+- **Frequency**: As needed for agent operations
+- **Revenue**: Real money from agent deposits
+
+### **3. Bitcoin Exchange Spread** (High-Margin Revenue)
+Platform markup on Bitcoin transactions:
+- **Spread**: 1-2% above market rate
+- **Example**: Buy BTC at $45,000, sell to user at $45,450 → Platform profit $450
+- **Frequency**: Every Bitcoin exchange transaction
+- **Revenue**: Real profit on Bitcoin trades
+
+### **4. Monthly Agent Subscription** (Recurring Revenue)
+Active agent platform fee:
+- **Fee**: 50,000 UGX/month (~$13.50 USD)
+- **Example**: 1,000 active agents = 50,000,000 UGX/month (~$13,500 USD)
+- **Frequency**: Monthly recurring
+- **Revenue**: Predictable subscription income
+
+### **Transaction Fee Split (70/30)**
+On every transaction, fees are split:
+- **Agent Commission**: 70% (paid to agent's cashBalance)
+- **Platform Share**: 30% (accounting only, not real money capture)
+
+**Important**: The 30% platform share from transaction fees is **not captured as real money**. It's an accounting metric. Real revenue comes from the 4 streams above.
+
+### **Revenue Projections**
+
+**Conservative Scenario** (Year 1):
+- 500 agents, 10,000 users
+- Settlement fees: ~$5,000/month
+- Liquidity fees: ~$3,000/month
+- Bitcoin spread: ~$2,000/month
+- Agent subscriptions: ~$6,750/month
+- **Total**: ~$16,750/month (~$201,000/year)
+
+**Growth Scenario** (Year 3):
+- 10,000 agents, 500,000 users
+- Settlement fees: ~$100,000/month
+- Liquidity fees: ~$60,000/month
+- Bitcoin spread: ~$50,000/month
+- Agent subscriptions: ~$135,000/month
+- **Total**: ~$345,000/month (~$4.14M/year)
+
+### **Revenue Allocation**
+Platform revenue is allocated:
+- **40%** - Operational costs (SMS gateway, servers, APIs, compliance)
+- **30%** - DAO Treasury (SNS governance, community fund)
+- **20%** - Development & growth (team, marketing, expansion)
+- **10%** - Emergency reserve (agent insurance, refunds, security)
+
 ## 📱 SMS Commands
 
 AfriTokeni works on any phone via SMS. Key commands:
