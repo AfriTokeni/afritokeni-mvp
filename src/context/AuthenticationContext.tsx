@@ -153,13 +153,31 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Parse user data if it exists
     if (storedUser && storedUserAuthMethod) {
       try {
-        parsedUser = JSON.parse(storedUser) as User;
-        // Convert createdAt string back to Date if it exists
-        if (parsedUser && parsedUser.createdAt && typeof parsedUser.createdAt === "string") {
+        const parsedUser = storedUser as User;
+        const parsedAgentUser = storedAgentUser as User;
+
+        // Convert createdAt string back to Date if it exists and user is not null
+        if (
+          parsedUser &&
+          parsedUser.createdAt &&
+          typeof parsedUser.createdAt === "string"
+        ) {
           parsedUser.createdAt = new Date(parsedUser.createdAt);
         }
-        authMethod = storedUserAuthMethod as "sms" | "web";
-        console.log("Found stored user data:", parsedUser);
+
+        // Convert createdAt string back to Date if it exists and agent user is not null
+        if (
+          parsedAgentUser &&
+          parsedAgentUser.createdAt &&
+          typeof parsedAgentUser.createdAt === "string"
+        ) {
+          parsedAgentUser.createdAt = new Date(parsedAgentUser.createdAt);
+        }
+
+        return {
+          user: { user: parsedUser, agent: parsedAgentUser },
+          authMethod: storedAgentAuthMethod as "sms" | "web",
+        };
       } catch (error) {
         console.error("Error parsing stored user data:", error);
         localStorage.removeItem('afritokeni_user');
@@ -371,7 +389,14 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (method === "web") {
         console.log("Web login initiated - using Juno/ICP Internet Identity");
         // Use Juno/ICP Internet Identity authentication for web users
-        await signIn();
+        await signIn({
+          internet_identity: {
+            options: {
+              domain: "id.ai",
+            },
+            derivationOrigin: "https://afritokeni.com/"
+          },
+        });
         return true;
       } else if (method === "sms") {
         // SMS-based authentication for users without internet (feature phones)
@@ -718,26 +743,36 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Update user type (used during role selection)
-  const updateUserType = useCallback(async (newUserType: 'user' | 'agent' | 'admin', currentUserType: 'user' | 'agent' | 'admin') => {
-    try {
-      // Parameters are for future use when we need more sophisticated role switching
-      console.log(`Updating user type from ${currentUserType} to ${newUserType}`);
-      
-      // Force a reload of user data from Juno
-      const currentJunoUser = await new Promise<JunoUser | null>((resolve) => {
-        const unsubscribe = authSubscribe((junoUser) => {
-          unsubscribe();
-          resolve(junoUser);
-        });
-      });
-      
-      if (currentJunoUser) {
-        await loadOrCreateUserFromJuno(currentJunoUser);
+  const updateUserType = useCallback(
+    async (
+      newUserType: "user" | "agent" | "admin",
+      currentUserType: "user" | "agent" | "admin",
+    ) => {
+      try {
+        // Parameters are for future use when we need more sophisticated role switching
+        console.log(
+          `Updating user type from ${currentUserType} to ${newUserType}`,
+        );
+
+        // Force a reload of user data from Juno
+        const currentJunoUser = await new Promise<JunoUser | null>(
+          (resolve) => {
+            const unsubscribe = authSubscribe((junoUser) => {
+              unsubscribe();
+              resolve(junoUser);
+            });
+          },
+        );
+
+        if (currentJunoUser) {
+          await loadOrCreateUserFromJuno(currentJunoUser);
+        }
+      } catch (error) {
+        console.error("Error updating user type:", error);
       }
-    } catch (error) {
-      console.error('Error updating user type:', error);
-    }
-  }, [loadOrCreateUserFromJuno]);
+    },
+    [loadOrCreateUserFromJuno],
+  );
 
   const value: AuthContextType = {
     user,
