@@ -84,6 +84,18 @@ export const user_mobile_routes: Route[] = [
     label: "Send",
     icon: Send,
   },
+   {
+    id: "withdraw" as RouteID,
+    path: "/users/withdraw",
+    label: "Withdraw",
+    icon: Banknote,
+  },
+    {
+    id: "agents" as RouteID,
+    path: "/users/agents",
+    label: "Agents",
+    icon: MapPin,
+  },
   {
     id: "dao" as RouteID,
     path: "/users/dao",
@@ -91,22 +103,10 @@ export const user_mobile_routes: Route[] = [
     icon: Vote,
   },
   {
-    id: "agents" as RouteID,
-    path: "/users/agents",
-    label: "Agents",
-    icon: MapPin,
-  },
-  {
     id: "history" as RouteID,
     path: "/users/history",
     label: "History",
     icon: History,
-  },
-  {
-    id: "withdraw" as RouteID,
-    path: "/users/withdraw",
-    label: "Withdraw",
-    icon: Banknote,
   },
   {
     id: "profile" as RouteID,

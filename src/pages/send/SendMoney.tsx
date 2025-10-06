@@ -259,8 +259,8 @@ const SendMoney: React.FC = () => {
         {sendStep === 0 && (
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">Choose Transfer Type</h2>
-              <p className="text-gray-600 text-lg">What would you like to do?</p>
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">Choose Transfer Type</h2>
+              <p className="text-gray-600 text-sm sm:text-base md:text-lg">What would you like to do?</p>
             </div>
               
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -270,16 +270,16 @@ const SendMoney: React.FC = () => {
                   setSendType('user');
                   setSendStep(1);
                 }}
-                className="bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left group"
+                className="bg-white p-4 sm:p-6 md:p-8 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left group"
               >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                    <User className="w-8 h-8 text-blue-600" />
+                <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <User className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">Send to User</h3>
-                    <p className="text-sm text-gray-600 mb-2">Transfer money to another AfriTokeni user</p>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-2">Send to User</h3>
+                    <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-2">Transfer money to another AfriTokeni user</p>
+                    <p className="text-xs sm:text-xs md:text-sm text-gray-500">
                       Send local currency to friends, family, or contacts who have AfriTokeni accounts.
                     </p>
                   </div>
@@ -292,16 +292,16 @@ const SendMoney: React.FC = () => {
                   setSendType('international');
                   setSendStep(1);
                 }}
-                className="bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all text-left group"
+                className="bg-white p-4 sm:p-6 md:p-8 border-2 border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all text-left group"
               >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                    <Globe className="w-8 h-8 text-green-600" />
+                <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-green-50 rounded-2xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
+                    <Globe className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">Send to Africa</h3>
-                    <p className="text-sm text-gray-600 mb-2">International Bitcoin remittances</p>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-2">Send to Africa</h3>
+                    <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-2">International Bitcoin remittances</p>
+                    <p className="text-xs sm:text-xs md:text-sm text-gray-500">
                       Send Bitcoin to family in Africa who receive local currency cash via SMS.
                     </p>
                   </div>
@@ -311,16 +311,16 @@ const SendMoney: React.FC = () => {
               {/* Exchange Bitcoin for Cash */}
               <button
                 onClick={() => navigate('/users/bitcoin/deposit')}
-                className="bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-orange-500 hover:shadow-lg transition-all text-left group"
+                className="bg-white p-4 sm:p-6 md:p-8 border-2 border-gray-200 rounded-2xl hover:border-orange-500 hover:shadow-lg transition-all text-left group"
               >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
-                    <Bitcoin className="w-8 h-8 text-orange-600" />
+                <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-orange-50 rounded-2xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
+                    <Bitcoin className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-orange-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">Exchange Bitcoin for Cash</h3>
-                    <p className="text-sm text-gray-600 mb-2">Convert Bitcoin to local currency via agents</p>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-2">Exchange Bitcoin for Cash</h3>
+                    <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-2">Convert Bitcoin to local currency via agents</p>
+                    <p className="text-xs sm:text-xs md:text-sm text-gray-500">
                       Send Bitcoin from your hardware wallet and receive cash from nearby agents.
                     </p>
                   </div>
@@ -334,13 +334,13 @@ const SendMoney: React.FC = () => {
           {sendStep === 1 && sendType === 'international' && (
             <div className="space-y-6">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Who are you sending to?</h2>
-                <p className="text-gray-600">Enter your recipient's details in Africa</p>
+                <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Who are you sending to?</h2>
+                <p className="text-gray-600 text-sm sm:text-base md:text-lg">Enter your recipient&apos;s details in Africa</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm md:text-base font-medium text-gray-700 mb-2">
                     First Name
                   </label>
                   <div className="relative">
@@ -419,10 +419,10 @@ const SendMoney: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-4 h-4 text-blue-600" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-blue-900 mb-1">SMS Notification</h3>

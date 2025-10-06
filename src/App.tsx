@@ -4,8 +4,8 @@ import junoConfig from "../juno.config";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import { AuthenticationProvider } from "./context/AuthenticationContext.tsx";
 import ModernLayout from "./components/ModernLayout.tsx";
-import { user_desktop_routes } from "./routes/userRoutes.ts";
-import { agent_desktop_routes } from "./routes/agentRoutes.ts";
+import { user_desktop_routes, user_mobile_routes } from "./routes/userRoutes.ts";
+import { agent_desktop_routes, agent_mobile_routes } from "./routes/agentRoutes.ts";
 
 // User Pages
 import UserDashboard from "./pages/UserDashboard.tsx";
@@ -64,7 +64,7 @@ const App: FC = () => {
     const initJuno = async () => {
       try {
         await initSatellite({
-          satelliteId: junoConfig.satellite.ids?.development || "dkk74-oyaaa-aaaal-askxq-cai",
+          satelliteId: junoConfig.satellite.ids?.development || "uxrrr-q7777-77774-qaaaq-cai",
           workers: {
             auth: true,
           },
@@ -87,7 +87,7 @@ const App: FC = () => {
           {/* User Routes */}
           <Route path="/users/*" element={
             <ProtectedRoute requiredRole="user">
-              <ModernLayout routes={user_desktop_routes} userType="user">
+              <ModernLayout desktopRoutes={user_desktop_routes} mobileRoutes={user_mobile_routes} userType="user">
                 <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
@@ -115,7 +115,7 @@ const App: FC = () => {
           {/* Agent Routes */}
           <Route path="/agents/*" element={
             <ProtectedRoute requiredRole="agent">
-              <ModernLayout routes={agent_desktop_routes} userType="agent">
+              <ModernLayout desktopRoutes={agent_desktop_routes} mobileRoutes={agent_mobile_routes} userType="agent">
                 <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
                 <Route path="withdraw" element={<ProcessWithdrawal/>} />

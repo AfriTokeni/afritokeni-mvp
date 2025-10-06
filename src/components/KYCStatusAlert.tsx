@@ -22,7 +22,7 @@ const KYCStatusAlert: React.FC<KYCStatusAlertProps> = ({user_type}) => {
     switch (currentUser.kycStatus) {
       case 'not_started':
         return {
-          icon: <AlertTriangle className="w-5 h-5 text-yellow-600" />,
+          icon: <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" />,
           bgColor: 'bg-yellow-50',
           borderColor: 'border-yellow-200',
           textColor: 'text-yellow-800',
@@ -33,7 +33,7 @@ const KYCStatusAlert: React.FC<KYCStatusAlertProps> = ({user_type}) => {
         };
       case 'pending':
         return {
-          icon: <Clock className="w-5 h-5 text-blue-600" />,
+          icon: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
           bgColor: 'bg-blue-50',
           borderColor: 'border-blue-200',
           textColor: 'text-blue-800',
@@ -44,7 +44,7 @@ const KYCStatusAlert: React.FC<KYCStatusAlertProps> = ({user_type}) => {
         };
       case 'rejected':
         return {
-          icon: <XCircle className="w-5 h-5 text-red-600" />,
+          icon: <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />,
           bgColor: 'bg-red-50',
           borderColor: 'border-red-200',
           textColor: 'text-red-800',
@@ -71,30 +71,30 @@ const KYCStatusAlert: React.FC<KYCStatusAlertProps> = ({user_type}) => {
   };
 
   return (
-    <div className={`${statusConfig.bgColor} ${statusConfig.borderColor} border rounded-lg p-4 mb-6`}>
+    <div className={`${statusConfig.bgColor} ${statusConfig.borderColor} border rounded-lg p-3 sm:p-4 md:p-6 mb-4 sm:mb-6`}>
       <div className="flex">
         <div className="flex-shrink-0">
           {statusConfig.icon}
         </div>
-        <div className="ml-3 flex-1">
-          <h3 className={`text-sm font-medium ${statusConfig.textColor}`}>
+        <div className="ml-2 sm:ml-3 flex-1">
+          <h3 className={`text-xs sm:text-sm md:text-base font-medium ${statusConfig.textColor}`}>
             {statusConfig.title}
           </h3>
-          <div className={`mt-2 text-sm ${statusConfig.textColor}`}>
+          <div className={`mt-1 sm:mt-2 text-xs sm:text-sm md:text-base ${statusConfig.textColor}`}>
             <p>{statusConfig.message}</p>
           </div>
           {statusConfig.actionText && statusConfig.actionPath && (
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <button
                 onClick={handleActionClick}
-                className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white ${
+                className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-transparent text-xs sm:text-sm leading-4 font-medium rounded-md text-white ${
                   currentUser.kycStatus === 'not_started' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-red-600 hover:bg-red-700'
                 } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   currentUser.kycStatus === 'not_started' ? 'focus:ring-yellow-500' : 'focus:ring-red-500'
                 } transition-colors`}
               >
                 {statusConfig.actionText}
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <ArrowRight className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
               </button>
             </div>
           )}

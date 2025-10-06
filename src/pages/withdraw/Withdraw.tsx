@@ -136,28 +136,28 @@ const WithdrawPage: React.FC = () => {
         <div className="mb-8 flex items-center justify-center">
           <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
             <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : currentStep === 'agent' || currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm md:text-base font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
                 1
               </div>
-              <span className="text-xs font-medium whitespace-nowrap">Enter Amount</span>
+              <span className="text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">Enter Amount</span>
             </div>
             
             <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
             
             <div className={`flex items-center space-x-2 ${currentStep === 'agent' ? 'text-gray-900' : currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'agent' ? 'bg-gray-900 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm md:text-base font-semibold ${currentStep === 'agent' ? 'bg-gray-900 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
                 2
               </div>
-              <span className="text-xs font-medium whitespace-nowrap">Select Agent</span>
+              <span className="text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">Select Agent</span>
             </div>
             
             <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
             
             <div className={`flex items-center space-x-2 ${currentStep === 'confirmation' ? 'text-gray-900' : 'text-gray-400'}`}>
-              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'confirmation' ? 'bg-gray-900 text-white' : 'bg-gray-200'}`}>
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm md:text-base font-semibold ${currentStep === 'confirmation' ? 'bg-gray-900 text-white' : 'bg-gray-200'}`}>
                 3
               </div>
-              <span className="text-xs font-medium whitespace-nowrap">Confirmation</span>
+              <span className="text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">Confirmation</span>
             </div>
           </div>
         </div>
