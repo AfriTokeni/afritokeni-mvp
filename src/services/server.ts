@@ -31,6 +31,7 @@ import type {
   User,
   EmailContent 
 } from '../types/notification.js';
+import { BitcoinService } from './bitcoinService.js';
 
 // Node.js process declaration
 declare const process: {
@@ -1259,47 +1260,54 @@ Please select an option:
   }
 }
 
+// In your USSD server - modified Bitcoin balance handler
 async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
   switch (session.step) {
     case 1: {
-      // PIN verification step
+      // PIN verification
       if (!/^\d{4}$/.test(sanitized_input)) {
         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
       }
       
-      // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
       if (!pinCorrect) {
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Get BTC balance and real-time rate
       try {
-        const { BitcoinRateService } = await import('./bitcoinRateService.js');
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please try again later.');
+        }
         
-        // In a real implementation, this would get actual BTC balance from datastore
-        const btcBalance = 0.00125; // Mock BTC balance
-        const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
-        const ugxEquivalent = btcBalance * btcRateUGX;
+        // Get or create Bitcoin wallet using your existing service
+        let wallet = await BitcoinService.getBitcoinWalletForUser(user.id);
         
-        return endSession(`Your Bitcoin Balance
+        if (!wallet) {
+          // Create new wallet for SMS user
+          wallet = await BitcoinService.createBitcoinWallet(user.id, session.phoneNumber);
+        }
+        
+        // Get real exchange rate
+        const rate = await BitcoinService.getExchangeRate('UGX');
+        const ugxEquivalent = await BitcoinService.calculateLocalFromBitcoin(wallet.balance, 'UGX');
+        
+        return endSession(`Your Bitcoin Wallet
 
-₿${btcBalance.toFixed(8)} BTC
+Address: ${wallet.address.substring(0, 12)}...
+Balance: ₿${BitcoinService.satoshisToBtc(wallet.balance).toFixed(8)}
 ≈ UGX ${ugxEquivalent.toLocaleString()}
 
-Current Rate: 1 BTC = UGX ${btcRateUGX.toLocaleString()}
+Rate: 1 BTC = UGX ${rate.btcToLocal.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
         
       } catch (error) {
         console.error('Error retrieving BTC balance:', error);
-        return endSession(`Error retrieving BTC balance.
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+        return endSession('Error retrieving BTC balance.\nPlease try again later.');
       }
     }
     
@@ -1309,6 +1317,57 @@ Thank you for using AfriTokeni!`);
       return handleBitcoin('', session);
   }
 }
+
+// async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
+//   const inputParts = input.split('*');
+//   const sanitized_input = inputParts[inputParts.length - 1] || '';
+  
+//   switch (session.step) {
+//     case 1: {
+//       // PIN verification step
+//       if (!/^\d{4}$/.test(sanitized_input)) {
+//         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+//       }
+      
+//       // Verify PIN
+//       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+//       if (!pinCorrect) {
+//         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+//       }
+      
+//       // Get BTC balance and real-time rate
+//       try {
+//         const { BitcoinRateService } = await import('./bitcoinRateService.js');
+        
+//         // In a real implementation, this would get actual BTC balance from datastore
+//         const btcBalance = 0.00125; // Mock BTC balance
+//         const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
+//         const ugxEquivalent = btcBalance * btcRateUGX;
+        
+//         return endSession(`Your Bitcoin Balance
+
+// ₿${btcBalance.toFixed(8)} BTC
+// ≈ UGX ${ugxEquivalent.toLocaleString()}
+
+// Current Rate: 1 BTC = UGX ${btcRateUGX.toLocaleString()}
+
+// Thank you for using AfriTokeni!`);
+        
+//       } catch (error) {
+//         console.error('Error retrieving BTC balance:', error);
+//         return endSession(`Error retrieving BTC balance.
+// Please try again later.
+
+// Thank you for using AfriTokeni!`);
+//       }
+//     }
+    
+//     default:
+//       session.currentMenu = 'bitcoin';
+//       session.step = 0;
+//       return handleBitcoin('', session);
+//   }
+// }
 
 async function handleBTCRate(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
@@ -1584,13 +1643,13 @@ Enter recipient phone number (256XXXXXXXXX):`);
     
     case 2: {
       // Step 2: Enter recipient phone number and verify they exist
-    //   if (!currentInput.match(/^256\d{9}$/)) {
-    //     return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
-    //   }
+      if (!currentInput.match(/^256\d{9}$/)) {
+        return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
+      }
 
-    console.log(`Searching for user by phone number: ${currentInput}`);
+      console.log(`Searching for user by phone number: ${currentInput}`);
 
-      // Use the new findUserByPhoneNumber method that handles both SMS and web users
+      // Use the findUserByPhoneNumber method to find recipient
       let recipient = await DataService.findUserByPhoneNumber(currentInput);
       
       if (!recipient) {
@@ -1599,19 +1658,16 @@ Enter recipient phone number (256XXXXXXXXX):`);
       }
       
       if (!recipient) {
-        // Try direct key lookup as fallback
-        recipient = await DataService.getUserByKey(currentInput);
-      }
-      
-      if (!recipient) {
-        // Try with + prefix as key
-        recipient = await DataService.getUserByKey(`+${currentInput}`);
-      }
-
-      if (!recipient) {
         return continueSession(`Phone number ${currentInput} is not registered with AfriTokeni.
         
 Please enter a valid recipient phone number (256XXXXXXXXX):`);
+      }
+
+      // Don't allow sending money to yourself
+      if (currentInput === session.phoneNumber) {
+        return continueSession(`You cannot send money to yourself.
+
+Please enter a different recipient phone number (256XXXXXXXXX):`);
       }
 
       session.data.recipientPhone = currentInput;
@@ -1652,52 +1708,54 @@ Enter your PIN:`);
       // PIN is correct, process the transaction
       console.log(`💳 Processing money transfer: ${session.phoneNumber} -> ${session.data.recipientPhone}, Amount: ${session.data.amount}, Fee: ${session.data.fee}`);
       
-      const senderPhone = `+${session.phoneNumber}`;
-      const recipientPhone = session.data.recipientPhone || '';
-      const amount = session.data.amount || 0;
-      const fee = session.data.fee || 0;
-      
-      const transferResult = await DataService.processSendMoney(
-        senderPhone,
-        recipientPhone,
-        amount,
-        fee
-      );
+      try {
+        const senderPhone = `+${session.phoneNumber}`;
+        const recipientPhone = session.data.recipientPhone || '';
+        const amount = session.data.amount || 0;
+        const fee = session.data.fee || 0;
+        
+        // Use the existing DataService.processSendMoney method (DataService is WebhookDataService)
+        const transferResult = await DataService.processSendMoney(
+          senderPhone,
+          recipientPhone,
+          amount,
+          fee
+        );
 
-      console.log(`Transfer result: ${JSON.stringify(transferResult)}`);
+        console.log(`Transfer result:`, transferResult);
 
-      if (!transferResult.success) {
-        return endSession(`❌ Transaction Failed!
+        if (!transferResult.success) {
+          return endSession(`❌ Transaction Failed!
 ${transferResult.error}
 
 Thank you for using AfriTokeni!`);
-      }
+        }
 
-      const transactionId = transferResult.transactionId;
-      const recipientName = session.data.recipientName || 'Unknown';
-      
-      // Send SMS to sender
-      await sendSMSNotification(
-        session.phoneNumber,
-        `Money sent successfully!
+        const transactionId = transferResult.transactionId;
+        const recipientName = session.data.recipientName || 'Unknown';
+        
+        // Send SMS to sender
+        await sendSMSNotification(
+          session.phoneNumber,
+          `Money sent successfully!
 Amount: UGX ${amount.toLocaleString()}
 To: ${recipientName} (${recipientPhone})
 Fee: UGX ${fee.toLocaleString()}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
-      );
-      
-      // Send SMS to recipient
-      await sendSMSNotification(
-        recipientPhone,
-        `You received money!
+        );
+        
+        // Send SMS to recipient  
+        await sendSMSNotification(
+          recipientPhone,
+          `You received money!
 Amount: UGX ${amount.toLocaleString()}
-From: ${session.phoneNumber}
+From: ${senderPhone}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
-      );
+        );
 
-      return endSession(`✅ Transaction Successful!
+        return endSession(`✅ Transaction Successful!
 
 Sent: UGX ${amount.toLocaleString()}
 To: ${recipientName}
@@ -1706,12 +1764,21 @@ Fee: UGX ${fee.toLocaleString()}
 Reference: ${transactionId}
 
 Thank you for using AfriTokeni!`);
+
+      } catch (error) {
+        console.error('Error processing send money transaction:', error);
+        return endSession(`❌ Transaction Failed!
+An error occurred while processing your transaction.
+
+Thank you for using AfriTokeni!`);
+      }
     }
     
     default:
       session.currentMenu = 'main';
       session.step = 0;
       session.data = {};
+      session.step = 1;
       return continueSession('Enter amount to send (UGX):');
   }
 }

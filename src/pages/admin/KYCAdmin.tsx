@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Check, X, Eye, FileText, Calendar, User } from 'lucide-react';
+import { Shield, Check, X, Eye, FileText, Calendar, User, DollarSign, AlertCircle } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { KYCService, KYCSubmission } from '../../services/kycService';
 import { DataService } from '../../services/dataService';
@@ -11,6 +11,10 @@ const KYCAdmin: React.FC = () => {
   const [reviewNotes, setReviewNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+  
+  // Agent balance management state
+  const [initializingBalances, setInitializingBalances] = useState(false);
+  const [balanceResult, setBalanceResult] = useState<{success: boolean; updated: number; errors: string[]} | null>(null);
 
   useEffect(() => {
     loadSubmissions();
@@ -25,6 +29,26 @@ const KYCAdmin: React.FC = () => {
       console.error('Failed to load KYC submissions:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInitializeAgentBalances = async () => {
+    setInitializingBalances(true);
+    setBalanceResult(null);
+    try {
+      console.log('🏦 Admin: Initializing all agent cash balances...');
+      const result = await DataService.initializeAllAgentsCashBalance();
+      setBalanceResult(result);
+      console.log('📊 Balance initialization result:', result);
+    } catch (error) {
+      console.error('Failed to initialize agent balances:', error);
+      setBalanceResult({
+        success: false,
+        updated: 0,
+        errors: [`Failed to initialize balances: ${error}`]
+      });
+    } finally {
+      setInitializingBalances(false);
     }
   };
 
@@ -101,8 +125,83 @@ const KYCAdmin: React.FC = () => {
     <PageLayout>
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">KYC Administration</h1>
-          <p className="text-neutral-600">Review and manage user KYC verification submissions</p>
+          <h1 className="text-3xl font-bold text-neutral-900 mb-2">Admin Dashboard</h1>
+          <p className="text-neutral-600">Manage KYC verification submissions and agent balances</p>
+        </div>
+
+        {/* Agent Balance Management Section */}
+        <div className="mb-8 bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-neutral-900 flex items-center">
+                <DollarSign className="w-5 h-5 mr-2" />
+                Agent Balance Management
+              </h2>
+              <p className="text-neutral-600 text-sm">Initialize agent cash balances for withdrawal processing</p>
+            </div>
+            <button
+              onClick={handleInitializeAgentBalances}
+              disabled={initializingBalances}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-neutral-300 disabled:cursor-not-allowed flex items-center"
+            >
+              {initializingBalances ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Initializing...
+                </>
+              ) : (
+                <>
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Initialize All Agent Balances
+                </>
+              )}
+            </button>
+          </div>
+
+          {balanceResult && (
+            <div className={`p-4 rounded-lg ${balanceResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+              {balanceResult.success ? (
+                <div className="flex items-start">
+                  <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5" />
+                  <div>
+                    <p className="text-green-800 font-medium">Balance initialization successful!</p>
+                    <p className="text-green-700 text-sm">Updated {balanceResult.updated} agent(s) with cash balance of 25,000,000 UGX</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start">
+                  <AlertCircle className="w-5 h-5 text-red-500 mr-2 mt-0.5" />
+                  <div>
+                    <p className="text-red-800 font-medium">Errors occurred during initialization:</p>
+                    <ul className="text-red-700 text-sm mt-1 list-disc list-inside">
+                      {balanceResult.errors.map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                    {balanceResult.updated > 0 && (
+                      <p className="text-red-700 text-sm mt-2">Successfully updated {balanceResult.updated} agent(s) before errors occurred.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-start">
+              <AlertCircle className="w-5 h-5 text-orange-500 mr-2 mt-0.5" />
+              <div>
+                <p className="text-orange-800 font-medium">How Agent Cash Balances Work:</p>
+                <ul className="text-orange-700 text-sm mt-1 list-disc list-inside space-y-1">
+                  <li>Agents need cash balance to process customer withdrawals</li>
+                  <li>When agents give cash to customers, their cash balance decreases</li>
+                  <li>When customers deposit with agents, agent cash balance increases</li>
+                  <li>Initial balance is set from VITE_AGENT_INITIAL_CASH_BALANCE environment variable (currently 25,000,000 UGX)</li>
+                  <li>This button sets all existing agents to the environment variable amount</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

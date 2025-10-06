@@ -2508,22 +2508,52 @@ Send *AFRI# for menu`;
       console.log(`🔍 After filtering: ${requests.length} requests match the criteria`);
 
       // Enhance requests with user information
+      // Note: For SMS users, userId is the phone number and serves as the document key
+      // SMS users may have default names "USSD User" so we handle this case specifically
       const enhancedRequests = await Promise.all(
         requests.map(async (request) => {
           try {
             const user = await this.getUserByKey(request.userId);
+            console.log(`🔍 User info for ${request.userId}:`, user);
+            
+            // For SMS users, userId is the phone number, and user.email also contains the phone number
+            const isPhoneNumber = /^256\d{9}$/.test(request.userId);
+            
+            let userName = 'Unknown User';
+            let userPhone = 'Unknown Phone';
+            
+            if (user) {
+              // Check if this is a default SMS user with generic names
+              if (user.firstName === 'USSD' && user.lastName === 'User') {
+                // For SMS users with default names, show phone number as identifier
+                userName = `SMS User (${request.userId})`;
+              } else {
+                userName = `${user.firstName} ${user.lastName}`;
+              }
+              
+              // For SMS users, the phone number is stored in the email field and also as userId
+              userPhone = isPhoneNumber ? request.userId : (user.email || 'Unknown Phone');
+            } else if (isPhoneNumber) {
+              // Even if user not found, if userId looks like a phone number, use it
+              userName = `SMS User (${request.userId})`;
+              userPhone = request.userId;
+            }
+            
             return {
               ...request,
-              userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
-              userPhone: user?.email || 'Unknown Phone', // email field contains phone for SMS users
+              userName,
+              userPhone,
               userLocation: 'Unknown Location' // Would need to enhance with actual location data
             };
           } catch (error) {
             console.error(`Error getting user info for ${request.userId}:`, error);
+            
+            // Fallback: if userId looks like a phone number, use it even if lookup failed
+            const isPhoneNumber = /^256\d{9}$/.test(request.userId);
             return {
               ...request,
-              userName: 'Unknown User',
-              userPhone: 'Unknown Phone',
+              userName: isPhoneNumber ? `SMS User (${request.userId})` : 'Unknown User',
+              userPhone: isPhoneNumber ? request.userId : 'Unknown Phone',
               userLocation: 'Unknown Location'
             };
           }
@@ -2752,23 +2782,51 @@ Send *AFRI# for menu`;
         withdrawalTransactions.map(async (transaction) => {
           try {
             const user = await this.getUserByKey(transaction.userId);
+            console.log(`🔍 User info for withdrawal ${transaction.userId}:`, user);
+            
+            // For SMS users, userId is the phone number
+            const isPhoneNumber = /^256\d{9}$/.test(transaction.userId);
+            
+            let userName = 'Unknown User';
+            let userPhone = 'Unknown Phone';
+            
+            if (user) {
+              // Check if this is a default SMS user with generic names
+              if (user.firstName === 'USSD' && user.lastName === 'User') {
+                // For SMS users with default names, show phone number as identifier
+                userName = `SMS User (${transaction.userId})`;
+              } else {
+                userName = `${user.firstName} ${user.lastName}`;
+              }
+              
+              // For SMS users, the phone number is stored in the email field and also as userId
+              userPhone = isPhoneNumber ? transaction.userId : (user.email || 'Unknown Phone');
+            } else if (isPhoneNumber) {
+              // Even if user not found, if userId looks like a phone number, use it
+              userName = `SMS User (${transaction.userId})`;
+              userPhone = transaction.userId;
+            }
+            
             return {
               id: transaction.id,
               userId: transaction.userId,
               agentId: transaction.agentId || '',
               amount: transaction.amount,
               currency: transaction.currency,
-              withdrawalCode: transaction.withdrawalCode || '',
+              withdrawalCode: transaction.metadata.withdrawalCode || '',
               fee: transaction.fee || 0,
               status: transaction.status as 'pending' | 'confirmed' | 'completed' | 'rejected',
               createdAt: transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt),
               updatedAt: transaction.updatedAt ? (transaction.updatedAt instanceof Date ? transaction.updatedAt.toISOString() : String(transaction.updatedAt)) : (transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt)),
-              userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
-              userPhone: user?.email || 'Unknown Phone', // email field contains phone for SMS users
+              userName,
+              userPhone,
               userLocation: 'Unknown Location' // Would need to enhance with actual location data
             } as WithdrawalRequest;
           } catch (error) {
             console.error(`Error getting user info for ${transaction.userId}:`, error);
+            
+            // Fallback: if userId looks like a phone number, use it even if lookup failed
+            const isPhoneNumber = /^256\d{9}$/.test(transaction.userId);
             return {
               id: transaction.id,
               userId: transaction.userId,
@@ -2780,8 +2838,8 @@ Send *AFRI# for menu`;
               status: transaction.status as 'pending' | 'confirmed' | 'completed' | 'rejected',
               createdAt: transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt),
               updatedAt: transaction.updatedAt ? (transaction.updatedAt instanceof Date ? transaction.updatedAt.toISOString() : String(transaction.updatedAt)) : (transaction.createdAt instanceof Date ? transaction.createdAt.toISOString() : String(transaction.createdAt)),
-              userName: 'Unknown User',
-              userPhone: 'Unknown Phone',
+              userName: isPhoneNumber ? `SMS User (${transaction.userId})` : 'Unknown User',
+              userPhone: isPhoneNumber ? transaction.userId : 'Unknown Phone',
               userLocation: 'Unknown Location'
             } as WithdrawalRequest;
           }

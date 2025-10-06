@@ -4,7 +4,7 @@ export default defineConfig({
   satellite: {
     ids: {
       development: "uxrrr-q7777-77774-qaaaq-cai",
-      production: "dkk74-oyaaa-aaaal-askxq-cai"
+      production: "dkk74-oyaaa-aaaal-askxq-cai",
     },
     source: "dist",
     predeploy: ["npm run build"],
@@ -66,6 +66,18 @@ export default defineConfig({
         },
         {
           collection: "deposit_requests",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
+        {
+          collection: "bitcoin_wallets",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
+        {
+          collection: "bitcoin_transactions",
           read: "public",
           write: "public",
           memory: "stable",

@@ -3,8 +3,9 @@ import { AfricanCurrency } from '../types/currency';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory } from 'ecpair';
-import { NotificationService } from './notificationService';
-import { DataService } from './dataService';
+import { NotificationService } from './notificationService.js';
+import { DataService } from './dataService.js';
+import { setDoc, listDocs } from '@junobuild/core';
 
 // Helper function for currency formatting
 const formatCurrencyAmount = (amount: number, currency: string): string => {
@@ -118,38 +119,69 @@ export class BitcoinService {
   }
 
   // Create Bitcoin wallet for user
-  static async createBitcoinWallet(userId: string): Promise<BitcoinWallet> {
-    const { address, privateKey } = this.generateBitcoinAddress();
-    
-    const wallet: BitcoinWallet = {
-      id: nanoid(),
-      userId,
-      address,
-      privateKey, // Store securely in production
-      balance: 0,
-      createdAt: new Date()
-    };
-
-    // Send notification for Bitcoin wallet creation
+  static async createBitcoinWallet(userId: string, phoneNumber?: string): Promise<BitcoinWallet> {
     try {
-      const user = await DataService.getUserByKey(userId);
-      if (user) {
-        await NotificationService.sendNotification(user, {
-          userId,
-          type: 'bitcoin_exchange',
-          amount: 0,
-          currency: 'BTC',
-          transactionId: wallet.id,
-          message: `Bitcoin wallet created. Address: ${address.substring(0, 8)}...`
-        });
-      }
-    } catch (notificationError) {
-      console.error('Failed to send Bitcoin wallet notification:', notificationError);
-    }
+      // Generate real Bitcoin address using your existing code
+      const { address, privateKey, publicKey } = this.generateBitcoinAddress();
+      
+      const wallet: BitcoinWallet = {
+        id: nanoid(),
+        userId,
+        address,
+        privateKey, // Store securely - consider encryption
+        balance: 0,
+        createdAt: new Date()
+      };
 
-    // In production, store in Juno datastore
-    // For now, return the wallet object
-    return wallet;
+      // Store in Juno datastore
+      const walletDocument = {
+        id: wallet.id,
+        userId,
+        address,
+        encryptedPrivateKey: this.encryptPrivateKey(privateKey, phoneNumber || userId),
+        publicKey,
+        balance: 0,
+        network: process.env.NODE_ENV === 'production' ? 'mainnet' : 'testnet',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        metadata: {
+          walletType: phoneNumber ? 'custodial' : 'custodial', // SMS users need custodial
+          isActive: true,
+          derivationPath: phoneNumber ? this.getDerivationPath(phoneNumber) : undefined
+        }
+      };
+
+      await setDoc({
+        collection: 'bitcoin_wallets',
+        doc: {
+          key: `btc_${userId}`,
+          data: walletDocument,
+          version: 1n
+        }
+      });
+
+      // Send notification
+      try {
+        const user = await DataService.getUserByKey(userId);
+        if (user) {
+          await NotificationService.sendNotification(user, {
+            userId,
+            type: 'bitcoin_exchange',
+            amount: 0,
+            currency: 'BTC',
+            transactionId: wallet.id,
+            message: `Bitcoin wallet created. Address: ${address.substring(0, 8)}...`
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send Bitcoin wallet notification:', notificationError);
+      }
+
+      return wallet;
+    } catch (error) {
+      console.error('Error creating Bitcoin wallet:', error);
+      throw error;
+    }
   }
 
   // Get REAL BTC to local currency exchange rate
@@ -716,6 +748,137 @@ export class BitcoinService {
       
       default:
         return `AfriTokeni: Bitcoin transaction ${transaction.type}. Amount: ${btcAmount}. Ref: ${transaction.id}`;
+    }
+  }
+
+  // Helper methods for SMS users
+  private static encryptPrivateKey(privateKey: string, seed: string): string {
+    // Simple encryption - in production use proper encryption
+    const crypto = require('crypto');
+    const key = crypto.scryptSync(seed, 'salt', 32);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(privateKey, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return `${iv.toString('hex')}:${encrypted}`;
+  }
+
+  private static getDerivationPath(phoneNumber: string): string {
+    const index = parseInt(phoneNumber.slice(-6)) % 1000000;
+    return `m/44'/0'/0'/${index}`;
+  }
+
+  // Get Bitcoin wallet for SMS user
+  static async getBitcoinWalletForUser(userId: string): Promise<BitcoinWallet | null> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_wallets'
+      });
+
+      const walletDoc = docs.items.find(doc => 
+        (doc.data as any).userId === userId
+      );
+
+      if (!walletDoc) {
+        return null;
+      }
+
+      const walletData = walletDoc.data as any;
+      
+      // Get real balance from blockchain
+      const realBalance = await this.getBitcoinBalance(walletData.address);
+      
+      // Update stored balance if different
+      if (realBalance !== walletData.balance) {
+        await this.updateWalletBalance(userId, realBalance);
+      }
+
+      return {
+        id: walletData.id,
+        userId: walletData.userId,
+        address: walletData.address,
+        privateKey: walletData.encryptedPrivateKey, // Keep encrypted
+        balance: realBalance,
+        createdAt: new Date(walletData.createdAt)
+      };
+    } catch (error) {
+      console.error('Error getting Bitcoin wallet:', error);
+      return null;
+    }
+  }
+
+  // Update wallet balance in Juno
+  static async updateWalletBalance(userId: string, newBalance: number): Promise<boolean> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_wallets'
+      });
+
+      const walletDoc = docs.items.find(doc => 
+        (doc.data as any).userId === userId
+      );
+
+      if (!walletDoc) return false;
+
+      const updatedData = {
+        ...walletDoc.data,
+        balance: newBalance,
+        updatedAt: new Date().toISOString()
+      };
+
+      await setDoc({
+        collection: 'bitcoin_wallets',
+        doc: {
+          key: walletDoc.key,
+          data: updatedData,
+          version: (walletDoc.version || 0n) + 1n
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating wallet balance:', error);
+      return false;
+    }
+  }
+
+  // Store Bitcoin transaction in Juno
+  static async storeBitcoinTransaction(transaction: BitcoinTransaction): Promise<void> {
+    try {
+      const transactionDoc = {
+        id: transaction.id,
+        userId: transaction.userId,
+        agentId: transaction.agentId,
+        type: transaction.type,
+        bitcoinAmount: transaction.bitcoinAmount,
+        fromAddress: transaction.fromAddress,
+        toAddress: transaction.toAddress,
+        bitcoinTxHash: transaction.bitcoinTxHash,
+        confirmations: transaction.confirmations,
+        networkFee: transaction.fee,
+        localAmount: transaction.localAmount,
+        localCurrency: transaction.localCurrency,
+        exchangeRate: transaction.exchangeRate,
+        agentFee: transaction.agentFee,
+        status: transaction.status,
+        createdAt: transaction.createdAt.toISOString(),
+        confirmedAt: transaction.confirmedAt?.toISOString(),
+        metadata: transaction.metadata
+      };
+
+      await setDoc({
+        collection: 'bitcoin_transactions',
+        doc: {
+          key: transaction.id,
+          data: transactionDoc,
+          version: 1n
+        }
+      });
+
+      console.log(`Stored Bitcoin transaction ${transaction.id} in Juno`);
+    } catch (error) {
+      console.error('Error storing Bitcoin transaction:', error);
+      throw error;
     }
   }
 }

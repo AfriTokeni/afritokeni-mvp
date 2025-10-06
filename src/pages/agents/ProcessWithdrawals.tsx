@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Minus } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Minus, DollarSign } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
@@ -15,6 +15,7 @@ const ProcessWithdrawals: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('pending');
+  const [initializingBalance, setInitializingBalance] = useState(false);
 
   const loadWithdrawalRequests = useCallback(async () => {
     const userId = user?.agent?.id || user?.user?.id;
@@ -62,6 +63,45 @@ const ProcessWithdrawals: React.FC = () => {
   useEffect(() => {
     loadWithdrawalRequests();
   }, [loadWithdrawalRequests]);
+
+  const handleInitializeMyBalance = async () => {
+    setInitializingBalance(true);
+    try {
+      const userId = user?.agent?.id || user?.user?.id;
+      if (!userId) {
+        throw new Error('No user ID available');
+      }
+
+      // Get the agent record to get the correct agent ID
+      const agentRecord = await DataService.getAgentByUserId(userId);
+      if (!agentRecord) {
+        throw new Error('Agent record not found');
+      }
+
+      console.log(`🏦 Current agent balance: ${agentRecord.cashBalance.toLocaleString()} UGX`);
+      
+      // Set balance to 25,000,000 UGX (the amount from environment variable)
+      const newBalance = 25000000;
+      const success = await DataService.updateAgentBalance(agentRecord.id, {
+        cashBalance: newBalance
+      });
+
+      if (success) {
+        console.log(`✅ Updated agent cash balance to ${newBalance.toLocaleString()} UGX`);
+        alert(`✅ Agent cash balance updated to ${newBalance.toLocaleString()} UGX! You can now process withdrawals.`);
+        
+        // Reload withdrawal requests to refresh any UI that might depend on agent balance
+        await loadWithdrawalRequests();
+      } else {
+        throw new Error('Failed to update agent balance');
+      }
+    } catch (error) {
+      console.error('Failed to initialize agent balance:', error);
+      alert(`❌ Failed to initialize agent balance: ${error}`);
+    } finally {
+      setInitializingBalance(false);
+    }
+  };
 
   const handleVerifyCode = async (request: WithdrawalRequest) => {
     if (verificationCode === request.withdrawalCode) {
@@ -229,8 +269,35 @@ const ProcessWithdrawals: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Process Withdrawals</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-bold text-neutral-900">Process Withdrawals</h1>
+            <button
+              onClick={handleInitializeMyBalance}
+              disabled={initializingBalance}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-neutral-300 disabled:cursor-not-allowed flex items-center text-sm"
+            >
+              {initializingBalance ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Set My Cash Balance (25M UGX)
+                </>
+              )}
+            </button>
+          </div>
           <p className="text-neutral-600">Manage customer cash withdrawals and digital balance debits</p>
+          {!initializingBalance && (
+            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-orange-800 text-sm">
+                💡 <strong>Need cash balance?</strong> If withdrawals fail due to insufficient agent cash balance, 
+                click the &ldquo;Set My Cash Balance&rdquo; button above to initialize your account with 25,000,000 UGX.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Filter Tabs */}
