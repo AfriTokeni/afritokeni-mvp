@@ -373,7 +373,7 @@ async function handleRegistrationCheck(input: string, session: USSDSession): Pro
       session.currentMenu = 'user_registration';
       session.step = 1;
       console.log(`➡️ Redirecting ${session.phoneNumber} to registration`);
-      return continueSession('Welcome to AfriTokeni!\nYou are not registered yet.\nPlease enter your first name:');
+      return continueSession('Welcome to AfriTokeni!\nYou are not registered yet.\nPlease enter your full name (first and last name):');
     } else {
       // User is registered - check if they have a PIN
       const hasPIN = await hasUserPin(session.phoneNumber);
@@ -405,25 +405,27 @@ async function handleUserRegistration(input: string, session: USSDSession): Prom
   console.log(`📝 User registration for ${session.phoneNumber}, step: ${session.step}, input: "${sanitized_input}"`);
   
   switch (session.step) {
-    case 1:
-      // Getting first name
-      if (!sanitized_input || sanitized_input.trim().length < 2) {
-        console.log(`❌ Invalid first name "${sanitized_input}" provided by ${session.phoneNumber}`);
-        return continueSession('Invalid name. Please enter your first name (at least 2 characters):');
+    case 1: {
+      // Getting full name
+      if (!sanitized_input || sanitized_input.trim().length < 3) {
+        console.log(`❌ Invalid name "${sanitized_input}" provided by ${session.phoneNumber}`);
+        return continueSession('Invalid name. Please enter your full name (first and last name):');
       }
-      session.data.firstName = sanitized_input.trim();
-      session.step = 2;
-      console.log(`✅ First name "${session.data.firstName}" collected for ${session.phoneNumber}`);
-      return continueSession(`Hello ${session.data.firstName}!\nNow please enter your last name:`);
       
-    case 2: {
-      // Getting last name
-      if (!sanitized_input || sanitized_input.trim().length < 2) {
-        console.log(`❌ Invalid last name "${sanitized_input}" provided by ${session.phoneNumber}`);
-        return continueSession('Invalid name. Please enter your last name (at least 2 characters):');
+      const fullNameParts = sanitized_input.trim().split(/\s+/);
+      if (fullNameParts.length < 2) {
+        console.log(`❌ Incomplete name "${sanitized_input}" provided by ${session.phoneNumber}`);
+        return continueSession('Please enter both first and last name separated by space:');
       }
-      session.data.lastName = sanitized_input.trim();
-      console.log(`✅ Last name "${session.data.lastName}" collected for ${session.phoneNumber}`);
+      
+      // First word is first name, last word is last name
+      const firstName = fullNameParts[0];
+      const lastName = fullNameParts[fullNameParts.length - 1];
+      
+      session.data.firstName = firstName;
+      session.data.lastName = lastName;
+      
+      console.log(`✅ Full name "${sanitized_input}" split into firstName: "${firstName}", lastName: "${lastName}" for ${session.phoneNumber}`);
       
       // Generate and send verification code
       const verificationCode = generateVerificationCode(session.phoneNumber);
@@ -439,7 +441,7 @@ async function handleUserRegistration(input: string, session: USSDSession): Prom
         session.currentMenu = 'verification';
         session.step = 1;
         console.log(`📱 SMS sent successfully to ${session.phoneNumber}, moving to verification menu`);
-        return continueSession(`Thank you ${session.data.firstName} ${session.data.lastName}!\nWe've sent a verification code to your phone.\nPlease enter the 6-digit code:`);
+        return continueSession(`Thank you ${firstName} ${lastName}!\nWe've sent a verification code to your phone.\nPlease enter the 6-digit code:`);
       } catch (error) {
         console.error(`❌ Failed to send verification SMS to ${session.phoneNumber}:`, error);
         return endSession('Failed to send verification code. Please try again later.');
