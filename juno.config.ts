@@ -70,6 +70,12 @@ export default defineConfig({
           write: "public",
           memory: "stable",
         },
+        {
+          collection: "platform_revenue",
+          read: "managed",
+          write: "managed",
+          memory: "stable",
+        },
       ],
       storage: [
         {
