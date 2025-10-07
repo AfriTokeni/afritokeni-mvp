@@ -24,6 +24,43 @@ export interface UserDataFromJuno {
 
 import { Transaction } from '../types/transaction';
 
+// Bitcoin interfaces for DataService
+export interface BitcoinTransaction {
+  id: string;
+  userId: string;
+  agentId?: string;
+  type: 'bitcoin_to_local' | 'local_to_bitcoin' | 'bitcoin_send' | 'bitcoin_receive';
+  bitcoinAmount: number; // in satoshis
+  localAmount?: number; // equivalent local currency amount
+  localCurrency: AfricanCurrency; // The local African currency being exchanged
+  exchangeRate: number; // BTC to local currency rate at time of transaction
+  bitcoinTxHash?: string; // actual Bitcoin network transaction hash
+  fromAddress?: string;
+  toAddress?: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'failed';
+  confirmations: number;
+  fee: number; // Bitcoin network fee in satoshis
+  agentFee?: number; // Agent commission in local currency
+  createdAt: Date | string;
+  confirmedAt?: Date | string;
+  updatedAt?: string;
+  metadata?: {
+    smsReference?: string;
+    exchangeMethod?: 'agent_cash' | 'agent_digital';
+    agentLocation?: string;
+  };
+}
+
+export interface BitcoinWallet {
+  id: string;
+  userId: string;
+  address: string;
+  privateKey?: string; // For POC - in production use threshold signatures
+  balance: number; // in satoshis
+  createdAt: Date | string;
+  updatedAt?: string;
+}
+
 // Deposit Request interface
 export interface DepositRequest {
   id: string;
