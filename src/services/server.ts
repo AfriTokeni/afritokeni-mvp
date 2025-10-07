@@ -24,14 +24,13 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import AfricasTalking from 'africastalking';
-import { WebhookDataService as DataService } from './webHookServices.js';
+import { WebhookDataService as DataService, BitcoinDataService as BitcoinService, Agent } from './webHookServices.js';
 import type { 
   NotificationRequest, 
   NotificationData,
   User,
   EmailContent 
 } from '../types/notification.js';
-import { BitcoinService } from './bitcoinService.js';
 
 // Node.js process declaration
 declare const process: {
@@ -1283,22 +1282,32 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
           return endSession('User not found. Please try again later.');
         }
         
-        // Get or create Bitcoin wallet using your existing service
-        let wallet = await BitcoinService.getBitcoinWalletForUser(user.id);
+        // Use the new Bitcoin balance calculation from webHookServices
+        const { balance: actualBalance, wallet } = await BitcoinService.getBitcoinBalanceWithSync(user.id);
         
         if (!wallet) {
           // Create new wallet for SMS user
-          wallet = await BitcoinService.createBitcoinWallet(user.id, session.phoneNumber);
+          const newWallet = await BitcoinService.createBitcoinWallet(user.id, session.phoneNumber);
+          
+          return endSession(`Your Bitcoin Wallet
+
+Address: ${newWallet.address.substring(0, 12)}...
+Balance: ₿0.00000000
+≈ UGX 0
+
+No transactions yet.
+
+Thank you for using AfriTokeni!`);
         }
         
         // Get real exchange rate
         const rate = await BitcoinService.getExchangeRate('UGX');
-        const ugxEquivalent = await BitcoinService.calculateLocalFromBitcoin(wallet.balance, 'UGX');
+        const ugxEquivalent = await BitcoinService.calculateLocalFromBitcoin(actualBalance, 'UGX');
         
         return endSession(`Your Bitcoin Wallet
 
 Address: ${wallet.address.substring(0, 12)}...
-Balance: ₿${BitcoinService.satoshisToBtc(wallet.balance).toFixed(8)}
+Balance: ₿${BitcoinService.satoshisToBtc(actualBalance).toFixed(8)}
 ≈ UGX ${ugxEquivalent.toLocaleString()}
 
 Rate: 1 BTC = UGX ${rate.btcToLocal.toLocaleString()}
@@ -1386,18 +1395,18 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Display current BTC rate from CoinGecko
+      // Display current BTC rate using getExchangeRate
       try {
-        const { BitcoinRateService } = await import('./bitcoinRateService.js');
-        const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
-        const lastUpdated = new Date().toLocaleString();
+        const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+        const lastUpdated = exchangeRate.lastUpdated.toLocaleString();
         
         return endSession(`Bitcoin Exchange Rate
 
-1 BTC = UGX ${btcRateUGX.toLocaleString()}
-1 UGX = ₿${(1/btcRateUGX).toFixed(10)}
+1 BTC = UGX ${exchangeRate.btcToLocal.toLocaleString()}
+1 UGX = ₿${exchangeRate.localToBtc.toFixed(10)}
 
 Last Updated: ${lastUpdated}
+Source: ${exchangeRate.source}
 
 Rates include platform fees
 Buy/Sell spreads may apply
@@ -1440,48 +1449,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
         return continueSession('Minimum purchase: UGX 10,000\nEnter UGX amount to spend:');
       }
       
-      // Calculate BTC amount and fees with real rate
-      const { BitcoinRateService } = await import('./bitcoinRateService.js');
-      const btcRate = await BitcoinRateService.getBitcoinRate('ugx');
-      const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
-      const netAmount = ugxAmount - fee;
-      const btcAmount = netAmount / btcRate;
-      
-      session.data.ugxAmount = ugxAmount;
-      session.data.btcAmount = btcAmount;
-      session.data.fee = fee;
-      session.step = 2;
-      
-      return continueSession(`BTC Purchase Quote
-
-Spend: UGX ${ugxAmount.toLocaleString()}
-Fee (2.5%): UGX ${fee.toLocaleString()}
-Net: UGX ${netAmount.toLocaleString()}
-Receive: ₿${btcAmount.toFixed(8)} BTC
-
-Rate: 1 BTC = UGX ${btcRate.toLocaleString()}
-
-Enter PIN to confirm:`);
-    }
-    
-    case 2: {
-      // PIN verification and purchase
-      if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
-      }
-      
-      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
-      if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
-      }
-      
-      // Process BTC purchase (mock implementation)
-      const ugxAmount = session.data.ugxAmount || 0;
-      const btcAmount = session.data.btcAmount || 0;
-      const fee = session.data.fee || 0;
-      const transactionId = `btc_buy_${Date.now()}`;
-      
-      // Check user balance
+      // Check user balance first
       const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < ugxAmount) {
         const currentBalance = userBalance ? userBalance.balance : 0;
@@ -1492,16 +1460,186 @@ Required: UGX ${ugxAmount.toLocaleString()}
 Thank you for using AfriTokeni!`);
       }
       
-      return endSession(`✅ BTC Purchase Successful!
+      // Calculate BTC amount and fees with real rate
+      const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+      const btcRate = exchangeRate.btcToLocal;
+      const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
+      const netAmount = ugxAmount - fee;
+      const btcAmount = netAmount / btcRate;
+      
+      session.data.ugxAmount = ugxAmount;
+      session.data.btcAmount = btcAmount;
+      session.data.fee = fee;
+      session.step = 2;
+      
+      // Get available agents for Bitcoin exchange
+      console.log('Getting available agents for Bitcoin purchase...');
+      try {
+        const agents = await DataService.getAvailableAgents();
+        const availableAgents = agents.filter((agent: Agent) => 
+          agent.isActive
+          // agent.cashBalance >= ugxAmount
+        );
+        
+        if (availableAgents.length === 0) {
+          return endSession(`No agents available for Bitcoin purchase at this time.
 
-Purchased: ₿${btcAmount.toFixed(8)} BTC
-Cost: UGX ${ugxAmount.toLocaleString()}
-Fee: UGX ${fee.toLocaleString()}
-Transaction ID: ${transactionId}
-
-BTC added to your wallet.
+Please try again later.
 
 Thank you for using AfriTokeni!`);
+        }
+        
+        session.data.availableAgents = availableAgents;
+        
+        let agentList = `BTC Purchase Quote
+
+Spend: UGX ${ugxAmount.toLocaleString()}
+Fee (2.5%): UGX ${fee.toLocaleString()}
+Net: UGX ${netAmount.toLocaleString()}
+Receive: ₿${btcAmount.toFixed(8)} BTC
+
+Select an agent:
+`;
+        
+        availableAgents.slice(0, 5).forEach((agent: any, index: number) => {
+          agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
+        });
+        
+        agentList += '0. Cancel';
+        
+        return continueSession(agentList);
+        
+      } catch (error) {
+        console.error('Error getting agents for Bitcoin purchase:', error);
+        return endSession('Error loading agents. Please try again later.');
+      }
+    }
+    
+    case 2: {
+      // Agent selection
+      const agentChoice = parseInt(currentInput);
+      
+      if (agentChoice === 0) {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return handleBitcoin('', session);
+      }
+      
+      const agents = session.data.availableAgents;
+      if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
+        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+      }
+      
+      const selectedAgent = agents[agentChoice - 1];
+      session.data.selectedAgent = selectedAgent;
+      session.step = 3;
+      
+      const ugxAmount = session.data.ugxAmount || 0;
+      const btcAmount = session.data.btcAmount || 0;
+      const fee = session.data.fee || 0;
+      
+      return continueSession(`Selected Agent:
+${selectedAgent.businessName}
+${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
+
+Purchase Details:
+Amount: UGX ${ugxAmount.toLocaleString()}
+Fee: UGX ${fee.toLocaleString()}
+Receive: ₿${btcAmount.toFixed(8)} BTC
+
+Enter your PIN to confirm:`);
+    }
+    
+    case 3: {
+      // PIN verification and process Bitcoin purchase
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      try {
+        // Get user information
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        // Get or create user's Bitcoin wallet
+        let wallet = await BitcoinService.getBitcoinWalletForUser(user.id);
+        if (!wallet) {
+          wallet = await BitcoinService.createBitcoinWallet(user.id, session.phoneNumber);
+        }
+        
+        const selectedAgent = session.data.selectedAgent;
+        const ugxAmount = session.data.ugxAmount || 0;
+        
+        // Generate a unique purchase code for the user to give to agent
+        const purchaseCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.purchaseCode = purchaseCode;
+        
+        // Process local to Bitcoin exchange through agent
+        const exchangeResult = await BitcoinService.processLocalToBitcoinExchange(
+          user.id,
+          selectedAgent.id,
+          ugxAmount,
+          'UGX',
+          wallet.address
+        );
+        
+        if (exchangeResult.success && exchangeResult.transaction) {
+          const btcAmount = BitcoinService.satoshisToBtc(exchangeResult.transaction.bitcoinAmount);
+          
+          // Send SMS with purchase details and code
+          const smsMessage = `AfriTokeni BTC Purchase
+Code: ${purchaseCode}
+Amount: UGX ${ugxAmount.toLocaleString()}
+BTC to receive: ₿${btcAmount.toFixed(8)}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+Transaction ID: ${exchangeResult.transaction.id}
+
+Give this code and payment to the agent to complete your Bitcoin purchase.`;
+
+          console.log(`Sending Bitcoin purchase SMS to ${session.phoneNumber}`);
+
+          try {
+            await sendSMSNotification(session.phoneNumber, smsMessage);
+          } catch (smsError) {
+            console.error('SMS sending failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ BTC Purchase Initiated!
+
+Purchase Code: ${purchaseCode}
+Transaction ID: ${exchangeResult.transaction.id}
+You will receive: ₿${btcAmount.toFixed(8)} BTC
+Amount to pay: UGX ${ugxAmount.toLocaleString()}
+
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+
+Give the code ${purchaseCode} and payment to the agent to complete your purchase.
+
+SMS sent with details.
+
+Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Purchase failed: ${exchangeResult.message}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+      } catch (error) {
+        console.error('Error processing Bitcoin purchase:', error);
+        return endSession('Error processing purchase. Please try again later.');
+      }
     }
     
     default:
@@ -1531,9 +1669,40 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         return continueSession('Minimum sale: ₿0.0001 BTC\nEnter BTC amount to sell:');
       }
       
+      // Check if user has Bitcoin wallet and sufficient balance
+      try {
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        const wallet = await BitcoinService.getBitcoinWalletForUser(user.id);
+        if (!wallet) {
+          return endSession(`No Bitcoin wallet found.
+
+Please create a wallet first.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+        const btcAmountSats = BitcoinService.btcToSatoshis(btcAmount);
+        if (wallet.balance < btcAmountSats) {
+          const availableBTC = BitcoinService.satoshisToBtc(wallet.balance);
+          return endSession(`Insufficient BTC balance!
+Your balance: ₿${availableBTC.toFixed(8)} BTC
+Required: ₿${btcAmount.toFixed(8)} BTC
+
+Thank you for using AfriTokeni!`);
+        }
+        
+      } catch (error) {
+        console.error('Error checking Bitcoin balance:', error);
+        return endSession('Error checking balance. Please try again later.');
+      }
+      
       // Calculate UGX amount and fees with real rate
-      const { BitcoinRateService } = await import('./bitcoinRateService.js');
-      const btcRate = await BitcoinRateService.getBitcoinRate('ugx');
+      const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+      const btcRate = exchangeRate.btcToLocal;
       const ugxGross = btcAmount * btcRate;
       const fee = Math.round(ugxGross * 0.025); // 2.5% fee
       const ugxNet = ugxGross - fee;
@@ -1544,20 +1713,87 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
       session.data.fee = fee;
       session.step = 2;
       
-      return continueSession(`BTC Sale Quote
+      // Get available agents for Bitcoin exchange
+      console.log('Getting available agents for Bitcoin sale...');
+      try {
+        const agents = await DataService.getAvailableAgents();
+        const availableAgents = agents.filter((agent: any) => 
+          agent.isActive && 
+          agent.services?.includes('bitcoin_exchange') &&
+          agent.cashBalance >= ugxNet // Agent needs enough cash to pay user
+        );
+        
+        if (availableAgents.length === 0) {
+          return endSession(`No agents available for Bitcoin sale at this time.
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+        session.data.availableAgents = availableAgents;
+        
+        let agentList = `BTC Sale Quote
 
 Sell: ₿${btcAmount.toFixed(8)} BTC
 Gross: UGX ${ugxGross.toLocaleString()}
 Fee (2.5%): UGX ${fee.toLocaleString()}
 You receive: UGX ${ugxNet.toLocaleString()}
 
-Rate: 1 BTC = UGX ${btcRate.toLocaleString()}
-
-Enter PIN to confirm:`);
+Select an agent:
+`;
+        
+        availableAgents.slice(0, 5).forEach((agent: any, index: number) => {
+          agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
+        });
+        
+        agentList += '0. Cancel';
+        
+        return continueSession(agentList);
+        
+      } catch (error) {
+        console.error('Error getting agents for Bitcoin sale:', error);
+        return endSession('Error loading agents. Please try again later.');
+      }
     }
     
     case 2: {
-      // PIN verification and sale
+      // Agent selection
+      const agentChoice = parseInt(currentInput);
+      
+      if (agentChoice === 0) {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return handleBitcoin('', session);
+      }
+      
+      const agents = session.data.availableAgents;
+      if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
+        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+      }
+      
+      const selectedAgent = agents[agentChoice - 1];
+      session.data.selectedAgent = selectedAgent;
+      session.step = 3;
+      
+      const btcAmount = session.data.btcAmount || 0;
+      const ugxNet = session.data.ugxNet || 0;
+      const fee = session.data.fee || 0;
+      
+      return continueSession(`Selected Agent:
+${selectedAgent.businessName}
+${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
+
+Sale Details:
+Sell: ₿${btcAmount.toFixed(8)} BTC
+Fee: UGX ${fee.toLocaleString()}
+You receive: UGX ${ugxNet.toLocaleString()}
+
+Enter your PIN to confirm:`);
+    }
+    
+    case 3: {
+      // PIN verification and process Bitcoin sale
       if (!/^\d{4}$/.test(currentInput)) {
         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
       }
@@ -1567,32 +1803,80 @@ Enter PIN to confirm:`);
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Process BTC sale (mock implementation)
-      const btcAmount = session.data.btcAmount || 0;
-      const ugxNet = session.data.ugxNet || 0;
-      const fee = session.data.fee || 0;
-      const transactionId = `btc_sell_${Date.now()}`;
-      
-      // Mock BTC balance check
-      const userBTCBalance = 0.00125; // Mock balance
-      if (userBTCBalance < btcAmount) {
-        return endSession(`Insufficient BTC balance!
-Your BTC balance: ₿${userBTCBalance.toFixed(8)} BTC
-Required: ₿${btcAmount.toFixed(8)} BTC
+      try {
+        // Get user information
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        const selectedAgent = session.data.selectedAgent;
+        const btcAmount = session.data.btcAmount || 0;
+        const btcAmountSats = BitcoinService.btcToSatoshis(btcAmount);
+        
+        // Generate a unique sale code for the user to give to agent
+        const saleCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.saleCode = saleCode;
+        
+        // Process Bitcoin to local currency exchange through agent
+        const exchangeResult = await BitcoinService.processBitcoinToLocalExchange(
+          user.id,
+          selectedAgent.id,
+          btcAmountSats,
+          'UGX',
+          'agent_cash'
+        );
+        
+        if (exchangeResult.success && exchangeResult.transaction) {
+          const ugxAmount = exchangeResult.transaction.localAmount || 0;
+          
+          // Send SMS with sale details and code
+          const smsMessage = `AfriTokeni BTC Sale
+Code: ${saleCode}
+BTC to sell: ₿${btcAmount.toFixed(8)}
+You will receive: UGX ${ugxAmount.toLocaleString()}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+Transaction ID: ${exchangeResult.transaction.id}
+
+Give this code to the agent to complete your Bitcoin sale and collect cash.`;
+
+          console.log(`Sending Bitcoin sale SMS to ${session.phoneNumber}`);
+
+          try {
+            await sendSMSNotification(session.phoneNumber, smsMessage);
+          } catch (smsError) {
+            console.error('SMS sending failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ BTC Sale Initiated!
+
+Sale Code: ${saleCode}
+Transaction ID: ${exchangeResult.transaction.id}
+Selling: ₿${btcAmount.toFixed(8)} BTC
+You will receive: UGX ${ugxAmount.toLocaleString()}
+
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+
+Give the code ${saleCode} to the agent to complete your sale and collect cash.
+
+SMS sent with details.
 
 Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Sale failed: ${exchangeResult.message}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+      } catch (error) {
+        console.error('Error processing Bitcoin sale:', error);
+        return endSession('Error processing sale. Please try again later.');
       }
-      
-      return endSession(`✅ BTC Sale Successful!
-
-Sold: ₿${btcAmount.toFixed(8)} BTC
-Received: UGX ${ugxNet.toLocaleString()}
-Fee: UGX ${fee.toLocaleString()}
-Transaction ID: ${transactionId}
-
-UGX added to your balance.
-
-Thank you for using AfriTokeni!`);
     }
     
     default:
