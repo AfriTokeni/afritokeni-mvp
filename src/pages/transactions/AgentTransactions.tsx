@@ -11,6 +11,7 @@ import {
 import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { BitcoinService } from '../../services/bitcoinService';
+import { DataService, DepositRequest } from '../../services/dataService';
 import { formatDate } from '../../utils/transactionUtils';
 
 const AgentTransactions: React.FC = () => {
@@ -36,6 +37,8 @@ const AgentTransactions: React.FC = () => {
     description?: string;
   }>>([]);
   const [loadingBitcoin, setLoadingBitcoin] = React.useState(false);
+  const [depositRequests, setDepositRequests] = React.useState<DepositRequest[]>([]);
+  const [loadingDeposits, setLoadingDeposits] = React.useState(false);
 
   // Combined transaction type
   type CombinedTransaction = {
@@ -45,7 +48,7 @@ const AgentTransactions: React.FC = () => {
     createdAt: Date;
     description?: string;
     amount?: number;
-    source: 'regular' | 'bitcoin';
+    source: 'regular' | 'bitcoin' | 'deposit_request';
     displayAmount: string;
     commission: string;
     customerName?: string;
@@ -70,15 +73,33 @@ const AgentTransactions: React.FC = () => {
     }
   }, [agent?.id]);
 
-  const itemsPerPage = 10;
+  // Load customer deposit requests when agent is available
+  React.useEffect(() => {
+    if (agent?.id) {
+      setLoadingDeposits(true);
+      DataService.getAgentDepositRequests(agent.id)
+        .then(requests => {
+          setDepositRequests(requests);
+        })
+        .catch(error => {
+          console.error('Error loading deposit requests:', error);
+          setDepositRequests([]);
+        })
+        .finally(() => {
+          setLoadingDeposits(false);
+        });
+    }
+  }, [agent?.id]);
 
-  const formatCurrency = (amount: number): string => {
-    return `UGX ${amount.toLocaleString()}`;
-  };
+  const itemsPerPage = 50;
 
   const getTransactionIcon = (type: string, source?: string) => {
     if (source === 'bitcoin') {
       return <Bitcoin className="h-5 w-5 text-orange-500" />;
+    }
+
+    if (source === 'deposit_request') {
+      return <Plus className="h-5 w-5 text-green-600" />;
     }
     
     switch (type) {
@@ -90,6 +111,8 @@ const AgentTransactions: React.FC = () => {
         return <Minus className="h-5 w-5 text-blue-500" />;
       case 'deposit':
         return <Plus className="h-5 w-5 text-purple-500" />;
+      case 'customer_deposit':
+        return <Plus className="h-5 w-5 text-green-600" />;
       case 'buy':
         return <Bitcoin className="h-5 w-5 text-green-600" />;
       case 'sell':
@@ -103,8 +126,12 @@ const AgentTransactions: React.FC = () => {
     switch (status) {
       case 'completed':
         return 'text-green-600 bg-green-100';
+      case 'confirmed':
+        return 'text-blue-600 bg-blue-100';
       case 'pending':
         return 'text-yellow-600 bg-yellow-100';
+      case 'rejected':
+        return 'text-red-600 bg-red-100';
       case 'failed':
         return 'text-red-600 bg-red-100';
       default:
@@ -131,13 +158,17 @@ const AgentTransactions: React.FC = () => {
     }
   };
 
-  // Combine regular and Bitcoin transactions
+  // Combine regular, Bitcoin transactions, and deposit requests
   const allTransactions = React.useMemo((): CombinedTransaction[] => {
     const regular: CombinedTransaction[] = (agentTransactions || []).map(tx => ({
       ...tx,
       source: 'regular' as const,
       displayAmount: `UGX ${tx.amount.toLocaleString()}`,
-      commission: `UGX ${Math.round(tx.amount * 0.02).toLocaleString()}`
+      commission: `UGX ${Math.round(tx.amount * 0.02).toLocaleString()}`,
+      // Enhance deposit descriptions to be clearer
+      description: tx.type === 'deposit' 
+        ? (tx.description?.includes('Customer') ? tx.description : `Agent Funding - ${tx.description || 'Cash deposit'}`)
+        : tx.description
     }));
 
     const bitcoin: CombinedTransaction[] = bitcoinTransactions.map(tx => ({
@@ -153,10 +184,23 @@ const AgentTransactions: React.FC = () => {
       customerPhone: tx.customerPhone
     }));
 
-    return [...regular, ...bitcoin].sort((a, b) => 
+    const deposits: CombinedTransaction[] = depositRequests.map(request => ({
+      id: request.id,
+      type: 'customer_deposit',
+      status: request.status,
+      createdAt: new Date(request.createdAt),
+      description: `Customer Deposit Request - Code: ${request.depositCode}`,
+      source: 'deposit_request' as const,
+      displayAmount: `UGX ${request.amount.toLocaleString()}`,
+      commission: `UGX ${Math.round(request.amount * 0.02).toLocaleString()}`,
+      customerName: request.userName,
+      customerPhone: request.userPhone
+    }));
+
+    return [...regular, ...bitcoin, ...deposits].sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-  }, [agentTransactions, bitcoinTransactions]);
+  }, [agentTransactions, bitcoinTransactions, depositRequests]);
 
   // Filter transactions based on search term and filters
   const filteredTransactions = React.useMemo(() => {
@@ -194,7 +238,7 @@ const AgentTransactions: React.FC = () => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, typeFilter]);
 
-  if (isLoading || loadingBitcoin) {
+  if (isLoading || loadingBitcoin || loadingDeposits) {
     return (
       <PageLayout>
         <div className="flex justify-center items-center h-48 sm:h-64">
@@ -233,7 +277,9 @@ const AgentTransactions: React.FC = () => {
             >
               <option value="all">All Statuses</option>
               <option value="completed">Completed</option>
+              <option value="confirmed">Confirmed</option>
               <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
               <option value="failed">Failed</option>
             </select>
             
@@ -246,7 +292,8 @@ const AgentTransactions: React.FC = () => {
               <option value="send">Send</option>
               <option value="receive">Receive</option>
               <option value="withdraw">Withdraw</option>
-              <option value="deposit">Deposit</option>
+              <option value="deposit">Agent Funding</option>
+              <option value="customer_deposit">Customer Deposits</option>
               <option value="buy">Bitcoin Buy</option>
               <option value="sell">Bitcoin Sell</option>
             </select>
@@ -322,6 +369,11 @@ const AgentTransactions: React.FC = () => {
                                   Customer: {transaction.customerPhone}
                                 </div>
                               )}
+                              {transaction.type === 'deposit' && transaction.source === 'regular' && (
+                                <div className="text-xs text-purple-600 font-semibold mt-1">
+                                  💰 Customer Deposit
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -372,6 +424,11 @@ const AgentTransactions: React.FC = () => {
                           {transaction.source === 'bitcoin' && transaction.customerPhone && (
                             <p className="text-xs text-gray-500 mt-1">
                               Customer: {transaction.customerPhone}
+                            </p>
+                          )}
+                          {transaction.type === 'deposit' && transaction.source === 'regular' && (
+                            <p className="text-xs text-purple-600 font-semibold mt-1">
+                              💰 Customer Deposit
                             </p>
                           )}
                         </div>
