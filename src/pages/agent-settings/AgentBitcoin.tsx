@@ -19,18 +19,18 @@ const AgentBitcoin: React.FC<AgentBitcoinProps> = ({
   selectedCurrency
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
       <button
         onClick={onToggle}
         className="w-full p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 transition-all duration-300 rounded-t-xl"
       >
         <div className="flex items-center space-x-3">
           <Bitcoin className="w-5 h-5 text-orange-600" />
-          <h2 className="text-lg font-semibold text-neutral-900">Bitcoin Services</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Bitcoin Services</h2>
         </div>
         {expanded ? 
-          <ChevronUp className="w-5 h-5 text-neutral-400" /> : 
-          <ChevronDown className="w-5 h-5 text-neutral-400" />
+          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+          <ChevronDown className="w-5 h-5 text-gray-400" />
         }
       </button>
       
@@ -59,11 +59,11 @@ const AgentBitcoin: React.FC<AgentBitcoinProps> = ({
             <>
               {/* Bitcoin Commission Rate */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bitcoin Commission Rate (%)
                 </label>
                 <div className="relative">
-                  <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="number"
                     min="0"
@@ -71,19 +71,19 @@ const AgentBitcoin: React.FC<AgentBitcoinProps> = ({
                     step="0.1"
                     value={agentData.bitcoinCommissionRate}
                     onChange={(e) => onSettingChange('bitcoinCommissionRate', parseFloat(e.target.value))}
-                    className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="3.0"
                   />
                 </div>
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Higher rates for Bitcoin due to volatility and complexity
                 </p>
               </div>
 
               {/* Bitcoin Service Information */}
-              <div className="bg-neutral-50 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-neutral-900 mb-3">Bitcoin Service Guidelines</h3>
-                <div className="space-y-2 text-xs text-neutral-600">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Bitcoin Service Guidelines</h3>
+                <div className="space-y-2 text-xs text-gray-600">
                   <div className="flex items-start space-x-2">
                     <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
                     <p>Always verify Bitcoin transactions are confirmed before releasing cash</p>
@@ -106,19 +106,19 @@ const AgentBitcoin: React.FC<AgentBitcoinProps> = ({
               {/* Bitcoin Exchange Limits */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 border border-orange-200 rounded-lg bg-gradient-to-br from-orange-50 to-yellow-50">
-                  <h4 className="text-sm font-medium text-neutral-900 mb-2">Daily Bitcoin Limit</h4>
-                  <p className="text-xs text-neutral-600 mb-2">Maximum Bitcoin value per day</p>
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Daily Bitcoin Limit</h4>
+                  <p className="text-xs text-gray-600 mb-2">Maximum Bitcoin value per day</p>
                   <div className="flex items-center space-x-2">
                     <span className="text-lg font-mono text-orange-600">₿0.1</span>
-                    <span className="text-sm text-neutral-500">≈ {formatCurrencyAmount(15000000, selectedCurrency as any)}</span>
+                    <span className="text-sm text-gray-500">≈ {formatCurrencyAmount(15000000, selectedCurrency as any)}</span>
                   </div>
                 </div>
                 <div className="p-4 border border-orange-200 rounded-lg bg-gradient-to-br from-orange-50 to-yellow-50">
-                  <h4 className="text-sm font-medium text-neutral-900 mb-2">Transaction Limit</h4>
-                  <p className="text-xs text-neutral-600 mb-2">Maximum per transaction</p>
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Transaction Limit</h4>
+                  <p className="text-xs text-gray-600 mb-2">Maximum per transaction</p>
                   <div className="flex items-center space-x-2">
                     <span className="text-lg font-mono text-orange-600">₿0.01</span>
-                    <span className="text-sm text-neutral-500">≈ {formatCurrencyAmount(1500000, selectedCurrency as any)}</span>
+                    <span className="text-sm text-gray-500">≈ {formatCurrencyAmount(1500000, selectedCurrency as any)}</span>
                   </div>
                 </div>
               </div>
@@ -127,8 +127,8 @@ const AgentBitcoin: React.FC<AgentBitcoinProps> = ({
 
           {!agentData.bitcoinEnabled && (
             <div className="text-center py-8">
-              <Bitcoin className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-              <p className="text-sm text-neutral-500">
+              <Bitcoin className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-sm text-gray-500">
                 Enable Bitcoin services to start earning from Bitcoin exchanges
               </p>
             </div>

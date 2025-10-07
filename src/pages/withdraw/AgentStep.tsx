@@ -51,7 +51,7 @@ const createBlinkingUserIcon = () => {
 
 
 const createAgentIcon = (isActive: boolean) => {
-  const bgColor = isActive ? 'bg-green-500' : 'bg-neutral-400';
+  const bgColor = isActive ? 'bg-green-500' : 'bg-gray-400';
   
   return L.divIcon({
     html: `
@@ -206,15 +206,15 @@ const AgentStep: React.FC<AgentStepProps> = ({
       {/* Agent Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="font-semibold text-neutral-900 mb-1">
+          <h3 className="font-semibold text-gray-900 mb-1">
             {agent.businessName}
           </h3>
-          <div className="flex items-center text-sm text-neutral-600 mb-2">
+          <div className="flex items-center text-sm text-gray-600 mb-2">
             <MapPin className="h-4 w-4 mr-1" />
             {agent.location.address}
           </div>
           {userLocation && (
-            <div className="flex items-center text-sm text-neutral-500">
+            <div className="flex items-center text-sm text-gray-500">
               <Navigation className="h-4 w-4 mr-1" />
               {formatDistance(agent, userLocation)} away
             </div>
@@ -225,7 +225,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
             ? 'bg-green-100 text-green-800' 
             : agent.status === 'busy'
             ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-neutral-100 text-neutral-600'
+            : 'bg-gray-100 text-gray-600'
         }`}>
           {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
         </div>
@@ -234,14 +234,14 @@ const AgentStep: React.FC<AgentStepProps> = ({
       {/* Agent Stats */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
-          <p className="font-mono font-semibold text-neutral-900">
+          <p className="text-xs text-gray-500 mb-1">Digital Balance</p>
+          <p className="font-mono font-semibold text-gray-900">
             {formatBalance(agent.digitalBalance || 0)} {userCurrency || 'UGX'}
           </p>
         </div>
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
-          <p className="font-mono font-semibold text-neutral-900">
+          <p className="text-xs text-gray-500 mb-1">Cash Available</p>
+          <p className="font-mono font-semibold text-gray-900">
             {formatBalance(agent.cashBalance || 0)} {userCurrency || 'UGX'}
           </p>
         </div>
@@ -254,12 +254,12 @@ const AgentStep: React.FC<AgentStepProps> = ({
             <Star
               key={star}
               className={`h-4 w-4 ${
-                star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+                star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
               }`}
             />
           ))}
         </div>
-        <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+        <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
       </div>
 
       {/* Services */}
@@ -283,11 +283,11 @@ const AgentStep: React.FC<AgentStepProps> = ({
             onAgentSelect(agent);
           }}
           disabled={isCreatingTransaction}
-          className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+          className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
           {isCreatingTransaction ? 'Creating Withdrawal...' : 'Select Agent'}
         </button>
-        <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
           <Phone className="h-4 w-4" />
         </button>
       </div>
@@ -298,32 +298,32 @@ const AgentStep: React.FC<AgentStepProps> = ({
       <div className="flex items-center space-x-4">
         <button
           onClick={onBackToAmount}
-          className="flex items-center space-x-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="font-medium text-xs sm:text-sm lg:text-base">Back to Amount</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-        <div className="p-3 sm:p-6 border-b border-neutral-200">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-3 sm:p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0 mb-4 sm:mb-6">
-            <h2 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-900">Select Agent</h2>
+            <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">Select Agent</h2>
             {localAmount && (
               <div className="text-left sm:text-right">
-                <p className="text-xs sm:text-sm font-medium text-neutral-600 mb-1">Withdrawal Amount</p>
-                <p className="text-sm sm:text-base lg:text-lg font-bold font-mono text-neutral-900">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Withdrawal Amount</p>
+                <p className="text-sm sm:text-base lg:text-lg font-bold font-mono text-gray-900">
                   {localAmount.toLocaleString()} {userCurrency}
                   {btcAmount && ` • ₿${parseFloat(btcAmount).toFixed(8)}`}
                 </p>
               </div>
             )}
           </div>
-          <div className="flex bg-neutral-100 rounded-lg p-1">
+          <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('map')}
               className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
-                viewMode === 'map' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'
+                viewMode === 'map' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               <Map className="h-4 w-4" />
@@ -332,7 +332,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
             <button
               onClick={() => setViewMode('list')}
               className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
-                viewMode === 'list' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'
+                viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               <List className="h-4 w-4" />
@@ -358,8 +358,8 @@ const AgentStep: React.FC<AgentStepProps> = ({
         {isLoading ? (
           <div className="w-full h-64 sm:h-80 lg:h-[500px] flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-neutral-900 mx-auto mb-3 sm:mb-4"></div>
-              <p className="text-neutral-600 text-xs sm:text-sm lg:text-base">Loading nearby agents...</p>
+              <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-900 mx-auto mb-3 sm:mb-4"></div>
+              <p className="text-gray-600 text-xs sm:text-sm lg:text-base">Loading nearby agents...</p>
             </div>
           </div>
         ) : viewMode === 'map' && userLocation ? (
@@ -395,7 +395,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
             {/* Custom Popup Overlay */}
             {popupAgent && (
               <div
-                className="fixed z-[10000] bg-white rounded-lg shadow-lg border border-neutral-200 p-4 max-w-sm"
+                className="fixed z-[10000] bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm"
                 style={{
                   left: `${popupPosition.x - 200}px`, // Center popup relative to marker
                   top: `${popupPosition.y - 20}px`,
@@ -403,10 +403,10 @@ const AgentStep: React.FC<AgentStepProps> = ({
                 }}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-neutral-900">Agent Details</h4>
+                  <h4 className="font-semibold text-gray-900">Agent Details</h4>
                   <button
                     onClick={closePopup}
-                    className="text-neutral-400 hover:text-neutral-600 ml-2"
+                    className="text-gray-400 hover:text-gray-600 ml-2"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -418,32 +418,32 @@ const AgentStep: React.FC<AgentStepProps> = ({
         ) : viewMode === 'list' ? (
           <div className="w-full h-64 sm:h-80 lg:h-[500px] overflow-y-auto">
             {availableAgents.length === 0 ? (
-              <div className="p-6 sm:p-8 text-center text-neutral-500">
+              <div className="p-6 sm:p-8 text-center text-gray-500">
                 <p className="font-medium text-xs sm:text-sm lg:text-base">No available agents at the moment.</p>
-                <p className="text-xs text-neutral-600 mt-1">Please try again later or contact support.</p>
+                <p className="text-xs text-gray-600 mt-1">Please try again later or contact support.</p>
               </div>
             ) : (
               <div className="p-4 space-y-4">
                 {availableAgents.map((agent) => (
                   <div
                     key={agent.id}
-                    className={`bg-white border border-neutral-200 rounded-xl p-6 hover:shadow-md transition-all duration-200 cursor-pointer ${
-                      selectedAgent?.id === agent.id ? 'ring-2 ring-neutral-900' : ''
+                    className={`bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-all duration-200 cursor-pointer ${
+                      selectedAgent?.id === agent.id ? 'ring-2 ring-gray-900' : ''
                     }`}
                     onClick={() => setSelectedAgent(selectedAgent?.id === agent.id ? null : agent)}
                   >
                     {/* Agent Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-neutral-900 mb-1">
+                        <h3 className="font-semibold text-gray-900 mb-1">
                           {agent.businessName}
                         </h3>
-                        <div className="flex items-center text-sm text-neutral-600 mb-2">
+                        <div className="flex items-center text-sm text-gray-600 mb-2">
                           <MapPin className="h-4 w-4 mr-1" />
                           {agent.location.address}
                         </div>
                         {userLocation && (
-                          <div className="flex items-center text-sm text-neutral-500">
+                          <div className="flex items-center text-sm text-gray-500">
                             <Navigation className="h-4 w-4 mr-1" />
                             {formatDistance(agent, userLocation)} away
                           </div>
@@ -454,7 +454,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
                           ? 'bg-green-100 text-green-800' 
                           : agent.status === 'busy'
                           ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-neutral-100 text-neutral-600'
+                          : 'bg-gray-100 text-gray-600'
                       }`}>
                         {agent.status === 'available' ? 'Online' : agent.status === 'busy' ? 'Busy' : 'Offline'}
                       </div>
@@ -463,14 +463,14 @@ const AgentStep: React.FC<AgentStepProps> = ({
                     {/* Agent Stats */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
-                        <p className="font-mono font-semibold text-neutral-900">
+                        <p className="text-xs text-gray-500 mb-1">Digital Balance</p>
+                        <p className="font-mono font-semibold text-gray-900">
                           {formatBalance(agent.digitalBalance || 0)} {userCurrency || 'UGX'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
-                        <p className="font-mono font-semibold text-neutral-900">
+                        <p className="text-xs text-gray-500 mb-1">Cash Available</p>
+                        <p className="font-mono font-semibold text-gray-900">
                           {formatBalance(agent.cashBalance || 0)} {userCurrency || 'UGX'}
                         </p>
                       </div>
@@ -478,7 +478,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
 
                     {/* Expandable Details */}
                     {selectedAgent?.id === agent.id && (
-                      <div className="border-t border-neutral-200 pt-4 mt-4 space-y-4">
+                      <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
                         {/* Rating */}
                         <div className="flex items-center">
                           <div className="flex items-center">
@@ -486,12 +486,12 @@ const AgentStep: React.FC<AgentStepProps> = ({
                               <Star
                                 key={star}
                                 className={`h-4 w-4 ${
-                                  star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
+                                  star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
                                 }`}
                               />
                             ))}
                           </div>
-                          <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+                          <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
                         </div>
 
                         {/* Services */}
@@ -509,14 +509,14 @@ const AgentStep: React.FC<AgentStepProps> = ({
 
                         {/* Operating Hours */}
                         <div>
-                          <p className="text-xs text-neutral-500 mb-2">Operating Hours</p>
+                          <p className="text-xs text-gray-500 mb-2">Operating Hours</p>
                           <div className="grid grid-cols-2 gap-2 text-xs">
                             <div className="flex items-center">
-                              <Clock className="h-3 w-3 mr-1 text-neutral-400" />
+                              <Clock className="h-3 w-3 mr-1 text-gray-400" />
                               <span>Mon-Fri: 8AM-6PM</span>
                             </div>
                             <div className="flex items-center">
-                              <Clock className="h-3 w-3 mr-1 text-neutral-400" />
+                              <Clock className="h-3 w-3 mr-1 text-gray-400" />
                               <span>Sat-Sun: 9AM-4PM</span>
                             </div>
                           </div>
@@ -532,13 +532,13 @@ const AgentStep: React.FC<AgentStepProps> = ({
                           onAgentSelect(agent);
                         }}
                         disabled={isCreatingTransaction}
-                        className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+                        className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                       >
                         {isCreatingTransaction ? 'Creating Withdrawal...' : 'Select Agent'}
                       </button>
                       <button
                         onClick={(e) => e.stopPropagation()}
-                        className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200"
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200"
                       >
                         <Phone className="h-4 w-4" />
                       </button>

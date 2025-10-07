@@ -82,6 +82,12 @@ export default defineConfig({
           write: "public",
           memory: "stable",
         },
+        {
+          collection: "platform_revenue",
+          read: "managed",
+          write: "managed",
+          memory: "stable",
+        }
       ],
       storage: [
         {
@@ -89,6 +95,13 @@ export default defineConfig({
           read: "managed",
           write: "managed",
           memory: "stable",
+        },
+        {
+          collection: "profile-images",
+          read: "public",
+          write: "managed",
+          memory: "stable",
+          maxSize: 5242880n, // 5MB max file size
         },
         {
           collection: "kyc_documents",

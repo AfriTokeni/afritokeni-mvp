@@ -36,10 +36,10 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 sm:p-8">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-neutral-900 mb-2">Deposit Money</h2>
-          <p className="text-neutral-600">Enter the amount you want to deposit</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Deposit Money</h2>
+          <p className="text-gray-600">Enter the amount you want to deposit</p>
         </div>
 
         <div className="space-y-6">
@@ -47,7 +47,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
                     <div>
             <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-medium text-neutral-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Select Currency
               </label>
              <CurrencySelector
@@ -55,24 +55,24 @@ const AmountStep: React.FC<AmountStepProps> = ({
                 onCurrencyChange={onCurrencyChange}
               />
             </div>
-            <div className="flex items-center space-x-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-neutral-200">
-                <span className="text-neutral-700 font-semibold text-xs">
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+                <span className="text-gray-700 font-semibold text-xs">
                   {selectedCurrency}
                 </span>
               </div>
               <div>
-                <p className="text-neutral-900 font-medium text-sm">
+                <p className="text-gray-900 font-medium text-sm">
                   {currencyInfo?.name}
                 </p>
-                <p className="text-neutral-500 text-xs">
+                <p className="text-gray-500 text-xs">
                   {currencyInfo?.symbol} • {currencyInfo?.country}
                 </p>
               </div>
             </div>
           </div>
           {/* <div>
-            <label htmlFor="currency" className="block text-sm font-medium text-neutral-700 mb-3">
+            <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-3">
               Select Currency
             </label>
             <div className="relative">
@@ -85,7 +85,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
           {/* Amount Input */}
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-neutral-700 mb-3">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-3">
               Deposit Amount
             </label>
             <div className="relative">
@@ -98,10 +98,10 @@ const AmountStep: React.FC<AmountStepProps> = ({
                   onError('');
                 }}
                 placeholder="0.00"
-                className="w-full pl-8 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200 font-mono text-lg"
+                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 font-mono text-lg"
               />
             </div>
-            <p className="text-xs text-neutral-500 mt-2">
+            <p className="text-xs text-gray-500 mt-2">
               Minimum: {formatCurrencyAmount(1000, selectedCurrency as AfricanCurrency)} • 
               Maximum: {formatCurrencyAmount(1000000, selectedCurrency as AfricanCurrency)}
             </p>
@@ -118,7 +118,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
           <button
             onClick={handleAmountContinue}
             disabled={!amount}
-            className="w-full bg-neutral-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-neutral-800 transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed"
+            className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Find Nearby Agents
           </button>

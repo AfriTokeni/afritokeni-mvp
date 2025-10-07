@@ -3,9 +3,9 @@ import { FC, useEffect } from "react";
 import junoConfig from "../juno.config";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import { AuthenticationProvider } from "./context/AuthenticationContext.tsx";
-import Layout from "./components/Layout.tsx";
-import { user_desktop_routes, user_mobile_routes } from "./routes/userRoutes.ts";
-import { agent_desktop_routes, agent_mobile_routes } from "./routes/agentRoutes.ts";
+import ModernLayout from "./components/ModernLayout.tsx";
+import { user_desktop_routes } from "./routes/userRoutes.ts";
+import { agent_desktop_routes } from "./routes/agentRoutes.ts";
 
 // User Pages
 import UserDashboard from "./pages/UserDashboard.tsx";
@@ -87,7 +87,7 @@ const App: FC = () => {
           {/* User Routes */}
           <Route path="/users/*" element={
             <ProtectedRoute requiredRole="user">
-              <Layout desktop_routes={user_desktop_routes} mobile_routes={user_mobile_routes} user_type="user">
+              <ModernLayout routes={user_desktop_routes} userType="user">
                 <Routes>
                 <Route path="dashboard" element={<UserDashboard />} />
                 <Route path="send" element={<SendMoney />} />
@@ -108,14 +108,14 @@ const App: FC = () => {
                 <Route path="dao" element={<DAODashboard />} />
                 <Route path="leaderboard" element={<LeaderboardPage />} />
               </Routes>
-            </Layout>
+            </ModernLayout>
             </ProtectedRoute>
           } />
           
           {/* Agent Routes */}
           <Route path="/agents/*" element={
             <ProtectedRoute requiredRole="agent">
-              <Layout desktop_routes={agent_desktop_routes} mobile_routes={agent_mobile_routes} user_type="agent">
+              <ModernLayout routes={agent_desktop_routes} userType="agent">
                 <Routes>
                 <Route path="dashboard" element={<AgentDashboard />} />
                 <Route path="withdraw" element={<ProcessWithdrawal/>} />
@@ -133,7 +133,7 @@ const App: FC = () => {
                 <Route path="settlement" element={<AgentSettlement/>} />
                 <Route path="agent-kyc" element={<AgentKYCPage />} />
               </Routes>
-            </Layout>
+              </ModernLayout>
             </ProtectedRoute>
           } />
           

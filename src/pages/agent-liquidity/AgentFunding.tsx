@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
 import { NotificationService } from '../../services/notificationService';
-import PageLayout from '../../components/PageLayout';
 
 type FundingMethod = 'bank_transfer' | 'mobile_money' | 'cash_deposit';
 
@@ -201,19 +200,19 @@ const AgentFunding: React.FC = () => {
 
   if (showSuccess) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="max-w-2xl mx-auto p-4">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-neutral-900 mb-2">Funding Request Submitted</h2>
-              <p className="text-neutral-600 mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Funding Request Submitted</h2>
+              <p className="text-gray-600 mb-6">
                 Your funding request has been submitted successfully.
               </p>
               
-              <div className="bg-neutral-50 rounded-lg p-4 mb-6">
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
                 <div className="text-left space-y-2">
                   <p><strong>Reference:</strong> <span className="font-mono">{fundingReference}</span></p>
                   <p><strong>Amount:</strong> UGX {parseFloat(amount).toLocaleString()}</p>
@@ -258,13 +257,13 @@ const AgentFunding: React.FC = () => {
               <div className="flex space-x-4">
                 <button
                   onClick={handleNewFunding}
-                  className="flex-1 bg-neutral-100 text-neutral-700 py-3 rounded-lg font-semibold hover:bg-neutral-200 transition-colors"
+                  className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
                 >
                   New Funding Request
                 </button>
                 <button
                   onClick={() => navigate('/agents/dashboard')}
-                  className="flex-1 bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 transition-colors"
+                  className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
                 >
                   Back to Dashboard
                 </button>
@@ -272,24 +271,24 @@ const AgentFunding: React.FC = () => {
             </div>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-8">
           <button
             onClick={() => navigate('/agents/dashboard')}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-neutral-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900">Fund Your Account</h1>
-            <p className="text-neutral-600">Add digital balance to process customer deposits</p>
+            <h1 className="text-2xl font-bold text-gray-900">Fund Your Account</h1>
+            <p className="text-gray-600">Add digital balance to process customer deposits</p>
           </div>
         </div>
 
@@ -309,32 +308,32 @@ const AgentFunding: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Funding Form */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            <h2 className="text-xl font-bold text-neutral-900 mb-6">Add Funds</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Add Funds</h2>
             
             {/* Amount Input */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-neutral-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 Funding Amount (UGX)
               </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="Enter amount to fund"
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent font-mono"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent font-mono"
                 />
               </div>
-              <p className="text-xs text-neutral-500 mt-2">
+              <p className="text-xs text-gray-500 mt-2">
                 Recommended minimum: UGX 500,000 for regular operations
               </p>
             </div>
 
             {/* Funding Methods */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-neutral-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 Funding Method
               </label>
               <div className="space-y-3">
@@ -346,16 +345,16 @@ const AgentFunding: React.FC = () => {
                       onClick={() => setSelectedMethod(method.id)}
                       className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                         selectedMethod === method.id
-                          ? 'border-neutral-900 bg-neutral-50'
-                          : 'border-neutral-200 hover:border-neutral-300'
+                          ? 'border-gray-900 bg-gray-50'
+                          : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <div className="flex items-start space-x-3">
-                        <Icon className="w-5 h-5 text-neutral-600 mt-1" />
+                        <Icon className="w-5 h-5 text-gray-600 mt-1" />
                         <div className="flex-1">
-                          <h3 className="font-semibold text-neutral-900">{method.name}</h3>
-                          <p className="text-sm text-neutral-600">{method.description}</p>
-                          <div className="flex justify-between mt-2 text-xs text-neutral-500">
+                          <h3 className="font-semibold text-gray-900">{method.name}</h3>
+                          <p className="text-sm text-gray-600">{method.description}</p>
+                          <div className="flex justify-between mt-2 text-xs text-gray-500">
                             <span>Processing: {method.processingTime}</span>
                             <span>Fee: {method.fee}</span>
                           </div>
@@ -370,35 +369,35 @@ const AgentFunding: React.FC = () => {
             {/* Method-specific Details */}
             {selectedMethod === 'bank_transfer' && (
               <div className="mb-6 space-y-4">
-                <h3 className="font-semibold text-neutral-900">Bank Transfer Details</h3>
+                <h3 className="font-semibold text-gray-900">Bank Transfer Details</h3>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Your Bank Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Bank Name</label>
                   <input
                     type="text"
                     value={bankDetails.bankName}
                     onChange={(e) => setBankDetails(prev => ({ ...prev, bankName: e.target.value }))}
                     placeholder="e.g., Stanbic Bank Uganda"
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Account Number</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
                   <input
                     type="text"
                     value={bankDetails.accountNumber}
                     onChange={(e) => setBankDetails(prev => ({ ...prev, accountNumber: e.target.value }))}
                     placeholder="Your business account number"
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Account Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Account Name</label>
                   <input
                     type="text"
                     value={bankDetails.accountName}
                     onChange={(e) => setBankDetails(prev => ({ ...prev, accountName: e.target.value }))}
                     placeholder="Business/Account holder name"
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -406,13 +405,13 @@ const AgentFunding: React.FC = () => {
 
             {selectedMethod === 'mobile_money' && (
               <div className="mb-6 space-y-4">
-                <h3 className="font-semibold text-neutral-900">Mobile Money Details</h3>
+                <h3 className="font-semibold text-gray-900">Mobile Money Details</h3>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Provider</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Provider</label>
                   <select
                     value={mobileDetails.provider}
                     onChange={(e) => setMobileDetails(prev => ({ ...prev, provider: e.target.value }))}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   >
                     <option value="MTN">MTN Mobile Money</option>
                     <option value="Airtel">Airtel Money</option>
@@ -420,13 +419,13 @@ const AgentFunding: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                   <input
                     type="tel"
                     value={mobileDetails.phoneNumber}
                     onChange={(e) => setMobileDetails(prev => ({ ...prev, phoneNumber: e.target.value }))}
                     placeholder="+256 XXX XXX XXX"
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -436,7 +435,7 @@ const AgentFunding: React.FC = () => {
             <button
               onClick={handleSubmitFunding}
               disabled={isSubmitting || !amount || parseFloat(amount) <= 0}
-              className="w-full bg-neutral-900 text-white py-3 rounded-lg font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               {isSubmitting ? (
                 <>
@@ -452,23 +451,23 @@ const AgentFunding: React.FC = () => {
           {/* Information Panel */}
           <div className="space-y-6">
             {/* How it Works */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-bold text-neutral-900 mb-4">How Agent Funding Works</h3>
-              <div className="space-y-4 text-sm text-neutral-600">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">How Agent Funding Works</h3>
+              <div className="space-y-4 text-sm text-gray-600">
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-600">1</div>
+                  <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">1</div>
                   <p>You transfer money to AfriTokeni using your preferred method</p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-600">2</div>
+                  <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">2</div>
                   <p>Your digital balance increases, allowing you to process customer deposits</p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-600">3</div>
+                  <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">3</div>
                   <p>When customers deposit cash, your digital balance converts to commission earnings</p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-600">4</div>
+                  <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">4</div>
                   <p>Request settlement to transfer earnings back to your bank account</p>
                 </div>
               </div>
@@ -497,7 +496,7 @@ const AgentFunding: React.FC = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

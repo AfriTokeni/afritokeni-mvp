@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CreditCard, DollarSign, Bitcoin, AlertCircle, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 
@@ -138,17 +137,17 @@ const TransactionLimits: React.FC = () => {
   };
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-6">
           <button
             onClick={() => navigate('/users/profile')}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-neutral-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <h1 className="text-2xl font-bold text-neutral-900">Transaction Limits</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Transaction Limits</h1>
         </div>
 
         {/* Status Messages */}
@@ -191,47 +190,47 @@ const TransactionLimits: React.FC = () => {
         {/* Transaction Limits */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Daily Limits */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
               <CreditCard className="w-5 h-5 text-blue-500" />
               <span>Daily Limits</span>
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Send Money ({userCurrency})
                 </label>
                 <input
                   type="number"
                   value={customLimits.daily.send}
                   onChange={(e) => handleLimitChange('daily', 'send', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Daily send limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {formatCurrencyAmount(limits.daily.send, userCurrency)}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Withdraw Cash ({userCurrency})
                 </label>
                 <input
                   type="number"
                   value={customLimits.daily.withdraw}
                   onChange={(e) => handleLimitChange('daily', 'withdraw', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Daily withdrawal limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {formatCurrencyAmount(limits.daily.withdraw, userCurrency)}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bitcoin Transactions (BTC)
                 </label>
                 <input
@@ -239,10 +238,10 @@ const TransactionLimits: React.FC = () => {
                   step="0.001"
                   value={customLimits.daily.bitcoin}
                   onChange={(e) => handleLimitChange('daily', 'bitcoin', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Daily Bitcoin limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {limits.daily.bitcoin} BTC
                 </p>
               </div>
@@ -250,47 +249,47 @@ const TransactionLimits: React.FC = () => {
           </div>
 
           {/* Monthly Limits */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
               <DollarSign className="w-5 h-5 text-green-500" />
               <span>Monthly Limits</span>
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Send Money ({userCurrency})
                 </label>
                 <input
                   type="number"
                   value={customLimits.monthly.send}
                   onChange={(e) => handleLimitChange('monthly', 'send', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Monthly send limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {formatCurrencyAmount(limits.monthly.send, userCurrency)}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Withdraw Cash ({userCurrency})
                 </label>
                 <input
                   type="number"
                   value={customLimits.monthly.withdraw}
                   onChange={(e) => handleLimitChange('monthly', 'withdraw', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Monthly withdrawal limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {formatCurrencyAmount(limits.monthly.withdraw, userCurrency)}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bitcoin Transactions (BTC)
                 </label>
                 <input
@@ -298,10 +297,10 @@ const TransactionLimits: React.FC = () => {
                   step="0.001"
                   value={customLimits.monthly.bitcoin}
                   onChange={(e) => handleLimitChange('monthly', 'bitcoin', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Monthly Bitcoin limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {limits.monthly.bitcoin} BTC
                 </p>
               </div>
@@ -309,47 +308,47 @@ const TransactionLimits: React.FC = () => {
           </div>
 
           {/* Single Transaction Limits */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center space-x-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
               <Bitcoin className="w-5 h-5 text-orange-500" />
               <span>Per Transaction</span>
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Send Money ({userCurrency})
                 </label>
                 <input
                   type="number"
                   value={customLimits.single.send}
                   onChange={(e) => handleLimitChange('single', 'send', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Per transaction send limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {formatCurrencyAmount(limits.single.send, userCurrency)}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Withdraw Cash ({userCurrency})
                 </label>
                 <input
                   type="number"
                   value={customLimits.single.withdraw}
                   onChange={(e) => handleLimitChange('single', 'withdraw', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Per transaction withdrawal limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {formatCurrencyAmount(limits.single.withdraw, userCurrency)}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bitcoin Transactions (BTC)
                 </label>
                 <input
@@ -357,10 +356,10 @@ const TransactionLimits: React.FC = () => {
                   step="0.001"
                   value={customLimits.single.bitcoin}
                   onChange={(e) => handleLimitChange('single', 'bitcoin', e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   placeholder="Per transaction Bitcoin limit"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Current: {limits.single.bitcoin} BTC
                 </p>
               </div>
@@ -372,7 +371,7 @@ const TransactionLimits: React.FC = () => {
         <div className="flex justify-between pt-4">
           <button
             onClick={resetToDefaults}
-            className="px-6 py-2 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 transition-colors"
+            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
           >
             Reset to Defaults
           </button>
@@ -380,14 +379,14 @@ const TransactionLimits: React.FC = () => {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save Changes'}</span>
           </button>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

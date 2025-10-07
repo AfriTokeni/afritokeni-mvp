@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { DataService, Agent } from '../../services/dataService';
 import { 
@@ -233,7 +232,7 @@ const DepositPage: React.FC = () => {
   }, [updateState]);
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="max-w-6xl mx-auto p-6">
         {/* Progress Indicator */}
         <ProgressIndicator
@@ -290,7 +289,7 @@ const DepositPage: React.FC = () => {
           )}
         {/* </div> */}
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

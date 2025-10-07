@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle } from 'lucide-react';
-import PageLayout from '../../components/PageLayout';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
@@ -248,17 +247,16 @@ const ProcessDeposits: React.FC = () => {
   };
 
   return (
-    <PageLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Process Deposits</h1>
-          <p className="text-neutral-600">Manage customer cash deposits and digital balance credits</p>
-        </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Process Deposits</h1>
+        <p className="text-gray-600">Manage customer cash deposits and digital balance credits</p>
+      </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <div className="flex space-x-1 bg-neutral-100 rounded-lg p-1 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 mb-6">
             {(['all', 'pending', 'confirmed', 'completed'] as const).map((tab) => (
               <button
                 key={tab}
@@ -296,16 +294,16 @@ const ProcessDeposits: React.FC = () => {
               filteredRequests.map((request) => (
                 <div
                   key={request.id}
-                  className="border border-neutral-200 rounded-lg p-4 hover:border-neutral-300 transition-colors"
+                  className="border border-gray-200 rounded-2xl p-4 hover:border-gray-300 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-neutral-600" />
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-gray-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-neutral-900">{request.userName}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-neutral-600">
+                        <h3 className="font-semibold text-gray-900">{request.userName}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <div className="flex items-center space-x-1">
                             <Phone className="w-4 h-4" />
                             <span>{request.userPhone}</span>
@@ -320,7 +318,7 @@ const ProcessDeposits: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-neutral-900 font-mono">
+                      <div className="text-2xl font-bold text-gray-900 font-mono">
                         {formatCurrencyAmount(request.amount.local, request.amount.currency as AfricanCurrency)}
                       </div>
                       <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md border text-xs font-medium ${getStatusColor(request.status)}`}>
@@ -331,9 +329,9 @@ const ProcessDeposits: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-neutral-600">
+                    <div className="text-sm text-gray-600">
                       <span>Deposit Code: </span>
-                      <span className="font-mono font-semibold text-neutral-900">{request.depositCode}</span>
+                      <span className="font-mono font-semibold text-gray-900">{request.depositCode}</span>
                       <span className="ml-4">
                         {new Date(request.createdAt).toLocaleString()}
                       </span>
@@ -401,7 +399,7 @@ const ProcessDeposits: React.FC = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
             <div className="flex items-start">
               <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-red-700">{error}</p>
@@ -410,7 +408,7 @@ const ProcessDeposits: React.FC = () => {
         )}
 
         {/* Instructions */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
           <h3 className="font-semibold text-blue-900 mb-3">Deposit Process:</h3>
           <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
             <li>Customer shows you their deposit code</li>
@@ -425,8 +423,7 @@ const ProcessDeposits: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
-    </PageLayout>
+    </div>
   );
 };
 

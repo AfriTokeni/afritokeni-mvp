@@ -198,6 +198,29 @@ export interface USSDSession {
   updateActivity(): void;
 }
 
+// Platform Revenue - tracks REAL money captured by platform
+export interface PlatformRevenue {
+  id: string;
+  amount: number;
+  currency: AfricanCurrency;
+  source: 'settlement_fee' | 'liquidity_fee' | 'bitcoin_spread' | 'agent_subscription';
+  sourceTransactionId?: string;
+  agentId?: string;
+  userId?: string;
+  description: string;
+  createdAt: Date;
+}
+
+export interface PlatformRevenueInput {
+  amount: number;
+  currency: AfricanCurrency;
+  source: 'settlement_fee' | 'liquidity_fee' | 'bitcoin_spread' | 'agent_subscription';
+  sourceTransactionId?: string;
+  agentId?: string;
+  userId?: string;
+  description: string;
+}
+
 
 // Simplified data service following Juno patterns
 export class DataService {
@@ -3122,6 +3145,82 @@ Send *AFRI# for menu`;
     } catch (error) {
       console.error('Error confirming deposit request:', error);
       return false;
+    }
+  }
+
+  // ==================== PLATFORM REVENUE OPERATIONS ====================
+  
+  /**
+   * Record platform revenue from settlement fees, liquidity fees, etc.
+   * This captures REAL money that the platform earns
+   */
+  static async recordPlatformRevenue(revenueData: PlatformRevenueInput): Promise<PlatformRevenue> {
+    try {
+      const now = new Date();
+      const revenueId = nanoid();
+
+      const revenue: PlatformRevenue = {
+        id: revenueId,
+        amount: revenueData.amount,
+        currency: revenueData.currency,
+        source: revenueData.source,
+        sourceTransactionId: revenueData.sourceTransactionId,
+        agentId: revenueData.agentId,
+        userId: revenueData.userId,
+        description: revenueData.description,
+        createdAt: now
+      };
+
+      await setDoc({
+        collection: 'platform_revenue',
+        doc: {
+          key: revenueId,
+          data: {
+            ...revenue,
+            createdAt: now.toISOString()
+          }
+        }
+      });
+
+      console.log('💰 Platform revenue recorded:', {
+        id: revenueId,
+        amount: revenueData.amount,
+        source: revenueData.source,
+        description: revenueData.description
+      });
+
+      return revenue;
+    } catch (error) {
+      console.error('Error recording platform revenue:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get total platform revenue
+   */
+  static async getTotalPlatformRevenue(): Promise<{ total: number; byCurrency: Record<string, number> }> {
+    try {
+      const docs = await listDocs({
+        collection: 'platform_revenue'
+      });
+
+      const byCurrency: Record<string, number> = {};
+      let total = 0;
+
+      docs.items.forEach(doc => {
+        const revenue = doc.data as any;
+        if (!byCurrency[revenue.currency]) {
+          byCurrency[revenue.currency] = 0;
+        }
+        byCurrency[revenue.currency] += revenue.amount;
+        total += revenue.amount;
+      });
+
+      return { total, byCurrency };
+    } catch (error) {
+      console.error('Error calculating total platform revenue:', error);
+      return { total: 0, byCurrency: {} };
     }
   }
 }

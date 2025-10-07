@@ -1,58 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   ArrowUp,
   ArrowDown,
   Plus,
   Minus,
   Search,
-  Filter,
 } from 'lucide-react';
 import { Transaction } from '../../types/transaction';
 import { normalizeTransaction } from '../../utils/transactionUtils';
-import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-
-
 
 const UserTransactions: React.FC = () => {
   const { transactions, isLoading } = useAfriTokeni();
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [filterType, setFilterType] = useState<string>('all');
   
-  // Normalize transactions to match expected interface
+  // Update search query from URL params
+  useEffect(() => {
+    const search = searchParams.get('search');
+    if (search) {
+      setSearchQuery(search);
+    }
+  }, [searchParams]);
+
+  // Normalize and filter transactions
   const normalizedTransactions = React.useMemo(() => {
-    return transactions.map(normalizeTransaction);
-  }, [transactions]);
+    let filtered = transactions.map(normalizeTransaction);
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(t => 
+        (t.description || '').toLowerCase().includes(query) ||
+        t.type.toLowerCase().includes(query) ||
+        t.status.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply type filter
+    if (filterType !== 'all') {
+      filtered = filtered.filter(t => t.type === filterType);
+    }
+    
+    return filtered;
+  }, [transactions, searchQuery, filterType]);
 
   // Loading state
   if (isLoading) {
     return (
-      <PageLayout>
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          <div className="flex justify-center items-center py-8 sm:py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-neutral-900 mx-auto mb-3 sm:mb-4"></div>
-              <p className="text-sm sm:text-base text-neutral-600">Loading transactions...</p>
-            </div>
+      <div className="space-y-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading transactions...</p>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   // No transactions state
   if (!transactions.length) {
     return (
-      <PageLayout>
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Transaction History</h1>
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 sm:p-12 text-center">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <ArrowUp className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
-            </div>
-            <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-1 sm:mb-2">No transactions yet</h3>
-            <p className="text-sm sm:text-base text-neutral-600 px-4">Your transaction history will appear here once you start sending or receiving money.</p>
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ArrowUp className="w-8 h-8 text-gray-400" />
           </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No transactions yet</h3>
+          <p className="text-gray-600">Your transaction history will appear here once you start sending or receiving money.</p>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
@@ -111,25 +131,34 @@ const UserTransactions: React.FC = () => {
 
 
   return (
-    <PageLayout>
-      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Transaction History</h1>
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-            <button className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200">
-              <Search className="w-4 h-4 text-neutral-500" />
-              <span className="text-sm font-medium text-neutral-700">Search</span>
-            </button>
-            <button className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200">
-              <Filter className="w-4 h-4 text-neutral-500" />
-              <span className="text-sm font-medium text-neutral-700">Filter</span>
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search transactions..."
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+          />
         </div>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+        >
+          <option value="all">All Types</option>
+          <option value="send">Send</option>
+          <option value="receive">Receive</option>
+          <option value="deposit">Deposit</option>
+          <option value="withdraw">Withdraw</option>
+        </select>
+      </div>
 
-        {/* Transactions List */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 divide-y divide-neutral-100">
+      {/* Transactions List */}
+      <div className="bg-white rounded-2xl border border-gray-200 divide-y divide-gray-100">
           {normalizedTransactions.length === 0 ? (
             <div className="p-8 text-center">
               <p className="text-neutral-500">No transactions yet</p>
@@ -215,10 +244,9 @@ const UserTransactions: React.FC = () => {
               </div>
             </div>
           ))
-          )}
-        </div>
+        )}
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

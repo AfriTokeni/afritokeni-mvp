@@ -16,18 +16,18 @@ const AgentSecurity: React.FC<AgentSecurityProps> = ({
   onToggle
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
       <button
         onClick={onToggle}
-        className="w-full p-6 flex items-center justify-between text-left hover:bg-neutral-50 transition-colors"
+        className="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center space-x-3">
           <Shield className="w-5 h-5 text-red-600" />
-          <h2 className="text-lg font-semibold text-neutral-900">Security & Notifications</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Security & Notifications</h2>
         </div>
         {expanded ? 
-          <ChevronUp className="w-5 h-5 text-neutral-400" /> : 
-          <ChevronDown className="w-5 h-5 text-neutral-400" />
+          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+          <ChevronDown className="w-5 h-5 text-gray-400" />
         }
       </button>
       
@@ -78,12 +78,12 @@ const AgentSecurity: React.FC<AgentSecurityProps> = ({
           </div>
 
           {/* Security Guidelines */}
-          <div className="bg-neutral-50 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-neutral-900 mb-3 flex items-center space-x-2">
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center space-x-2">
               <Lock className="w-4 h-4" />
               <span>Security Best Practices</span>
             </h3>
-            <div className="space-y-2 text-xs text-neutral-600">
+            <div className="space-y-2 text-xs text-gray-600">
               <div className="flex items-start space-x-2">
                 <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
                 <p>Always verify customer identity before processing transactions</p>
@@ -109,14 +109,14 @@ const AgentSecurity: React.FC<AgentSecurityProps> = ({
 
           {/* Emergency Contacts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border border-neutral-200 rounded-lg">
-              <h4 className="text-sm font-medium text-neutral-900 mb-2">AfriTokeni Support</h4>
-              <p className="text-xs text-neutral-600 mb-2">24/7 technical support</p>
+            <div className="p-4 border border-gray-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">AfriTokeni Support</h4>
+              <p className="text-xs text-gray-600 mb-2">24/7 technical support</p>
               <p className="text-sm font-mono text-blue-600">+256-800-AFRI (2374)</p>
             </div>
-            <div className="p-4 border border-neutral-200 rounded-lg">
-              <h4 className="text-sm font-medium text-neutral-900 mb-2">Emergency Hotline</h4>
-              <p className="text-xs text-neutral-600 mb-2">Security incidents & fraud</p>
+            <div className="p-4 border border-gray-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Emergency Hotline</h4>
+              <p className="text-xs text-gray-600 mb-2">Security incidents & fraud</p>
               <p className="text-sm font-mono text-red-600">+256-911-HELP</p>
             </div>
           </div>

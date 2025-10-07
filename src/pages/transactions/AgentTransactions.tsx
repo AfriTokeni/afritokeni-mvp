@@ -8,7 +8,6 @@ import {
   Bitcoin,
 } from 'lucide-react';
 // Transaction type is imported via normalizeTransaction utility
-import PageLayout from '../../components/PageLayout';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { BitcoinService } from '../../services/bitcoinService';
 import { DataService, DepositRequest } from '../../services/dataService';
@@ -240,19 +239,19 @@ const AgentTransactions: React.FC = () => {
 
   if (isLoading || loadingBitcoin || loadingDeposits) {
     return (
-      <PageLayout>
+      <div className="space-y-6">
         <div className="flex justify-center items-center h-48 sm:h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-indigo-600 mx-auto mb-3 sm:mb-4"></div>
             <p className="text-sm sm:text-base text-gray-600">Loading transactions...</p>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="space-y-4 sm:space-y-6">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Agent Transaction History</h1>
         
@@ -502,7 +501,7 @@ const AgentTransactions: React.FC = () => {
           )}
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

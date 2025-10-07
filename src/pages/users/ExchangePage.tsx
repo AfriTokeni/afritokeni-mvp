@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRightLeft, Bitcoin, DollarSign, Users, MapPin, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../../components/PageLayout';
 import { BitcoinService } from '../../services/bitcoinService';
 import { AfricanCurrency, AFRICAN_CURRENCIES } from '../../types/currency';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
@@ -81,7 +80,7 @@ const ExchangePage: React.FC = () => {
   };
 
   return (
-    <PageLayout>
+    <div className="space-y-6">
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -89,20 +88,20 @@ const ExchangePage: React.FC = () => {
             <ArrowRightLeft className="w-4 h-4 mr-2" />
             Bitcoin Exchange
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">Exchange Bitcoin</h1>
-          <p className="text-neutral-600">Buy or sell Bitcoin for local African currencies through our agent network</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Exchange Bitcoin</h1>
+          <p className="text-gray-600">Buy or sell Bitcoin for local African currencies through our agent network</p>
         </div>
 
         {/* Exchange Type Selector */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-center mb-6">
-            <div className="bg-neutral-100 rounded-lg p-1 flex">
+            <div className="bg-gray-100 rounded-lg p-1 flex">
               <button
                 onClick={() => setExchangeType('sell')}
                 className={`px-6 py-2 rounded-md font-medium text-sm transition-colors ${
                   exchangeType === 'sell'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Sell Bitcoin
@@ -111,8 +110,8 @@ const ExchangePage: React.FC = () => {
                 onClick={() => setExchangeType('buy')}
                 className={`px-6 py-2 rounded-md font-medium text-sm transition-colors ${
                   exchangeType === 'buy'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Buy Bitcoin
@@ -124,7 +123,7 @@ const ExchangePage: React.FC = () => {
             {/* Exchange Form */}
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   {exchangeType === 'sell' ? 'Bitcoin Amount (Satoshis)' : 'Local Currency Amount'}
                 </label>
                 <div className="relative">
@@ -133,22 +132,22 @@ const ExchangePage: React.FC = () => {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder={exchangeType === 'sell' ? '50000' : '100000'}
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                   />
-                  <div className="absolute right-3 top-3 text-neutral-500 text-sm">
+                  <div className="absolute right-3 top-3 text-gray-500 text-sm">
                     {exchangeType === 'sell' ? 'sats' : selectedCurrency}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Currency
                 </label>
                 <select
                   value={selectedCurrency}
                   onChange={(e) => setSelectedCurrency(e.target.value as AfricanCurrency)}
-                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {Object.entries(AFRICAN_CURRENCIES).map(([code, info]) => (
                     <option key={code} value={code}>
@@ -160,9 +159,9 @@ const ExchangePage: React.FC = () => {
 
               {/* Exchange Preview */}
               {amount && (
-                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-neutral-600">You {exchangeType}:</span>
+                    <span className="text-sm text-gray-600">You {exchangeType}:</span>
                     <span className="font-mono font-semibold">
                       {exchangeType === 'sell' 
                         ? `${amount} sats` 
@@ -171,7 +170,7 @@ const ExchangePage: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-neutral-600">You receive:</span>
+                    <span className="text-sm text-gray-600">You receive:</span>
                     <span className="font-mono font-semibold text-green-600">
                       {exchangeType === 'sell'
                         ? formatCurrency(calculateExchange(), selectedCurrency)
@@ -179,8 +178,8 @@ const ExchangePage: React.FC = () => {
                       }
                     </span>
                   </div>
-                  <div className="mt-2 pt-2 border-t border-neutral-200">
-                    <div className="flex items-center justify-between text-xs text-neutral-500">
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>Exchange rate:</span>
                       <span>1 BTC = {formatCurrency(exchangeRate, selectedCurrency)}</span>
                     </div>
@@ -202,9 +201,9 @@ const ExchangePage: React.FC = () => {
               <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <Bitcoin className="w-6 h-6 text-orange-600" />
-                  <h3 className="font-semibold text-neutral-900">How it works</h3>
+                  <h3 className="font-semibold text-gray-900">How it works</h3>
                 </div>
-                <div className="space-y-3 text-sm text-neutral-700">
+                <div className="space-y-3 text-sm text-gray-700">
                   <div className="flex items-start space-x-2">
                     <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="text-orange-600 font-semibold text-xs">1</span>
@@ -233,23 +232,23 @@ const ExchangePage: React.FC = () => {
               </div>
 
               {/* Nearby Agents */}
-              <div className="bg-white border border-neutral-200 rounded-lg p-6">
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center space-x-3 mb-4">
-                  <Users className="w-5 h-5 text-neutral-600" />
-                  <h3 className="font-semibold text-neutral-900">Nearby Agents</h3>
+                  <Users className="w-5 h-5 text-gray-600" />
+                  <h3 className="font-semibold text-gray-900">Nearby Agents</h3>
                 </div>
                 <div className="space-y-3">
                   {nearbyAgents.map((agent) => (
-                    <div key={agent.id} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
+                    <div key={agent.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center">
-                          <span className="text-neutral-600 font-semibold text-xs">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-gray-600 font-semibold text-xs">
                             {agent.name.charAt(0)}
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium text-neutral-900 text-sm">{agent.name}</p>
-                          <div className="flex items-center space-x-2 text-xs text-neutral-500">
+                          <p className="font-medium text-gray-900 text-sm">{agent.name}</p>
+                          <div className="flex items-center space-x-2 text-xs text-gray-500">
                             <MapPin className="w-3 h-3" />
                             <span>{agent.location}</span>
                           </div>
@@ -282,8 +281,8 @@ const ExchangePage: React.FC = () => {
               <span className="text-blue-600 font-semibold text-sm">SMS</span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-neutral-900 mb-2">Exchange via SMS</h3>
-              <p className="text-neutral-600 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Exchange via SMS</h3>
+              <p className="text-gray-600 mb-4">
                 You can also exchange Bitcoin using SMS commands from any phone:
               </p>
               <div className="space-y-2 text-sm">
@@ -303,32 +302,32 @@ const ExchangePage: React.FC = () => {
 
         {/* Exchange Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border border-neutral-200 rounded-lg p-6 text-center">
+          <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
               <Clock className="w-6 h-6 text-green-600" />
             </div>
-            <div className="text-2xl font-bold text-neutral-900 mb-1">~2 min</div>
-            <div className="text-neutral-600 text-sm">Average exchange time</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">~2 min</div>
+            <div className="text-gray-600 text-sm">Average exchange time</div>
           </div>
           
-          <div className="bg-white border border-neutral-200 rounded-lg p-6 text-center">
+          <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
               <Users className="w-6 h-6 text-blue-600" />
             </div>
-            <div className="text-2xl font-bold text-neutral-900 mb-1">{nearbyAgents.length}+</div>
-            <div className="text-neutral-600 text-sm">Active agents</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">{nearbyAgents.length}+</div>
+            <div className="text-gray-600 text-sm">Active agents</div>
           </div>
           
-          <div className="bg-white border border-neutral-200 rounded-lg p-6 text-center">
+          <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3">
               <DollarSign className="w-6 h-6 text-orange-600" />
             </div>
-            <div className="text-2xl font-bold text-neutral-900 mb-1">2.5%</div>
-            <div className="text-neutral-600 text-sm">Exchange fee</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">2.5%</div>
+            <div className="text-gray-600 text-sm">Exchange fee</div>
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

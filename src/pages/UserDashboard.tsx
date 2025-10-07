@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
-import PageLayout from '../components/PageLayout';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
 import { 
@@ -89,24 +88,23 @@ const UserDashboard: React.FC = () => {
   };
 
   return (
-    <PageLayout>
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="space-y-6">
 
         {/* KYC Status Alert */}
         <KYCStatusAlert user_type="user" />
 
         {/* Balance Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="bg-white border border-gray-200 p-8 rounded-2xl hover:border-gray-300 transition-all">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-xl flex items-center justify-center">
-                    <span className="text-neutral-700 font-semibold text-xs sm:text-sm">{userCurrency}</span>
+                  <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
+                    <span className="text-gray-900 font-bold text-sm">{userCurrency}</span>
                   </div>
                   <div>
-                    <p className="text-neutral-900 font-medium text-sm sm:text-base">{currencyInfo.name}</p>
-                    <p className="text-neutral-500 text-xs sm:text-sm">Primary balance</p>
+                    <p className="text-gray-900 font-semibold text-base">{currencyInfo.name}</p>
+                    <p className="text-gray-500 text-sm">Primary balance</p>
                   </div>
                 </div>
               </div>
@@ -117,13 +115,13 @@ const UserDashboard: React.FC = () => {
                 }}
               />
             </div>
-            <div className="mb-4 sm:mb-6">
-              <span className="text-2xl sm:text-3xl font-semibold text-neutral-900 font-mono">
+            <div className="mb-6">
+              <span className="text-4xl font-bold text-gray-900 font-mono">
                 {formatCurrency(getRealBalance())}
               </span>
             </div>
-            <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-neutral-100">
-              <span className="text-neutral-500 text-xs sm:text-sm">Available Balance</span>
+            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+              <span className="text-gray-500 text-sm">Available Balance</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-green-600 font-medium text-sm">Active</span>
@@ -131,27 +129,27 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="bg-white border border-gray-200 p-8 rounded-2xl hover:border-gray-300 transition-all">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-                    <Bitcoin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+                  <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+                    <Bitcoin className="w-6 h-6 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-neutral-900 font-medium text-sm sm:text-base">Bitcoin Balance</p>
-                    <p className="text-neutral-600 text-xs sm:text-sm">Bitcoin wallet</p>
+                    <p className="text-gray-900 font-semibold text-base">Bitcoin Balance</p>
+                    <p className="text-gray-500 text-sm">Bitcoin wallet</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="text-xl sm:text-2xl font-semibold text-neutral-900 font-mono">
+                  <span className="text-4xl font-bold text-gray-900 font-mono">
                     ₿0.00000000
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-orange-100">
-              <span className="text-neutral-600 text-xs sm:text-sm">≈ {formatCurrency(0)}</span>
+            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+              <span className="text-gray-500 text-sm">≈ {formatCurrency(0)}</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                 <span className="text-orange-600 font-medium text-sm">Bitcoin</span>
@@ -162,75 +160,75 @@ const UserDashboard: React.FC = () => {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-2xl font-bold text-neutral-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <button 
               onClick={() => navigate('/users/deposit')}
-              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-green-200"
+              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-all duration-200">
-                <Plus className="w-6 h-6 text-green-600 transition-colors duration-200" />
+              <div className="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-colors">
+                <Plus className="w-7 h-7 text-green-600" />
               </div>
-              <span className="text-neutral-900 font-semibold text-sm">Deposit Cash</span>
-              <p className="text-neutral-500 text-xs mt-1">Add money via agents</p>
+              <span className="text-gray-900 font-semibold text-sm">Deposit Cash</span>
+              <p className="text-gray-500 text-xs mt-1">Add money via agents</p>
             </button>
 
             <button 
               onClick={() => navigate('/users/send')}
-              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-blue-200"
+              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition-all duration-200">
-                <Send className="w-6 h-6 text-blue-600 transition-colors duration-200" />
+              <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition-colors">
+                <Send className="w-7 h-7 text-blue-600" />
               </div>
-              <span className="text-neutral-900 font-semibold text-sm">Send Money</span>
-              <p className="text-neutral-500 text-xs mt-1">Transfer to contacts</p>
+              <span className="text-gray-900 font-semibold text-sm">Send Money</span>
+              <p className="text-gray-500 text-xs mt-1">Transfer to contacts</p>
             </button>
 
             <button 
               onClick={() => navigate('/users/withdraw')}
-              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-red-200"
+              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-red-100 transition-all duration-200">
-                <Minus className="w-6 h-6 text-red-600 transition-colors duration-200" />
+              <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-red-100 transition-colors">
+                <Minus className="w-7 h-7 text-red-600" />
               </div>
-              <span className="text-neutral-900 font-semibold text-sm">Withdraw Cash</span>
-              <p className="text-neutral-500 text-xs mt-1">Get cash from agents</p>
+              <span className="text-gray-900 font-semibold text-sm">Withdraw Cash</span>
+              <p className="text-gray-500 text-xs mt-1">Get cash from agents</p>
             </button>
 
             <button 
               onClick={() => navigate('/users/bitcoin')}
-              className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-center group hover:border-orange-200"
+              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-100 transition-all duration-200">
-                <Bitcoin className="w-6 h-6 text-orange-600 transition-colors duration-200" />
+              <div className="w-14 h-14 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-100 transition-colors">
+                <Bitcoin className="w-7 h-7 text-orange-600" />
               </div>
-              <span className="text-neutral-900 font-semibold text-sm">Bitcoin Exchange</span>
-              <p className="text-neutral-500 text-xs mt-1">Convert BTC to cash</p>
+              <span className="text-gray-900 font-semibold text-sm">Bitcoin Exchange</span>
+              <p className="text-gray-500 text-xs mt-1">Convert BTC to cash</p>
             </button>
           </div>
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
-          <div className="p-6 border-b border-neutral-100">
+        <div className="bg-white rounded-2xl border border-gray-200">
+          <div className="p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-neutral-900">Recent Transactions</h3>
+              <h3 className="text-xl font-bold text-gray-900">Recent Transactions</h3>
               <button 
                 onClick={() => navigate('/users/history')}
-                className="text-neutral-600 text-sm font-medium hover:text-neutral-900 transition-colors px-4 py-2 rounded-lg hover:bg-neutral-50"
+                className="text-gray-600 text-sm font-medium hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
               >
                 View All
               </button>
             </div>
           </div>
-          <div className="divide-y divide-neutral-100">
+          <div className="divide-y divide-gray-100">
             {transactions.length > 0 ? (
               transactions.slice(0, 5).map((transaction) => (
-                <div key={transaction.id} className="p-3 sm:p-4 md:p-6 hover:bg-neutral-50 transition-colors">
+                <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
                   {/* Mobile Layout */}
                   <div className="sm:hidden">
                     <div className="flex items-start space-x-3">
-                      <div className="w-10 h-10 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
                         {getTransactionIcon(transaction.type)}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -293,8 +291,7 @@ const UserDashboard: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
-    </PageLayout>
+    </div>
   );
 };
 
