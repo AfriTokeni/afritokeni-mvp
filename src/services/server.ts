@@ -1242,7 +1242,7 @@ Please select an option:
     case '4':
       session.currentMenu = 'btc_sell';
       session.step = 1;
-      return continueSession('Sell BTC\nEnter BTC amount to sell:');
+      return await handleBTCSell('', session);
     
     case '0':
       session.currentMenu = 'main';
@@ -1655,44 +1655,135 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
   
   switch (session.step) {
     case 1: {
-      // Enter BTC amount to sell
+      // Show Bitcoin balance and currency option if no input
       if (!currentInput) {
-        return continueSession('Sell BTC\nEnter BTC amount to sell (e.g., 0.001):');
+        try {
+          const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+          if (!user) {
+            return endSession('User not found. Please contact support.');
+          }
+          
+          // Get Bitcoin balance with sync
+          const { balance: balanceSats, wallet } = await BitcoinService.getBitcoinBalanceWithSync(user.id);
+          
+          if (!wallet || balanceSats <= 0) {
+            return endSession(`No Bitcoin available to sell.
+
+Bitcoin Balance: ₿0.00000000
+≈ UGX 0
+
+Thank you for using AfriTokeni!`);
+          }
+          
+          // Get exchange rate for UGX equivalent
+          const balanceBTC = BitcoinService.satoshisToBtc(balanceSats);
+          const ugxEquivalent = await BitcoinService.calculateLocalFromBitcoin(balanceSats, 'UGX');
+          
+          return continueSession(`Sell Bitcoin
+
+Your Bitcoin Balance:
+₿${balanceBTC.toFixed(8)} BTC
+≈ UGX ${ugxEquivalent.toLocaleString()}
+
+Choose amount type:
+1. Enter UGX amount
+2. Enter BTC amount
+0. Cancel`);
+          
+        } catch (error) {
+          console.error('Error checking Bitcoin balance:', error);
+          return endSession('Error checking balance. Please try again later.');
+        }
       }
       
-      const btcAmount = parseFloat(currentInput);
-      if (isNaN(btcAmount) || btcAmount <= 0) {
-        return continueSession('Invalid amount.\nEnter BTC amount to sell (e.g., 0.001):');
+      // Handle currency selection
+      if (currentInput === '1') {
+        session.data.amountType = 'ugx';
+        session.step = 2;
+        return continueSession('Enter UGX amount to receive (min: UGX 1,000):');
+      } else if (currentInput === '2') {
+        session.data.amountType = 'btc';
+        session.step = 2;
+        return continueSession('Enter BTC amount to sell (min: ₿0.00001):');
+      } else if (currentInput === '0') {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return handleBitcoin('', session);
+      } else {
+        return continueSession(`Invalid selection.
+
+Choose amount type:
+1. Enter UGX amount
+2. Enter BTC amount
+0. Cancel`);
+      }
+    }
+    
+    case 2: {
+      // Handle amount input based on selected type
+      const amountType = session.data.amountType;
+      let btcAmount: number;
+      let ugxAmount: number;
+      
+      if (amountType === 'ugx') {
+        // User entered UGX amount, convert to BTC
+        ugxAmount = parseFloat(currentInput);
+        if (isNaN(ugxAmount) || ugxAmount <= 0) {
+          return continueSession('Invalid amount.\nEnter UGX amount to receive (min: UGX 1,000):');
+        }
+        
+        if (ugxAmount < 1000) {
+          return continueSession('Minimum sale: UGX 1,000\nEnter UGX amount to receive:');
+        }
+        
+        // Get exchange rate and calculate BTC amount (before fees)
+        const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+        const btcRate = exchangeRate.btcToLocal;
+        
+        // Calculate gross UGX needed (including fees) to get the desired net amount
+        const feeRate = 0.025; // 2.5% fee
+        const ugxGross = ugxAmount / (1 - feeRate); // Reverse calculate gross amount
+        btcAmount = ugxGross / btcRate;
+        
+      } else {
+        // User entered BTC amount directly
+        btcAmount = parseFloat(currentInput);
+        if (isNaN(btcAmount) || btcAmount <= 0) {
+          return continueSession('Invalid amount.\nEnter BTC amount to sell (min: ₿0.00001):');
+        }
+        
+        if (btcAmount < 0.00001) {
+          return continueSession('Minimum sale: ₿0.00001 BTC\nEnter BTC amount to sell:');
+        }
+        
+        // Calculate UGX amount
+        const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+        const btcRate = exchangeRate.btcToLocal;
+        ugxAmount = btcAmount * btcRate;
       }
       
-      if (btcAmount < 0.0001) {
-        return continueSession('Minimum sale: ₿0.0001 BTC\nEnter BTC amount to sell:');
-      }
-      
-      // Check if user has Bitcoin wallet and sufficient balance
+      // Check if user has sufficient Bitcoin balance
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
           return endSession('User not found. Please contact support.');
         }
         
-        const wallet = await BitcoinService.getBitcoinWalletForUser(user.id);
-        if (!wallet) {
-          return endSession(`No Bitcoin wallet found.
-
-Please create a wallet first.
-
-Thank you for using AfriTokeni!`);
-        }
-        
+        const { balance: balanceSats } = await BitcoinService.getBitcoinBalanceWithSync(user.id);
         const btcAmountSats = BitcoinService.btcToSatoshis(btcAmount);
-        if (wallet.balance < btcAmountSats) {
-          const availableBTC = BitcoinService.satoshisToBtc(wallet.balance);
-          return endSession(`Insufficient BTC balance!
+        
+        if (balanceSats < btcAmountSats) {
+          const availableBTC = BitcoinService.satoshisToBtc(balanceSats);
+          const availableUGX = await BitcoinService.calculateLocalFromBitcoin(balanceSats, 'UGX');
+          
+          return continueSession(`Insufficient BTC balance!
+
 Your balance: ₿${availableBTC.toFixed(8)} BTC
+≈ UGX ${availableUGX.toLocaleString()}
+
 Required: ₿${btcAmount.toFixed(8)} BTC
 
-Thank you for using AfriTokeni!`);
+Enter a smaller amount:`);
         }
         
       } catch (error) {
@@ -1700,7 +1791,7 @@ Thank you for using AfriTokeni!`);
         return endSession('Error checking balance. Please try again later.');
       }
       
-      // Calculate UGX amount and fees with real rate
+      // Calculate fees and net amounts
       const exchangeRate = await BitcoinService.getExchangeRate('UGX');
       const btcRate = exchangeRate.btcToLocal;
       const ugxGross = btcAmount * btcRate;
@@ -1711,16 +1802,16 @@ Thank you for using AfriTokeni!`);
       session.data.ugxGross = ugxGross;
       session.data.ugxNet = ugxNet;
       session.data.fee = fee;
-      session.step = 2;
+      session.step = 3;
       
       // Get available agents for Bitcoin exchange
       console.log('Getting available agents for Bitcoin sale...');
       try {
         const agents = await DataService.getAvailableAgents();
-        const availableAgents = agents.filter((agent: any) => 
-          agent.isActive && 
-          agent.services?.includes('bitcoin_exchange') &&
-          agent.cashBalance >= ugxNet // Agent needs enough cash to pay user
+        const availableAgents = agents.filter((agent: Agent) => 
+          agent.isActive
+          // agent.services?.includes('bitcoin_exchange') &&
+          // agent.cashBalance >= ugxNet // Agent needs enough cash to pay user
         );
         
         if (availableAgents.length === 0) {
@@ -1757,7 +1848,7 @@ Select an agent:
       }
     }
     
-    case 2: {
+    case 3: {
       // Agent selection
       const agentChoice = parseInt(currentInput);
       
@@ -1774,7 +1865,7 @@ Select an agent:
       
       const selectedAgent = agents[agentChoice - 1];
       session.data.selectedAgent = selectedAgent;
-      session.step = 3;
+      session.step = 4;
       
       const btcAmount = session.data.btcAmount || 0;
       const ugxNet = session.data.ugxNet || 0;
@@ -1792,7 +1883,7 @@ You receive: UGX ${ugxNet.toLocaleString()}
 Enter your PIN to confirm:`);
     }
     
-    case 3: {
+    case 4: {
       // PIN verification and process Bitcoin sale
       if (!/^\d{4}$/.test(currentInput)) {
         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
