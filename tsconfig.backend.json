@@ -18,8 +18,6 @@
     "src/services/server.ts",
     "src/services/webHookServices.ts",
     "src/functions/notifications.ts",
-    "src/functions/bitcoinService.ts",
-    "src/functions/dataService.ts",
     "src/types/**/*"
   ],
   "exclude": [
