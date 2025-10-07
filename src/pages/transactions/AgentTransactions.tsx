@@ -5,26 +5,102 @@ import {
   Plus,
   Minus,
   Search,
+  Bitcoin,
 } from 'lucide-react';
 // Transaction type is imported via normalizeTransaction utility
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { normalizeTransaction, formatDate } from '../../utils/transactionUtils';
+import { BitcoinService } from '../../services/bitcoinService';
+import { DataService, DepositRequest } from '../../services/dataService';
+import { formatDate } from '../../utils/transactionUtils';
 
 const AgentTransactions: React.FC = () => {
-  const { agentTransactions, isLoading } = useAfriTokeni();
+  const { agentTransactions, isLoading, agent } = useAfriTokeni();
   
   const [currentPage, setCurrentPage] = React.useState(1);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState<string>('all');
   const [typeFilter, setTypeFilter] = React.useState<string>('all');
+  const [bitcoinTransactions, setBitcoinTransactions] = React.useState<Array<{
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    type: 'buy' | 'sell';
+    amount: number;
+    currency: string;
+    bitcoinAmount: number;
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    createdAt: Date;
+    location?: string;
+    exchangeRate: number;
+    agentFee?: number;
+    description?: string;
+  }>>([]);
+  const [loadingBitcoin, setLoadingBitcoin] = React.useState(false);
+  const [depositRequests, setDepositRequests] = React.useState<DepositRequest[]>([]);
+  const [loadingDeposits, setLoadingDeposits] = React.useState(false);
 
-  const itemsPerPage = 10;
-
-  const formatCurrency = (amount: number): string => {
-    return `UGX ${amount.toLocaleString()}`;
+  // Combined transaction type
+  type CombinedTransaction = {
+    id: string;
+    type: string;
+    status: string;
+    createdAt: Date;
+    description?: string;
+    amount?: number;
+    source: 'regular' | 'bitcoin' | 'deposit_request';
+    displayAmount: string;
+    commission: string;
+    customerName?: string;
+    customerPhone?: string;
   };
 
-  const getTransactionIcon = (type: string) => {
+  // Load Bitcoin transactions when agent is available
+  React.useEffect(() => {
+    if (agent?.id) {
+      setLoadingBitcoin(true);
+      BitcoinService.getAgentBitcoinTransactions(agent.id)
+        .then(btcTxs => {
+          setBitcoinTransactions(btcTxs);
+        })
+        .catch(error => {
+          console.error('Error loading Bitcoin transactions:', error);
+          setBitcoinTransactions([]);
+        })
+        .finally(() => {
+          setLoadingBitcoin(false);
+        });
+    }
+  }, [agent?.id]);
+
+  // Load customer deposit requests when agent is available
+  React.useEffect(() => {
+    if (agent?.id) {
+      setLoadingDeposits(true);
+      DataService.getAgentDepositRequests(agent.id)
+        .then(requests => {
+          setDepositRequests(requests);
+        })
+        .catch(error => {
+          console.error('Error loading deposit requests:', error);
+          setDepositRequests([]);
+        })
+        .finally(() => {
+          setLoadingDeposits(false);
+        });
+    }
+  }, [agent?.id]);
+
+  const itemsPerPage = 50;
+
+  const getTransactionIcon = (type: string, source?: string) => {
+    if (source === 'bitcoin') {
+      return <Bitcoin className="h-5 w-5 text-orange-500" />;
+    }
+
+    if (source === 'deposit_request') {
+      return <Plus className="h-5 w-5 text-green-600" />;
+    }
+    
     switch (type) {
       case 'send':
         return <ArrowUp className="h-5 w-5 text-red-500" />;
@@ -34,6 +110,12 @@ const AgentTransactions: React.FC = () => {
         return <Minus className="h-5 w-5 text-blue-500" />;
       case 'deposit':
         return <Plus className="h-5 w-5 text-purple-500" />;
+      case 'customer_deposit':
+        return <Plus className="h-5 w-5 text-green-600" />;
+      case 'buy':
+        return <Bitcoin className="h-5 w-5 text-green-600" />;
+      case 'sell':
+        return <Bitcoin className="h-5 w-5 text-red-600" />;
       default:
         return <Plus className="h-5 w-5 text-gray-500" />;
     }
@@ -43,8 +125,12 @@ const AgentTransactions: React.FC = () => {
     switch (status) {
       case 'completed':
         return 'text-green-600 bg-green-100';
+      case 'confirmed':
+        return 'text-blue-600 bg-blue-100';
       case 'pending':
         return 'text-yellow-600 bg-yellow-100';
+      case 'rejected':
+        return 'text-red-600 bg-red-100';
       case 'failed':
         return 'text-red-600 bg-red-100';
       default:
@@ -62,33 +148,82 @@ const AgentTransactions: React.FC = () => {
         return 'text-blue-600 bg-blue-100';
       case 'deposit':
         return 'text-purple-600 bg-purple-100';
+      case 'buy':
+        return 'text-green-600 bg-green-100';
+      case 'sell':
+        return 'text-orange-600 bg-orange-100';
       default:
         return 'text-gray-600 bg-gray-100';
     }
   };
 
+  // Combine regular, Bitcoin transactions, and deposit requests
+  const allTransactions = React.useMemo((): CombinedTransaction[] => {
+    const regular: CombinedTransaction[] = (agentTransactions || []).map(tx => ({
+      ...tx,
+      source: 'regular' as const,
+      displayAmount: `UGX ${tx.amount.toLocaleString()}`,
+      commission: `UGX ${Math.round(tx.amount * 0.02).toLocaleString()}`,
+      // Enhance deposit descriptions to be clearer
+      description: tx.type === 'deposit' 
+        ? (tx.description?.includes('Customer') ? tx.description : `Agent Funding - ${tx.description || 'Cash deposit'}`)
+        : tx.description
+    }));
+
+    const bitcoin: CombinedTransaction[] = bitcoinTransactions.map(tx => ({
+      id: tx.id,
+      type: tx.type,
+      status: tx.status,
+      createdAt: tx.createdAt,
+      description: tx.description,
+      source: 'bitcoin' as const,
+      displayAmount: `${tx.bitcoinAmount} sats`,
+      commission: tx.agentFee ? `UGX ${tx.agentFee.toLocaleString()}` : '0 UGX',
+      customerName: tx.customerName,
+      customerPhone: tx.customerPhone
+    }));
+
+    const deposits: CombinedTransaction[] = depositRequests.map(request => ({
+      id: request.id,
+      type: 'customer_deposit',
+      status: request.status,
+      createdAt: new Date(request.createdAt),
+      description: `Customer Deposit Request - Code: ${request.depositCode}`,
+      source: 'deposit_request' as const,
+      displayAmount: `UGX ${request.amount.toLocaleString()}`,
+      commission: `UGX ${Math.round(request.amount * 0.02).toLocaleString()}`,
+      customerName: request.userName,
+      customerPhone: request.userPhone
+    }));
+
+    return [...regular, ...bitcoin, ...deposits].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [agentTransactions, bitcoinTransactions, depositRequests]);
+
   // Filter transactions based on search term and filters
   const filteredTransactions = React.useMemo(() => {
-    if (!agentTransactions) return [];
-    
-    return agentTransactions.filter((transaction) => {
+    return allTransactions.filter((transaction) => {
       const description = transaction.description || '';
       const transactionId = transaction.id || '';
+      const customerName = transaction.customerName || '';
       
       const matchesSearch = 
         description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transactionId.toLowerCase().includes(searchTerm.toLowerCase());
+        transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customerName.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === 'all' || transaction.status === statusFilter;
       const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
       
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [agentTransactions, searchTerm, statusFilter, typeFilter]);
+  }, [allTransactions, searchTerm, statusFilter, typeFilter]);
 
-  // Normalize transactions to ensure consistent data structure
+  // Normalize transactions to ensure consistent data structure (skip for combined transactions)
   const normalizedTransactions = React.useMemo(() => {
-    return filteredTransactions.map(transaction => normalizeTransaction(transaction));
+    // For combined transactions, we don't need to normalize since we already have proper structure
+    return filteredTransactions;
   }, [filteredTransactions]);
 
   // Calculate pagination
@@ -102,7 +237,7 @@ const AgentTransactions: React.FC = () => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, typeFilter]);
 
-  if (isLoading) {
+  if (isLoading || loadingBitcoin || loadingDeposits) {
     return (
       <div className="space-y-6">
         <div className="flex justify-center items-center h-48 sm:h-64">
@@ -141,7 +276,9 @@ const AgentTransactions: React.FC = () => {
             >
               <option value="all">All Statuses</option>
               <option value="completed">Completed</option>
+              <option value="confirmed">Confirmed</option>
               <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
               <option value="failed">Failed</option>
             </select>
             
@@ -154,7 +291,10 @@ const AgentTransactions: React.FC = () => {
               <option value="send">Send</option>
               <option value="receive">Receive</option>
               <option value="withdraw">Withdraw</option>
-              <option value="deposit">Deposit</option>
+              <option value="deposit">Agent Funding</option>
+              <option value="customer_deposit">Customer Deposits</option>
+              <option value="buy">Bitcoin Buy</option>
+              <option value="sell">Bitcoin Sell</option>
             </select>
             
             <button
@@ -213,25 +353,36 @@ const AgentTransactions: React.FC = () => {
                         <td className="px-6 py-4 max-w-xs">
                           <div className="flex items-start">
                             <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full">
-                              {getTransactionIcon(transaction.type)}
+                              {getTransactionIcon(transaction.type, transaction.source)}
                             </div>
                             <div className="ml-4 min-w-0 flex-1">
                               <div className="text-sm font-medium text-gray-900 break-words leading-5">
-                                {transaction.description || 'Transaction'}
+                                {transaction.description || 
+                                 (transaction.customerName ? `${transaction.customerName} - Bitcoin ${transaction.type}` : 'Transaction')}
                               </div>
                               <div className="text-xs text-gray-500 break-all mt-1">
                                 ID: {transaction.id}
                               </div>
+                              {transaction.source === 'bitcoin' && transaction.customerPhone && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Customer: {transaction.customerPhone}
+                                </div>
+                              )}
+                              {transaction.type === 'deposit' && transaction.source === 'regular' && (
+                                <div className="text-xs text-purple-600 font-semibold mt-1">
+                                  💰 Customer Deposit
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(transaction.type)}`}>
-                            {transaction.type}
+                            {transaction.source === 'bitcoin' ? `Bitcoin ${transaction.type}` : transaction.type}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatCurrency(transaction.amount)}
+                          {transaction.displayAmount}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
@@ -239,7 +390,14 @@ const AgentTransactions: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(transaction.createdAt)}
+                          {transaction.commission && (
+                            <div className="text-green-600 font-semibold">
+                              +{transaction.commission}
+                            </div>
+                          )}
+                          <div className="text-gray-500">
+                            {formatDate(transaction.createdAt)}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -253,21 +411,37 @@ const AgentTransactions: React.FC = () => {
                   <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center bg-gray-100 rounded-full">
-                        {getTransactionIcon(transaction.type)}
+                        {getTransactionIcon(transaction.type, transaction.source)}
                       </div>
                       <div className="flex-1 min-w-0">
                         {/* Transaction Description - Full text with wrapping */}
                         <div className="mb-3">
                           <p className="text-sm font-medium text-gray-900 leading-5 break-words">
-                            {transaction.description || 'Transaction'}
+                            {transaction.description || 
+                             (transaction.customerName ? `${transaction.customerName} - Bitcoin ${transaction.type}` : 'Transaction')}
                           </p>
+                          {transaction.source === 'bitcoin' && transaction.customerPhone && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Customer: {transaction.customerPhone}
+                            </p>
+                          )}
+                          {transaction.type === 'deposit' && transaction.source === 'regular' && (
+                            <p className="text-xs text-purple-600 font-semibold mt-1">
+                              💰 Customer Deposit
+                            </p>
+                          )}
                         </div>
                         
                         {/* Amount - Prominent display */}
                         <div className="mb-3">
                           <p className="text-base font-semibold text-gray-900">
-                            {formatCurrency(transaction.amount)}
+                            {transaction.displayAmount}
                           </p>
+                          {transaction.commission && (
+                            <p className="text-sm text-green-600 font-semibold">
+                              Commission: +{transaction.commission}
+                            </p>
+                          )}
                         </div>
                         
                         {/* Transaction ID - Full display with background */}

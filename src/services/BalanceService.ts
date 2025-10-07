@@ -6,6 +6,7 @@ export class BalanceService {
   // Initialize with some sample transactions for demo
   static initialize() {
     this.transactions = [
+      // Original transactions for user_123
       {
         id: 'txn_001',
         type: 'deposit',
@@ -35,6 +36,96 @@ export class BalanceService {
         fromUserId: 'user_789',
         status: 'completed',
         createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
+      },
+      // Transactions for real agent user IDs
+      {
+        id: 'txn_004',
+        type: 'deposit',
+        amount: 75000,
+        currency: 'UGX',
+        userId: 'usr_003', // Agent agt_001's userId
+        status: 'completed',
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+        agentId: 'agt_001',
+        description: 'Customer deposit'
+      },
+      {
+        id: 'txn_005',
+        type: 'withdraw',
+        amount: 25000,
+        currency: 'UGX',
+        userId: 'usr_003',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+        agentId: 'agt_001',
+        description: 'Customer withdrawal'
+      },
+      {
+        id: 'txn_006',
+        type: 'send',
+        amount: 30000,
+        currency: 'UGX',
+        userId: 'usr_003',
+        toUserId: 'usr_010',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        description: 'Money transfer'
+      },
+      {
+        id: 'txn_007',
+        type: 'deposit',
+        amount: 120000,
+        currency: 'UGX',
+        userId: 'usr_006', // Agent agt_002's userId
+        status: 'completed',
+        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
+        agentId: 'agt_002',
+        description: 'Large customer deposit'
+      },
+      {
+        id: 'txn_008',
+        type: 'withdraw',
+        amount: 45000,
+        currency: 'UGX',
+        userId: 'usr_006',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+        agentId: 'agt_002',
+        description: 'Customer withdrawal'
+      },
+      // More customer deposit examples
+      {
+        id: 'txn_009',
+        type: 'deposit',
+        amount: 50000,
+        currency: 'UGX',
+        userId: 'usr_003',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+        agentId: 'agt_001',
+        description: 'Mobile money deposit'
+      },
+      {
+        id: 'txn_010',
+        type: 'deposit',
+        amount: 200000,
+        currency: 'UGX',
+        userId: 'usr_006',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+        agentId: 'agt_002',
+        description: 'Business customer deposit'
+      },
+      {
+        id: 'txn_011',
+        type: 'deposit',
+        amount: 15000,
+        currency: 'UGX',
+        userId: 'usr_003',
+        status: 'pending',
+        createdAt: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
+        agentId: 'agt_001',
+        description: 'Cash deposit - verification needed'
       }
     ];
   }

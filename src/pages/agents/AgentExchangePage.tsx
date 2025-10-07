@@ -12,6 +12,8 @@ import {
   Calculator
 } from 'lucide-react';
 import { BitcoinService } from '../../services/bitcoinService';
+import { DataService } from '../../services/dataService';
+import { useAuthentication } from '../../context/AuthenticationContext';
 import DynamicFeeCalculator from '../../components/DynamicFeeCalculator';
 
 interface ExchangeRequest {
@@ -28,10 +30,12 @@ interface ExchangeRequest {
 }
 
 const AgentExchangePage: React.FC = () => {
+  const { user } = useAuthentication();
   const [activeTab, setActiveTab] = useState<'requests' | 'calculator'>('requests');
   const [exchangeRequests, setExchangeRequests] = useState<ExchangeRequest[]>([]);
   const [exchangeRate, setExchangeRate] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Calculator state
   const [calcAmount, setCalcAmount] = useState<string>('');
@@ -42,50 +46,71 @@ const AgentExchangePage: React.FC = () => {
     const initializeExchange = async () => {
       try {
         setLoading(true);
+        setError(null);
         
         // Get current exchange rate
         const rate = await BitcoinService.getExchangeRate('UGX');
         setExchangeRate(rate.btcToLocal);
-        
-        // Mock exchange requests - in real app, fetch from backend
-        const mockRequests: ExchangeRequest[] = [
-          {
-            id: '1',
-            customerName: 'John Mukasa',
-            customerPhone: '+256701234567',
-            type: 'buy',
-            amount: 100000,
-            currency: 'UGX',
-            bitcoinAmount: 0.00260417,
-            status: 'pending',
-            createdAt: new Date(Date.now() - 5 * 60 * 1000),
-            location: 'Kampala Central'
-          },
-          {
-            id: '2',
-            customerName: 'Sarah Nakato',
-            customerPhone: '+256702345678',
-            type: 'sell',
-            amount: 50000,
-            currency: 'UGX',
-            bitcoinAmount: 0.00130208,
-            status: 'processing',
-            createdAt: new Date(Date.now() - 15 * 60 * 1000),
-            location: 'Wandegeya'
+
+        // Get agent data for current user
+        let agentId: string | undefined;
+        if (user?.agent?.id || user?.user?.id) {
+          try {
+            const userId = user.agent?.id || user.user?.id;
+            const agentData = await DataService.getAgentByUserId(userId!);
+            agentId = agentData?.id;
+            console.log('Found agent ID:', agentId);
+          } catch (agentError) {
+            console.warn('Could not find agent data for user:', agentError);
           }
-        ];
+        }
         
-        setExchangeRequests(mockRequests);
+        // Fetch real Bitcoin exchange requests from Juno store
+        const realExchangeRequests = await BitcoinService.getAgentExchangeRequests(agentId);
+        console.log('Fetched exchange requests:', realExchangeRequests);
+        
+        setExchangeRequests(realExchangeRequests);
         
       } catch (error) {
         console.error('Error initializing exchange:', error);
+        setError('Failed to load exchange data. Please try again.');
+        
+        // Fallback to empty array on error
+        setExchangeRequests([]);
       } finally {
         setLoading(false);
       }
     };
 
     initializeExchange();
-  }, []);
+  }, [user]);
+
+  // Function to refresh data
+  const refreshData = async () => {
+    setLoading(true);
+    try {
+      // Get agent data for current user
+      let agentId: string | undefined;
+      if (user?.agent?.id || user?.user?.id) {
+        try {
+          const userId = user.agent?.id || user.user?.id;
+          const agentData = await DataService.getAgentByUserId(userId!);
+          agentId = agentData?.id;
+        } catch (agentError) {
+          console.warn('Could not find agent data for user:', agentError);
+        }
+      }
+      
+      const realExchangeRequests = await BitcoinService.getAgentExchangeRequests(agentId);
+      setExchangeRequests(realExchangeRequests);
+      setError(null);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      setError('Failed to refresh data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (calcAmount && exchangeRate) {
@@ -105,23 +130,46 @@ const AgentExchangePage: React.FC = () => {
   }, [calcAmount, calcCurrency, exchangeRate]);
 
   const handleRequestAction = async (requestId: string, action: 'approve' | 'reject') => {
-    setExchangeRequests(prev => 
-      prev.map(req => 
-        req.id === requestId 
-          ? { ...req, status: action === 'approve' ? 'processing' : 'cancelled' }
-          : req
-      )
-    );
-  };
-
-  const completeExchange = async (requestId: string) => {
-    setExchangeRequests(prev => 
-      prev.map(req => 
-        req.id === requestId 
-          ? { ...req, status: 'completed' }
-          : req
-      )
-    );
+    try {
+      // Backend uses 'failed' for rejected transactions, frontend uses 'cancelled'
+      const backendStatus = action === 'approve' ? 'completed' : 'failed';
+      const frontendStatus = action === 'approve' ? 'completed' : 'cancelled';
+      
+      // Get the actual agent ID by looking up the agent record using the user ID
+      let agentId: string | undefined;
+      try {
+        // user.agent.id is actually the userId, we need the actual agent ID
+        const userIdForAgent = user.agent?.id || user.user?.id;
+        
+        if (userIdForAgent) {
+          const agentRecord = await DataService.getAgentByUserId(userIdForAgent);
+          agentId = agentRecord?.id;
+          console.log(`✅ Found agent ID: ${agentId} for user: ${userIdForAgent}`);
+        }
+      } catch (error) {
+        console.error('Error looking up agent record:', error);
+      }
+      
+      const result = await BitcoinService.updateTransactionStatus(requestId, backendStatus, agentId);
+      
+      if (result.success) {
+        // Update local state with frontend status mapping
+        setExchangeRequests(prev => 
+          prev.map(req => 
+            req.id === requestId 
+              ? { ...req, status: frontendStatus }
+              : req
+          )
+        );
+        console.log(`✅ ${action === 'approve' ? 'Approved' : 'Rejected'} transaction ${requestId}`);
+      } else {
+        console.error(`Failed to ${action} transaction:`, result.message);
+        alert(`Failed to ${action} transaction: ${result.message}`);
+      }
+    } catch (error) {
+      console.error(`Error ${action}ing transaction:`, error);
+      alert(`Error ${action}ing transaction. Please try again.`);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -156,11 +204,38 @@ const AgentExchangePage: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Bitcoin Exchange</h1>
             <p className="text-gray-600 mt-1">Manage customer Bitcoin exchanges</p>
           </div>
-          <div className="flex items-center space-x-2 text-sm">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-gray-600">1 BTC = UGX {exchangeRate.toLocaleString()}</span>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={refreshData}
+              disabled={loading}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-neutral-600">1 BTC = UGX {exchangeRate.toLocaleString()}</span>
+            </div>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+              <p className="text-red-700 font-semibold">Error</p>
+            </div>
+            <p className="text-red-600 mt-1">{error}</p>
+            <button
+              onClick={refreshData}
+              className="mt-2 text-red-600 underline hover:text-red-700"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
@@ -238,11 +313,11 @@ const AgentExchangePage: React.FC = () => {
               <h2 className="text-lg font-bold text-gray-900">Active Requests</h2>
               
               {exchangeRequests.filter(r => r.status !== 'completed' && r.status !== 'cancelled').length === 0 ? (
-                <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm text-center">
-                  <ArrowRightLeft className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Active Requests</h3>
-                  <p className="text-gray-600">
-                    When customers request Bitcoin exchanges, they'll appear here.
+                <div className="bg-white border border-neutral-200 p-8 rounded-xl shadow-sm text-center">
+                  <ArrowRightLeft className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">No Active Requests</h3>
+                  <p className="text-neutral-600">
+                    When customers request Bitcoin exchanges, they&apos;ll appear here.
                   </p>
                 </div>
               ) : (
@@ -319,13 +394,10 @@ const AgentExchangePage: React.FC = () => {
                               </button>
                             </>
                           )}
-                          {request.status === 'processing' && (
-                            <button
-                              onClick={() => completeExchange(request.id)}
-                              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200 font-semibold"
-                            >
-                              Complete
-                            </button>
+                          {request.status === 'completed' && (
+                            <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold">
+                              Completed
+                            </span>
                           )}
                         </div>
                       </div>

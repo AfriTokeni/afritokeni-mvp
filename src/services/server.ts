@@ -24,7 +24,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import AfricasTalking from 'africastalking';
-import { WebhookDataService as DataService } from './webHookServices.js';
+import { WebhookDataService as DataService, BitcoinDataService as BitcoinService, Agent } from './webHookServices.js';
 import type { 
   NotificationRequest, 
   NotificationData,
@@ -64,7 +64,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 interface USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
   data: {
     amount?: number;
     withdrawAmount?: number;
@@ -75,7 +75,13 @@ interface USSDSession {
     withdrawalCode?: string;
     transactionId?: string;
     pinAttempts?: number;
+    pinVerified?: boolean; // Track if user has verified PIN in current session
     recipientPhoneNumber?: string;
+    // New registration fields
+    firstName?: string;
+    lastName?: string;
+    verificationCode?: string;
+    verificationAttempts?: number;
     [key: string]: any;
   };
   step: number;
@@ -126,7 +132,7 @@ const ussdSessions = new Map<string, USSDSession>();
 class USSDSessionImpl implements USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
   data: Record<string, any>;
   step: number;
   lastActivity: number;
@@ -134,7 +140,7 @@ class USSDSessionImpl implements USSDSession {
   constructor(sessionId: string, phoneNumber: string) {
     this.sessionId = sessionId;
     this.phoneNumber = phoneNumber.replace('+', '');
-    this.currentMenu = 'pin_check'; // Start with PIN check
+    this.currentMenu = 'registration_check'; // Start with registration check
     this.data = {};
     this.step = 0;
     this.lastActivity = Date.now();
@@ -151,11 +157,22 @@ class USSDSessionImpl implements USSDSession {
 
 function getOrCreateSession(sessionId: string, phoneNumber: string): USSDSession {
   const cleanPhoneNumber = phoneNumber.replace('+', '');
+  console.log(`📋 Session management for ${sessionId}, phone: ${cleanPhoneNumber}`);
+  
   if (!ussdSessions.has(sessionId) || ussdSessions.get(sessionId)!.isExpired()) {
+    if (ussdSessions.has(sessionId) && ussdSessions.get(sessionId)!.isExpired()) {
+      console.log(`⏰ Session ${sessionId} expired, creating new session`);
+    } else {
+      console.log(`🆕 Creating new session ${sessionId} for ${cleanPhoneNumber}`);
+    }
     ussdSessions.set(sessionId, new USSDSessionImpl(sessionId, cleanPhoneNumber));
+  } else {
+    console.log(`♻️  Using existing session ${sessionId} for ${cleanPhoneNumber}`);
   }
+  
   const session = ussdSessions.get(sessionId)!;
   session.updateActivity();
+  console.log(`📋 Session ${sessionId} - Current menu: ${session.currentMenu}, Step: ${session.step}`);
   return session;
 }
 
@@ -190,15 +207,90 @@ setInterval(() => {
 
 
 
-// Helper functions for PIN management (integrated with DataService)
+// Helper functions for user registration and PIN management (integrated with DataService)
+
+// Check if user is registered in Juno datastore
+async function isUserRegistered(phoneNumber: string): Promise<boolean> {
+  try {
+    console.log(`Checking if user is registered for: ${phoneNumber}`);
+    const user = await DataService.findUserByPhoneNumber(`+${phoneNumber}`);
+    console.log(`Registration check result for ${phoneNumber}:`, user ? 'User found' : 'User not found');
+    return user !== null;
+  } catch (error) {
+    console.error(`Error checking user registration for ${phoneNumber}:`, error);
+    return false;
+  }
+}
+
+// Register new user in Juno datastore
+async function registerNewUser(phoneNumber: string, firstName: string, lastName: string): Promise<boolean> {
+  try {
+    console.log(`Registering new user: ${firstName} ${lastName} with phone ${phoneNumber}`);
+    await DataService.createUser({
+      firstName: firstName,
+      lastName: lastName,
+      email: `+${phoneNumber}`, // Store phone as email for SMS users
+      userType: 'user',
+      kycStatus: 'not_started',
+      authMethod: 'sms'
+    });
+    console.log(`Successfully registered user: ${phoneNumber}`);
+    return true;
+  } catch (error) {
+    console.error(`Error registering user ${phoneNumber}:`, error);
+    return false;
+  }
+}
+
+// Generate and store verification code
+function generateVerificationCode(phoneNumber: string): string {
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+  verificationCodes.set(phoneNumber, {
+    code: code,
+    userId: phoneNumber,
+    timestamp: Date.now()
+  });
+  return code;
+}
+
+// Verify the verification code
+function verifyVerificationCode(phoneNumber: string, inputCode: string): boolean {
+  const storedData = verificationCodes.get(phoneNumber);
+  if (!storedData) {
+    return false;
+  }
+  
+  // Check if code has expired (10 minutes)
+  if (Date.now() - storedData.timestamp > 10 * 60 * 1000) {
+    verificationCodes.delete(phoneNumber);
+    return false;
+  }
+  
+  const isValid = storedData.code === inputCode;
+  if (isValid) {
+    verificationCodes.delete(phoneNumber); // Clean up after successful verification
+  }
+  
+  return isValid;
+}
+
 async function hasUserPin(phoneNumber: string): Promise<boolean> {
   try {
-    console.log(`Checking if user has PIN for: ${phoneNumber}`);
+    console.log(`🔍 Checking if user has PIN for: ${phoneNumber}`);
     const userPin = await DataService.getUserPin(`+${phoneNumber}`);
-    console.log(`PIN check result for ${phoneNumber}:`, userPin ? 'PIN found' : 'No PIN found');
-    return userPin !== null && userPin.isSet;
+    console.log(`🔍 getUserPin result for ${phoneNumber}:`, userPin);
+    
+    if (userPin) {
+      console.log(`🔍 UserPin details - PIN: ${userPin.pin}, isSet: ${userPin.isSet}`);
+      const hasPin = userPin !== null && userPin.isSet;
+      console.log(`🔍 Final hasUserPin result for ${phoneNumber}: ${hasPin}`);
+      return hasPin;
+    } else {
+      console.log(`🔍 No userPin found for ${phoneNumber}`);
+      return false;
+    }
   } catch (error) {
-    console.error('Error checking user PIN:', error);
+    console.error('❌ Error checking user PIN:', error);
     return false;
   }
 }
@@ -228,6 +320,22 @@ async function verifyUserPin(phoneNumber: string, pin: string): Promise<boolean>
     console.error('Error verifying user PIN:', error);
     return false;
   }
+}
+
+// Helper function to check if PIN verification is required for sensitive operations
+function requiresPinVerification(session: USSDSession): boolean {
+  // If PIN has already been verified in this session, no need to verify again
+  return !session.data.pinVerified;
+}
+
+// Helper function to initiate PIN verification for sensitive operations
+function requestPinVerification(session: USSDSession, operation: string, nextMenu: string): string {
+  session.currentMenu = 'pin_check';
+  session.step = 1;
+  session.data.pendingOperation = operation;
+  session.data.nextMenu = nextMenu;
+  session.data.pinAttempts = 0;
+  return continueSession(`${operation}\nFor security, please enter your 4-digit PIN:`);
 }
 
 // Get user balance from DataService
@@ -268,15 +376,39 @@ async function sendSMSNotification(phoneNumber: string, message: string): Promis
 
 // USSD Menu Handlers
 
-// PIN checking and setup handlers
-async function handlePinCheck(input: string, session: USSDSession): Promise<string> {
+// Registration check handler - first step when user dials USSD
+async function handleRegistrationCheck(input: string, session: USSDSession): Promise<string> {
+  console.log(`🔍 Registration check for ${session.phoneNumber}, input: "${input}"`);
+  
   if (!input) {
-    // First time - check if user has PIN
-    if (await hasUserPin(session.phoneNumber)) {
-      // User has PIN - go directly to main menu
-      session.currentMenu = 'main';
-      session.step = 0;
-      return continueSession(`Welcome back to AfriTokeni USSD Service
+    // First time dialing USSD - check if user is registered
+    const isRegistered = await isUserRegistered(session.phoneNumber);
+    console.log(`📋 User ${session.phoneNumber} registration status: ${isRegistered ? 'Registered' : 'Not registered'}`);
+    
+    if (!isRegistered) {
+      // User not registered - ask for their name
+      session.currentMenu = 'user_registration';
+      session.step = 1;
+      console.log(`➡️ Redirecting ${session.phoneNumber} to registration`);
+      return continueSession('Welcome to AfriTokeni!\nYou are not registered yet.\nPlease enter your full name (first and last name):');
+    } else {
+      // User is registered - check if they have a PIN
+      const hasPIN = await hasUserPin(session.phoneNumber);
+      console.log(`🔑 User ${session.phoneNumber} PIN status: ${hasPIN ? 'Has PIN' : 'No PIN'}`);
+      
+      if (!hasPIN) {
+        // User registered but no PIN - go to PIN setup
+        session.currentMenu = 'pin_setup';
+        session.step = 1;
+        console.log(`➡️ Redirecting ${session.phoneNumber} to PIN setup`);
+        return continueSession('Welcome back to AfriTokeni!\nTo secure your account, please set up a 4-digit PIN:\nEnter your new PIN:');
+      } else {
+        // User registered and has PIN - go directly to main menu (no PIN verification required for menu access)
+        session.currentMenu = 'main';
+        session.step = 0;
+        session.data = { pinVerified: false }; // Track that PIN hasn't been verified yet for sensitive operations
+        console.log(`➡️ User ${session.phoneNumber} has PIN, going directly to main menu`);
+        return continueSession(`Welcome back to AfriTokeni USSD Service!
 Please select an option:
 1. Send Money
 2. Check Balance
@@ -285,11 +417,7 @@ Please select an option:
 5. Deposit Money
 6. Bitcoin Services
 7. Help`);
-    } else {
-      // User doesn't have PIN - set it up
-      session.currentMenu = 'pin_setup';
-      session.step = 1;
-      return continueSession('Welcome to AfriTokeni!\nYou need to set up a 4-digit PIN to secure your account.\nPlease enter your new PIN:');
+      }
     }
   }
   
@@ -297,39 +425,254 @@ Please select an option:
   return continueSession('Welcome to AfriTokeni!\nPlease wait...');
 }
 
+// User registration handler - for new users
+async function handleUserRegistration(input: string, session: USSDSession): Promise<string> {
+  const sanitized_input = input.split("*")[input.split("*").length - 1];
+  console.log(`📝 User registration for ${session.phoneNumber}, step: ${session.step}, input: "${sanitized_input}"`);
+  
+  switch (session.step) {
+    case 1: {
+      // Getting full name
+      if (!sanitized_input || sanitized_input.trim().length < 3) {
+        console.log(`❌ Invalid name "${sanitized_input}" provided by ${session.phoneNumber}`);
+        return continueSession('Invalid name. Please enter your full name (first and last name):');
+      }
+      
+      const fullNameParts = sanitized_input.trim().split(/\s+/);
+      if (fullNameParts.length < 2) {
+        console.log(`❌ Incomplete name "${sanitized_input}" provided by ${session.phoneNumber}`);
+        return continueSession('Please enter both first and last name separated by space:');
+      }
+      
+      // First word is first name, last word is last name
+      const firstName = fullNameParts[0];
+      const lastName = fullNameParts[fullNameParts.length - 1];
+      
+      session.data.firstName = firstName;
+      session.data.lastName = lastName;
+      
+      console.log(`✅ Full name "${sanitized_input}" split into firstName: "${firstName}", lastName: "${lastName}" for ${session.phoneNumber}`);
+      
+      // Generate and send verification code
+      const verificationCode = generateVerificationCode(session.phoneNumber);
+      session.data.verificationCode = verificationCode;
+      session.data.verificationAttempts = 0;
+      console.log(`🔢 Generated verification code ${verificationCode} for ${session.phoneNumber}`);
+      
+      // Send SMS with verification code
+      try {
+        await sendSMSNotification(`+${session.phoneNumber}`, 
+          `AfriTokeni Verification: Your code is ${verificationCode}. Enter this code to complete registration.`);
+        
+        session.currentMenu = 'verification';
+        session.step = 1;
+        console.log(`📱 SMS sent successfully to ${session.phoneNumber}, moving to verification menu`);
+        return continueSession(`Thank you ${firstName} ${lastName}!\nWe've sent a verification code to your phone.\nPlease enter the 6-digit code:`);
+      } catch (error) {
+        console.error(`❌ Failed to send verification SMS to ${session.phoneNumber}:`, error);
+        return endSession('Failed to send verification code. Please try again later.');
+      }
+    }
+      
+    default:
+      console.log(`❌ Invalid registration step ${session.step} for ${session.phoneNumber}`);
+      return endSession('Registration process error. Please try again.');
+  }
+}
+
+// Verification handler - for verifying SMS code
+async function handleVerification(input: string, session: USSDSession): Promise<string> {
+  const sanitized_input = input.split("*")[input.split("*").length - 1];
+  console.log(`🔍 Verification for ${session.phoneNumber}, attempt ${(session.data.verificationAttempts || 0) + 1}, input: "${sanitized_input}"`);
+  
+  switch (session.step) {
+    case 1: {
+      // Verifying the code
+      if (!sanitized_input || sanitized_input.length !== 6) {
+        session.data.verificationAttempts = (session.data.verificationAttempts || 0) + 1;
+        console.log(`❌ Invalid code format for ${session.phoneNumber}, attempts: ${session.data.verificationAttempts}`);
+        if (session.data.verificationAttempts >= 3) {
+          console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please dial again to restart registration.');
+        }
+        return continueSession('Invalid code format. Please enter the 6-digit verification code:');
+      }
+      
+      // Verify the code
+      const isValidCode = verifyVerificationCode(session.phoneNumber, sanitized_input);
+      console.log(`🔐 Code verification result for ${session.phoneNumber}: ${isValidCode ? 'Valid' : 'Invalid'}`);
+      
+      if (!isValidCode) {
+        session.data.verificationAttempts = (session.data.verificationAttempts || 0) + 1;
+        console.log(`❌ Invalid verification code for ${session.phoneNumber}, attempts: ${session.data.verificationAttempts}`);
+        if (session.data.verificationAttempts >= 3) {
+          console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please dial again to restart registration.');
+        }
+        return continueSession('Invalid verification code. Please try again:');
+      }
+      
+      // Code is valid - register the user
+      console.log(`✅ Valid verification code for ${session.phoneNumber}, proceeding with user registration`);
+      const registrationSuccess = await registerNewUser(
+        session.phoneNumber,
+        session.data.firstName!,
+        session.data.lastName!
+      );
+      
+      if (!registrationSuccess) {
+        console.log(`❌ User registration failed for ${session.phoneNumber}`);
+        return endSession('Registration failed. Please try again later.');
+      }
+      
+      // Registration successful - now set up PIN
+      console.log(`👤 User ${session.phoneNumber} registered successfully, moving to PIN setup`);
+      session.currentMenu = 'pin_setup';
+      session.step = 1;
+      return continueSession('Verification successful!\nAccount created successfully.\nNow please set up a 4-digit PIN to secure your account:\nEnter your new PIN:');
+    }
+      
+    default:
+      console.log(`❌ Invalid verification step ${session.step} for ${session.phoneNumber}`);
+      return endSession('Verification process error. Please try again.');
+  }
+}
+
+// PIN checking and setup handlers
+async function handlePinCheck(input: string, session: USSDSession): Promise<string> {
+  console.log(`🔑 PIN check for ${session.phoneNumber}, step: ${session.step}, raw input: "${input}"`);
+  
+  // Extract the last part of USSD input (the actual PIN entered)
+  const inputParts = input.split('*');
+  const pinInput = inputParts[inputParts.length - 1] || '';
+  console.log(`🔑 PIN input after USSD parsing: "${pinInput}"`);
+  
+  switch (session.step) {
+    case 1: {
+      // User is entering their PIN
+      if (!pinInput) {
+        return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
+      }
+      
+      if (!/^\d{4}$/.test(pinInput)) {
+        session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+        console.log(`❌ Invalid PIN format for ${session.phoneNumber}, PIN: "${pinInput}", attempts: ${session.data.pinAttempts}`);
+        
+        if (session.data.pinAttempts >= 3) {
+          console.log(`🚫 Max PIN attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please try again later.');
+        }
+        
+        return continueSession('Invalid PIN format. Please enter exactly 4 digits:');
+      }
+      
+      // Verify the PIN
+      const isValidPin = await verifyUserPin(session.phoneNumber, pinInput);
+      console.log(`🔐 PIN verification result for ${session.phoneNumber}: ${isValidPin ? 'Valid' : 'Invalid'}`);
+      
+      if (isValidPin) {
+        // PIN is correct - check if there's a pending operation
+        console.log(`✅ PIN verified successfully for ${session.phoneNumber}`);
+        session.data.pinVerified = true; // Mark PIN as verified in this session
+        
+        // Check if there's a pending operation to complete
+        if (session.data.pendingOperation && session.data.nextMenu) {
+          console.log(`🔄 Completing pending operation: ${session.data.pendingOperation}`);
+          const nextMenu = session.data.nextMenu;
+          
+          // Clear pending operation data
+          delete session.data.pendingOperation;
+          delete session.data.nextMenu;
+          
+          // Route to the appropriate handler
+          session.currentMenu = nextMenu;
+          session.step = 1;
+          
+          if (nextMenu === 'check_balance') {
+            return await handleCheckBalance('', session);
+          } else if (nextMenu === 'transaction_history') {
+            return await handleTransactionHistory('', session);
+          }
+        }
+        
+        // No pending operation - go to main menu
+        session.currentMenu = 'main';
+        session.step = 0;
+        return continueSession(`Welcome back to AfriTokeni USSD Service
+Please select an option:
+1. Send Money
+2. Check Balance
+3. Withdraw Money
+4. Transaction History
+5. Deposit Money
+6. Bitcoin Services
+7. Help`);
+      } else {
+        // PIN is incorrect
+        session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
+        console.log(`❌ Invalid PIN for ${session.phoneNumber}, attempts: ${session.data.pinAttempts}`);
+        
+        if (session.data.pinAttempts >= 3) {
+          console.log(`🚫 Max PIN attempts reached for ${session.phoneNumber}`);
+          return endSession('Too many failed attempts. Please try again later.');
+        }
+        
+        const remainingAttempts = 3 - session.data.pinAttempts;
+        return continueSession(`Incorrect PIN. You have ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.\nPlease enter your 4-digit PIN:`);
+      }
+    }
+    
+    default:
+      // Initialize PIN check
+      console.log(`🔑 Initializing PIN check for ${session.phoneNumber}`);
+      session.step = 1;
+      session.data.pinAttempts = 0;
+      return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
+  }
+}
+
 async function handlePinSetup(input: string, session: USSDSession): Promise<string> {
-  const sanitized_input = input.split("*")[1];
+  // Extract the last part of USSD input (the actual PIN entered)
+  const inputParts = input.split('*');
+  const pinInput = inputParts[inputParts.length - 1] || '';
+  console.log(`🔧 PIN setup for ${session.phoneNumber}, step: ${session.step}, input: "${pinInput}"`);
+  
   switch (session.step) {
     case 1:
       // First PIN entry
-      if (!/^\d{4}$/.test(input)) {
+      if (!/^\d{4}$/.test(pinInput)) {
+        console.log(`❌ Invalid PIN format during setup for ${session.phoneNumber}: "${pinInput}"`);
         return continueSession('Invalid PIN format.\nPlease enter exactly 4 digits:');
       }
-      session.data.newPin = input;
+      session.data.newPin = pinInput;
       session.step = 2;
+      console.log(`✅ First PIN entry accepted for ${session.phoneNumber}`);
       return continueSession('Please confirm your PIN by entering it again:');
     
     case 2:
       // PIN confirmation
-      { console.log(`Confirming PIN for ${input} ${session.data.newPin}`);
+      { 
+        console.log(`🔄 Confirming PIN for ${session.phoneNumber}: "${pinInput}" vs "${session.data.newPin}"`);
 
-      if (sanitized_input !== session.data.newPin) {
-        // Reset PIN setup
-        session.step = 1;
-        session.data = {};
-        return continueSession('PINs do not match.\nPlease enter your new 4-digit PIN again:');
-      }
+        if (pinInput !== session.data.newPin) {
+          // Reset PIN setup
+          session.step = 1;
+          session.data = {};
+          console.log(`❌ PIN mismatch for ${session.phoneNumber}`);
+          return continueSession('PINs do not match.\nPlease enter your new 4-digit PIN again:');
+        }
 
-      console.log(`New PIN set for ${session.phoneNumber}`);
+        console.log(`🔑 New PIN confirmed for ${session.phoneNumber}`);
 
-      // Save PIN and proceed to main menu
-      const pinSaved = await setUserPin(session.phoneNumber, sanitized_input);
-      if (pinSaved) {
-        session.currentMenu = 'main';
-        session.step = 0;
-        session.data = {};
-        
-        return continueSession(`PIN set successfully!
+        // Save PIN and proceed to main menu
+        const pinSaved = await setUserPin(session.phoneNumber, pinInput);
+        if (pinSaved) {
+          session.currentMenu = 'main';
+          session.step = 0;
+          session.data = {};
+          console.log(`✅ PIN setup completed successfully for ${session.phoneNumber}`);
+          
+          return continueSession(`PIN set successfully!
 
 Welcome to AfriTokeni USSD Service
 Please select an option:
@@ -340,13 +683,14 @@ Please select an option:
 5. Deposit Money
 6. Bitcoin Services
 7. Help`);
-      } else {
-        // PIN save failed, retry
-        session.step = 1;
-        session.data = {};
-        return continueSession('Error saving PIN. Please try again.\nEnter your new 4-digit PIN:');
-      }
-    }  
+        } else {
+          // PIN save failed, retry
+          session.step = 1;
+          session.data = {};
+          console.log(`❌ Failed to save PIN for ${session.phoneNumber}`);
+          return continueSession('Error saving PIN. Please try again.\nEnter your new 4-digit PIN:');
+        }
+      }  
     
     default:
       session.currentMenu = 'pin_check';
@@ -378,9 +722,14 @@ Please select an option:
       return continueSession('Send Money\nEnter amount to send (UGX):');
     
     case '2':
-      session.currentMenu = 'check_balance';
-      session.step = 1;
-      return continueSession('Check Balance\nEnter your 4-digit PIN:');
+      // Check Balance - requires PIN verification if not already verified
+      if (requiresPinVerification(session)) {
+        return requestPinVerification(session, 'Check Balance', 'check_balance');
+      } else {
+        session.currentMenu = 'check_balance';
+        session.step = 1;
+        return await handleCheckBalance('', session); // Directly proceed to balance check
+      }
     
     case '3':
       session.currentMenu = 'withdraw';
@@ -388,9 +737,14 @@ Please select an option:
       return continueSession('Withdraw Money\nEnter amount (UGX):');
     
     case '4':
-      session.currentMenu = 'transaction_history';
-      session.step = 1;
-      return continueSession('Transaction History\nEnter your 4-digit PIN:');
+      // Transaction History - requires PIN verification if not already verified
+      if (requiresPinVerification(session)) {
+        return requestPinVerification(session, 'Transaction History', 'transaction_history');
+      } else {
+        session.currentMenu = 'transaction_history';
+        session.step = 1;
+        return await handleTransactionHistory('', session); // Directly proceed to transaction history
+      }
     
     case '5':
       session.currentMenu = 'deposit';
@@ -427,6 +781,36 @@ async function handleCheckBalance(input: string, session: USSDSession): Promise<
   console.log(`Check balance input: ${input}`);
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
+  
+  // If PIN is already verified in session, skip PIN verification
+  if (session.data.pinVerified) {
+    console.log(`PIN already verified for ${session.phoneNumber}, showing balance directly`);
+    try {
+      const balance = await getUserBalance(session.phoneNumber);
+      
+      if (balance !== null) {
+        return endSession(`Your Account Balance
+Amount: UGX ${balance.toLocaleString()}
+Available: UGX ${balance.toLocaleString()}
+
+Thank you for using AfriTokeni!`);
+      } else {
+        // No balance found, assume 0
+        return endSession(`Your Account Balance
+Amount: UGX 0
+Available: UGX 0
+
+Thank you for using AfriTokeni!`);
+      }
+    } catch (error) {
+      console.error('Error retrieving balance:', error);
+      return endSession(`Error retrieving balance.
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+    }
+  }
+  
   switch (session.step) {
     case 1: {
       // PIN verification step
@@ -479,6 +863,65 @@ async function handleTransactionHistory(input: string, session: USSDSession): Pr
   console.log(`Transaction history input: ${input}`);
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
+  
+  // If PIN is already verified in session, skip PIN verification
+  if (session.data.pinVerified) {
+    console.log(`PIN already verified for ${session.phoneNumber}, showing transaction history directly`);
+    try {
+      console.log(`Getting transaction history for ${session.phoneNumber}`);
+      const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
+      
+      if (transactions.length === 0) {
+        return endSession(`Transaction History:
+
+No transactions found.
+
+To start using AfriTokeni, send money or make a deposit through an agent.
+
+Thank you for using AfriTokeni!`);
+      }
+
+      let transactionList = `Last ${transactions.length} Transactions:\n\n`;
+      
+      transactions.forEach((tx, index) => {
+        const date = tx.createdAt.toLocaleDateString('en-GB');
+        let description = '';
+        
+        switch (tx.type) {
+          case 'send':
+            description = `Sent: UGX ${tx.amount.toLocaleString()}`;
+            if (tx.fee && tx.fee > 0) {
+              description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+            }
+            break;
+          case 'receive':
+            description = `Received: UGX ${tx.amount.toLocaleString()}`;
+            break;
+          case 'withdraw':
+            description = `Withdraw: UGX ${tx.amount.toLocaleString()}`;
+            if (tx.fee && tx.fee > 0) {
+              description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+            }
+            break;
+          case 'deposit':
+            description = `Deposit: UGX ${tx.amount.toLocaleString()}`;
+            break;
+          default:
+            description = `${tx.description || 'Transaction'}: UGX ${tx.amount.toLocaleString()}`;
+        }
+        
+        transactionList += `${index + 1}. ${date}\n${description}\nStatus: ${tx.status}\n\n`;
+      });
+
+      return endSession(`${transactionList}Thank you for using AfriTokeni!`);
+    } catch (error) {
+      console.error('Error retrieving transaction history:', error);
+      return endSession(`Error retrieving transaction history.
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+    }
+  }
   
   switch (session.step) {
     case 1: {
@@ -799,7 +1242,7 @@ Please select an option:
     case '4':
       session.currentMenu = 'btc_sell';
       session.step = 1;
-      return continueSession('Sell BTC\nEnter BTC amount to sell:');
+      return await handleBTCSell('', session);
     
     case '0':
       session.currentMenu = 'main';
@@ -816,47 +1259,64 @@ Please select an option:
   }
 }
 
+// In your USSD server - modified Bitcoin balance handler
 async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
   switch (session.step) {
     case 1: {
-      // PIN verification step
+      // PIN verification
       if (!/^\d{4}$/.test(sanitized_input)) {
         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
       }
       
-      // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
       if (!pinCorrect) {
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Get BTC balance and real-time rate
       try {
-        const { BitcoinRateService } = await import('./bitcoinRateService.js');
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please try again later.');
+        }
         
-        // In a real implementation, this would get actual BTC balance from datastore
-        const btcBalance = 0.00125; // Mock BTC balance
-        const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
-        const ugxEquivalent = btcBalance * btcRateUGX;
+        // Use the new Bitcoin balance calculation from webHookServices
+        const { balance: actualBalance, wallet } = await BitcoinService.getBitcoinBalanceWithSync(user.id);
         
-        return endSession(`Your Bitcoin Balance
+        if (!wallet) {
+          // Create new wallet for SMS user
+          const newWallet = await BitcoinService.createBitcoinWallet(user.id, session.phoneNumber);
+          
+          return endSession(`Your Bitcoin Wallet
 
-₿${btcBalance.toFixed(8)} BTC
+Address: ${newWallet.address.substring(0, 12)}...
+Balance: ₿0.00000000
+≈ UGX 0
+
+No transactions yet.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+        // Get real exchange rate
+        const rate = await BitcoinService.getExchangeRate('UGX');
+        const ugxEquivalent = await BitcoinService.calculateLocalFromBitcoin(actualBalance, 'UGX');
+        
+        return endSession(`Your Bitcoin Wallet
+
+Address: ${wallet.address.substring(0, 12)}...
+Balance: ₿${BitcoinService.satoshisToBtc(actualBalance).toFixed(8)}
 ≈ UGX ${ugxEquivalent.toLocaleString()}
 
-Current Rate: 1 BTC = UGX ${btcRateUGX.toLocaleString()}
+Rate: 1 BTC = UGX ${rate.btcToLocal.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
         
       } catch (error) {
         console.error('Error retrieving BTC balance:', error);
-        return endSession(`Error retrieving BTC balance.
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+        return endSession('Error retrieving BTC balance.\nPlease try again later.');
       }
     }
     
@@ -866,6 +1326,57 @@ Thank you for using AfriTokeni!`);
       return handleBitcoin('', session);
   }
 }
+
+// async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
+//   const inputParts = input.split('*');
+//   const sanitized_input = inputParts[inputParts.length - 1] || '';
+  
+//   switch (session.step) {
+//     case 1: {
+//       // PIN verification step
+//       if (!/^\d{4}$/.test(sanitized_input)) {
+//         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+//       }
+      
+//       // Verify PIN
+//       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+//       if (!pinCorrect) {
+//         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+//       }
+      
+//       // Get BTC balance and real-time rate
+//       try {
+//         const { BitcoinRateService } = await import('./bitcoinRateService.js');
+        
+//         // In a real implementation, this would get actual BTC balance from datastore
+//         const btcBalance = 0.00125; // Mock BTC balance
+//         const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
+//         const ugxEquivalent = btcBalance * btcRateUGX;
+        
+//         return endSession(`Your Bitcoin Balance
+
+// ₿${btcBalance.toFixed(8)} BTC
+// ≈ UGX ${ugxEquivalent.toLocaleString()}
+
+// Current Rate: 1 BTC = UGX ${btcRateUGX.toLocaleString()}
+
+// Thank you for using AfriTokeni!`);
+        
+//       } catch (error) {
+//         console.error('Error retrieving BTC balance:', error);
+//         return endSession(`Error retrieving BTC balance.
+// Please try again later.
+
+// Thank you for using AfriTokeni!`);
+//       }
+//     }
+    
+//     default:
+//       session.currentMenu = 'bitcoin';
+//       session.step = 0;
+//       return handleBitcoin('', session);
+//   }
+// }
 
 async function handleBTCRate(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
@@ -884,18 +1395,18 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Display current BTC rate from CoinGecko
+      // Display current BTC rate using getExchangeRate
       try {
-        const { BitcoinRateService } = await import('./bitcoinRateService.js');
-        const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
-        const lastUpdated = new Date().toLocaleString();
+        const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+        const lastUpdated = exchangeRate.lastUpdated.toLocaleString();
         
         return endSession(`Bitcoin Exchange Rate
 
-1 BTC = UGX ${btcRateUGX.toLocaleString()}
-1 UGX = ₿${(1/btcRateUGX).toFixed(10)}
+1 BTC = UGX ${exchangeRate.btcToLocal.toLocaleString()}
+1 UGX = ₿${exchangeRate.localToBtc.toFixed(10)}
 
 Last Updated: ${lastUpdated}
+Source: ${exchangeRate.source}
 
 Rates include platform fees
 Buy/Sell spreads may apply
@@ -938,48 +1449,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
         return continueSession('Minimum purchase: UGX 10,000\nEnter UGX amount to spend:');
       }
       
-      // Calculate BTC amount and fees with real rate
-      const { BitcoinRateService } = await import('./bitcoinRateService.js');
-      const btcRate = await BitcoinRateService.getBitcoinRate('ugx');
-      const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
-      const netAmount = ugxAmount - fee;
-      const btcAmount = netAmount / btcRate;
-      
-      session.data.ugxAmount = ugxAmount;
-      session.data.btcAmount = btcAmount;
-      session.data.fee = fee;
-      session.step = 2;
-      
-      return continueSession(`BTC Purchase Quote
-
-Spend: UGX ${ugxAmount.toLocaleString()}
-Fee (2.5%): UGX ${fee.toLocaleString()}
-Net: UGX ${netAmount.toLocaleString()}
-Receive: ₿${btcAmount.toFixed(8)} BTC
-
-Rate: 1 BTC = UGX ${btcRate.toLocaleString()}
-
-Enter PIN to confirm:`);
-    }
-    
-    case 2: {
-      // PIN verification and purchase
-      if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
-      }
-      
-      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
-      if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
-      }
-      
-      // Process BTC purchase (mock implementation)
-      const ugxAmount = session.data.ugxAmount || 0;
-      const btcAmount = session.data.btcAmount || 0;
-      const fee = session.data.fee || 0;
-      const transactionId = `btc_buy_${Date.now()}`;
-      
-      // Check user balance
+      // Check user balance first
       const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < ugxAmount) {
         const currentBalance = userBalance ? userBalance.balance : 0;
@@ -990,16 +1460,186 @@ Required: UGX ${ugxAmount.toLocaleString()}
 Thank you for using AfriTokeni!`);
       }
       
-      return endSession(`✅ BTC Purchase Successful!
+      // Calculate BTC amount and fees with real rate
+      const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+      const btcRate = exchangeRate.btcToLocal;
+      const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
+      const netAmount = ugxAmount - fee;
+      const btcAmount = netAmount / btcRate;
+      
+      session.data.ugxAmount = ugxAmount;
+      session.data.btcAmount = btcAmount;
+      session.data.fee = fee;
+      session.step = 2;
+      
+      // Get available agents for Bitcoin exchange
+      console.log('Getting available agents for Bitcoin purchase...');
+      try {
+        const agents = await DataService.getAvailableAgents();
+        const availableAgents = agents.filter((agent: Agent) => 
+          agent.isActive
+          // agent.cashBalance >= ugxAmount
+        );
+        
+        if (availableAgents.length === 0) {
+          return endSession(`No agents available for Bitcoin purchase at this time.
 
-Purchased: ₿${btcAmount.toFixed(8)} BTC
-Cost: UGX ${ugxAmount.toLocaleString()}
-Fee: UGX ${fee.toLocaleString()}
-Transaction ID: ${transactionId}
-
-BTC added to your wallet.
+Please try again later.
 
 Thank you for using AfriTokeni!`);
+        }
+        
+        session.data.availableAgents = availableAgents;
+        
+        let agentList = `BTC Purchase Quote
+
+Spend: UGX ${ugxAmount.toLocaleString()}
+Fee (2.5%): UGX ${fee.toLocaleString()}
+Net: UGX ${netAmount.toLocaleString()}
+Receive: ₿${btcAmount.toFixed(8)} BTC
+
+Select an agent:
+`;
+        
+        availableAgents.slice(0, 5).forEach((agent: any, index: number) => {
+          agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
+        });
+        
+        agentList += '0. Cancel';
+        
+        return continueSession(agentList);
+        
+      } catch (error) {
+        console.error('Error getting agents for Bitcoin purchase:', error);
+        return endSession('Error loading agents. Please try again later.');
+      }
+    }
+    
+    case 2: {
+      // Agent selection
+      const agentChoice = parseInt(currentInput);
+      
+      if (agentChoice === 0) {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return handleBitcoin('', session);
+      }
+      
+      const agents = session.data.availableAgents;
+      if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
+        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+      }
+      
+      const selectedAgent = agents[agentChoice - 1];
+      session.data.selectedAgent = selectedAgent;
+      session.step = 3;
+      
+      const ugxAmount = session.data.ugxAmount || 0;
+      const btcAmount = session.data.btcAmount || 0;
+      const fee = session.data.fee || 0;
+      
+      return continueSession(`Selected Agent:
+${selectedAgent.businessName}
+${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
+
+Purchase Details:
+Amount: UGX ${ugxAmount.toLocaleString()}
+Fee: UGX ${fee.toLocaleString()}
+Receive: ₿${btcAmount.toFixed(8)} BTC
+
+Enter your PIN to confirm:`);
+    }
+    
+    case 3: {
+      // PIN verification and process Bitcoin purchase
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      try {
+        // Get user information
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        // Get or create user's Bitcoin wallet
+        let wallet = await BitcoinService.getBitcoinWalletForUser(user.id);
+        if (!wallet) {
+          wallet = await BitcoinService.createBitcoinWallet(user.id, session.phoneNumber);
+        }
+        
+        const selectedAgent = session.data.selectedAgent;
+        const ugxAmount = session.data.ugxAmount || 0;
+        
+        // Generate a unique purchase code for the user to give to agent
+        const purchaseCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.purchaseCode = purchaseCode;
+        
+        // Process local to Bitcoin exchange through agent
+        const exchangeResult = await BitcoinService.processLocalToBitcoinExchange(
+          user.id,
+          selectedAgent.id,
+          ugxAmount,
+          'UGX',
+          wallet.address
+        );
+        
+        if (exchangeResult.success && exchangeResult.transaction) {
+          const btcAmount = BitcoinService.satoshisToBtc(exchangeResult.transaction.bitcoinAmount);
+          
+          // Send SMS with purchase details and code
+          const smsMessage = `AfriTokeni BTC Purchase
+Code: ${purchaseCode}
+Amount: UGX ${ugxAmount.toLocaleString()}
+BTC to receive: ₿${btcAmount.toFixed(8)}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+Transaction ID: ${exchangeResult.transaction.id}
+
+Give this code and payment to the agent to complete your Bitcoin purchase.`;
+
+          console.log(`Sending Bitcoin purchase SMS to ${session.phoneNumber}`);
+
+          try {
+            await sendSMSNotification(session.phoneNumber, smsMessage);
+          } catch (smsError) {
+            console.error('SMS sending failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ BTC Purchase Initiated!
+
+Purchase Code: ${purchaseCode}
+Transaction ID: ${exchangeResult.transaction.id}
+You will receive: ₿${btcAmount.toFixed(8)} BTC
+Amount to pay: UGX ${ugxAmount.toLocaleString()}
+
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+
+Give the code ${purchaseCode} and payment to the agent to complete your purchase.
+
+SMS sent with details.
+
+Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Purchase failed: ${exchangeResult.message}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+      } catch (error) {
+        console.error('Error processing Bitcoin purchase:', error);
+        return endSession('Error processing purchase. Please try again later.');
+      }
     }
     
     default:
@@ -1015,23 +1655,145 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
   
   switch (session.step) {
     case 1: {
-      // Enter BTC amount to sell
+      // Show Bitcoin balance and currency option if no input
       if (!currentInput) {
-        return continueSession('Sell BTC\nEnter BTC amount to sell (e.g., 0.001):');
+        try {
+          const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+          if (!user) {
+            return endSession('User not found. Please contact support.');
+          }
+          
+          // Get Bitcoin balance with sync
+          const { balance: balanceSats, wallet } = await BitcoinService.getBitcoinBalanceWithSync(user.id);
+          
+          if (!wallet || balanceSats <= 0) {
+            return endSession(`No Bitcoin available to sell.
+
+Bitcoin Balance: ₿0.00000000
+≈ UGX 0
+
+Thank you for using AfriTokeni!`);
+          }
+          
+          // Get exchange rate for UGX equivalent
+          const balanceBTC = BitcoinService.satoshisToBtc(balanceSats);
+          const ugxEquivalent = await BitcoinService.calculateLocalFromBitcoin(balanceSats, 'UGX');
+          
+          return continueSession(`Sell Bitcoin
+
+Your Bitcoin Balance:
+₿${balanceBTC.toFixed(8)} BTC
+≈ UGX ${ugxEquivalent.toLocaleString()}
+
+Choose amount type:
+1. Enter UGX amount
+2. Enter BTC amount
+0. Cancel`);
+          
+        } catch (error) {
+          console.error('Error checking Bitcoin balance:', error);
+          return endSession('Error checking balance. Please try again later.');
+        }
       }
       
-      const btcAmount = parseFloat(currentInput);
-      if (isNaN(btcAmount) || btcAmount <= 0) {
-        return continueSession('Invalid amount.\nEnter BTC amount to sell (e.g., 0.001):');
+      // Handle currency selection
+      if (currentInput === '1') {
+        session.data.amountType = 'ugx';
+        session.step = 2;
+        return continueSession('Enter UGX amount to receive (min: UGX 1,000):');
+      } else if (currentInput === '2') {
+        session.data.amountType = 'btc';
+        session.step = 2;
+        return continueSession('Enter BTC amount to sell (min: ₿0.00001):');
+      } else if (currentInput === '0') {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return handleBitcoin('', session);
+      } else {
+        return continueSession(`Invalid selection.
+
+Choose amount type:
+1. Enter UGX amount
+2. Enter BTC amount
+0. Cancel`);
+      }
+    }
+    
+    case 2: {
+      // Handle amount input based on selected type
+      const amountType = session.data.amountType;
+      let btcAmount: number;
+      let ugxAmount: number;
+      
+      if (amountType === 'ugx') {
+        // User entered UGX amount, convert to BTC
+        ugxAmount = parseFloat(currentInput);
+        if (isNaN(ugxAmount) || ugxAmount <= 0) {
+          return continueSession('Invalid amount.\nEnter UGX amount to receive (min: UGX 1,000):');
+        }
+        
+        if (ugxAmount < 1000) {
+          return continueSession('Minimum sale: UGX 1,000\nEnter UGX amount to receive:');
+        }
+        
+        // Get exchange rate and calculate BTC amount (before fees)
+        const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+        const btcRate = exchangeRate.btcToLocal;
+        
+        // Calculate gross UGX needed (including fees) to get the desired net amount
+        const feeRate = 0.025; // 2.5% fee
+        const ugxGross = ugxAmount / (1 - feeRate); // Reverse calculate gross amount
+        btcAmount = ugxGross / btcRate;
+        
+      } else {
+        // User entered BTC amount directly
+        btcAmount = parseFloat(currentInput);
+        if (isNaN(btcAmount) || btcAmount <= 0) {
+          return continueSession('Invalid amount.\nEnter BTC amount to sell (min: ₿0.00001):');
+        }
+        
+        if (btcAmount < 0.00001) {
+          return continueSession('Minimum sale: ₿0.00001 BTC\nEnter BTC amount to sell:');
+        }
+        
+        // Calculate UGX amount
+        const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+        const btcRate = exchangeRate.btcToLocal;
+        ugxAmount = btcAmount * btcRate;
       }
       
-      if (btcAmount < 0.0001) {
-        return continueSession('Minimum sale: ₿0.0001 BTC\nEnter BTC amount to sell:');
+      // Check if user has sufficient Bitcoin balance
+      try {
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        const { balance: balanceSats } = await BitcoinService.getBitcoinBalanceWithSync(user.id);
+        const btcAmountSats = BitcoinService.btcToSatoshis(btcAmount);
+        
+        if (balanceSats < btcAmountSats) {
+          const availableBTC = BitcoinService.satoshisToBtc(balanceSats);
+          const availableUGX = await BitcoinService.calculateLocalFromBitcoin(balanceSats, 'UGX');
+          
+          return continueSession(`Insufficient BTC balance!
+
+Your balance: ₿${availableBTC.toFixed(8)} BTC
+≈ UGX ${availableUGX.toLocaleString()}
+
+Required: ₿${btcAmount.toFixed(8)} BTC
+
+Enter a smaller amount:`);
+        }
+        
+      } catch (error) {
+        console.error('Error checking Bitcoin balance:', error);
+        return endSession('Error checking balance. Please try again later.');
       }
       
-      // Calculate UGX amount and fees with real rate
-      const { BitcoinRateService } = await import('./bitcoinRateService.js');
-      const btcRate = await BitcoinRateService.getBitcoinRate('ugx');
+      // Calculate fees and net amounts
+      const exchangeRate = await BitcoinService.getExchangeRate('UGX');
+      const btcRate = exchangeRate.btcToLocal;
       const ugxGross = btcAmount * btcRate;
       const fee = Math.round(ugxGross * 0.025); // 2.5% fee
       const ugxNet = ugxGross - fee;
@@ -1040,22 +1802,89 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
       session.data.ugxGross = ugxGross;
       session.data.ugxNet = ugxNet;
       session.data.fee = fee;
-      session.step = 2;
+      session.step = 3;
       
-      return continueSession(`BTC Sale Quote
+      // Get available agents for Bitcoin exchange
+      console.log('Getting available agents for Bitcoin sale...');
+      try {
+        const agents = await DataService.getAvailableAgents();
+        const availableAgents = agents.filter((agent: Agent) => 
+          agent.isActive
+          // agent.services?.includes('bitcoin_exchange') &&
+          // agent.cashBalance >= ugxNet // Agent needs enough cash to pay user
+        );
+        
+        if (availableAgents.length === 0) {
+          return endSession(`No agents available for Bitcoin sale at this time.
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+        session.data.availableAgents = availableAgents;
+        
+        let agentList = `BTC Sale Quote
 
 Sell: ₿${btcAmount.toFixed(8)} BTC
 Gross: UGX ${ugxGross.toLocaleString()}
 Fee (2.5%): UGX ${fee.toLocaleString()}
 You receive: UGX ${ugxNet.toLocaleString()}
 
-Rate: 1 BTC = UGX ${btcRate.toLocaleString()}
-
-Enter PIN to confirm:`);
+Select an agent:
+`;
+        
+        availableAgents.slice(0, 5).forEach((agent: any, index: number) => {
+          agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
+        });
+        
+        agentList += '0. Cancel';
+        
+        return continueSession(agentList);
+        
+      } catch (error) {
+        console.error('Error getting agents for Bitcoin sale:', error);
+        return endSession('Error loading agents. Please try again later.');
+      }
     }
     
-    case 2: {
-      // PIN verification and sale
+    case 3: {
+      // Agent selection
+      const agentChoice = parseInt(currentInput);
+      
+      if (agentChoice === 0) {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return handleBitcoin('', session);
+      }
+      
+      const agents = session.data.availableAgents;
+      if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
+        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+      }
+      
+      const selectedAgent = agents[agentChoice - 1];
+      session.data.selectedAgent = selectedAgent;
+      session.step = 4;
+      
+      const btcAmount = session.data.btcAmount || 0;
+      const ugxNet = session.data.ugxNet || 0;
+      const fee = session.data.fee || 0;
+      
+      return continueSession(`Selected Agent:
+${selectedAgent.businessName}
+${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
+
+Sale Details:
+Sell: ₿${btcAmount.toFixed(8)} BTC
+Fee: UGX ${fee.toLocaleString()}
+You receive: UGX ${ugxNet.toLocaleString()}
+
+Enter your PIN to confirm:`);
+    }
+    
+    case 4: {
+      // PIN verification and process Bitcoin sale
       if (!/^\d{4}$/.test(currentInput)) {
         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
       }
@@ -1065,32 +1894,80 @@ Enter PIN to confirm:`);
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Process BTC sale (mock implementation)
-      const btcAmount = session.data.btcAmount || 0;
-      const ugxNet = session.data.ugxNet || 0;
-      const fee = session.data.fee || 0;
-      const transactionId = `btc_sell_${Date.now()}`;
-      
-      // Mock BTC balance check
-      const userBTCBalance = 0.00125; // Mock balance
-      if (userBTCBalance < btcAmount) {
-        return endSession(`Insufficient BTC balance!
-Your BTC balance: ₿${userBTCBalance.toFixed(8)} BTC
-Required: ₿${btcAmount.toFixed(8)} BTC
+      try {
+        // Get user information
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        const selectedAgent = session.data.selectedAgent;
+        const btcAmount = session.data.btcAmount || 0;
+        const btcAmountSats = BitcoinService.btcToSatoshis(btcAmount);
+        
+        // Generate a unique sale code for the user to give to agent
+        const saleCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.saleCode = saleCode;
+        
+        // Process Bitcoin to local currency exchange through agent
+        const exchangeResult = await BitcoinService.processBitcoinToLocalExchange(
+          user.id,
+          selectedAgent.id,
+          btcAmountSats,
+          'UGX',
+          'agent_cash'
+        );
+        
+        if (exchangeResult.success && exchangeResult.transaction) {
+          const ugxAmount = exchangeResult.transaction.localAmount || 0;
+          
+          // Send SMS with sale details and code
+          const smsMessage = `AfriTokeni BTC Sale
+Code: ${saleCode}
+BTC to sell: ₿${btcAmount.toFixed(8)}
+You will receive: UGX ${ugxAmount.toLocaleString()}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+Transaction ID: ${exchangeResult.transaction.id}
+
+Give this code to the agent to complete your Bitcoin sale and collect cash.`;
+
+          console.log(`Sending Bitcoin sale SMS to ${session.phoneNumber}`);
+
+          try {
+            await sendSMSNotification(session.phoneNumber, smsMessage);
+          } catch (smsError) {
+            console.error('SMS sending failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ BTC Sale Initiated!
+
+Sale Code: ${saleCode}
+Transaction ID: ${exchangeResult.transaction.id}
+Selling: ₿${btcAmount.toFixed(8)} BTC
+You will receive: UGX ${ugxAmount.toLocaleString()}
+
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+
+Give the code ${saleCode} to the agent to complete your sale and collect cash.
+
+SMS sent with details.
 
 Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Sale failed: ${exchangeResult.message}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+      } catch (error) {
+        console.error('Error processing Bitcoin sale:', error);
+        return endSession('Error processing sale. Please try again later.');
       }
-      
-      return endSession(`✅ BTC Sale Successful!
-
-Sold: ₿${btcAmount.toFixed(8)} BTC
-Received: UGX ${ugxNet.toLocaleString()}
-Fee: UGX ${fee.toLocaleString()}
-Transaction ID: ${transactionId}
-
-UGX added to your balance.
-
-Thank you for using AfriTokeni!`);
     }
     
     default:
@@ -1141,13 +2018,13 @@ Enter recipient phone number (256XXXXXXXXX):`);
     
     case 2: {
       // Step 2: Enter recipient phone number and verify they exist
-    //   if (!currentInput.match(/^256\d{9}$/)) {
-    //     return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
-    //   }
+      if (!currentInput.match(/^256\d{9}$/)) {
+        return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
+      }
 
-    console.log(`Searching for user by phone number: ${currentInput}`);
+      console.log(`Searching for user by phone number: ${currentInput}`);
 
-      // Use the new findUserByPhoneNumber method that handles both SMS and web users
+      // Use the findUserByPhoneNumber method to find recipient
       let recipient = await DataService.findUserByPhoneNumber(currentInput);
       
       if (!recipient) {
@@ -1156,19 +2033,16 @@ Enter recipient phone number (256XXXXXXXXX):`);
       }
       
       if (!recipient) {
-        // Try direct key lookup as fallback
-        recipient = await DataService.getUserByKey(currentInput);
-      }
-      
-      if (!recipient) {
-        // Try with + prefix as key
-        recipient = await DataService.getUserByKey(`+${currentInput}`);
-      }
-
-      if (!recipient) {
         return continueSession(`Phone number ${currentInput} is not registered with AfriTokeni.
         
 Please enter a valid recipient phone number (256XXXXXXXXX):`);
+      }
+
+      // Don't allow sending money to yourself
+      if (currentInput === session.phoneNumber) {
+        return continueSession(`You cannot send money to yourself.
+
+Please enter a different recipient phone number (256XXXXXXXXX):`);
       }
 
       session.data.recipientPhone = currentInput;
@@ -1209,52 +2083,54 @@ Enter your PIN:`);
       // PIN is correct, process the transaction
       console.log(`💳 Processing money transfer: ${session.phoneNumber} -> ${session.data.recipientPhone}, Amount: ${session.data.amount}, Fee: ${session.data.fee}`);
       
-      const senderPhone = `+${session.phoneNumber}`;
-      const recipientPhone = session.data.recipientPhone || '';
-      const amount = session.data.amount || 0;
-      const fee = session.data.fee || 0;
-      
-      const transferResult = await DataService.processSendMoney(
-        senderPhone,
-        recipientPhone,
-        amount,
-        fee
-      );
+      try {
+        const senderPhone = `+${session.phoneNumber}`;
+        const recipientPhone = session.data.recipientPhone || '';
+        const amount = session.data.amount || 0;
+        const fee = session.data.fee || 0;
+        
+        // Use the existing DataService.processSendMoney method (DataService is WebhookDataService)
+        const transferResult = await DataService.processSendMoney(
+          senderPhone,
+          recipientPhone,
+          amount,
+          fee
+        );
 
-      console.log(`Transfer result: ${JSON.stringify(transferResult)}`);
+        console.log(`Transfer result:`, transferResult);
 
-      if (!transferResult.success) {
-        return endSession(`❌ Transaction Failed!
+        if (!transferResult.success) {
+          return endSession(`❌ Transaction Failed!
 ${transferResult.error}
 
 Thank you for using AfriTokeni!`);
-      }
+        }
 
-      const transactionId = transferResult.transactionId;
-      const recipientName = session.data.recipientName || 'Unknown';
-      
-      // Send SMS to sender
-      await sendSMSNotification(
-        session.phoneNumber,
-        `Money sent successfully!
+        const transactionId = transferResult.transactionId;
+        const recipientName = session.data.recipientName || 'Unknown';
+        
+        // Send SMS to sender
+        await sendSMSNotification(
+          session.phoneNumber,
+          `Money sent successfully!
 Amount: UGX ${amount.toLocaleString()}
 To: ${recipientName} (${recipientPhone})
 Fee: UGX ${fee.toLocaleString()}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
-      );
-      
-      // Send SMS to recipient
-      await sendSMSNotification(
-        recipientPhone,
-        `You received money!
+        );
+        
+        // Send SMS to recipient  
+        await sendSMSNotification(
+          recipientPhone,
+          `You received money!
 Amount: UGX ${amount.toLocaleString()}
-From: ${session.phoneNumber}
+From: ${senderPhone}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
-      );
+        );
 
-      return endSession(`✅ Transaction Successful!
+        return endSession(`✅ Transaction Successful!
 
 Sent: UGX ${amount.toLocaleString()}
 To: ${recipientName}
@@ -1263,12 +2139,21 @@ Fee: UGX ${fee.toLocaleString()}
 Reference: ${transactionId}
 
 Thank you for using AfriTokeni!`);
+
+      } catch (error) {
+        console.error('Error processing send money transaction:', error);
+        return endSession(`❌ Transaction Failed!
+An error occurred while processing your transaction.
+
+Thank you for using AfriTokeni!`);
+      }
     }
     
     default:
       session.currentMenu = 'main';
       session.step = 0;
       session.data = {};
+      session.step = 1;
       return continueSession('Enter amount to send (UGX):');
   }
 }
@@ -1669,6 +2554,15 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
 
     // Route to appropriate handler based on current menu
     switch (session.currentMenu) {
+      case 'registration_check':
+        response = await handleRegistrationCheck(text, session);
+        break;
+      case 'user_registration':
+        response = await handleUserRegistration(text, session);
+        break;
+      case 'verification':
+        response = await handleVerification(text, session);
+        break;
       case 'pin_check':
         response = await handlePinCheck(text, session);
         break;
@@ -1709,7 +2603,7 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
         response = await handleWithdraw(text, session);
         break;
       default:
-        response = await handlePinCheck('', session);
+        response = await handleRegistrationCheck('', session);
     }
 
     // Clean up session if ended

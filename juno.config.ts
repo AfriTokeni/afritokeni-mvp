@@ -3,8 +3,8 @@ import { defineConfig } from "@junobuild/config";
 export default defineConfig({
   satellite: {
     ids: {
-      development: "atbka-rp777-77775-aaaaq-cai",
-      production: "dkk74-oyaaa-aaaal-askxq-cai"
+      development: "uxrrr-q7777-77774-qaaaq-cai",
+      production: "dkk74-oyaaa-aaaal-askxq-cai",
     },
     source: "dist",
     predeploy: ["npm run build"],
@@ -71,11 +71,23 @@ export default defineConfig({
           memory: "stable",
         },
         {
+          collection: "bitcoin_wallets",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
+        {
+          collection: "bitcoin_transactions",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
+        {
           collection: "platform_revenue",
           read: "managed",
           write: "managed",
           memory: "stable",
-        },
+        }
       ],
       storage: [
         {

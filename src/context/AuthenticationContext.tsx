@@ -79,17 +79,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem(userKey, userString);
     localStorage.setItem(methodKey, method);
 
-    const prev_logged_user = localStorage.getItem(
-      "afritokeni_current_user_type",
-    );
-    const parsedUser = prev_logged_user ? JSON.parse(prev_logged_user) : {};
-    const obj = {
-      ...parsedUser,
-      [userType]: userType,
-    };
-
-    // Also store current active user info for easy retrieval
-    localStorage.setItem("afritokeni_current_user_type", JSON.stringify(obj));
+    // Update current user type tracking (simplified)
+    const currentUserTypes = JSON.parse(localStorage.getItem("afritokeni_current_user_type") || "{}");
+    currentUserTypes[userType] = userType;
+    localStorage.setItem("afritokeni_current_user_type", JSON.stringify(currentUserTypes));
+    
+    console.log(`Stored ${userType} data with auth method:`, method);
   };
 
   // Helper function to clear user data from both storages
@@ -145,93 +140,59 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Helper function to get stored user data for specific user type
   const getStoredUserData = () => {
-    // let targetUserType = userType;
-    // console.log('Getting stored user data for type:', userType);
+    // Check for stored user and agent data directly
+    const storedUser = localStorage.getItem('afritokeni_user');
+    const storedUserAuthMethod = localStorage.getItem('afritokeni_user_auth_method');
+    const storedAgent = localStorage.getItem('afritokeni_agent');
+    const storedAgentAuthMethod = localStorage.getItem('afritokeni_agent_auth_method');
+    
+    let parsedUser: User | null = null;
+    let parsedAgent: User | null = null;
+    let authMethod: "sms" | "web" = "web";
 
-    // // If no specific user type requested, get the current active one
-    // if (!targetUserType) {
-    //   targetUserType = localStorage.getItem('afritokeni_current_user_type') as 'user' | 'agent';
-    // }
-
-    // // If still no user type found, try to find any existing data (prioritize user over agent)
-    // if (!targetUserType) {
-    //   // Check if user data exists
-    //   const userExists = localStorage.getItem('afritokeni_user') && localStorage.getItem('afritokeni_user_auth_method');
-    //   const agentExists = localStorage.getItem('afritokeni_agent') && localStorage.getItem('afritokeni_agent_auth_method');
-
-    //   if (userExists) {
-    //     targetUserType = 'user';
-    //   } else if (agentExists) {
-    //     targetUserType = 'agent';
-    //   }
-    // }
-
-    const user_type_storage = localStorage.getItem(
-      "afritokeni_current_user_type",
-    );
-
-    const target_user_type = user_type_storage
-      ? JSON.parse(localStorage.getItem("afritokeni_current_user_type") || "{}")
-      : null;
-    console.log("Target user type for retrieval:", target_user_type);
-
-    if (!target_user_type) return null;
-
-    // if (!targetUserType) return null;
-
-    const userKey = `afritokeni_${target_user_type["user"]}`;
-    const userMethodKey = `afritokeni_${target_user_type["user"]}_auth_method`;
-
-    const agent_user_key = `afritokeni_${target_user_type["agent"]}`;
-    const agent_user_method_key = `afritokeni_${target_user_type["agent"]}_auth_method`;
-
-    // User data
-    const storedUser = JSON.parse(localStorage.getItem(userKey) || "null");
-    const storedUserAuthMethod = localStorage.getItem(userMethodKey);
-
-    // Agent user data
-    const storedAgentUser = JSON.parse(
-      localStorage.getItem(agent_user_key) || "null",
-    );
-    const storedAgentAuthMethod = localStorage.getItem(agent_user_method_key);
-
-    if (
-      (storedUser && storedUserAuthMethod) ||
-      (storedAgentUser && storedAgentAuthMethod)
-    ) {
+    // Parse user data if it exists
+    if (storedUser && storedUserAuthMethod) {
       try {
-        const parsedUser = storedUser as User;
-        const parsedAgentUser = storedAgentUser as User;
-        
-        // Convert createdAt string back to Date if it exists and user is not null
+        parsedUser = JSON.parse(storedUser) as User;
+        // Convert createdAt string back to Date if it exists
         if (parsedUser && parsedUser.createdAt && typeof parsedUser.createdAt === "string") {
           parsedUser.createdAt = new Date(parsedUser.createdAt);
         }
-
-        // Convert createdAt string back to Date if it exists and agent user is not null
-        if (
-          parsedAgentUser && 
-          parsedAgentUser.createdAt &&
-          typeof parsedAgentUser.createdAt === "string"
-        ) {
-          parsedAgentUser.createdAt = new Date(parsedAgentUser.createdAt);
-        }
-
-        return {
-          user: { user: parsedUser, agent: parsedAgentUser },
-          authMethod: storedAgentAuthMethod as "sms" | "web",
-        };
+        authMethod = storedUserAuthMethod as "sms" | "web";
+        console.log("Found stored user data:", parsedUser);
       } catch (error) {
         console.error("Error parsing stored user data:", error);
-
-        // Clear corrupted data
-        localStorage.removeItem(userKey);
-        localStorage.removeItem(agent_user_key);
-        localStorage.removeItem(userMethodKey);
-        localStorage.removeItem(agent_user_method_key);
+        localStorage.removeItem('afritokeni_user');
+        localStorage.removeItem('afritokeni_user_auth_method');
       }
     }
 
+    // Parse agent data if it exists
+    if (storedAgent && storedAgentAuthMethod) {
+      try {
+        parsedAgent = JSON.parse(storedAgent) as User;
+        // Convert createdAt string back to Date if it exists
+        if (parsedAgent && parsedAgent.createdAt && typeof parsedAgent.createdAt === "string") {
+          parsedAgent.createdAt = new Date(parsedAgent.createdAt);
+        }
+        authMethod = storedAgentAuthMethod as "sms" | "web";
+        console.log("Found stored agent data:", parsedAgent);
+      } catch (error) {
+        console.error("Error parsing stored agent data:", error);
+        localStorage.removeItem('afritokeni_agent');
+        localStorage.removeItem('afritokeni_agent_auth_method');
+      }
+    }
+
+    // Return data if any user type was found
+    if (parsedUser || parsedAgent) {
+      return {
+        user: { user: parsedUser, agent: parsedAgent },
+        authMethod: authMethod,
+      };
+    }
+
+    console.log("No stored user data found");
     return null;
   };
 
@@ -382,7 +343,16 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Load or create user profile from Juno datastore
         loadOrCreateUserFromJuno(junoUser);
       } else {
-        // User is not authenticated
+        // User is not authenticated with Juno - but check if we have SMS users stored
+        const storedData = getStoredUserData();
+        if (storedData && storedData.authMethod === "sms") {
+          // Keep SMS user authenticated even if Juno user is null
+          console.log("Keeping SMS user authenticated despite Juno user being null");
+          return;
+        }
+        
+        // Only clear state if there's no stored SMS user
+        console.log("No Juno user and no SMS user - clearing authentication state");
         setUser({ user: null, agent: null, admin: null });
         setAuthMethod("web");
       }
