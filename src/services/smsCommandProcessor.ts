@@ -8,6 +8,9 @@ import { SMSDataAdapter } from './smsDataAdapter';
 import { SMSLightningCommands } from './smsLightningCommands';
 import { getCurrencyFromPhone } from '../utils/africanPhoneNumbers';
 import { AfricanCurrency } from '../types/currency';
+import { RateLimiter } from './rateLimiter';
+import { FraudDetectionService } from './fraudDetection';
+import { TranslationService, Language } from './translations';
 
 export interface SMSCommand {
   phoneNumber: string;
@@ -37,6 +40,18 @@ export class SMSCommandProcessor {
   async processCommand(command: SMSCommand): Promise<SMSCommandResponse> {
     const { phoneNumber, message } = command;
     const normalizedMessage = message.trim().toUpperCase();
+
+    // Detect user's language
+    const language = await TranslationService.detectLanguage(phoneNumber);
+
+    // Rate limiting check
+    const rateCheck = RateLimiter.isAllowed(phoneNumber, 'sms');
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        reply: TranslationService.translate('too_many_requests', language) + ' ' + rateCheck.message
+      };
+    }
 
     try {
       // Registration command
