@@ -50,7 +50,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
   };
 
   const handleAvatarClick = () => {
-    navigate(`/${userType}s/profile`);
+    navigate(`/${userType}s/${userType === 'agent' ? 'settings' : 'profile'}`);
   };
 
   // Get page title from current route
