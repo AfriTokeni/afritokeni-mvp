@@ -5,6 +5,20 @@ import { nanoid } from 'nanoid';
 import { User } from '../types/auth';
 import { AnonymousIdentity } from "@dfinity/agent";
 import type { SatelliteOptions } from "@junobuild/core";
+import { AfricanCurrency } from '../types/currency';
+import * as bitcoin from 'bitcoinjs-lib';
+import * as ecc from 'tiny-secp256k1';
+import { ECPairFactory } from 'ecpair';
+import { createCipheriv, scryptSync, randomBytes } from 'node:crypto';
+import { Buffer } from 'node:buffer';
+
+// Node.js process declaration for environment variables
+// declare const process: {
+//   env: {
+//     [key: string]: string | undefined;
+//     NODE_ENV?: string;
+//   };
+// };
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
@@ -132,6 +146,59 @@ export interface USSDSession {
   isExpired(): boolean;
   updateActivity(): void;
 }
+
+
+// Bitcoin wallet and transaction interfaces
+export interface BitcoinWallet {
+  id: string;
+  userId: string;
+  address: string;
+  privateKey?: string; // For POC - in production use threshold signatures
+  balance: number; // in satoshis
+  createdAt: Date;
+}
+
+export interface BitcoinTransaction {
+  id: string;
+  userId: string;
+  agentId?: string;
+  type: 'bitcoin_to_local' | 'local_to_bitcoin' | 'bitcoin_send' | 'bitcoin_receive';
+  bitcoinAmount: number; // in satoshis
+  localAmount?: number; // equivalent local currency amount
+  localCurrency: AfricanCurrency; // The local African currency being exchanged
+  exchangeRate: number; // BTC to local currency rate at time of transaction
+  bitcoinTxHash?: string; // actual Bitcoin network transaction hash
+  fromAddress?: string;
+  toAddress?: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'failed';
+  confirmations: number;
+  fee: number; // Bitcoin network fee in satoshis
+  agentFee?: number; // Agent commission in local currency
+  createdAt: Date;
+  confirmedAt?: Date;
+  metadata?: {
+    smsReference?: string;
+    exchangeMethod?: 'agent_cash' | 'agent_digital';
+    agentLocation?: string;
+  };
+}
+
+export interface ExchangeRate {
+  btcToLocal: number;
+  localToBtc: number;
+  currency: AfricanCurrency;
+  lastUpdated: Date;
+  source: string;
+}
+
+export interface MultiCurrencyExchangeRates {
+  [currency: string]: ExchangeRate;
+}
+
+// Helper function for currency formatting
+const formatCurrencyAmount = (amount: number, currency: string): string => {
+  return `${amount.toFixed(2)} ${currency}`;
+};
 
 // Simplified data service following Juno patterns
 export class WebhookDataService {
@@ -1108,4 +1175,1210 @@ export class WebhookDataService {
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
       }
     }
+}
+
+export class BitcoinDataService {
+  private static readonly SATOSHIS_PER_BTC = 100000000;
+  private static readonly NETWORK_FEE_SATS = 1000; // Default network fee
+  
+  // Bitcoin networks
+  private static readonly MAINNET = bitcoin.networks.bitcoin;
+  private static readonly TESTNET = bitcoin.networks.testnet;
+  
+  // Use testnet for development, mainnet for production
+  private static readonly NETWORK = process.env.NODE_ENV === 'production' ? this.MAINNET : this.TESTNET;
+  
+  // Initialize ECPair with secp256k1
+  private static readonly ECPair = ECPairFactory(ecc);
+  
+  // Generate REAL Bitcoin address using bitcoinjs-lib
+  static generateBitcoinAddress(): { address: string; privateKey: string; publicKey: string } {
+    // Generate a random private key
+    const keyPair = this.ECPair.makeRandom({ network: this.NETWORK });
+    
+    // Get the private key in WIF format
+    const privateKey = keyPair.toWIF();
+    
+    // Get the public key as hex string
+    const publicKey = Buffer.from(keyPair.publicKey).toString('hex');
+    
+    // Generate P2WPKH (native segwit) address
+    const { address } = bitcoin.payments.p2wpkh({ 
+      pubkey: Buffer.from(keyPair.publicKey), 
+      network: this.NETWORK 
+    });
+    
+    if (!address) {
+      throw new Error('Failed to generate Bitcoin address');
+    }
+    
+    return {
+      address,
+      privateKey,
+      publicKey
+    };
+  }
+  
+  // Generate Bitcoin address from existing private key
+  static getAddressFromPrivateKey(privateKeyWIF: string): { address: string; publicKey: string } {
+    const keyPair = this.ECPair.fromWIF(privateKeyWIF, this.NETWORK);
+    const publicKey = Buffer.from(keyPair.publicKey).toString('hex');
+    
+    const { address } = bitcoin.payments.p2wpkh({ 
+      pubkey: Buffer.from(keyPair.publicKey), 
+      network: this.NETWORK 
+    });
+    
+    if (!address) {
+      throw new Error('Failed to generate address from private key');
+    }
+    
+    return { address, publicKey };
+  }
+
+  // Create Bitcoin wallet for user
+  static async createBitcoinWallet(userId: string, phoneNumber?: string): Promise<BitcoinWallet> {
+    try {
+      // Generate real Bitcoin address using your existing code
+      const { address, privateKey, publicKey } = this.generateBitcoinAddress();
+      
+      const wallet: BitcoinWallet = {
+        id: nanoid(),
+        userId,
+        address,
+        privateKey, // Store securely - consider encryption
+        balance: 0,
+        createdAt: new Date()
+      };
+
+      // Store in Juno datastore
+      const walletDocument = {
+        id: wallet.id,
+        userId,
+        address,
+        encryptedPrivateKey: this.encryptPrivateKey(privateKey, phoneNumber || userId),
+        publicKey,
+        balance: 0,
+        network: process.env.NODE_ENV === 'production' ? 'mainnet' : 'testnet',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        metadata: {
+          walletType: phoneNumber ? 'custodial' : 'custodial', // SMS users need custodial
+          isActive: true,
+          derivationPath: phoneNumber ? this.getDerivationPath(phoneNumber) : undefined
+        }
+      };
+
+      await setDoc({
+        collection: 'bitcoin_wallets',
+        doc: {
+          key: `btc_${userId}`,
+          data: walletDocument,
+          version: 1n
+        },
+        satellite
+      });
+
+      // Send notification
+      try {
+        const user = await WebhookDataService.getUserByKey(userId);
+        if (user) {
+          console.log(`Sending Bitcoin wallet creation notification to user ${user.firstName} ${user.lastName}`);
+          // await NotificationService.sendNotification(user, {
+          //   userId,
+          //   type: 'bitcoin_exchange',
+          //   amount: 0,
+          //   currency: 'BTC',
+          //   transactionId: wallet.id,
+          //   message: `Bitcoin wallet created. Address: ${address.substring(0, 8)}...`
+          // });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send Bitcoin wallet notification:', notificationError);
+      }
+
+      return wallet;
+    } catch (error) {
+      console.error('Error creating Bitcoin wallet:', error);
+      throw error;
+    }
+  }
+
+  // Get REAL BTC to local currency exchange rate
+  static async getExchangeRate(currency: AfricanCurrency = 'NGN'): Promise<ExchangeRate> {
+    try {
+      // Get real BTC price in USD first
+      const btcUsdResponse = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC');
+      const btcUsdData = await btcUsdResponse.json();
+      const btcToUsd = parseFloat(btcUsdData.data.rates.USD);
+      
+      // Get USD to local currency rate
+      let usdToLocal = 1;
+      
+      if (currency !== 'BTC') {
+        try {
+          // Use exchangerate-api for real forex rates
+          const forexResponse = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
+          const forexData = await forexResponse.json();
+          
+          // Map African currencies to their forex codes
+          const currencyMap: Record<AfricanCurrency, string> = {
+            'NGN': 'NGN', 'KES': 'KES', 'TZS': 'TZS', 'RWF': 'RWF', 'BIF': 'BIF', 'ETB': 'ETB', 'UGX': 'UGX',
+            'GHS': 'GHS', 'GNF': 'GNF', 'XOF': 'XOF', 'XAF': 'XAF', 'CDF': 'CDF',
+            'AOA': 'AOA', 'ZAR': 'ZAR', 'BWP': 'BWP', 'EGP': 'EGP', 'MAD': 'MAD',
+            'TND': 'TND', 'DZD': 'DZD', 'MRU': 'MRU', 'MUR': 'MUR', 'SLL': 'SLL', 'LRD': 'LRD',
+            'GMD': 'GMD', 'SZL': 'SZL', 'LSL': 'LSL', 'NAD': 'NAD', 'ZMW': 'ZMW',
+            'ZWL': 'ZWL', 'MWK': 'MWK', 'MZN': 'MZN', 'SCR': 'SCR', 'CVE': 'CVE',
+            'STN': 'STN', 'KMF': 'KMF', 'DJF': 'DJF', 'ERN': 'ERN', 'MGA': 'MGA',
+            'SOS': 'SOS', 'LYD': 'LYD', 'SDG': 'SDG', 'BTC': 'BTC'
+          };
+          
+          const forexCode = currencyMap[currency];
+          if (forexCode && forexData.rates[forexCode]) {
+            usdToLocal = forexData.rates[forexCode];
+          } else {
+            // Fallback to estimated rates if not available in forex API
+            const fallbackRates: Record<AfricanCurrency, number> = {
+              'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'BIF': 2900, 'ETB': 120,
+              'UGX': 3700, 'GHS': 15, 'GNF': 8600, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
+              'AOA': 900, 'ZAR': 18, 'BWP': 13.5, 'EGP': 49, 'MAD': 10,
+              'TND': 3.1, 'DZD': 135, 'MRU': 36, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
+              'GMD': 67, 'SZL': 18, 'LSL': 18, 'NAD': 18, 'ZMW': 27,
+              'ZWL': 25000, 'MWK': 1730, 'MZN': 64, 'SCR': 13.5, 'CVE': 101,
+              'STN': 22.5, 'KMF': 450, 'DJF': 178, 'ERN': 15, 'MGA': 4500,
+              'SOS': 570, 'LYD': 4.8, 'SDG': 600, 'BTC': 1
+            };
+            usdToLocal = fallbackRates[currency] || 1;
+          }
+        } catch (forexError) {
+          console.warn('Forex API failed, using fallback rates:', forexError);
+          // Use fallback rates
+          const fallbackRates: Record<AfricanCurrency, number> = {
+            'NGN': 1550, 'KES': 129, 'TZS': 2300, 'RWF': 1240, 'BIF': 2900, 'ETB': 120,
+            'UGX': 3700, 'GHS': 15, 'GNF': 8600, 'XOF': 600, 'XAF': 600, 'CDF': 2800,
+            'AOA': 900, 'ZAR': 18, 'BWP': 13.5, 'EGP': 49, 'MAD': 10,
+            'TND': 3.1, 'DZD': 135, 'MRU': 36, 'MUR': 46, 'SLL': 22000, 'LRD': 190,
+            'GMD': 67, 'SZL': 18, 'LSL': 18, 'NAD': 18, 'ZMW': 27,
+            'ZWL': 25000, 'MWK': 1730, 'MZN': 64, 'SCR': 13.5, 'CVE': 101,
+            'STN': 22.5, 'KMF': 450, 'DJF': 178, 'ERN': 15, 'MGA': 4500,
+            'SOS': 570, 'LYD': 4.8, 'SDG': 600, 'BTC': 1
+          };
+          usdToLocal = fallbackRates[currency] || 1;
+        }
+      }
+      
+      const btcToLocal = currency === 'BTC' ? 1 : btcToUsd * usdToLocal;
+      
+      return {
+        btcToLocal,
+        localToBtc: 1 / btcToLocal,
+        currency,
+        lastUpdated: new Date(),
+        source: 'coinbase_exchangerate_api'
+      };
+    } catch (error) {
+      console.error('Error fetching real exchange rate:', error);
+      // Fallback to estimated rates
+      const fallbackRates: Record<AfricanCurrency, number> = {
+        'NGN': 65000000, 'KES': 6500000, 'UGX': 150000000, 'ZAR': 1200000,
+        'GHS': 800000, 'EGP': 3200000, 'MAD': 650000, 'TZS': 150000000,
+        'RWF': 85000000, 'BIF': 145000000, 'ETB': 7500000, 'XOF': 40000000, 'XAF': 40000000,
+        'CDF': 180000000, 'AOA': 55000000, 'BWP': 900000, 'TND': 200000,
+        'DZD': 8800000, 'MRU': 2400000, 'MUR': 3000000, 'BTC': 1, 'SLL': 1200000000,
+        'LRD': 12000000, 'GMD': 4200000, 'GNF': 540000000, 'SZL': 1200000, 'LSL': 1200000,
+        'NAD': 1200000, 'ZMW': 18000000, 'ZWL': 32000000000, 'MWK': 85000000,
+        'MZN': 4200000, 'SCR': 900000, 'CVE': 6800000, 'STN': 1500000,
+        'KMF': 30000000, 'DJF': 12000000, 'ERN': 1000000, 'MGA': 300000000,
+        'SOS': 38000000, 'LYD': 320000, 'SDG': 40000000
+      };
+      
+      const rate = fallbackRates[currency] || fallbackRates['NGN'];
+      
+      return {
+        btcToLocal: rate,
+        localToBtc: 1 / rate,
+        currency,
+        lastUpdated: new Date(),
+        source: 'fallback'
+      };
+    }
+  }
+
+  // Convert satoshis to BTC
+  static satoshisToBtc(satoshis: number): number {
+    return satoshis / this.SATOSHIS_PER_BTC;
+  }
+
+  // Convert BTC to satoshis
+  static btcToSatoshis(btc: number): number {
+    return Math.round(btc * this.SATOSHIS_PER_BTC);
+  }
+
+  // Calculate local currency equivalent of Bitcoin amount
+  static async calculateLocalFromBitcoin(satoshis: number, currency: AfricanCurrency): Promise<number> {
+    const rate = await this.getExchangeRate(currency);
+    const btc = this.satoshisToBtc(satoshis);
+    return Math.round(btc * rate.btcToLocal);
+  }
+
+  // Calculate Bitcoin equivalent of local currency amount
+  static async calculateBitcoinFromLocal(amount: number, currency: AfricanCurrency): Promise<number> {
+    const rate = await this.getExchangeRate(currency);
+    const btc = amount * rate.localToBtc;
+    return this.btcToSatoshis(btc);
+  }
+
+  // Create Bitcoin transaction record
+  static async createBitcoinTransaction(
+    transaction: Omit<BitcoinTransaction, 'id' | 'createdAt' | 'confirmations'>
+  ): Promise<BitcoinTransaction> {
+    const newTransaction: BitcoinTransaction = {
+      ...transaction,
+      id: nanoid(),
+      confirmations: 0,
+      createdAt: new Date()
+    };
+
+    try {
+      // Store Bitcoin transaction in Juno datastore
+      const transactionDoc = {
+        id: newTransaction.id,
+        userId: newTransaction.userId,
+        agentId: newTransaction.agentId,
+        type: newTransaction.type,
+        bitcoinAmount: newTransaction.bitcoinAmount,
+        localAmount: newTransaction.localAmount,
+        localCurrency: newTransaction.localCurrency,
+        exchangeRate: newTransaction.exchangeRate,
+        bitcoinTxHash: newTransaction.bitcoinTxHash,
+        fromAddress: newTransaction.fromAddress,
+        toAddress: newTransaction.toAddress,
+        status: newTransaction.status,
+        confirmations: newTransaction.confirmations,
+        fee: newTransaction.fee,
+        agentFee: newTransaction.agentFee,
+        createdAt: newTransaction.createdAt.toISOString(),
+        confirmedAt: newTransaction.confirmedAt?.toISOString(),
+        metadata: newTransaction.metadata
+      };
+
+      await setDoc({
+        collection: 'bitcoin_transactions',
+        doc: {
+          key: newTransaction.id,
+          data: transactionDoc,
+          version: 1n
+        },
+        satellite
+      });
+
+      console.log(`✅ Bitcoin transaction ${newTransaction.id} stored in Juno datastore`);
+      return newTransaction;
+    } catch (error) {
+      console.error('❌ Error storing Bitcoin transaction in Juno:', error);
+      // Return the transaction even if storage fails, for backwards compatibility
+      return newTransaction;
+    }
+  }
+
+  // Send REAL Bitcoin transaction
+  static async sendBitcoin(
+    fromAddress: string,
+    toAddress: string,
+    amountSats: number,
+    privateKeyWIF: string
+  ): Promise<{ txHash: string; success: boolean; error?: string }> {
+    try {
+      // Get UTXOs for the from address
+      const utxos = await this.getUTXOs(fromAddress);
+      
+      if (utxos.length === 0) {
+        return {
+          txHash: '',
+          success: false,
+          error: 'No UTXOs available for this address'
+        };
+      }
+      
+      // Calculate total available balance
+      const totalBalance = utxos.reduce((sum, utxo) => sum + utxo.value, 0);
+      
+      if (totalBalance < amountSats + this.NETWORK_FEE_SATS) {
+        return {
+          txHash: '',
+          success: false,
+          error: `Insufficient balance. Available: ${totalBalance} sats, Required: ${amountSats + this.NETWORK_FEE_SATS} sats`
+        };
+      }
+      
+      // Create transaction
+      const keyPair = this.ECPair.fromWIF(privateKeyWIF, this.NETWORK);
+      const psbt = new bitcoin.Psbt({ network: this.NETWORK });
+      
+      // Add inputs
+      let inputValue = 0;
+      for (const utxo of utxos) {
+        if (inputValue >= amountSats + this.NETWORK_FEE_SATS) break;
+        
+        psbt.addInput({
+          hash: utxo.txid,
+          index: utxo.vout,
+          witnessUtxo: {
+            script: bitcoin.payments.p2wpkh({ pubkey: Buffer.from(keyPair.publicKey), network: this.NETWORK }).output!,
+            value: utxo.value,
+          },
+        });
+        inputValue += utxo.value;
+      }
+      
+      // Add output to recipient
+      psbt.addOutput({
+        address: toAddress,
+        value: amountSats,
+      });
+      
+      // Add change output if necessary
+      const change = inputValue - amountSats - this.NETWORK_FEE_SATS;
+      if (change > 0) {
+        psbt.addOutput({
+          address: fromAddress,
+          value: change,
+        });
+      }
+      
+      // Sign all inputs
+      for (let i = 0; i < psbt.inputCount; i++) {
+        psbt.signInput(i, keyPair as any);
+      }
+      
+      // Finalize and extract transaction
+      psbt.finalizeAllInputs();
+      const tx = psbt.extractTransaction();
+      const txHex = tx.toHex();
+      
+      // Broadcast transaction
+      const txHash = await this.broadcastTransaction(txHex);
+      
+      return {
+        txHash,
+        success: true
+      };
+    } catch (error) {
+      console.error('Bitcoin transaction error:', error);
+      return {
+        txHash: '',
+        success: false,
+        error: error instanceof Error ? error.message : 'Transaction failed'
+      };
+    }
+  }
+  
+  // Get UTXOs for an address using blockchain API
+  static async getUTXOs(address: string): Promise<Array<{
+    txid: string;
+    vout: number;
+    value: number;
+  }>> {
+    try {
+      // Use BlockCypher API for testnet/mainnet
+      const network = this.NETWORK === this.MAINNET ? 'main' : 'test3';
+      const apiUrl = `https://api.blockcypher.com/v1/btc/${network}/addrs/${address}?unspentOnly=true`;
+      
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      if (!data.txrefs) {
+        return [];
+      }
+      
+      return data.txrefs.map((utxo: any) => ({
+        txid: utxo.tx_hash,
+        vout: utxo.tx_output_n,
+        value: utxo.value
+      }));
+    } catch (error) {
+      console.error('Error fetching UTXOs:', error);
+      return [];
+    }
+  }
+  
+  // Broadcast transaction to Bitcoin network
+  static async broadcastTransaction(txHex: string): Promise<string> {
+    try {
+      // Use BlockCypher API to broadcast
+      const network = this.NETWORK === this.MAINNET ? 'main' : 'test3';
+      const apiUrl = `https://api.blockcypher.com/v1/btc/${network}/txs/push`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tx: txHex }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.tx && data.tx.hash) {
+        return data.tx.hash;
+      } else {
+        throw new Error(data.error || 'Failed to broadcast transaction');
+      }
+    } catch (error) {
+      console.error('Error broadcasting transaction:', error);
+      throw error;
+    }
+  }
+
+  // Check REAL Bitcoin transaction confirmations
+  static async checkTransactionConfirmations(txHash: string): Promise<number> {
+    try {
+      // Use BlockCypher API to get transaction details
+      const network = this.NETWORK === this.MAINNET ? 'main' : 'test3';
+      const apiUrl = `https://api.blockcypher.com/v1/btc/${network}/txs/${txHash}`;
+      
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      if (data.confirmations !== undefined) {
+        return data.confirmations;
+      } else {
+        console.warn('Transaction not found or pending:', txHash);
+        return 0;
+      }
+    } catch (error) {
+      console.error('Error checking confirmations:', error);
+      return 0;
+    }
+  }
+  
+  // Get REAL Bitcoin balance for an address
+  static async getBitcoinBalance(address: string): Promise<number> {
+    try {
+      // Use BlockCypher API to get address balance
+      const network = this.NETWORK === this.MAINNET ? 'main' : 'test3';
+      const apiUrl = `https://api.blockcypher.com/v1/btc/${network}/addrs/${address}/balance`;
+      
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      return data.balance || 0; // Balance in satoshis
+    } catch (error) {
+      console.error('Error fetching Bitcoin balance:', error);
+      return 0;
+    }
+  }
+
+  // Process Bitcoin to local currency exchange through agent with dynamic fees
+  static async processBitcoinToLocalExchange(
+    userId: string,
+    agentId: string,
+    bitcoinAmount: number, // in satoshis
+    localCurrency: AfricanCurrency,
+    exchangeMethod: 'agent_cash' | 'agent_digital',
+    customerLocation?: { latitude: number; longitude: number; accessibility: 'urban' | 'suburban' | 'rural' | 'remote' },
+    agentDistance?: number,
+    urgency: 'standard' | 'express' | 'emergency' = 'standard'
+  ): Promise<{
+    success: boolean;
+    transaction?: BitcoinTransaction;
+    message: string;
+    feeBreakdown?: any;
+  }> {
+    try {
+      const rate = await this.getExchangeRate(localCurrency);
+      const localAmount = await this.calculateLocalFromBitcoin(bitcoinAmount, localCurrency);
+      
+      // Calculate dynamic fee if location data is available
+      let agentFee: number;
+      let feeBreakdown: any = null;
+      
+      if (customerLocation && agentDistance !== undefined) {
+        const { DynamicFeeService } = await import('./dynamicFeeService');
+        const now = new Date();
+        const hour = now.getHours();
+        const timeOfDay = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : hour < 22 ? 'evening' : 'night';
+        const dayOfWeek = now.getDay() === 0 || now.getDay() === 6 ? 'weekend' : 'weekday';
+        
+        const feeCalculation = DynamicFeeService.calculateDynamicFee(
+          {
+            amount: localAmount,
+            currency: localCurrency,
+            type: 'bitcoin_sell',
+            customerLocation: {
+              latitude: customerLocation.latitude,
+              longitude: customerLocation.longitude,
+              accessibility: customerLocation.accessibility
+            },
+            urgency,
+            timeOfDay: timeOfDay as any,
+            dayOfWeek: dayOfWeek as any
+          },
+          agentDistance,
+          { latitude: 0, longitude: 0, accessibility: 'urban' } // Agent location placeholder
+        );
+        
+        agentFee = feeCalculation.totalFeeAmount;
+        feeBreakdown = feeCalculation;
+      } else {
+        // Fallback to fixed 3% fee for remote areas, 2% for others
+        const feeRate = customerLocation?.accessibility === 'remote' ? 0.03 : 0.02;
+        agentFee = Math.round(localAmount * feeRate);
+      }
+      
+      const netLocalAmount = localAmount - agentFee;
+
+      const transaction = await this.createBitcoinTransaction({
+        userId,
+        agentId,
+        type: 'bitcoin_to_local',
+        bitcoinAmount,
+        localAmount: netLocalAmount,
+        localCurrency,
+        exchangeRate: rate.btcToLocal,
+        status: 'pending',
+        fee: this.NETWORK_FEE_SATS,
+        agentFee,
+        metadata: {
+          exchangeMethod,
+          smsReference: `BTC${Date.now().toString().slice(-6)}`
+        }
+      });
+
+      // Send notifications to user and agent
+      try {
+        const [user, agent] = await Promise.all([
+          WebhookDataService.getUserByKey(userId),
+          WebhookDataService.getUserByKey(agentId)
+        ]);
+
+        if (user) {
+          console.log(`Sending Bitcoin exchange notification to user ${user.firstName} ${user.lastName}`);
+          // await NotificationService.sendNotification(user, {
+          //   userId,
+          //   type: 'bitcoin_exchange',
+          //   amount: this.satoshisToBtc(bitcoinAmount),
+          //   currency: 'BTC',
+          //   status: 'initiated',
+          //   transactionId: transaction.id,
+          //   message: `Bitcoin exchange initiated for ${formatCurrencyAmount(netLocalAmount, localCurrency)}`
+          // });
+        }
+
+        if (agent) {
+          console.log(`Sending Bitcoin exchange notification to agent ${agent.firstName} ${agent.lastName}`);
+          // await NotificationService.sendNotification(agent, {
+          //   userId: agentId,
+          //   type: 'agent_match',
+          //   amount: netLocalAmount,
+          //   currency: localCurrency,
+          //   transactionId: transaction.id,
+          //   message: `New Bitcoin exchange request: ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC`
+          // });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send Bitcoin exchange notifications:', notificationError);
+      }
+
+      // Send notifications for local to Bitcoin exchange
+      try {
+        const [user, agent] = await Promise.all([
+          WebhookDataService.getUserByKey(userId),
+          WebhookDataService.getUserByKey(agentId)
+        ]);
+
+        if (user) {
+          console.log(`Sending Bitcoin purchase notification to user ${user.firstName} ${user.lastName}`);
+          // await NotificationService.sendNotification(user, {
+          //   userId,
+          //   type: 'bitcoin_exchange',
+          //   amount: this.satoshisToBtc(bitcoinAmount),
+          //   currency: 'BTC',
+          //   status: 'initiated',
+          //   transactionId: transaction.id,
+          //   message: `Bitcoin purchase initiated with ${formatCurrencyAmount(localAmount, localCurrency)}`
+          // });
+        }
+
+        if (agent) {
+          console.log(`Sending Bitcoin purchase notification to agent ${agent.firstName} ${agent.lastName}`);
+          // await NotificationService.sendNotification(agent, {
+          //   userId: agentId,
+          //   type: 'agent_match',
+          //   amount: localAmount,
+          //   currency: localCurrency,
+          //   transactionId: transaction.id,
+          //   message: `New Bitcoin purchase request: ${formatCurrencyAmount(localAmount, localCurrency)} → ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC`
+          // });
+        }
+      } catch (notificationError) {
+        console.error('Failed to send Bitcoin purchase notifications:', notificationError);
+      }
+
+      return {
+        success: true,
+        transaction,
+        message: `Bitcoin exchange successful! ${bitcoinAmount} satoshis exchanged for ${netLocalAmount.toLocaleString()} ${localCurrency}`,
+        feeBreakdown
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Bitcoin exchange failed'
+      };
+    }
+  }
+
+  // Process local currency to Bitcoin exchange through agent
+  static async processLocalToBitcoinExchange(
+    userId: string,
+    agentId: string,
+    localAmount: number,
+    localCurrency: AfricanCurrency,
+    userBitcoinAddress: string
+  ): Promise<{
+    success: boolean;
+    transaction?: BitcoinTransaction;
+    message: string;
+  }> {
+    try {
+      const rate = await this.getExchangeRate(localCurrency);
+      const agentFee = Math.round(localAmount * 0.02); // 2% agent fee
+      const netLocalAmount = localAmount - agentFee;
+      const bitcoinAmount = await this.calculateBitcoinFromLocal(netLocalAmount, localCurrency);
+
+      const transaction = await this.createBitcoinTransaction({
+        userId,
+        agentId,
+        type: 'local_to_bitcoin',
+        bitcoinAmount,
+        localAmount: netLocalAmount,
+        localCurrency,
+        exchangeRate: rate.btcToLocal,
+        toAddress: userBitcoinAddress,
+        status: 'pending',
+        fee: this.NETWORK_FEE_SATS,
+        agentFee,
+        metadata: {
+          exchangeMethod: 'agent_cash',
+          smsReference: `${localCurrency}${Date.now().toString().slice(-6)}`
+        }
+      });
+
+      return {
+        success: true,
+        transaction,
+        message: `Exchange initiated: ${formatCurrencyAmount(localAmount, localCurrency)} → ${this.satoshisToBtc(bitcoinAmount).toFixed(8)} BTC`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to process local currency exchange'
+      };
+    }
+  }
+
+  // Format Bitcoin amount for display
+  static formatBitcoinAmount(satoshis: number): string {
+    const btc = this.satoshisToBtc(satoshis);
+    if (btc >= 1) {
+      return `${btc.toFixed(8)} BTC`;
+    } else if (btc >= 0.001) {
+      return `${(btc * 1000).toFixed(5)} mBTC`;
+    } else {
+      return `${satoshis} sats`;
+    }
+  }
+
+  // Generate SMS message for Bitcoin transaction
+  static generateBitcoinSMS(transaction: BitcoinTransaction, userPhone: string): string {
+    const btcAmount = this.formatBitcoinAmount(transaction.bitcoinAmount);
+    const localAmount = transaction.localAmount ? formatCurrencyAmount(transaction.localAmount, transaction.localCurrency) : '0';
+    
+    // Log SMS generation for the user
+    console.log(`Generating Bitcoin SMS for ${userPhone}`);
+    
+    switch (transaction.type) {
+      case 'bitcoin_to_local':
+        return `AfriTokeni: Bitcoin exchange completed. ${btcAmount} → ${localAmount}. Ref: ${transaction.metadata?.smsReference}`;
+      
+      case 'local_to_bitcoin':
+        return `AfriTokeni: ${transaction.localCurrency} exchange completed. ${localAmount} → ${btcAmount}. Address: ${transaction.toAddress}. Ref: ${transaction.metadata?.smsReference}`;
+      
+      case 'bitcoin_receive':
+        return `AfriTokeni: Bitcoin received. ${btcAmount} to your wallet. TxHash: ${transaction.bitcoinTxHash?.slice(0, 8)}...`;
+      
+      default:
+        return `AfriTokeni: Bitcoin transaction ${transaction.type}. Amount: ${btcAmount}. Ref: ${transaction.id}`;
+    }
+  }
+
+  // Helper methods for SMS users
+  private static encryptPrivateKey(privateKey: string, seed: string): string {
+    // Simple encryption - in production use proper encryption
+    const key = scryptSync(seed, 'salt', 32);
+    const iv = randomBytes(16);
+    const cipher = createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(privateKey, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return `${iv.toString('hex')}:${encrypted}`;
+  }
+
+  private static getDerivationPath(phoneNumber: string): string {
+    const index = parseInt(phoneNumber.slice(-6)) % 1000000;
+    return `m/44'/0'/0'/${index}`;
+  }
+
+  // Get Bitcoin wallet for SMS user (without blockchain balance check for transaction-based calculations)
+  static async getBitcoinWalletForUser(userId: string): Promise<BitcoinWallet | null> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_wallets',
+        satellite
+      });
+
+      const walletDoc = docs.items.find(doc => 
+        (doc.data as any).userId === userId
+      );
+
+      if (!walletDoc) {
+        return null;
+      }
+
+      const walletData = walletDoc.data as any;
+      
+      // For transaction-based balance calculation, don't query blockchain
+      // Use the stored balance as-is, it will be updated by the sync function
+      return {
+        id: walletData.id,
+        userId: walletData.userId,
+        address: walletData.address,
+        privateKey: walletData.encryptedPrivateKey, // Keep encrypted
+        balance: walletData.balance || 0, // Use stored balance without blockchain query
+        createdAt: new Date(walletData.createdAt)
+      };
+    } catch (error) {
+      console.error('Error getting Bitcoin wallet:', error);
+      return null;
+    }
+  }
+
+  // Update wallet balance in Juno
+  static async updateWalletBalance(userId: string, newBalance: number): Promise<boolean> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_wallets',
+        satellite
+      });
+
+      const walletDoc = docs.items.find(doc => 
+        (doc.data as any).userId === userId
+      );
+
+      if (!walletDoc) return false;
+
+      const updatedData = {
+        ...walletDoc.data,
+        balance: newBalance,
+        updatedAt: new Date().toISOString()
+      };
+
+      await setDoc({
+        collection: 'bitcoin_wallets',
+        doc: {
+          key: walletDoc.key,
+          data: updatedData,
+          version: (walletDoc.version || 0n) + 1n
+        },
+        satellite
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating wallet balance:', error);
+      return false;
+    }
+  }
+
+  // Store Bitcoin transaction in Juno
+  static async storeBitcoinTransaction(transaction: BitcoinTransaction): Promise<void> {
+    try {
+      const transactionDoc = {
+        id: transaction.id,
+        userId: transaction.userId,
+        agentId: transaction.agentId,
+        type: transaction.type,
+        bitcoinAmount: transaction.bitcoinAmount,
+        fromAddress: transaction.fromAddress,
+        toAddress: transaction.toAddress,
+        bitcoinTxHash: transaction.bitcoinTxHash,
+        confirmations: transaction.confirmations,
+        networkFee: transaction.fee,
+        localAmount: transaction.localAmount,
+        localCurrency: transaction.localCurrency,
+        exchangeRate: transaction.exchangeRate,
+        agentFee: transaction.agentFee,
+        status: transaction.status,
+        createdAt: transaction.createdAt.toISOString(),
+        confirmedAt: transaction.confirmedAt?.toISOString(),
+        metadata: transaction.metadata
+      };
+
+      await setDoc({
+        collection: 'bitcoin_transactions',
+        doc: {
+          key: transaction.id,
+          data: transactionDoc,
+          version: 1n
+        },
+        satellite
+      });
+
+      console.log(`Stored Bitcoin transaction ${transaction.id} in Juno`);
+    } catch (error) {
+      console.error('Error storing Bitcoin transaction:', error);
+      throw error;
+    }
+  }
+
+  // Get Bitcoin transactions for a specific agent
+  static async getAgentBitcoinTransactions(agentId: string): Promise<BitcoinTransaction[]> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_transactions',
+        satellite
+      });
+
+      if (!docs.items) {
+        return [];
+      }
+
+      const transactions: BitcoinTransaction[] = docs.items
+        .map(doc => doc.data as BitcoinTransaction)
+        .filter(txData => txData.agentId === agentId)
+        .map(txData => ({
+          id: txData.id,
+          userId: txData.userId,
+          agentId: txData.agentId,
+          type: txData.type,
+          bitcoinAmount: txData.bitcoinAmount,
+          localAmount: txData.localAmount,
+          localCurrency: txData.localCurrency,
+          exchangeRate: txData.exchangeRate,
+          bitcoinTxHash: txData.bitcoinTxHash,
+          fromAddress: txData.fromAddress,
+          toAddress: txData.toAddress,
+          status: txData.status,
+          confirmations: txData.confirmations,
+          fee: txData.fee,
+          agentFee: txData.agentFee,
+          createdAt: new Date(txData.createdAt),
+          confirmedAt: txData.confirmedAt ? new Date(txData.confirmedAt) : undefined,
+          metadata: txData.metadata
+        }))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort by newest first
+
+      console.log(`Retrieved ${transactions.length} Bitcoin transactions for agent ${agentId}`);
+      return transactions;
+    } catch (error) {
+      console.error('Error getting agent Bitcoin transactions:', error);
+      return [];
+    }
+  }
+
+  // Get all Bitcoin transactions (for admin/overview)
+  static async getAllBitcoinTransactions(): Promise<BitcoinTransaction[]> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_transactions',
+        satellite
+      });
+
+      if (!docs.items) {
+        return [];
+      }
+
+      const transactions: BitcoinTransaction[] = docs.items
+        .map(doc => doc.data as BitcoinTransaction)
+        .map(txData => ({
+          id: txData.id,
+          userId: txData.userId,
+          agentId: txData.agentId,
+          type: txData.type,
+          bitcoinAmount: txData.bitcoinAmount,
+          localAmount: txData.localAmount,
+          localCurrency: txData.localCurrency,
+          exchangeRate: txData.exchangeRate,
+          bitcoinTxHash: txData.bitcoinTxHash,
+          fromAddress: txData.fromAddress,
+          toAddress: txData.toAddress,
+          status: txData.status,
+          confirmations: txData.confirmations,
+          fee: txData.fee,
+          agentFee: txData.agentFee,
+          createdAt: new Date(txData.createdAt),
+          confirmedAt: txData.confirmedAt ? new Date(txData.confirmedAt) : undefined,
+          metadata: txData.metadata
+        }))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort by newest first
+
+      console.log(`Retrieved ${transactions.length} total Bitcoin transactions`);
+      return transactions;
+    } catch (error) {
+      console.error('Error getting all Bitcoin transactions:', error);
+      return [];
+    }
+  }
+
+  // Get Bitcoin transactions with user details for agent interface
+  static async getAgentBitcoinExchangeRequests(agentId: string): Promise<Array<{
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    type: 'buy' | 'sell';
+    amount: number;
+    currency: string;
+    bitcoinAmount: number;
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    createdAt: Date;
+    location?: string;
+    exchangeRate: number;
+    agentFee?: number;
+    metadata?: {
+      smsReference?: string;
+      exchangeMethod?: 'agent_cash' | 'agent_digital';
+      agentLocation?: string;
+    };
+  }>> {
+    try {
+      const transactions = await this.getAgentBitcoinTransactions(agentId);
+      
+      // Convert Bitcoin transactions to exchange request format
+      const exchangeRequests = await Promise.all(
+        transactions.map(async (tx) => {
+          // Get user details
+          const user = await WebhookDataService.getUserByKey(tx.userId);
+          
+          return {
+            id: tx.id,
+            customerName: user ? `${user.firstName} ${user.lastName}` : 'Unknown Customer',
+            customerPhone: user ? user.email : 'Unknown Phone', // email field contains phone for SMS users
+            type: tx.type === 'local_to_bitcoin' ? 'buy' as const : 'sell' as const,
+            amount: tx.localAmount || 0,
+            currency: tx.localCurrency,
+            bitcoinAmount: this.satoshisToBtc(tx.bitcoinAmount),
+            status: tx.status === 'pending' ? 'pending' as const : 
+                   tx.status === 'confirmed' ? 'processing' as const :
+                   tx.status === 'completed' ? 'completed' as const :
+                   'cancelled' as const,
+            createdAt: tx.createdAt,
+            location: tx.metadata?.agentLocation || 'Location Unknown',
+            exchangeRate: tx.exchangeRate,
+            agentFee: tx.agentFee,
+            metadata: tx.metadata
+          };
+        })
+      );
+
+      return exchangeRequests;
+    } catch (error) {
+      console.error('Error getting agent exchange requests:', error);
+      return [];
+    }
+  }
+
+  // Update Bitcoin transaction status
+  static async updateBitcoinTransactionStatus(
+    transactionId: string, 
+    newStatus: 'pending' | 'confirmed' | 'completed' | 'failed',
+    agentId?: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Get the current transaction to verify agent access
+      const currentTx = await getDoc({
+        collection: 'bitcoin_transactions',
+        key: transactionId,
+        satellite
+      });
+      
+      if (!currentTx) {
+        return { success: false, message: 'Transaction not found' };
+      }
+
+      const txData = currentTx.data as BitcoinTransaction;
+      
+      // If agentId is provided, verify the agent has access to this transaction
+      if (agentId && txData.agentId !== agentId) {
+        return { success: false, message: 'Unauthorized: Agent does not have access to this transaction' };
+      }
+
+      // Update the transaction status
+      await setDoc({
+        collection: 'bitcoin_transactions',
+        doc: {
+          key: transactionId,
+          data: {
+            ...txData,
+            status: newStatus,
+            updatedAt: new Date().toISOString(),
+            createdAt: typeof txData.createdAt === 'string' ? txData.createdAt : txData.createdAt.toISOString()
+          }
+        },
+        satellite
+      });
+
+      // If status is completed, update the user's wallet balance
+      if (newStatus === 'completed' && txData.type === 'local_to_bitcoin') {
+        await this.updateUserBitcoinBalance(txData.userId, txData.bitcoinAmount);
+      }
+
+      console.log(`✅ Updated Bitcoin transaction ${transactionId} status to ${newStatus}`);
+      
+      return { 
+        success: true, 
+        message: `Transaction status updated to ${newStatus}` 
+      };
+    } catch (error) {
+      console.error('Error updating Bitcoin transaction status:', error);
+      return { 
+        success: false, 
+        message: 'Failed to update transaction status' 
+      };
+    }
+  }
+
+  // Update user's Bitcoin wallet balance
+  static async updateUserBitcoinBalance(userId: string, amountSats: number): Promise<void> {
+    try {
+      const userWallet = await getDoc({
+        collection: 'bitcoin_wallets',
+        key: userId,
+        satellite
+      });
+      
+      if (userWallet) {
+        const walletData = userWallet.data as BitcoinWallet;
+        const newBalance = walletData.balance + amountSats;
+        
+        await setDoc({
+          collection: 'bitcoin_wallets',
+          doc: {
+            key: userId,
+            data: {
+              ...walletData,
+              balance: newBalance,
+              updatedAt: new Date().toISOString(),
+              createdAt: typeof walletData.createdAt === 'string' ? walletData.createdAt : walletData.createdAt.toISOString()
+            }
+          },
+          satellite
+        });
+        
+        console.log(`✅ Updated Bitcoin wallet balance for user ${userId}: +${amountSats} sats (new balance: ${newBalance} sats)`);
+      } else {
+        console.warn(`⚠️ Bitcoin wallet not found for user ${userId}`);
+      }
+    } catch (error) {
+      console.error('Error updating user Bitcoin balance:', error);
+    }
+  }
+
+  // Calculate actual Bitcoin balance from transaction history for SMS users
+  static async calculateBitcoinBalanceFromTransactions(userId: string): Promise<number> {
+    try {
+      console.log(`🧮 Calculating Bitcoin balance from transactions for user ${userId}`);
+      
+      const docs = await listDocs({
+        collection: 'bitcoin_transactions',
+        satellite
+      });
+
+      console.log(`🧮 Total documents in bitcoin_transactions collection: ${docs.items?.length || 0}`);
+
+      if (!docs.items) {
+        console.log(`No Bitcoin transactions found for user ${userId}`);
+        return 0;
+      }
+
+      const userTransactions = docs.items
+        .map(doc => doc.data as BitcoinTransaction)
+        .filter((tx: BitcoinTransaction) => tx.userId === userId);
+      
+      console.log(`Found ${userTransactions.length} Bitcoin transactions for user ${userId}`);
+      
+      // Log all user transactions for debugging
+      userTransactions.forEach((tx, index) => {
+        console.log(`🧮 Transaction ${index + 1}: ID=${tx.id}, type=${tx.type}, amount=${tx.bitcoinAmount} sats, status=${tx.status}`);
+      });
+      
+      // Calculate balance from completed/confirmed transactions
+      const completedTransactions = userTransactions.filter((tx: BitcoinTransaction) => 
+        tx.status === 'completed' || tx.status === 'confirmed'
+      );
+      
+      console.log(`Found ${completedTransactions.length} completed/confirmed transactions`);
+      
+      // Log completed transactions specifically
+      completedTransactions.forEach((tx, index) => {
+        console.log(`🧮 Completed transaction ${index + 1}: ID=${tx.id}, type=${tx.type}, amount=${tx.bitcoinAmount} sats, status=${tx.status}`);
+      });
+      
+      const calculatedBalance = completedTransactions.reduce((balance: number, tx: BitcoinTransaction) => {
+        console.log(`Processing transaction ${tx.id}: type=${tx.type}, amount=${tx.bitcoinAmount}, status=${tx.status}`);
+        
+        if (tx.type === 'local_to_bitcoin' || tx.type === 'bitcoin_receive') {
+          // User bought Bitcoin or received Bitcoin - add to balance
+          console.log(`Adding ${tx.bitcoinAmount} satoshis to balance (${tx.type})`);
+          return balance + (tx.bitcoinAmount || 0);
+        } else if (tx.type === 'bitcoin_to_local' || tx.type === 'bitcoin_send') {
+          // User sold Bitcoin or sent Bitcoin - subtract from balance
+          console.log(`Subtracting ${tx.bitcoinAmount} satoshis from balance (${tx.type})`);
+          return balance - (tx.bitcoinAmount || 0);
+        }
+        return balance;
+      }, 0);
+      
+      console.log(`Calculated Bitcoin balance for ${userId}: ${calculatedBalance} satoshis from ${completedTransactions.length} completed transactions`);
+      return calculatedBalance;
+      
+    } catch (error) {
+      console.error('Error calculating Bitcoin balance from transactions:', error);
+      return 0;
+    }
+  }
+
+  // Get Bitcoin balance with sync functionality for SMS users (calculates from transactions and updates wallet)
+  static async getBitcoinBalanceWithSync(userId: string): Promise<{ balance: number; wallet: BitcoinWallet | null }> {
+    try {
+      console.log(`🔍 getBitcoinBalanceWithSync called for userId: ${userId}`);
+      
+      // Calculate actual balance from transactions FIRST
+      const calculatedBalance = await this.calculateBitcoinBalanceFromTransactions(userId);
+      console.log(`🔍 Calculated balance from transactions: ${calculatedBalance} satoshis`);
+      
+      // Get wallet (but don't rely on its balance, use our calculated balance)
+      const wallet = await this.getBitcoinWalletForUser(userId);
+      console.log(`🔍 Wallet found: ${wallet ? 'Yes' : 'No'}`);
+      
+      if (!wallet) {
+        console.log(`No Bitcoin wallet found for user ${userId}, returning calculated balance anyway`);
+        return { balance: calculatedBalance, wallet: null };
+      }
+
+      console.log(`🔍 Wallet stored balance: ${wallet.balance} satoshis`);
+      
+      // Update wallet balance to match calculated balance if different
+      if (wallet.balance !== calculatedBalance) {
+        console.log(`Syncing wallet balance from ${wallet.balance} to ${calculatedBalance} satoshis`);
+        await this.updateWalletBalance(userId, calculatedBalance);
+        wallet.balance = calculatedBalance;
+      }
+
+      console.log(`🔍 Final balance returned: ${calculatedBalance} satoshis`);
+      return { balance: calculatedBalance, wallet };
+    } catch (error) {
+      console.error('Error getting Bitcoin balance with sync:', error);
+      return { balance: 0, wallet: null };
+    }
+  }
 }
