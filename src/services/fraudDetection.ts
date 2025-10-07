@@ -242,10 +242,11 @@ export class FraudDetectionService {
    */
   private static async isNewAccount(phoneNumber: string): Promise<boolean> {
     try {
-      const user = await DataService.getUserByPhone(phoneNumber);
-      if (!user) return true; // No user = treat as new
+      const user = await DataService.getUser(phoneNumber);
+      if (!user || !user.createdAt) return true; // No user or no createdAt = treat as new
 
-      const accountAge = Date.now() - new Date(user.createdAt).getTime();
+      const createdDate = typeof user.createdAt === 'string' ? new Date(user.createdAt) : user.createdAt;
+      const accountAge = Date.now() - createdDate.getTime();
       return accountAge < 24 * 60 * 60 * 1000; // Less than 24 hours
     } catch (error) {
       return true; // Error = treat as new for safety

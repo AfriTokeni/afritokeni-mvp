@@ -9,8 +9,7 @@ import { SMSLightningCommands } from './smsLightningCommands';
 import { getCurrencyFromPhone } from '../utils/africanPhoneNumbers';
 import { AfricanCurrency } from '../types/currency';
 import { RateLimiter } from './rateLimiter';
-import { FraudDetectionService } from './fraudDetection';
-import { TranslationService, Language } from './translations';
+import { TranslationService } from './translations';
 
 export interface SMSCommand {
   phoneNumber: string;
