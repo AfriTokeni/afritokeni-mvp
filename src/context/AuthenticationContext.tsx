@@ -153,8 +153,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Parse user data if it exists
     if (storedUser && storedUserAuthMethod) {
       try {
-        const parsedUser = storedUser as User;
-        const parsedAgentUser = storedAgentUser as User;
+        const parsedUser = JSON.parse(storedUser) as User;
+        const parsedAgentUser = storedAgent ? JSON.parse(storedAgent) as User : null;
 
         // Convert createdAt string back to Date if it exists and user is not null
         if (
@@ -389,14 +389,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (method === "web") {
         console.log("Web login initiated - using Juno/ICP Internet Identity");
         // Use Juno/ICP Internet Identity authentication for web users
-        await signIn({
-          internet_identity: {
-            options: {
-              domain: "id.ai",
-            },
-            derivationOrigin: "https://afritokeni.com/"
-          },
-        });
+        await signIn();
         return true;
       } else if (method === "sms") {
         // SMS-based authentication for users without internet (feature phones)
