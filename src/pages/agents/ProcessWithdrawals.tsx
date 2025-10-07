@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-<<<<<<< HEAD
-import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Minus, DollarSign } from 'lucide-react';
-import PageLayout from '../../components/PageLayout';
-=======
 import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Minus } from 'lucide-react';
->>>>>>> origin/main
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
@@ -271,42 +266,9 @@ const ProcessWithdrawals: React.FC = () => {
   return (
     <div className="space-y-6">
         {/* Header */}
-<<<<<<< HEAD
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-neutral-900">Process Withdrawals</h1>
-            <button
-              onClick={handleInitializeMyBalance}
-              disabled={initializingBalance}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-neutral-300 disabled:cursor-not-allowed flex items-center text-sm"
-            >
-              {initializingBalance ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  Set My Cash Balance (25M UGX)
-                </>
-              )}
-            </button>
-          </div>
-          <p className="text-neutral-600">Manage customer cash withdrawals and digital balance debits</p>
-          {!initializingBalance && (
-            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="text-orange-800 text-sm">
-                💡 <strong>Need cash balance?</strong> If withdrawals fail due to insufficient agent cash balance, 
-                click the &ldquo;Set My Cash Balance&rdquo; button above to initialize your account with 25,000,000 UGX.
-              </p>
-            </div>
-          )}
-=======
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Process Withdrawals</h1>
           <p className="text-gray-600">Manage customer cash withdrawals and digital balance debits</p>
->>>>>>> origin/main
         </div>
 
         {/* Filter Tabs */}
