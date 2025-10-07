@@ -2,6 +2,20 @@
 
 AfriTokeni is an SMS-accessible Bitcoin banking platform built on Internet Computer Protocol (ICP) that serves Africa's 14.6M unbanked adults. Our system enables Bitcoin transactions via SMS commands on feature phones, bridging the digital divide in financial services.
 
+---
+
+## 📖 **[READ THE COMPLETE SYSTEM GUIDE](./COMPLETE_SYSTEM_GUIDE.md)**
+
+**Everything you need to know about AfriTokeni in one comprehensive document:**
+- 🎯 System overview & core features
+- 💰 Revenue model & projections (4 real revenue streams)
+- 📱 SMS/USSD commands & flows (English, Luganda, Swahili)
+- 🔒 Security features (rate limiting, fraud detection, PIN verification)
+- 🏗️ Technical architecture & stack
+- 🚀 Getting started & production deployment
+
+---
+
 ## 🎯 Project Highlights
 
 - **🏛️ FIRST SMS-ACCESSIBLE DAO**: Live SNS governance on IC mainnet - vote via SMS or web!
