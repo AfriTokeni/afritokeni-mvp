@@ -37,7 +37,9 @@ const KYCAdmin: React.FC = () => {
     setBalanceResult(null);
     try {
       console.log('🏦 Admin: Initializing all agent cash balances...');
-      const result = await DataService.initializeAllAgentsCashBalance();
+      // TODO: Implement initializeAllAgentsCashBalance method in DataService
+      // const result = await DataService.initializeAllAgentsCashBalance();
+      const result = { success: false, updated: 0, errors: ['Method not implemented yet'] };
       setBalanceResult(result);
       console.log('📊 Balance initialization result:', result);
     } catch (error) {
