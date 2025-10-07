@@ -5,7 +5,7 @@ import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory } from 'ecpair';
 import { NotificationService } from './notificationService.js';
 import { DataService } from './dataService.js';
-import { setDoc, listDocs } from '@junobuild/core';
+import { setDoc, listDocs, getDoc } from '@junobuild/core';
 
 // Helper function for currency formatting
 const formatCurrencyAmount = (amount: number, currency: string): string => {
@@ -43,6 +43,7 @@ export interface BitcoinTransaction {
   metadata?: {
     smsReference?: string;
     exchangeMethod?: 'agent_cash' | 'agent_digital';
+    agentLocation?: string;
   };
 }
 
@@ -831,7 +832,7 @@ export class BitcoinService {
         doc: {
           key: walletDoc.key,
           data: updatedData,
-          version: (walletDoc.version || 0n) + 1n
+          version: (walletDoc.version || 1n)
         }
       });
 
@@ -879,6 +880,173 @@ export class BitcoinService {
     } catch (error) {
       console.error('Error storing Bitcoin transaction:', error);
       throw error;
+    }
+  }
+
+  // Get Bitcoin exchange requests for agent interface
+  static async getAgentExchangeRequests(agentId?: string): Promise<Array<{
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    type: 'buy' | 'sell';
+    amount: number;
+    currency: string;
+    bitcoinAmount: number;
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    createdAt: Date;
+    location?: string;
+    exchangeRate: number;
+    agentFee?: number;
+  }>> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_transactions'
+      });
+
+      if (!docs.items) {
+        return [];
+      }
+
+      const transactions = docs.items
+        .map(doc => doc.data as BitcoinTransaction)
+        .filter(tx => !agentId || tx.agentId === agentId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      // Convert Bitcoin transactions to exchange request format
+      const exchangeRequests = await Promise.all(
+        transactions.map(async (tx) => {
+          // Get user details
+          let user;
+          try {
+            user = await DataService.getUserByKey(tx.userId);
+          } catch (error) {
+            console.warn(`Could not fetch user ${tx.userId}:`, error);
+          }
+          
+          return {
+            id: tx.id,
+            customerName: user ? `${user.firstName} ${user.lastName}` : 'Unknown Customer',
+            customerPhone: user ? user.email : 'Unknown Phone', // email field contains phone for SMS users
+            type: tx.type === 'local_to_bitcoin' ? 'buy' as const : 'sell' as const,
+            amount: tx.localAmount || 0,
+            currency: tx.localCurrency,
+            bitcoinAmount: this.satoshisToBtc(tx.bitcoinAmount),
+            status: tx.status === 'pending' ? 'pending' as const : 
+                   tx.status === 'confirmed' ? 'processing' as const :
+                   tx.status === 'completed' ? 'completed' as const :
+                   'cancelled' as const,
+            createdAt: new Date(tx.createdAt),
+            location: tx.metadata?.agentLocation || 'Location Unknown',
+            exchangeRate: tx.exchangeRate,
+            agentFee: tx.agentFee
+          };
+        })
+      );
+
+      console.log(`Retrieved ${exchangeRequests.length} Bitcoin exchange requests${agentId ? ` for agent ${agentId}` : ''}`);
+      return exchangeRequests;
+    } catch (error) {
+      console.error('Error getting Bitcoin exchange requests:', error);
+      return [];
+    }
+  }
+
+  // Update Bitcoin transaction status
+  static async updateTransactionStatus(
+    transactionId: string, 
+    newStatus: 'pending' | 'confirmed' | 'completed' | 'failed',
+    agentId?: string
+  ): Promise<{ success: boolean; message: string }> {
+    return await this.updateBitcoinTransactionStatus(transactionId, newStatus, agentId);
+  }
+
+  // Update Bitcoin transaction status - direct implementation
+  static async updateBitcoinTransactionStatus(
+    transactionId: string, 
+    newStatus: 'pending' | 'confirmed' | 'completed' | 'failed',
+    agentId?: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Get the current transaction to verify agent access
+      const currentTx = await getDoc({
+        collection: 'bitcoin_transactions',
+        key: transactionId
+      });
+
+      
+      if (!currentTx) {
+        return { success: false, message: 'Transaction not found' };
+      }
+
+      const txData = currentTx.data as BitcoinTransaction;
+      
+      // Verify agent access: if agentId is provided, ensure the agent has access to this transaction
+      if (agentId && txData.agentId && txData.agentId !== agentId) {
+        console.warn(`⚠️ Agent authorization failed: transaction.agentId=${txData.agentId}, provided.agentId=${agentId}`);
+        return { success: false, message: 'Unauthorized: Agent does not have access to this transaction' };
+      }
+
+      // Update the transaction status
+      await setDoc({
+        collection: 'bitcoin_transactions',
+        doc: {
+          key: transactionId,
+          data: {
+            ...txData,
+            status: newStatus,
+            updatedAt: new Date().toISOString(),
+            createdAt: typeof txData.createdAt === 'string' ? txData.createdAt : txData.createdAt.toISOString(),
+          },
+          version: currentTx?.version ? currentTx.version : 1n
+        }
+      });
+
+      // If status is completed, update user Bitcoin balance
+      if (newStatus === 'completed' && txData.type === 'local_to_bitcoin') {
+        await this.updateUserBitcoinBalance(txData.userId, txData.bitcoinAmount);
+      }
+
+      console.log(`✅ Updated Bitcoin transaction ${transactionId} status to ${newStatus}`);
+      
+      return { 
+        success: true, 
+        message: `Transaction status updated to ${newStatus}` 
+      };
+    } catch (error) {
+      console.error('Error updating Bitcoin transaction status:', error);
+      return { 
+        success: false, 
+        message: 'Failed to update transaction status' 
+      };
+    }
+  }
+
+  // Update user's Bitcoin wallet balance
+  static async updateUserBitcoinBalance(userId: string, amountSats: number): Promise<void> {
+    try {
+      console.log(`🪙 Updating Bitcoin balance for user ${userId} by ${amountSats} satoshis`);
+      
+      // Get current wallet
+      const wallet = await this.getBitcoinWalletForUser(userId);
+      if (!wallet) {
+        console.warn(`No Bitcoin wallet found for user ${userId}, creating one...`);
+        await this.createBitcoinWallet(userId);
+        return this.updateUserBitcoinBalance(userId, amountSats); // Retry after creating wallet
+      }
+
+      // Calculate new balance
+      const newBalance = wallet.balance + amountSats;
+      console.log(`🪙 Current balance: ${wallet.balance} sats, adding: ${amountSats} sats, new balance: ${newBalance} sats`);
+
+      // Update wallet balance in Juno
+      const success = await this.updateWalletBalance(userId, newBalance);
+      if (success) {
+        console.log(`✅ Successfully updated Bitcoin balance for user ${userId} to ${newBalance} satoshis`);
+      } else {
+        console.error(`❌ Failed to update Bitcoin balance for user ${userId}`);
+      }
+    } catch (error) {
+      console.error('Error updating user Bitcoin balance:', error);
     }
   }
 }
