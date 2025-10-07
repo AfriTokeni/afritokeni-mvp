@@ -1049,4 +1049,150 @@ export class BitcoinService {
       console.error('Error updating user Bitcoin balance:', error);
     }
   }
+
+  // Get Bitcoin balance for an agent (uses their user ID to get wallet)
+  static async getAgentBitcoinBalance(agentId: string): Promise<number> {
+    try {
+      // Get agent data to find their user ID
+      const agentDoc = await getDoc({
+        collection: 'agents',
+        key: agentId
+      });
+
+      if (!agentDoc?.data) {
+        console.warn(`Agent ${agentId} not found`);
+        return 0;
+      }
+
+      const agent = agentDoc.data as { userId?: string };
+      const userId = agent.userId;
+
+      if (!userId) {
+        console.warn(`Agent ${agentId} has no associated user ID`);
+        return 0;
+      }
+
+      // Get their Bitcoin wallet
+      const wallet = await this.getBitcoinWalletForUser(userId);
+      if (!wallet) {
+        console.log(`No Bitcoin wallet found for agent ${agentId} (user ${userId})`);
+        return 0;
+      }
+
+      // Calculate balance from all Bitcoin transactions for this agent
+      const transactions = await this.getAgentBitcoinTransactions(agentId);
+      let balance = 0;
+
+      for (const tx of transactions) {
+        if (tx.status === 'completed') {
+          if (tx.type === 'sell') {
+            // Customer sells Bitcoin TO agent - agent receives Bitcoin
+            // Agent's Bitcoin balance increases
+            balance += tx.bitcoinAmount;
+          } else if (tx.type === 'buy') {
+            // Customer buys Bitcoin FROM agent - agent gives Bitcoin  
+            // Agent's Bitcoin balance decreases
+            balance -= tx.bitcoinAmount;
+          }
+          
+          // Add agent fees/commissions (always positive for agent)
+          if (tx.agentFee && tx.agentFee > 0) {
+            balance += tx.agentFee;
+          }
+        }
+      }
+
+      // Also include wallet balance for any direct Bitcoin deposits
+      if (wallet.balance) {
+        balance += wallet.balance;
+      }
+
+      return Math.max(0, balance); // Never return negative balance
+    } catch (error) {
+      console.error(`Error getting Bitcoin balance for agent ${agentId}:`, error);
+      return 0;
+    }
+  }
+
+  // Get all Bitcoin transactions for an agent including exchanges and commissions
+  static async getAgentBitcoinTransactions(agentId: string): Promise<Array<{
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    type: 'buy' | 'sell';
+    amount: number;
+    currency: string;
+    bitcoinAmount: number;
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    createdAt: Date;
+    location?: string;
+    exchangeRate: number;
+    agentFee?: number;
+    description?: string;
+  }>> {
+    try {
+      const docs = await listDocs({
+        collection: 'bitcoin_transactions'
+      });
+
+      if (!docs.items) {
+        return [];
+      }
+
+      const transactions = docs.items
+        .map(doc => doc.data as BitcoinTransaction)
+        .filter(tx => tx.agentId === agentId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      // Convert Bitcoin transactions to display format
+      const displayTransactions = await Promise.all(
+        transactions.map(async (tx) => {
+          // Get user details for customer name
+          let customerName = 'Unknown Customer';
+          let customerPhone = 'Unknown';
+
+          if (tx.userId) {
+            try {
+              const userDoc = await getDoc({
+                collection: 'users',
+                key: tx.userId
+              });
+              if (userDoc?.data) {
+                const user = userDoc.data as { name?: string; firstName?: string; phoneNumber?: string };
+                customerName = user.name || user.firstName || 'Unknown Customer';
+                customerPhone = user.phoneNumber || 'Unknown';
+              }
+            } catch (error) {
+              console.warn(`Could not fetch user details for ${tx.userId}:`, error);
+            }
+          }
+
+          // Convert transaction type to buy/sell format
+          const transactionType: 'buy' | 'sell' = tx.type === 'local_to_bitcoin' ? 'buy' : 'sell';
+          const mappedStatus = tx.status === 'confirmed' ? 'completed' : tx.status as 'pending' | 'processing' | 'completed' | 'cancelled';
+
+          return {
+            id: tx.id || '',
+            customerName,
+            customerPhone,
+            type: transactionType,
+            amount: tx.localAmount || 0,
+            currency: tx.localCurrency as string,
+            bitcoinAmount: tx.bitcoinAmount,
+            status: mappedStatus,
+            createdAt: new Date(tx.createdAt),
+            location: tx.metadata?.agentLocation,
+            exchangeRate: tx.exchangeRate,
+            agentFee: tx.agentFee || 0,
+            description: `Customer ${transactionType === 'buy' ? 'bought' : 'sold'} ${tx.bitcoinAmount} satoshis for ${tx.localAmount} ${tx.localCurrency}`
+          };
+        })
+      );
+
+      return displayTransactions;
+    } catch (error) {
+      console.error(`Error getting Bitcoin transactions for agent ${agentId}:`, error);
+      return [];
+    }
+  }
 }
