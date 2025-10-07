@@ -14,7 +14,6 @@ const ProcessWithdrawals: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('pending');
-  const [initializingBalance, setInitializingBalance] = useState(false);
 
   const loadWithdrawalRequests = useCallback(async () => {
     const userId = user?.agent?.id || user?.user?.id;
@@ -62,45 +61,6 @@ const ProcessWithdrawals: React.FC = () => {
   useEffect(() => {
     loadWithdrawalRequests();
   }, [loadWithdrawalRequests]);
-
-  const handleInitializeMyBalance = async () => {
-    setInitializingBalance(true);
-    try {
-      const userId = user?.agent?.id || user?.user?.id;
-      if (!userId) {
-        throw new Error('No user ID available');
-      }
-
-      // Get the agent record to get the correct agent ID
-      const agentRecord = await DataService.getAgentByUserId(userId);
-      if (!agentRecord) {
-        throw new Error('Agent record not found');
-      }
-
-      console.log(`🏦 Current agent balance: ${agentRecord.cashBalance.toLocaleString()} UGX`);
-      
-      // Set balance to 25,000,000 UGX (the amount from environment variable)
-      const newBalance = 25000000;
-      const success = await DataService.updateAgentBalance(agentRecord.id, {
-        cashBalance: newBalance
-      });
-
-      if (success) {
-        console.log(`✅ Updated agent cash balance to ${newBalance.toLocaleString()} UGX`);
-        alert(`✅ Agent cash balance updated to ${newBalance.toLocaleString()} UGX! You can now process withdrawals.`);
-        
-        // Reload withdrawal requests to refresh any UI that might depend on agent balance
-        await loadWithdrawalRequests();
-      } else {
-        throw new Error('Failed to update agent balance');
-      }
-    } catch (error) {
-      console.error('Failed to initialize agent balance:', error);
-      alert(`❌ Failed to initialize agent balance: ${error}`);
-    } finally {
-      setInitializingBalance(false);
-    }
-  };
 
   const handleVerifyCode = async (request: WithdrawalRequest) => {
     if (verificationCode === request.withdrawalCode) {
