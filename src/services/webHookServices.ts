@@ -9,7 +9,7 @@ import { AfricanCurrency } from '../types/currency';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory } from 'ecpair';
-import { createCipheriv, scryptSync, randomBytes } from 'node:crypto';
+import { createCipheriv, scryptSync, randomBytes, webcrypto } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 
 // Node.js process declaration for environment variables
@@ -19,6 +19,11 @@ import { Buffer } from 'node:buffer';
 //     NODE_ENV?: string;
 //   };
 // };
+
+// Make crypto globally available for ecpair library
+if (typeof globalThis.crypto === 'undefined') {
+  globalThis.crypto = webcrypto as any;
+}
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
