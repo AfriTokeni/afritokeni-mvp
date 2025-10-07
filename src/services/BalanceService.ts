@@ -92,6 +92,40 @@ export class BalanceService {
         createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
         agentId: 'agt_002',
         description: 'Customer withdrawal'
+      },
+      // More customer deposit examples
+      {
+        id: 'txn_009',
+        type: 'deposit',
+        amount: 50000,
+        currency: 'UGX',
+        userId: 'usr_003',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+        agentId: 'agt_001',
+        description: 'Mobile money deposit'
+      },
+      {
+        id: 'txn_010',
+        type: 'deposit',
+        amount: 200000,
+        currency: 'UGX',
+        userId: 'usr_006',
+        status: 'completed',
+        createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+        agentId: 'agt_002',
+        description: 'Business customer deposit'
+      },
+      {
+        id: 'txn_011',
+        type: 'deposit',
+        amount: 15000,
+        currency: 'UGX',
+        userId: 'usr_003',
+        status: 'pending',
+        createdAt: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
+        agentId: 'agt_001',
+        description: 'Cash deposit - verification needed'
       }
     ];
   }
