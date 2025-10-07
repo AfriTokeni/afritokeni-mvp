@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { BalanceService } from '../services/BalanceService';
+import { BitcoinService } from '../services/bitcoinService';
 import { formatCurrencyAmount } from '../types/currency';
 import PageLayout from '../components/PageLayout';
 import AgentStatusIndicator from '../components/AgentStatusIndicator';
@@ -37,15 +38,58 @@ const AgentDashboard: React.FC = () => {
   const [showVerificationAlert, setShowVerificationAlert] = useState(true);
   const { notifications, dismissNotification } = useNotifications();
   
-  // Calculate daily earnings from DataService
-  const calculateDailyEarnings = (): number => {
-    // Simple calculation based on mock data
-    return 25000; // Mock daily earnings
-  };
-
   // Get customers count
   const [customersCount, setCustomersCount] = useState(0);
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
+  const [bitcoinBalance, setBitcoinBalance] = useState(0);
+  const [bitcoinTransactions, setBitcoinTransactions] = useState<Array<{
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    type: 'buy' | 'sell';
+    amount: number;
+    currency: string;
+    bitcoinAmount: number;
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    createdAt: Date;
+    location?: string;
+    exchangeRate: number;
+    agentFee?: number;
+    description?: string;
+  }>>([]);
+
+  // Calculate real daily earnings from actual transactions
+  const calculateDailyEarnings = (): number => {
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+
+    let totalEarnings = 0;
+
+    // Calculate earnings from regular transactions (2% commission)
+    const todayRegularTxs = agentTransactions.filter(tx => {
+      const txDate = new Date(tx.createdAt);
+      return txDate >= startOfDay && txDate < endOfDay && tx.status === 'completed';
+    });
+
+    todayRegularTxs.forEach(tx => {
+      totalEarnings += Math.round(tx.amount * 0.02); // 2% commission on regular transactions
+    });
+
+    // Calculate earnings from Bitcoin transactions (agent fees)
+    const todayBitcoinTxs = bitcoinTransactions.filter(tx => {
+      const txDate = new Date(tx.createdAt);
+      return txDate >= startOfDay && txDate < endOfDay && tx.status === 'completed';
+    });
+
+    todayBitcoinTxs.forEach(tx => {
+      if (tx.agentFee && tx.agentFee > 0) {
+        totalEarnings += tx.agentFee;
+      }
+    });
+
+    return totalEarnings;
+  };
 
   React.useEffect(() => {
     // Load customers count asynchronously
@@ -55,14 +99,53 @@ const AgentDashboard: React.FC = () => {
     
     // Load agent transactions
     if (agent) {
-      const transactions = BalanceService.getTransactionHistory(agent.id);
+      // Use agent.userId for BalanceService since it tracks by user ID, not agent ID
+      const transactions = BalanceService.getTransactionHistory(agent.userId || agent.id);
       setAgentTransactions(transactions);
+      
+      // Load agent Bitcoin balance and transactions
+      BitcoinService.getAgentBitcoinBalance(agent.id).then(balance => {
+        setBitcoinBalance(balance);
+      }).catch(error => {
+        console.error('Error loading Bitcoin balance:', error);
+        setBitcoinBalance(0);
+      });
+      
+      BitcoinService.getAgentBitcoinTransactions(agent.id).then(btcTxs => {
+        setBitcoinTransactions(btcTxs);
+      }).catch(error => {
+        console.error('Error loading Bitcoin transactions:', error);
+        setBitcoinTransactions([]);
+      });
     }
   }, [agent]);
 
-  // Get agent's Bitcoin balance using BalanceService
-  const bitcoinBalance = agent ? BalanceService.calculateBalance(agent.id, 'BTC') : 0;
   const dailyEarnings = calculateDailyEarnings();
+
+  // Combine regular transactions and Bitcoin transactions for display
+  const allTransactions = React.useMemo(() => {
+    const combined = [
+      ...agentTransactions.map(tx => ({
+        ...tx,
+        source: 'regular' as const,
+        displayType: tx.type.charAt(0).toUpperCase() + tx.type.slice(1).replace(/[_-]/g, ' '),
+        displayAmount: formatCurrencyAmount(tx.amount, tx.currency as 'UGX'),
+        commission: formatCurrencyAmount(Math.round(tx.amount * 0.02), tx.currency as 'UGX'),
+        description: tx.description || 'Transaction'
+      })),
+      ...bitcoinTransactions.map(tx => ({
+        ...tx,
+        source: 'bitcoin' as const,
+        displayType: `Bitcoin ${tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}`,
+        displayAmount: `${tx.bitcoinAmount} sats`,
+        commission: tx.agentFee ? formatCurrencyAmount(tx.agentFee, tx.currency as 'UGX') : '0 UGX',
+        description: tx.description || `Bitcoin ${tx.type}`
+      }))
+    ];
+    
+    // Sort by creation date, newest first
+    return combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [agentTransactions, bitcoinTransactions]);
   
 
   const formatCurrency = (amount: number): string => {
@@ -492,7 +575,7 @@ const AgentDashboard: React.FC = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm font-semibold text-neutral-600">Today&apos;s Transactions</p>
-                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{agentTransactions.length}</p>
+                <p className="text-lg sm:text-xl font-bold text-neutral-900 font-mono mt-1">{allTransactions.length}</p>
               </div>
             </div>
           </div>
@@ -520,28 +603,32 @@ const AgentDashboard: React.FC = () => {
           </div>
           <div className="p-4 sm:p-6">
             <div className="space-y-3 sm:space-y-4">
-              {agentTransactions.slice(0, 4).map((transaction) => (
+              {allTransactions.slice(0, 4).map((transaction) => (
                 <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-neutral-100 last:border-b-0">
                   <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs sm:text-sm font-bold text-neutral-600">
-                        {transaction.description ? transaction.description.split(' ').map((n: string) => n[0]).join('').slice(0, 2) : 'TX'}
-                      </span>
+                      {transaction.source === 'bitcoin' ? (
+                        <Bitcoin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+                      ) : (
+                        <span className="text-xs sm:text-sm font-bold text-neutral-600">
+                          {transaction.description ? transaction.description.split(' ').map((n: string) => n[0]).join('').slice(0, 2) : 'TX'}
+                        </span>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm font-semibold text-neutral-900 truncate">{transaction.description || 'Transaction'}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-neutral-900 truncate">{transaction.description}</p>
                       <p className="text-xs text-neutral-600 font-medium mt-1 truncate">
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace(/[_-]/g, ' ')}
+                        {transaction.displayType}
                       </p>
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-2">
                     <div className="text-xs sm:text-sm font-bold text-neutral-900 font-mono">
-                      {formatCurrencyAmount(transaction.amount, transaction.currency as any)}
+                      {transaction.displayAmount}
                     </div>
                     <div className="text-xs mt-1">
                       <span className="text-green-600 font-bold font-mono">
-                        +{formatCurrencyAmount(Math.round(transaction.amount * 0.02), transaction.currency as any)}
+                        +{transaction.commission}
                       </span>
                       <div className={`mt-1 font-semibold text-xs ${
                         transaction.status === 'completed' ? 'text-green-600' : 
@@ -553,7 +640,7 @@ const AgentDashboard: React.FC = () => {
                   </div>
                 </div>
               ))}
-              {agentTransactions.length === 0 && (
+              {allTransactions.length === 0 && (
                 <div className="text-center py-6 sm:py-8">
                   <p className="text-neutral-600 text-sm">No transactions yet</p>
                 </div>
