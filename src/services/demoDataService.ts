@@ -27,6 +27,7 @@ export interface DemoTransaction {
   to?: string;
   status: 'completed' | 'pending' | 'failed';
   timestamp: Date;
+  createdAt: Date; // For compatibility with Transaction interface
   description: string;
   fee?: number;
 }
@@ -109,15 +110,17 @@ export class DemoDataService {
       const amount = faker.number.int({ min: 5000, max: 200000 });
       const fee = Math.floor(amount * 0.028); // 2.8% fee
 
+      const timestamp = faker.date.recent({ days: 30 });
       transactions.push({
         id: faker.string.uuid(),
         type,
         amount,
         currency: 'UGX',
-        from: type === 'receive' ? faker.phone.number('+256 ### ### ###') : undefined,
-        to: type === 'send' ? faker.phone.number('+256 ### ### ###') : undefined,
+        from: type === 'receive' ? `+256${faker.number.int({ min: 700000000, max: 799999999 })}` : undefined,
+        to: type === 'send' ? `+256${faker.number.int({ min: 700000000, max: 799999999 })}` : undefined,
         status: faker.helpers.arrayElement(['completed', 'completed', 'completed', 'pending']),
-        timestamp: faker.date.recent({ days: 30 }),
+        timestamp,
+        createdAt: timestamp,
         description: this.getTransactionDescription(type),
         fee: ['send', 'withdraw', 'bitcoin_buy', 'bitcoin_sell'].includes(type) ? fee : undefined
       });
@@ -138,6 +141,7 @@ export class DemoDataService {
       const amount = faker.number.int({ min: 10000, max: 500000 });
       const commission = Math.floor(amount * 0.05); // 5% commission
 
+      const timestamp = faker.date.recent({ days: 30 });
       transactions.push({
         id: faker.string.uuid(),
         type,
@@ -146,7 +150,8 @@ export class DemoDataService {
         from: faker.person.fullName(),
         to: type === 'withdraw' ? 'Bank Account' : undefined,
         status: 'completed',
-        timestamp: faker.date.recent({ days: 30 }),
+        timestamp,
+        createdAt: timestamp,
         description: `${type === 'deposit' ? 'Cash deposit' : type === 'withdraw' ? 'Cash withdrawal' : 'Bitcoin exchange'} for ${faker.person.firstName()}`,
         fee: commission
       });
@@ -208,11 +213,13 @@ export class DemoDataService {
   /**
    * Add a new demo transaction (for simulating actions)
    */
-  static addUserTransaction(transaction: Omit<DemoTransaction, 'id' | 'timestamp'>): DemoTransaction {
+  static addUserTransaction(transaction: Omit<DemoTransaction, 'id' | 'timestamp' | 'createdAt'>): DemoTransaction {
+    const now = new Date();
     const newTransaction: DemoTransaction = {
       ...transaction,
       id: faker.string.uuid(),
-      timestamp: new Date()
+      timestamp: now,
+      createdAt: now
     };
 
     this.userTransactions.unshift(newTransaction);
@@ -232,11 +239,13 @@ export class DemoDataService {
   /**
    * Add agent transaction
    */
-  static addAgentTransaction(transaction: Omit<DemoTransaction, 'id' | 'timestamp'>): DemoTransaction {
+  static addAgentTransaction(transaction: Omit<DemoTransaction, 'id' | 'timestamp' | 'createdAt'>): DemoTransaction {
+    const now = new Date();
     const newTransaction: DemoTransaction = {
       ...transaction,
       id: faker.string.uuid(),
-      timestamp: new Date()
+      timestamp: now,
+      createdAt: now
     };
 
     this.agentTransactions.unshift(newTransaction);

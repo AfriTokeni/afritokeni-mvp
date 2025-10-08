@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
+import { DemoModeBanner } from './DemoModeBanner';
+import { DemoModeToggle } from './DemoModeToggle';
 import CollapsibleSidebar from './CollapsibleSidebar';
 import PublicFooter from './PublicFooter';
 import type { LucideIcon } from 'lucide-react';
@@ -61,6 +63,9 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Demo Mode Banner */}
+      <DemoModeBanner />
+      
       {/* Collapsible Sidebar */}
       <CollapsibleSidebar routes={routes} userType={userType} />
       
@@ -73,6 +78,9 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
           </div>
           
           <div className="flex items-center gap-4">
+            {/* Demo Mode Toggle */}
+            <DemoModeToggle />
+            
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
