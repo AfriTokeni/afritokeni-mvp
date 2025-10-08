@@ -65,35 +65,35 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
       <CollapsibleSidebar routes={routes} userType={userType} />
       
       {/* Main Content Area */}
-      <div className="ml-16 transition-all duration-300">
+      <div className="md:ml-16 transition-all duration-300 pb-20 md:pb-0">
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-black">{getPageTitle()}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-black">{getPageTitle()}</h1>
           </div>
           
-          <div className="flex items-center gap-4">
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="relative">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Search Bar - Hide on very small screens */}
+            <form onSubmit={handleSearch} className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search transactions..."
-                className="w-80 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-48 md:w-80 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </form>
             
             {/* User Avatar - Clickable */}
             <button
               onClick={handleAvatarClick}
-              className="w-10 h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden"
+              className="w-8 h-8 md:w-10 md:h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden"
             >
               {profileImage ? (
                 <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-white text-sm font-semibold">
+                <span className="text-white text-xs md:text-sm font-semibold">
                   {userName.charAt(0).toUpperCase() || (userType === 'user' ? 'U' : userType === 'agent' ? 'A' : 'AD')}
                 </span>
               )}
@@ -102,12 +102,14 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
         </header>
 
         {/* Page Content */}
-        <main className="p-8">
+        <main className="p-4 md:p-8">
           {children}
         </main>
 
-        {/* Footer */}
-        <PublicFooter />
+        {/* Footer - Hidden on tablet and below */}
+        <div className="hidden md:block">
+          <PublicFooter />
+        </div>
       </div>
     </div>
   );

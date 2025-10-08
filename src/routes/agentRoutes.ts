@@ -6,7 +6,8 @@ import {
   Banknote,
   Home,
   LayoutDashboard,
-  Send
+  Send,
+  ArrowLeftRight
 } from 'lucide-react';
 
 export interface Route {
@@ -75,10 +76,10 @@ export const agent_mobile_routes: Route[] = [
     icon: Banknote,
   },
   {
-    id: 'lightning',
-    path: '/agents/lightning',
-    label: 'Send Bitcoin',
-    icon: Send,
+    id: 'bitcoin-exchange',
+    path: '/agents/exchange',
+    label: 'Exchange',
+    icon: ArrowLeftRight,
   },
   {
     id: 'customers',
