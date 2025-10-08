@@ -16,47 +16,47 @@ const BitcoinConfirmStep: React.FC<BitcoinConfirmStepProps> = ({
   onMakeAnother,
 }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
+        <div className="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
         </div>
-        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Exchange Initiated!</h2>
-        <p className="text-neutral-600">Your Bitcoin exchange is being processed</p>
+        <h2 className="text-xl md:text-2xl font-bold text-neutral-900 mb-2">Exchange Initiated!</h2>
+        <p className="text-neutral-600 text-sm md:text-base">Your Bitcoin exchange is being processed</p>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-        <div className="space-y-4">
+      <div className="bg-white border border-neutral-200 rounded-lg md:rounded-xl p-4 md:p-6 shadow-sm">
+        <div className="space-y-3 md:space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-neutral-600">Transaction ID:</span>
-            <span className="font-mono text-sm">{transactionId}</span>
+            <span className="text-neutral-600 text-xs md:text-sm">Transaction ID:</span>
+            <span className="font-mono text-xs md:text-sm">{transactionId}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-neutral-600">Status:</span>
+            <span className="text-neutral-600 text-xs md:text-sm">Status:</span>
             <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-yellow-500" />
-              <span className="text-yellow-600 font-medium">Waiting for confirmation</span>
+              <Clock className="w-3 h-3 md:w-4 md:h-4 text-yellow-500" />
+              <span className="text-yellow-600 font-medium text-xs md:text-sm">Waiting for confirmation</span>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-neutral-600">Agent:</span>
-            <span className="font-medium">{selectedAgent?.businessName}</span>
+            <span className="text-neutral-600 text-xs md:text-sm">Agent:</span>
+            <span className="font-medium text-xs md:text-sm">{selectedAgent?.businessName}</span>
           </div>
         </div>
 
         {/* Agent Info Card */}
         {selectedAgent && (
-          <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <div className="mt-4 md:mt-6 p-3 md:p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <span className="text-orange-600 font-semibold">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <span className="text-orange-600 font-semibold text-sm md:text-base">
                   {selectedAgent.businessName.split(' ').map((n: string) => n[0]).join('')}
                 </span>
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-neutral-900">{selectedAgent.businessName}</h4>
-                <p className="text-sm text-neutral-600">{selectedAgent.location.address}</p>
-                <div className="flex items-center text-sm">
+                <h4 className="font-semibold text-neutral-900 text-sm md:text-base">{selectedAgent.businessName}</h4>
+                <p className="text-xs md:text-sm text-neutral-600">{selectedAgent.location.address}</p>
+                <div className="flex items-center text-xs md:text-sm">
                   <span className="text-yellow-500">4.0 ★</span>
                   <span className="ml-2 text-neutral-600">• {selectedAgent.commissionRate}% fee</span>
                 </div>
@@ -66,10 +66,10 @@ const BitcoinConfirmStep: React.FC<BitcoinConfirmStepProps> = ({
         )}
 
         {/* Status and Next Steps */}
-        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="mt-4 md:mt-6 p-3 md:p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <div className="flex items-start space-x-3">
-            <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-yellow-800">
+            <Clock className="w-4 h-4 md:w-5 md:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <div className="text-xs md:text-sm text-yellow-800">
               <p className="font-medium mb-1">Next Steps:</p>
               <ul className="space-y-1 text-xs">
                 <li>• Wait for Bitcoin transaction confirmation (≈10 minutes)</li>
@@ -82,42 +82,42 @@ const BitcoinConfirmStep: React.FC<BitcoinConfirmStepProps> = ({
         </div>
 
         {/* Transaction Timeline */}
-        <div className="mt-6">
-          <h4 className="font-medium text-neutral-900 mb-4">Transaction Progress</h4>
+        <div className="mt-4 md:mt-6">
+          <h4 className="font-medium text-neutral-900 mb-3 md:mb-4 text-sm md:text-base">Transaction Progress</h4>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-3 h-3 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-neutral-900">Escrow Created</p>
+                <p className="text-xs md:text-sm font-medium text-neutral-900">Escrow Created</p>
                 <p className="text-xs text-neutral-500">Exchange request initiated</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 md:w-6 md:h-6 bg-yellow-500 rounded-full flex items-center justify-center">
                 <Clock className="w-3 h-3 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-neutral-900">Awaiting Bitcoin</p>
+                <p className="text-xs md:text-sm font-medium text-neutral-900">Awaiting Bitcoin</p>
                 <p className="text-xs text-neutral-500">Send Bitcoin to the provided address</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-neutral-300 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 md:w-6 md:h-6 bg-neutral-300 rounded-full flex items-center justify-center">
                 <div className="w-2 h-2 bg-white rounded-full" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-neutral-500">Bitcoin Confirmation</p>
+                <p className="text-xs md:text-sm font-medium text-neutral-500">Bitcoin Confirmation</p>
                 <p className="text-xs text-neutral-400">Usually takes 10-60 minutes</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-neutral-300 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 md:w-6 md:h-6 bg-neutral-300 rounded-full flex items-center justify-center">
                 <div className="w-2 h-2 bg-white rounded-full" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-neutral-500">Cash Exchange</p>
+                <p className="text-xs md:text-sm font-medium text-neutral-500">Cash Exchange</p>
                 <p className="text-xs text-neutral-400">Meet agent to complete exchange</p>
               </div>
             </div>
@@ -125,17 +125,17 @@ const BitcoinConfirmStep: React.FC<BitcoinConfirmStepProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 space-y-3">
+        <div className="mt-4 md:mt-6 space-y-3">
           <button
             onClick={onViewTransactions}
-            className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2"
+            className="w-full bg-orange-600 text-white py-2.5 md:py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2 text-sm md:text-base"
           >
             <span>View Transaction History</span>
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
             onClick={onMakeAnother}
-            className="w-full bg-neutral-100 text-neutral-700 py-3 rounded-lg font-medium hover:bg-neutral-200 transition-colors"
+            className="w-full bg-neutral-100 text-neutral-700 py-2.5 md:py-3 rounded-lg font-medium hover:bg-neutral-200 transition-colors text-sm md:text-base"
           >
             Make Another Exchange
           </button>

@@ -36,18 +36,17 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Deposit Money</h2>
-          <p className="text-gray-600">Enter the amount you want to deposit</p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 lg:p-8">
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Deposit Money</h2>
+          <p className="text-sm md:text-base text-gray-600">Enter the amount you want to deposit</p>
         </div>
 
-        <div className="space-y-6">
-          {/* Currency Selection */}
+        <div className="space-y-4 md:space-y-6">{/* Currency Selection */}
 
                     <div>
             <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-xs md:text-sm font-medium text-gray-700">
                 Select Currency
               </label>
              <CurrencySelector
@@ -85,7 +84,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
           {/* Amount Input */}
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-3">
+            <label htmlFor="amount" className="block text-xs md:text-sm font-medium text-gray-700 mb-3">
               Deposit Amount
             </label>
             <div className="relative">
@@ -98,7 +97,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
                   onError('');
                 }}
                 placeholder="0.00"
-                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 font-mono text-lg"
+                className="w-full pl-6 md:pl-8 pr-3 md:pr-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 font-mono text-base md:text-lg"
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">
@@ -109,8 +108,8 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
           {/* Error Message */}
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="p-3 md:p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-xs md:text-sm text-red-700">{error}</p>
             </div>
           )}
 
@@ -118,7 +117,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
           <button
             onClick={handleAmountContinue}
             disabled={!amount}
-            className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-gray-900 text-white py-2 md:py-3 px-3 md:px-4 rounded-lg font-medium text-sm md:text-base hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Find Nearby Agents
           </button>

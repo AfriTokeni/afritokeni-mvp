@@ -94,30 +94,30 @@ const AgentTransactions: React.FC = () => {
 
   const getTransactionIcon = (type: string, source?: string) => {
     if (source === 'bitcoin') {
-      return <Bitcoin className="h-5 w-5 text-orange-500" />;
+      return <Bitcoin className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />;
     }
 
     if (source === 'deposit_request') {
-      return <Plus className="h-5 w-5 text-green-600" />;
+      return <Plus className="h-4 w-4 md:h-5 md:w-5 text-green-600" />;
     }
     
     switch (type) {
       case 'send':
-        return <ArrowUp className="h-5 w-5 text-red-500" />;
+        return <ArrowUp className="h-4 w-4 md:h-5 md:w-5 text-red-500" />;
       case 'receive':
-        return <ArrowDown className="h-5 w-5 text-green-500" />;
+        return <ArrowDown className="h-4 w-4 md:h-5 md:w-5 text-green-500" />;
       case 'withdraw':
-        return <Minus className="h-5 w-5 text-blue-500" />;
+        return <Minus className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />;
       case 'deposit':
-        return <Plus className="h-5 w-5 text-purple-500" />;
+        return <Plus className="h-4 w-4 md:h-5 md:w-5 text-purple-500" />;
       case 'customer_deposit':
-        return <Plus className="h-5 w-5 text-green-600" />;
+        return <Plus className="h-4 w-4 md:h-5 md:w-5 text-green-600" />;
       case 'buy':
-        return <Bitcoin className="h-5 w-5 text-green-600" />;
+        return <Bitcoin className="h-4 w-4 md:h-5 md:w-5 text-green-600" />;
       case 'sell':
-        return <Bitcoin className="h-5 w-5 text-red-600" />;
+        return <Bitcoin className="h-4 w-4 md:h-5 md:w-5 text-red-600" />;
       default:
-        return <Plus className="h-5 w-5 text-gray-500" />;
+        return <Plus className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />;
     }
   };
 
@@ -251,28 +251,28 @@ const AgentTransactions: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 sm:space-y-6">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Agent Transaction History</h1>
+    <div className="space-y-4 md:space-y-6">
+      <div className="space-y-3 md:space-y-4 lg:space-y-6">
+        <h1 className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">Agent Transaction History</h1>
         
         {/* Search and Filters */}
-        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white p-3 md:p-4 lg:p-6 rounded-lg shadow-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search transactions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-8 md:pl-10 pr-3 md:pr-4 py-2 border border-gray-300 rounded-md text-xs md:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
             
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-2 md:px-3 py-2 border border-gray-300 rounded-md text-xs md:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="all">All Statuses</option>
               <option value="completed">Completed</option>
@@ -285,7 +285,7 @@ const AgentTransactions: React.FC = () => {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-2 md:px-3 py-2 border border-gray-300 rounded-md text-xs md:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="all">All Types</option>
               <option value="send">Send</option>
@@ -303,7 +303,7 @@ const AgentTransactions: React.FC = () => {
                 setStatusFilter('all');
                 setTypeFilter('all');
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md text-xs md:text-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               Clear Filters
             </button>
@@ -313,10 +313,10 @@ const AgentTransactions: React.FC = () => {
         {/* Transactions Table */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {currentTransactions.length === 0 ? (
-            <div className="p-6 sm:p-8 text-center">
-              <Plus className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
-              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-1 sm:mb-2">No transactions found</h3>
-              <p className="text-sm sm:text-base text-gray-500">
+            <div className="p-4 md:p-6 lg:p-8 text-center">
+              <Plus className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-gray-400 mx-auto mb-2 md:mb-3 lg:mb-4" />
+              <h3 className="text-sm md:text-base lg:text-lg font-medium text-gray-900 mb-1 md:mb-2">No transactions found</h3>
+              <p className="text-xs md:text-sm lg:text-base text-gray-500">
                 {agentTransactions?.length === 0 
                   ? "You haven't made any transactions yet."
                   : "No transactions match your current filters."
@@ -330,19 +330,19 @@ const AgentTransactions: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Transaction
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Type
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Date
                       </th>
                     </tr>
@@ -350,13 +350,13 @@ const AgentTransactions: React.FC = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentTransactions.map((transaction) => (
                       <tr key={transaction.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 max-w-xs">
+                        <td className="px-4 md:px-6 py-4 max-w-xs">
                           <div className="flex items-start">
-                            <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full">
+                            <div className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 flex items-center justify-center bg-gray-100 rounded-full">
                               {getTransactionIcon(transaction.type, transaction.source)}
                             </div>
-                            <div className="ml-4 min-w-0 flex-1">
-                              <div className="text-sm font-medium text-gray-900 break-words leading-5">
+                            <div className="ml-3 md:ml-4 min-w-0 flex-1">
+                              <div className="text-xs md:text-sm font-medium text-gray-900 break-words leading-5">
                                 {transaction.description || 
                                  (transaction.customerName ? `${transaction.customerName} - Bitcoin ${transaction.type}` : 'Transaction')}
                               </div>
@@ -376,20 +376,20 @@ const AgentTransactions: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(transaction.type)}`}>
                             {transaction.source === 'bitcoin' ? `Bitcoin ${transaction.type}` : transaction.type}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                           {transaction.displayAmount}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
                             {transaction.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-500">
                           {transaction.commission && (
                             <div className="text-green-600 font-semibold">
                               +{transaction.commission}
@@ -406,17 +406,17 @@ const AgentTransactions: React.FC = () => {
               </div>
 
               {/* Mobile Card View */}
-              <div className="lg:hidden space-y-4">
+              <div className="lg:hidden space-y-3 md:space-y-4">
                 {currentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center bg-gray-100 rounded-full">
+                      <div className="flex-shrink-0 h-6 w-6 md:h-8 md:w-8 flex items-center justify-center bg-gray-100 rounded-full">
                         {getTransactionIcon(transaction.type, transaction.source)}
                       </div>
                       <div className="flex-1 min-w-0">
                         {/* Transaction Description - Full text with wrapping */}
-                        <div className="mb-3">
-                          <p className="text-sm font-medium text-gray-900 leading-5 break-words">
+                        <div className="mb-2 md:mb-3">
+                          <p className="text-xs md:text-sm font-medium text-gray-900 leading-5 break-words">
                             {transaction.description || 
                              (transaction.customerName ? `${transaction.customerName} - Bitcoin ${transaction.type}` : 'Transaction')}
                           </p>
@@ -433,19 +433,19 @@ const AgentTransactions: React.FC = () => {
                         </div>
                         
                         {/* Amount - Prominent display */}
-                        <div className="mb-3">
-                          <p className="text-base font-semibold text-gray-900">
+                        <div className="mb-2 md:mb-3">
+                          <p className="text-sm md:text-base font-semibold text-gray-900">
                             {transaction.displayAmount}
                           </p>
                           {transaction.commission && (
-                            <p className="text-sm text-green-600 font-semibold">
+                            <p className="text-xs md:text-sm text-green-600 font-semibold">
                               Commission: +{transaction.commission}
                             </p>
                           )}
                         </div>
                         
                         {/* Transaction ID - Full display with background */}
-                        <div className="bg-gray-50 rounded-md px-2 py-1 mb-3">
+                        <div className="bg-gray-50 rounded-md px-2 py-1 mb-2 md:mb-3">
                           <p className="text-xs text-gray-500 break-all">
                             ID: {transaction.id}
                           </p>
@@ -475,22 +475,22 @@ const AgentTransactions: React.FC = () => {
 
               {/* Responsive Pagination */}
               {totalPages > 1 && (
-                <div className="bg-white px-3 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div className="bg-white px-3 md:px-4 lg:px-6 py-3 flex items-center justify-between border-t border-gray-200">
                   <div className="flex-1 flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="w-full sm:w-auto relative inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full sm:w-auto relative inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs md:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
                     </button>
-                    <span className="text-xs sm:text-sm text-gray-700 text-center">
+                    <span className="text-xs md:text-sm text-gray-700 text-center">
                       Page {currentPage} of {totalPages}
                     </span>
                     <button
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className="w-full sm:w-auto relative inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full sm:w-auto relative inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs md:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
                     </button>

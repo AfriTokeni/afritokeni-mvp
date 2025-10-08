@@ -101,24 +101,24 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
   });
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-3 md:p-4 lg:p-6">
       {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-4 md:mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 md:w-4 md:h-4" />
           <input
             type="text"
             placeholder="Search by name, phone, or withdrawal code..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-colors duration-200 text-sm sm:text-base"
+            className="w-full pl-8 md:pl-10 pr-3 md:pr-4 py-2 md:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-colors duration-200 text-xs md:text-sm"
           />
         </div>
         
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-colors duration-200 text-sm sm:text-base"
+          className="px-3 md:px-4 py-2 md:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-colors duration-200 text-xs md:text-sm"
         >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
@@ -129,22 +129,22 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
       </div>
 
       {/* Withdrawal Requests List */}
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {loading ? (
-          <div className="text-center py-8 sm:py-12">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 animate-pulse">
-              <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+          <div className="text-center py-6 md:py-8 lg:py-12">
+            <div className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 animate-pulse">
+              <CreditCard className="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8 text-gray-400" />
             </div>
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Loading withdrawal requests...</h3>
-            <p className="text-gray-600 text-sm sm:text-base">Please wait while we fetch the latest requests</p>
+            <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 mb-2">Loading withdrawal requests...</h3>
+            <p className="text-gray-600 text-xs md:text-sm lg:text-base">Please wait while we fetch the latest requests</p>
           </div>
         ) : filteredRequests.length === 0 ? (
-          <div className="text-center py-8 sm:py-12">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+          <div className="text-center py-6 md:py-8 lg:py-12">
+            <div className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+              <CreditCard className="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8 text-gray-400" />
             </div>
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No withdrawal requests found</h3>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 mb-2">No withdrawal requests found</h3>
+            <p className="text-gray-600 text-xs md:text-sm lg:text-base">
               {searchTerm || filterStatus !== 'all' 
                 ? 'Try adjusting your search or filter criteria'
                 : 'Withdrawal requests will appear here when customers make requests'
@@ -156,25 +156,25 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
             <div
               key={request.id}
               onClick={() => onSelectWithdrawal(request)}
-              className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
+              className="bg-white border border-gray-200 rounded-xl md:rounded-2xl p-3 md:p-4 lg:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
-                <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                <div className="flex items-center space-x-3 md:space-x-4 min-w-0 flex-1">
                   {/* User Avatar */}
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+                  <div className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-gray-600" />
                   </div>
                   
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900 truncate">{request.userName}</h3>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-gray-600 mt-1 space-y-1 sm:space-y-0">
+                    <h3 className="text-xs md:text-sm font-semibold text-gray-900 truncate">{request.userName}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs md:text-sm text-gray-600 mt-1 space-y-1 sm:space-y-0">
                       <div className="flex items-center space-x-1">
-                        <Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                         <span className="truncate">{request.userPhone}</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <Clock className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                         <span>{getTimeAgo(request.requestedAt)}</span>
                       </div>
                     </div>
@@ -183,7 +183,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
 
                 {/* Amount and Status */}
                 <div className="text-left sm:text-right flex-shrink-0">
-                  <div className="text-base font-bold text-gray-900 font-mono">
+                  <div className="text-sm md:text-base font-bold text-gray-900 font-mono">
                     {formatCurrency(request.amount.local, request.amount.currency)}
                   </div>
                   
@@ -193,7 +193,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
                   </div>
                   
                   {/* Status Badge */}
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusColor(request.status)}`}>
+                  <span className={`inline-flex items-center px-2 md:px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusColor(request.status)}`}>
                     {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                   </span>
                 </div>

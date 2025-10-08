@@ -55,34 +55,34 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
           className="flex items-center space-x-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="font-medium">Back to Agent Selection</span>
+          <span className="font-medium text-sm md:text-base">Back to Agent Selection</span>
         </button>
       </div>
 
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Send Bitcoin</h2>
-        <p className="text-neutral-600">Send Bitcoin from your wallet to complete the exchange</p>
+        <h2 className="text-xl md:text-2xl font-bold text-neutral-900 mb-2">Send Bitcoin</h2>
+        <p className="text-neutral-600 text-sm md:text-base">Send Bitcoin from your wallet to complete the exchange</p>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+      <div className="bg-white border border-neutral-200 rounded-lg md:rounded-xl p-4 md:p-6 shadow-sm">
         {/* Agent Info */}
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-            <span className="text-orange-600 font-semibold">
+        <div className="flex items-center space-x-3 mb-4 md:mb-6">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-full flex items-center justify-center">
+            <span className="text-orange-600 font-semibold text-sm md:text-base">
               {selectedAgent.businessName.split(' ').map((n: string) => n[0]).join('')}
             </span>
           </div>
           <div>
-            <h3 className="font-semibold text-neutral-900">{selectedAgent.businessName}</h3>
-            <p className="text-sm text-neutral-600">{selectedAgent.location.address}</p>
-            <div className="flex items-center text-sm text-yellow-500">
+            <h3 className="font-semibold text-neutral-900 text-sm md:text-base">{selectedAgent.businessName}</h3>
+            <p className="text-xs md:text-sm text-neutral-600">{selectedAgent.location.address}</p>
+            <div className="flex items-center text-xs md:text-sm text-yellow-500">
               <span className="font-medium">4.0</span>
               <span className="ml-1">★</span>
               <span className="ml-2 text-neutral-600">• {selectedAgent.commissionRate}% fee</span>
@@ -92,18 +92,18 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
 
         <div className="space-y-4">
           {/* QR Code Section */}
-          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <div className="p-3 md:p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="text-center mb-4">
-              <div className="w-32 h-32 bg-white border-2 border-orange-300 rounded-lg mx-auto flex items-center justify-center mb-3">
-                <QrCode className="w-16 h-16 text-orange-600" />
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-white border-2 border-orange-300 rounded-lg mx-auto flex items-center justify-center mb-3">
+                <QrCode className="w-12 h-12 md:w-16 md:h-16 text-orange-600" />
               </div>
-              <p className="text-sm text-neutral-600">Scan QR code with your wallet app</p>
+              <p className="text-xs md:text-sm text-neutral-600">Scan QR code with your wallet app</p>
             </div>
           </div>
 
           {/* Bitcoin Address */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-xs md:text-sm font-medium text-neutral-700 mb-2">
               Bitcoin Address
             </label>
             <div className="flex items-center space-x-2">
@@ -111,11 +111,11 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
                 type="text"
                 value={depositAddress}
                 readOnly
-                className="flex-1 px-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 font-mono text-sm"
+                className="flex-1 px-3 md:px-4 py-2.5 md:py-3 border border-neutral-300 rounded-lg bg-neutral-50 font-mono text-xs md:text-sm"
               />
               <button
                 onClick={() => copyToClipboard(depositAddress)}
-                className="px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="px-3 md:px-4 py-2.5 md:py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
@@ -123,7 +123,7 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
           </div>
 
           {/* Transaction Summary */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
             <div>
               <span className="text-neutral-600">Amount to send:</span>
               <div className="font-mono font-semibold">₿{btcAmount}</div>
@@ -138,10 +138,10 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
         </div>
 
         {/* Escrow Protection Info */}
-        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div className="mt-4 md:mt-6 p-3 md:p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-start space-x-3">
-            <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-green-800">
+            <Shield className="w-4 h-4 md:w-5 md:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div className="text-xs md:text-sm text-green-800">
               <p className="font-medium mb-1">🔒 Secure Escrow Protection:</p>
               <ul className="space-y-1 text-xs">
                 <li>• Your Bitcoin is held safely by AfriTokeni until cash is received</li>
@@ -155,10 +155,10 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
 
         {/* Exchange Code */}
         {escrowTransaction && (
-          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <div className="mt-4 p-3 md:p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="text-center">
-              <p className="text-sm text-orange-800 font-medium mb-2">Your Exchange Code:</p>
-              <div className="text-2xl font-mono font-bold text-orange-900 bg-white px-4 py-2 rounded border-2 border-orange-300">
+              <p className="text-xs md:text-sm text-orange-800 font-medium mb-2">Your Exchange Code:</p>
+              <div className="text-xl md:text-2xl font-mono font-bold text-orange-900 bg-white px-3 md:px-4 py-2 rounded border-2 border-orange-300">
                 {escrowTransaction.exchangeCode}
               </div>
               <p className="text-xs text-orange-700 mt-2">
@@ -169,10 +169,10 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
         )}
 
         {/* Instructions */}
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mt-4 md:mt-6 p-3 md:p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800">
+            <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-xs md:text-sm text-blue-800">
               <p className="font-medium mb-1">Next Steps:</p>
               <ul className="space-y-1 text-xs">
                 <li>• Send exactly ₿{btcAmount} to the escrow address above</li>
@@ -187,7 +187,7 @@ const BitcoinDepositStep: React.FC<BitcoinDepositStepProps> = ({
         {/* Confirm Button */}
         <button
           onClick={onConfirm}
-          className="w-full mt-6 bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+          className="w-full mt-4 md:mt-6 bg-orange-600 text-white py-2.5 md:py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors text-sm md:text-base"
         >
           I&apos;ve Sent the Bitcoin
         </button>

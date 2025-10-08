@@ -16,29 +16,29 @@ const AgentSecurity: React.FC<AgentSecurityProps> = ({
   onToggle
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
+    <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-200">
       <button
         onClick={onToggle}
-        className="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+        className="w-full p-4 md:p-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center space-x-3">
-          <Shield className="w-5 h-5 text-red-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Security & Notifications</h2>
+          <Shield className="w-4 h-4 md:w-5 md:h-5 text-red-600" />
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">Security & Notifications</h2>
         </div>
         {expanded ? 
-          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-          <ChevronDown className="w-5 h-5 text-gray-400" />
+          <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-gray-400" /> : 
+          <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
         }
       </button>
       
       {expanded && (
-        <div className="px-6 pb-6 space-y-6">
+        <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-4 md:space-y-6">
           {/* ID Verification Requirement */}
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+          <div className="flex items-center justify-between p-3 md:p-4 bg-red-50 rounded-lg border border-red-200">
             <div className="flex items-center space-x-3">
-              <Eye className="w-5 h-5 text-red-600" />
+              <Eye className="w-4 h-4 md:w-5 md:h-5 text-red-600" />
               <div>
-                <h3 className="text-sm font-medium text-red-900">Require ID Verification</h3>
+                <h3 className="text-xs md:text-sm font-medium text-red-900">Require ID Verification</h3>
                 <p className="text-xs text-red-700 mt-1">
                   Require customers to show ID for all transactions
                 </p>

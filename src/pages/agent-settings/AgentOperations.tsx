@@ -31,23 +31,23 @@ const AgentOperations: React.FC<AgentOperationsProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
       <button
         onClick={onToggle}
-        className="w-full p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 rounded-t-xl"
+        className="w-full p-4 md:p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 rounded-t-xl"
       >
         <div className="flex items-center space-x-3">
-          <Clock className="w-5 h-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Operations & Limits</h2>
+          <Clock className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">Operations & Limits</h2>
         </div>
         {expanded ? 
-          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-          <ChevronDown className="w-5 h-5 text-gray-400" />
+          <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-gray-400" /> : 
+          <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
         }
       </button>
       
       {expanded && (
-        <div className="px-6 pb-6 space-y-6">
+        <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-4 md:space-y-6">
           {/* Operating Hours */}
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Operating Hours</h3>

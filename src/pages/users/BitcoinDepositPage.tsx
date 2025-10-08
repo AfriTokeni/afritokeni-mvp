@@ -180,33 +180,33 @@ const BitcoinDepositPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="max-w-4xl mx-auto">
         {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center space-x-4">
+        <div className="mb-6 md:mb-8">
+          <div className="flex items-center justify-center space-x-2 md:space-x-4 overflow-x-auto px-4">
             {[
               { key: 'amount', label: 'Amount', icon: Bitcoin },
               { key: 'agent', label: 'Agent', icon: ArrowRight },
               { key: 'deposit', label: 'Send', icon: QrCode },
               { key: 'confirm', label: 'Confirm', icon: CheckCircle }
             ].map(({ key, label, icon: Icon }, index) => (
-              <div key={key} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              <div key={key} className="flex items-center flex-shrink-0">
+                <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center ${
                   step === key 
                     ? 'bg-orange-600 text-white' 
                     : index < ['amount', 'agent', 'deposit', 'confirm'].indexOf(step)
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-200 text-gray-500'
                 }`}>
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4 md:w-5 md:h-5" />
                 </div>
-                <span className={`ml-2 text-sm font-medium ${
+                <span className={`ml-1 md:ml-2 text-xs md:text-sm font-medium whitespace-nowrap ${
                   step === key ? 'text-orange-600' : 'text-gray-500'
                 }`}>
                   {label}
                 </span>
-                {index < 3 && <ArrowRight className="w-4 h-4 text-gray-300 mx-4" />}
+                {index < 3 && <ArrowRight className="w-3 h-3 md:w-4 md:h-4 text-gray-300 mx-2 md:mx-4 flex-shrink-0" />}
               </div>
             ))}
           </div>

@@ -40,54 +40,54 @@ const AgentProfile: React.FC<AgentProfileProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
       <button
         onClick={onToggle}
-        className="w-full p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 rounded-t-xl"
+        className="w-full p-4 md:p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 rounded-t-xl"
       >
         <div className="flex items-center space-x-3">
-          <User className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Agent Profile</h2>
+          <User className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">Agent Profile</h2>
         </div>
         {expanded ? 
-          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-          <ChevronDown className="w-5 h-5 text-gray-400" />
+          <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-gray-400" /> : 
+          <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
         }
       </button>
       
       {expanded && (
-        <div className="px-6 pb-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-3 md:space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
                 Business Name
               </label>
               <input
                 type="text"
                 value={agent?.businessName || ''}
                 disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-xs md:text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
                 Agent ID
               </label>
               <input
                 type="text"
                 value={agent?.id || ''}
                 disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 font-mono"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 font-mono text-xs md:text-sm"
               />
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
               Current Location
             </label>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
-              <p className="text-sm text-gray-700">
+              <p className="text-xs md:text-sm text-gray-700">
                 {agent?.location ? 
                   `${agent.location.address}, ${agent.location.city}, ${agent.location.state}, ${agent.location.country}` :
                   'Location not set'

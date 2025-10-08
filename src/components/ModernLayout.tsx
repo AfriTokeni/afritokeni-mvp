@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, User, LogOut } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import CollapsibleSidebar from './CollapsibleSidebar';
 import PublicFooter from './PublicFooter';
@@ -22,10 +22,12 @@ interface ModernLayoutProps {
 const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuthentication();
+  const { user, logout } = useAuthentication();
   const [searchQuery, setSearchQuery] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Load profile image and user name
   useEffect(() => {
@@ -41,6 +43,20 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
     }
   }, [user]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -50,7 +66,27 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
   };
 
   const handleAvatarClick = () => {
+    // On mobile/tablet, show dropdown. On desktop, navigate directly to profile
+    if (window.innerWidth < 1024) { // lg breakpoint
+      setShowDropdown(!showDropdown);
+    } else {
+      navigate(`/${userType}s/${userType === 'agent' ? 'settings' : 'profile'}`);
+    }
+  };
+
+  const handleProfileClick = () => {
+    setShowDropdown(false);
     navigate(`/${userType}s/${userType === 'agent' ? 'settings' : 'profile'}`);
+  };
+
+  const handleLogoutClick = async () => {
+    setShowDropdown(false);
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   // Get page title from current route
@@ -85,19 +121,42 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
               />
             </form>
             
-            {/* User Avatar - Clickable */}
-            <button
-              onClick={handleAvatarClick}
-              className="w-8 h-8 md:w-10 md:h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden"
-            >
-              {profileImage ? (
-                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-white text-xs md:text-sm font-semibold">
-                  {userName.charAt(0).toUpperCase() || (userType === 'user' ? 'U' : userType === 'agent' ? 'A' : 'AD')}
-                </span>
+            {/* User Avatar - Clickable with Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={handleAvatarClick}
+                className="w-8 h-8 md:w-10 md:h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden"
+              >
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white text-xs md:text-sm font-semibold">
+                    {userName.charAt(0).toUpperCase() || (userType === 'user' ? 'U' : userType === 'agent' ? 'A' : 'AD')}
+                  </span>
+                )}
+              </button>
+
+              {/* Dropdown Menu - Only show on mobile/tablet */}
+              {showDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 lg:hidden animate-in fade-in duration-200">
+                  <button
+                    onClick={handleProfileClick}
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>{userType === 'agent' ? 'Settings' : 'Profile'}</span>
+                  </button>
+                  <hr className="my-1 border-gray-100" />
+                  <button
+                    onClick={handleLogoutClick}
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
               )}
-            </button>
+            </div>
           </div>
         </header>
 

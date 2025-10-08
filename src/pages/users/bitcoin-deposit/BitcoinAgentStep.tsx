@@ -156,16 +156,16 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
       {/* Agent Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="font-semibold text-neutral-900 mb-1">
+          <h3 className="font-semibold text-neutral-900 mb-1 text-sm md:text-base">
             {agent.businessName}
           </h3>
-          <div className="flex items-center text-sm text-neutral-600 mb-2">
-            <MapPin className="h-4 w-4 mr-1" />
+          <div className="flex items-center text-xs md:text-sm text-neutral-600 mb-2">
+            <MapPin className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             {agent.location.address}
           </div>
           {userLocation && (
-            <div className="flex items-center text-sm text-neutral-500">
-              <Navigation className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-xs md:text-sm text-neutral-500">
+              <Navigation className="h-3 w-3 md:h-4 md:w-4 mr-1" />
               {formatDistance(agent)} away
             </div>
           )}
@@ -185,13 +185,13 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
           <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
-          <p className="font-mono font-semibold text-neutral-900">
+          <p className="font-mono font-semibold text-neutral-900 text-xs md:text-sm">
             {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
           </p>
         </div>
         <div>
           <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
-          <p className="font-mono font-semibold text-neutral-900">
+          <p className="font-mono font-semibold text-neutral-900 text-xs md:text-sm">
             {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
           </p>
         </div>
@@ -203,13 +203,13 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
           {[1, 2, 3, 4, 5].map((star) => (
             <Star
               key={star}
-              className={`h-4 w-4 ${
+              className={`h-3 w-3 md:h-4 md:w-4 ${
                 star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
               }`}
             />
           ))}
         </div>
-        <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+        <span className="ml-2 text-xs md:text-sm text-neutral-600">4.0 (23 reviews)</span>
       </div>
 
       {/* Services */}
@@ -233,78 +233,78 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
             onAgentSelect(agent);
           }}
           disabled={isCreating}
-          className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+          className="flex-1 bg-neutral-900 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
           {isCreating ? 'Creating...' : 'Select Agent'}
         </button>
-        <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
-          <Phone className="h-4 w-4" />
+        <button className="px-3 md:px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-xs md:text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+          <Phone className="h-3 w-3 md:h-4 md:w-4" />
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
           className="flex items-center space-x-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="font-medium">Back to Amount</span>
+          <span className="font-medium text-sm md:text-base">Back to Amount</span>
         </button>
       </div>
 
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Choose an Agent</h2>
-        <p className="text-neutral-600">Select a trusted agent near you for cash exchange</p>
+        <h2 className="text-xl md:text-2xl font-bold text-neutral-900 mb-2">Choose an Agent</h2>
+        <p className="text-neutral-600 text-sm md:text-base">Select a trusted agent near you for cash exchange</p>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+      <div className="bg-white border border-neutral-200 rounded-lg md:rounded-xl p-4 md:p-6 shadow-sm">
         {/* View Toggle */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-4 md:mb-6">
           <div className="bg-gray-100 p-1 rounded-lg">
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              className={`px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-md transition-all ${
                 viewMode === 'list'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <List className="w-4 h-4 inline mr-2" />
+              <List className="w-3 h-3 md:w-4 md:h-4 inline mr-2" />
               List View
             </button>
             <button
               type="button"
               onClick={() => setViewMode('map')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              className={`px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-md transition-all ${
                 viewMode === 'map'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Map className="w-4 h-4 inline mr-2" />
+              <Map className="w-3 h-3 md:w-4 md:h-4 inline mr-2" />
               Map View
             </button>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-8">
+          <div className="text-center py-6 md:py-8">
             <div className="inline-flex items-center space-x-2 text-neutral-600">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-neutral-900"></div>
-              <span>Finding nearby agents...</span>
+              <span className="text-sm md:text-base">Finding nearby agents...</span>
             </div>
           </div>
         ) : viewMode === 'list' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {agents.map((agent) => (
               <div
                 key={agent.id}
-                className={`bg-white rounded-xl shadow-sm border border-neutral-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                className={`bg-white rounded-lg md:rounded-xl shadow-sm border border-neutral-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                   selectedAgent?.id === agent.id ? 'ring-2 ring-blue-500' : ''
                 }`}
                 onClick={() => {
@@ -320,16 +320,16 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                 {/* Agent Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-neutral-900 mb-1">
+                    <h3 className="font-semibold text-neutral-900 mb-1 text-sm md:text-base">
                       {agent.businessName}
                     </h3>
-                    <div className="flex items-center text-sm text-neutral-600 mb-2">
-                      <MapPin className="h-4 w-4 mr-1" />
+                    <div className="flex items-center text-xs md:text-sm text-neutral-600 mb-2">
+                      <MapPin className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                       {agent.location.address}
                     </div>
                     {userLocation && (
-                      <div className="flex items-center text-sm text-neutral-500">
-                        <Navigation className="h-4 w-4 mr-1" />
+                      <div className="flex items-center text-xs md:text-sm text-neutral-500">
+                        <Navigation className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                         {formatDistance(agent)} away
                       </div>
                     )}
@@ -349,13 +349,13 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">Digital Balance</p>
-                    <p className="font-mono font-semibold text-neutral-900">
+                    <p className="font-mono font-semibold text-neutral-900 text-xs md:text-sm">
                       {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">Cash Available</p>
-                    <p className="font-mono font-semibold text-neutral-900">
+                    <p className="font-mono font-semibold text-neutral-900 text-xs md:text-sm">
                       {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
                     </p>
                   </div>
@@ -367,13 +367,13 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`h-4 w-4 ${
+                        className={`h-3 w-3 md:h-4 md:w-4 ${
                           star <= 4 ? 'text-yellow-400 fill-current' : 'text-neutral-300'
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="ml-2 text-sm text-neutral-600">4.0 (23 reviews)</span>
+                  <span className="ml-2 text-xs md:text-sm text-neutral-600">4.0 (23 reviews)</span>
                 </div>
 
                 {/* Services */}
@@ -398,12 +398,12 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                       onAgentSelect(agent);
                     }}
                     disabled={isCreating}
-                    className="flex-1 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="flex-1 bg-neutral-900 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {isCreating ? 'Creating...' : 'Select Agent'}
                   </button>
-                  <button className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
-                    <Phone className="h-4 w-4" />
+                  <button className="px-3 md:px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-xs md:text-sm font-medium hover:bg-neutral-50 transition-colors duration-200">
+                    <Phone className="h-3 w-3 md:h-4 md:w-4" />
                   </button>
                 </div>
 
@@ -413,14 +413,14 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                     <div className="space-y-3">
                       <div>
                         <p className="text-xs text-neutral-500 mb-1">Operating Hours</p>
-                        <div className="flex items-center text-sm text-neutral-700">
-                          <Clock className="h-4 w-4 mr-2" />
+                        <div className="flex items-center text-xs md:text-sm text-neutral-700">
+                          <Clock className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                           Mon-Sat: 8:00 AM - 8:00 PM
                         </div>
                       </div>
                       <div>
                         <p className="text-xs text-neutral-500 mb-1">Services Available</p>
-                        <ul className="text-sm text-neutral-700 space-y-1">
+                        <ul className="text-xs md:text-sm text-neutral-700 space-y-1">
                           <li>• Cash deposits and withdrawals</li>
                           <li>• Bitcoin buying and selling</li>
                           <li>• Money transfers</li>
@@ -429,10 +429,10 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
                       </div>
                       <div>
                         <p className="text-xs text-neutral-500 mb-1">Available Balance</p>
-                        <p className="text-sm text-neutral-700">
+                        <p className="text-xs md:text-sm text-neutral-700">
                           Digital: {agent.digitalBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
                         </p>
-                        <p className="text-sm text-neutral-700">
+                        <p className="text-xs md:text-sm text-neutral-700">
                           Cash: {agent.cashBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
                         </p>
                       </div>
@@ -444,7 +444,7 @@ const BitcoinAgentStep: React.FC<BitcoinAgentStepProps> = ({
           </div>
         ) : (
           <div className="relative">
-            <div className="h-96 w-full relative z-0">
+            <div className="h-64 md:h-96 w-full relative z-0">
               <MapContainer
                 center={userLocation || [0.3476, 32.5825]}
                 zoom={13}
