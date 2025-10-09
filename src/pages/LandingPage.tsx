@@ -350,13 +350,13 @@ const LandingPage: React.FC = () => {
                     </div>
                     
                     <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BAL</div>
-                      <div className="text-gray-500 text-xs mt-1">Bitcoin</div>
+                      <div className="font-mono text-orange-600 font-medium text-xs">CKBTC BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">ckBTC</div>
                     </div>
                     
-                    <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BUY</div>
-                      <div className="text-gray-500 text-xs mt-1">Buy BTC</div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="font-mono text-green-600 font-medium text-xs">USDC BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">ckUSDC</div>
                     </div>
                   </div>
                 </div>
