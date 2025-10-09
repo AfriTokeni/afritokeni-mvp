@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   TrendingUp,
@@ -17,14 +17,35 @@ import { BalanceService } from "../services/BalanceService";
 import { BitcoinService } from "../services/bitcoinService";
 import { formatCurrencyAmount } from "../types/currency";
 import { useAfriTokeni } from "../hooks/useAfriTokeni";
+import { useDemoMode } from "../context/DemoModeContext";
+import { DemoModeModal } from "../components/DemoModeModal";
+import { DemoDataService } from "../services/demoDataService";
 import { DataService } from "../services/dataService";
 import { Transaction } from "../types/transaction";
 
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { agent } = useAfriTokeni();
+  const { isDemoMode } = useDemoMode();
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
   const [showVerificationAlert, setShowVerificationAlert] = useState(true);
+
+  // Show demo modal on first visit
+  useEffect(() => {
+    const hasSeenModal = localStorage.getItem('afritokeni_agent_seen_demo_modal');
+    if (!hasSeenModal) {
+      setShowDemoModal(true);
+      localStorage.setItem('afritokeni_agent_seen_demo_modal', 'true');
+    }
+  }, []);
+
+  // Initialize demo data if demo mode is enabled
+  useEffect(() => {
+    if (isDemoMode && agent?.id) {
+      DemoDataService.initializeDemoAgent(agent.id);
+    }
+  }, [isDemoMode, agent?.id]);
 
   // Get customers count
   const [customersCount, setCustomersCount] = useState(0);
@@ -47,6 +68,38 @@ const AgentDashboard: React.FC = () => {
       description?: string;
     }>
   >([]);
+
+  // Get demo data helpers
+  const getDisplayBalance = (): number => {
+    if (isDemoMode) {
+      const demoAgent = DemoDataService.getDemoAgent();
+      return demoAgent?.balance || 2500000; // Default demo balance
+    }
+    return agent?.balance || 0;
+  };
+
+  const getDisplayCustomersCount = (): number => {
+    if (isDemoMode) {
+      const demoAgent = DemoDataService.getDemoAgent();
+      return demoAgent?.activeCustomers || 127;
+    }
+    return customersCount;
+  };
+
+  const getDisplayTransactions = () => {
+    if (isDemoMode) {
+      return DemoDataService.getAgentTransactions().slice(0, 5);
+    }
+    return agentTransactions.slice(0, 5);
+  };
+
+  const getDisplayTotalEarnings = (): number => {
+    if (isDemoMode) {
+      const demoAgent = DemoDataService.getDemoAgent();
+      return demoAgent?.totalEarnings || 3500000;
+    }
+    return calculateDailyEarnings();
+  };
 
   // Calculate real daily earnings from actual transactions
   const calculateDailyEarnings = (): number => {

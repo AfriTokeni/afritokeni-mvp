@@ -3,6 +3,7 @@ import { FC, useEffect } from "react";
 import junoConfig from "../juno.config";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import { AuthenticationProvider } from "./context/AuthenticationContext.tsx";
+import { DemoModeProvider } from "./context/DemoModeContext.tsx";
 import ModernLayout from "./components/ModernLayout.tsx";
 import { user_desktop_routes } from "./routes/userRoutes.ts";
 import { agent_desktop_routes } from "./routes/agentRoutes.ts";
@@ -80,8 +81,9 @@ const App: FC = () => {
 
   return (
     <BrowserRouter>
-      <AuthenticationProvider>
-        <Routes>
+      <DemoModeProvider>
+        <AuthenticationProvider>
+          <Routes>
           {/* Auth Routes - Only Juno/ICP authentication used */}
     
           {/* User Routes */}
@@ -170,7 +172,8 @@ const App: FC = () => {
           {/* Default redirects */}
           <Route path="/dashboard" element={<Navigate to="/users/dashboard" replace />} />
         </Routes>
-      </AuthenticationProvider>
+        </AuthenticationProvider>
+      </DemoModeProvider>
     </BrowserRouter>
   );
 };

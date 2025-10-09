@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
+import { useDemoMode } from '../context/DemoModeContext';
+import { DemoModeModal } from '../components/DemoModeModal';
+import { DemoDataService } from '../services/demoDataService';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
 import { 
@@ -19,6 +22,8 @@ import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../types/currency';
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserCurrency } = useAuthentication();
+  const { isDemoMode } = useDemoMode();
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const { 
     transactions,
     balance,
@@ -27,6 +32,22 @@ const UserDashboard: React.FC = () => {
 
   // Get user's preferred currency or default to UGX
   const currentUser = user.user;
+
+  // Show demo modal on first visit
+  useEffect(() => {
+    const hasSeenModal = localStorage.getItem('afritokeni_seen_demo_modal');
+    if (!hasSeenModal) {
+      setShowDemoModal(true);
+      localStorage.setItem('afritokeni_seen_demo_modal', 'true');
+    }
+  }, []);
+
+  // Initialize demo data if demo mode is enabled
+  useEffect(() => {
+    if (isDemoMode && currentUser?.email) {
+      DemoDataService.initializeDemoUser(currentUser.email);
+    }
+  }, [isDemoMode, currentUser?.email]);
   const userCurrency = currentUser?.preferredCurrency || 'UGX';
   const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
 
@@ -34,11 +55,23 @@ const UserDashboard: React.FC = () => {
     return formatCurrencyAmount(amount, userCurrency as any);
   };
 
-  // Get real balance from datastore
-  const getRealBalance = (): number => {
+  // Get balance - use demo data if demo mode is enabled
+  const getDisplayBalance = (): number => {
+    if (isDemoMode) {
+      const demoUser = DemoDataService.getDemoUser();
+      return demoUser?.balance || 150000; // Default demo balance
+    }
     if (!balance) return 0;
     // Return the balance if it matches the user's currency, otherwise return 0
     return balance.currency === userCurrency ? balance.balance : 0;
+  };
+
+  // Get transactions - use demo data if demo mode is enabled
+  const getDisplayTransactions = () => {
+    if (isDemoMode) {
+      return DemoDataService.getUserTransactions().slice(0, 5);
+    }
+    return transactions.slice(0, 5);
   };
 
   // // Refresh data when dashboard mounts to ensure latest balance
@@ -89,6 +122,12 @@ const UserDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+        {/* Demo Mode Modal */}
+        <DemoModeModal 
+          isOpen={showDemoModal} 
+          onClose={() => setShowDemoModal(false)}
+          userType="user"
+        />
 
         {/* KYC Status Alert */}
         <KYCStatusAlert user_type="user" />
@@ -117,7 +156,7 @@ const UserDashboard: React.FC = () => {
             </div>
             <div className="mb-4 md:mb-6">
               <span className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 font-mono">
-                {formatCurrency(getRealBalance())}
+                {formatCurrency(getDisplayBalance())}
               </span>
             </div>
             <div className="flex justify-between items-center pt-3 md:pt-4 border-t border-gray-100">
@@ -222,8 +261,8 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
           <div className="divide-y divide-gray-100">
-            {transactions.length > 0 ? (
-              transactions.slice(0, 5).map((transaction) => (
+            {getDisplayTransactions().length > 0 ? (
+              getDisplayTransactions().map((transaction) => (
                 <div key={transaction.id} className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
                   {/* Mobile Layout */}
                   <div className="sm:hidden">

@@ -18,6 +18,7 @@ AfriTokeni is an SMS-accessible Bitcoin banking platform built on Internet Compu
 
 ## 🎯 Project Highlights
 
+- **🎮 INTERACTIVE DEMO MODE**: Try the platform instantly with realistic fake data - no setup required!
 - **🏛️ FIRST SMS-ACCESSIBLE DAO**: Live SNS governance on IC mainnet - vote via SMS or web!
 - **SMS-First Design**: Complete Bitcoin banking via SMS commands - no internet required
 - **Real Bitcoin Integration**: Live Bitcoin transactions using BlockCypher API with secure escrow system
@@ -170,7 +171,16 @@ Collections: users, agents, transactions, balances,
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Quick Start (Demo Mode)
+
+The fastest way to explore AfriTokeni:
+
+1. Visit [https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/](https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/)
+2. Click **"Try Playground Demo"** 
+3. Explore all features with realistic fake data
+4. Toggle demo mode on/off anytime from the header
+
+### Prerequisites (For Development)
 - [Node.js](https://nodejs.org/) and npm
 - [Docker](https://www.docker.com/get-started) (for Juno)
 - [ngrok](https://ngrok.com/download) (for SMS testing)
