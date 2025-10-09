@@ -39,6 +39,9 @@ const LandingPage: React.FC = () => {
               <Link to="/tariff" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 Pricing
               </Link>
+              <Link to="/ussd" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Try USSD
+              </Link>
               <Link to="/about" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 About
               </Link>
