@@ -11,6 +11,7 @@
 
 import { ethers } from 'ethers';
 import { Principal } from '@dfinity/principal';
+import { Actor, HttpAgent } from '@dfinity/agent';
 import { nanoid } from 'nanoid';
 import {
   CkUSDCConfig,
@@ -280,12 +281,18 @@ export class CkUSDCService {
         throw new Error(`Minimum withdrawal is ${CKUSDC_CONSTANTS.MIN_TRANSFER} ckUSDC`);
       }
 
-      // TODO: Call ICP minter canister to initiate withdrawal
-      // const principal = Principal.fromText(request.principalId);
-      // const result = await minterCanister.withdraw({
-      //   amount: request.amount,
-      //   recipient: request.ethereumAddress
-      // });
+      // Call ICP minter canister to initiate withdrawal
+      const minterActor = await this.getMinterActor();
+      
+      const result: any = await minterActor.withdraw({
+        amount: BigInt(request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS)),
+        address: request.ethereumAddress
+      });
+
+      // Check if withdrawal was successful
+      if ('Err' in result) {
+        throw new Error(`Withdrawal failed: ${result.Err}`);
+      }
 
       // Store withdrawal transaction
       const transactionId = nanoid();
@@ -339,19 +346,24 @@ export class CkUSDCService {
         throw new Error(`Minimum transfer is ${CKUSDC_CONSTANTS.MIN_TRANSFER} ckUSDC`);
       }
 
-      // TODO: Call ICP ledger canister to transfer
-      // const senderPrincipal = Principal.fromText(request.senderId);
-      // const recipientPrincipal = Principal.fromText(request.recipient);
-      // const result = await ledgerCanister.icrc1_transfer({
-      //   from_subaccount: [],
-      //   to: { owner: recipientPrincipal, subaccount: [] },
-      //   amount: request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
-      //   fee: [],
-      //   memo: request.memo ? new TextEncoder().encode(request.memo) : [],
-      //   created_at_time: []
-      // });
+      // Call ICP ledger canister to execute transfer
+      const recipientPrincipal = Principal.fromText(request.recipient);
+      const ledgerActor = await this.getLedgerActor();
+      
+      const result: any = await ledgerActor.icrc1_transfer({
+        from_subaccount: [],
+        to: { owner: recipientPrincipal, subaccount: [] },
+        amount: BigInt(request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS)),
+        fee: [],
+        memo: request.memo ? Array.from(new TextEncoder().encode(request.memo)) : [],
+        created_at_time: []
+      });
 
-      // Execute transfer and store transaction
+      // Check if transfer was successful
+      if ('Err' in result) {
+        throw new Error(`Transfer failed: ${result.Err}`);
+      }
+
       const transactionId = nanoid();
       const fee = 0.001;
 
@@ -622,5 +634,91 @@ export class CkUSDCService {
       console.error('Error fetching transaction history:', error);
       return [];
     }
+  }
+
+  // ==================== ICP CANISTER INTEGRATION ====================
+
+  /**
+   * Create ICP agent for canister calls
+   */
+  private static async createAgent(): Promise<HttpAgent> {
+    const agent = new HttpAgent({
+      host: process.env.NODE_ENV === 'production' 
+        ? 'https://ic0.app' 
+        : 'http://localhost:4943'
+    });
+
+    // Fetch root key for local development
+    if (process.env.NODE_ENV !== 'production') {
+      await agent.fetchRootKey();
+    }
+
+    return agent;
+  }
+
+  /**
+   * Get ckUSDC ledger canister actor
+   */
+  private static async getLedgerActor() {
+    const agent = await this.createAgent();
+    
+    // ICRC-1 Ledger IDL
+    const ledgerIdl = ({ IDL }: any) => {
+      return IDL.Service({
+        'icrc1_balance_of': IDL.Func(
+          [IDL.Record({ 'owner': IDL.Principal, 'subaccount': IDL.Opt(IDL.Vec(IDL.Nat8)) })],
+          [IDL.Nat],
+          ['query']
+        ),
+        'icrc1_transfer': IDL.Func(
+          [IDL.Record({
+            'from_subaccount': IDL.Opt(IDL.Vec(IDL.Nat8)),
+            'to': IDL.Record({ 'owner': IDL.Principal, 'subaccount': IDL.Opt(IDL.Vec(IDL.Nat8)) }),
+            'amount': IDL.Nat,
+            'fee': IDL.Opt(IDL.Nat),
+            'memo': IDL.Opt(IDL.Vec(IDL.Nat8)),
+            'created_at_time': IDL.Opt(IDL.Nat64)
+          })],
+          [IDL.Variant({ 'Ok': IDL.Nat, 'Err': IDL.Text })],
+          []
+        ),
+      });
+    };
+
+    return Actor.createActor(ledgerIdl, {
+      agent,
+      canisterId: this.config.ledgerCanisterId,
+    });
+  }
+
+  /**
+   * Get ckUSDC minter canister actor
+   */
+  private static async getMinterActor() {
+    const agent = await this.createAgent();
+    
+    // Minter canister IDL
+    const minterIdl = ({ IDL }: any) => {
+      return IDL.Service({
+        'get_deposit_address': IDL.Func(
+          [IDL.Record({ 'owner': IDL.Principal, 'subaccount': IDL.Opt(IDL.Vec(IDL.Nat8)) })],
+          [IDL.Text],
+          ['query']
+        ),
+        'withdraw': IDL.Func(
+          [IDL.Record({
+            'amount': IDL.Nat,
+            'address': IDL.Text
+          })],
+          [IDL.Variant({ 'Ok': IDL.Nat, 'Err': IDL.Text })],
+          []
+        ),
+      });
+    };
+
+    return Actor.createActor(minterIdl, {
+      agent,
+      canisterId: this.config.minterCanisterId,
+    });
   }
 }

@@ -5,7 +5,7 @@
  * Provides price stability for African financial transactions
  */
 
-// import { Principal } from '@dfinity/principal'; // TODO: Use when connecting to real ICP canisters
+// import { Principal } from '@dfinity/principal'; // Use when connecting to ICP mainnet canisters
 
 /**
  * ckUSDC configuration for connecting to ICP canisters
