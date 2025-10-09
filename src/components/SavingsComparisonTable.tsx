@@ -11,7 +11,7 @@ const SavingsComparisonTable: React.FC = () => {
   const toCurrency = AFRICAN_CURRENCIES[toCountry];
   
   const numAmount = parseFloat(amount) || 0;
-  const isLightning = numAmount < 100; // Lightning only for <$100
+  const useCkUSDC = numAmount < 100; // ckUSDC for small amounts (<$100), ckBTC for larger
 
   // AfriTokeni fees based on location (from TariffPage - REAL fees)
   const feeMap = {
@@ -137,7 +137,7 @@ const SavingsComparisonTable: React.FC = () => {
                   Speed
                 </th>
                 <th className="text-center py-4 px-4 sm:px-6 text-gray-700 font-bold text-sm sm:text-base">
-                  SMS Access
+                  USSD Access
                 </th>
                 <th className="text-center py-4 px-4 sm:px-6 text-gray-700 font-bold text-sm sm:text-base">
                   39 Countries
@@ -167,20 +167,12 @@ const SavingsComparisonTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  {isLightning ? (
-                    <>
-                      <div className="inline-flex items-center gap-1 text-green-600 font-semibold text-sm sm:text-base">
-                        <Check className="w-5 h-5" />
-                        Instant
-                      </div>
-                      <div className="text-xs sm:text-sm text-gray-600 mt-1">&lt;1 second</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-sm sm:text-base text-gray-600 font-semibold">10-30 min</div>
-                      <div className="text-xs sm:text-sm text-gray-500 mt-1">Bitcoin L1</div>
-                    </>
-                  )}
+                  <div className="inline-flex items-center gap-1 text-green-600 font-semibold text-sm sm:text-base">
+                    <Check className="w-5 h-5" />
+                    Instant
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-600 mt-1">&lt;1 second</div>
+                  <div className="text-xs sm:text-sm text-gray-500 mt-1">{useCkUSDC ? 'ckUSDC' : 'ckBTC'}</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
                   <div className="inline-flex items-center gap-1 text-green-600 font-semibold text-sm sm:text-base">
@@ -341,8 +333,8 @@ const SavingsComparisonTable: React.FC = () => {
             </div>
             <div className="text-sm text-gray-600 mt-2">
               Sending ${numAmount} to {toCurrency.country} ({location} area)
-              {isLightning && <span className="text-green-600 font-semibold"> • Lightning Network (Instant!)</span>}
-              {!isLightning && <span className="text-gray-500"> • Bitcoin L1 (10-30 min)</span>}
+              {useCkUSDC && <span className="text-green-600 font-semibold"> • ckUSDC (Stablecoin)</span>}
+              {!useCkUSDC && <span className="text-green-600 font-semibold"> • ckBTC (ICP Bitcoin)</span>}
             </div>
           </div>
         </div>
@@ -350,9 +342,10 @@ const SavingsComparisonTable: React.FC = () => {
         {/* Bottom Note */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500 max-w-3xl mx-auto">
-            * AfriTokeni fees: 2.5-4% urban, 4-7% rural, 7-12% remote (fair agent compensation). 
-            Mobile money fees: M-Pesa ~13%, MTN MoMo ~11%, Airtel Money ~10% (includes FX markups). 
-            All services support SMS - AfriTokeni works across all 39 African currencies.
+            * AfriTokeni uses ICP-native ckBTC (Bitcoin) and ckUSDC (stablecoin) for instant transfers. 
+            Fees: 2.5-4% urban, 4-7% rural, 7-12% remote (fair agent compensation). 
+            Mobile money: M-Pesa ~13%, MTN MoMo ~11%, Airtel Money ~10% (includes FX markups). 
+            AfriTokeni works via USSD across all 39 African currencies.
           </p>
         </div>
 
