@@ -67,9 +67,6 @@ const LandingPage: React.FC = () => {
               <br />
               <span className="text-orange-600">in under 1 second</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto">
-              ICP-native Bitcoin with instant transfers. Works on any phone. 39 African currencies.
-            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleICPLogin}
@@ -227,26 +224,28 @@ const LandingPage: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-3xl mx-auto">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                ckBTC + ckUSDC via SMS
+                ckBTC + ckUSDC via USSD
               </h3>
               <p className="text-gray-600">
-                Send Bitcoin or stablecoins from any phone - ICP-native speed
+                Menu-driven interface - works on any phone, no internet needed
               </p>
             </div>
             
             <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
-              <div className="text-green-400 mb-2">$ Send ckBTC (instant):</div>
-              <div className="text-white mb-4">BTC SEND +234... 5000 NGN</div>
+              <div className="text-green-400 mb-2">$ Dial USSD menu:</div>
+              <div className="text-white mb-4">*AFRI#</div>
               
-              <div className="text-green-400 mb-2">$ Send ckUSDC (stable):</div>
-              <div className="text-white mb-4">USDC SEND +256... 50</div>
-              
-              <div className="text-yellow-400 mb-2">⚡ Response (instant):</div>
-              <div className="text-gray-300">
-                ✓ Transfer Complete!<br/>
-                ✓ Sent: 5,000 NGN<br/>
-                ✓ Fee: ~$0.01 | Time: &lt;1 sec
+              <div className="text-yellow-400 mb-2">⚡ Menu appears:</div>
+              <div className="text-gray-300 mb-4">
+                1. Send Money<br/>
+                2. Check Balance<br/>
+                5. Check ckBTC Balance<br/>
+                6. Send ckBTC<br/>
+                8. Check ckUSDC Balance
               </div>
+              
+              <div className="text-green-400 mb-2">$ Select option:</div>
+              <div className="text-white">6 (Send ckBTC)</div>
             </div>
 
             <div className="mt-6 flex items-center justify-center gap-4 text-sm text-gray-600">
@@ -279,7 +278,7 @@ const LandingPage: React.FC = () => {
               ICP-Native Crypto Banking
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
-              ckBTC (fast Bitcoin) + ckUSDC (stable value) for 39 African currencies. SMS or web - any phone.
+              ckBTC (fast Bitcoin) + ckUSDC (stable value) for 39 African currencies. USSD or web - any phone.
             </p>
             <div className="mt-8 px-4 max-w-4xl mx-auto">
               <div className="flex flex-wrap justify-center gap-3 mb-3">
