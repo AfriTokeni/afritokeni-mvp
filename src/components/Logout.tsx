@@ -2,10 +2,14 @@ import { signOut } from "@junobuild/core";
 import { FC } from "react";
 
 export const Logout: FC = () => {
+  const handleSignOut = () => {
+    signOut({windowReload:false});
+  };
+
   return (
     <button
       type="button"
-      onClick={signOut}
+      onClick={handleSignOut}
       className="hover:text-lavender-blue-500 active:text-lavender-blue-400 mt-24 flex items-center gap-2 dark:text-white"
     >
       <svg

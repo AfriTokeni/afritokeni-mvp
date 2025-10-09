@@ -38,7 +38,6 @@ const AgentDashboard: React.FC = () => {
   const [customersCount, setCustomersCount] = useState(0);
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
 
-
   // Calculate real daily earnings from actual transactions
   const calculateDailyEarnings = (): number => {
     const today = new Date();
