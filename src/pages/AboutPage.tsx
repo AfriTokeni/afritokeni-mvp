@@ -19,7 +19,7 @@ const AboutPage: React.FC = () => {
             Banking the Unbanked
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We're building the future of financial inclusion in Africa, one SMS at a time.
+            We're building the future of financial inclusion in Africa, one USSD transaction at a time.
           </p>
         </div>
 
@@ -37,7 +37,7 @@ const AboutPage: React.FC = () => {
               We said: <strong>enough is enough</strong>.
             </p>
             <p>
-              Built for the World Hackathon League's ICP track, AfriTokeni leverages the Internet Computer Protocol to create a truly decentralized, SMS-accessible financial system. No internet required. No smartphone needed. Just your phone and a dream of financial freedom.
+              Built for the World Hackathon League's ICP track, AfriTokeni leverages the Internet Computer Protocol to create a truly decentralized, USSD-accessible financial system. No internet required. No smartphone needed. Just your phone and a dream of financial freedom.
             </p>
           </div>
         </div>
@@ -48,7 +48,7 @@ const AboutPage: React.FC = () => {
             <Target className="w-12 h-12 text-blue-600 mb-4" />
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
             <p className="text-gray-600">
-              Provide SMS-accessible Bitcoin banking to every African, regardless of location, phone type, or internet access. Financial inclusion is a right, not a privilege.
+              Provide USSD-accessible Bitcoin banking to every African, regardless of location, phone type, or internet access. Financial inclusion is a right, not a privilege.
             </p>
           </div>
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-purple-200">
@@ -74,7 +74,7 @@ const AboutPage: React.FC = () => {
               </li>
               <li className="flex items-start gap-3">
                 <Zap className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                <span><strong>SMS Gateway Integration:</strong> Canisters can process SMS commands without internet</span>
+                <span><strong>USSD Gateway Integration:</strong> Canisters can process USSD commands without internet</span>
               </li>
               <li className="flex items-start gap-3">
                 <Zap className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />

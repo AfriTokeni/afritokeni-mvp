@@ -48,14 +48,24 @@ const PublicHeader: React.FC = () => {
               Pricing
             </Link>
             <Link 
-              to="/sms" 
+              to="/ussd" 
               className={`font-medium transition-colors ${
-                isActive('/sms') 
+                isActive('/ussd') 
                   ? 'text-black font-semibold' 
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Try SMS
+              Try USSD
+            </Link>
+            <Link 
+              to="/about" 
+              className={`font-medium transition-colors ${
+                isActive('/about') 
+                  ? 'text-black font-semibold' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              About
             </Link>
           </nav>
 
