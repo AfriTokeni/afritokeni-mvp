@@ -95,22 +95,31 @@ export async function sendNotification(request: NotificationRequest) {
       console.log(`📱 [BACKEND] SMS content: ${smsMessage}`);
       
       // Real SMS gateway integration (Africa's Talking)
+      // Note: API keys should be configured in Juno environment variables
       try {
-        const response = await fetch('https://api.africastalking.com/version1/messaging', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'apiKey': process.env.AFRICAS_TALKING_API_KEY || '',
-          },
-          body: new URLSearchParams({
-            username: process.env.AFRICAS_TALKING_USERNAME || 'sandbox',
-            to: user.phone,
-            message: smsMessage,
-          }),
-        });
+        const apiKey = (process.env as any).AFRICAS_TALKING_API_KEY || '';
+        const username = (process.env as any).AFRICAS_TALKING_USERNAME || 'sandbox';
         
-        const data = await response.json();
-        smsResult = { success: true, phone: user.phone, response: data };
+        if (apiKey) {
+          const response = await fetch('https://api.africastalking.com/version1/messaging', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'apiKey': apiKey,
+            },
+            body: new URLSearchParams({
+              username,
+              to: user.phone,
+              message: smsMessage,
+            }),
+          });
+          
+          const data = await response.json();
+          smsResult = { success: true, phone: user.phone, response: data };
+        } else {
+          console.log('SMS gateway not configured, simulating message');
+          smsResult = { simulated: true, phone: user.phone, message: smsMessage };
+        }
       } catch (error) {
         console.error('SMS gateway error:', error);
         smsResult = { simulated: true, phone: user.phone, message: smsMessage, error };

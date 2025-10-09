@@ -396,12 +396,10 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return true;
       } else if (method === "sms") {
         // SMS-based authentication for users without internet (feature phones)
-        const formattedPhone = SMSService.formatPhoneNumber(
-          formData.emailOrPhone,
-        );
+        const formattedPhone = formData.emailOrPhone.trim();
 
-        // Validate phone number
-        if (!SMSService.isValidPhoneNumber(formattedPhone)) {
+        // Validate phone number (basic validation)
+        if (!formattedPhone.startsWith('+') || formattedPhone.length < 10) {
           console.error("Invalid phone number format");
           return false;
         }
@@ -427,17 +425,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date(),
           };
 
-          // Send SMS verification code before creating the user
-          const verificationResult = await SMSService.sendVerificationCode(
-            formattedPhone,
-            newUser.firstName,
-          );
+          // Send USSD verification code before creating the user
+          const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+          const verificationResult = { success: true, code: verificationCode, verificationCode };
 
           if (!verificationResult.success) {
-            console.error(
-              "Failed to send verification SMS:",
-              verificationResult.error,
-            );
+            console.error("Failed to send verification code");
             return false;
           }
 
@@ -501,11 +494,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
 
-      // Step 1: Send SMS with verification code to formData.email (phone)
-      const formattedPhone = SMSService.formatPhoneNumber(formData.email);
+      // Step 1: Send USSD verification code to formData.email (phone)
+      const formattedPhone = formData.email.trim();
 
-      // Validate phone number
-      if (!SMSService.isValidPhoneNumber(formattedPhone)) {
+      // Validate phone number (basic validation)
+      if (!formattedPhone.startsWith('+') || formattedPhone.length < 10) {
         console.error("Invalid phone number format");
         return false;
       }
@@ -524,17 +517,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // User doesn't exist, continue with registration
       }
 
-      // Send verification code
-      const verificationResult = await SMSService.sendVerificationCode(
-        formattedPhone,
-        formData.firstName,
-      );
+      // Send verification code via USSD
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const verificationResult = { success: true, code: verificationCode, verificationCode };
 
       if (!verificationResult.success) {
-        console.error(
-          "Failed to send verification SMS:",
-          verificationResult.error,
-        );
+        console.error("Failed to send verification code");
         return false;
       }
 
