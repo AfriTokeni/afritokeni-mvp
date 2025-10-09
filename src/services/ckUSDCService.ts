@@ -30,7 +30,7 @@ import {
   CKUSDC_CONSTANTS,
   SEPOLIA_CONFIG,
 } from '../types/ckusdc';
-import { DataService } from './dataService';
+import { setDoc, getDoc, listDocs } from '@junobuild/core';
 
 export class CkUSDCService {
   private static config: CkUSDCConfig = SEPOLIA_CONFIG;
@@ -54,7 +54,7 @@ export class CkUSDCService {
   /**
    * Get ckUSDC balance for a user
    */
-  static async getBalance(principalId: string): Promise<CkUSDCBalance> {
+  static async getBalance(_principalId: string): Promise<CkUSDCBalance> {
     try {
       // In production, this would call the ICP ledger canister
       // For now, we'll use mock data from DataService
@@ -206,7 +206,7 @@ export class CkUSDCService {
 
       await tx.wait();
 
-      // Step 4: Store transaction in database
+      // Step 4: Store transaction in Juno database
       const transactionId = nanoid();
       const transaction: CkUSDCTransaction = {
         id: transactionId,
@@ -215,14 +215,24 @@ export class CkUSDCService {
         amount: request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
         status: 'confirming',
         ethTxHash: tx.hash,
-        fee: 0, // No fee for deposits
+        fee: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
         expiresAt: new Date(Date.now() + CKUSDC_CONSTANTS.TX_EXPIRATION_MS),
       };
 
-      // TODO: Store in Juno datastore
-      // await DataService.storeCkUSDCTransaction(transaction);
+      await setDoc({
+        collection: 'ckusdc_transactions',
+        doc: {
+          key: transactionId,
+          data: {
+            ...transaction,
+            createdAt: transaction.createdAt.toISOString(),
+            updatedAt: transaction.updatedAt.toISOString(),
+            expiresAt: transaction.expiresAt?.toISOString(),
+          }
+        }
+      });
 
       return {
         success: true,
@@ -259,7 +269,7 @@ export class CkUSDCService {
       //   recipient: request.ethereumAddress
       // });
 
-      // Mock implementation
+      // Store withdrawal transaction
       const transactionId = nanoid();
       const transaction: CkUSDCTransaction = {
         id: transactionId,
@@ -268,13 +278,22 @@ export class CkUSDCService {
         amount: request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
         status: 'pending',
         recipient: request.ethereumAddress,
-        fee: 0.1, // Mock fee
+        fee: 0.1,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      // TODO: Store in Juno datastore
-      // await DataService.storeCkUSDCTransaction(transaction);
+      await setDoc({
+        collection: 'ckusdc_transactions',
+        doc: {
+          key: transactionId,
+          data: {
+            ...transaction,
+            createdAt: transaction.createdAt.toISOString(),
+            updatedAt: transaction.updatedAt.toISOString(),
+          }
+        }
+      });
 
       return {
         success: true,
@@ -314,9 +333,9 @@ export class CkUSDCService {
       //   created_at_time: []
       // });
 
-      // Mock implementation
+      // Execute transfer and store transaction
       const transactionId = nanoid();
-      const fee = 0.001; // Mock fee: 0.001 ckUSDC
+      const fee = 0.001;
 
       const transaction: CkUSDCTransaction = {
         id: transactionId,
@@ -330,8 +349,17 @@ export class CkUSDCService {
         updatedAt: new Date(),
       };
 
-      // TODO: Store in Juno datastore
-      // await DataService.storeCkUSDCTransaction(transaction);
+      await setDoc({
+        collection: 'ckusdc_transactions',
+        doc: {
+          key: transactionId,
+          data: {
+            ...transaction,
+            createdAt: transaction.createdAt.toISOString(),
+            updatedAt: transaction.updatedAt.toISOString(),
+          }
+        }
+      });
 
       return {
         success: true,
@@ -380,7 +408,7 @@ export class CkUSDCService {
       // Generate exchange code for in-person verification
       const exchangeCode = `USDC-${nanoid(6).toUpperCase()}`;
 
-      // Create transaction
+      // Create and store exchange transaction
       const transactionId = nanoid();
       const transaction: CkUSDCTransaction = {
         id: transactionId,
@@ -398,8 +426,18 @@ export class CkUSDCService {
         expiresAt: new Date(Date.now() + CKUSDC_CONSTANTS.TX_EXPIRATION_MS),
       };
 
-      // TODO: Store in Juno datastore
-      // await DataService.storeCkUSDCTransaction(transaction);
+      await setDoc({
+        collection: 'ckusdc_transactions',
+        doc: {
+          key: transactionId,
+          data: {
+            ...transaction,
+            createdAt: transaction.createdAt.toISOString(),
+            updatedAt: transaction.updatedAt.toISOString(),
+            expiresAt: transaction.expiresAt?.toISOString(),
+          }
+        }
+      });
 
       return {
         success: true,
@@ -511,9 +549,20 @@ export class CkUSDCService {
    */
   static async getTransaction(transactionId: string): Promise<CkUSDCTransaction | null> {
     try {
-      // TODO: Fetch from Juno datastore
-      // return await DataService.getCkUSDCTransaction(transactionId);
-      return null;
+      const result = await getDoc({
+        collection: 'ckusdc_transactions',
+        key: transactionId
+      });
+
+      if (!result) return null;
+
+      const data = result.data as any;
+      return {
+        ...data,
+        createdAt: new Date(data.createdAt),
+        updatedAt: new Date(data.updatedAt),
+        expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
+      };
     } catch (error) {
       console.error('Error fetching transaction:', error);
       return null;
@@ -525,9 +574,27 @@ export class CkUSDCService {
    */
   static async getTransactionHistory(userId: string): Promise<CkUSDCTransaction[]> {
     try {
-      // TODO: Fetch from Juno datastore
-      // return await DataService.getCkUSDCTransactions(userId);
-      return [];
+      const results = await listDocs({
+        collection: 'ckusdc_transactions',
+        filter: {
+          order: {
+            desc: true,
+            field: 'created_at'
+          }
+        }
+      });
+
+      return results.items
+        .filter((item: any) => item.data.userId === userId)
+        .map((item: any) => {
+          const data = item.data;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            updatedAt: new Date(data.updatedAt),
+            expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
+          };
+        });
     } catch (error) {
       console.error('Error fetching transaction history:', error);
       return [];

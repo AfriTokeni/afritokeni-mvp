@@ -19,7 +19,6 @@ import TransactionLimits from "./pages/profile/TransactionLimits.tsx";
 import HelpSupport from "./pages/profile/HelpSupport.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
 import DepositPage from "./pages/deposit/DepositPage.tsx";
-import LightningPage from "./pages/users/LightningPage.tsx";
 import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
 import AgentMapPage from "./pages/users/AgentMapPage.tsx";
 import DAODashboard from "./pages/dao/DAODashboard.tsx";
@@ -33,10 +32,8 @@ import ProcessWithdrawal from './pages/withdraw/ProcessWithdrawal';
 import ProcessDeposits from './pages/agents/ProcessDeposits';
 import ProcessWithdrawals from './pages/agents/ProcessWithdrawals';
 import AgentCustomers from './pages/AgentCustomers';
-import AgentLightningPage from './pages/agents/AgentLightningPage';
 import AgentSettings from './pages/agent-settings';
 import RoleSelection from './pages/auth/RoleSelection';
-import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
 import AgentFunding from './pages/agent-liquidity/AgentFunding';
 import AgentSettlement from './pages/agent-liquidity/AgentSettlement';
 
@@ -102,7 +99,6 @@ const App: FC = () => {
                 <Route path="user-kyc" element={<UserKYCPage />} />
                 <Route path="ckbtc/send" element={<CkBTCSendPage />} />
                 <Route path="ckbtc/deposit" element={<CkBTCDepositPage />} />
-                <Route path="lightning" element={<LightningPage />} />
                 <Route path="dao" element={<DAODashboard />} />
                 <Route path="leaderboard" element={<LeaderboardPage />} />
               </Routes>
@@ -121,8 +117,6 @@ const App: FC = () => {
                 <Route path="process-withdrawals" element={<ProcessWithdrawals/>} />
                 <Route path="deposit" element={<ProcessDeposits/>} />
                 <Route path="customers" element={<AgentCustomers/>} />
-                <Route path="transactions" element={<AgentTransactions/>} />
-                <Route path="lightning" element={<AgentLightningPage/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<AgentSettings/>} />
                 <Route path="funding" element={<AgentFunding/>} />
