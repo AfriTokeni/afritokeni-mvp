@@ -12,6 +12,7 @@ import {
   signOut,
   getDoc,
   type User as JunoUser,
+  InternetIdentityProvider,
 } from "@junobuild/core";
 import {
   AuthContextType,
@@ -387,9 +388,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       if (method === "web") {
-        console.log("Web login initiated - using Juno/ICP Internet Identity");
-        // Use Juno/ICP Internet Identity authentication for web users
-        await signIn();
+        console.log("Web login initiated - using Juno/ICP Internet Identity with id.ai domain");
+        // Use Juno/ICP Internet Identity authentication for web users with id.ai domain
+        // Note: TypeScript types haven't been updated yet, but id.ai is supported per documentation
+        const provider = new InternetIdentityProvider({ domain: "id.ai" as any });
+        await signIn({ provider });
         return true;
       } else if (method === "sms") {
         // SMS-based authentication for users without internet (feature phones)
