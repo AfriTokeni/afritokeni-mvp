@@ -1,433 +1,312 @@
-# AfriTokeni: SMS-Based Bitcoin Banking for Africa
+# AfriTokeni
+## SMS-Accessible Crypto Banking for Africa
 
-AfriTokeni is an SMS-accessible Bitcoin banking platform built on Internet Computer Protocol (ICP) that serves Africa's 14.6M unbanked adults. Our system enables Bitcoin transactions via SMS commands on feature phones, bridging the digital divide in financial services.
-
----
-
-## 📖 **[READ THE COMPLETE SYSTEM GUIDE](./COMPLETE_SYSTEM_GUIDE.md)**
-
-**Everything you need to know about AfriTokeni in one comprehensive document:**
-- 🎯 System overview & core features
-- 💰 Revenue model & projections (4 real revenue streams)
-- 📱 SMS/USSD commands & flows (English, Luganda, Swahili)
-- 🔒 Security features (rate limiting, fraud detection, PIN verification)
-- 🏗️ Technical architecture & stack
-- 🚀 Getting started & production deployment
+**Instant, low-cost cryptocurrency banking for Africa's 14.6M unbanked adults.**
 
 ---
 
-## 🎯 Project Highlights
+## 🎯 What is AfriTokeni?
 
-- **🎮 INTERACTIVE DEMO MODE**: Try the platform instantly with realistic fake data - no setup required!
-- **🏛️ FIRST SMS-ACCESSIBLE DAO**: Live SNS governance on IC mainnet - vote via SMS or web!
-- **SMS-First Design**: Complete Bitcoin banking via SMS commands - no internet required
-- **Real Bitcoin Integration**: Live Bitcoin transactions using BlockCypher API with secure escrow system
-- **Agent Network**: Physical cash-to-Bitcoin exchange through verified local agents
-- **Multi-Currency Support**: All 39 African currencies with dynamic fee pricing
-- **83% Cost Reduction**: Significantly cheaper than traditional mobile money solutions
-- **Universal Access**: Works on 98% of phones across Africa (feature phones + smartphones)
+AfriTokeni brings Bitcoin and stablecoin banking to any phone—no internet required. Using USSD technology and the Internet Computer Protocol (ICP), we enable:
 
-## Demo Video
+- **ckBTC (ICP Bitcoin)**: Instant transfers in <1 second with ~$0.01 fees
+- **ckUSDC (Stablecoin)**: Stable value pegged to $1 USD
+- **USSD Access**: Works on 100% of phones (feature phones + smartphones)
+- **Agent Network**: Physical cash-to-crypto exchange
+- **DAO Governance**: Community-owned with SMS voting
 
-[AfriTokeni Demo](https://www.loom.com/share/f442426d1f754e9c91870c8efc45ce89?sid=44fff060-6e3f-466d-b199-2e0dc1e6420d)
+**83% cheaper than mobile money. 600x faster than Bitcoin. Accessible to everyone.**
 
-## Live Application
+---
 
-You can access the live production application here: **[https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/](https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/)**
+## 📖 Documentation
+
+### **[READ THE COMPLETE WHITEPAPER](./docs/WHITEPAPER.md)**
+
+Everything you need to know about AfriTokeni:
+- 🎯 Problem statement & solution
+- 💰 Three-asset system (Local + ckBTC + ckUSDC)
+- 📱 USSD banking interface
+- 🔒 Security & escrow system
+- 🏪 Agent network economics
+- 🏛️ DAO governance
+- 💵 Revenue model & projections
+- 🚀 Roadmap to 10M users
+
+---
+
+## 🚀 Quick Start
+
+### Live Application
+
+**Production**: https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/
+
+### Demo Video
+
+[Watch the Demo](https://www.loom.com/share/f442426d1f754e9c91870c8efc45ce89)
+
+### Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/AfriTokeni/afritokeni-mvp.git
+cd afritokeni-mvp
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+---
 
 ## 🌟 Key Features
 
-### 👥 **For Users**
-- **💰 Multi-Currency Wallets**: Support for all 39 African currencies (NGN, KES, GHS, ZAR, UGX, etc.)
-- **₿ Bitcoin Integration**: Buy/sell Bitcoin with local currency through secure escrow system
-- **📱 Universal Access**: Works on any phone - SMS commands or modern web interface
-- **💸 Send Money**: Transfer funds to any user via phone number across different currencies
-- **🏧 Cash Services**: Deposit/withdraw cash through verified agent network
-- **🔐 KYC Verification**: Secure identity verification with document upload
-- **📊 Transaction History**: Complete financial activity tracking and reporting
-- **🔔 SMS Notifications**: Real-time transaction alerts and confirmations
+### For Users
+- **Multi-Currency Wallets**: 39 African currencies (NGN, KES, GHS, UGX, etc.)
+- **ckBTC**: Instant Bitcoin transfers (<1 sec, ~$0.01 fees)
+- **ckUSDC**: Stable value ($1 peg, no volatility)
+- **USSD Banking**: Works on any phone via *123#
+- **Cash Services**: Deposit/withdraw via agent network
+- **Send Money**: Transfer to anyone by phone number
+- **DAO Voting**: Vote on platform decisions via SMS
 
-### 🏪 **For Agents**
-- **💼 Agent Dashboard**: Professional interface for managing customer transactions
-- **💳 Liquidity Management**: Fund operations via bank transfer/mobile money, withdraw earnings
-- **₿ Bitcoin Operations**: Help customers exchange Bitcoin for cash with live rates
-- **👥 Customer Management**: Process deposits, withdrawals, and Bitcoin exchanges
-- **📈 Earnings Tracking**: Real-time commission tracking and settlement system
-- **🗺️ Location Services**: GPS-based customer matching and service area management
-- **📱 SMS Integration**: Process transactions via SMS for offline customers
-- **🔒 Security Features**: 6-digit verification codes and transaction escrow protection
+### For Agents
+- **Earn 2-12%**: Commission based on location
+- **Flexible Hours**: Be your own boss
+- **Crypto Exchange**: Buy/sell ckBTC and ckUSDC
+- **Cash Services**: Process deposits and withdrawals
+- **Dashboard**: Professional agent management tools
+- **Liquidity Management**: Track cash and crypto reserves
 
-### 👨‍💼 **For Administrators**
-- **🔍 KYC Management**: Review and approve user/agent identity verification
-- **📊 System Monitoring**: Transaction oversight and compliance management
-- **🛡️ Security Controls**: Admin authentication and role-based access control
-- **📈 Analytics Dashboard**: Platform usage and financial flow monitoring
+### For the Platform
+- **100% ICP-Native**: No AWS, no centralized servers
+- **Decentralized**: Censorship-resistant infrastructure
+- **Secure**: Escrow system with 6-digit codes
+- **Scalable**: Handles millions of transactions
+- **Community-Owned**: DAO governance with AFRI token
 
-## 🏛️ DAO Governance (SNS) - LIVE ON IC MAINNET!
+---
 
-**AfriTokeni is governed by a fully functional SNS DAO on Internet Computer mainnet!**
+## 🏗️ Technical Stack
 
-### **🎉 WORLD'S FIRST SMS-ACCESSIBLE DAO**
-Unbanked Africans can participate in on-chain governance via feature phones - no internet required!
+**Frontend**:
+- React 19.2 + TypeScript
+- TailwindCSS
+- Vite 7
+- React Router
 
-### **Live SNS Canisters:**
-- **Governance**: `kly22-hyaaa-aaaac-qceeq-cai`
-- **AFRI Token (ICRC-1)**: `kf2xs-4iaaa-aaaac-qcefq-cai`
-- **Root**: `kq5g7-5aaaa-aaaac-qcega-cai`
-- **Swap**: `kx4al-qyaaa-aaaac-qcegq-cai`
-- **Index**: `kc3rg-rqaaa-aaaac-qcefa-cai`
+**Backend**:
+- Juno (ICP) - Decentralized storage
+- ICP Canisters - Smart contracts
+- ICRC-1 - Token standard
+- Internet Identity - Authentication
 
-### **Token Details:**
-- **Total Supply**: 1,000,000,000 AFRI
-- **Distribution**: 250M neurons, 750M swap
-- **Symbol**: AFRI
-- **Standard**: ICRC-1 (SNS)
-- **Minimum to Propose**: 1,000 AFRI
+**Blockchain**:
+- ckBTC - ICP-native Bitcoin (1:1 backed)
+- ckUSDC - ICP-native USDC stablecoin
+- Chain-key cryptography
+- <1 second finality
 
-### **Complete DAO Features:**
+**Communication**:
+- Africa's Talking SMS Gateway
+- USSD session management
+- Multi-language support (English, Luganda, Swahili)
 
-#### **Create Proposals** (Web & SMS)
-- 5 proposal types: Fee Adjustment, Currency Addition, Agent Standards, Treasury, Other
-- Real SNS governance integration via `manage_neuron` calls
-- Proposals stored on-chain in SNS governance canister
-- Minimum 1,000 AFRI tokens required
+---
 
-#### **Vote on Proposals** (Web & SMS)
-- Vote Yes/No/Abstain on active proposals
-- Real SNS neuron voting via `manage_neuron` with `RegisterVote`
-- Votes recorded on-chain in SNS governance
-- Real-time vote tallies from SNS
+## 📊 Market Opportunity
 
-#### **View & Track**
-- Live proposals fetched from SNS governance canister
-- Leaderboard showing top AFRI holders (from SNS neurons)
-- Track your AFRI token earnings
-- Real-time voting progress and results
+- **Target**: 14.6M unbanked Ugandans (54% of adults)
+- **Market**: $133B mobile money market (25.73% annual growth)
+- **Infrastructure**: 98% 2G coverage, 84% feature phones
+- **Cost Advantage**: 83% cheaper than current solutions
 
-### **How to Participate:**
+---
 
-#### **Via Web:**
-- **Create Proposal**: Visit `/users/dao` → Click "Create Proposal"
-- **Vote**: Click Yes/No/Abstain on any active proposal
-- **View Leaderboard**: Navigate to `/users/leaderboard`
-- **Check Balance**: Dashboard shows your AFRI tokens
+## 🎯 Use Cases
 
-#### **Via SMS (No Internet!):**
-- **Vote**: `VOTE YES PROP-001`
-- **Check Balance**: `AFRI BAL`
-- **View Proposals**: `PROPOSALS`
-- **Create Proposal**: `PROPOSE [type] [title] [description]`
+### 1. Remittances
+Send money home instantly with ~$0.01 fees (vs 10-13% for mobile money)
 
-### **Technical Implementation:**
-- Real SNS governance canister integration using `@dfinity/agent`
-- ICRC-1 ledger for token balances and transfers
-- SNS neuron staking for voting power
-- Fallback to local storage if SNS calls fail
-- Complete IDL definitions for all SNS methods
+### 2. Savings
+Store value in ckUSDC to avoid inflation and volatility
 
-## 🏗️ Technical Architecture
+### 3. Bitcoin Access
+Buy/sell Bitcoin via USSD on any phone
 
-AfriTokeni uses a hybrid architecture combining Internet Computer Protocol (ICP) blockchain with traditional web services for maximum accessibility.
+### 4. Cash Services
+Deposit and withdraw physical cash through local agents
 
-### **Core Components**
+### 5. Merchant Payments
+Accept crypto payments and convert to local currency
 
-#### **Frontend (React/TypeScript)**
-- **User Interface**: Modern responsive web app for smartphones
-- **Agent Dashboard**: Professional fintech interface for agent operations  
-- **Admin Panel**: KYC management and system oversight
-- **SMS Interface**: Feature phone simulation and testing
+---
 
-#### **Backend (Internet Computer Protocol)**
-- **Juno Satellite**: Backend-as-a-Service on ICP blockchain
-- **Decentralized Storage**: All user data, transactions, and balances stored on-chain
-- **Internet Identity**: Passwordless authentication for web users
-- **HTTP Outcalls**: Direct API calls to external services (SMS, Bitcoin, forex)
+## 🔒 Security
 
-#### **Bitcoin Integration**
-- **Real Bitcoin Operations**: Live address generation, balance checking, transaction broadcasting
-- **BlockCypher API**: Mainnet/testnet Bitcoin network integration
-- **Escrow System**: Secure 6-digit code verification for agent exchanges
-- **Hardware Wallet Support**: Integration with Ledger, Trezor for advanced users
+- **Escrow System**: 6-digit codes protect both users and agents
+- **24hr Refunds**: Automatic refund if transaction not completed
+- **Rate Limiting**: 10 requests/minute to prevent abuse
+- **Fraud Detection**: AI-powered suspicious activity monitoring
+- **KYC Verification**: Agent and user identity verification
+- **ICP Security**: Chain-key cryptography and decentralized storage
 
-#### **SMS Gateway (Node.js/Express)**
-- **AfricasTalking API**: SMS and USSD processing for feature phones
-- **Webhook Server**: Processes offline transactions and notifications
-- **Command Processing**: Complete financial operations via text messages
+---
 
-### **Data Architecture**
-```typescript
-Collections: users, agents, transactions, balances, 
-            bitcoin_transactions, bitcoin_wallets, 
-            user_roles, email_subscriptions
+## 🏛️ DAO Governance
+
+**AFRI Token Distribution**:
+- 40% Agents (400M)
+- 30% Users (300M)
+- 20% Treasury (200M)
+- 10% Team (100M, 4-year vesting)
+
+**Vote on**:
+- Fee structures
+- New currency additions
+- Agent standards
+- Treasury spending
+- Platform upgrades
+- Policy changes
+
+**Vote via**:
+- Web dashboard
+- USSD commands (*123*8#)
+- Mobile app
+
+---
+
+## 📱 USSD Commands
+
+```
+*123# → Main Menu
+
+1. Send Money (Local/ckBTC/ckUSDC)
+2. Check Balance
+3. Cash Services (Deposit/Withdraw)
+4. Exchange (Buy/Sell crypto)
+5. Find Agents
+6. Transaction History
+7. Account Settings
+8. DAO Governance (Vote)
 ```
 
-### **Security Features**
-- **Multi-Factor Authentication**: SMS + Internet Identity
-- **Transaction Escrow**: 6-digit verification codes
-- **KYC Compliance**: Document verification for users and agents
-- **Encrypted Storage**: Private keys encrypted with AES-256
-- **Role-Based Access**: User/Agent/Admin permission system
+**Example**:
+```
+*123*1*2# → Send ckBTC
+*123*2*3# → Check ckUSDC balance
+*123*8*2# → Vote on proposal
+```
 
+---
 
-## 🚀 Getting Started
+## 🚀 Roadmap
 
-### Quick Start (Demo Mode)
+### Phase 1: Foundation ✅ COMPLETE
+- Core platform (React + ICP)
+- ckBTC + ckUSDC integration
+- USSD interface
+- Agent dashboard
+- Escrow system
+- DAO governance
 
-The fastest way to explore AfriTokeni:
+### Phase 2: Launch (Q1 2026)
+- Deploy to ICP mainnet
+- Launch in Uganda
+- 100 agents, 10K users
+- $500K monthly volume
 
-1. Visit [https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/](https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/)
-2. Click **"Try Playground Demo"** 
-3. Explore all features with realistic fake data
-4. Toggle demo mode on/off anytime from the header
+### Phase 3: Scale (Q2-Q3 2026)
+- Expand to Kenya, Nigeria, Ghana
+- 1,000 agents, 100K users
+- $5M monthly volume
+- Mobile app launch
 
-### Prerequisites (For Development)
-- [Node.js](https://nodejs.org/) and npm
-- [Docker](https://www.docker.com/get-started) (for Juno)
-- [ngrok](https://ngrok.com/download) (for SMS testing)
+### Phase 4: Continental (Q4 2026 - 2027)
+- All 39 African countries
+- 10,000 agents, 1M users
+- $50M monthly volume
+- Full financial ecosystem
 
-### Step 1: Clone and Install
+### Phase 5: Ecosystem (2028+)
+- 100,000 agents, 10M users
+- $500M monthly volume
+- DeFi integration
+- Pan-African payment network
+
+---
+
+## 💡 Why AfriTokeni?
+
+| Feature | AfriTokeni | Mobile Money | Traditional Crypto |
+|---------|------------|--------------|-------------------|
+| **Speed** | <1 second | Minutes-Hours | 10-60 minutes |
+| **Fees** | ~$0.01 | 10-13% | $1-50 |
+| **Access** | Any phone (USSD) | Any phone (SMS) | Smartphone only |
+| **Stability** | ckUSDC option | Yes | No |
+| **Bitcoin** | ckBTC included | No | Yes |
+| **Decentralized** | Yes (ICP) | No | Yes |
+| **Coverage** | 39 countries | 1-3 countries | Global |
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md).
+
+### Development Setup
+
 ```bash
-git clone https://github.com/AfriTokeni/afritokeni-mvp.git
-cd afritokeni-mvp
+# Install dependencies
 npm install
-```
 
-### Step 2: Start Juno Development Emulator
-```bash
-juno dev start
-```
-This starts the local ICP blockchain emulator required for authentication.
-
-### Step 3: Create and Configure Juno Satellite
-1. Open [http://localhost:5866](http://localhost:5866) in your browser
-2. Create a new satellite and copy the Satellite ID
-3. Update `juno.config.ts` with your satellite ID:
-   ```typescript
-   export default defineConfig({
-     satellite: {
-       ids: {
-         development: "YOUR_SATELLITE_ID_HERE",
-       },
-       source: "dist",
-     },
-   });
-   ```
-
-### Step 4: Create Required Collections
-Login and create datastore collections:
-```bash
-juno login --mode development --emulator
-juno config --mode development
-```
-Create these collections in [Juno Datastore UI](http://localhost:5866/datastore):
-- `users`, `transactions`, `balances`, `agents`
-- `bitcoin_transactions`, `bitcoin_wallets`, `user_roles`
-
-### Step 5: Start Frontend
-```bash
+# Start dev server
 npm run dev
+
+# Run tests
+npm test
+
+# Build
+npm run build
+
+# Lint
+npm run lint
 ```
 
-### Step 6: Setup SMS Backend (Optional)
-```bash
-# Create .env with AfricasTalking credentials
-echo "VITE_AT_API_KEY=your_key\nVITE_AT_USERNAME=sandbox\nVITE_PORT=3001" > .env
+---
 
-# Build and start backend
-npm run build:backend
-npm run start:backend
+## 📄 License
 
-# Expose with ngrok for SMS testing
-ngrok http 3001
-```
+MIT License - see [LICENSE](./LICENSE) for details
 
-## 💰 Real Financial System
+---
 
-AfriTokeni operates as a complete transaction-based financial system with **zero hardcoded balances**:
+## 📞 Contact
 
-### Core Features
-- **Transaction-Based Balances**: All balances calculated from real transaction history
-- **39 African Currencies**: NGN, KES, GHS, ZAR, UGX, TZS, RWF, ETB, etc.
-- **Agent Network**: Physical cash ↔ digital currency conversion
-- **Bitcoin Integration**: Direct Bitcoin ↔ local currency exchange via agents
-- **Multi-Currency Transfers**: Send money across different African currencies
+- **Website**: https://afritokeni.com
+- **Email**: hello@afritokeni.com
+- **Twitter**: @AfriTokeni
+- **GitHub**: https://github.com/AfriTokeni
 
-### Financial Flows
-1. **Cash Deposits**: Users bring cash to agents → digital balance increases
-2. **Cash Withdrawals**: Users get cash from agents → digital balance decreases  
-3. **User Transfers**: Send money to other users via phone number
-4. **Bitcoin Exchange**: Buy/sell Bitcoin through agent network with escrow protection
-5. **Agent Settlement**: Agents withdraw earnings via bank/mobile money
+**For Agents**: agent@afritokeni.com  
+**For Investors**: invest@afritokeni.com  
+**For Press**: press@afritokeni.com
 
-## 💵 Platform Revenue Model
+---
 
-AfriTokeni generates **real revenue** (not theoretical accounting) through these streams:
+## 🌍 Our Mission
 
-### **1. Agent Settlement Fees** (Primary Revenue)
-When agents withdraw their earned commissions:
-- **Fee**: 2% of settlement amount
-- **Example**: Agent withdraws 1,000,000 UGX → Platform keeps 20,000 UGX, Agent receives 980,000 UGX
-- **Frequency**: Weekly/monthly agent payouts
-- **Revenue**: Real money transferred to platform bank account
+**Bank the unbanked. Empower Africa. Build wealth.**
 
-### **2. Agent Liquidity Fees** (Secondary Revenue)
-When agents fund their operational balance:
-- **Fee**: 1% of funding amount
-- **Example**: Agent deposits 5,000,000 UGX → Platform keeps 50,000 UGX, Agent gets 4,950,000 UGX digitalBalance
-- **Frequency**: As needed for agent operations
-- **Revenue**: Real money from agent deposits
+AfriTokeni is more than a platform—it's a movement to bring financial inclusion to every African, regardless of location, phone type, or internet access.
 
-### **3. Bitcoin Exchange Spread** (High-Margin Revenue)
-Platform markup on Bitcoin transactions:
-- **Spread**: 1-2% above market rate
-- **Example**: Buy BTC at $45,000, sell to user at $45,450 → Platform profit $450
-- **Frequency**: Every Bitcoin exchange transaction
-- **Revenue**: Real profit on Bitcoin trades
+**Join us in building the future of money in Africa.**
 
-### **4. Monthly Agent Subscription** (Recurring Revenue)
-Active agent platform fee:
-- **Fee**: 50,000 UGX/month (~$13.50 USD)
-- **Example**: 1,000 active agents = 50,000,000 UGX/month (~$13,500 USD)
-- **Frequency**: Monthly recurring
-- **Revenue**: Predictable subscription income
+---
 
-### **Transaction Fee Split (70/30)**
-On every transaction, fees are split:
-- **Agent Commission**: 70% (paid to agent's cashBalance)
-- **Platform Share**: 30% (accounting only, not real money capture)
-
-**Important**: The 30% platform share from transaction fees is **not captured as real money**. It's an accounting metric. Real revenue comes from the 4 streams above.
-
-### **Revenue Projections**
-
-**Conservative Scenario** (Year 1):
-- 500 agents, 10,000 users
-- Settlement fees: ~$5,000/month
-- Liquidity fees: ~$3,000/month
-- Bitcoin spread: ~$2,000/month
-- Agent subscriptions: ~$6,750/month
-- **Total**: ~$16,750/month (~$201,000/year)
-
-**Growth Scenario** (Year 3):
-- 10,000 agents, 500,000 users
-- Settlement fees: ~$100,000/month
-- Liquidity fees: ~$60,000/month
-- Bitcoin spread: ~$50,000/month
-- Agent subscriptions: ~$135,000/month
-- **Total**: ~$345,000/month (~$4.14M/year)
-
-### **Revenue Allocation**
-Platform revenue is allocated:
-- **40%** - Operational costs (SMS gateway, servers, APIs, compliance)
-- **30%** - DAO Treasury (SNS governance, community fund)
-- **20%** - Development & growth (team, marketing, expansion)
-- **10%** - Emergency reserve (agent insurance, refunds, security)
-
-## 📱 SMS Commands
-
-AfriTokeni works on any phone via SMS. Key commands:
-
-- `*AFRI#` - Access main menu
-- `BTC BAL` - Check Bitcoin balance  
-- `BTC RATE UGX` - Get exchange rates
-- `BTC BUY 50000 UGX` - Buy Bitcoin with local currency
-- `BTC SELL 0.001` - Sell Bitcoin for cash via agents
-- `SEND 10000 UGX +256701234567` - Send money to another user
-
-## ICP Features Used
-
-*   **Juno**: Used as a comprehensive Backend-as-a-Service (BaaS) to simplify development on the Internet Computer.
-*   **Decentralized Datastore**: All application data, including user profiles, balances, transaction history, and Bitcoin transaction records, is stored on-chain in a decentralized database.
-*   **Internet Identity**: Provides secure, passwordless authentication for web application users.
-*   **HTTP Outcalls**: A powerful feature that allows the on-chain canister to directly and securely make API calls to external Web 2.0 services. This was essential for integrating with the AfricasTalking API to send SMS messages and respond to USSD requests, as well as for fetching live Bitcoin exchange rates and blockchain data.
-*   **On-Chain Hosting**: The frontend assets and canister logic are hosted directly on the Internet Computer, providing a tamper-proof and unstoppable user experience.
-*   **WebAssembly Integration**: Leverages WASM for cryptographic operations in Bitcoin address generation and transaction signing using libraries like `tiny-secp256k1`.
-
-## Challenges Faced
-
-### Webhook Server Deployment
-A primary challenge was deploying the Node.js webhook server, which interacts with the AfricasTalking API, directly onto Juno/ICP. Due to difficulties in configuring the necessary external API routes and handlers within a canister, we adopted a hybrid approach. The webhook server was deployed to **Render**, a traditional cloud service, which then communicates with our Juno datastore on the Internet Computer.
-
-### WebAssembly Integration
-Integrating Bitcoin cryptographic libraries like `tiny-secp256k1` required careful configuration of Vite to handle WebAssembly modules. This was resolved by adding `vite-plugin-wasm` and `vite-plugin-top-level-await` to properly support WASM-based cryptographic operations in the browser environment.
-
-## 🚀 Future Roadmap
-
-Our vision is to make AfriTokeni the leading Bitcoin banking platform for Africa's unbanked population. Here's our path from MVP to continental scale.
-
-### **Phase 1: Production Hardening (Q1 2026)**
-🎯 **Goal**: Secure, scalable platform ready for pilot deployment
-
-**Security & Infrastructure**
-- Comprehensive security audit of all components
-- ICP threshold signatures for Bitcoin key management
-- Production-grade SMS gateway deployment
-- CI/CD pipelines and monitoring systems
-- Full test suite (unit, integration, end-to-end)
-
-**Regulatory Foundation**
-- Uganda financial services compliance
-- Bitcoin custody and exchange licensing
-- Agent network legal framework
-- KYC/AML compliance systems
-
-### **Phase 2: Uganda Pilot (Q2-Q3 2026)**
-🎯 **Goal**: Validate product-market fit with 1,000 users and 50 agents
-
-**Market Entry**
-- Kampala metropolitan area launch
-- Agent recruitment and training program
-- User onboarding and education campaigns
-- Community partnerships and local marketing
-
-**Product Optimization**
-- Real-world usage data collection
-- SMS command optimization for local languages
-- Agent liquidity management refinement
-- Customer support infrastructure
-
-### **Phase 3: National Scale (Q4 2026 - Q2 2027)**
-🎯 **Goal**: 50,000 users across Uganda with sustainable unit economics
-
-**Geographic Expansion**
-- Rural area penetration strategy
-- Multi-language SMS support (Luganda, Swahili)
-- Agent network scaling to 500+ locations
-- Partnership with mobile network operators
-
-**Advanced Features**
-- Cross-border remittances to Kenya/Tanzania
-- Native stablecoin support (USDC, USDT) alongside Bitcoin
-- Merchant payment integration
-- Savings and credit products
-- Insurance partnerships
-
-### **Phase 4: Continental Vision (2027+)**
-🎯 **Goal**: Pan-African Bitcoin banking network
-
-**Multi-Country Expansion**
-- Kenya, Nigeria, Ghana market entry
-- Regulatory compliance in 10+ countries
-- Cross-border Bitcoin remittance corridors
-- Local currency support for all 39 African currencies
-
-**Ecosystem Development**
-- Developer API for third-party integrations
-- Agent franchise model
-- Bitcoin education and literacy programs
-- Central bank digital currency (CBDC) integration
-
-### **Technology Evolution**
-- **ICP Native Bitcoin**: Migrate to ICP's native Bitcoin integration
-- **Decentralized SMS**: Explore on-chain SMS processing
-- **AI-Powered Support**: Automated customer service in local languages
-- **Satellite Internet**: Starlink integration for remote area connectivity
-
-### **Impact Goals by 2027**
-- **10 Million Users**: Across 15 African countries
-- **100,000 Agents**: Comprehensive rural coverage
-- **$1 Billion Volume**: Monthly transaction processing
-- **Financial Inclusion**: Banking the previously unbanked population
-
-
-
+**Made with ❤️ for Africa | Powered by Internet Computer Protocol**
