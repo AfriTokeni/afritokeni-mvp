@@ -1,0 +1,536 @@
+/**
+ * ckUSDC Service for AfriTokeni
+ * 
+ * Handles all ckUSDC operations:
+ * - Deposits (USDC → ckUSDC via Ethereum bridge)
+ * - Withdrawals (ckUSDC → USDC)
+ * - Transfers (ckUSDC between ICP users)
+ * - Balance queries
+ * - Exchange rate fetching
+ */
+
+import { ethers } from 'ethers';
+import { Principal } from '@dfinity/principal';
+import { nanoid } from 'nanoid';
+import {
+  CkUSDCConfig,
+  CkUSDCBalance,
+  CkUSDCDepositRequest,
+  CkUSDCDepositResponse,
+  CkUSDCWithdrawalRequest,
+  CkUSDCWithdrawalResponse,
+  CkUSDCTransferRequest,
+  CkUSDCTransferResponse,
+  CkUSDCExchangeRequest,
+  CkUSDCExchangeResponse,
+  CkUSDCExchangeRate,
+  CkUSDCTransaction,
+  ERC20_APPROVE_ABI,
+  HELPER_CONTRACT_ABI,
+  CKUSDC_CONSTANTS,
+  SEPOLIA_CONFIG,
+} from '../types/ckusdc';
+import { DataService } from './dataService';
+
+export class CkUSDCService {
+  private static config: CkUSDCConfig = SEPOLIA_CONFIG;
+
+  /**
+   * Initialize ckUSDC service with configuration
+   */
+  static initialize(config: Partial<CkUSDCConfig>) {
+    this.config = { ...this.config, ...config };
+  }
+
+  /**
+   * Get current configuration
+   */
+  static getConfig(): CkUSDCConfig {
+    return this.config;
+  }
+
+  // ==================== BALANCE OPERATIONS ====================
+
+  /**
+   * Get ckUSDC balance for a user
+   */
+  static async getBalance(principalId: string): Promise<CkUSDCBalance> {
+    try {
+      // In production, this would call the ICP ledger canister
+      // For now, we'll use mock data from DataService
+      
+      // TODO: Replace with actual canister call
+      // const principal = Principal.fromText(principalId);
+      // const balance = await ledgerCanister.icrc1_balance_of({
+      //   owner: principal,
+      //   subaccount: []
+      // });
+
+      // Mock implementation
+      const mockBalance = 0; // Start with 0 balance
+      
+      return {
+        balance: mockBalance,
+        balanceFormatted: this.formatAmount(mockBalance),
+        lastUpdated: new Date(),
+      };
+    } catch (error) {
+      console.error('Error fetching ckUSDC balance:', error);
+      throw new Error('Failed to fetch ckUSDC balance');
+    }
+  }
+
+  /**
+   * Get ckUSDC balance with local currency equivalent
+   */
+  static async getBalanceWithLocalCurrency(
+    principalId: string,
+    currency: string
+  ): Promise<CkUSDCBalance> {
+    const balance = await this.getBalance(principalId);
+    const exchangeRate = await this.getExchangeRate(currency);
+    
+    const localCurrencyEquivalent = 
+      parseFloat(balance.balanceFormatted) * exchangeRate.rate;
+
+    return {
+      ...balance,
+      localCurrencyEquivalent,
+      localCurrency: currency,
+    };
+  }
+
+  // ==================== DEPOSIT OPERATIONS ====================
+
+  /**
+   * Approve USDC spending by helper contract
+   */
+  static async approveUSDC(amount: number): Promise<string> {
+    try {
+      if (!window.ethereum) {
+        throw new Error('MetaMask not installed');
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      
+      const contract = new ethers.Contract(
+        this.config.sepoliaUSDCAddress,
+        ERC20_APPROVE_ABI,
+        signer
+      );
+
+      const amountInSmallestUnit = ethers.utils.parseUnits(
+        amount.toString(),
+        CKUSDC_CONSTANTS.DECIMALS
+      );
+
+      const tx = await contract.approve(
+        this.config.helperContractAddress,
+        amountInSmallestUnit
+      );
+
+      await tx.wait();
+      return tx.hash;
+    } catch (error) {
+      console.error('Error approving USDC:', error);
+      throw new Error('Failed to approve USDC spending');
+    }
+  }
+
+  /**
+   * Convert Principal ID to Byte32 address for deposits
+   */
+  static principalToByte32(principalId: string): string {
+    try {
+      const principal = Principal.fromText(principalId);
+      const bytes = principal.toUint8Array();
+      
+      // Pad to 32 bytes
+      const paddedBytes = new Uint8Array(32);
+      paddedBytes.set(bytes);
+      
+      // Convert to hex string
+      return '0x' + Array.from(paddedBytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    } catch (error) {
+      console.error('Error converting Principal to Byte32:', error);
+      throw new Error('Invalid Principal ID');
+    }
+  }
+
+  /**
+   * Deposit USDC to get ckUSDC
+   */
+  static async deposit(request: CkUSDCDepositRequest): Promise<CkUSDCDepositResponse> {
+    try {
+      // Validate amount
+      if (request.amount < CKUSDC_CONSTANTS.MIN_DEPOSIT) {
+        throw new Error(`Minimum deposit is ${CKUSDC_CONSTANTS.MIN_DEPOSIT} USDC`);
+      }
+      if (request.amount > CKUSDC_CONSTANTS.MAX_DEPOSIT) {
+        throw new Error(`Maximum deposit is ${CKUSDC_CONSTANTS.MAX_DEPOSIT} USDC`);
+      }
+
+      // Step 1: Approve USDC spending
+      await this.approveUSDC(request.amount);
+
+      // Step 2: Convert Principal to Byte32
+      const depositAddress = this.principalToByte32(request.principalId);
+
+      // Step 3: Deposit via helper contract
+      if (!window.ethereum) {
+        throw new Error('MetaMask not installed');
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      
+      const contract = new ethers.Contract(
+        this.config.helperContractAddress,
+        HELPER_CONTRACT_ABI,
+        signer
+      );
+
+      const amountInSmallestUnit = ethers.utils.parseUnits(
+        request.amount.toString(),
+        CKUSDC_CONSTANTS.DECIMALS
+      );
+
+      const tx = await contract.deposit(
+        this.config.sepoliaUSDCAddress,
+        amountInSmallestUnit,
+        depositAddress
+      );
+
+      await tx.wait();
+
+      // Step 4: Store transaction in database
+      const transactionId = nanoid();
+      const transaction: CkUSDCTransaction = {
+        id: transactionId,
+        userId: request.principalId,
+        type: 'deposit',
+        amount: request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
+        status: 'confirming',
+        ethTxHash: tx.hash,
+        fee: 0, // No fee for deposits
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        expiresAt: new Date(Date.now() + CKUSDC_CONSTANTS.TX_EXPIRATION_MS),
+      };
+
+      // TODO: Store in Juno datastore
+      // await DataService.storeCkUSDCTransaction(transaction);
+
+      return {
+        success: true,
+        transactionId,
+        depositAddress,
+        ethTxHash: tx.hash,
+        estimatedConfirmationTime: 5, // ~5 minutes for Sepolia
+      };
+    } catch (error: any) {
+      console.error('Error depositing USDC:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to deposit USDC',
+      };
+    }
+  }
+
+  // ==================== WITHDRAWAL OPERATIONS ====================
+
+  /**
+   * Withdraw ckUSDC to get USDC on Ethereum
+   */
+  static async withdraw(request: CkUSDCWithdrawalRequest): Promise<CkUSDCWithdrawalResponse> {
+    try {
+      // Validate amount
+      if (request.amount < CKUSDC_CONSTANTS.MIN_TRANSFER) {
+        throw new Error(`Minimum withdrawal is ${CKUSDC_CONSTANTS.MIN_TRANSFER} ckUSDC`);
+      }
+
+      // TODO: Call ICP minter canister to initiate withdrawal
+      // const principal = Principal.fromText(request.principalId);
+      // const result = await minterCanister.withdraw({
+      //   amount: request.amount,
+      //   recipient: request.ethereumAddress
+      // });
+
+      // Mock implementation
+      const transactionId = nanoid();
+      const transaction: CkUSDCTransaction = {
+        id: transactionId,
+        userId: request.principalId,
+        type: 'withdrawal',
+        amount: request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
+        status: 'pending',
+        recipient: request.ethereumAddress,
+        fee: 0.1, // Mock fee
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // TODO: Store in Juno datastore
+      // await DataService.storeCkUSDCTransaction(transaction);
+
+      return {
+        success: true,
+        transactionId,
+        estimatedProcessingTime: 10, // ~10 minutes
+      };
+    } catch (error: any) {
+      console.error('Error withdrawing ckUSDC:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to withdraw ckUSDC',
+      };
+    }
+  }
+
+  // ==================== TRANSFER OPERATIONS ====================
+
+  /**
+   * Transfer ckUSDC between ICP users
+   */
+  static async transfer(request: CkUSDCTransferRequest): Promise<CkUSDCTransferResponse> {
+    try {
+      // Validate amount
+      if (request.amount < CKUSDC_CONSTANTS.MIN_TRANSFER) {
+        throw new Error(`Minimum transfer is ${CKUSDC_CONSTANTS.MIN_TRANSFER} ckUSDC`);
+      }
+
+      // TODO: Call ICP ledger canister to transfer
+      // const senderPrincipal = Principal.fromText(request.senderId);
+      // const recipientPrincipal = Principal.fromText(request.recipient);
+      // const result = await ledgerCanister.icrc1_transfer({
+      //   from_subaccount: [],
+      //   to: { owner: recipientPrincipal, subaccount: [] },
+      //   amount: request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
+      //   fee: [],
+      //   memo: request.memo ? new TextEncoder().encode(request.memo) : [],
+      //   created_at_time: []
+      // });
+
+      // Mock implementation
+      const transactionId = nanoid();
+      const fee = 0.001; // Mock fee: 0.001 ckUSDC
+
+      const transaction: CkUSDCTransaction = {
+        id: transactionId,
+        userId: request.senderId,
+        type: 'transfer',
+        amount: request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
+        status: 'completed',
+        recipient: request.recipient,
+        fee,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // TODO: Store in Juno datastore
+      // await DataService.storeCkUSDCTransaction(transaction);
+
+      return {
+        success: true,
+        transactionId,
+        fee,
+      };
+    } catch (error: any) {
+      console.error('Error transferring ckUSDC:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to transfer ckUSDC',
+        fee: 0,
+      };
+    }
+  }
+
+  // ==================== EXCHANGE OPERATIONS ====================
+
+  /**
+   * Exchange ckUSDC with local currency via agent
+   */
+  static async exchange(request: CkUSDCExchangeRequest): Promise<CkUSDCExchangeResponse> {
+    try {
+      // Get exchange rate
+      const exchangeRate = await this.getExchangeRate(request.currency);
+      
+      // Calculate amounts based on type
+      let ckusdcAmount: number;
+      let localCurrencyAmount: number;
+      
+      if (request.type === 'buy') {
+        // User buying ckUSDC with local currency
+        localCurrencyAmount = request.amount;
+        ckusdcAmount = localCurrencyAmount / exchangeRate.rate;
+      } else {
+        // User selling ckUSDC for local currency
+        ckusdcAmount = request.amount;
+        localCurrencyAmount = ckusdcAmount * exchangeRate.rate;
+      }
+
+      // Calculate fee (2% default, can be dynamic based on location)
+      const feePercentage = CKUSDC_CONSTANTS.DEFAULT_EXCHANGE_FEE;
+      const fee = ckusdcAmount * feePercentage;
+      const agentCommission = fee * 0.8; // Agent gets 80% of fee
+
+      // Generate exchange code for in-person verification
+      const exchangeCode = `USDC-${nanoid(6).toUpperCase()}`;
+
+      // Create transaction
+      const transactionId = nanoid();
+      const transaction: CkUSDCTransaction = {
+        id: transactionId,
+        userId: request.userId,
+        type: request.type === 'buy' ? 'exchange_buy' : 'exchange_sell',
+        amount: ckusdcAmount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS),
+        status: 'pending',
+        agentId: request.agentId,
+        localCurrencyAmount,
+        localCurrency: request.currency,
+        exchangeRate: exchangeRate.rate,
+        fee,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        expiresAt: new Date(Date.now() + CKUSDC_CONSTANTS.TX_EXPIRATION_MS),
+      };
+
+      // TODO: Store in Juno datastore
+      // await DataService.storeCkUSDCTransaction(transaction);
+
+      return {
+        success: true,
+        transactionId,
+        exchangeRate: exchangeRate.rate,
+        ckusdcAmount,
+        localCurrencyAmount,
+        fee,
+        feePercentage,
+        agentCommission,
+        exchangeCode,
+      };
+    } catch (error: any) {
+      console.error('Error exchanging ckUSDC:', error);
+      return {
+        success: false,
+        exchangeRate: 0,
+        ckusdcAmount: 0,
+        localCurrencyAmount: 0,
+        fee: 0,
+        feePercentage: 0,
+        agentCommission: 0,
+        error: error.message || 'Failed to exchange ckUSDC',
+      };
+    }
+  }
+
+  // ==================== EXCHANGE RATE OPERATIONS ====================
+
+  /**
+   * Get ckUSDC exchange rate for a currency
+   * ckUSDC is pegged 1:1 with USD, so we just need USD exchange rates
+   */
+  static async getExchangeRate(currency: string): Promise<CkUSDCExchangeRate> {
+    try {
+      // Mock exchange rates (in production, fetch from API)
+      const mockRates: Record<string, number> = {
+        UGX: 3750,  // 1 USD = 3750 UGX
+        NGN: 1550,  // 1 USD = 1550 NGN
+        KES: 150,   // 1 USD = 150 KES
+        GHS: 15,    // 1 USD = 15 GHS
+        ZAR: 18,    // 1 USD = 18 ZAR
+        TZS: 2600,  // 1 USD = 2600 TZS
+      };
+
+      const rate = mockRates[currency] || 1;
+
+      return {
+        currency,
+        rate,
+        lastUpdated: new Date(),
+        source: 'mock', // In production: 'coinbase' or 'exchangerate-api'
+      };
+    } catch (error) {
+      console.error('Error fetching exchange rate:', error);
+      throw new Error('Failed to fetch exchange rate');
+    }
+  }
+
+  /**
+   * Get exchange rates for multiple currencies
+   */
+  static async getExchangeRates(currencies: string[]): Promise<CkUSDCExchangeRate[]> {
+    const rates = await Promise.all(
+      currencies.map(currency => this.getExchangeRate(currency))
+    );
+    return rates;
+  }
+
+  // ==================== UTILITY FUNCTIONS ====================
+
+  /**
+   * Format ckUSDC amount for display
+   */
+  static formatAmount(amount: number): string {
+    const amountInUSDC = amount / Math.pow(10, CKUSDC_CONSTANTS.DECIMALS);
+    return amountInUSDC.toFixed(2);
+  }
+
+  /**
+   * Parse ckUSDC amount from string
+   */
+  static parseAmount(amountStr: string): number {
+    const amount = parseFloat(amountStr);
+    return amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS);
+  }
+
+  /**
+   * Validate Ethereum address
+   */
+  static isValidEthereumAddress(address: string): boolean {
+    return ethers.utils.isAddress(address);
+  }
+
+  /**
+   * Validate Principal ID
+   */
+  static isValidPrincipalId(principalId: string): boolean {
+    try {
+      Principal.fromText(principalId);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get transaction by ID
+   */
+  static async getTransaction(transactionId: string): Promise<CkUSDCTransaction | null> {
+    try {
+      // TODO: Fetch from Juno datastore
+      // return await DataService.getCkUSDCTransaction(transactionId);
+      return null;
+    } catch (error) {
+      console.error('Error fetching transaction:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get user's transaction history
+   */
+  static async getTransactionHistory(userId: string): Promise<CkUSDCTransaction[]> {
+    try {
+      // TODO: Fetch from Juno datastore
+      // return await DataService.getCkUSDCTransactions(userId);
+      return [];
+    } catch (error) {
+      console.error('Error fetching transaction history:', error);
+      return [];
+    }
+  }
+}

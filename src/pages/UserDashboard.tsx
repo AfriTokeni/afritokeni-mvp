@@ -7,6 +7,7 @@ import { DemoModeModal } from '../components/DemoModeModal';
 import { DemoDataService } from '../services/demoDataService';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
+import { CkUSDCBalanceCard } from '../components/CkUSDCBalanceCard';
 import { 
   Send, 
   Bitcoin,
@@ -132,8 +133,9 @@ const UserDashboard: React.FC = () => {
         {/* KYC Status Alert */}
         <KYCStatusAlert user_type="user" />
 
-        {/* Balance Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Balance Cards - Now 3 columns to include ckUSDC */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Local Currency Balance */}
           <div className="bg-white border border-gray-200 p-8 rounded-2xl hover:border-gray-300 transition-all">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
@@ -168,6 +170,7 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Bitcoin Balance */}
           <div className="bg-white border border-gray-200 p-8 rounded-2xl hover:border-gray-300 transition-all">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
@@ -195,6 +198,16 @@ const UserDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* ckUSDC Balance - NEW STABLECOIN SUPPORT */}
+          <CkUSDCBalanceCard
+            principalId={currentUser?.id || ''}
+            preferredCurrency={userCurrency}
+            showActions={true}
+            onDeposit={() => navigate('/users/ckusdc/deposit')}
+            onSend={() => navigate('/users/ckusdc/send')}
+            onExchange={() => navigate('/users/ckusdc/exchange')}
+          />
         </div>
 
         {/* Quick Actions */}
