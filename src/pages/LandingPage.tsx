@@ -39,8 +39,8 @@ const LandingPage: React.FC = () => {
               <Link to="/tariff" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 Pricing
               </Link>
-              <Link to="/sms" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                Try SMS
+              <Link to="/about" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                About
               </Link>
             </nav>
 
@@ -122,9 +122,9 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">ckBTC Instant</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                ICP-native Bitcoin transfers in &lt;1 second. ~$0.01 fees. No Lightning complexity.
+                ICP-native Bitcoin transfers in &lt;1 second. ~$0.01 fees. Instant and secure.
               </p>
-              <div className="text-sm font-semibold text-orange-600 mt-auto">Lightning-like speed</div>
+              <div className="text-sm font-semibold text-orange-600 mt-auto">Instant transfers</div>
             </div>
 
             {/* Agent Incentives */}
@@ -146,9 +146,9 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">DAO Governed</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Community-owned. Vote on fees, currencies, and policies via SMS. Agents and users control the platform.
+                Community-owned. Vote on fees, currencies, and policies via USSD. Agents and users control the platform.
               </p>
-              <div className="text-sm font-semibold text-purple-600 mt-auto">Vote via SMS</div>
+              <div className="text-sm font-semibold text-purple-600 mt-auto">Vote via USSD</div>
             </div>
           </div>
         </div>
@@ -309,30 +309,30 @@ const LandingPage: React.FC = () => {
                   🇲🇼 Malawi
                 </span>
                 <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-sm text-blue-700 font-medium shadow-sm">
-                  +31 more (SMS + web)
+                  +31 more (USSD + web)
                 </span>
               </div>
             </div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {/* SMS Interface */}
+            {/* USSD Interface */}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 lg:p-8">
               <div className="space-y-6">
                 <div className="text-center">
                   <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium mb-4">
                     <Smartphone className="w-4 h-4 mr-2" />
-                    SMS Interface
+                    USSD Interface
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Any Phone Works</h3>
-                  <p className="text-gray-600">SMS commands or USSD menu - no internet required</p>
+                  <p className="text-gray-600">USSD menu - no internet required</p>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">SMS Commands</div>
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">USSD Menu</div>
                     <div className="inline-flex items-center px-2 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium">
-                      or dial *123#
+                      Dial *AFRI#
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -363,7 +363,7 @@ const LandingPage: React.FC = () => {
                     to="/sms"
                     className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
                   >
-                    Try SMS Banking →
+                    Try USSD Banking →
                   </Link>
                 </div>
               </div>
