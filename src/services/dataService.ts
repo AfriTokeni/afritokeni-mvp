@@ -1916,6 +1916,16 @@ Thank you for using AfriTokeni!`,
         return await this.handleBitcoinSellCommand(command, userId, phoneNumber);
       } else if (command.startsWith('CONFIRM ')) {
         return await this.handleConfirmCommand(command, userId, phoneNumber);
+      } else if (command === 'CKBTC BAL' || command === 'CKBTC BALANCE') {
+        return await this.handleCkBTCBalanceCommand(userId);
+      } else if (command.startsWith('CKBTC SEND ')) {
+        return await this.handleCkBTCSendCommand(command, userId, phoneNumber);
+      } else if (command === 'CKBTC DEPOSIT') {
+        return await this.handleCkBTCDepositCommand(userId);
+      } else if (command === 'USDC BAL' || command === 'USDC BALANCE') {
+        return await this.handleCkUSDCBalanceCommand(userId);
+      } else if (command.startsWith('USDC SEND ')) {
+        return await this.handleCkUSDCSendCommand(command, userId, phoneNumber);
       } else if (command === '*AFRI#') {
         return this.getMainMenu();
       } else {
@@ -1990,15 +2000,29 @@ Reply with agent number to withdraw.`;
 
   private static getMainMenu(): string {
     return `*AFRI# - AfriTokeni Menu
-1. Send Money - SEND amount phone
-2. Check Balance - BAL
-3. Find Agents - AGENTS
-4. Withdraw Cash - WITHDRAW amount
-5. Bitcoin Balance - BTC BAL
-6. Bitcoin Rate - BTC RATE currency
-7. Buy Bitcoin - BTC BUY amount currency
-8. Sell Bitcoin - BTC SELL amount currency
-9. Help - HELP`;
+
+💰 LOCAL CURRENCY:
+- Send Money: SEND amount phone
+- Check Balance: BAL
+- Withdraw Cash: WITHDRAW amount
+- Find Agents: AGENTS
+
+⚡ ckBTC (INSTANT):
+- Balance: CKBTC BAL
+- Send: CKBTC SEND phone amount
+- Deposit: CKBTC DEPOSIT
+
+💵 ckUSDC (STABLE):
+- Balance: USDC BAL
+- Send: USDC SEND phone amount
+
+₿ BITCOIN:
+- Balance: BTC BAL
+- Rate: BTC RATE currency
+- Buy: BTC BUY amount currency
+- Sell: BTC SELL amount currency
+
+Reply with command or HELP`;
   }
 
   // Bitcoin SMS Command Handlers
@@ -2271,6 +2295,185 @@ Send *AFRI# for menu`;
       return 'Unknown transaction type. Please try again.';
     } catch (error) {
       return 'Error confirming transaction. Please try again.';
+    }
+  }
+
+  // ckBTC SMS Command Handlers
+  private static async handleCkBTCBalanceCommand(userId?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    try {
+      const { CkBTCService } = await import('./ckBTCService');
+      const { BitcoinRateService } = await import('./bitcoinRateService');
+      
+      const balance = await CkBTCService.getBalance(userId);
+      const ugxRate = await BitcoinRateService.getBitcoinRate('ugx');
+      const satoshis = balance.balanceSatoshis;
+      const btc = satoshis / 100000000;
+      const ugxValue = btc * ugxRate;
+      
+      return `ckBTC Balance (Instant):
+₿${balance.balanceBTC} ckBTC
+≈ UGX ${ugxValue.toLocaleString()}
+
+⚡ Instant transfers <1 sec
+💰 Fee: ~$0.01 per transfer
+
+Send CKBTC SEND for transfers
+Send CKBTC DEPOSIT for deposit address
+Send *AFRI# for menu`;
+    } catch (error) {
+      return 'Error checking ckBTC balance. Please try again.';
+    }
+  }
+
+  private static async handleCkBTCSendCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    const parts = command.split(' ');
+    if (parts.length < 4) {
+      return 'Format: CKBTC SEND phone amount. Example: CKBTC SEND +256700123456 0.001';
+    }
+    
+    const recipient = parts[2];
+    const amount = parseFloat(parts[3]);
+    
+    if (isNaN(amount) || amount <= 0) {
+      return 'Invalid amount. Please enter a valid number.';
+    }
+    
+    try {
+      const { CkBTCService } = await import('./ckBTCService');
+      const { CkBTCUtils } = await import('../types/ckbtc');
+      
+      const amountSatoshis = CkBTCUtils.btcToSatoshis(amount);
+      const feeSatoshis = 10; // ~$0.01
+      
+      // Store pending transaction for confirmation
+      const confirmationCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      await this.storePendingTransaction(userId, {
+        type: 'ckbtc_send',
+        recipient,
+        amountSatoshis,
+        amountBTC: amount,
+        feeSatoshis,
+        confirmationCode,
+        phoneNumber: phoneNumber || '',
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+      });
+      
+      return `ckBTC Instant Transfer:
+Send: ₿${amount.toFixed(8)} ckBTC
+To: ${recipient}
+Fee: ₿0.00000010 (~$0.01)
+Total: ₿${(amount + 0.00000010).toFixed(8)}
+
+⚡ Completes in <1 second!
+
+To confirm, reply:
+CONFIRM ${confirmationCode}
+
+Quote expires in 5 minutes.`;
+    } catch (error) {
+      return 'Error processing ckBTC transfer. Please try again.';
+    }
+  }
+
+  private static async handleCkBTCDepositCommand(userId?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    try {
+      const { CkBTCService } = await import('./ckBTCService');
+      
+      const response = await CkBTCService.getDepositAddress({ principalId: userId });
+      
+      if (!response.success || !response.depositAddress) {
+        return 'Error generating deposit address. Please try again.';
+      }
+      
+      return `ckBTC Deposit Address:
+${response.depositAddress}
+
+How to deposit:
+1. Send Bitcoin to address above
+2. Wait for ${response.minConfirmations || 6} confirmations (~60 min)
+3. ckBTC automatically minted!
+
+⚡ Then enjoy instant transfers!
+
+Send CKBTC BAL to check balance
+Send *AFRI# for menu`;
+    } catch (error) {
+      return 'Error getting deposit address. Please try again.';
+    }
+  }
+
+  // ckUSDC SMS Command Handlers
+  private static async handleCkUSDCBalanceCommand(userId?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    try {
+      const { CkUSDCService } = await import('./ckUSDCService');
+      
+      const balance = await CkUSDCService.getBalanceWithLocalCurrency(userId, 'UGX');
+      
+      return `ckUSDC Balance (Stable):
+$${balance.balanceFormatted} ckUSDC
+≈ UGX ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}
+
+💵 1:1 USD peg (stable value)
+⚡ Instant transfers
+
+Send USDC SEND for transfers
+Send *AFRI# for menu`;
+    } catch (error) {
+      return 'Error checking ckUSDC balance. Please try again.';
+    }
+  }
+
+  private static async handleCkUSDCSendCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
+    if (!userId) return 'Please register first. Send *AFRI# for menu.';
+    
+    const parts = command.split(' ');
+    if (parts.length < 4) {
+      return 'Format: USDC SEND phone amount. Example: USDC SEND +256700123456 50';
+    }
+    
+    const recipient = parts[2];
+    const amount = parseFloat(parts[3]);
+    
+    if (isNaN(amount) || amount <= 0) {
+      return 'Invalid amount. Please enter a valid number.';
+    }
+    
+    try {
+      // Store pending transaction for confirmation
+      const confirmationCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      await this.storePendingTransaction(userId, {
+        type: 'ckusdc_send',
+        recipient,
+        amount,
+        fee: 0.01, // ~$0.01
+        confirmationCode,
+        phoneNumber: phoneNumber || '',
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+      });
+      
+      return `ckUSDC Instant Transfer:
+Send: $${amount.toFixed(2)} ckUSDC
+To: ${recipient}
+Fee: $0.01
+Total: $${(amount + 0.01).toFixed(2)}
+
+💵 Stable value (1:1 USD)
+⚡ Completes in <1 second!
+
+To confirm, reply:
+CONFIRM ${confirmationCode}
+
+Quote expires in 5 minutes.`;
+    } catch (error) {
+      return 'Error processing ckUSDC transfer. Please try again.';
     }
   }
 
