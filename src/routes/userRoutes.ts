@@ -9,6 +9,7 @@ import {
   Trophy,
   LayoutDashboard,
   Banknote,
+  PlusIcon,
 } from 'lucide-react';
 import { RouteID } from '../types/routes';
 
@@ -83,6 +84,12 @@ export const user_mobile_routes: Route[] = [
     path: "/users/send",
     label: "Send",
     icon: Send,
+  },
+   {
+    id: "deposit" as RouteID,
+    path: "/users/deposit",
+    label: "Deposit",
+    icon: PlusIcon,
   },
     {
     id: "withdraw" as RouteID,

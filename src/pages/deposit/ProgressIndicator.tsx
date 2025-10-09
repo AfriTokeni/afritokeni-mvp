@@ -19,14 +19,14 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ currentStep, step
   };
 
   return (
-    <div className="max-w-4xl mx-auto mb-6 md:mb-8 px-3 md:px-4">
-      <div className="flex items-center justify-center space-x-4 md:space-x-8">
+    <div className="max-w-4xl mx-auto mb-4 md:mb-6 lg:mb-8 px-2 md:px-4">
+      <div className="flex items-center justify-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-8">
         {steps.map((step, index) => (
           <div key={step.key} className="flex items-center">
-            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${getStepClassName(index)}`}>
+            <div className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs sm:text-xs md:text-sm font-medium ${getStepClassName(index)}`}>
               {step.number}
             </div>
-            <span className="ml-1 md:ml-2 text-xs md:text-sm font-medium text-gray-700">{step.label}</span>
+            <span className="ml-1 sm:ml-1 md:ml-2 text-xs sm:text-xs md:text-sm lg:text-base font-medium text-gray-700">{step.label}</span>
           </div>
         ))}
       </div>

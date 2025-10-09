@@ -40,17 +40,17 @@ const TransactionCodeDisplay: React.FC<TransactionCodeDisplayProps> = ({
   };
 
   return (
-    <div className={`bg-white border border-neutral-200 rounded-xl p-6 ${className}`}>
+    <div className={`bg-white border border-neutral-200 rounded-lg md:rounded-xl p-3 md:p-4 lg:p-6 ${className}`}>
       <div className="text-center">
-        <h3 className="text-lg font-semibold text-neutral-900 mb-2">{title}</h3>
+        <h3 className="text-sm md:text-base lg:text-lg font-semibold text-neutral-900 mb-1 md:mb-2">{title}</h3>
         {description && (
-          <p className="text-sm text-neutral-600 mb-4">{description}</p>
+          <p className="text-xs md:text-sm text-neutral-600 mb-3 md:mb-4">{description}</p>
         )}
 
         {/* Code Display */}
-        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4 mb-4">
+        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 md:p-4 mb-3 md:mb-4">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            <span className="text-2xl font-mono font-bold text-neutral-900">
+            <span className="text-lg sm:text-xl md:text-2xl font-mono font-bold text-neutral-900">
               {showCode ? formatCode(code) : '•••-•••'}
             </span>
             <button
@@ -58,14 +58,14 @@ const TransactionCodeDisplay: React.FC<TransactionCodeDisplayProps> = ({
               className="p-1 text-neutral-500 hover:text-neutral-700 transition-colors"
               title={showCode ? 'Hide code' : 'Show code'}
             >
-              {showCode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showCode ? <EyeOff className="w-3 h-3 md:w-4 md:h-4" /> : <Eye className="w-3 h-3 md:w-4 md:h-4" />}
             </button>
           </div>
           
           <div className="flex justify-center space-x-2">
             <button
               onClick={handleCopyCode}
-              className="flex items-center space-x-1 px-3 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-md text-sm text-neutral-700 transition-colors"
+              className="flex items-center space-x-1 px-2 md:px-3 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-md text-xs md:text-sm text-neutral-700 transition-colors"
             >
               <Copy className="w-3 h-3" />
               <span>{copied ? 'Copied!' : 'Copy'}</span>
@@ -74,7 +74,7 @@ const TransactionCodeDisplay: React.FC<TransactionCodeDisplayProps> = ({
             {showQR && (
               <button
                 onClick={() => setShowQRCode(!showQRCode)}
-                className="flex items-center space-x-1 px-3 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-md text-sm text-neutral-700 transition-colors"
+                className="flex items-center space-x-1 px-2 md:px-3 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-md text-xs md:text-sm text-neutral-700 transition-colors"
               >
                 <QrCode className="w-3 h-3" />
                 <span>{showQRCode ? 'Hide QR' : 'Show QR'}</span>
@@ -86,14 +86,19 @@ const TransactionCodeDisplay: React.FC<TransactionCodeDisplayProps> = ({
         {/* QR Code Display */}
         {showQR && showQRCode && (
           <div className="flex justify-center">
-            <div className="bg-white p-4 rounded-lg border border-neutral-200">
+            <div className="bg-white p-3 md:p-4 rounded-lg border border-neutral-200">
+              <QRCodeGenerator 
+                value={code} 
+                size={120}
+                className="mx-auto md:hidden"
+              />
               <QRCodeGenerator 
                 value={code} 
                 size={150}
-                className="mx-auto"
+                className="mx-auto hidden md:block"
               />
               <p className="text-xs text-neutral-500 mt-2 text-center">
-                Scan with agent's device
+                Scan with agent&apos;s device
               </p>
             </div>
           </div>

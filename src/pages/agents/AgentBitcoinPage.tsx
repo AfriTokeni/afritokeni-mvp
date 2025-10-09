@@ -89,57 +89,57 @@ const AgentBitcoinPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Bitcoin Wallet</h1>
-            <p className="text-gray-600 mt-1">Manage your Bitcoin for customer exchanges</p>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Bitcoin Wallet</h1>
+            <p className="text-sm md:text-base text-gray-600 mt-1">Manage your Bitcoin for customer exchanges</p>
           </div>
           <button
             onClick={refreshBalance}
-            className="flex items-center space-x-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors duration-200"
+            className="flex items-center space-x-2 px-3 md:px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors duration-200 self-start sm:self-auto"
           >
-            <RefreshCw className="w-4 h-4" />
-            <span className="font-semibold">Refresh</span>
+            <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="font-semibold text-xs md:text-sm">Refresh</span>
           </button>
         </div>
 
         {/* Bitcoin Balance Card */}
-        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-6 rounded-2xl shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center">
-                <Bitcoin className="w-6 h-6 text-orange-600" />
+        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 md:p-6 rounded-xl md:rounded-2xl shadow-sm">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="flex items-center space-x-2 md:space-x-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-xl md:rounded-2xl flex items-center justify-center">
+                <Bitcoin className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">Bitcoin Balance</h2>
-                <p className="text-gray-600 text-sm">Agent Wallet</p>
+                <h2 className="text-base md:text-lg font-bold text-gray-900">Bitcoin Balance</h2>
+                <p className="text-gray-600 text-xs md:text-sm">Agent Wallet</p>
               </div>
             </div>
             <button
               onClick={() => setShowBalance(!showBalance)}
               className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
             >
-              {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showBalance ? <EyeOff className="w-4 h-4 md:w-5 md:h-5" /> : <Eye className="w-4 h-4 md:w-5 md:h-5" />}
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <div>
-              <p className="text-gray-600 text-sm mb-2">Bitcoin Amount</p>
-              <p className="text-3xl font-bold text-gray-900 font-mono">
+              <p className="text-gray-600 text-xs md:text-sm mb-2">Bitcoin Amount</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
                 {showBalance ? `₿${bitcoinBalance.toFixed(8)}` : '••••••••'}
               </p>
             </div>
             
             <div>
-              <p className="text-gray-600 text-sm mb-2">UGX Value</p>
-              <p className="text-xl font-semibold text-gray-700 font-mono">
+              <p className="text-gray-600 text-xs md:text-sm mb-2">UGX Value</p>
+              <p className="text-lg md:text-xl font-semibold text-gray-700 font-mono">
                 {showBalance ? `UGX ${ugxValue.toLocaleString()}` : '••••••••'}
               </p>
-              <p className="text-gray-500 text-sm mt-1">
+              <p className="text-gray-500 text-xs md:text-sm mt-1">
                 1 BTC = UGX {exchangeRate.toLocaleString()}
               </p>
             </div>
@@ -147,90 +147,90 @@ const AgentBitcoinPage: React.FC = () => {
         </div>
 
         {/* Bitcoin Address Card */}
-        <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Your Bitcoin Address</h3>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <p className="font-mono text-sm text-gray-700 break-all flex-1 mr-4">
+        <div className="bg-white border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-2xl shadow-sm">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4">Your Bitcoin Address</h3>
+          <div className="bg-gray-50 p-3 md:p-4 rounded-lg md:rounded-xl border border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <p className="font-mono text-xs md:text-sm text-gray-700 break-all flex-1 sm:mr-4">
                 {bitcoinAddress}
               </p>
               <button
                 onClick={copyAddress}
-                className="flex items-center space-x-2 px-3 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 flex-shrink-0"
+                className="flex items-center justify-center space-x-2 px-3 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 flex-shrink-0 w-full sm:w-auto"
               >
-                <Copy className="w-4 h-4" />
-                <span className="text-sm font-semibold">
+                <Copy className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-xs md:text-sm font-semibold">
                   {copied ? 'Copied!' : 'Copy'}
                 </span>
               </button>
             </div>
           </div>
-          <p className="text-gray-500 text-sm mt-3">
+          <p className="text-gray-500 text-xs md:text-sm mt-3">
             Share this address with customers who want to send you Bitcoin, or use it to receive Bitcoin from exchanges.
           </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <ArrowDownLeft className="w-5 h-5 text-green-600" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <div className="bg-white border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-2xl shadow-sm">
+            <div className="flex items-center space-x-2 md:space-x-3 mb-3 md:mb-4">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg md:rounded-xl flex items-center justify-center">
+                <ArrowDownLeft className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900">Receive Bitcoin</h3>
-                <p className="text-gray-600 text-sm">From customers or exchanges</p>
+                <h3 className="text-sm md:text-base font-bold text-gray-900">Receive Bitcoin</h3>
+                <p className="text-gray-600 text-xs md:text-sm">From customers or exchanges</p>
               </div>
             </div>
-            <p className="text-gray-600 text-sm mb-4">
+            <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">
               Give your Bitcoin address to customers who want to pay with Bitcoin, or receive from crypto exchanges.
             </p>
-            <button className="w-full px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors duration-200 font-semibold">
+            <button className="w-full px-3 md:px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors duration-200 font-semibold text-xs md:text-sm">
               Show QR Code
             </button>
           </div>
 
-          <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <ArrowUpRight className="w-5 h-5 text-blue-600" />
+          <div className="bg-white border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-2xl shadow-sm">
+            <div className="flex items-center space-x-2 md:space-x-3 mb-3 md:mb-4">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg md:rounded-xl flex items-center justify-center">
+                <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900">Send Bitcoin</h3>
-                <p className="text-gray-600 text-sm">To customers or exchanges</p>
+                <h3 className="text-sm md:text-base font-bold text-gray-900">Send Bitcoin</h3>
+                <p className="text-gray-600 text-xs md:text-sm">To customers or exchanges</p>
               </div>
             </div>
-            <p className="text-gray-600 text-sm mb-4">
+            <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">
               Send Bitcoin to customers after they give you cash, or to exchanges to convert to UGX.
             </p>
-            <button className="w-full px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200 font-semibold">
+            <button className="w-full px-3 md:px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200 font-semibold text-xs md:text-sm">
               Send Bitcoin
             </button>
           </div>
         </div>
 
         {/* Agent Exchange Instructions */}
-        <div className="bg-blue-50 border border-blue-200 p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-            <Bitcoin className="w-5 h-5 text-blue-600" />
+        <div className="bg-blue-50 border border-blue-200 p-4 md:p-6 rounded-xl md:rounded-2xl">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4 flex items-center space-x-2">
+            <Bitcoin className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
             <span>Bitcoin Exchange for Agents</span>
           </h3>
           
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">How to Help Customers Buy Bitcoin:</h4>
-              <ol className="list-decimal list-inside space-y-1 text-gray-700 text-sm">
+              <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-2">How to Help Customers Buy Bitcoin:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-gray-700 text-xs md:text-sm">
                 <li>Customer gives you UGX cash</li>
                 <li>Calculate Bitcoin amount using current rate (1 BTC = UGX {exchangeRate.toLocaleString()})</li>
-                <li>Get customer's Bitcoin address</li>
+                <li>Get customer&apos;s Bitcoin address</li>
                 <li>Send Bitcoin from your wallet to their address</li>
                 <li>Keep small commission (2-3% recommended)</li>
               </ol>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">How to Help Customers Sell Bitcoin:</h4>
-              <ol className="list-decimal list-inside space-y-1 text-gray-700 text-sm">
+              <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-2">How to Help Customers Sell Bitcoin:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-gray-700 text-xs md:text-sm">
                 <li>Customer sends Bitcoin to your address</li>
                 <li>Wait for confirmation (usually 10-30 minutes)</li>
                 <li>Calculate UGX amount using current rate</li>
@@ -242,49 +242,49 @@ const AgentBitcoinPage: React.FC = () => {
         </div>
 
         {/* SMS Commands for Agents */}
-        <div className="bg-gray-50 border border-gray-200 p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-            <MessageSquare className="w-5 h-5 text-gray-600" />
+        <div className="bg-gray-50 border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-2xl">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4 flex items-center space-x-2">
+            <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
             <span>SMS Bitcoin Commands</span>
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Check Bitcoin Balance:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">BTC BAL</code>
+              <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-2">Check Bitcoin Balance:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700">BTC BAL</code>
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Get Bitcoin Address:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">BTC ADDR</code>
+              <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-2">Get Bitcoin Address:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700">BTC ADDR</code>
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Send Bitcoin:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">BTC SEND [address] [amount]</code>
+              <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-2">Send Bitcoin:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700">BTC SEND [address] [amount]</code>
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Check BTC Rate:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">BTC RATE UGX</code>
+              <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-2">Check BTC Rate:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700">BTC RATE UGX</code>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="mt-3 md:mt-4 p-3 md:p-4 bg-yellow-50 border border-yellow-200 rounded-lg md:rounded-xl">
             <div className="flex items-start space-x-2">
-              <Smartphone className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+              <Smartphone className="w-4 h-4 md:w-5 md:h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-yellow-800 font-semibold text-sm">SMS Commands Available</p>
-                <p className="text-yellow-700 text-sm mt-1">
-                  All Bitcoin operations can be performed via SMS when you don't have internet access. 
+                <p className="text-yellow-800 font-semibold text-xs md:text-sm">SMS Commands Available</p>
+                <p className="text-yellow-700 text-xs md:text-sm mt-1">
+                  All Bitcoin operations can be performed via SMS when you don&apos;t have internet access. 
                   Send commands to <strong>+256-XXX-XXXX</strong>
                 </p>
               </div>

@@ -141,12 +141,12 @@ const UserDashboard: React.FC = () => {
                     <p className="text-gray-500 text-xs md:text-sm">Bitcoin wallet</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 font-mono">
-                    ₿0.00000000
-                  </span>
-                </div>
               </div>
+            </div>
+            <div className="mb-4 md:mb-6">
+              <span className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 font-mono">
+                ₿0.00000000
+              </span>
             </div>
             <div className="flex justify-between items-center pt-3 md:pt-4 border-t border-gray-100">
               <span className="text-gray-500 text-xs md:text-sm">≈ {formatCurrency(0)}</span>

@@ -178,20 +178,20 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
   };
 
   const renderAgentDetails = (agent: typeof agents[0]) => (
-    <div className="min-w-48">
+    <div className="min-w-48 sm:min-w-52 md:min-w-56">
       {/* Agent Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3 md:mb-4">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1">
+          <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-1">
             {agent.businessName}
           </h3>
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            <MapPin className="h-4 w-4 mr-1" />
+          <div className="flex items-center text-xs md:text-sm text-gray-600 mb-1 md:mb-2">
+            <MapPin className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             {agent.location.address}
           </div>
           {userLocation && (
-            <div className="flex items-center text-sm text-gray-500">
-              <Navigation className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-xs md:text-sm text-gray-500">
+              <Navigation className="h-3 w-3 md:h-4 md:w-4 mr-1" />
               {formatDistance(agent)} away
             </div>
           )}
@@ -208,38 +208,38 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
       </div>
 
       {/* Agent Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-2 md:gap-4 mb-3 md:mb-4">
         <div>
           <p className="text-xs text-gray-500 mb-1">Digital Balance</p>
-          <p className="font-mono font-semibold text-gray-900">
+          <p className="font-mono text-xs md:text-sm font-semibold text-gray-900">
             {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1">Cash Available</p>
-          <p className="font-mono font-semibold text-gray-900">
+          <p className="font-mono text-xs md:text-sm font-semibold text-gray-900">
             {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
           </p>
         </div>
       </div>
 
       {/* Rating (Mock) */}
-      <div className="flex items-center mb-4">
+      <div className="flex items-center mb-3 md:mb-4">
         <div className="flex items-center">
           {[1, 2, 3, 4, 5].map((star) => (
             <Star
               key={star}
-              className={`h-4 w-4 ${
+              className={`h-3 w-3 md:h-4 md:w-4 ${
                 star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
               }`}
             />
           ))}
         </div>
-        <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
+        <span className="ml-2 text-xs md:text-sm text-gray-600">4.0 (23 reviews)</span>
       </div>
 
       {/* Services */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
           Cash Deposit
         </span>
@@ -259,12 +259,12 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             onCreateDepositRequest(agent);
           }}
           disabled={isCreating}
-          className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
+          className="flex-1 bg-gray-900 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
           {isCreating ? 'Creating...' : 'Select Agent'}
         </button>
-        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
-          <Phone className="h-4 w-4" />
+        <button className="px-3 md:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
+          <Phone className="h-3 w-3 md:h-4 md:w-4" />
         </button>
       </div>
     </div>
@@ -273,56 +273,56 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 lg:p-8">
-        <div className="text-center mb-6 md:mb-8">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Select Agent</h2>
-          <p className="text-sm md:text-base text-gray-600">
+        <div className="text-center mb-4 md:mb-6 lg:mb-8">
+          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-2">Select Agent</h2>
+          <p className="text-xs md:text-sm lg:text-base text-gray-600">
             Choose an agent to deposit {formatCurrencyAmount(parseFloat(amount), selectedCurrency as AfricanCurrency)}
           </p>
         </div>
 
         {/* View Toggle */}
-        <div className="flex justify-center mb-4 md:mb-6">
+        <div className="flex justify-center mb-3 md:mb-4 lg:mb-6">
           <div className="bg-gray-100 p-1 rounded-lg">
             <button
               type="button"
               onClick={() => onViewModeChange('list')}
-              className={`px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-md transition-all ${
+              className={`px-2 sm:px-3 md:px-4 py-1 md:py-1.5 lg:py-2 text-xs sm:text-xs md:text-sm font-medium rounded-md transition-all ${
                 viewMode === 'list'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <List className="w-3 h-3 md:w-4 md:h-4 inline mr-1 md:mr-2" />
+              <List className="w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4 inline mr-1 sm:mr-1 md:mr-2" />
               List View
             </button>
             <button
               type="button"
               onClick={() => onViewModeChange('map')}
-              className={`px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-md transition-all ${
+              className={`px-2 sm:px-3 md:px-4 py-1 md:py-1.5 lg:py-2 text-xs sm:text-xs md:text-sm font-medium rounded-md transition-all ${
                 viewMode === 'map'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Map className="w-3 h-3 md:w-4 md:h-4 inline mr-1 md:mr-2" />
+              <Map className="w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4 inline mr-1 sm:mr-1 md:mr-2" />
               Map View
             </button>
           </div>
         </div>
 
         {isLoadingAgents ? (
-          <div className="text-center py-6 md:py-8">
+          <div className="text-center py-4 md:py-6 lg:py-8">
             <div className="inline-flex items-center space-x-2 text-gray-600">
-              <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-gray-900"></div>
-              <span className="text-xs md:text-sm">Finding nearby agents...</span>
+              <div className="animate-spin rounded-full h-3 w-3 sm:h-3 sm:w-3 md:h-4 md:w-4 border-b-2 border-gray-900"></div>
+              <span className="text-xs sm:text-xs md:text-sm">Finding nearby agents...</span>
             </div>
           </div>
         ) : viewMode === 'list' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
             {uniqueAgents.map((agent) => (
               <div
                 key={agent.id}
-                className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                className={`bg-white rounded-lg md:rounded-xl shadow-sm border border-gray-200 p-3 md:p-4 lg:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                   selectedAgent?.id === agent.id ? 'ring-2 ring-blue-500' : ''
                 }`}
                 onClick={() => {
@@ -336,18 +336,18 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                 }}
               >
                 {/* Agent Header */}
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3 md:mb-4">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 mb-1">
                       {agent.businessName}
                     </h3>
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <MapPin className="h-4 w-4 mr-1" />
+                    <div className="flex items-center text-xs md:text-sm text-gray-600 mb-1 md:mb-2">
+                      <MapPin className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                       {agent.location.address}
                     </div>
                     {userLocation && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Navigation className="h-4 w-4 mr-1" />
+                      <div className="flex items-center text-xs md:text-sm text-gray-500">
+                        <Navigation className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                         {formatDistance(agent)} away
                       </div>
                     )}
@@ -364,38 +364,38 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                 </div>
 
                 {/* Agent Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-3 md:mb-4">
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Digital Balance</p>
-                    <p className="font-mono font-semibold text-gray-900">
+                    <p className="font-mono text-xs md:text-sm font-semibold text-gray-900">
                       {formatBalance(agent.digitalBalance || 0)} {selectedCurrency || 'UGX'}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Cash Available</p>
-                    <p className="font-mono font-semibold text-gray-900">
+                    <p className="font-mono text-xs md:text-sm font-semibold text-gray-900">
                       {formatBalance(agent.cashBalance || 0)} {selectedCurrency || 'UGX'}
                     </p>
                   </div>
                 </div>
 
                 {/* Rating (Mock) */}
-                <div className="flex items-center mb-4">
+                <div className="flex items-center mb-3 md:mb-4">
                   <div className="flex items-center">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`h-4 w-4 ${
+                        className={`h-3 w-3 md:h-4 md:w-4 ${
                           star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
+                  <span className="ml-2 text-xs md:text-sm text-gray-600">4.0 (23 reviews)</span>
                 </div>
 
                 {/* Services */}
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
                   <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
                     Cash Deposit
                   </span>
@@ -416,29 +416,29 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                       onCreateDepositRequest(agent);
                     }}
                     disabled={isCreating}
-                    className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="flex-1 bg-gray-900 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {isCreating ? 'Creating...' : 'Select Agent'}
                   </button>
-                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
-                    <Phone className="h-4 w-4" />
+                  <button className="px-3 md:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
+                    <Phone className="h-3 w-3 md:h-4 md:w-4" />
                   </button>
                 </div>
 
                 {/* Expanded Details */}
                 {selectedAgent?.id === agent.id && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="space-y-3">
+                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200">
+                    <div className="space-y-2 md:space-y-3">
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Operating Hours</p>
-                        <div className="flex items-center text-sm text-gray-700">
-                          <Clock className="h-4 w-4 mr-2" />
+                        <div className="flex items-center text-xs md:text-sm text-gray-700">
+                          <Clock className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                           Mon-Sat: 8:00 AM - 8:00 PM
                         </div>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Services Available</p>
-                        <ul className="text-sm text-gray-700 space-y-1">
+                        <ul className="text-xs md:text-sm text-gray-700 space-y-1">
                           <li>• Cash deposits and withdrawals</li>
                           <li>• Bitcoin buying and selling</li>
                           <li>• Money transfers</li>
@@ -447,10 +447,10 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Available Balance</p>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-xs md:text-sm text-gray-700">
                           Digital: {agent.digitalBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
                         </p>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-xs md:text-sm text-gray-700">
                           Cash: {agent.cashBalance?.toLocaleString() || 'N/A'} {selectedCurrency || 'UGX'}
                         </p>
                       </div>
@@ -461,14 +461,14 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             ))}
           </div>
         ) : (
-          <div className="h-96 w-full relative z-0" style={{ minHeight: '384px' }}>
+          <div className="h-64 sm:h-80 md:h-96 w-full relative z-0" style={{ minHeight: '256px' }}>
             <MapContainer
               center={userLocation || [0.3476, 32.5825]} // Default to Kampala if no user location
               zoom={13}
               style={{ 
                 height: '100%', 
                 width: '100%', 
-                minHeight: '384px', 
+                minHeight: '256px', 
                 position: 'relative', 
                 zIndex: 1,
                 borderRadius: '0.5rem'
@@ -506,10 +506,10 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
         )}
 
         {isCreating && (
-          <div className="text-center mt-6">
+          <div className="text-center mt-4 md:mt-6">
             <div className="inline-flex items-center space-x-2 text-gray-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
-              <span>Creating deposit request...</span>
+              <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-gray-900"></div>
+              <span className="text-xs md:text-sm">Creating deposit request...</span>
             </div>
           </div>
         )}
@@ -533,8 +533,8 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
               top: `${popupPosition.y}px`,
               transform: 'translate(-50%, -100%)',
               marginTop: '-10px',
-              maxWidth: '320px',
-              minWidth: '280px',
+              maxWidth: '280px',
+              minWidth: '240px',
             }}
           >
             {/* Arrow pointing down */}
@@ -552,13 +552,14 @@ const AgentSelectionStep: React.FC<AgentSelectionStepProps> = ({
             {/* Close button */}
             <button
               onClick={closePopup}
-              className="absolute top-3 right-3 z-10 p-1 rounded-full hover:bg-gray-100 transition-colors"
+              className="absolute top-2 md:top-3 right-2 md:right-3 z-10 p-1 rounded-full hover:bg-gray-100 transition-colors"
             >
-              <X size={16} />
+              <X size={14} className="md:hidden" />
+              <X size={16} className="hidden md:block" />
             </button>
 
             {/* Agent details content */}
-            <div className="p-4">
+            <div className="p-3 md:p-4">
               {renderAgentDetails(popupAgent)}
             </div>
           </div>
