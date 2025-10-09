@@ -464,32 +464,37 @@ export class CkUSDCService {
       };
     }
   }
-
   // ==================== EXCHANGE RATE OPERATIONS ====================
 
   /**
    * Get ckUSDC exchange rate for a currency
-   * ckUSDC is pegged 1:1 with USD, so we just need USD exchange rates
+   * ckUSDC is pegged 1:1 with USD, so we fetch real USD exchange rates from CoinGecko
    */
   static async getExchangeRate(currency: string): Promise<CkUSDCExchangeRate> {
     try {
-      // Mock exchange rates (in production, fetch from API)
-      const mockRates: Record<string, number> = {
-        UGX: 3750,  // 1 USD = 3750 UGX
-        NGN: 1550,  // 1 USD = 1550 NGN
-        KES: 150,   // 1 USD = 150 KES
-        GHS: 15,    // 1 USD = 15 GHS
-        ZAR: 18,    // 1 USD = 18 ZAR
-        TZS: 2600,  // 1 USD = 2600 TZS
-      };
-
-      const rate = mockRates[currency] || 1;
+      const currencyLower = currency.toLowerCase();
+      
+      // Fetch real USD exchange rate from CoinGecko
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=usd-coin&vs_currencies=${currencyLower}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch exchange rate from CoinGecko');
+      }
+      
+      const data = await response.json();
+      const rate = data['usd-coin']?.[currencyLower];
+      
+      if (!rate) {
+        throw new Error(`Exchange rate not available for ${currency}`);
+      }
 
       return {
         currency,
         rate,
         lastUpdated: new Date(),
-        source: 'mock', // In production: 'coinbase' or 'exchangerate-api'
+        source: 'coingecko',
       };
     } catch (error) {
       console.error('Error fetching exchange rate:', error);
