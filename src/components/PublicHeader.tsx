@@ -28,9 +28,9 @@ const PublicHeader: React.FC = () => {
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link 
-              to="/bitcoin-exchange" 
+              to="/how-it-works" 
               className={`font-medium transition-colors ${
-                isActive('/bitcoin-exchange') 
+                isActive('/how-it-works') 
                   ? 'text-black font-semibold' 
                   : 'text-gray-600 hover:text-gray-900'
               }`}

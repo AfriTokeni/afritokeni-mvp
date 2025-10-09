@@ -33,7 +33,7 @@ const LandingPage: React.FC = () => {
             
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link to="/bitcoin-exchange" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <Link to="/how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 How It Works
               </Link>
               <Link to="/tariff" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">

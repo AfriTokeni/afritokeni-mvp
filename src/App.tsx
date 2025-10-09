@@ -142,8 +142,9 @@ const App: FC = () => {
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
           
-          {/* Bitcoin Exchange Info Page */}
-          <Route path="/bitcoin-exchange" element={<BitcoinExchangePage />} />
+          {/* How It Works Page */}
+          <Route path="/how-it-works" element={<BitcoinExchangePage />} />
+          <Route path="/bitcoin-exchange" element={<Navigate to="/how-it-works" replace />} />
           
           {/* Tariff Page */}
           <Route path="/tariff" element={<TariffPage />} />
