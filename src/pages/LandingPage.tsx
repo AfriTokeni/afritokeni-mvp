@@ -113,7 +113,7 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Escrow Protected</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                AfriTokeni holds Bitcoin in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
+                AfriTokeni holds ckBTC/ckUSDC in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
               </p>
               <div className="text-sm font-semibold text-blue-600 mt-auto">Zero fraud risk</div>
             </div>
@@ -130,16 +130,16 @@ const LandingPage: React.FC = () => {
               <div className="text-sm font-semibold text-orange-600 mt-auto">Instant transfers</div>
             </div>
 
-            {/* Agent Incentives */}
+            {/* ckUSDC Stable Value */}
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200">
               <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
-                <Bitcoin className="w-8 h-8 text-white" />
+                <Lock className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Agent Earnings</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">ckUSDC Stable</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Agents earn 2-12% commission based on location. Remote areas pay more. Fair compensation system.
+                Protect yourself from Bitcoin volatility. ckUSDC stays pegged to $1 USD. Instant transfers, stable value.
               </p>
-              <div className="text-sm font-semibold text-green-600 mt-auto">Up to 12% commission</div>
+              <div className="text-sm font-semibold text-green-600 mt-auto">No volatility risk</div>
             </div>
 
             {/* DAO Governance */}
@@ -163,13 +163,13 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm font-medium mb-4">
               <Zap className="w-4 h-4 mr-2" />
-              ICP-Native ckBTC
+              ICP-Native Assets
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Instant Bitcoin Transfers
+              ckBTC + ckUSDC Instant Transfers
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              Send ckBTC in under 1 second with ~$0.01 fees. Powered by Internet Computer Protocol.
+              Send ckBTC (Bitcoin) or ckUSDC (stablecoin) in under 1 second with ~$0.01 fees. Choose speed or stability.
             </p>
           </div>
 
@@ -199,7 +199,7 @@ const LandingPage: React.FC = () => {
                 ~$0.01 Fee
               </h3>
               <p className="text-gray-600 mb-4">
-                99% cheaper than on-chain Bitcoin transactions.
+                99% cheaper than traditional transfers.
               </p>
               <div className="text-sm text-gray-500">
                 vs $1-50 on-chain
@@ -275,13 +275,13 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-12 sm:mb-16">
             <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-orange-50 border border-orange-100 text-orange-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
               <Bitcoin className="w-3 h-3 mr-2" />
-              Bitcoin Integration
+              Dual Asset System
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4 sm:px-0">
-              ICP-Native Crypto Banking
+              ckBTC + ckUSDC Banking
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
-              ckBTC (fast Bitcoin) + ckUSDC (stable value) for 39 African currencies. USSD or web - any phone.
+              ckBTC (ICP Bitcoin - fast) + ckUSDC (stablecoin - no volatility) for 39 African currencies. USSD or web.
             </p>
             <div className="mt-8 px-4 max-w-4xl mx-auto">
               <div className="flex flex-wrap justify-center gap-3 mb-3">
@@ -381,7 +381,7 @@ const LandingPage: React.FC = () => {
                     Web Interface
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Full Dashboard</h3>
-                  <p className="text-gray-600">Complete Bitcoin banking with charts & analytics</p>
+                  <p className="text-gray-600">Complete crypto banking: ckBTC + ckUSDC with charts & analytics</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
