@@ -119,7 +119,7 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Lightning Speed */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200">
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200 flex flex-col">
               <div className="w-16 h-16 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-8 h-8 text-white" />
               </div>
