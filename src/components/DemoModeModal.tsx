@@ -3,7 +3,6 @@
  * Inspired by InFoundr's playground demo modal
  */
 
-import React, { useState } from 'react';
 import { X, Zap, FileText, Lightbulb } from 'lucide-react';
 import { useDemoMode } from '../context/DemoModeContext';
 

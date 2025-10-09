@@ -292,7 +292,7 @@ export class DemoDataService {
         id: faker.string.uuid(),
         businessName: `${faker.company.name()} Money Services`,
         ownerName: faker.person.fullName(),
-        phoneNumber: faker.phone.number('+256 ### ### ###'),
+        phoneNumber: `+256${faker.number.int({ min: 700000000, max: 799999999 })}`,
         location: `${faker.location.street()}, ${faker.helpers.arrayElement(['Kampala', 'Entebbe', 'Wakiso', 'Mukono'])}`,
         balance: faker.number.int({ min: 500000, max: 5000000 }),
         currency: 'UGX',
@@ -316,7 +316,7 @@ export class DemoDataService {
       customers.push({
         id: faker.string.uuid(),
         name: faker.person.fullName(),
-        phoneNumber: faker.phone.number('+256 ### ### ###'),
+        phoneNumber: `+256${faker.number.int({ min: 700000000, max: 799999999 })}`,
         balance: faker.number.int({ min: 10000, max: 500000 }),
         totalTransactions: faker.number.int({ min: 5, max: 100 }),
         lastTransaction: faker.date.recent({ days: 7 }),

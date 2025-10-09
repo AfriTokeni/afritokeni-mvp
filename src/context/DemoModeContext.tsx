@@ -3,7 +3,7 @@
  * Manages demo mode state across the application
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { DemoDataService } from '../services/demoDataService';
 
 interface DemoModeContextType {

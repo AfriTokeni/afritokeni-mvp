@@ -3,7 +3,6 @@
  * Shows at the top when demo mode is active
  */
 
-import React from 'react';
 import { Zap, X } from 'lucide-react';
 import { useDemoMode } from '../context/DemoModeContext';
 

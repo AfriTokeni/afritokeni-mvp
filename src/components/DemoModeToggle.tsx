@@ -3,7 +3,6 @@
  * Simple toggle switch for demo mode in header/dashboard
  */
 
-import React from 'react';
 import { Zap } from 'lucide-react';
 import { useDemoMode } from '../context/DemoModeContext';
 
