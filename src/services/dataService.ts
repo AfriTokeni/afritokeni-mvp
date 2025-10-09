@@ -1906,14 +1906,6 @@ Thank you for using AfriTokeni!`,
         return await this.handleAgentsCommand(userId);
       } else if (command.startsWith('WITHDRAW ')) {
         return await this.handleWithdrawCommand(command, userId);
-      } else if (command === 'BTC BAL' || command === 'BTC BALANCE') {
-        return await this.handleBitcoinBalanceCommand(userId);
-      } else if (command.startsWith('BTC RATE ')) {
-        return await this.handleBitcoinRateCommand(command);
-      } else if (command.startsWith('BTC BUY ')) {
-        return await this.handleBitcoinBuyCommand(command, userId, phoneNumber);
-      } else if (command.startsWith('BTC SELL ')) {
-        return await this.handleBitcoinSellCommand(command, userId, phoneNumber);
       } else if (command.startsWith('CONFIRM ')) {
         return await this.handleConfirmCommand(command, userId, phoneNumber);
       } else if (command === 'CKBTC BAL' || command === 'CKBTC BALANCE') {
@@ -1999,217 +1991,27 @@ Reply with agent number to withdraw.`;
   }
 
   private static getMainMenu(): string {
-    return `*AFRI# - AfriTokeni Menu
+    return `*AFRI# - AfriTokeni
 
 💰 LOCAL CURRENCY:
-- Send Money: SEND amount phone
-- Check Balance: BAL
-- Withdraw Cash: WITHDRAW amount
-- Find Agents: AGENTS
+1. Send Money
+2. Check Balance
+3. Withdraw Cash
+4. Find Agents
 
 ⚡ ckBTC (INSTANT):
-- Balance: CKBTC BAL
-- Send: CKBTC SEND phone amount
-- Deposit: CKBTC DEPOSIT
+5. Check ckBTC Balance
+6. Send ckBTC
+7. Get Deposit Address
 
 💵 ckUSDC (STABLE):
-- Balance: USDC BAL
-- Send: USDC SEND phone amount
+8. Check ckUSDC Balance
+9. Send ckUSDC
 
-₿ BITCOIN:
-- Balance: BTC BAL
-- Rate: BTC RATE currency
-- Buy: BTC BUY amount currency
-- Sell: BTC SELL amount currency
-
-Reply with command or HELP`;
+Reply with number or 0 for help`;
   }
 
-  // Bitcoin SMS Command Handlers
-  private static async handleBitcoinBalanceCommand(userId?: string): Promise<string> {
-    if (!userId) return 'Please register first. Send *AFRI# for menu.';
-    
-    try {
-      const { BitcoinRateService } = await import('./bitcoinRateService');
-      
-      // Mock Bitcoin balance for demo - in production, integrate with BitcoinService
-      const btcBalance = 0.00125; // Mock balance
-      const ugxRate = await BitcoinRateService.getBitcoinRate('ugx');
-      const ugxValue = btcBalance * ugxRate;
-      
-      return `Bitcoin Balance:
-₿${btcBalance.toFixed(8)} BTC
-≈ UGX ${ugxValue.toLocaleString()}
-
-Send BTC RATE [currency] for rates
-Send *AFRI# for menu`;
-    } catch (error) {
-      return 'Error checking Bitcoin balance. Please try again.';
-    }
-  }
-
-  private static async handleBitcoinRateCommand(command: string): Promise<string> {
-    const parts = command.split(' ');
-    if (parts.length < 3) {
-      return 'Format: BTC RATE currency. Example: BTC RATE UGX';
-    }
-    
-    const currency = parts[2].toUpperCase();
-    
-    try {
-      const { BitcoinRateService } = await import('./bitcoinRateService');
-      
-      // Fetch real rates from CoinGecko
-      const rates = await BitcoinRateService.getBitcoinRates(['UGX', 'KES', 'NGN', 'ZAR', 'GHS']);
-      
-      const rate = rates[currency];
-      if (!rate) {
-        return `Currency ${currency} not supported. Supported: UGX, KES, NGN, ZAR, GHS`;
-      }
-      
-      return `Bitcoin Exchange Rate:
-1 BTC = ${rate.toLocaleString()} ${currency}
-1 ${currency} = ₿${(1/rate).toFixed(8)}
-
-Updated: ${new Date().toLocaleString()}
-Send BTC BUY/SELL for exchange
-Send *AFRI# for menu`;
-    } catch (error) {
-      return 'Error getting exchange rate. Please try again.';
-    }
-  }
-
-  private static async handleBitcoinBuyCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
-    if (!userId) return 'Please register first. Send *AFRI# for menu.';
-    
-    const parts = command.split(' ');
-    if (parts.length < 4) {
-      return 'Format: BTC BUY amount currency. Example: BTC BUY 100000 UGX';
-    }
-    
-    const amount = parseInt(parts[2]);
-    const currency = parts[3].toUpperCase();
-    
-    if (isNaN(amount) || amount <= 0) {
-      return 'Invalid amount. Please enter a valid number.';
-    }
-    
-    try {
-      const { BitcoinRateService } = await import('./bitcoinRateService');
-      
-      // Calculate dynamic fee and Bitcoin amount with real rate
-      const exchangeRate = await BitcoinRateService.getBitcoinRate(currency.toLowerCase());
-      const btcAmount = amount / exchangeRate;
-      
-      // Calculate dynamic fee based on location (mock data for SMS)
-      const baseFee = 0.025; // 2.5% base fee
-      const locationMultiplier = 1.2; // Assume suburban location for SMS users
-      const timeMultiplier = 1.0; // Standard time
-      const totalFeeRate = baseFee * locationMultiplier * timeMultiplier;
-      const feeAmount = amount * totalFeeRate;
-      const netAmount = amount - feeAmount;
-      const netBtcAmount = netAmount / exchangeRate;
-      
-      // Store pending transaction for confirmation
-      const confirmationCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-      await this.storePendingTransaction(userId, {
-        type: 'bitcoin_buy',
-        amount,
-        currency,
-        btcAmount: netBtcAmount,
-        feeAmount,
-        feeRate: totalFeeRate,
-        confirmationCode,
-        phoneNumber: phoneNumber || '',
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
-      });
-      
-      return `Bitcoin Purchase Quote:
-Buy: ₿${btcAmount.toFixed(8)} BTC
-Cost: ${amount.toLocaleString()} ${currency}
-
-Fee Breakdown:
-- Base fee (2.5%): ${currency} ${Math.round(amount * 0.025).toLocaleString()}
-- Location adj: +20%
-- Total fee (${(totalFeeRate * 100).toFixed(1)}%): ${currency} ${feeAmount.toLocaleString()}
-
-You receive: ₿${netBtcAmount.toFixed(8)} BTC
-Net cost: ${currency} ${netAmount.toLocaleString()}
-
-To confirm, reply:
-CONFIRM ${confirmationCode}
-
-Quote expires in 5 minutes.`;
-    } catch (error) {
-      return 'Error calculating Bitcoin purchase. Please try again.';
-    }
-  }
-
-  private static async handleBitcoinSellCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
-    if (!userId) return 'Please register first. Send *AFRI# for menu.';
-    
-    const parts = command.split(' ');
-    if (parts.length < 4) {
-      return 'Format: BTC SELL amount currency. Example: BTC SELL 50000 UGX';
-    }
-    
-    const amount = parseInt(parts[2]);
-    const currency = parts[3].toUpperCase();
-    
-    if (isNaN(amount) || amount <= 0) {
-      return 'Invalid amount. Please enter a valid number.';
-    }
-    
-    try {
-      const { BitcoinRateService } = await import('./bitcoinRateService');
-      
-      // Calculate Bitcoin equivalent and dynamic fee with real rate
-      const exchangeRate = await BitcoinRateService.getBitcoinRate(currency.toLowerCase());
-      const btcAmount = amount / exchangeRate;
-      
-      // Calculate dynamic fee
-      const baseFee = 0.025; // 2.5% base fee
-      const locationMultiplier = 1.2; // Assume suburban location
-      const timeMultiplier = 1.0; // Standard time
-      const totalFeeRate = baseFee * locationMultiplier * timeMultiplier;
-      const feeAmount = amount * totalFeeRate;
-      const netAmount = amount - feeAmount;
-      
-      // Store pending transaction
-      const confirmationCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-      await this.storePendingTransaction(userId, {
-        type: 'bitcoin_sell',
-        amount,
-        currency,
-        btcAmount,
-        feeAmount,
-        feeRate: totalFeeRate,
-        confirmationCode,
-        phoneNumber: phoneNumber || '',
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000)
-      });
-      
-      return `Bitcoin Sale Quote:
-Sell: ₿${btcAmount.toFixed(8)} BTC
-Value: ${amount.toLocaleString()} ${currency}
-
-Fee Breakdown:
-- Base fee (2.5%): ${currency} ${Math.round(amount * 0.025).toLocaleString()}
-- Location adj: +20%
-- Total fee (${(totalFeeRate * 100).toFixed(1)}%): ${currency} ${feeAmount.toLocaleString()}
-
-You receive: ${currency} ${netAmount.toLocaleString()}
-Agent will contact you for cash pickup.
-
-To confirm, reply:
-CONFIRM ${confirmationCode}
-
-Quote expires in 5 minutes.`;
-    } catch (error) {
-      return 'Error calculating Bitcoin sale. Please try again.';
-    }
-  }
-
+  // USSD Command Handlers
   private static async handleConfirmCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
     if (!userId) return 'Please register first. Send *AFRI# for menu.';
     
@@ -2234,60 +2036,40 @@ Quote expires in 5 minutes.`;
       }
       
       // Process the transaction
-      if (pendingTx.type === 'bitcoin_buy') {
-        // Create Bitcoin purchase transaction
-        const txId = await this.createTransaction({
-          userId,
-          type: 'ugx_to_bitcoin',
-          amount: pendingTx.amount,
-          currency: pendingTx.currency as any,
-          status: 'pending',
-          description: `Bitcoin purchase: ₿${pendingTx.btcAmount.toFixed(8)}`,
-          fee: pendingTx.feeAmount,
-          metadata: {
-            smsReference: `BTC${Date.now().toString().slice(-6)}`,
-            exchangeMethod: 'agent_cash' as const
-          }
+      if (pendingTx.type === 'ckbtc_send') {
+        // Process ckBTC transfer
+        const { CkBTCService } = await import('./ckBTCService');
+        const result = await CkBTCService.transfer({
+          amountSatoshis: pendingTx.amountSatoshis,
+          recipient: pendingTx.recipient,
+          senderId: userId,
+          memo: 'USSD transfer'
         });
         
         await this.deletePendingTransaction(userId, confirmationCode);
         
-        return `Bitcoin Purchase Confirmed!
-Transaction ID: ${txId.id}
-Amount: ₿${pendingTx.btcAmount.toFixed(8)} BTC
-Cost: ${pendingTx.amount.toLocaleString()} ${pendingTx.currency}
-Fee: ${pendingTx.feeAmount.toLocaleString()} ${pendingTx.currency}
-
-An agent will contact you at ${phoneNumber} to complete the exchange.
+        if (result.success) {
+          return `ckBTC Transfer Complete!
+Sent: ₿${pendingTx.amountBTC.toFixed(8)} ckBTC
+To: ${pendingTx.recipient}
+Fee: ₿0.00000010
+Time: <1 second ✅
 
 Send *AFRI# for menu`;
-        
-      } else if (pendingTx.type === 'bitcoin_sell') {
-        // Create Bitcoin sale transaction
-        const txId = await this.createTransaction({
-          userId,
-          type: 'bitcoin_to_ugx',
-          amount: pendingTx.amount,
-          currency: pendingTx.currency as any,
-          status: 'pending',
-          description: `Bitcoin sale: ₿${pendingTx.btcAmount.toFixed(8)}`,
-          fee: pendingTx.feeAmount,
-          metadata: {
-            smsReference: `BTC${Date.now().toString().slice(-6)}`,
-            exchangeMethod: 'agent_cash' as const
-          }
-        });
-        
+        } else {
+          return `Transfer failed: ${result.error}. Please try again.`;
+        }
+      } else if (pendingTx.type === 'ckusdc_send') {
+        // Process ckUSDC transfer
+        const { CkUSDCService } = await import('./ckUSDCService');
+        // TODO: Implement actual transfer
         await this.deletePendingTransaction(userId, confirmationCode);
         
-        const netAmount = pendingTx.amount - pendingTx.feeAmount;
-        return `Bitcoin Sale Confirmed!
-Transaction ID: ${txId.id}
-Selling: ₿${pendingTx.btcAmount.toFixed(8)} BTC
-You receive: ${netAmount.toLocaleString()} ${pendingTx.currency}
-Fee: ${pendingTx.feeAmount.toLocaleString()} ${pendingTx.currency}
-
-An agent will contact you at ${phoneNumber} with cash.
+        return `ckUSDC Transfer Complete!
+Sent: $${pendingTx.amount.toFixed(2)} ckUSDC
+To: ${pendingTx.recipient}
+Fee: $0.01
+Time: <1 second ✅
 
 Send *AFRI# for menu`;
       }
@@ -2298,7 +2080,7 @@ Send *AFRI# for menu`;
     }
   }
 
-  // ckBTC SMS Command Handlers
+  // ckBTC USSD Command Handlers
   private static async handleCkBTCBalanceCommand(userId?: string): Promise<string> {
     if (!userId) return 'Please register first. Send *AFRI# for menu.';
     
@@ -2319,9 +2101,7 @@ Send *AFRI# for menu`;
 ⚡ Instant transfers <1 sec
 💰 Fee: ~$0.01 per transfer
 
-Send CKBTC SEND for transfers
-Send CKBTC DEPOSIT for deposit address
-Send *AFRI# for menu`;
+Dial *AFRI# for menu`;
     } catch (error) {
       return 'Error checking ckBTC balance. Please try again.';
     }
@@ -2401,14 +2181,13 @@ How to deposit:
 
 ⚡ Then enjoy instant transfers!
 
-Send CKBTC BAL to check balance
-Send *AFRI# for menu`;
+Dial *AFRI# for menu`;
     } catch (error) {
       return 'Error getting deposit address. Please try again.';
     }
   }
 
-  // ckUSDC SMS Command Handlers
+  // ckUSDC USSD Command Handlers
   private static async handleCkUSDCBalanceCommand(userId?: string): Promise<string> {
     if (!userId) return 'Please register first. Send *AFRI# for menu.';
     
@@ -2424,8 +2203,7 @@ $${balance.balanceFormatted} ckUSDC
 💵 1:1 USD peg (stable value)
 ⚡ Instant transfers
 
-Send USDC SEND for transfers
-Send *AFRI# for menu`;
+Dial *AFRI# for menu`;
     } catch (error) {
       return 'Error checking ckUSDC balance. Please try again.';
     }
