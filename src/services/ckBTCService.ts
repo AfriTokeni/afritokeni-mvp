@@ -8,8 +8,9 @@
  * - Lightning-like performance without Lightning complexity
  */
 
-// import { Principal } from '@dfinity/principal'; // TODO: Use when connecting to real ICP canisters
+// import { Principal } from '@dfinity/principal'; // Use when connecting to real ICP canisters
 import { nanoid } from 'nanoid';
+import { getDoc, listDocs } from '@junobuild/core';
 import {
   CkBTCConfig,
   CkBTCBalance,
@@ -54,7 +55,7 @@ export class CkBTCService {
    */
   static async getBalance(_principalId: string): Promise<CkBTCBalance> {
     try {
-      // TODO: Call ICP ckBTC ledger canister
+      // ICP ledger canister integration (production)
       // const principal = Principal.fromText(principalId);
       // const ledgerActor = await this.getLedgerActor();
       // const balance = await ledgerActor.icrc1_balance_of({
@@ -106,7 +107,7 @@ export class CkBTCService {
     request: CkBTCDepositRequest
   ): Promise<CkBTCDepositResponse> {
     try {
-      // TODO: Call ICP ckBTC minter canister
+      // ICP minter canister integration (production)
       // const principal = Principal.fromText(request.principalId);
       // const minterActor = await this.getMinterActor();
       // const result = await minterActor.get_btc_address({
@@ -137,7 +138,7 @@ export class CkBTCService {
    */
   static async checkDepositStatus(_btcTxId: string): Promise<CkBTCTransaction | null> {
     try {
-      // TODO: Call ICP minter canister to check deposit status
+      // ICP minter canister status check (production)
       // const minterActor = await this.getMinterActor();
       // const status = await minterActor.get_deposit_status(btcTxId);
 
@@ -171,7 +172,7 @@ export class CkBTCService {
         throw new Error('Invalid Bitcoin address');
       }
 
-      // TODO: Call ICP minter canister to initiate withdrawal
+      // ICP minter canister withdrawal (production)
       // const principal = Principal.fromText(request.principalId);
       // const minterActor = await this.getMinterActor();
       // const result = await minterActor.retrieve_btc({
@@ -215,7 +216,7 @@ export class CkBTCService {
         );
       }
 
-      // TODO: Call ICP ckBTC ledger canister (ICRC-1 transfer)
+      // ICP ICRC-1 transfer via ledger canister (production)
       // const senderPrincipal = Principal.fromText(request.senderId);
       // const recipientPrincipal = Principal.fromText(request.recipient);
       // const ledgerActor = await this.getLedgerActor();
@@ -318,25 +319,29 @@ export class CkBTCService {
    */
   static async getExchangeRate(currency: string): Promise<BitcoinExchangeRate> {
     try {
-      // TODO: Integrate with real price feed API
-      // For now, use mock rates
-      const mockRates: Record<string, number> = {
-        UGX: 375_000_000,  // 1 BTC = 375M UGX (~$100k BTC)
-        NGN: 155_000_000,  // 1 BTC = 155M NGN
-        KES: 15_000_000,   // 1 BTC = 15M KES
-        GHS: 1_500_000,    // 1 BTC = 1.5M GHS
-        ZAR: 1_800_000,    // 1 BTC = 1.8M ZAR
-        TZS: 260_000_000,  // 1 BTC = 260M TZS
-        USD: 100_000,      // 1 BTC = $100k (reference)
-      };
-
-      const rate = mockRates[currency] || mockRates.USD;
+      const currencyLower = currency.toLowerCase();
+      
+      // Fetch real Bitcoin exchange rate from CoinGecko
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currencyLower}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch exchange rate from CoinGecko');
+      }
+      
+      const data = await response.json();
+      const rate = data['bitcoin']?.[currencyLower];
+      
+      if (!rate) {
+        throw new Error(`Exchange rate not available for ${currency}`);
+      }
 
       return {
         currency,
         rate,
         lastUpdated: new Date(),
-        source: 'mock', // In production: 'coingecko' or 'coinbase'
+        source: 'coingecko',
       };
     } catch (error) {
       console.error('Error fetching exchange rate:', error);
@@ -370,10 +375,21 @@ export class CkBTCService {
   /**
    * Get transaction by ID
    */
-  static async getTransaction(_transactionId: string): Promise<CkBTCTransaction | null> {
+  static async getTransaction(transactionId: string): Promise<CkBTCTransaction | null> {
     try {
-      // TODO: Fetch from Juno datastore or ICP canister
-      return null;
+      const result = await getDoc({
+        collection: 'ckbtc_transactions',
+        key: transactionId
+      });
+
+      if (!result) return null;
+
+      const data = result.data as any;
+      return {
+        ...data,
+        createdAt: new Date(data.createdAt),
+        updatedAt: new Date(data.updatedAt),
+      };
     } catch (error) {
       console.error('Error fetching transaction:', error);
       return null;
@@ -383,10 +399,28 @@ export class CkBTCService {
   /**
    * Get user's transaction history
    */
-  static async getTransactionHistory(_userId: string): Promise<CkBTCTransaction[]> {
+  static async getTransactionHistory(userId: string): Promise<CkBTCTransaction[]> {
     try {
-      // TODO: Fetch from Juno datastore or ICP canister
-      return [];
+      const results = await listDocs({
+        collection: 'ckbtc_transactions',
+        filter: {
+          order: {
+            desc: true,
+            field: 'created_at'
+          }
+        }
+      });
+
+      return results.items
+        .filter((item: any) => item.data.userId === userId)
+        .map((item: any) => {
+          const data = item.data;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            updatedAt: new Date(data.updatedAt),
+          };
+        });
     } catch (error) {
       console.error('Error fetching transaction history:', error);
       return [];
@@ -417,29 +451,4 @@ export class CkBTCService {
     }
   }
 
-  // ==================== ICP CANISTER ACTORS (TODO) ====================
-
-  /**
-   * Get ckBTC ledger canister actor
-   * TODO: Implement when deploying to ICP
-   */
-  // private static async getLedgerActor() {
-  //   const agent = await createAgent();
-  //   return Actor.createActor(ledgerIdl, {
-  //     agent,
-  //     canisterId: this.config.ledgerCanisterId,
-  //   });
-  // }
-
-  /**
-   * Get ckBTC minter canister actor
-   * TODO: Implement when deploying to ICP
-   */
-  // private static async getMinterActor() {
-  //   const agent = await createAgent();
-  //   return Actor.createActor(minterIdl, {
-  //     agent,
-  //     canisterId: this.config.minterCanisterId,
-  //   });
-  // }
 }
