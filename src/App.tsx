@@ -50,7 +50,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Landing Page
 import LandingPage from "./pages/LandingPage";
 import TariffPage from "./pages/TariffPage";
-import SMSPlayground from "./pages/SMSPlayground";
+import USSDPlayground from "./pages/USSDPlayground";
 import BecomeAgentPage from "./pages/BecomeAgentPage";
 import AboutPage from "./pages/AboutPage";
 
@@ -151,8 +151,8 @@ const App: FC = () => {
           {/* About Page */}
           <Route path="/about" element={<AboutPage />} />
           
-          {/* SMS Playground */}
-          <Route path="/sms" element={<SMSPlayground />} />
+          {/* USSD Playground */}
+          <Route path="/ussd" element={<USSDPlayground />} />
           
           {/* Become an Agent */}
           <Route path="/become-agent" element={<BecomeAgentPage />} />

@@ -360,7 +360,7 @@ const LandingPage: React.FC = () => {
                 
                 <div className="text-center pt-4 border-t border-gray-200">
                   <Link
-                    to="/sms"
+                    to="/ussd"
                     className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
                   >
                     Try USSD Banking →

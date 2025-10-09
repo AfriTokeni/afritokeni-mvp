@@ -2061,17 +2061,27 @@ Send *AFRI# for menu`;
         }
       } else if (pendingTx.type === 'ckusdc_send') {
         // Process ckUSDC transfer
-        // const { CkUSDCService } = await import('./ckUSDCService');
-        // TODO: Implement actual ckUSDC transfer
+        const { CkUSDCService } = await import('./ckUSDCService');
+        
+        const result = await CkUSDCService.transfer({
+          senderId: userId,
+          recipient: pendingTx.recipient,
+          amount: pendingTx.amount,
+        });
+        
         await this.deletePendingTransaction(userId, confirmationCode);
         
-        return `ckUSDC Transfer Complete!
+        if (result.success) {
+          return `ckUSDC Transfer Complete!
 Sent: $${pendingTx.amount.toFixed(2)} ckUSDC
 To: ${pendingTx.recipient}
-Fee: $0.01
+Fee: $${result.fee?.toFixed(2) || '0.00'}
 Time: <1 second ✅
 
 Send *AFRI# for menu`;
+        } else {
+          return `Transfer failed: ${result.error}. Please try again.`;
+        }
       }
       
       return 'Unknown transaction type. Please try again.';
@@ -3202,6 +3212,58 @@ Quote expires in 5 minutes.`;
     } catch (error) {
       console.error('Error calculating total platform revenue:', error);
       return { total: 0, byCurrency: {} };
+    }
+  }
+
+  /**
+   * Initialize cash balance for all agents
+   */
+  static async initializeAllAgentsCashBalance(): Promise<{ success: boolean; updated: number; errors: string[] }> {
+    try {
+      const agents = await listDocs({
+        collection: 'agents'
+      });
+
+      let updated = 0;
+      const errors: string[] = [];
+
+      for (const agentDoc of agents.items) {
+        try {
+          const agent = agentDoc.data as any;
+          
+          // Initialize cashBalance if not set
+          if (agent.cashBalance === undefined || agent.cashBalance === null) {
+            await setDoc({
+              collection: 'agents',
+              doc: {
+                key: agentDoc.key,
+                data: {
+                  ...agent,
+                  cashBalance: 0,
+                  digitalBalance: agent.digitalBalance || 0,
+                  updatedAt: new Date().toISOString(),
+                }
+              }
+            });
+            updated++;
+          }
+        } catch (error) {
+          errors.push(`Failed to update agent ${agentDoc.key}: ${error}`);
+        }
+      }
+
+      return {
+        success: errors.length === 0,
+        updated,
+        errors
+      };
+    } catch (error) {
+      console.error('Error initializing agent balances:', error);
+      return {
+        success: false,
+        updated: 0,
+        errors: [`Failed to initialize: ${error}`]
+      };
     }
   }
 }

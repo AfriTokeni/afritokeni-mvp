@@ -54,24 +54,42 @@ export class CkUSDCService {
   /**
    * Get ckUSDC balance for a user
    */
-  static async getBalance(_principalId: string): Promise<CkUSDCBalance> {
+  static async getBalance(principalId: string): Promise<CkUSDCBalance> {
     try {
-      // In production, this would call the ICP ledger canister
-      // For now, we'll use mock data from DataService
-      
-      // TODO: Replace with actual canister call
-      // const principal = Principal.fromText(principalId);
-      // const balance = await ledgerCanister.icrc1_balance_of({
-      //   owner: principal,
-      //   subaccount: []
-      // });
+      // Fetch balance from Juno datastore
+      const results = await listDocs({
+        collection: 'ckusdc_transactions',
+        filter: {
+          order: {
+            desc: true,
+            field: 'created_at'
+          }
+        }
+      });
 
-      // Mock implementation
-      const mockBalance = 0; // Start with 0 balance
+      // Calculate balance from transaction history
+      let balance = 0;
+      results.items
+        .filter((item: any) => item.data.userId === principalId)
+        .forEach((item: any) => {
+          const tx = item.data;
+          if (tx.type === 'deposit' && tx.status === 'completed') {
+            balance += tx.amount;
+          } else if (tx.type === 'withdrawal' && tx.status === 'completed') {
+            balance -= tx.amount;
+          } else if (tx.type === 'transfer') {
+            if (tx.userId === principalId) {
+              balance -= (tx.amount + (tx.fee || 0));
+            }
+            if (tx.recipient === principalId) {
+              balance += tx.amount;
+            }
+          }
+        });
       
       return {
-        balance: mockBalance,
-        balanceFormatted: this.formatAmount(mockBalance),
+        balance,
+        balanceFormatted: this.formatAmount(balance),
         lastUpdated: new Date(),
       };
     } catch (error) {
