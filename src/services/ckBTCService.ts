@@ -8,7 +8,7 @@
  * - Lightning-like performance without Lightning complexity
  */
 
-import { Principal } from '@dfinity/principal';
+// import { Principal } from '@dfinity/principal'; // TODO: Use when connecting to real ICP canisters
 import { nanoid } from 'nanoid';
 import {
   CkBTCConfig,
@@ -52,7 +52,7 @@ export class CkBTCService {
    * Get ckBTC balance for a user
    * Uses ICP ledger canister (ICRC-1 standard)
    */
-  static async getBalance(principalId: string): Promise<CkBTCBalance> {
+  static async getBalance(_principalId: string): Promise<CkBTCBalance> {
     try {
       // TODO: Call ICP ckBTC ledger canister
       // const principal = Principal.fromText(principalId);
@@ -135,7 +135,7 @@ export class CkBTCService {
    * Check deposit status
    * ICP minter automatically mints ckBTC when BTC is received
    */
-  static async checkDepositStatus(btcTxId: string): Promise<CkBTCTransaction | null> {
+  static async checkDepositStatus(_btcTxId: string): Promise<CkBTCTransaction | null> {
     try {
       // TODO: Call ICP minter canister to check deposit status
       // const minterActor = await this.getMinterActor();
@@ -370,7 +370,7 @@ export class CkBTCService {
   /**
    * Get transaction by ID
    */
-  static async getTransaction(transactionId: string): Promise<CkBTCTransaction | null> {
+  static async getTransaction(_transactionId: string): Promise<CkBTCTransaction | null> {
     try {
       // TODO: Fetch from Juno datastore or ICP canister
       return null;
@@ -383,7 +383,7 @@ export class CkBTCService {
   /**
    * Get user's transaction history
    */
-  static async getTransactionHistory(userId: string): Promise<CkBTCTransaction[]> {
+  static async getTransactionHistory(_userId: string): Promise<CkBTCTransaction[]> {
     try {
       // TODO: Fetch from Juno datastore or ICP canister
       return [];

@@ -2012,7 +2012,7 @@ Reply with number or 0 for help`;
   }
 
   // USSD Command Handlers
-  private static async handleConfirmCommand(command: string, userId?: string, phoneNumber?: string): Promise<string> {
+  private static async handleConfirmCommand(command: string, userId?: string, _phoneNumber?: string): Promise<string> {
     if (!userId) return 'Please register first. Send *AFRI# for menu.';
     
     const parts = command.split(' ');
@@ -2061,8 +2061,8 @@ Send *AFRI# for menu`;
         }
       } else if (pendingTx.type === 'ckusdc_send') {
         // Process ckUSDC transfer
-        const { CkUSDCService } = await import('./ckUSDCService');
-        // TODO: Implement actual transfer
+        // const { CkUSDCService } = await import('./ckUSDCService');
+        // TODO: Implement actual ckUSDC transfer
         await this.deletePendingTransaction(userId, confirmationCode);
         
         return `ckUSDC Transfer Complete!
@@ -2123,7 +2123,7 @@ Dial *AFRI# for menu`;
     }
     
     try {
-      const { CkBTCService } = await import('./ckBTCService');
+      // const { CkBTCService } = await import('./ckBTCService');
       const { CkBTCUtils } = await import('../types/ckbtc');
       
       const amountSatoshis = CkBTCUtils.btcToSatoshis(amount);
