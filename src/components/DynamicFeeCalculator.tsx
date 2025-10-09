@@ -86,20 +86,20 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
   };
 
   return (
-    <div className="bg-white border border-neutral-200 p-6 rounded-xl shadow-sm">
-      <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center space-x-2">
-        <Calculator className="w-5 h-5 text-blue-600" />
+    <div className="bg-white border border-neutral-200 p-4 md:p-6 rounded-xl shadow-sm">
+      <h3 className="text-base md:text-lg font-bold text-neutral-900 mb-2 flex items-center space-x-2">
+        <Calculator className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
         <span>Agent Commission Calculator</span>
       </h3>
-      <p className="text-sm text-neutral-600 mb-4">
+      <p className="text-xs md:text-sm text-neutral-600 mb-3 md:mb-4">
         Calculate agent commission based on location, distance, and service level. Agents earn higher fees for serving remote areas.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Input Section */}
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            <label className="block text-xs md:text-sm font-semibold text-neutral-700 mb-2">
               Transaction Amount
             </label>
             <input
@@ -107,18 +107,18 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
-              className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 md:px-4 py-2 md:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            <label className="block text-xs md:text-sm font-semibold text-neutral-700 mb-2">
               Currency
             </label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value as AfricanCurrency)}
-              className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 md:px-4 py-2 md:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
             >
               {Object.entries(AFRICAN_CURRENCIES)
                 .filter(([code]) => code !== 'BTC')
@@ -132,7 +132,7 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            <label className="block text-xs md:text-sm font-semibold text-neutral-700 mb-2">
               Customer Location Type
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -140,7 +140,7 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
                 <button
                   key={type}
                   onClick={() => setCustomerLocation(type)}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 ${
+                  className={`px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-colors duration-200 ${
                     customerLocation === type
                       ? getLocationColor(type)
                       : 'text-neutral-600 bg-neutral-50 hover:bg-neutral-100'
@@ -153,7 +153,7 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            <label className="block text-xs md:text-sm font-semibold text-neutral-700 mb-2">
               Distance to Agent (km)
             </label>
             <input
@@ -161,20 +161,20 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
               value={distance}
               onChange={(e) => setDistance(e.target.value)}
               placeholder="Distance in kilometers"
-              className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 md:px-4 py-2 md:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            <label className="block text-xs md:text-sm font-semibold text-neutral-700 mb-2">
               Service Urgency
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 md:gap-2">
               {(['standard', 'express', 'emergency'] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => setUrgency(type)}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 ${
+                  className={`px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-colors duration-200 ${
                     urgency === type
                       ? getUrgencyColor(type)
                       : 'text-neutral-600 bg-neutral-50 hover:bg-neutral-100'
@@ -188,40 +188,40 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
         </div>
 
         {/* Results Section */}
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {feeCalculation && (
             <>
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+              <div className="bg-blue-50 border border-blue-200 p-3 md:p-4 rounded-lg">
                 <div className="text-center">
-                  <p className="text-blue-600 text-sm font-semibold mb-2">Total Fee</p>
-                  <p className="text-3xl font-bold text-neutral-900 font-mono">
+                  <p className="text-blue-600 text-xs md:text-sm font-semibold mb-2">Total Fee</p>
+                  <p className="text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
                     {(feeCalculation.totalFeePercentage * 100).toFixed(2)}%
                   </p>
-                  <p className="text-xl font-semibold text-neutral-700 font-mono">
+                  <p className="text-lg md:text-xl font-semibold text-neutral-700 font-mono">
                     {currency} {feeCalculation.totalFeeAmount.toLocaleString()}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                <div className="bg-green-50 border border-green-200 p-2.5 md:p-3 rounded-lg">
                   <p className="text-green-600 text-xs font-semibold mb-1">Agent Commission</p>
-                  <p className="text-lg font-bold text-neutral-900 font-mono">
+                  <p className="text-sm md:text-lg font-bold text-neutral-900 font-mono">
                     {currency} {feeCalculation.agentCommission.toLocaleString()}
                   </p>
                 </div>
-                <div className="bg-neutral-50 border border-neutral-200 p-3 rounded-lg">
+                <div className="bg-neutral-50 border border-neutral-200 p-2.5 md:p-3 rounded-lg">
                   <p className="text-neutral-600 text-xs font-semibold mb-1">Platform Fee</p>
-                  <p className="text-lg font-bold text-neutral-900 font-mono">
+                  <p className="text-sm md:text-lg font-bold text-neutral-900 font-mono">
                     {currency} {feeCalculation.platformRevenue.toLocaleString()}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-neutral-900">Fee Breakdown:</h4>
+              <div className="space-y-1.5 md:space-y-2">
+                <h4 className="text-xs md:text-sm font-semibold text-neutral-900">Fee Breakdown:</h4>
                 {feeCalculation.breakdown.map((item: any, index: number) => (
-                  <div key={index} className="flex justify-between items-center text-sm">
+                  <div key={index} className="flex justify-between items-center text-xs md:text-sm">
                     <span className="text-neutral-600">{item.description}</span>
                     <span className="font-semibold text-neutral-900">
                       {(item.percentage * 100).toFixed(2)}%
@@ -230,11 +230,11 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
                 ))}
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+              <div className="bg-yellow-50 border border-yellow-200 p-2.5 md:p-3 rounded-lg">
                 <div className="flex items-start space-x-2">
-                  <Info className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <Info className="w-3 h-3 md:w-4 md:h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-yellow-800 font-semibold text-sm">Dynamic Pricing</p>
+                    <p className="text-yellow-800 font-semibold text-xs md:text-sm">Dynamic Pricing</p>
                     <p className="text-yellow-700 text-xs mt-1">
                       Fees adjust based on distance, location accessibility, time, and demand to ensure fair compensation for agents.
                     </p>
@@ -247,26 +247,26 @@ const DynamicFeeCalculator: React.FC<DynamicFeeCalculatorProps> = ({ onFeeCalcul
       </div>
 
       {/* Fee Comparison */}
-      <div className="mt-6 pt-6 border-t border-neutral-200">
-        <h4 className="text-sm font-semibold text-neutral-900 mb-3">Fee Comparison Examples:</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-          <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
-            <div className="flex items-center space-x-2 mb-2">
-              <TrendingDown className="w-4 h-4 text-green-600" />
+      <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-neutral-200">
+        <h4 className="text-xs md:text-sm font-semibold text-neutral-900 mb-2 md:mb-3">Fee Comparison Examples:</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 text-xs md:text-sm">
+          <div className="bg-green-50 border border-green-200 p-2.5 md:p-3 rounded-lg">
+            <div className="flex items-center space-x-1.5 md:space-x-2 mb-1.5 md:mb-2">
+              <TrendingDown className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
               <span className="font-semibold text-green-800">Urban - Low Fee</span>
             </div>
             <p className="text-green-700">5km, Urban, Standard: ~2.5%</p>
           </div>
-          <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
-            <div className="flex items-center space-x-2 mb-2">
-              <Clock className="w-4 h-4 text-yellow-600" />
+          <div className="bg-yellow-50 border border-yellow-200 p-2.5 md:p-3 rounded-lg">
+            <div className="flex items-center space-x-1.5 md:space-x-2 mb-1.5 md:mb-2">
+              <Clock className="w-3 h-3 md:w-4 md:h-4 text-yellow-600" />
               <span className="font-semibold text-yellow-800">Rural - Medium Fee</span>
             </div>
             <p className="text-yellow-700">25km, Rural, Express: ~5.5%</p>
           </div>
-          <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-            <div className="flex items-center space-x-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-red-600" />
+          <div className="bg-red-50 border border-red-200 p-2.5 md:p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center space-x-1.5 md:space-x-2 mb-1.5 md:mb-2">
+              <TrendingUp className="w-3 h-3 md:w-4 md:h-4 text-red-600" />
               <span className="font-semibold text-red-800">Remote - High Fee</span>
             </div>
             <p className="text-red-700">80km, Remote, Emergency: ~10%</p>

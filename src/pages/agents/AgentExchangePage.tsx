@@ -184,11 +184,11 @@ const AgentExchangePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
-            <p className="text-gray-600">Loading exchange data...</p>
+            <RefreshCw className="w-6 h-6 md:w-8 md:h-8 animate-spin text-blue-500 mx-auto mb-3 md:mb-4" />
+            <p className="text-sm md:text-base text-gray-600">Loading exchange data...</p>
           </div>
         </div>
       </div>
@@ -196,24 +196,24 @@ const AgentExchangePage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Bitcoin Exchange</h1>
-            <p className="text-gray-600 mt-1">Manage customer Bitcoin exchanges</p>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Bitcoin Exchange</h1>
+            <p className="text-sm md:text-base text-gray-600 mt-1">Manage customer Bitcoin exchanges</p>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <button
               onClick={refreshData}
               disabled={loading}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center sm:justify-start space-x-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3 h-3 md:w-4 md:h-4 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
-            <div className="flex items-center space-x-2 text-sm">
+            <div className="flex items-center justify-center sm:justify-start space-x-2 text-xs md:text-sm">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-neutral-600">1 BTC = UGX {exchangeRate.toLocaleString()}</span>
             </div>
@@ -222,15 +222,15 @@ const AgentExchangePage: React.FC = () => {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+          <div className="bg-red-50 border border-red-200 p-3 md:p-4 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-              <p className="text-red-700 font-semibold">Error</p>
+              <div className="w-3 h-3 md:w-4 md:h-4 bg-red-500 rounded-full"></div>
+              <p className="text-red-700 font-semibold text-sm md:text-base">Error</p>
             </div>
-            <p className="text-red-600 mt-1">{error}</p>
+            <p className="text-red-600 mt-1 text-sm md:text-base">{error}</p>
             <button
               onClick={refreshData}
-              className="mt-2 text-red-600 underline hover:text-red-700"
+              className="mt-2 text-red-600 underline hover:text-red-700 text-sm md:text-base"
             >
               Try again
             </button>
@@ -238,69 +238,71 @@ const AgentExchangePage: React.FC = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-          <button
-            onClick={() => setActiveTab('requests')}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${
-              activeTab === 'requests'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Exchange Requests
-          </button>
-          <button
-            onClick={() => setActiveTab('calculator')}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${
-              activeTab === 'calculator'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Rate Calculator
-          </button>
+        <div className="overflow-x-auto">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg min-w-max">
+            <button
+              onClick={() => setActiveTab('requests')}
+              className={`flex-shrink-0 px-3 md:px-4 py-2 rounded-md text-xs sm:text-sm font-semibold transition-colors duration-200 whitespace-nowrap ${
+                activeTab === 'requests'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Exchange Requests
+            </button>
+            <button
+              onClick={() => setActiveTab('calculator')}
+              className={`flex-shrink-0 px-3 md:px-4 py-2 rounded-md text-xs sm:text-sm font-semibold transition-colors duration-200 whitespace-nowrap ${
+                activeTab === 'calculator'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Rate Calculator
+            </button>
+          </div>
         </div>
 
         {activeTab === 'requests' && (
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-yellow-600" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              <div className="bg-white border border-gray-200 p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm">
+                <div className="flex items-center space-x-2 md:space-x-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-4 h-4 md:w-5 md:h-5 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Pending</p>
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-gray-600 text-xs md:text-sm">Pending</p>
+                    <p className="text-lg md:text-xl font-bold text-gray-900">
                       {exchangeRequests.filter(r => r.status === 'pending').length}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <ArrowRightLeft className="w-5 h-5 text-blue-600" />
+              <div className="bg-white border border-gray-200 p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm">
+                <div className="flex items-center space-x-2 md:space-x-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <ArrowRightLeft className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Processing</p>
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-gray-600 text-xs md:text-sm">Processing</p>
+                    <p className="text-lg md:text-xl font-bold text-gray-900">
                       {exchangeRequests.filter(r => r.status === 'processing').length}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="bg-white border border-gray-200 p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm sm:col-span-2 lg:col-span-1">
+                <div className="flex items-center space-x-2 md:space-x-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Completed Today</p>
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-gray-600 text-xs md:text-sm">Completed Today</p>
+                    <p className="text-lg md:text-xl font-bold text-gray-900">
                       {exchangeRequests.filter(r => r.status === 'completed').length}
                     </p>
                   </div>
@@ -309,14 +311,14 @@ const AgentExchangePage: React.FC = () => {
             </div>
 
             {/* Exchange Requests */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-gray-900">Active Requests</h2>
+            <div className="space-y-3 md:space-y-4">
+              <h2 className="text-base md:text-lg font-bold text-gray-900">Active Requests</h2>
               
               {exchangeRequests.filter(r => r.status !== 'completed' && r.status !== 'cancelled').length === 0 ? (
-                <div className="bg-white border border-neutral-200 p-8 rounded-xl shadow-sm text-center">
-                  <ArrowRightLeft className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">No Active Requests</h3>
-                  <p className="text-neutral-600">
+                <div className="bg-white border border-neutral-200 p-6 md:p-8 rounded-xl shadow-sm text-center">
+                  <ArrowRightLeft className="w-8 h-8 md:w-12 md:h-12 text-neutral-400 mx-auto mb-3 md:mb-4" />
+                  <h3 className="text-base md:text-lg font-semibold text-neutral-900 mb-2">No Active Requests</h3>
+                  <p className="text-sm md:text-base text-neutral-600">
                     When customers request Bitcoin exchanges, they&apos;ll appear here.
                   </p>
                 </div>
@@ -324,31 +326,33 @@ const AgentExchangePage: React.FC = () => {
                 exchangeRequests
                   .filter(r => r.status !== 'completed' && r.status !== 'cancelled')
                   .map((request) => (
-                    <div key={request.id} className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                    <div key={request.id} className="bg-white border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-2xl shadow-sm">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 md:space-y-4 lg:space-y-0">
                         <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              request.type === 'buy' ? 'bg-green-100' : 'bg-orange-100'
-                            }`}>
-                              {request.type === 'buy' ? (
-                                <Bitcoin className="w-5 h-5 text-green-600" />
-                              ) : (
-                                <DollarSign className="w-5 h-5 text-orange-600" />
-                              )}
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 space-y-2 sm:space-y-0">
+                            <div className="flex items-center space-x-2 md:space-x-3">
+                              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center ${
+                                request.type === 'buy' ? 'bg-green-100' : 'bg-orange-100'
+                              }`}>
+                                {request.type === 'buy' ? (
+                                  <Bitcoin className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+                                ) : (
+                                  <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="font-bold text-gray-900 text-sm md:text-base truncate">
+                                  {request.customerName} - {request.type === 'buy' ? 'Buy' : 'Sell'} Bitcoin
+                                </h3>
+                                <p className="text-gray-600 text-xs md:text-sm">{request.customerPhone}</p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-bold text-gray-900">
-                                {request.customerName} - {request.type === 'buy' ? 'Buy' : 'Sell'} Bitcoin
-                              </h3>
-                              <p className="text-gray-600 text-sm">{request.customerPhone}</p>
-                            </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(request.status)}`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(request.status)} flex-shrink-0`}>
                               {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                             </span>
                           </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 text-xs md:text-sm">
                             <div>
                               <p className="text-gray-500">Amount</p>
                               <p className="font-semibold text-gray-900 font-mono">
@@ -370,32 +374,32 @@ const AgentExchangePage: React.FC = () => {
                             <div>
                               <p className="text-gray-500">Location</p>
                               <p className="font-semibold text-gray-900 flex items-center">
-                                <MapPin className="w-3 h-3 mr-1" />
-                                {request.location}
+                                <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                                <span className="truncate">{request.location}</span>
                               </p>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex space-x-3">
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                           {request.status === 'pending' && (
                             <>
                               <button
                                 onClick={() => handleRequestAction(request.id, 'reject')}
-                                className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 font-semibold"
+                                className="px-3 md:px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 font-semibold text-xs md:text-sm"
                               >
                                 Reject
                               </button>
                               <button
                                 onClick={() => handleRequestAction(request.id, 'approve')}
-                                className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors duration-200 font-semibold"
+                                className="px-3 md:px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors duration-200 font-semibold text-xs md:text-sm"
                               >
                                 Accept
                               </button>
                             </>
                           )}
                           {request.status === 'completed' && (
-                            <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold">
+                            <span className="px-3 md:px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold text-xs md:text-sm text-center">
                               Completed
                             </span>
                           )}
@@ -409,20 +413,20 @@ const AgentExchangePage: React.FC = () => {
         )}
 
         {activeTab === 'calculator' && (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Dynamic Fee Calculator */}
             <DynamicFeeCalculator />
 
             {/* Rate Calculator */}
-            <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                <Calculator className="w-5 h-5" />
+            <div className="bg-white border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-2xl shadow-sm">
+              <h2 className="text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4 flex items-center space-x-2">
+                <Calculator className="w-4 h-4 md:w-5 md:h-5" />
                 <span>Simple Exchange Rate Calculator</span>
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-2">
                     Amount
                   </label>
                   <input
@@ -430,18 +434,18 @@ const AgentExchangePage: React.FC = () => {
                     value={calcAmount}
                     onChange={(e) => setCalcAmount(e.target.value)}
                     placeholder="Enter amount"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-2">
                     Currency
                   </label>
                   <select
                     value={calcCurrency}
                     onChange={(e) => setCalcCurrency(e.target.value as 'UGX' | 'BTC')}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                   >
                     <option value="UGX">UGX (Ugandan Shilling)</option>
                     <option value="BTC">BTC (Bitcoin)</option>
@@ -450,16 +454,16 @@ const AgentExchangePage: React.FC = () => {
               </div>
 
               {calcAmount && (
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mt-4 md:mt-6 p-3 md:p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="text-center">
-                    <p className="text-gray-600 text-sm mb-2">Converts to:</p>
-                    <p className="text-2xl font-bold text-gray-900 font-mono">
+                    <p className="text-gray-600 text-xs md:text-sm mb-2">Converts to:</p>
+                    <p className="text-xl md:text-2xl font-bold text-gray-900 font-mono">
                       {calcCurrency === 'UGX' 
                         ? `₿${calcResult.toFixed(8)}`
                         : `UGX ${calcResult.toLocaleString()}`
                       }
                     </p>
-                    <p className="text-gray-500 text-sm mt-2">
+                    <p className="text-gray-500 text-xs md:text-sm mt-2">
                       Rate: 1 BTC = UGX {exchangeRate.toLocaleString()}
                     </p>
                   </div>
@@ -468,41 +472,41 @@ const AgentExchangePage: React.FC = () => {
             </div>
 
             {/* Dynamic Commission Information */}
-            <div className="bg-gradient-to-br from-green-50 to-blue-50 border border-green-200 p-6 rounded-2xl">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Smart Commission System</h3>
+            <div className="bg-gradient-to-br from-green-50 to-blue-50 border border-green-200 p-4 md:p-6 rounded-xl md:rounded-2xl">
+              <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4">Smart Commission System</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-green-800 mb-2">Urban Areas</h4>
-                  <p className="text-gray-600 text-sm mb-2">Low distance, high competition</p>
-                  <div className="space-y-1 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-3 md:mb-4">
+                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-green-800 mb-2 text-sm md:text-base">Urban Areas</h4>
+                  <p className="text-gray-600 text-xs md:text-sm mb-2">Low distance, high competition</p>
+                  <div className="space-y-1 text-xs md:text-sm">
                     <p className="font-semibold text-green-700">2.5-4% commission</p>
                     <p className="text-gray-600">Quick service, nearby customers</p>
                   </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-yellow-800 mb-2">Rural Areas</h4>
-                  <p className="text-gray-600 text-sm mb-2">Medium distance, moderate effort</p>
-                  <div className="space-y-1 text-sm">
+                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-yellow-800 mb-2 text-sm md:text-base">Rural Areas</h4>
+                  <p className="text-gray-600 text-xs md:text-sm mb-2">Medium distance, moderate effort</p>
+                  <div className="space-y-1 text-xs md:text-sm">
                     <p className="font-semibold text-yellow-700">4-7% commission</p>
                     <p className="text-gray-600">Travel required, fewer agents</p>
                   </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-red-800 mb-2">Remote Villages</h4>
-                  <p className="text-gray-600 text-sm mb-2">Long distance, high effort</p>
-                  <div className="space-y-1 text-sm">
+                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200 sm:col-span-2 lg:col-span-1">
+                  <h4 className="font-semibold text-red-800 mb-2 text-sm md:text-base">Remote Villages</h4>
+                  <p className="text-gray-600 text-xs md:text-sm mb-2">Long distance, high effort</p>
+                  <div className="space-y-1 text-xs md:text-sm">
                     <p className="font-semibold text-red-700">7-12% commission</p>
                     <p className="text-gray-600">Significant travel, exclusive service</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-4 rounded-lg border border-blue-200">
-                <h4 className="font-semibold text-blue-800 mb-2">Additional Fee Factors</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div className="bg-white p-3 md:p-4 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-2 text-sm md:text-base">Additional Fee Factors</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 text-xs md:text-sm">
                   <div>
                     <span className="font-semibold text-gray-700">Express Service:</span>
                     <p className="text-blue-600">+30% fee</p>
@@ -526,48 +530,48 @@ const AgentExchangePage: React.FC = () => {
         )}
 
         {/* SMS Commands */}
-        <div className="bg-gray-50 border border-gray-200 p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-            <MessageSquare className="w-5 h-5 text-gray-600" />
+        <div className="bg-gray-50 border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-2xl">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4 flex items-center space-x-2">
+            <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
             <span>SMS Exchange Commands</span>
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Accept Exchange Request:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">EXCHANGE ACCEPT [request-id]</code>
+              <h4 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Accept Exchange Request:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700 break-all">EXCHANGE ACCEPT [request-id]</code>
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Complete Exchange:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">EXCHANGE COMPLETE [request-id]</code>
+              <h4 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Complete Exchange:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700 break-all">EXCHANGE COMPLETE [request-id]</code>
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Check BTC Rate:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">BTC RATE UGX</code>
+              <h4 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Check BTC Rate:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700 break-all">BTC RATE UGX</code>
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">List Pending Requests:</h4>
-              <div className="bg-white p-3 rounded-lg border border-gray-200">
-                <code className="text-sm text-gray-700">EXCHANGE LIST</code>
+              <h4 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">List Pending Requests:</h4>
+              <div className="bg-white p-2 md:p-3 rounded-lg border border-gray-200">
+                <code className="text-xs md:text-sm text-gray-700 break-all">EXCHANGE LIST</code>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mt-3 md:mt-4 p-3 md:p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start space-x-2">
-              <Smartphone className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <Smartphone className="w-4 h-4 md:w-5 md:h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-blue-800 font-semibold text-sm">SMS Exchange Available</p>
-                <p className="text-blue-700 text-sm mt-1">
+                <p className="text-blue-800 font-semibold text-xs md:text-sm">SMS Exchange Available</p>
+                <p className="text-blue-700 text-xs md:text-sm mt-1">
                   Manage Bitcoin exchanges via SMS when offline. Send commands to <strong>+256-XXX-XXXX</strong>
                 </p>
               </div>

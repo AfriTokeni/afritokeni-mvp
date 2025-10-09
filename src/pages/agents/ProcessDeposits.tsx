@@ -219,15 +219,15 @@ const ProcessDeposits: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Clock className="w-5 h-5 text-yellow-500" />;
+        return <Clock className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-yellow-500" />;
       case 'confirmed':
-        return <AlertCircle className="w-5 h-5 text-blue-500" />;
+        return <AlertCircle className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-blue-500" />;
       case 'completed':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-green-500" />;
       case 'rejected':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-red-500" />;
       default:
-        return <Clock className="w-5 h-5 text-neutral-500" />;
+        return <Clock className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-neutral-500" />;
     }
   };
 
@@ -247,46 +247,48 @@ const ProcessDeposits: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Process Deposits</h1>
-        <p className="text-gray-600">Manage customer cash deposits and digital balance credits</p>
+      <div className="bg-white rounded-xl md:rounded-2xl border border-gray-200 p-4 md:p-6">
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Process Deposits</h1>
+        <p className="text-sm md:text-base text-gray-600">Manage customer cash deposits and digital balance credits</p>
       </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 mb-6">
-            {(['all', 'pending', 'confirmed', 'completed'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setFilter(tab)}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  filter === tab
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                <span className="ml-2 text-xs bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded-full">
-                  {tab === 'all' ? depositRequests.length : depositRequests.filter(r => r.status === tab).length}
-                </span>
-              </button>
-            ))}
+        <div className="bg-white rounded-xl md:rounded-2xl border border-gray-200 p-4 md:p-6">
+          <div className="overflow-x-auto">
+            <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 mb-4 md:mb-6 min-w-max">
+              {(['all', 'pending', 'confirmed', 'completed'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setFilter(tab)}
+                  className={`flex-shrink-0 py-2 px-3 md:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                    filter === tab
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-600 hover:text-neutral-900'
+                  }`}
+                >
+                  <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
+                  <span className="ml-1 sm:ml-2 text-xs bg-neutral-200 text-neutral-600 px-1.5 sm:px-2 py-0.5 rounded-full">
+                    {tab === 'all' ? depositRequests.length : depositRequests.filter(r => r.status === tab).length}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Deposit Requests List */}
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-neutral-600">Loading deposit requests...</p>
+              <div className="text-center py-8 md:py-12">
+                <div className="animate-spin w-6 h-6 md:w-8 md:h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-3 md:mb-4"></div>
+                <p className="text-sm md:text-base text-neutral-600">Loading deposit requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
-              <div className="text-center py-12">
-                <Clock className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">No deposit requests</h3>
-                <p className="text-neutral-600">
+              <div className="text-center py-8 md:py-12">
+                <Clock className="w-8 h-8 md:w-12 md:h-12 text-neutral-400 mx-auto mb-3 md:mb-4" />
+                <h3 className="text-base md:text-lg font-semibold text-neutral-900 mb-2">No deposit requests</h3>
+                <p className="text-sm md:text-base text-neutral-600">
                   {filter === 'pending' ? 'No pending deposits at the moment.' : `No ${filter} deposits found.`}
                 </p>
               </div>
@@ -294,31 +296,31 @@ const ProcessDeposits: React.FC = () => {
               filteredRequests.map((request) => (
                 <div
                   key={request.id}
-                  className="border border-gray-200 rounded-2xl p-4 hover:border-gray-300 transition-colors"
+                  className="border border-gray-200 rounded-xl md:rounded-2xl p-3 md:p-4 hover:border-gray-300 transition-colors"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-gray-600" />
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 md:mb-4 space-y-3 sm:space-y-0">
+                    <div className="flex items-center space-x-3 md:space-x-4">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 md:w-6 md:h-6 text-gray-600" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{request.userName}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{request.userName}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs md:text-sm text-gray-600 space-y-1 sm:space-y-0">
                           <div className="flex items-center space-x-1">
-                            <Phone className="w-4 h-4" />
-                            <span>{request.userPhone}</span>
+                            <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                            <span className="truncate">{request.userPhone}</span>
                           </div>
                           {request.userLocation && (
                             <div className="flex items-center space-x-1">
-                              <MapPin className="w-4 h-4" />
-                              <span>{request.userLocation}</span>
+                              <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                              <span className="truncate">{request.userLocation}</span>
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900 font-mono">
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-lg md:text-2xl font-bold text-gray-900 font-mono">
                         {formatCurrencyAmount(request.amount.local, request.amount.currency as AfricanCurrency)}
                       </div>
                       <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md border text-xs font-medium ${getStatusColor(request.status)}`}>
@@ -328,53 +330,55 @@ const ProcessDeposits: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      <span>Deposit Code: </span>
-                      <span className="font-mono font-semibold text-gray-900">{request.depositCode}</span>
-                      <span className="ml-4">
-                        {new Date(request.createdAt).toLocaleString()}
-                      </span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                    <div className="text-xs md:text-sm text-gray-600">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0">
+                        <div>
+                          <span>Deposit Code: </span>
+                          <span className="font-mono font-semibold text-gray-900">{request.depositCode}</span>
+                        </div>
+                        <div className="text-gray-500">
+                          {new Date(request.createdAt).toLocaleString()}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                       {request.status === 'pending' && (
-                        <>
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="text"
-                              placeholder="Enter deposit code"
-                              value={verificationCodes[request.id] || ''}
-                              onChange={(e) => setVerificationCodes(prev => ({ ...prev, [request.id]: e.target.value }))}
-                              className="px-3 py-1 border border-neutral-300 rounded text-sm font-mono"
-                              maxLength={6}
-                            />
-                            <button
-                              onClick={() => handleVerifyCode(request)}
-                              disabled={!(verificationCodes[request.id] || '')}
-                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-neutral-300"
-                            >
-                              Verify
-                            </button>
-                          </div>
-                        </>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="text"
+                            placeholder="Enter deposit code"
+                            value={verificationCodes[request.id] || ''}
+                            onChange={(e) => setVerificationCodes(prev => ({ ...prev, [request.id]: e.target.value }))}
+                            className="flex-1 sm:w-auto px-2 md:px-3 py-1 border border-neutral-300 rounded text-xs md:text-sm font-mono"
+                            maxLength={6}
+                          />
+                          <button
+                            onClick={() => handleVerifyCode(request)}
+                            disabled={!(verificationCodes[request.id] || '')}
+                            className="px-2 md:px-3 py-1 bg-blue-600 text-white rounded text-xs md:text-sm hover:bg-blue-700 disabled:bg-neutral-300 whitespace-nowrap"
+                          >
+                            Verify
+                          </button>
+                        </div>
                       )}
 
                       {request.status === 'confirmed' && selectedRequest?.id === request.id && (
-                        <div className="flex space-x-2">
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                           <button
                             onClick={() => handleConfirmDeposit(request)}
                             disabled={isProcessing}
-                            className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:bg-neutral-300 flex items-center space-x-1"
+                            className="px-3 md:px-4 py-2 bg-green-600 text-white rounded text-xs md:text-sm hover:bg-green-700 disabled:bg-neutral-300 flex items-center justify-center space-x-1"
                           >
                             {isProcessing ? (
                               <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-white"></div>
                                 <span>Processing...</span>
                               </>
                             ) : (
                               <>
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
                                 <span>Complete Deposit</span>
                               </>
                             )}
@@ -382,9 +386,9 @@ const ProcessDeposits: React.FC = () => {
                           <button
                             onClick={() => handleRejectDeposit(request)}
                             disabled={isProcessing}
-                            className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:bg-neutral-300 flex items-center space-x-1"
+                            className="px-3 md:px-4 py-2 bg-red-600 text-white rounded text-xs md:text-sm hover:bg-red-700 disabled:bg-neutral-300 flex items-center justify-center space-x-1"
                           >
-                            <XCircle className="w-4 h-4" />
+                            <XCircle className="w-3 h-3 md:w-4 md:h-4" />
                             <span>Reject</span>
                           </button>
                         </div>
@@ -399,26 +403,26 @@ const ProcessDeposits: React.FC = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+          <div className="bg-red-50 border border-red-200 rounded-xl md:rounded-2xl p-3 md:p-4">
             <div className="flex items-start">
-              <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-700">{error}</p>
+              <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+              <p className="text-xs md:text-sm text-red-700">{error}</p>
             </div>
           </div>
         )}
 
         {/* Instructions */}
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <h3 className="font-semibold text-blue-900 mb-3">Deposit Process:</h3>
-          <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl md:rounded-2xl p-4 md:p-6">
+          <h3 className="font-semibold text-blue-900 mb-3 text-sm md:text-base">Deposit Process:</h3>
+          <ol className="text-xs md:text-sm text-blue-800 space-y-1.5 md:space-y-2 list-decimal list-inside">
             <li>Customer shows you their deposit code</li>
             <li>Verify the code matches the request</li>
             <li>Collect the cash amount from customer</li>
             <li>Complete the deposit to credit their digital balance</li>
             <li>Customer receives confirmation notification</li>
           </ol>
-          <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-            <p className="text-sm text-blue-900 font-medium">
+          <div className="mt-3 md:mt-4 p-2.5 md:p-3 bg-blue-100 rounded-lg">
+            <p className="text-xs md:text-sm text-blue-900 font-medium">
               ⚠️ Always verify the deposit code before accepting cash. Rejected deposits cannot be reversed.
             </p>
           </div>
