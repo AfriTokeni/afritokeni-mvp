@@ -875,7 +875,7 @@ We provide a complete financial system that serves the unbanked, empowers agents
 ## Contact & Resources
 
 - **Website**: https://afritokeni.com
-- **Live App**: https://dkk74-oyaaa-aaaal-askxq-cai.icp0.io/
+- **Live App**: https://afritokeni.com
 - **GitHub**: https://github.com/AfriTokeni/afritokeni-mvp
 - **Email**: hello@afritokeni.com
 - **Twitter**: @AfriTokeni
