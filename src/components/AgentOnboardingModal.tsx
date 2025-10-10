@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Phone, MapPin, Building } from 'lucide-react';
+import { X, Phone, MapPin, Building } from 'lucide-react';
 import { getActiveCurrencies, AfricanCurrency } from '../types/currency';
 
 interface AgentOnboardingModalProps {

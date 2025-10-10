@@ -14,7 +14,6 @@ import { formatCurrencyAmount, AfricanCurrency } from "../types/currency";
 import { useAfriTokeni } from "../hooks/useAfriTokeni";
 import { useDemoMode } from "../context/DemoModeContext";
 import { AgentDemoDataService } from "../services/agentDemoDataService";
-import { DataService } from "../services/dataService";
 import { Transaction } from "../types/transaction";
 import { CurrencySelector } from "../components/CurrencySelector";
 import { CkBTCBalanceCard } from "../components/CkBTCBalanceCard";
@@ -43,40 +42,12 @@ const AgentDashboard: React.FC = () => {
     }
   }, [isDemoMode, currentAgent]);
 
-  // Get customers count
-  const [customersCount, setCustomersCount] = useState(0);
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showKYCBanner, setShowKYCBanner] = useState(true);
   const [kycStatus, setKycStatus] = useState<'pending' | 'verified' | 'rejected' | 'not_started'>('not_started');
 
-  // Calculate real daily earnings from actual transactions
-  const calculateDailyEarnings = (): number => {
-    const today = new Date();
-    const startOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-    );
-    const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-
-    let totalEarnings = 0;
-
-    // Calculate earnings from regular transactions (2% commission)
-    const todayRegularTxs = agentTransactions.filter((tx) => {
-      const txDate = new Date(tx.createdAt);
-      return (
-        txDate >= startOfDay && txDate < endOfDay && tx.status === "completed"
-      );
-    });
-
-    todayRegularTxs.forEach((tx) => {
-      totalEarnings += Math.round(tx.amount * 0.02); // 2% commission on regular transactions
-    });
-
-    return totalEarnings;
-  };
 
   useEffect(() => {
     if (isDemoMode) {
@@ -223,7 +194,7 @@ const AgentDashboard: React.FC = () => {
           country: (currentAgent as any)?.country,
           city: (currentAgent as any)?.city,
           address: (currentAgent as any)?.address,
-          kycStatus: kycStatus
+          kycStatus: kycStatus === 'not_started' ? undefined : kycStatus
         }}
       />
 
