@@ -9,12 +9,9 @@ import { useAuthentication } from '../../context/AuthenticationContext';
 import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
 import { GovernanceService, Proposal } from '../../services/governanceService';
 import CreateProposalModal from '../../components/CreateProposalModal';
-import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
 
 const DAODashboard: React.FC = () => {
   const { user } = useAuthentication();
-  const { isDemoMode } = useDemoMode();
   const [tokenBalance, setTokenBalance] = useState<TokenBalance | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
@@ -27,51 +24,24 @@ const DAODashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [user, isDemoMode]);
+  }, [user]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      if (isDemoMode) {
-        // Use demo data
-        const demoUser = DemoDataService.getDemoUser();
-        if (demoUser) {
-          setTokenBalance({
-            userId: demoUser.id,
-            balance: demoUser.daoTokens,
-            earned: {
-              transactions: 1200,
-              agentActivity: 0,
-              referrals: 500,
-              staking: 300,
-            },
-            locked: 0,
-            lastUpdated: new Date(),
-          });
-        }
-        
-        // Generate demo leaderboard
-        const demoLeaderboard = DemoDataService.generateDAOLeaderboard(20);
-        console.log('Demo leaderboard generated:', demoLeaderboard);
-        setLeaderboard(demoLeaderboard);
-        setTotalHolders(demoLeaderboard.length);
-        
-        // Get demo proposals
-        const demoProposals = GovernanceService.getDemoProposals();
-        setProposals(demoProposals);
-      } else {
-        if (user?.user?.id) {
-          const balance = await AfriTokenService.getBalance(user.user.id);
-          setTokenBalance(balance);
-        }
-        const activeProposals = await GovernanceService.getActiveProposals();
-        setProposals(activeProposals);
-        
-        // Load real leaderboard data
-        const leaderboardData = await AfriTokenService.getLeaderboard(10);
-        setLeaderboard(leaderboardData);
-        setTotalHolders(leaderboardData.length);
+      // Always load real mainnet data - DAO is never in demo mode
+      if (user?.user?.id || user?.agent?.id) {
+        const userId = user?.user?.id || user?.agent?.id;
+        const balance = await AfriTokenService.getBalance(userId!);
+        setTokenBalance(balance);
       }
+      const activeProposals = await GovernanceService.getActiveProposals();
+      setProposals(activeProposals);
+      
+      // Load real leaderboard data
+      const leaderboardData = await AfriTokenService.getLeaderboard(10);
+      setLeaderboard(leaderboardData);
+      setTotalHolders(leaderboardData.length);
     } catch (error) {
       console.error('Error loading DAO data:', error);
     } finally {
@@ -522,7 +492,8 @@ const DAODashboard: React.FC = () => {
               {leaderboard.map((holder, index) => {
                 const rank = holder.rank || index + 1;
                 const displayName = holder.name || holder.userId || 'Anonymous';
-                const votingPower = holder.votingPower || `${((holder.balance / AfriTokenService.getTotalSupply()) * 100).toFixed(2)}%`;
+                const totalSupply = AfriTokenService.getTotalSupply();
+                const votingPower = holder.votingPower || `${((Number(holder.balance) / Number(totalSupply)) * 100).toFixed(2)}%`;
                 
                 return (
                   <div key={holder.address || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

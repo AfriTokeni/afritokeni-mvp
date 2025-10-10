@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, DollarSign, Building2, Smartphone, Clock, CheckCircle, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { DollarSign, Building2, Smartphone, Clock, CheckCircle, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
 import { NotificationService } from '../../services/notificationService';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { AgentDemoDataService } from '../../services/agentDemoDataService';
+import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
+import { useAuthentication } from '../../context/AuthenticationContext';
 
 type SettlementMethod = 'bank_transfer' | 'mobile_money';
 type SettlementStatus = 'pending' | 'processing' | 'completed' | 'failed';
@@ -33,10 +37,16 @@ interface SettlementRequest {
 }
 
 const AgentSettlement: React.FC = () => {
-  const navigate = useNavigate();
+  const { } = useNavigate();
+  const { user: authUser } = useAuthentication();
   const { user, agent, refreshData } = useAfriTokeni();
+  const { isDemoMode } = useDemoMode();
   const [amount, setAmount] = useState<string>('');
   const [selectedMethod, setSelectedMethod] = useState<SettlementMethod>('bank_transfer');
+
+  // Get agent currency
+  const currentAgent = authUser.agent || agent;
+  const agentCurrency = (currentAgent as any)?.preferredCurrency || 'UGX';
   const [bankDetails, setBankDetails] = useState({
     accountNumber: '',
     bankName: '',
@@ -148,12 +158,7 @@ const AgentSettlement: React.FC = () => {
     }
 
     if (settlementAmount > maxAmount) {
-      alert(`Maximum settlement amount is UGX ${maxAmount.toLocaleString()}`);
-      return;
-    }
-
-    if (!agent) {
-      alert('Agent information not found');
+      alert(`Maximum settlement amount is ${formatCurrencyAmount(maxAmount, agentCurrency as AfricanCurrency)}`);
       return;
     }
 
@@ -163,6 +168,36 @@ const AgentSettlement: React.FC = () => {
       const reference = generateReference();
       const settlementFee = calculateSettlementFee(settlementAmount);
       const netAmount = calculateNetAmount(settlementAmount);
+
+      // Demo mode - instant settlement
+      if (isDemoMode) {
+        AgentDemoDataService.requestSettlement(settlementAmount, agentCurrency, selectedMethod.replace('_', ' '));
+        
+        const newSettlement: SettlementRequest = {
+          id: reference,
+          amount: settlementAmount,
+          settlementFee,
+          netAmount,
+          method: selectedMethod,
+          status: 'completed',
+          reference,
+          createdAt: new Date(),
+          completedAt: new Date()
+        };
+        
+        setSettlements([newSettlement, ...settlements]);
+        setAmount('');
+        setIsSubmitting(false);
+        console.log('🎭 Demo settlement completed:', settlementAmount, agentCurrency);
+        return;
+      }
+
+      // Real mode
+      if (!agent) {
+        alert('Agent information not found');
+        setIsSubmitting(false);
+        return;
+      }
 
       const settlementRequest: SettlementRequest = {
         id: reference,
@@ -322,19 +357,6 @@ const AgentSettlement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="p-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <button
-            onClick={() => navigate('/agents/dashboard')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Settlement Requests</h1>
-            <p className="text-gray-600">Withdraw your earnings to bank or mobile money</p>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Settlement Form */}

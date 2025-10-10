@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Medal, Award } from 'lucide-react';
-import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
+import { AfriTokenService } from '../../services/afriTokenService';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { DemoDataService } from '../../services/demoDataService';
 

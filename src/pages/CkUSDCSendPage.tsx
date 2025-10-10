@@ -5,7 +5,7 @@ import { useAuthentication } from '../context/AuthenticationContext';
 
 export const CkUSDCSendPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuthentication();
+  const { } = useAuthentication();
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
