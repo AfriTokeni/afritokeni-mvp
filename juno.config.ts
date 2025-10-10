@@ -87,7 +87,31 @@ export default defineConfig({
           read: "managed",
           write: "managed",
           memory: "stable",
-        }
+        },
+        {
+          collection: "ckbtc_transactions",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
+        {
+          collection: "ckusdc_transactions",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
+        {
+          collection: "pending_transactions",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
+        {
+          collection: "escrow_transactions",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
       ],
       storage: [
         {

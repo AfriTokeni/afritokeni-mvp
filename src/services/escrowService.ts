@@ -1,14 +1,25 @@
-import { BitcoinService } from './bitcoinService';
+/**
+ * Escrow Service for AfriTokeni
+ * 
+ * Manages secure escrow transactions for ckBTC and ckUSDC exchanges
+ * Protects both users and agents with 6-digit codes and 24hr refunds
+ */
+
+import { nanoid } from 'nanoid';
+import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { AfricanCurrency } from '../types/currency';
+
+export type AssetType = 'ckBTC' | 'ckUSDC';
 
 export interface EscrowTransaction {
   id: string;
   userId: string;
   agentId: string;
-  bitcoinAmount: number; // in satoshis
+  assetType: AssetType; // ckBTC or ckUSDC
+  amount: number; // in satoshis for ckBTC, or smallest unit for ckUSDC
   localAmount: number;
   currency: AfricanCurrency;
-  escrowAddress: string;
+  escrowAddress: string; // ICP Principal
   exchangeCode: string;
   status: 'pending' | 'funded' | 'completed' | 'disputed' | 'refunded' | 'expired';
   createdAt: Date;
@@ -22,7 +33,7 @@ export interface Agent {
   id: string;
   name: string;
   location: string;
-  bitcoinAddress: string;
+  principalId: string; // ICP Principal for ckBTC
   rating: number;
   totalTransactions: number;
   successRate: number;
@@ -34,31 +45,32 @@ export class EscrowService {
   private static readonly ESCROW_TIMEOUT_HOURS = 24;
 
   /**
-   * Create a new escrow transaction
+   * Create a new escrow transaction for ckBTC or ckUSDC exchange
    */
   static async createEscrowTransaction(
     userId: string,
     agentId: string,
-    bitcoinAmount: number,
+    assetType: AssetType,
+    amount: number,
     localAmount: number,
     currency: AfricanCurrency
   ): Promise<EscrowTransaction> {
-    // Generate unique escrow address for this transaction
-    const addressData = await BitcoinService.generateBitcoinAddress();
-    const escrowAddress = addressData.address;
+    // Generate unique escrow address (ICP Principal)
+    const escrowAddress = `escrow_${nanoid()}`;
     
     // Generate 6-digit exchange code
-    const exchangeCode = this.generateExchangeCode();
+    const exchangeCode = this.generateExchangeCode(assetType);
     
     // Calculate expiration time
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + this.ESCROW_TIMEOUT_HOURS);
 
     const transaction: EscrowTransaction = {
-      id: this.generateTransactionId(),
+      id: nanoid(),
       userId,
       agentId,
-      bitcoinAmount,
+      assetType,
+      amount,
       localAmount,
       currency,
       escrowAddress,
@@ -68,7 +80,7 @@ export class EscrowService {
       expiresAt,
     };
 
-    // In production, save to database
+    // Save to Juno
     await this.saveTransaction(transaction);
     
     // Notify agent of pending transaction
@@ -78,104 +90,42 @@ export class EscrowService {
   }
 
   /**
-   * Check if escrow address has been funded
-   */
-  static async checkEscrowFunding(transactionId: string): Promise<boolean> {
-    const transaction = await this.getTransaction(transactionId);
-    if (!transaction || transaction.status !== 'pending') {
-      return false;
-    }
-
-    try {
-      const balance = await BitcoinService.getBitcoinBalance(transaction.escrowAddress);
-      const requiredBalance = transaction.bitcoinAmount / 100000000; // Convert satoshis to BTC
-
-      if (balance >= requiredBalance) {
-        // Update transaction status
-        transaction.status = 'funded';
-        transaction.fundedAt = new Date();
-        await this.saveTransaction(transaction);
-        
-        // Notify agent that funds are available
-        await this.notifyAgentFunded(transaction.agentId, transaction);
-        
-        return true;
-      }
-    } catch (error) {
-      console.error('Error checking escrow funding:', error);
-    }
-
-    return false;
-  }
-
-  /**
    * Verify exchange code and complete transaction
    */
-  static async verifyExchangeCode(
-    agentId: string,
-    exchangeCode: string
-  ): Promise<{ success: boolean; transaction?: EscrowTransaction; error?: string }> {
-    try {
-      const transaction = await this.getTransactionByCode(exchangeCode);
-      
-      if (!transaction) {
-        return { success: false, error: 'Invalid exchange code' };
-      }
-
-      if (transaction.agentId !== agentId) {
-        return { success: false, error: 'Unauthorized agent' };
-      }
-
-      if (transaction.status !== 'funded') {
-        return { success: false, error: 'Transaction not funded or already completed' };
-      }
-
-      if (new Date() > transaction.expiresAt) {
-        return { success: false, error: 'Transaction expired' };
-      }
-
-      // Complete the transaction
-      await this.completeTransaction(transaction);
-
-      return { success: true, transaction };
-    } catch (error) {
-      console.error('Error verifying exchange code:', error);
-      return { success: false, error: 'System error' };
+  static async verifyAndComplete(exchangeCode: string, agentId: string): Promise<EscrowTransaction> {
+    const transaction = await this.getTransactionByCode(exchangeCode);
+    
+    if (!transaction) {
+      throw new Error('Invalid exchange code');
     }
-  }
 
-  /**
-   * Complete transaction - release Bitcoin to agent
-   */
-  private static async completeTransaction(transaction: EscrowTransaction): Promise<void> {
+    if (transaction.agentId !== agentId) {
+      throw new Error('Exchange code does not belong to this agent');
+    }
+
+    if (transaction.status !== 'funded') {
+      throw new Error('Transaction not funded yet');
+    }
+
+    if (new Date() > transaction.expiresAt) {
+      throw new Error('Exchange code expired');
+    }
+
     try {
-      // Get agent's Bitcoin address
-      const agent = await this.getAgent(transaction.agentId);
-      if (!agent) {
-        throw new Error('Agent not found');
-      }
-
-      // Transfer Bitcoin from escrow to agent
-      const result = await BitcoinService.sendBitcoin(
-        transaction.escrowAddress,
-        agent.bitcoinAddress,
-        transaction.bitcoinAmount,
-        '' // private key would be managed securely in production
-      );
-      const txHash = result.txHash;
-
-      // Update transaction
+      // Transfer ckBTC from escrow to agent
+      // In production, this would call ICP canister
+      
       transaction.status = 'completed';
       transaction.completedAt = new Date();
-      transaction.transactionHash = txHash;
-      
       await this.saveTransaction(transaction);
 
       // Update agent stats
-      await this.updateAgentStats(transaction.agentId, true);
+      await this.updateAgentStats(agentId, true);
 
       // Notify both parties
       await this.notifyTransactionComplete(transaction);
+
+      return transaction;
     } catch (error) {
       console.error('Error completing transaction:', error);
       transaction.status = 'disputed';
@@ -201,24 +151,14 @@ export class EscrowService {
   }
 
   /**
-   * Refund Bitcoin to user
+   * Refund ckBTC to user
    */
   private static async refundTransaction(transaction: EscrowTransaction): Promise<void> {
     try {
-      // Get user's refund address (could be original sending address or user-specified)
-      const userRefundAddress = await this.getUserRefundAddress(transaction.userId);
-      
-      // Transfer Bitcoin back to user
-      const result = await BitcoinService.sendBitcoin(
-        transaction.escrowAddress,
-        userRefundAddress,
-        transaction.bitcoinAmount,
-        '' // private key would be managed securely in production
-      );
-      const txHash = result.txHash;
+      // Transfer ckBTC back to user
+      // In production, this would call ICP canister
 
       transaction.status = 'refunded';
-      transaction.transactionHash = txHash;
       await this.saveTransaction(transaction);
 
       // Notify user of refund
@@ -233,63 +173,102 @@ export class EscrowService {
   /**
    * Generate unique 6-digit exchange code
    */
-  private static generateExchangeCode(): string {
+  private static generateExchangeCode(assetType: AssetType): string {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    return `BTC-${code}`;
+    const prefix = assetType === 'ckBTC' ? 'BTC' : 'USD';
+    return `${prefix}-${code}`;
   }
 
-  /**
-   * Generate unique transaction ID
-   */
-  private static generateTransactionId(): string {
-    return 'tx_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-  }
-
-  // Mock database operations - replace with real database in production
-  private static transactions: Map<string, EscrowTransaction> = new Map();
-  private static agents: Map<string, Agent> = new Map();
-
+  // Juno database operations
   private static async saveTransaction(transaction: EscrowTransaction): Promise<void> {
-    this.transactions.set(transaction.id, transaction);
+    await setDoc({
+      collection: 'escrow_transactions',
+      doc: {
+        key: transaction.id,
+        data: {
+          ...transaction,
+          createdAt: transaction.createdAt.toISOString(),
+          expiresAt: transaction.expiresAt.toISOString(),
+          fundedAt: transaction.fundedAt?.toISOString(),
+          completedAt: transaction.completedAt?.toISOString(),
+        }
+      }
+    });
   }
 
-  private static async getTransaction(id: string): Promise<EscrowTransaction | null> {
-    return this.transactions.get(id) || null;
+  static async getTransaction(id: string): Promise<EscrowTransaction | null> {
+    try {
+      const doc = await getDoc({
+        collection: 'escrow_transactions',
+        key: id
+      });
+      
+      if (!doc?.data) return null;
+      
+      const data = doc.data as any;
+      return {
+        ...data,
+        createdAt: new Date(data.createdAt),
+        expiresAt: new Date(data.expiresAt),
+        fundedAt: data.fundedAt ? new Date(data.fundedAt) : undefined,
+        completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+      };
+    } catch {
+      return null;
+    }
   }
 
   private static async getTransactionByCode(code: string): Promise<EscrowTransaction | null> {
-    for (const transaction of this.transactions.values()) {
-      if (transaction.exchangeCode === code) {
-        return transaction;
-      }
+    try {
+      const results = await listDocs({
+        collection: 'escrow_transactions'
+      });
+      
+      const transaction = results.items.find((item: any) => item.data.exchangeCode === code);
+      if (!transaction) return null;
+      
+      const data = transaction.data as any;
+      return {
+        ...data,
+        createdAt: new Date(data.createdAt),
+        expiresAt: new Date(data.expiresAt),
+        fundedAt: data.fundedAt ? new Date(data.fundedAt) : undefined,
+        completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+      };
+    } catch {
+      return null;
     }
-    return null;
   }
 
   private static async getExpiredTransactions(): Promise<EscrowTransaction[]> {
-    const now = new Date();
-    return Array.from(this.transactions.values()).filter(
-      tx => tx.expiresAt < now && (tx.status === 'pending' || tx.status === 'funded')
-    );
-  }
-
-  private static async getAgent(id: string): Promise<Agent | null> {
-    return this.agents.get(id) || null;
-  }
-
-  private static async getUserRefundAddress(_userId: string): Promise<string> {
-    // In production, get user's preferred refund address or derive from user ID
-    const addressData = await BitcoinService.generateBitcoinAddress();
-    return addressData.address;
+    try {
+      const results = await listDocs({
+        collection: 'escrow_transactions'
+      });
+      
+      const now = new Date();
+      return results.items
+        .map((item: any) => {
+          const data = item.data;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            expiresAt: new Date(data.expiresAt),
+            fundedAt: data.fundedAt ? new Date(data.fundedAt) : undefined,
+            completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+          };
+        })
+        .filter((tx: EscrowTransaction) => 
+          tx.expiresAt < now && (tx.status === 'pending' || tx.status === 'funded')
+        );
+    } catch {
+      return [];
+    }
   }
 
   // Notification methods - implement with real notification service
   private static async notifyAgent(agentId: string, transaction: EscrowTransaction): Promise<void> {
     console.log(`Notifying agent ${agentId} of new transaction ${transaction.id}`);
-  }
-
-  private static async notifyAgentFunded(agentId: string, transaction: EscrowTransaction): Promise<void> {
-    console.log(`Notifying agent ${agentId} that transaction ${transaction.id} is funded`);
   }
 
   private static async notifyTransactionComplete(transaction: EscrowTransaction): Promise<void> {
@@ -300,25 +279,22 @@ export class EscrowService {
     console.log(`Refunding transaction ${transaction.id} to user ${transaction.userId}`);
   }
 
-  private static async updateAgentStats(agentId: string, success: boolean): Promise<void> {
-    const agent = await this.getAgent(agentId);
-    if (agent) {
-      agent.totalTransactions += 1;
-      if (success) {
-        agent.successRate = ((agent.successRate * (agent.totalTransactions - 1)) + 1) / agent.totalTransactions;
-      }
-      this.agents.set(agentId, agent);
-    }
+  private static async updateAgentStats(_agentId: string, _success: boolean): Promise<void> {
+    // Update agent statistics in database
+    console.log('Updating agent stats');
   }
 
-  // Initialize with mock agents
-  static initializeMockData(): void {
-    const mockAgents: Agent[] = [
+  /**
+   * Get available agents
+   */
+  static async getAvailableAgents(): Promise<Agent[]> {
+    // In production, fetch from database
+    return [
       {
         id: 'agent_1',
         name: 'John Mukasa',
         location: 'Kampala, Uganda',
-        bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+        principalId: 'principal_mock_1',
         rating: 4.9,
         totalTransactions: 150,
         successRate: 0.98,
@@ -329,7 +305,7 @@ export class EscrowService {
         id: 'agent_2',
         name: 'Sarah Nakato',
         location: 'Accra, Ghana',
-        bitcoinAddress: 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
+        principalId: 'principal_mock_2',
         rating: 4.8,
         totalTransactions: 89,
         successRate: 0.96,
@@ -340,7 +316,7 @@ export class EscrowService {
         id: 'agent_3',
         name: 'David Okello',
         location: 'Nairobi, Kenya',
-        bitcoinAddress: 'bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3',
+        principalId: 'principal_mock_3',
         rating: 4.7,
         totalTransactions: 67,
         successRate: 0.94,
@@ -348,33 +324,57 @@ export class EscrowService {
         isActive: true
       }
     ];
-
-    mockAgents.forEach(agent => {
-      this.agents.set(agent.id, agent);
-    });
-  }
-
-  /**
-   * Get available agents
-   */
-  static async getAvailableAgents(): Promise<Agent[]> {
-    return Array.from(this.agents.values()).filter(agent => agent.isActive);
   }
 
   /**
    * Get transaction status for user
    */
   static async getUserTransactions(userId: string): Promise<EscrowTransaction[]> {
-    return Array.from(this.transactions.values()).filter(tx => tx.userId === userId);
+    try {
+      const results = await listDocs({
+        collection: 'escrow_transactions'
+      });
+      
+      return results.items
+        .filter((item: any) => item.data.userId === userId)
+        .map((item: any) => {
+          const data = item.data;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            expiresAt: new Date(data.expiresAt),
+            fundedAt: data.fundedAt ? new Date(data.fundedAt) : undefined,
+            completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+          };
+        });
+    } catch {
+      return [];
+    }
   }
 
   /**
    * Get pending transactions for agent
    */
   static async getAgentTransactions(agentId: string): Promise<EscrowTransaction[]> {
-    return Array.from(this.transactions.values()).filter(tx => tx.agentId === agentId);
+    try {
+      const results = await listDocs({
+        collection: 'escrow_transactions'
+      });
+      
+      return results.items
+        .filter((item: any) => item.data.agentId === agentId)
+        .map((item: any) => {
+          const data = item.data;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            expiresAt: new Date(data.expiresAt),
+            fundedAt: data.fundedAt ? new Date(data.fundedAt) : undefined,
+            completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+          };
+        });
+    } catch {
+      return [];
+    }
   }
 }
-
-// Initialize mock data
-EscrowService.initializeMockData();

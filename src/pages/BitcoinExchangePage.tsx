@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bitcoin, Shield, Users, Clock, CheckCircle, AlertTriangle, Smartphone, QrCode } from 'lucide-react';
+import { Bitcoin, Shield, Users, Clock, CheckCircle, AlertTriangle, Smartphone, QrCode, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { LoginFormData } from '../types/auth';
@@ -39,11 +39,12 @@ const BitcoinExchangePage: React.FC = () => {
             <Bitcoin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
             Bitcoin Exchange
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-3 sm:mb-4 px-2 sm:px-0">
-            Convert Bitcoin to Cash
+          <h1 className="text-4xl sm:text-5xl font-bold text-neutral-900 mb-4">
+            How AfriTokeni Works
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-neutral-600 max-w-3xl mx-auto px-2 sm:px-0">
-            Safely exchange Bitcoin from your hardware wallet for local African currencies through our trusted agent network with secure escrow protection.
+          <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
+            Send money instantly across Africa using ckBTC (ICP Bitcoin) or ckUSDC (stablecoin). 
+            No internet needed - works via USSD on any phone with secure escrow protection.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-6 sm:mt-8 px-2 sm:px-0">
             <button
@@ -61,9 +62,67 @@ const BitcoinExchangePage: React.FC = () => {
           </div>
         </div>
 
+        {/* Three-Asset System */}
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-8">
+          <h2 className="text-3xl font-bold text-neutral-900 mb-6 text-center">Three Ways to Send Money</h2>
+          <p className="text-center text-neutral-600 mb-8 max-w-2xl mx-auto">
+            AfriTokeni gives you three options - choose what works best for your needs
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Local Currencies */}
+            <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                <DollarSign className="w-6 h-6 text-gray-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Local Currencies</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                39 African currencies (UGX, NGN, KES, GHS, etc.)
+              </p>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>• Daily transactions</li>
+                <li>• Cash via agents</li>
+                <li>• USSD accessible</li>
+              </ul>
+            </div>
+
+            {/* ckBTC */}
+            <div className="bg-white rounded-xl p-6 border-2 border-orange-200">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                <Bitcoin className="w-6 h-6 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-bold text-orange-900 mb-2">ckBTC (ICP Bitcoin)</h3>
+              <p className="text-sm text-orange-700 mb-4">
+                Instant Bitcoin transfers on ICP blockchain
+              </p>
+              <ul className="text-sm text-orange-700 space-y-2">
+                <li>• &lt;1 second transfers</li>
+                <li>• ~$0.01 fees</li>
+                <li>• 1:1 Bitcoin backed</li>
+              </ul>
+            </div>
+
+            {/* ckUSDC */}
+            <div className="bg-white rounded-xl p-6 border-2 border-green-200">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <Shield className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-green-900 mb-2">ckUSDC (Stablecoin)</h3>
+              <p className="text-sm text-green-700 mb-4">
+                Stable value pegged to US Dollar
+              </p>
+              <ul className="text-sm text-green-700 space-y-2">
+                <li>• No volatility</li>
+                <li>• 1:1 USD peg</li>
+                <li>• Instant transfers</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {/* How It Works */}
-        <div className="bg-white border border-neutral-200 rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 mb-6 sm:mb-8 text-center">How Bitcoin Exchange Works</h2>
+        <div className="bg-white border border-neutral-200 rounded-xl p-8 shadow-sm">
+          <h2 className="text-3xl font-bold text-neutral-900 mb-8 text-center">How It Works</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="text-center space-y-3 sm:space-y-4">

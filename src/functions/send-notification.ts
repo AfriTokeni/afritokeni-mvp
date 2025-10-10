@@ -94,11 +94,36 @@ export async function sendNotification(request: NotificationRequest) {
       console.log(`📱 [BACKEND] SMS notification prepared for ${user.phone}`);
       console.log(`📱 [BACKEND] SMS content: ${smsMessage}`);
       
-      // TODO: Integrate real SMS gateway here
-      // const smsResponse = await sendSMS(user.phone, smsMessage);
-      // smsResult = smsResponse;
-      
-      smsResult = { simulated: true, phone: user.phone, message: smsMessage };
+      // Real SMS gateway integration (Africa's Talking)
+      // Note: API keys should be configured in Juno environment variables
+      try {
+        const apiKey = (process.env as any).AFRICAS_TALKING_API_KEY || '';
+        const username = (process.env as any).AFRICAS_TALKING_USERNAME || 'sandbox';
+        
+        if (apiKey) {
+          const response = await fetch('https://api.africastalking.com/version1/messaging', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'apiKey': apiKey,
+            },
+            body: new URLSearchParams({
+              username,
+              to: user.phone,
+              message: smsMessage,
+            }),
+          });
+          
+          const data = await response.json();
+          smsResult = { success: true, phone: user.phone, response: data };
+        } else {
+          console.log('SMS gateway not configured, simulating message');
+          smsResult = { simulated: true, phone: user.phone, message: smsMessage };
+        }
+      } catch (error) {
+        console.error('SMS gateway error:', error);
+        smsResult = { simulated: true, phone: user.phone, message: smsMessage, error };
+      }
     } else {
       console.log(`⏭️ [BACKEND] Skipping SMS - User: ${user.phone ? 'has phone' : 'no phone'}, Auth: ${user.authMethod}`);
     }

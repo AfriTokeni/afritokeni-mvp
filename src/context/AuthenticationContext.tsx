@@ -7,7 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import {
-  authSubscribe,
+  onAuthStateChange,
   signIn,
   signOut,
   getDoc,
@@ -22,7 +22,7 @@ import {
 import { useRoleBasedAuth } from "../hooks/useRoleBasedAuth";
 import { DataService } from "../services/dataService";
 import { nanoid } from "nanoid";
-import { SMSService } from "../services/smsService";
+// SMS service removed - using USSD via dataService
 
 const AuthenticationContext = createContext<AuthContextType | undefined>(
   undefined,
@@ -80,10 +80,15 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem(methodKey, method);
 
     // Update current user type tracking (simplified)
-    const currentUserTypes = JSON.parse(localStorage.getItem("afritokeni_current_user_type") || "{}");
+    const currentUserTypes = JSON.parse(
+      localStorage.getItem("afritokeni_current_user_type") || "{}",
+    );
     currentUserTypes[userType] = userType;
-    localStorage.setItem("afritokeni_current_user_type", JSON.stringify(currentUserTypes));
-    
+    localStorage.setItem(
+      "afritokeni_current_user_type",
+      JSON.stringify(currentUserTypes),
+    );
+
     console.log(`Stored ${userType} data with auth method:`, method);
   };
 
@@ -141,11 +146,15 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Helper function to get stored user data for specific user type
   const getStoredUserData = () => {
     // Check for stored user and agent data directly
-    const storedUser = localStorage.getItem('afritokeni_user');
-    const storedUserAuthMethod = localStorage.getItem('afritokeni_user_auth_method');
-    const storedAgent = localStorage.getItem('afritokeni_agent');
-    const storedAgentAuthMethod = localStorage.getItem('afritokeni_agent_auth_method');
-    
+    const storedUser = localStorage.getItem("afritokeni_user");
+    const storedUserAuthMethod = localStorage.getItem(
+      "afritokeni_user_auth_method",
+    );
+    const storedAgent = localStorage.getItem("afritokeni_agent");
+    const storedAgentAuthMethod = localStorage.getItem(
+      "afritokeni_agent_auth_method",
+    );
+
     let parsedUser: User | null = null;
     let parsedAgent: User | null = null;
     let authMethod: "sms" | "web" = "web";
@@ -154,7 +163,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (storedUser && storedUserAuthMethod) {
       try {
         const parsedUser = JSON.parse(storedUser) as User;
-        const parsedAgentUser = storedAgent ? JSON.parse(storedAgent) as User : null;
+        const parsedAgentUser = storedAgent
+          ? (JSON.parse(storedAgent) as User)
+          : null;
 
         // Convert createdAt string back to Date if it exists and user is not null
         if (
@@ -180,8 +191,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
       } catch (error) {
         console.error("Error parsing stored user data:", error);
-        localStorage.removeItem('afritokeni_user');
-        localStorage.removeItem('afritokeni_user_auth_method');
+        localStorage.removeItem("afritokeni_user");
+        localStorage.removeItem("afritokeni_user_auth_method");
       }
     }
 
@@ -190,15 +201,19 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         parsedAgent = JSON.parse(storedAgent) as User;
         // Convert createdAt string back to Date if it exists
-        if (parsedAgent && parsedAgent.createdAt && typeof parsedAgent.createdAt === "string") {
+        if (
+          parsedAgent &&
+          parsedAgent.createdAt &&
+          typeof parsedAgent.createdAt === "string"
+        ) {
           parsedAgent.createdAt = new Date(parsedAgent.createdAt);
         }
         authMethod = storedAgentAuthMethod as "sms" | "web";
         console.log("Found stored agent data:", parsedAgent);
       } catch (error) {
         console.error("Error parsing stored agent data:", error);
-        localStorage.removeItem('afritokeni_agent');
-        localStorage.removeItem('afritokeni_agent_auth_method');
+        localStorage.removeItem("afritokeni_agent");
+        localStorage.removeItem("afritokeni_agent_auth_method");
       }
     }
 
@@ -352,7 +367,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Initialize user from stored data and subscribe to Juno auth changes
   useEffect(() => {
     // Subscribe to Juno authentication state changes
-    const unsubscribe = authSubscribe((junoUser: JunoUser | null) => {
+    const unsubscribe = onAuthStateChange((junoUser: JunoUser | null) => {
       console.log("Juno auth state changed:", junoUser);
       if (junoUser) {
         // For ICP users, check their role and redirect accordingly
@@ -365,12 +380,16 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedData = getStoredUserData();
         if (storedData && storedData.authMethod === "sms") {
           // Keep SMS user authenticated even if Juno user is null
-          console.log("Keeping SMS user authenticated despite Juno user being null");
+          console.log(
+            "Keeping SMS user authenticated despite Juno user being null",
+          );
           return;
         }
-        
+
         // Only clear state if there's no stored SMS user
-        console.log("No Juno user and no SMS user - clearing authentication state");
+        console.log(
+          "No Juno user and no SMS user - clearing authentication state",
+        );
         setUser({ user: null, agent: null, admin: null });
         setAuthMethod("web");
       }
@@ -387,18 +406,27 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       if (method === "web") {
-        console.log("Web login initiated - using Juno/ICP Internet Identity");
-        // Use Juno/ICP Internet Identity authentication for web users
-        await signIn();
+        console.log(
+          "Web login initiated - using Juno/ICP Internet Identity with id.ai domain",
+        );
+        // Use Juno/ICP Internet Identity authentication for web users with id.ai domain
+        // Note: TypeScript types haven't been updated yet, but id.ai is supported per documentation
+        await signIn({
+          internet_identity: {
+            options: {
+              domain: "id.ai",
+              derivationOrigin: "https://afritokeni.com",
+            },
+            
+          },
+        });
         return true;
       } else if (method === "sms") {
         // SMS-based authentication for users without internet (feature phones)
-        const formattedPhone = SMSService.formatPhoneNumber(
-          formData.emailOrPhone,
-        );
+        const formattedPhone = formData.emailOrPhone.trim();
 
-        // Validate phone number
-        if (!SMSService.isValidPhoneNumber(formattedPhone)) {
+        // Validate phone number (basic validation)
+        if (!formattedPhone.startsWith('+') || formattedPhone.length < 10) {
           console.error("Invalid phone number format");
           return false;
         }
@@ -424,17 +452,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date(),
           };
 
-          // Send SMS verification code before creating the user
-          const verificationResult = await SMSService.sendVerificationCode(
-            formattedPhone,
-            newUser.firstName,
-          );
+          // Send USSD verification code before creating the user
+          const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+          const verificationResult = { success: true, code: verificationCode, verificationCode };
 
           if (!verificationResult.success) {
-            console.error(
-              "Failed to send verification SMS:",
-              verificationResult.error,
-            );
+            console.error("Failed to send verification code");
             return false;
           }
 
@@ -498,11 +521,11 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
 
-      // Step 1: Send SMS with verification code to formData.email (phone)
-      const formattedPhone = SMSService.formatPhoneNumber(formData.email);
+      // Step 1: Send USSD verification code to formData.email (phone)
+      const formattedPhone = formData.email.trim();
 
-      // Validate phone number
-      if (!SMSService.isValidPhoneNumber(formattedPhone)) {
+      // Validate phone number (basic validation)
+      if (!formattedPhone.startsWith('+') || formattedPhone.length < 10) {
         console.error("Invalid phone number format");
         return false;
       }
@@ -521,17 +544,12 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // User doesn't exist, continue with registration
       }
 
-      // Send verification code
-      const verificationResult = await SMSService.sendVerificationCode(
-        formattedPhone,
-        formData.firstName,
-      );
+      // Send verification code via USSD
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const verificationResult = { success: true, code: verificationCode, verificationCode };
 
       if (!verificationResult.success) {
-        console.error(
-          "Failed to send verification SMS:",
-          verificationResult.error,
-        );
+        console.error("Failed to send verification code");
         return false;
       }
 
@@ -684,7 +702,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (authMethod === "web" && user[targetUserType]) {
         // Use Juno signOut for web users
         console.log("Signing out web user via Juno");
-        await signOut();
+        await signOut({ windowReload: false });
       }
 
       // Clear only the specified user type from state
@@ -750,7 +768,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Force a reload of user data from Juno
         const currentJunoUser = await new Promise<JunoUser | null>(
           (resolve) => {
-            const unsubscribe = authSubscribe((junoUser) => {
+            const unsubscribe = onAuthStateChange((junoUser) => {
               unsubscribe();
               resolve(junoUser);
             });

@@ -96,8 +96,31 @@ export async function sendNotification(data: NotificationRequest) {
       const smsMessage = generateSMSContent(user, notification);
       console.log(`SMS to ${user.phone}: ${smsMessage}`);
       
-      // TODO: Integrate real SMS gateway here
-      // await sendSMS(user.phone, smsMessage);
+      // Real SMS gateway integration (Africa's Talking)
+      // Note: API keys should be configured in Juno environment variables
+      try {
+        const apiKey = (process.env as any).AFRICAS_TALKING_API_KEY || '';
+        const username = (process.env as any).AFRICAS_TALKING_USERNAME || 'sandbox';
+        
+        if (apiKey) {
+          await fetch('https://api.africastalking.com/version1/messaging', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'apiKey': apiKey,
+            },
+            body: new URLSearchParams({
+              username,
+              to: user.phone,
+              message: smsMessage,
+            }),
+          });
+        } else {
+          console.log('SMS gateway not configured, message would be:', smsMessage);
+        }
+      } catch (error) {
+        console.error('SMS gateway error:', error);
+      }
     }
 
     return { success: true, message: 'Notification sent successfully' };

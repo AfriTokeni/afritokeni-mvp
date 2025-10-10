@@ -32,15 +32,18 @@ const LandingPage: React.FC = () => {
             </Link>
             
             {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-6 lg:gap-8">
-              <Link to="/bitcoin-exchange" className="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
+            <nav className="hidden md:flex items-center gap-8">
+              <Link to="/how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 How It Works
               </Link>
               <Link to="/tariff" className="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
                 Pricing
               </Link>
-              <Link to="/sms" className="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
-                Try SMS
+              <Link to="/ussd" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Try USSD
+              </Link>
+              <Link to="/about" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                About
               </Link>
             </nav>
 
@@ -67,10 +70,7 @@ const LandingPage: React.FC = () => {
               <br />
               <span className="text-orange-600">in under 1 second</span>
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 lg:mb-10 leading-relaxed max-w-2xl mx-auto px-2 sm:px-0">
-              Lightning Network fees under $0.001. Works on any phone. 39 African currencies.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2 sm:px-0">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleICPLogin}
                 className="bg-black text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-xl text-sm sm:text-base lg:text-lg font-semibold hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
@@ -111,35 +111,35 @@ const LandingPage: React.FC = () => {
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-600 rounded-lg lg:rounded-xl flex items-center justify-center mb-4 sm:mb-6">
                 <Lock className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
               </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 sm:mb-4">Escrow Protected</h3>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600 leading-relaxed mb-3 sm:mb-4">
-                AfriTokeni holds Bitcoin in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Escrow Protected</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                AfriTokeni holds ckBTC/ckUSDC in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
               </p>
               <div className="text-xs sm:text-sm font-semibold text-blue-600 mt-auto">Zero fraud risk</div>
             </div>
 
             {/* Lightning Speed */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8 border-2 border-yellow-200">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-orange-600 rounded-lg lg:rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                <Zap className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200 flex flex-col">
+              <div className="w-16 h-16 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
+                <Zap className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 sm:mb-4">Lightning Fast</h3>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600 leading-relaxed mb-3 sm:mb-4">
-                Transfers complete in under 1 second. $0.001 fees. Perfect for daily payments under $100.
+              <h3 className="text-xl font-bold text-gray-900 mb-4">ckBTC Instant</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                ICP-native Bitcoin transfers in &lt;1 second. ~$0.01 fees. Instant and secure.
               </p>
-              <div className="text-xs sm:text-sm font-semibold text-orange-600 mt-auto">99% cheaper</div>
+              <div className="text-sm font-semibold text-orange-600 mt-auto">Instant transfers</div>
             </div>
 
-            {/* Agent Incentives */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8 border-2 border-green-200">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-600 rounded-lg lg:rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                <Bitcoin className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+            {/* ckUSDC Stable Value */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200">
+              <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
+                <Lock className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 sm:mb-4">Agent Earnings</h3>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600 leading-relaxed mb-3 sm:mb-4">
-                Agents earn 2-12% commission based on location. Remote areas pay more. Fair compensation system.
+              <h3 className="text-xl font-bold text-gray-900 mb-4">ckUSDC Stable</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                Protect yourself from Bitcoin volatility. ckUSDC stays pegged to $1 USD. Instant transfers, stable value.
               </p>
-              <div className="text-xs sm:text-sm font-semibold text-green-600 mt-auto">Up to 12% commission</div>
+              <div className="text-sm font-semibold text-green-600 mt-auto">No volatility risk</div>
             </div>
 
             {/* DAO Governance */}
@@ -147,29 +147,29 @@ const LandingPage: React.FC = () => {
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center mb-4 sm:mb-6">
                 <Globe className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
               </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 sm:mb-4">DAO Governed</h3>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600 leading-relaxed mb-3 sm:mb-4">
-                Community-owned. Vote on fees, currencies, and policies via SMS. Agents and users control the platform.
+              <h3 className="text-xl font-bold text-gray-900 mb-4">DAO Governed</h3>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                Community-owned. Vote on fees, currencies, and policies via USSD. Agents and users control the platform.
               </p>
-              <div className="text-xs sm:text-sm font-semibold text-purple-600 mt-auto">Vote via SMS</div>
+              <div className="text-sm font-semibold text-purple-600 mt-auto">Vote via USSD</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* How It Works - SIMPLIFIED */}
-      <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 xl:py-24">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="text-center mb-8 sm:mb-12">
-            <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-yellow-100 border border-yellow-200 text-yellow-800 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
-              <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-              Lightning Network
+      <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm font-medium mb-4">
+              <Zap className="w-4 h-4 mr-2" />
+              ICP-Native Assets
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2 sm:px-0">
-              Instant Bitcoin Transfers
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              ckBTC + ckUSDC Instant Transfers
             </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2 sm:px-0">
-              Send Bitcoin in under 1 second with fees less than $0.001. The future of payments is here.
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+              Send ckBTC (Bitcoin) or ckUSDC (stablecoin) in under 1 second with ~$0.01 fees. Choose speed or stability.
             </p>
           </div>
 
@@ -195,14 +195,14 @@ const LandingPage: React.FC = () => {
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg lg:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
                 <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white">$</span>
               </div>
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
-                $0.001 Fee
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                ~$0.01 Fee
               </h3>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600 mb-3 sm:mb-4">
-                99% cheaper than traditional Bitcoin transactions.
+              <p className="text-gray-600 mb-4">
+                99% cheaper than traditional transfers.
               </p>
-              <div className="text-xs sm:text-sm text-gray-500">
-                vs $5-20 on-chain
+              <div className="text-sm text-gray-500">
+                vs $1-50 on-chain
               </div>
             </div>
 
@@ -224,39 +224,41 @@ const LandingPage: React.FC = () => {
           </div>
 
           {/* SMS Lightning Commands */}
-          <div className="bg-white rounded-xl lg:rounded-2xl shadow-2xl border border-gray-200 p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
-            <div className="text-center mb-4 sm:mb-6">
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                Bitcoin Transfers via SMS
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-3xl mx-auto">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                ckBTC + ckUSDC via USSD
               </h3>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600">
-                Send Bitcoin from any phone - auto-optimized for speed and cost
+              <p className="text-gray-600">
+                Menu-driven interface - works on any phone, no internet needed
               </p>
             </div>
             
-            <div className="bg-gray-900 rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 font-mono text-xs sm:text-sm">
-              <div className="text-green-400 mb-2">$ Send Bitcoin (auto-optimized):</div>
-              <div className="text-white mb-3 sm:mb-4">BTC SEND +234... 5000 NGN</div>
+            <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
+              <div className="text-green-400 mb-2">$ Dial USSD menu:</div>
+              <div className="text-white mb-4">*AFRI#</div>
               
-              <div className="text-green-400 mb-2">$ Check Bitcoin balance:</div>
-              <div className="text-white mb-3 sm:mb-4">BTC BAL</div>
-              
-              <div className="text-yellow-400 mb-2">⚡ Response (instant):</div>
-              <div className="text-gray-300 text-xs sm:text-sm">
-                ✓ Instant Transfer Complete!<br/>
-                ✓ Sent: 5,000 NGN<br/>
-                ✓ Fee: $0.001 | Time: &lt;1 sec
+              <div className="text-yellow-400 mb-2">⚡ Menu appears:</div>
+              <div className="text-gray-300 mb-4">
+                1. Send Money<br/>
+                2. Check Balance<br/>
+                5. Check ckBTC Balance<br/>
+                6. Send ckBTC<br/>
+                8. Check ckUSDC Balance
               </div>
+              
+              <div className="text-green-400 mb-2">$ Select option:</div>
+              <div className="text-white">6 (Send ckBTC)</div>
             </div>
 
             <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"></div>
-                <span>Auto-Optimized</span>
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span>ckBTC (Fast)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full"></div>
-                <span>Best Rates</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>ckUSDC (Stable)</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-500 rounded-full"></div>
@@ -268,18 +270,18 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Bitcoin Banking Section */}
-      <section className="bg-gray-50 py-8 sm:py-12 lg:py-16 xl:py-20">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <div className="inline-flex items-center px-2 sm:px-3 lg:px-4 py-2 rounded-full bg-orange-50 border border-orange-100 text-orange-700 text-xs sm:text-sm font-medium mb-2 sm:mb-3 lg:mb-4">
-              <Bitcoin className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-2" />
-              Bitcoin Integration
+      <section className="bg-gray-50 py-12 sm:py-16 lg:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-orange-50 border border-orange-100 text-orange-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+              <Bitcoin className="w-3 h-3 mr-2" />
+              Dual Asset System
             </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 px-2 sm:px-4 lg:px-0">
-              Bitcoin Banking for Africa
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4 sm:px-0">
+              ckBTC + ckUSDC Banking
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-600 max-w-3xl mx-auto px-2 sm:px-4 lg:px-0">
-              Exchange Bitcoin for 39 African currencies. SMS + USSD (*123#) or web - works on any phone.
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
+              ckBTC (ICP Bitcoin - fast) + ckUSDC (stablecoin - no volatility) for 39 African currencies. USSD or web.
             </p>
             <div className="mt-6 sm:mt-8 px-2 sm:px-4 max-w-4xl mx-auto">
               <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-2 sm:mb-3">
@@ -309,31 +311,31 @@ const LandingPage: React.FC = () => {
                 <span className="inline-flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-full bg-white border border-gray-200 text-xs sm:text-sm text-gray-700 shadow-sm">
                   🇲🇼 Malawi
                 </span>
-                <span className="inline-flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-full bg-blue-50 border border-blue-200 text-xs sm:text-sm text-blue-700 font-medium shadow-sm">
-                  +31 more (SMS + web)
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-sm text-blue-700 font-medium shadow-sm">
+                  +31 more (USSD + web)
                 </span>
               </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {/* SMS Interface */}
-            <div className="bg-white rounded-xl lg:rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
-              <div className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
+            {/* USSD Interface */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 lg:p-8">
+              <div className="space-y-6">
                 <div className="text-center">
-                  <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
-                    <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                    SMS Interface
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium mb-4">
+                    <Smartphone className="w-4 h-4 mr-2" />
+                    USSD Interface
                   </div>
-                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-2">Any Phone Works</h3>
-                  <p className="text-xs sm:text-sm lg:text-base text-gray-600">SMS commands or USSD menu - no internet required</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Any Phone Works</h3>
+                  <p className="text-gray-600">USSD menu - no internet required</p>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">SMS Commands</div>
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">USSD Menu</div>
                     <div className="inline-flex items-center px-2 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium">
-                      or dial *123#
+                      Dial *AFRI#
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -347,24 +349,24 @@ const LandingPage: React.FC = () => {
                       <div className="text-gray-500 text-xs mt-1">Balance</div>
                     </div>
                     
-                    <div className="text-center p-2 sm:p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BAL</div>
-                      <div className="text-gray-500 text-xs mt-1">Bitcoin</div>
+                    <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="font-mono text-orange-600 font-medium text-xs">CKBTC BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">ckBTC</div>
                     </div>
                     
-                    <div className="text-center p-2 sm:p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BUY</div>
-                      <div className="text-gray-500 text-xs mt-1">Buy BTC</div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="font-mono text-green-600 font-medium text-xs">USDC BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">ckUSDC</div>
                     </div>
                   </div>
                 </div>
                 
                 <div className="text-center pt-3 sm:pt-4 border-t border-gray-200">
                   <Link
-                    to="/sms"
-                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-xs sm:text-sm"
+                    to="/ussd"
+                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
                   >
-                    Try SMS Banking →
+                    Try USSD Banking →
                   </Link>
                 </div>
               </div>
@@ -378,8 +380,8 @@ const LandingPage: React.FC = () => {
                     <Globe className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                     Web Interface
                   </div>
-                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-2">Full Dashboard</h3>
-                  <p className="text-xs sm:text-sm lg:text-base text-gray-600">Complete Bitcoin banking with charts & analytics</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Full Dashboard</h3>
+                  <p className="text-gray-600">Complete crypto banking: ckBTC + ckUSDC with charts & analytics</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">

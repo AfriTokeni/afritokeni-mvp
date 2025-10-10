@@ -5,7 +5,6 @@ import {
   Users,
   Plus,
   Minus,
-  Bitcoin,
   Eye,
   EyeOff,
   Wallet,
@@ -14,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import { BalanceService } from "../services/BalanceService";
-import { BitcoinService } from "../services/bitcoinService";
 import { formatCurrencyAmount } from "../types/currency";
 import { useAfriTokeni } from "../hooks/useAfriTokeni";
 import { useDemoMode } from "../context/DemoModeContext";
@@ -39,24 +37,6 @@ const AgentDashboard: React.FC = () => {
   // Get customers count
   const [customersCount, setCustomersCount] = useState(0);
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
-  const [bitcoinBalance, setBitcoinBalance] = useState(0);
-  const [bitcoinTransactions, setBitcoinTransactions] = useState<
-    Array<{
-      id: string;
-      customerName: string;
-      customerPhone: string;
-      type: "buy" | "sell";
-      amount: number;
-      currency: string;
-      bitcoinAmount: number;
-      status: "pending" | "processing" | "completed" | "cancelled";
-      createdAt: Date;
-      location?: string;
-      exchangeRate: number;
-      agentFee?: number;
-      description?: string;
-    }>
-  >([]);
 
   // Calculate real daily earnings from actual transactions
   const calculateDailyEarnings = (): number => {
@@ -82,20 +62,6 @@ const AgentDashboard: React.FC = () => {
       totalEarnings += Math.round(tx.amount * 0.02); // 2% commission on regular transactions
     });
 
-    // Calculate earnings from Bitcoin transactions (agent fees)
-    const todayBitcoinTxs = bitcoinTransactions.filter((tx) => {
-      const txDate = new Date(tx.createdAt);
-      return (
-        txDate >= startOfDay && txDate < endOfDay && tx.status === "completed"
-      );
-    });
-
-    todayBitcoinTxs.forEach((tx) => {
-      if (tx.agentFee && tx.agentFee > 0) {
-        totalEarnings += tx.agentFee;
-      }
-    });
-
     return totalEarnings;
   };
 
@@ -112,31 +78,12 @@ const AgentDashboard: React.FC = () => {
         agent.userId || agent.id,
       );
       setAgentTransactions(transactions);
-
-      // Load agent Bitcoin balance and transactions
-      BitcoinService.getAgentBitcoinBalance(agent.id)
-        .then((balance) => {
-          setBitcoinBalance(balance);
-        })
-        .catch((error) => {
-          console.error("Error loading Bitcoin balance:", error);
-          setBitcoinBalance(0);
-        });
-
-      BitcoinService.getAgentBitcoinTransactions(agent.id)
-        .then((btcTxs) => {
-          setBitcoinTransactions(btcTxs);
-        })
-        .catch((error) => {
-          console.error("Error loading Bitcoin transactions:", error);
-          setBitcoinTransactions([]);
-        });
     }
   }, [agent]);
 
   const dailyEarnings = calculateDailyEarnings();
 
-  // Combine regular transactions and Bitcoin transactions for display
+  // Combine regular transactions for display
   const allTransactions = React.useMemo(() => {
     const combined = [
       ...agentTransactions.map((tx) => ({
@@ -152,16 +99,6 @@ const AgentDashboard: React.FC = () => {
         ),
         description: tx.description || "Transaction",
       })),
-      ...bitcoinTransactions.map((tx) => ({
-        ...tx,
-        source: "bitcoin" as const,
-        displayType: `Bitcoin ${tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}`,
-        displayAmount: `${tx.bitcoinAmount} sats`,
-        commission: tx.agentFee
-          ? formatCurrencyAmount(tx.agentFee, tx.currency as "UGX")
-          : "0 UGX",
-        description: tx.description || `Bitcoin ${tx.type}`,
-      })),
     ];
 
     // Sort by creation date, newest first
@@ -169,7 +106,7 @@ const AgentDashboard: React.FC = () => {
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  }, [agentTransactions, bitcoinTransactions]);
+  }, [agentTransactions]);
 
   const formatCurrency = (amount: number): string => {
     return formatCurrencyAmount(amount, "UGX");
@@ -459,41 +396,6 @@ const AgentDashboard: React.FC = () => {
             </button>
           </div>
 
-          {/* Bitcoin Balance Card */}
-          <div className="rounded-xl sm:rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-yellow-50 p-4 sm:p-6 lg:p-8">
-            <div className="mb-4 sm:mb-6 flex items-start justify-between">
-              <div>
-                <p className="mb-2 text-xs sm:text-sm font-medium text-gray-600">
-                  Bitcoin Balance
-                </p>
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <p className="font-mono text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {showBalance ? `₿${bitcoinBalance.toFixed(8)}` : "••••••"}
-                  </p>
-                  <button
-                    onClick={() => setShowBalance(!showBalance)}
-                    className="text-gray-400"
-                  >
-                    {showBalance ? (
-                      <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
-                    ) : (
-                      <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
-                    )}
-                  </button>
-                </div>
-                <p className="mt-2 text-xs sm:text-sm text-gray-600">Ready for exchange</p>
-              </div>
-              <div className="rounded-lg sm:rounded-xl bg-orange-100 p-2 sm:p-3">
-                <Bitcoin className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
-              </div>
-            </div>
-            <button
-              onClick={() => navigate("/agents/bitcoin")}
-              className="w-full rounded-lg sm:rounded-xl bg-orange-600 py-2.5 sm:py-3 font-semibold text-white text-sm sm:text-base transition-colors hover:bg-orange-700"
-            >
-              Manage
-            </button>
-          </div>
         </div>
 
         {/* Quick Actions - Reorganized by Category */}
@@ -685,21 +587,17 @@ const AgentDashboard: React.FC = () => {
                   key={transaction.id}
                   className="flex items-center justify-between border-b border-neutral-100 py-2 sm:py-3 last:border-b-0"
                 >
-                  <div className="flex min-w-0 flex-1 items-center space-x-2 sm:space-x-3 lg:space-x-4">
-                    <div className="flex h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 flex-shrink-0 items-center justify-center rounded-full bg-neutral-100">
-                      {transaction.source === "bitcoin" ? (
-                        <Bitcoin className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-orange-600" />
-                      ) : (
-                        <span className="text-xs font-bold text-neutral-600 sm:text-sm">
-                          {transaction.description
-                            ? transaction.description
-                                .split(" ")
-                                .map((n: string) => n[0])
-                                .join("")
-                                .slice(0, 2)
-                            : "TX"}
-                        </span>
-                      )}
+                  <div className="flex min-w-0 flex-1 items-center space-x-3 sm:space-x-4">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-neutral-100 sm:h-10 sm:w-10">
+                      <span className="text-xs font-bold text-neutral-600 sm:text-sm">
+                        {transaction.description
+                          ? transaction.description
+                              .split(" ")
+                              .map((n: string) => n[0])
+                              .join("")
+                              .slice(0, 2)
+                          : "TX"}
+                      </span>
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-neutral-900 sm:text-sm">
