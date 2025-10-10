@@ -5,7 +5,6 @@ import { useAuthentication } from '../context/AuthenticationContext';
 import { DemoModeBanner } from './DemoModeBanner';
 import { DemoModeToggle } from './DemoModeToggle';
 import CollapsibleSidebar from './CollapsibleSidebar';
-import PublicFooter from './PublicFooter';
 import type { LucideIcon } from 'lucide-react';
 
 interface Route {
@@ -113,9 +112,6 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
         <main className="p-8">
           {children}
         </main>
-
-        {/* Footer */}
-        <PublicFooter />
       </div>
     </div>
   );
