@@ -91,23 +91,45 @@ AfriTokeni provides **instant, low-cost crypto banking accessible via USSD** on 
 
 ### 2.2 How It Works
 
-**User Access:**
-1. **Feature Phone** → Dial *123# → USSD Menu
-2. **Smartphone** → Web App → Full Dashboard
-
-↓
-
-**ICP Blockchain (Juno Platform)**
-
-↓
-
-**Crypto Services:**
-- ckBTC Service (ICP Bitcoin)
-- ckUSDC Service (Stablecoin)
-
-↓
-
-**Agent Network** (Cash Exchange)
+```
+┌────────────────────────────────────────┐
+│             USER EXPERIENCE            │
+├────────────────────────────────────────┤
+│                                        │
+│  Feature Phone          Smartphone     │
+│  ┌──────────┐          ┌──────────┐    │
+│  │ Dial     │          │  Web     │    │
+│  │ *123#    │          │  App     │    │
+│  │          │          │          │    │
+│  │ USSD     │          │ Full UI  │    │
+│  │ Menu     │          │ Dashboard│    │
+│  └──────────┘          └──────────┘    │
+│       │                     │          │
+│       └─────────┬───────────┘          │
+│                 │                      │
+│                 ▼                      │
+│      ┌─────────────────────┐           │
+│      │  ICP Blockchain     │           │
+│      │  (Juno Platform)    │           │
+│      └─────────────────────┘           │
+│                 │                      │
+│       ┌─────────┴─────────┐            │
+│       │                   │            │
+│       ▼                   ▼            │
+│  ┌─────────┐         ┌─────────┐       │
+│  │ ckBTC   │         │ ckUSDC  │       │
+│  │ Service │         │ Service │       │
+│  └─────────┘         └─────────┘       │
+│       │                   │            │
+│       └─────────┬─────────┘            │
+│                 │                      │
+│                 ▼                      │
+│      ┌─────────────────────┐           │
+│      │  Agent Network      │           │
+│      │  (Cash Exchange)    │           │
+│      └─────────────────────┘           │
+└────────────────────────────────────────┘
+```
 
 ### 2.3 Key Differentiators
 
@@ -155,34 +177,46 @@ AfriTokeni provides **instant, low-cost crypto banking accessible via USSD** on 
 
 AfriTokeni runs entirely on the Internet Computer Protocol:
 
-**ICP Canister Architecture:**
+```
+┌────────────────────────────────────────────────┐
+│          ICP CANISTER ARCHITECTURE             │
+├────────────────────────────────────────────────┤
+│                                                │
+│  ┌──────────────┐  ┌──────────────┐            │
+│  │  Frontend    │  │  Datastore   │            │
+│  │  Canister    │  │  Canister    │            │
+│  │  (Juno)      │  │  (Juno)      │            │
+│  └──────────────┘  └──────────────┘            │
+│         │                  │                   │
+│         └────────┬─────────┘                   │
+│                  │                             │
+│         ┌────────┴────────┐                    │
+│         │                 │                    │
+│    ┌────▼────┐      ┌────▼────┐                │
+│    │ ckBTC   │      │ ckUSDC  │                │
+│    │ Ledger  │      │ Ledger  │                │
+│    │ Canister│      │ Canister│                │
+│    └────┬────┘      └────┬────┘                │
+│         │                 │                    │
+│    ┌────▼────┐      ┌────▼────┐                │
+│    │ ckBTC   │      │ ckUSDC  │                │
+│    │ Minter  │      │ Minter  │                │
+│    │ Canister│      │ Canister│                │
+│    └─────────┘      └─────────┘                │
+│                                                │
+└────────────────────────────────────────────────┘
+```
 
-**Application Layer:**
-- Frontend Canister (Juno)
-- Datastore Canister (Juno)
-
-↓
-
-**Ledger Layer:**
-- ckBTC Ledger Canister
-- ckUSDC Ledger Canister
-
-↓
-
-**Minter Layer:**
-- ckBTC Minter Canister
-- ckUSDC Minter Canister
-
-**Key Benefits**:
-- **No AWS/Google Cloud**: Pure blockchain infrastructure
-- **Censorship Resistant**: No single point of failure
+**enefits**:
+- *AWS/Google Cloud**: Pure blockchain astructure
+- **Censorship Resistant**: No single pointfailure
 - **Low Cost**: ~$0.01 per transaction
-- **Instant Finality**: <1 second confirmations
-- **Scalable**: Handles millions of transactions per day
+- *tant Finality**: <1 second confirmat
+- **Scalable**: Handles millions of transacs per day
 
-### 3.3 Data Architecture
+### Data Architecture
 
-**Collections** (Juno Datastore):
+**ections** (Juno Datastore):
 - `users`: User profiles and authentication
 - `agents`: Agent network information
 - `transactions`: All financial transactions

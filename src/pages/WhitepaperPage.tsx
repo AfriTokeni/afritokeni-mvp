@@ -10,10 +10,10 @@ const WhitepaperPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/docs/WHITEPAPER.md')
-      .then((res) => res.text())
-      .then((text) => {
-        setMarkdown(text);
+    // Import markdown directly from source
+    import('../../docs/WHITEPAPER.md?raw')
+      .then((module) => {
+        setMarkdown(module.default);
         setLoading(false);
       })
       .catch((error) => {
@@ -43,8 +43,8 @@ const WhitepaperPage = () => {
               prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
               prose-strong:text-neutral-900 prose-strong:font-semibold
               prose-code:text-sm prose-code:bg-neutral-100 prose-code:text-neutral-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-              prose-pre:bg-neutral-50 prose-pre:border prose-pre:border-neutral-200 prose-pre:text-neutral-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:whitespace-pre prose-pre:font-mono prose-pre:text-xs prose-pre:leading-tight
-              prose-pre:code:bg-transparent prose-pre:code:p-0 prose-pre:code:text-neutral-800 prose-pre:code:font-mono prose-pre:code:text-xs
+              prose-pre:bg-neutral-50 prose-pre:border prose-pre:border-neutral-200 prose-pre:text-neutral-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
+              prose-pre:code:bg-transparent prose-pre:code:p-0 prose-pre:code:text-neutral-800
               prose-blockquote:border-l-4 prose-blockquote:border-neutral-300 prose-blockquote:italic
               prose-ul:list-disc prose-ul:pl-6
               prose-ol:list-decimal prose-ol:pl-6
