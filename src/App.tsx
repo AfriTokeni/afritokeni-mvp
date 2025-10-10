@@ -25,6 +25,9 @@ import DAODashboard from "./pages/dao/DAODashboard.tsx";
 import LeaderboardPage from "./pages/users/LeaderboardPage.tsx";
 import { CkBTCSendPage } from "./pages/CkBTCSendPage.tsx";
 import { CkBTCDepositPage } from "./pages/CkBTCDepositPage.tsx";
+import { CkUSDCSendPage } from "./pages/CkUSDCSendPage.tsx";
+import { CkUSDCDepositPage } from "./pages/CkUSDCDepositPage.tsx";
+import { CryptoExchangePage } from "./pages/CryptoExchangePage.tsx";
 
 //Agent Pages
 import AgentDashboard from './pages/AgentDashboard';
@@ -108,6 +111,10 @@ const App: FC = () => {
                 <Route path="user-kyc" element={<UserKYCPage />} />
                 <Route path="ckbtc/send" element={<CkBTCSendPage />} />
                 <Route path="ckbtc/deposit" element={<CkBTCDepositPage />} />
+                <Route path="ckbtc/exchange" element={<CryptoExchangePage />} />
+                <Route path="ckusdc/send" element={<CkUSDCSendPage />} />
+                <Route path="ckusdc/deposit" element={<CkUSDCDepositPage />} />
+                <Route path="ckusdc/exchange" element={<CryptoExchangePage />} />
                 <Route path="dao" element={<DAODashboard />} />
                 <Route path="leaderboard" element={<LeaderboardPage />} />
               </Routes>
