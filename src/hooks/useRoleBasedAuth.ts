@@ -80,13 +80,6 @@ export const useRoleBasedAuth = () => {
           console.log(`Redirecting ${roleData.role} to ${target}`);
           navigate(target, { replace: true });
           lastNavigatedPathRef.current = target;
-          // Force a small delay to ensure navigation completes
-          setTimeout(() => {
-            if (window.location.pathname !== target) {
-              console.log('Navigation did not complete, forcing reload');
-              window.location.href = target;
-            }
-          }, 500);
         }
       } else {
         // New user - need to determine role
