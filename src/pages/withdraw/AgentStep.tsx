@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { ArrowLeft, MapPin, Star, List, MapIcon as Map, X, Navigation, Phone, Clock } from 'lucide-react';
 import L from 'leaflet';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { DemoDataService } from '../../services/demoDataService';
 import { useMap } from 'react-leaflet';
 
 // Fix for default Leaflet icon paths in Vite/Webpack
@@ -125,6 +127,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
   isCreatingTransaction = false,
   transactionError,
 }) => {
+  const { isDemoMode } = useDemoMode();
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [agents, setAgents] = useState<DBAgent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -139,9 +142,15 @@ const AgentStep: React.FC<AgentStepProps> = ({
       
       setIsLoading(true);
       try {
-        const [lat, lng] = userLocation;
-        const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
-        setAgents(dbAgents);
+        if (isDemoMode) {
+          // Load demo agents
+          const demoAgents = await DemoDataService.loadAgents();
+          setAgents(demoAgents);
+        } else {
+          const [lat, lng] = userLocation;
+          const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
+          setAgents(dbAgents);
+        }
       } catch (error) {
         console.error('Error fetching nearby agents:', error);
         setAgents([]); // Fallback to empty array
@@ -151,7 +160,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
     };
 
     fetchNearbyAgents();
-  }, [userLocation]);
+  }, [userLocation, isDemoMode]);
 
   // Fix popup z-index to ensure visibility above map
   useEffect(() => {

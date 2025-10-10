@@ -3,7 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Search, MapPin, Star, Phone, Clock, List, MapIcon as Map, Navigation, Users } from 'lucide-react';
 import L from 'leaflet';
 import { listDocs } from '@junobuild/core';
-import { isDemoMode, getDemoDataPath } from '../../config/demo';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { DemoDataService } from '../../services/demoDataService';
 
 interface Agent {
   id: string;
@@ -72,6 +73,7 @@ const createAgentIcon = (isActive: boolean) => {
 };
 
 const AgentMapPage: React.FC = () => {
+  const { isDemoMode } = useDemoMode();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -109,20 +111,15 @@ const AgentMapPage: React.FC = () => {
         (error) => {
           console.error('Error getting location:', error);
           setLocationPermission('denied');
-          // Default to Kampala center if location denied
-          setUserLocation({
-            lat: 0.3476,
-            lng: 32.5825
-          });
+          // Don't set any default location - let user search by name only
+          setUserLocation(null);
         }
       );
     } else {
+      console.error('Geolocation not supported by browser');
       setLocationPermission('denied');
-      // Default to Kampala center
-      setUserLocation({
-        lat: 0.3476,
-        lng: 32.5825
-      });
+      // Don't set any default location - let user search by name only
+      setUserLocation(null);
     }
   };
 
@@ -169,26 +166,20 @@ const AgentMapPage: React.FC = () => {
         setAgents(agentsData);
         
         // If no agents found, fall back to demo data if in demo mode
-        if (agentsData.length === 0 && isDemoMode()) {
+        if (agentsData.length === 0 && isDemoMode) {
           console.log('No agents found in datastore, loading demo data...');
-          const response = await fetch(getDemoDataPath('AGENTS'));
-          const demoData = await response.json();
-          setAgents(demoData);
+          const demoAgents = await DemoDataService.loadAgents();
+          setAgents(demoAgents);
         }
         
       } catch (error) {
         console.error('Error loading agents:', error);
         
         // Fallback to demo data if Juno fails and in demo mode
-        if (isDemoMode()) {
-          try {
-            console.log('Falling back to demo data...');
-            const response = await fetch(getDemoDataPath('AGENTS'));
-            const demoData = await response.json();
-            setAgents(demoData);
-          } catch (fallbackError) {
-            console.error('Error loading fallback data:', fallbackError);
-          }
+        if (isDemoMode) {
+          console.log('Falling back to demo data...');
+          const demoAgents = await DemoDataService.loadAgents();
+          setAgents(demoAgents);
         }
       } finally {
         setLoading(false);
@@ -197,7 +188,7 @@ const AgentMapPage: React.FC = () => {
 
     loadAgents();
     getUserLocation();
-  }, []);
+  }, [isDemoMode]);
 
   // Filter agents based on search, distance, and online status
   const filteredAgents = agents.filter(agent => {
@@ -307,9 +298,9 @@ const AgentMapPage: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
-            <div className="relative">
+            <div className="relative md:col-span-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
@@ -325,7 +316,10 @@ const AgentMapPage: React.FC = () => {
               <select
                 value={filterRadius}
                 onChange={(e) => setFilterRadius(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                disabled={!userLocation}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
+                  !userLocation ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''
+                }`}
               >
                 <option value={5}>Within 5km</option>
                 <option value={10}>Within 10km</option>
@@ -348,16 +342,29 @@ const AgentMapPage: React.FC = () => {
                 Online agents only
               </label>
             </div>
+          </div>
 
-            {/* Location Status */}
-            <div className="flex items-center text-sm text-gray-600">
-              <Navigation className="h-4 w-4 mr-2" />
-              {locationPermission === 'granted' ? (
-                <span className="text-green-600">Location enabled</span>
-              ) : (
-                <span className="text-orange-600">Using default location</span>
-              )}
-            </div>
+          {/* Location Status - Moved below filters */}
+          <div className="mt-4 flex items-center justify-between text-sm">
+            {locationPermission === 'granted' ? (
+              <span className="text-green-600 font-medium flex items-center">
+                <Navigation className="h-4 w-4 mr-2" />
+                📍 Location enabled - showing agents near you
+              </span>
+            ) : (
+              <div className="flex items-center justify-between w-full">
+                <span className="text-orange-600 font-medium flex items-center">
+                  <Navigation className="h-4 w-4 mr-2" />
+                  ⚠️ Location disabled - distance filter unavailable
+                </span>
+                <button
+                  onClick={getUserLocation}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  Enable location
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -503,8 +510,8 @@ const AgentMapPage: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="h-[600px] rounded-lg overflow-hidden">
               <MapContainer
-                center={[userLocation?.lat || 0.3476, userLocation?.lng || 32.5825]}
-                zoom={13}
+                center={userLocation ? [userLocation.lat, userLocation.lng] : [0, 20]}
+                zoom={userLocation ? 13 : 3}
                 style={{ height: '100%', width: '100%' }}
                 className="rounded-lg"
               >
@@ -638,28 +645,6 @@ const AgentMapPage: React.FC = () => {
           </div>
         )}
 
-        {/* Location Permission Prompt */}
-        {locationPermission === 'denied' && (
-          <div className="fixed bottom-4 right-4 bg-orange-100 border border-orange-200 rounded-lg p-4 max-w-sm">
-            <div className="flex items-start">
-              <Navigation className="h-5 w-5 text-orange-600 mt-0.5 mr-3" />
-              <div>
-                <p className="text-sm font-medium text-orange-800 mb-1">
-                  Location access denied
-                </p>
-                <p className="text-xs text-orange-700 mb-2">
-                  Enable location access for more accurate agent distances.
-                </p>
-                <button
-                  onClick={getUserLocation}
-                  className="text-xs text-orange-800 underline hover:no-underline"
-                >
-                  Try again
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
     </div>
   );
 };

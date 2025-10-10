@@ -4,6 +4,8 @@ import { DataService, Agent } from '../services/dataService';
 import { TransactionService } from '../services/TransactionService';
 import { User } from '../types/auth';
 import { Transaction } from '../types/transaction';
+import { useDemoMode } from '../context/DemoModeContext';
+import { DemoDataService } from '../services/demoDataService';
 
 interface UserBalance {
   balance: number;
@@ -14,6 +16,7 @@ interface UserBalance {
 
 export const useAfriTokeni = () => {
   const { user } = useAuthentication();
+  const { isDemoMode } = useDemoMode();
   const [balance, setBalance] = useState<UserBalance | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
@@ -39,12 +42,21 @@ export const useAfriTokeni = () => {
       
       // Load regular user data if user is logged in
       if (user?.user?.id) {
-        await DataService.initializeUserData(user.user.id);
-        
-        dataPromises.push(
-          DataService.getUserBalance(user.user.id),
-          DataService.getUserTransactions(user.user.id)
-        );
+        if (isDemoMode) {
+          // Use demo data
+          const demoUser = DemoDataService.getDemoUser();
+          const demoTransactions = DemoDataService.getUserTransactions();
+          dataPromises.push(
+            Promise.resolve({ balance: demoUser?.balance || 0, currency: 'UGX' }),
+            Promise.resolve(demoTransactions)
+          );
+        } else {
+          await DataService.initializeUserData(user.user.id);
+          dataPromises.push(
+            DataService.getUserBalance(user.user.id),
+            DataService.getUserTransactions(user.user.id)
+          );
+        }
       }
 
       console.log('Data promises for user:', user.agent?.id);
@@ -104,7 +116,7 @@ export const useAfriTokeni = () => {
     }
   }, [user?.user?.id, user?.agent?.id]);
 
-  // Load user data when user changes
+  // Load user data when user changes or demo mode changes
   useEffect(() => {
     if (user?.user?.id || user?.agent?.id) {
       loadUserData();
@@ -114,7 +126,7 @@ export const useAfriTokeni = () => {
       setAgent(null);
       setAgentTransactions([]);
     }
-  }, [user?.user?.id, user?.agent?.id, loadUserData]);
+  }, [user?.user?.id, user?.agent?.id, isDemoMode, loadUserData]);
 
   const calculateFee = (amount: number): number => {
     return Math.round(amount * 0.01); // 1% fee

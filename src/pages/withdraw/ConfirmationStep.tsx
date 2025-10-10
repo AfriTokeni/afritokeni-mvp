@@ -7,7 +7,7 @@ import TransactionCodeDisplay from '../../components/TransactionCodeDisplay';
 interface ConfirmationStepProps {
   localAmount: number;
   btcAmount: string;
-  withdrawType: 'cash' | 'bitcoin';
+  withdrawType: 'cash' | 'bitcoin' | 'ckusdc';
   userCurrency: string;
   fee: number;
   userLocation: [number, number] | null;

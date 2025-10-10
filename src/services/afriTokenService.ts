@@ -5,6 +5,7 @@
 
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { SnsGovernanceCanister } from '@dfinity/sns';
 
 // SNS Canister IDs from environment
 const SNS_LEDGER_CANISTER = import.meta.env.VITE_SNS_LEDGER_CANISTER;
@@ -265,10 +266,22 @@ export class AfriTokenService {
   }
 
   /**
-   * Get total supply
+   * Get total supply from SNS ledger
    */
-  static getTotalSupply(): number {
-    return this.TOTAL_SUPPLY;
+  static async getTotalSupply(): Promise<number> {
+    try {
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+      const ledger = Actor.createActor(icrc1Idl, {
+        agent,
+        canisterId: SNS_LEDGER_CANISTER,
+      });
+
+      const totalSupply: any = await ledger.icrc1_total_supply();
+      return Number(totalSupply) / 100_000_000; // Convert e8s to AFRI
+    } catch (error) {
+      console.error('Error fetching total supply:', error);
+      return this.TOTAL_SUPPLY; // Fallback to hardcoded value
+    }
   }
 
   /**
@@ -276,45 +289,41 @@ export class AfriTokenService {
    */
   static async getLeaderboard(limit: number = 10): Promise<TokenBalance[]> {
     try {
-      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
-      
-      // Query SNS governance for all neurons (token holders)
       const SNS_GOVERNANCE_CANISTER_ID = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
       
-      // Get governance neuron holders
-      // Note: This queries the actual SNS governance canister for neuron data
-      const governanceIdl = ({ IDL }: any) => {
-        return IDL.Service({
-          list_neurons: IDL.Func(
-            [IDL.Record({ limit: IDL.Nat32, start_page_at: IDL.Opt(IDL.Vec(IDL.Nat8)) })],
-            [IDL.Record({ neurons: IDL.Vec(IDL.Record({ id: IDL.Vec(IDL.Nat8), stake_e8s: IDL.Nat64 })) })],
-            ['query']
-          ),
-        });
-      };
-
-      const governance = Actor.createActor(governanceIdl, {
+      // Create agent for IC mainnet
+      const agent = await HttpAgent.create({ host: 'https://ic0.app' });
+      
+      // Create SNS Governance canister instance using official SDK
+      const governance = SnsGovernanceCanister.create({
         agent,
-        canisterId: SNS_GOVERNANCE_CANISTER_ID,
+        canisterId: Principal.fromText(SNS_GOVERNANCE_CANISTER_ID),
       });
 
-      // Get top neurons by stake
-      const neuronsResponse: any = await governance.list_neurons({
+      // List all neurons (staked tokens)
+      const neuronsResponse: any = await governance.listNeurons({
         limit: limit,
-        start_page_at: [],
       });
 
-      const leaderboard: TokenBalance[] = neuronsResponse.neurons.map((neuron: any, index: number) => ({
-        userId: `Neuron ${index + 1}`,
-        balance: Number(neuron.stake_e8s) / 100_000_000,
-        earned: { transactions: 0, agentActivity: 0, referrals: 0, staking: 0 },
-        locked: Number(neuron.stake_e8s) / 100_000_000,
-        lastUpdated: new Date(),
-      }));
+      // Convert neurons to leaderboard format
+      const neurons = neuronsResponse.neurons || neuronsResponse || [];
+      const leaderboard: TokenBalance[] = neurons.map((neuron: any, index: number) => {
+        const stake = Number(neuron.cached_neuron_stake_e8s || 0) / 100_000_000; // Convert e8s to AFRI
+        const neuronIdHex = neuron.id?.id ? Buffer.from(neuron.id.id).toString('hex').slice(0, 8) : `${index + 1}`;
+        return {
+          userId: `Neuron ${neuronIdHex}`,
+          balance: stake,
+          earned: { transactions: 0, agentActivity: 0, referrals: 0, staking: stake },
+          locked: stake, // All neuron stake is locked
+          lastUpdated: new Date(),
+        };
+      });
 
-      return leaderboard;
+      // Sort by balance descending
+      return leaderboard.sort((a, b) => b.balance - a.balance);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
+      console.log('💡 Tip: Use Demo Mode to see leaderboard data while SNS integration is being configured');
       return [];
     }
   }

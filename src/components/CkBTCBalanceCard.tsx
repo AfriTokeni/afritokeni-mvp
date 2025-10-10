@@ -6,8 +6,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Bitcoin, Zap, Send, Download, RefreshCw, TrendingUp } from 'lucide-react';
+import { Download, Send, RefreshCw, Bitcoin, Zap, TrendingUp } from 'lucide-react';
 import { CkBTCService } from '../services/ckBTCService';
+import { useDemoMode } from '../context/DemoModeContext';
+import { DemoDataService } from '../services/demoDataService';
 import { CkBTCBalance } from '../types/ckbtc';
 
 interface CkBTCBalanceCardProps {
@@ -33,6 +35,7 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
   onSend,
   onExchange,
 }) => {
+  const { isDemoMode } = useDemoMode();
   const [balance, setBalance] = useState<CkBTCBalance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -41,13 +44,30 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
   const fetchBalance = async () => {
     try {
       setError(null);
-      const balanceData = await CkBTCService.getBalanceWithLocalCurrency(
-        principalId,
-        preferredCurrency
-      );
-      setBalance(balanceData);
+      
+      if (isDemoMode) {
+        // Use demo data
+        const demoUser = DemoDataService.getDemoUser();
+        if (demoUser) {
+          const exchangeRate = await CkBTCService.getExchangeRate(preferredCurrency);
+          const btcAmount = demoUser.ckBTCBalance / 100000000; // satoshis to BTC
+          setBalance({
+            balanceSatoshis: demoUser.ckBTCBalance,
+            balanceBTC: btcAmount.toFixed(8),
+            localCurrencyEquivalent: btcAmount * exchangeRate.rate,
+            localCurrency: preferredCurrency,
+            lastUpdated: new Date(),
+          });
+        }
+      } else {
+        const balanceData = await CkBTCService.getBalanceWithLocalCurrency(
+          principalId,
+          preferredCurrency
+        );
+        setBalance(balanceData);
+      }
     } catch (err: any) {
-      console.error('Error fetching ckBTC balance:', error);
+      console.error('Error fetching ckBTC balance:', err);
       setError(err.message || 'Failed to load balance');
     } finally {
       setIsLoading(false);
@@ -57,7 +77,7 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
 
   useEffect(() => {
     fetchBalance();
-  }, [principalId, preferredCurrency]);
+  }, [principalId, preferredCurrency, isDemoMode]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -157,8 +177,7 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
         <div className="flex items-start gap-2">
           <Zap className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-neutral-700">
-            <span className="font-semibold">Lightning-Fast:</span> Send Bitcoin instantly 
-            with ~$0.01 fees. No waiting for confirmations!
+            <span className="font-semibold">Lightning-Fast:</span> Send Bitcoin instantly with ~$0.01 fees.
           </p>
         </div>
       </div>
@@ -193,10 +212,8 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
       )}
 
       {/* Last Updated */}
-      <div className="mt-4 pt-4 border-t border-orange-200">
-        <p className="text-xs text-neutral-500">
-          Last updated: {balance?.lastUpdated.toLocaleTimeString()}
-        </p>
+      <div className="text-xs text-gray-400 mt-3">
+        Last updated: {balance?.lastUpdated.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
       </div>
     </div>
   );

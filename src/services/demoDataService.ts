@@ -14,15 +14,17 @@ export interface DemoUser {
   phoneNumber: string;
   balance: number;
   currency: AfricanCurrency;
-  bitcoinBalance: number;
+  ckBTCBalance: number; // in satoshis
+  ckUSDCBalance: number; // in USDC
+  daoTokens: number; // AFRI governance tokens
   createdAt: Date;
 }
 
 export interface DemoTransaction {
   id: string;
-  type: 'send' | 'receive' | 'deposit' | 'withdraw' | 'bitcoin_buy' | 'bitcoin_sell';
+  type: 'send' | 'receive' | 'deposit' | 'withdraw' | 'bitcoin_buy' | 'bitcoin_sell' | 'dao_reward' | 'ckbtc_buy' | 'ckusdc_buy' | 'ckbtc_send' | 'ckusdc_send';
   amount: number;
-  currency: AfricanCurrency;
+  currency: AfricanCurrency | 'BTC' | 'USDC' | 'AFRI';
   from?: string;
   to?: string;
   status: 'completed' | 'pending' | 'failed';
@@ -62,14 +64,16 @@ export class DemoDataService {
       lastName: faker.person.lastName(),
       email: phoneNumber,
       phoneNumber: phoneNumber,
-      balance: faker.number.int({ min: 50000, max: 500000 }),
+      balance: faker.number.int({ min: 250000, max: 850000 }), // Increased primary balance
       currency: 'UGX',
-      bitcoinBalance: faker.number.float({ min: 0.001, max: 0.1, fractionDigits: 8 }),
+      ckBTCBalance: faker.number.int({ min: 50000, max: 500000 }), // 0.0005 - 0.005 BTC in satoshis
+      ckUSDCBalance: faker.number.float({ min: 50, max: 500, fractionDigits: 2 }), // $50-$500 USDC
+      daoTokens: 5000, // 5000 AFRI tokens - enough to create proposals
       createdAt: faker.date.past({ years: 1 })
     };
 
-    // Generate fake transactions
-    this.userTransactions = this.generateUserTransactions(20);
+    // Generate more diverse fake transactions
+    this.userTransactions = this.generateUserTransactions(35);
 
     return this.demoUser;
   }
@@ -103,26 +107,48 @@ export class DemoDataService {
    */
   private static generateUserTransactions(count: number): DemoTransaction[] {
     const transactions: DemoTransaction[] = [];
-    const types: DemoTransaction['type'][] = ['send', 'receive', 'deposit', 'withdraw', 'bitcoin_buy', 'bitcoin_sell'];
+    const types: DemoTransaction['type'][] = [
+      'send', 'receive', 'deposit', 'withdraw', 
+      'ckbtc_buy', 'ckbtc_send', 
+      'ckusdc_buy', 'ckusdc_send',
+      'dao_reward'
+    ];
 
     for (let i = 0; i < count; i++) {
       const type = faker.helpers.arrayElement(types);
-      const amount = faker.number.int({ min: 5000, max: 200000 });
-      const fee = Math.floor(amount * 0.028); // 2.8% fee
+      let amount: number;
+      let currency: 'UGX' | 'BTC' | 'USDC' | 'AFRI' = 'UGX';
+      
+      // Set amount and currency based on type
+      if (type === 'ckbtc_buy' || type === 'ckbtc_send') {
+        amount = faker.number.int({ min: 10000, max: 100000 }); // satoshis
+        currency = 'BTC';
+      } else if (type === 'ckusdc_buy' || type === 'ckusdc_send') {
+        amount = faker.number.float({ min: 5, max: 200, fractionDigits: 2 });
+        currency = 'USDC';
+      } else if (type === 'dao_reward') {
+        amount = faker.number.int({ min: 10, max: 500 });
+        currency = 'AFRI';
+      } else {
+        amount = faker.number.int({ min: 5000, max: 250000 });
+        currency = 'UGX';
+      }
+      
+      const fee = type.includes('send') || type.includes('buy') ? Math.floor(amount * 0.01) : undefined;
 
-      const timestamp = faker.date.recent({ days: 30 });
+      const timestamp = faker.date.recent({ days: 60 });
       transactions.push({
         id: faker.string.uuid(),
         type,
         amount,
-        currency: 'UGX',
-        from: type === 'receive' ? `+256${faker.number.int({ min: 700000000, max: 799999999 })}` : undefined,
-        to: type === 'send' ? `+256${faker.number.int({ min: 700000000, max: 799999999 })}` : undefined,
-        status: faker.helpers.arrayElement(['completed', 'completed', 'completed', 'pending']),
+        currency,
+        from: type === 'receive' ? faker.person.fullName() : undefined,
+        to: type === 'send' || type.includes('_send') ? faker.person.fullName() : undefined,
+        status: faker.helpers.arrayElement(['completed', 'completed', 'completed', 'completed', 'pending']),
         timestamp,
         createdAt: timestamp,
         description: this.getTransactionDescription(type),
-        fee: ['send', 'withdraw', 'bitcoin_buy', 'bitcoin_sell'].includes(type) ? fee : undefined
+        fee
       });
     }
 
@@ -170,13 +196,23 @@ export class DemoDataService {
       case 'receive':
         return `Received from ${faker.person.firstName()} ${faker.person.lastName()}`;
       case 'deposit':
-        return `Cash deposit at ${faker.company.name()}`;
+        return `Cash deposit via agent`;
       case 'withdraw':
-        return `Cash withdrawal at ${faker.company.name()}`;
+        return `Cash withdrawal via agent`;
       case 'bitcoin_buy':
         return `Bought Bitcoin`;
       case 'bitcoin_sell':
         return `Sold Bitcoin`;
+      case 'ckbtc_buy':
+        return `Bought ckBTC`;
+      case 'ckbtc_send':
+        return `Sent ckBTC to ${faker.person.firstName()}`;
+      case 'ckusdc_buy':
+        return `Bought ckUSDC`;
+      case 'ckusdc_send':
+        return `Sent ckUSDC to ${faker.person.firstName()}`;
+      case 'dao_reward':
+        return `DAO governance reward`;
       default:
         return 'Transaction';
     }
@@ -325,6 +361,60 @@ export class DemoDataService {
     }
 
     return customers;
+  }
+
+  /**
+   * Generate DAO leaderboard with demo data
+   */
+  static generateDAOLeaderboard(count: number = 20): any[] {
+    const leaderboard: any[] = [];
+    
+    // Add current demo user at the top with 5000 tokens
+    const demoUser = this.getDemoUser();
+    if (demoUser) {
+      leaderboard.push({
+        rank: 1,
+        address: demoUser.id,
+        name: `${demoUser.firstName} ${demoUser.lastName}`,
+        balance: 5000,
+        votingPower: '12.5%',
+        proposalsCreated: faker.number.int({ min: 2, max: 8 }),
+        votesParticipated: faker.number.int({ min: 15, max: 45 })
+      });
+    }
+    
+    // Generate other holders
+    for (let i = 1; i < count; i++) {
+      const balance = faker.number.int({ min: 100, max: 4500 });
+      leaderboard.push({
+        rank: i + 1,
+        address: faker.string.uuid(),
+        name: faker.person.fullName(),
+        balance,
+        votingPower: `${((balance / 40000) * 100).toFixed(2)}%`,
+        proposalsCreated: faker.number.int({ min: 0, max: 5 }),
+        votesParticipated: faker.number.int({ min: 5, max: 30 })
+      });
+    }
+    
+    return leaderboard.sort((a, b) => b.balance - a.balance).map((item, index) => ({
+      ...item,
+      rank: index + 1
+    }));
+  }
+
+  /**
+   * Load demo agents from JSON file
+   */
+  static async loadAgents(): Promise<any[]> {
+    try {
+      const response = await fetch('/data/agents.json');
+      const agents = await response.json();
+      return agents;
+    } catch (error) {
+      console.error('Error loading agents.json:', error);
+      return [];
+    }
   }
 
   /**

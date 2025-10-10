@@ -26,7 +26,13 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
     // Save preference to localStorage
     localStorage.setItem('afritokeni_demo_mode', isDemoMode.toString());
 
-    if (!isDemoMode) {
+    if (isDemoMode) {
+      // Initialize demo data when enabling demo mode
+      const existingUser = DemoDataService.getDemoUser();
+      if (!existingUser) {
+        DemoDataService.initializeDemoUser('+256700000000');
+      }
+    } else {
       // Reset demo data when disabling demo mode
       DemoDataService.reset();
     }

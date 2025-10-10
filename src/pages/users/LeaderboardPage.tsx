@@ -1,23 +1,35 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Medal, Award } from 'lucide-react';
 import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { DemoDataService } from '../../services/demoDataService';
 
 export default function LeaderboardPage() {
-  const [leaderboard, setLeaderboard] = useState<TokenBalance[]>([]);
+  const { isDemoMode } = useDemoMode();
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalSupply, setTotalSupply] = useState(0);
 
   useEffect(() => {
     loadLeaderboard();
-  }, []);
+  }, [isDemoMode]);
 
   const loadLeaderboard = async () => {
     try {
       setLoading(true);
-      const data = await AfriTokenService.getLeaderboard(10);
-      const supply = AfriTokenService.getTotalSupply();
-      setLeaderboard(data);
-      setTotalSupply(supply);
+      
+      if (isDemoMode) {
+        // Use demo data
+        const demoLeaderboard = DemoDataService.generateDAOLeaderboard(20);
+        setLeaderboard(demoLeaderboard);
+        const supply = await AfriTokenService.getTotalSupply();
+        setTotalSupply(supply);
+      } else {
+        const data = await AfriTokenService.getLeaderboard(10);
+        const supply = await AfriTokenService.getTotalSupply();
+        setLeaderboard(data);
+        setTotalSupply(supply);
+      }
     } catch (error) {
       console.error('Error loading leaderboard:', error);
     } finally {
@@ -94,9 +106,9 @@ export default function LeaderboardPage() {
 
                   {/* Holder Info */}
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{holder.userId}</p>
+                    <p className="font-semibold text-gray-900">{holder.name || holder.userId || 'Anonymous'}</p>
                     <p className="text-sm text-gray-600">
-                      {getPercentage(holder.balance)}% of total supply
+                      {holder.votingPower || `${getPercentage(holder.balance)}% of total supply`}
                     </p>
                   </div>
 
@@ -108,15 +120,22 @@ export default function LeaderboardPage() {
                     <p className="text-sm text-gray-600">AFRI</p>
                   </div>
 
-                  {/* Locked */}
-                  {holder.locked > 0 && (
+                  {/* Activity or Locked */}
+                  {holder.proposalsCreated ? (
+                    <div className="text-right">
+                      <p className="text-sm font-mono text-blue-600">
+                        {holder.proposalsCreated} proposals
+                      </p>
+                      <p className="text-xs text-gray-500">{holder.votesParticipated} votes</p>
+                    </div>
+                  ) : holder.locked > 0 ? (
                     <div className="text-right">
                       <p className="text-sm font-mono text-orange-600">
                         {formatNumber(holder.locked)} locked
                       </p>
                       <p className="text-xs text-gray-500">In governance</p>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ))}
             </div>

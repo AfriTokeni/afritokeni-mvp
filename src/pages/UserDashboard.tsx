@@ -9,13 +9,17 @@ import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
 import { CkUSDCBalanceCard } from '../components/CkUSDCBalanceCard';
 import { CkBTCBalanceCard } from '../components/CkBTCBalanceCard';
+import { OnboardingModal, OnboardingData } from '../components/OnboardingModal';
+import { ProfileIncompleteBanner } from '../components/ProfileIncompleteBanner';
+import { DataService } from '../services/dataService';
 import { 
   Send,
   Bitcoin,
   ArrowUp,
   ArrowDown,
   Minus,
-  Plus
+  Plus,
+  Info
 } from 'lucide-react';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../types/currency';
 
@@ -26,6 +30,10 @@ const UserDashboard: React.FC = () => {
   const { user, updateUserCurrency } = useAuthentication();
   const { isDemoMode } = useDemoMode();
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const { 
     transactions,
     balance,
@@ -50,6 +58,70 @@ const UserDashboard: React.FC = () => {
       DemoDataService.initializeDemoUser(currentUser.email);
     }
   }, [isDemoMode, currentUser?.email]);
+
+  // Check for missing profile fields and show onboarding/banner
+  useEffect(() => {
+    if (!currentUser || isDemoMode) return;
+
+    const missing: string[] = [];
+    
+    if (!currentUser.firstName || !currentUser.lastName) {
+      missing.push('Full Name');
+    }
+    if (!currentUser.preferredCurrency) {
+      missing.push('Preferred Currency');
+    }
+    if (!(currentUser as any).phone && !currentUser.email?.startsWith('+')) {
+      missing.push('Phone Number');
+    }
+    if (!currentUser.location?.country || !currentUser.location?.city) {
+      missing.push('Location (Country & City)');
+    }
+
+    setMissingFields(missing);
+
+    // Only show onboarding/banner AFTER demo modal has been seen
+    const hasSeenDemoModal = localStorage.getItem('afritokeni_seen_demo_modal');
+    if (!hasSeenDemoModal) return; // Wait for demo modal first
+
+    // Show onboarding modal on first login if profile is incomplete
+    const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${currentUser.id}`);
+    if (missing.length > 0 && !hasCompletedOnboarding) {
+      setShowOnboarding(true);
+    } else if (missing.length > 0 && !bannerDismissed) {
+      // Show banner if onboarding was skipped but profile still incomplete
+      setShowBanner(true);
+    }
+  }, [currentUser, isDemoMode, bannerDismissed]);
+
+  const handleOnboardingComplete = async (data: OnboardingData) => {
+    if (!currentUser) return;
+
+    try {
+      // Update user profile in database
+      await DataService.updateUser(currentUser.id, {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email || currentUser.email,
+        preferredCurrency: data.preferredCurrency,
+        location: {
+          country: data.country,
+          city: data.city
+        }
+      });
+
+      // Mark onboarding as completed
+      localStorage.setItem(`onboarding_completed_${currentUser.id}`, 'true');
+      setShowOnboarding(false);
+      setShowBanner(false);
+      
+      // Refresh user data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+    }
+  };
+
   const userCurrency = currentUser?.preferredCurrency || 'UGX';
   const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
 
@@ -124,12 +196,46 @@ const UserDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+        {/* Onboarding Modal */}
+        <OnboardingModal
+          isOpen={showOnboarding}
+          onClose={() => {
+            setShowOnboarding(false);
+            localStorage.setItem(`onboarding_completed_${currentUser?.id}`, 'true');
+          }}
+          onComplete={handleOnboardingComplete}
+          currentData={{
+            firstName: currentUser?.firstName,
+            lastName: currentUser?.lastName,
+            email: currentUser?.email,
+            phone: (currentUser as any)?.phone || '',
+            preferredCurrency: currentUser?.preferredCurrency as any,
+            country: currentUser?.location?.country || '',
+            city: currentUser?.location?.city || ''
+          }}
+        />
+
         {/* Demo Mode Modal */}
         <DemoModeModal 
           isOpen={showDemoModal} 
           onClose={() => setShowDemoModal(false)}
           userType="user"
         />
+
+        {/* Profile Incomplete Banner */}
+        {showBanner && missingFields.length > 0 && (
+          <ProfileIncompleteBanner
+            missingFields={missingFields}
+            onDismiss={() => {
+              setBannerDismissed(true);
+              setShowBanner(false);
+            }}
+            onComplete={() => {
+              setShowBanner(false);
+              setShowOnboarding(true);
+            }}
+          />
+        )}
 
         {/* KYC Status Alert */}
         <KYCStatusAlert user_type="user" />
@@ -162,11 +268,31 @@ const UserDashboard: React.FC = () => {
                 {formatCurrency(getDisplayBalance())}
               </span>
             </div>
-            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-              <span className="text-gray-500 text-sm">Available Balance</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-600 font-medium text-sm">Active</span>
+            <div className="pt-4 border-t border-gray-100 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500 text-sm">Available Balance</span>
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-green-600 font-medium text-sm">Active</span>
+                </div>
+              </div>
+              
+              {/* Info: How to add money */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start space-x-2">
+                <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-900">
+                  <p className="font-semibold mb-1">How to add money:</p>
+                  <ul className="space-y-0.5 text-blue-800">
+                    <li>• Deposit cash via agents</li>
+                    <li>• Sell ckBTC/ckUSDC for cash</li>
+                    <li>• Receive from other users</li>
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Last updated timestamp */}
+              <div className="text-xs text-gray-400">
+                Last updated: {new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>

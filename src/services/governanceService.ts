@@ -49,6 +49,7 @@ export class GovernanceService {
   private static readonly PASS_THRESHOLD = 50; // 50% yes votes to pass
   private static readonly VOTING_PERIOD_DAYS = 7;
   public static readonly MIN_TOKENS_TO_PROPOSE = 1000; // Need 1000 AFRI to create proposal
+  private static demoProposals: Proposal[] = [];
 
   /**
    * Create a new governance proposal via SNS
@@ -142,6 +143,28 @@ export class GovernanceService {
     choice: VoteChoice,
     votingPower: number
   ): Promise<Vote> {
+    // Check if this is a demo proposal
+    if (proposalId.startsWith('DEMO-')) {
+      // Handle demo vote locally
+      const proposal = this.demoProposals.find(p => p.id === proposalId);
+      if (proposal) {
+        if (choice === 'yes') proposal.votes.yes += votingPower;
+        else if (choice === 'no') proposal.votes.no += votingPower;
+        else proposal.votes.abstain += votingPower;
+      }
+      
+      const vote: Vote = {
+        proposalId,
+        userId,
+        choice,
+        votingPower,
+        timestamp: new Date(),
+      };
+      
+      console.log(`🗳️ ${userId} voted ${choice} with ${votingPower} AFRI on ${proposalId} (local)`);
+      return vote;
+    }
+
     try {
       const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
@@ -308,7 +331,13 @@ export class GovernanceService {
         });
         return IDL.Service({
           list_proposals: IDL.Func(
-            [IDL.Record({ limit: IDL.Nat32, exclude_type: IDL.Vec(IDL.Nat64), include_status: IDL.Vec(IDL.Int32) })],
+            [IDL.Record({ 
+              limit: IDL.Nat32, 
+              exclude_type: IDL.Vec(IDL.Nat64), 
+              include_reward_status: IDL.Vec(IDL.Int32),
+              before_proposal: IDL.Opt(IDL.Record({ id: IDL.Nat64 })),
+              include_status: IDL.Vec(IDL.Int32)
+            })],
             [IDL.Record({ proposals: IDL.Vec(ProposalData) })],
             ['query']
           ),
@@ -322,8 +351,10 @@ export class GovernanceService {
 
       // Fetch proposals from SNS
       const response: any = await governance.list_proposals({
-        limit: 100,
+        limit: 10,
         exclude_type: [],
+        include_reward_status: [],
+        before_proposal: [],
         include_status: [1], // 1 = Open/Active proposals
       });
 
@@ -353,6 +384,41 @@ export class GovernanceService {
       // Return empty array - no Juno fallback
       return [];
     }
+  }
+
+  /**
+   * Create a demo proposal (for demo mode)
+   */
+  static async createDemoProposal(data: {
+    type: ProposalType;
+    title: string;
+    description: string;
+    proposer: string;
+    userTokens: number;
+  }): Promise<Proposal> {
+    const proposal: Proposal = {
+      id: `DEMO-${Date.now()}`,
+      type: data.type,
+      title: data.title,
+      description: data.description,
+      proposer: data.proposer,
+      createdAt: new Date(),
+      votingEndsAt: new Date(Date.now() + this.VOTING_PERIOD_DAYS * 24 * 60 * 60 * 1000),
+      status: 'active',
+      votes: { yes: 0, no: 0, abstain: 0 },
+      quorum: this.QUORUM_PERCENTAGE,
+      threshold: this.PASS_THRESHOLD,
+    };
+    
+    this.demoProposals.push(proposal);
+    return proposal;
+  }
+
+  /**
+   * Get demo proposals
+   */
+  static getDemoProposals(): Proposal[] {
+    return this.demoProposals;
   }
 
   /**

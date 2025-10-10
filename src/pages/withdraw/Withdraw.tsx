@@ -6,6 +6,8 @@ import ConfirmationStep from './ConfirmationStep';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { DemoDataService } from '../../services/demoDataService';
 
 import type { WithdrawStep } from './types';
 import { Agent as DBAgent } from '../../services/dataService';
@@ -13,6 +15,7 @@ import { Agent as DBAgent } from '../../services/dataService';
 const WithdrawPage: React.FC = () => {
   const { user } = useAuthentication();
   const { balance } = useAfriTokeni();
+  const { isDemoMode } = useDemoMode();
 
   // Refresh data when withdraw page loads to ensure latest balance
   // useEffect(() => {
@@ -36,14 +39,16 @@ const WithdrawPage: React.FC = () => {
   const [withdrawalCode, setWithdrawalCode] = useState<string>('');
   const [finalLocalAmount, setFinalLocalAmount] = useState<number>(0);
   const [finalBtcAmount, setFinalBtcAmount] = useState<string>('');
-  const [withdrawType, setWithdrawType] = useState<'cash' | 'bitcoin'>('cash');
+  const [withdrawType, setWithdrawType] = useState<'cash' | 'bitcoin' | 'ckusdc'>('cash');
   const [withdrawalFee, setWithdrawalFee] = useState<number>(0);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
 
   // Get user's preferred currency or default to UGX (same as dashboard)
   const currentUser = user.user;
-  const userCurrency = currentUser?.preferredCurrency || 'UGX';
+  const defaultCurrency = currentUser?.preferredCurrency || 'UGX';
+  const userCurrency = selectedCurrency || defaultCurrency;
   
   // Mock Bitcoin exchange rate - would be live in production
   const getBtcExchangeRate = (currency: string) => {
@@ -84,7 +89,7 @@ const WithdrawPage: React.FC = () => {
   };
 
   const handleAgentSelect = async (agent: DBAgent) => {
-    if (!user.user?.id) {
+    if (!user.user?.id && !isDemoMode) {
       setTransactionError('User not authenticated');
       return;
     }
@@ -96,18 +101,30 @@ const WithdrawPage: React.FC = () => {
       // Generate withdrawal code
       const code = generateWithdrawalCode();
       
-      // Create withdrawal request in Juno backend
-      await DataService.createWithdrawalRequest(
-        user.user.id,
-        agent.id,
-        finalLocalAmount,
-        userCurrency,
-        code,
-        withdrawalFee
-      );
+      if (!isDemoMode && user.user?.id) {
+        // Create withdrawal request in Juno backend
+        await DataService.createWithdrawalRequest(
+          user.user.id,
+          agent.id,
+          finalLocalAmount,
+          userCurrency,
+          code,
+          withdrawalFee
+        );
+      } else {
+        // Demo mode - just simulate delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log('🎭 Demo withdrawal created:', {
+          agent: agent.businessName,
+          amount: finalLocalAmount,
+          currency: userCurrency,
+          code
+        });
+      }
 
       // Set selected agent and proceed to confirmation
       setSelectedAgent(agent);
+      setWithdrawalCode(code);
       setCurrentStep('confirmation');
     } catch (error) {
       console.error('Error creating withdraw transaction:', error);
@@ -168,13 +185,15 @@ const WithdrawPage: React.FC = () => {
             exchangeRate={exchangeRate}
             userBalance={getBalanceForCurrency()}
             preferredCurrency={userCurrency}
-            onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin') => {
+            ckBTCBalance={isDemoMode ? DemoDataService.getDemoUser()?.ckBTCBalance : 0}
+            ckUSDCBalance={isDemoMode ? DemoDataService.getDemoUser()?.ckUSDCBalance : 0}
+            onCurrencyChange={(currency) => setSelectedCurrency(currency)}
+            onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin' | 'ckusdc') => {
               // Store the amounts for the confirmation step
               setFinalLocalAmount(parseFloat(localAmount) || 0);
               setFinalBtcAmount(btcAmount);
               setWithdrawType(withdrawType);
               setWithdrawalFee(fee);
-              // Note: selectedCurrency is now ignored since we use user's preferred currency
               setCurrentStep(withdrawType === 'cash' ? 'agent' : 'confirmation');
             }}
           />

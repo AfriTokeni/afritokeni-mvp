@@ -321,46 +321,56 @@ export class CkBTCService {
     try {
       const currencyUpper = currency.toUpperCase();
       
-      // Step 1: Get BTC/USD rate from CoinGecko
+      // Use Coinbase API (no CORS, no rate limits for public data)
       const btcResponse = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
+        'https://api.coinbase.com/v2/exchange-rates?currency=BTC'
       );
       
       if (!btcResponse.ok) {
-        throw new Error('Failed to fetch BTC/USD rate');
+        throw new Error('Failed to fetch BTC exchange rates');
       }
       
       const btcData = await btcResponse.json();
-      const btcUsdRate = btcData['bitcoin']?.['usd'];
+      const btcToLocalRate = btcData.data?.rates?.[currencyUpper];
       
-      if (!btcUsdRate) {
-        throw new Error('BTC/USD rate not available');
+      if (!btcToLocalRate) {
+        // If currency not directly available, calculate via USD
+        const btcToUsd = btcData.data?.rates?.['USD'];
+        if (!btcToUsd) {
+          throw new Error('BTC/USD rate not available');
+        }
+        
+        // Get USD to local currency rate
+        const fxResponse = await fetch(
+          `https://api.exchangerate-api.com/v4/latest/USD`
+        );
+        
+        if (!fxResponse.ok) {
+          throw new Error('Failed to fetch forex rates');
+        }
+        
+        const fxData = await fxResponse.json();
+        const usdToLocal = fxData.rates[currencyUpper];
+        
+        if (!usdToLocal) {
+          throw new Error(`Exchange rate not available for ${currency}`);
+        }
+        
+        const calculatedRate = parseFloat(btcToUsd) * usdToLocal;
+        
+        return {
+          currency,
+          rate: calculatedRate,
+          lastUpdated: new Date(),
+          source: 'coinbase+exchangerate-api',
+        };
       }
-      
-      // Step 2: Get USD to local currency rate from exchangerate-api.com (free, no key needed)
-      const fxResponse = await fetch(
-        `https://api.exchangerate-api.com/v4/latest/USD`
-      );
-      
-      if (!fxResponse.ok) {
-        throw new Error('Failed to fetch forex rates');
-      }
-      
-      const fxData = await fxResponse.json();
-      const usdToLocalRate = fxData.rates[currencyUpper];
-      
-      if (!usdToLocalRate) {
-        throw new Error(`Exchange rate not available for ${currency}`);
-      }
-      
-      // Step 3: Calculate BTC to local currency rate
-      const btcToLocalRate = btcUsdRate * usdToLocalRate;
 
       return {
         currency,
-        rate: btcToLocalRate,
+        rate: parseFloat(btcToLocalRate),
         lastUpdated: new Date(),
-        source: 'coingecko+exchangerate-api',
+        source: 'coinbase',
       };
     } catch (error) {
       console.error('Error fetching exchange rate:', error);

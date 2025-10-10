@@ -4,14 +4,17 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Vote as VoteIcon, TrendingUp, Users, Coins, Plus, CheckCircle, XCircle, Clock, HelpCircle } from 'lucide-react';
+import { Vote as VoteIcon, TrendingUp, Users, Coins, Plus, CheckCircle, XCircle, Clock, HelpCircle, ChevronDown, ChevronUp, DollarSign, Globe, Shield, FileText, Lightbulb } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
 import { GovernanceService, Proposal } from '../../services/governanceService';
 import CreateProposalModal from '../../components/CreateProposalModal';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { DemoDataService } from '../../services/demoDataService';
 
 const DAODashboard: React.FC = () => {
   const { user } = useAuthentication();
+  const { isDemoMode } = useDemoMode();
   const [tokenBalance, setTokenBalance] = useState<TokenBalance | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
@@ -20,25 +23,55 @@ const DAODashboard: React.FC = () => {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [totalHolders, setTotalHolders] = useState(0);
   const [showEarnInfo, setShowEarnInfo] = useState(false);
+  const [showDistribution, setShowDistribution] = useState(false);
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      if (user?.user?.id) {
-        const balance = await AfriTokenService.getBalance(user.user.id);
-        setTokenBalance(balance);
+      if (isDemoMode) {
+        // Use demo data
+        const demoUser = DemoDataService.getDemoUser();
+        if (demoUser) {
+          setTokenBalance({
+            userId: demoUser.id,
+            balance: demoUser.daoTokens,
+            earned: {
+              transactions: 1200,
+              agentActivity: 0,
+              referrals: 500,
+              staking: 300,
+            },
+            locked: 0,
+            lastUpdated: new Date(),
+          });
+        }
+        
+        // Generate demo leaderboard
+        const demoLeaderboard = DemoDataService.generateDAOLeaderboard(20);
+        console.log('Demo leaderboard generated:', demoLeaderboard);
+        setLeaderboard(demoLeaderboard);
+        setTotalHolders(demoLeaderboard.length);
+        
+        // Get demo proposals
+        const demoProposals = GovernanceService.getDemoProposals();
+        setProposals(demoProposals);
+      } else {
+        if (user?.user?.id) {
+          const balance = await AfriTokenService.getBalance(user.user.id);
+          setTokenBalance(balance);
+        }
+        const activeProposals = await GovernanceService.getActiveProposals();
+        setProposals(activeProposals);
+        
+        // Load real leaderboard data
+        const leaderboardData = await AfriTokenService.getLeaderboard(10);
+        setLeaderboard(leaderboardData);
+        setTotalHolders(leaderboardData.length);
       }
-      const activeProposals = await GovernanceService.getActiveProposals();
-      setProposals(activeProposals);
-      
-      // Load real leaderboard data
-      const leaderboardData = await AfriTokenService.getLeaderboard(10);
-      setLeaderboard(leaderboardData);
-      setTotalHolders(leaderboardData.length);
     } catch (error) {
       console.error('Error loading DAO data:', error);
     } finally {
@@ -52,10 +85,9 @@ const DAODashboard: React.FC = () => {
     try {
       await GovernanceService.vote(proposalId, user.user.id, choice, tokenBalance.balance);
       await loadData();
-      alert(`Vote cast: ${choice.toUpperCase()}`);
+      // Success - no alert needed, just refresh
     } catch (error) {
       console.error('Error voting:', error);
-      alert('Failed to cast vote');
     }
   };
 
@@ -66,6 +98,17 @@ const DAODashboard: React.FC = () => {
       case 'rejected': return 'bg-red-100 text-red-700';
       case 'executed': return 'bg-gray-100 text-gray-700';
       default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getProposalTypeLabel = (type: string) => {
+    switch (type) {
+      case 'fee_adjustment': return { label: 'Fee Adjustment', color: 'bg-green-100 text-green-700', icon: DollarSign };
+      case 'currency_addition': return { label: 'Add Currency', color: 'bg-blue-100 text-blue-700', icon: Globe };
+      case 'agent_standards': return { label: 'Agent Standards', color: 'bg-purple-100 text-purple-700', icon: Shield };
+      case 'treasury': return { label: 'Treasury', color: 'bg-orange-100 text-orange-700', icon: FileText };
+      case 'other': return { label: 'Other', color: 'bg-gray-100 text-gray-700', icon: Lightbulb };
+      default: return { label: 'Other', color: 'bg-gray-100 text-gray-700', icon: Lightbulb };
     }
   };
 
@@ -181,6 +224,97 @@ const DAODashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Token Distribution Info */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 border border-purple-200">
+        <button
+          onClick={() => setShowDistribution(!showDistribution)}
+          className="w-full flex items-center justify-between"
+        >
+          <div className="flex items-start gap-3">
+            <Coins className="w-6 h-6 text-purple-600 mt-1" />
+            <div className="text-left">
+              <h3 className="text-lg font-bold text-gray-900 mb-1">AFRI Token Distribution</h3>
+              <p className="text-sm text-gray-700">
+                Total Supply: <span className="font-mono font-semibold">1,000,000,000 AFRI</span>
+              </p>
+            </div>
+          </div>
+          {showDistribution ? (
+            <ChevronUp className="w-5 h-5 text-purple-600" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-purple-600" />
+          )}
+        </button>
+        
+        {showDistribution && (
+        <>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="bg-white rounded-lg p-4 border border-purple-100">
+            <h4 className="font-semibold text-gray-900 mb-3">Community (45%)</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex justify-between">
+                <span>• Agents</span>
+                <span className="font-mono font-semibold">250M (25%)</span>
+              </li>
+              <li className="flex justify-between">
+                <span>• Users</span>
+                <span className="font-mono font-semibold">200M (20%)</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-purple-100">
+            <h4 className="font-semibold text-gray-900 mb-3">Investors (10%)</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex justify-between">
+                <span>• Seed Round</span>
+                <span className="font-mono font-semibold">50M (5%)</span>
+              </li>
+              <li className="flex justify-between">
+                <span>• Strategic</span>
+                <span className="font-mono font-semibold">50M (5%)</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-purple-100">
+            <h4 className="font-semibold text-gray-900 mb-3">Team & Advisors (20%)</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex justify-between">
+                <span>• Core Team</span>
+                <span className="font-mono font-semibold">150M (15%)</span>
+              </li>
+              <li className="flex justify-between">
+                <span>• Advisors</span>
+                <span className="font-mono font-semibold">50M (5%)</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-purple-100">
+            <h4 className="font-semibold text-gray-900 mb-3">Ecosystem (25%)</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex justify-between">
+                <span>• Treasury</span>
+                <span className="font-mono font-semibold">150M (15%)</span>
+              </li>
+              <li className="flex justify-between">
+                <span>• Liquidity</span>
+                <span className="font-mono font-semibold">100M (10%)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="mt-4 p-3 bg-white rounded-lg border border-purple-100">
+          <p className="text-xs text-gray-600">
+            <strong>Note:</strong> Tokens are distributed through SMS transactions, agent activities, governance participation, and referrals to ensure widespread adoption across Africa's unbanked population.
+          </p>
+        </div>
+        </>
+        )}
+      </div>
+
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-gray-200">
         <button
@@ -233,16 +367,22 @@ const DAODashboard: React.FC = () => {
             const totalVotes = proposal.votes.yes + proposal.votes.no + proposal.votes.abstain;
             const yesPercentage = calculateVotePercentage(proposal.votes.yes, totalVotes);
             const noPercentage = calculateVotePercentage(proposal.votes.no, totalVotes);
+            const typeInfo = getProposalTypeLabel(proposal.type);
+            const TypeIcon = typeInfo.icon;
 
             return (
               <div key={proposal.id} className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${typeInfo.color}`}>
+                        <TypeIcon className="w-3.5 h-3.5" />
+                        {typeInfo.label}
+                      </span>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(proposal.status)}`}>
                         {proposal.status.toUpperCase()}
                       </span>
-                      <span className="text-sm text-gray-500">{proposal.id}</span>
+                      <span className="text-xs text-gray-400">{proposal.id}</span>
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{proposal.title}</h3>
                     <p className="text-gray-600 mb-4">{proposal.description}</p>
@@ -380,12 +520,12 @@ const DAODashboard: React.FC = () => {
           ) : (
             <div className="space-y-3">
               {leaderboard.map((holder, index) => {
-                const rank = index + 1;
-                const totalSupply = AfriTokenService.getTotalSupply();
-                const percentage = ((holder.balance / totalSupply) * 100).toFixed(2);
+                const rank = holder.rank || index + 1;
+                const displayName = holder.name || holder.userId || 'Anonymous';
+                const votingPower = holder.votingPower || `${((holder.balance / AfriTokenService.getTotalSupply()) * 100).toFixed(2)}%`;
                 
                 return (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={holder.address || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
                         rank === 1 ? 'bg-yellow-400 text-yellow-900' :
@@ -396,9 +536,9 @@ const DAODashboard: React.FC = () => {
                         {rank}
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-900">{holder.userId}</div>
+                        <div className="font-semibold text-gray-900">{displayName}</div>
                         <div className="text-sm text-gray-500">
-                          {holder.locked > 0 ? `${holder.locked.toLocaleString()} locked` : 'Token Holder'}
+                          {holder.proposalsCreated ? `${holder.proposalsCreated} proposals • ${holder.votesParticipated} votes` : 'Token Holder'}
                         </div>
                       </div>
                     </div>
@@ -407,7 +547,7 @@ const DAODashboard: React.FC = () => {
                         {holder.balance.toLocaleString()} AFRI
                       </div>
                       <div className="text-sm text-gray-500">
-                        {percentage}% of supply
+                        {votingPower} voting power
                       </div>
                     </div>
                   </div>

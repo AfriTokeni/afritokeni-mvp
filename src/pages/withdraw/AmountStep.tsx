@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { DollarSign, AlertCircle, Bitcoin } from 'lucide-react';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
+import { CurrencySelector } from '../../components/CurrencySelector';
+import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
+import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
 
 interface AmountStepProps {
   exchangeRate: number; // BTC to local currency rate
   userBalance: number; // User's current balance in local currency
   preferredCurrency: string; // User's preferred currency from profile
-  onContinue: (localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin', selectedCurrency: string) => void;
+  ckBTCBalance?: number; // ckBTC balance in satoshis
+  ckUSDCBalance?: number; // ckUSDC balance
+  onContinue: (localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin' | 'ckusdc', selectedCurrency: string) => void;
+  onCurrencyChange?: (currency: string) => void;
   initialLocalAmount?: string;
   initialBtcAmount?: string;
 }
@@ -15,13 +21,16 @@ const AmountStep: React.FC<AmountStepProps> = ({
   exchangeRate,
   userBalance,
   preferredCurrency,
+  ckBTCBalance = 0,
+  ckUSDCBalance = 0,
   onContinue,
+  onCurrencyChange,
   initialLocalAmount = '',
   initialBtcAmount = ''
 }) => {
   const [localAmount, setLocalAmount] = useState<string>(initialLocalAmount);
   const [btcAmount, setBtcAmount] = useState<string>(initialBtcAmount);
-  const [withdrawType, setWithdrawType] = useState<'cash' | 'bitcoin'>('cash');
+  const [withdrawType, setWithdrawType] = useState<'cash' | 'bitcoin' | 'ckusdc'>('cash');
   const [error, setError] = useState<string>('');
   
   // Use the user's preferred currency passed as prop (consistent with dashboard)
@@ -97,18 +106,58 @@ const AmountStep: React.FC<AmountStepProps> = ({
     <div className="bg-white rounded-2xl border border-gray-200 p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Withdrawal Amount</h2>
       
-      {/* Current Balance Display */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-600">Current Balance:</span>
-          <span className="text-2xl font-bold text-gray-900 font-mono">{formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency)}</span>
+      {/* Balance Cards - Reusing Dashboard Components */}
+      <div className="mb-6 space-y-4">
+        {/* Primary Balance Card */}
+        <div className="bg-white rounded-xl border border-neutral-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-medium text-neutral-500">{selectedCurrency}</span>
+                <span className="text-xs text-neutral-400">Primary Balance</span>
+              </div>
+              <p className="text-3xl font-bold text-neutral-900 font-mono">
+                {selectedCurrency} {formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency).replace(selectedCurrency, '').trim()}
+              </p>
+            </div>
+            <CurrencySelector
+              currentCurrency={selectedCurrency}
+              onCurrencyChange={(currency) => onCurrencyChange?.(currency)}
+            />
+          </div>
+          <div className="flex items-center gap-2 text-xs text-neutral-500">
+            <span className="inline-flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              Active
+            </span>
+          </div>
         </div>
+
+        {/* ckBTC and ckUSDC Balance Cards */}
+        {(ckBTCBalance > 0 || ckUSDCBalance > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {ckBTCBalance > 0 && (
+              <CkBTCBalanceCard
+                principalId="demo-user"
+                preferredCurrency={selectedCurrency}
+                showActions={false}
+              />
+            )}
+            {ckUSDCBalance > 0 && (
+              <CkUSDCBalanceCard
+                principalId="demo-user"
+                preferredCurrency={selectedCurrency}
+                showActions={false}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Withdrawal Type Selection */}
       <div className="mb-6">
         <label className="block text-sm font-semibold text-gray-900 mb-3">What would you like to withdraw?</label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             type="button"
             onClick={() => {
@@ -154,8 +203,34 @@ const AmountStep: React.FC<AmountStepProps> = ({
                 <Bitcoin className="w-6 h-6 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 mb-1">Convert to Bitcoin</h3>
-                <p className="text-sm text-gray-600">Exchange local currency for Bitcoin</p>
+                <h3 className="font-bold text-gray-900 mb-1">Convert to ckBTC</h3>
+                <p className="text-sm text-gray-600">Exchange local currency for Chain Key Bitcoin</p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setWithdrawType('ckusdc');
+              if (localAmount) {
+                const usdcEquivalent = (parseFloat(localAmount) / 3800).toFixed(2);
+                setBtcAmount(usdcEquivalent);
+              }
+            }}
+            className={`p-6 border-2 rounded-2xl text-left transition-all ${
+              withdrawType === 'ckusdc'
+                ? 'border-gray-900 bg-gray-50'
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-start space-x-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-50">
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 mb-1">Convert to ckUSDC</h3>
+                <p className="text-sm text-gray-600">Exchange local currency for Chain Key USDC</p>
               </div>
             </div>
           </button>
@@ -163,33 +238,6 @@ const AmountStep: React.FC<AmountStepProps> = ({
       </div>
 
       <div className="space-y-4 sm:space-y-6">
-        {/* Currency Display */}
-        <div>
-          <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <label className="block text-xs sm:text-sm font-medium text-gray-700">
-              Currency
-            </label>
-            <div className="flex items-center space-x-2">
-              <span className="font-medium text-gray-900">{selectedCurrency}</span>
-              <span className="text-xs text-gray-500">({currencyInfo.name})</span>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
-              <span className="text-gray-700 font-semibold text-xs">
-                {selectedCurrency}
-              </span>
-            </div>
-            <div>
-              <p className="text-gray-900 font-medium text-sm">
-                {currencyInfo?.name}
-              </p>
-              <p className="text-gray-500 text-xs">
-                {currencyInfo?.symbol} • {currencyInfo?.country}
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Error Message */}
         {error && (

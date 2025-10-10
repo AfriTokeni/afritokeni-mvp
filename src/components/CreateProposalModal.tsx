@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, FileText, DollarSign, Globe, Shield, Lightbulb } from 'lucide-react';
 import { GovernanceService, ProposalType } from '../services/governanceService';
+import { useDemoMode } from '../context/DemoModeContext';
 
 interface CreateProposalModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export default function CreateProposalModal({
   userTokens,
   onSuccess,
 }: CreateProposalModalProps) {
+  const { isDemoMode } = useDemoMode();
   const [type, setType] = useState<ProposalType>('other');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -40,25 +42,37 @@ export default function CreateProposalModal({
 
     setLoading(true);
     try {
-      await GovernanceService.createProposal(
-        userId,
-        {
+      if (isDemoMode) {
+        // In demo mode, create a local demo proposal
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await GovernanceService.createDemoProposal({
           type,
           title,
           description,
-          executionData: {},
-        },
-        userTokens
-      );
+          proposer: userId,
+          userTokens,
+        });
+      } else {
+        await GovernanceService.createProposal(
+          userId,
+          {
+            type,
+            title,
+            description,
+            executionData: {},
+          },
+          userTokens
+        );
+      }
       
-      alert('Proposal created successfully!');
       onSuccess();
       onClose();
       setTitle('');
       setDescription('');
       setType('other');
     } catch (error: any) {
-      alert(error.message || 'Failed to create proposal');
+      console.error('Error creating proposal:', error);
+      alert(error.message || 'Failed to create proposal on SNS governance');
     } finally {
       setLoading(false);
     }

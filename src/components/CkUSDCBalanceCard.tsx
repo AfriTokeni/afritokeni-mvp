@@ -9,6 +9,8 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, Send, Download, RefreshCw } from 'lucide-react';
 import { CkUSDCService } from '../services/ckUSDCService';
 import { CkUSDCBalance } from '../types/ckusdc';
+import { useDemoMode } from '../context/DemoModeContext';
+import { DemoDataService } from '../services/demoDataService';
 
 interface CkUSDCBalanceCardProps {
   /** User's Principal ID */
@@ -33,6 +35,7 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
   onSend,
   onExchange,
 }) => {
+  const { isDemoMode } = useDemoMode();
   const [balance, setBalance] = useState<CkUSDCBalance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -41,11 +44,27 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
   const fetchBalance = async () => {
     try {
       setError(null);
-      const balanceData = await CkUSDCService.getBalanceWithLocalCurrency(
-        principalId,
-        preferredCurrency
-      );
-      setBalance(balanceData);
+      
+      if (isDemoMode) {
+        // Use demo data
+        const demoUser = DemoDataService.getDemoUser();
+        if (demoUser) {
+          const exchangeRate = await CkUSDCService.getExchangeRate(preferredCurrency);
+          setBalance({
+            balance: demoUser.ckUSDCBalance * 1000000, // Convert to smallest unit
+            balanceFormatted: demoUser.ckUSDCBalance.toFixed(2),
+            localCurrencyEquivalent: demoUser.ckUSDCBalance * exchangeRate.rate,
+            localCurrency: preferredCurrency,
+            lastUpdated: new Date(),
+          });
+        }
+      } else {
+        const balanceData = await CkUSDCService.getBalanceWithLocalCurrency(
+          principalId,
+          preferredCurrency
+        );
+        setBalance(balanceData);
+      }
     } catch (err: any) {
       console.error('Error fetching ckUSDC balance:', err);
       setError(err.message || 'Failed to load balance');
@@ -57,7 +76,7 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
 
   useEffect(() => {
     fetchBalance();
-  }, [principalId, preferredCurrency]);
+  }, [principalId, preferredCurrency, isDemoMode]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -188,10 +207,8 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
       )}
 
       {/* Last Updated */}
-      <div className="mt-4 pt-4 border-t border-green-200">
-        <p className="text-xs text-neutral-500">
-          Last updated: {balance?.lastUpdated.toLocaleTimeString()}
-        </p>
+      <div className="text-xs text-gray-400 mt-3">
+        Last updated: {balance?.lastUpdated.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
       </div>
     </div>
   );
