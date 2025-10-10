@@ -59,8 +59,16 @@ const App: FC = () => {
   useEffect(() => {
     const initJuno = async () => {
       try {
+        // Use development satellite for localhost, production for deployed
+        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const satelliteId = isProduction 
+          ? (junoConfig.satellite.ids?.production || "dkk74-oyaaa-aaaal-askxq-cai")
+          : (junoConfig.satellite.ids?.development || "atbka-rp777-77775-aaaaq-cai");
+        
+        console.log(`Initializing Juno with ${isProduction ? 'production' : 'development'} satellite:`, satelliteId);
+        
         await initSatellite({
-          satelliteId: junoConfig.satellite.ids?.production || "dkk74-oyaaa-aaaal-askxq-cai",
+          satelliteId,
           workers: {
             auth: true,
           },
