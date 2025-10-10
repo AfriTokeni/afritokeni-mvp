@@ -320,37 +320,37 @@ const AgentSettlement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="p-4 space-y-6">
+    <div className="space-y-4 md:space-y-6">
+      <div className="p-3 md:p-4 space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
+        <div className="flex items-center space-x-3 md:space-x-4 mb-6 md:mb-8">
           <button
             onClick={() => navigate('/agents/dashboard')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Settlement Requests</h1>
-            <p className="text-gray-600">Withdraw your earnings to bank or mobile money</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Settlement Requests</h1>
+            <p className="text-sm md:text-base text-gray-600">Withdraw your earnings to bank or mobile money</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
           {/* Settlement Form */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Request Settlement</h2>
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-200 p-4 md:p-6">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Request Settlement</h2>
             
             {/* Available Balance */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center space-x-3">
-                <DollarSign className="w-5 h-5 text-green-600" />
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
                 <div>
-                  <h3 className="font-semibold text-green-900">Available for Settlement</h3>
-                  <p className="text-green-800 font-mono text-lg">
+                  <h3 className="font-semibold text-green-900 text-sm md:text-base">Available for Settlement</h3>
+                  <p className="text-green-800 font-mono text-base md:text-lg">
                     UGX {getMaxSettlementAmount().toLocaleString()}
                   </p>
-                  <p className="text-sm text-green-700">
+                  <p className="text-xs md:text-sm text-green-700">
                     This is your commission earnings from processed deposits
                   </p>
                 </div>
@@ -358,12 +358,12 @@ const AgentSettlement: React.FC = () => {
             </div>
 
             {getMaxSettlementAmount() === 0 ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center space-x-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
+                <div className="flex items-center space-x-2 md:space-x-3">
+                  <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-yellow-600" />
                   <div>
-                    <h3 className="font-semibold text-yellow-900">No Earnings Available</h3>
-                    <p className="text-yellow-800 text-sm">
+                    <h3 className="font-semibold text-yellow-900 text-sm md:text-base">No Earnings Available</h3>
+                    <p className="text-yellow-800 text-xs md:text-sm">
                       Process customer deposits to earn commissions that can be settled.
                     </p>
                   </div>
@@ -372,28 +372,28 @@ const AgentSettlement: React.FC = () => {
             ) : (
               <>
                 {/* Amount Input */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                <div className="mb-4 md:mb-6">
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                     Settlement Amount (UGX)
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                     <input
                       type="number"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       placeholder="Enter amount to settle"
                       max={getMaxSettlementAmount()}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent font-mono"
+                      className="w-full pl-8 md:pl-10 pr-3 md:pr-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent font-mono text-sm md:text-base"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 mt-1 md:mt-2">
                     Maximum: UGX {getMaxSettlementAmount().toLocaleString()}
                   </p>
                   {amount && parseFloat(amount) > 0 && (
-                    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
-                      <h4 className="font-semibold text-gray-900 text-sm">Settlement Breakdown</h4>
-                      <div className="space-y-1 text-sm">
+                    <div className="mt-3 md:mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 md:p-4 space-y-1.5 md:space-y-2">
+                      <h4 className="font-semibold text-gray-900 text-xs md:text-sm">Settlement Breakdown</h4>
+                      <div className="space-y-1 text-xs md:text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Settlement Amount:</span>
                           <span className="font-mono font-semibold">UGX {parseFloat(amount).toLocaleString()}</span>
@@ -402,7 +402,7 @@ const AgentSettlement: React.FC = () => {
                           <span>Platform Fee (2%):</span>
                           <span className="font-mono font-semibold">- UGX {calculateSettlementFee(parseFloat(amount)).toLocaleString()}</span>
                         </div>
-                        <div className="border-t border-gray-300 pt-2 flex justify-between font-bold">
+                        <div className="border-t border-gray-300 pt-1.5 md:pt-2 flex justify-between font-bold">
                           <span className="text-gray-900">You Receive:</span>
                           <span className="font-mono text-green-600">UGX {calculateNetAmount(parseFloat(amount)).toLocaleString()}</span>
                         </div>
@@ -423,18 +423,18 @@ const AgentSettlement: React.FC = () => {
                         <div
                           key={method.id}
                           onClick={() => setSelectedMethod(method.id)}
-                          className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                          className={`p-3 md:p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                             selectedMethod === method.id
                               ? 'border-gray-900 bg-gray-50'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
-                          <div className="flex items-start space-x-3">
-                            <Icon className="w-5 h-5 text-gray-600 mt-1" />
+                          <div className="flex items-start space-x-2 md:space-x-3">
+                            <Icon className="w-4 h-4 md:w-5 md:h-5 text-gray-600 mt-0.5 md:mt-1" />
                             <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900">{method.name}</h3>
-                              <p className="text-sm text-gray-600">{method.description}</p>
-                              <div className="flex justify-between mt-2 text-xs text-gray-500">
+                              <h3 className="font-semibold text-gray-900 text-xs md:text-sm">{method.name}</h3>
+                              <p className="text-xs md:text-sm text-gray-600">{method.description}</p>
+                              <div className="flex justify-between mt-1 md:mt-2 text-xs text-gray-500">
                                 <span>Processing: {method.processingTime}</span>
                                 <span>Fee: {method.fee}</span>
                               </div>
@@ -448,50 +448,50 @@ const AgentSettlement: React.FC = () => {
 
                 {/* Method-specific Details */}
                 {selectedMethod === 'bank_transfer' && (
-                  <div className="mb-6 space-y-4">
-                    <h3 className="font-semibold text-gray-900">Bank Account Details</h3>
+                  <div className="mb-4 md:mb-6 space-y-3 md:space-y-4">
+                    <h3 className="font-semibold text-gray-900 text-xs md:text-sm">Bank Account Details</h3>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Bank Name</label>
+                      <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Bank Name</label>
                       <input
                         type="text"
                         value={bankDetails.bankName}
                         onChange={(e) => setBankDetails(prev => ({ ...prev, bankName: e.target.value }))}
                         placeholder="e.g., Stanbic Bank Uganda"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                        className="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm md:text-base"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
+                      <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Account Number</label>
                       <input
                         type="text"
                         value={bankDetails.accountNumber}
                         onChange={(e) => setBankDetails(prev => ({ ...prev, accountNumber: e.target.value }))}
                         placeholder="Your account number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                        className="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm md:text-base"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Account Name</label>
+                      <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Account Name</label>
                       <input
                         type="text"
                         value={bankDetails.accountName}
                         onChange={(e) => setBankDetails(prev => ({ ...prev, accountName: e.target.value }))}
                         placeholder="Account holder name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                        className="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm md:text-base"
                       />
                     </div>
                   </div>
                 )}
 
                 {selectedMethod === 'mobile_money' && (
-                  <div className="mb-6 space-y-4">
-                    <h3 className="font-semibold text-gray-900">Mobile Money Details</h3>
+                  <div className="mb-4 md:mb-6 space-y-3 md:space-y-4">
+                    <h3 className="font-semibold text-gray-900 text-xs md:text-sm">Mobile Money Details</h3>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Provider</label>
+                      <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Provider</label>
                       <select
                         value={mobileDetails.provider}
                         onChange={(e) => setMobileDetails(prev => ({ ...prev, provider: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                        className="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm md:text-base"
                       >
                         <option value="MTN">MTN Mobile Money</option>
                         <option value="Airtel">Airtel Money</option>
@@ -499,13 +499,13 @@ const AgentSettlement: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                      <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Phone Number</label>
                       <input
                         type="tel"
                         value={mobileDetails.phoneNumber}
                         onChange={(e) => setMobileDetails(prev => ({ ...prev, phoneNumber: e.target.value }))}
                         placeholder="+256 XXX XXX XXX"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                        className="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm md:text-base"
                       />
                     </div>
                   </div>
@@ -515,11 +515,11 @@ const AgentSettlement: React.FC = () => {
                 <button
                   onClick={handleSubmitSettlement}
                   disabled={isSubmitting || !amount || parseFloat(amount) <= 0 || parseFloat(amount) > getMaxSettlementAmount()}
-                  className="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  className="w-full bg-gray-900 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm md:text-base"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-3 h-3 md:w-4 md:h-4 mr-2 animate-spin" />
                       Submitting Request...
                     </>
                   ) : (
@@ -531,32 +531,32 @@ const AgentSettlement: React.FC = () => {
           </div>
 
           {/* Settlement History */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Settlement History</h2>
+          <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-200 p-4 md:p-6">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Settlement History</h2>
             
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <div className="flex items-center justify-center py-6 md:py-8">
+                <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin text-gray-400" />
               </div>
             ) : settlements.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <DollarSign className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>No settlement requests yet</p>
-                <p className="text-sm">Your settlement history will appear here</p>
+              <div className="text-center py-6 md:py-8 text-gray-500">
+                <DollarSign className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 text-gray-300" />
+                <p className="text-sm md:text-base">No settlement requests yet</p>
+                <p className="text-xs md:text-sm">Your settlement history will appear here</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {settlements.map((settlement) => (
-                  <div key={settlement.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
+                  <div key={settlement.id} className="border border-gray-200 rounded-lg p-3 md:p-4">
+                    <div className="flex items-center justify-between mb-2 md:mb-3">
                       <div className="flex flex-col">
                         <div className="flex items-center space-x-2 mb-1">
                           {getStatusIcon(settlement.status)}
-                          <span className="font-semibold text-gray-900">
+                          <span className="font-semibold text-gray-900 text-sm md:text-base">
                             UGX {settlement.amount.toLocaleString()}
                           </span>
                         </div>
-                        <div className="text-xs text-gray-500 ml-6">
+                        <div className="text-xs text-gray-500 ml-5 md:ml-6">
                           Fee: {settlement.settlementFee.toLocaleString()} • Net: {settlement.netAmount.toLocaleString()} UGX
                         </div>
                       </div>
@@ -565,8 +565,8 @@ const AgentSettlement: React.FC = () => {
                       </span>
                     </div>
                     
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p><strong>Reference:</strong> <span className="font-mono">{settlement.reference}</span></p>
+                    <div className="text-xs md:text-sm text-gray-600 space-y-1">
+                      <p><strong>Reference:</strong> <span className="font-mono text-xs">{settlement.reference}</span></p>
                       <p><strong>Method:</strong> {settlementMethods.find(m => m.id === settlement.method)?.name}</p>
                       <p><strong>Requested:</strong> {settlement.createdAt.toLocaleDateString()}</p>
                       {settlement.completedAt && (
@@ -589,9 +589,9 @@ const AgentSettlement: React.FC = () => {
         </div>
 
         {/* Information Panel */}
-        <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-          <h3 className="text-lg font-bold text-blue-900 mb-4">Settlement Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-blue-800">
+        <div className="bg-blue-50 rounded-lg p-4 md:p-6 border border-blue-200">
+          <h3 className="text-base md:text-lg font-bold text-blue-900 mb-3 md:mb-4">Settlement Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-xs md:text-sm text-blue-800">
             <div>
               <h4 className="font-semibold mb-2">How Settlements Work:</h4>
               <ul className="space-y-1">

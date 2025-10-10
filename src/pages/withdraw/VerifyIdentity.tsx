@@ -45,7 +45,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
   const verificationInstructions = [
     {
       key: 'identityDocument' as keyof typeof verificationSteps,
-      icon: <User className="w-5 h-5" />,
+      icon: <User className="w-4 h-4 md:w-5 md:h-5" />,
       title: 'Verify Identity Document',
       description: 'Check the customer\'s National ID or Passport matches the withdrawal request',
       details: [
@@ -57,7 +57,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
     },
     {
       key: 'phoneVerification' as keyof typeof verificationSteps,
-      icon: <Phone className="w-5 h-5" />,
+      icon: <Phone className="w-4 h-4 md:w-5 md:h-5" />,
       title: 'Verify Phone Number',
       description: 'Confirm the customer\'s phone number matches the registered number',
       details: [
@@ -68,7 +68,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
     },
     {
       key: 'amountConfirmation' as keyof typeof verificationSteps,
-      icon: <CreditCard className="w-5 h-5" />,
+      icon: <CreditCard className="w-4 h-4 md:w-5 md:h-5" />,
       title: 'Confirm Withdrawal Amount',
       description: 'Verify the customer knows the exact amount they are withdrawing',
       details: [
@@ -79,7 +79,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
     },
     {
       key: 'customerPresence' as keyof typeof verificationSteps,
-      icon: <CheckCircle className="w-5 h-5" />,
+      icon: <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />,
       title: 'Confirm Customer Presence',
       description: 'Verify the customer is physically present and ready to receive cash',
       details: [
@@ -91,27 +91,27 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
   ];
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-3 md:p-4 lg:p-6">
       {/* Withdrawal Details Header */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-4 sm:space-y-0">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-blue-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate">{withdrawal.userName}</h3>
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-600">
+              <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-800 truncate">{withdrawal.userName}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs md:text-sm text-gray-600">
                 <div className="flex items-center space-x-1">
-                  <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Phone className="w-3 h-3 md:w-4 md:h-4" />
                   <span className="truncate">{withdrawal.userPhone}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <MapPin className="w-3 h-3 md:w-4 md:h-4" />
                   <span className="truncate">{withdrawal.location}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Clock className="w-3 h-3 md:w-4 md:h-4" />
                   <span>Requested {getTimeAgo(withdrawal.requestedAt)}</span>
                 </div>
               </div>
@@ -119,7 +119,7 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
           </div>
           
           <div className="text-left sm:text-right">
-            <div className="text-xl sm:text-2xl font-bold text-gray-800">
+            <div className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">
               {formatCurrency(withdrawal.amount.local, withdrawal.amount.currency)}
             </div>
             <div className="text-xs text-gray-500 mt-1">
@@ -130,12 +130,12 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
       </div>
 
       {/* Important Notice */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
         <div className="flex items-start space-x-3">
-          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
+          <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-600 mt-0.5" />
           <div>
-            <h4 className="text-xs sm:text-sm font-medium text-amber-800">Important Security Notice</h4>
-            <p className="text-xs sm:text-sm text-amber-700 mt-1">
+            <h4 className="text-xs md:text-sm font-medium text-amber-800">Important Security Notice</h4>
+            <p className="text-xs md:text-sm text-amber-700 mt-1">
               Please complete ALL verification steps before proceeding to withdrawal approval. 
               This ensures the security of both the customer and your agency.
             </p>
@@ -144,8 +144,8 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
       </div>
 
       {/* Verification Steps */}
-      <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-        <h2 className="text-base sm:text-lg font-semibold text-gray-800">Identity Verification Checklist</h2>
+      <div className="space-y-3 md:space-y-4 mb-4 md:mb-6">
+        <h2 className="text-sm md:text-base lg:text-lg font-semibold text-gray-800">Identity Verification Checklist</h2>
         
         {verificationInstructions.map((instruction, index) => (
           <div 
@@ -168,13 +168,13 @@ const VerifyIdentity: React.FC<VerifyIdentityProps> = ({ withdrawal, onVerifyCom
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-2">
-                    <span className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-medium">
+                    <span className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-medium">
                       {index + 1}
                     </span>
-                    <h3 className="text-sm sm:text-base font-medium text-gray-800">{instruction.title}</h3>
+                    <h3 className="text-xs md:text-sm lg:text-base font-medium text-gray-800">{instruction.title}</h3>
                   </div>
                   
-                  <p className="text-xs sm:text-sm text-gray-600">{instruction.description}</p>
+                  <p className="text-xs md:text-sm text-gray-600">{instruction.description}</p>
                 </div>
               </div>
               

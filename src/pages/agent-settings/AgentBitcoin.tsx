@@ -19,27 +19,27 @@ const AgentBitcoin: React.FC<AgentBitcoinProps> = ({
   selectedCurrency
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
       <button
         onClick={onToggle}
-        className="w-full p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 transition-all duration-300 rounded-t-xl"
+        className="w-full p-4 md:p-6 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 transition-all duration-300 rounded-t-xl"
       >
         <div className="flex items-center space-x-3">
-          <Bitcoin className="w-5 h-5 text-orange-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Bitcoin Services</h2>
+          <Bitcoin className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">Bitcoin Services</h2>
         </div>
         {expanded ? 
-          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-          <ChevronDown className="w-5 h-5 text-gray-400" />
+          <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-gray-400" /> : 
+          <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
         }
       </button>
       
       {expanded && (
-        <div className="px-6 pb-6 space-y-6">
+        <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-4 md:space-y-6">
           {/* Bitcoin Services Toggle */}
-          <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200">
+          <div className="flex items-center justify-between p-3 md:p-4 bg-orange-50 rounded-lg border border-orange-200">
             <div>
-              <h3 className="text-sm font-medium text-orange-900">Enable Bitcoin Services</h3>
+              <h3 className="text-xs md:text-sm font-medium text-orange-900">Enable Bitcoin Services</h3>
               <p className="text-xs text-orange-700 mt-1">
                 Allow customers to exchange Bitcoin for local currency
               </p>
@@ -90,7 +90,7 @@ const AgentBitcoin: React.FC<AgentBitcoinProps> = ({
                   </div>
                   <div className="flex items-start space-x-2">
                     <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                    <p>Use AfriTokeni's escrow system for secure Bitcoin exchanges</p>
+                    <p>Use AfriTokeni&apos;s escrow system for secure Bitcoin exchanges</p>
                   </div>
                   <div className="flex items-start space-x-2">
                     <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>

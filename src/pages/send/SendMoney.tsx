@@ -254,31 +254,31 @@ const SendMoney: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
         {/* Step 0: Choose transfer type */}
         {sendStep === 0 && (
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">Choose Transfer Type</h2>
-              <p className="text-gray-600 text-lg">What would you like to do?</p>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-3">Choose Transfer Type</h2>
+              <p className="text-gray-600 text-sm sm:text-base md:text-lg">What would you like to do?</p>
             </div>
               
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {/* Send to User */}
               <button
                 onClick={() => {
                   setSendType('user');
                   setSendStep(1);
                 }}
-                className="bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left group"
+                className="bg-white p-6 md:p-8 border-2 border-gray-200 rounded-xl md:rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left group"
               >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                    <User className="w-8 h-8 text-blue-600" />
+                <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <User className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">Send to User</h3>
-                    <p className="text-sm text-gray-600 mb-2">Transfer money to another AfriTokeni user</p>
+                    <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1 md:mb-2">Send to User</h3>
+                    <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2">Transfer money to another AfriTokeni user</p>
                     <p className="text-xs text-gray-500">
                       Send local currency to friends, family, or contacts who have AfriTokeni accounts.
                     </p>
@@ -292,15 +292,15 @@ const SendMoney: React.FC = () => {
                   setSendType('international');
                   setSendStep(1);
                 }}
-                className="bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all text-left group"
+                className="bg-white p-6 md:p-8 border-2 border-gray-200 rounded-xl md:rounded-2xl hover:border-green-500 hover:shadow-lg transition-all text-left group"
               >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                    <Globe className="w-8 h-8 text-green-600" />
+                <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-green-50 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
+                    <Globe className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">Send to Africa</h3>
-                    <p className="text-sm text-gray-600 mb-2">International Bitcoin remittances</p>
+                    <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1 md:mb-2">Send to Africa</h3>
+                    <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2">International Bitcoin remittances</p>
                     <p className="text-xs text-gray-500">
                       Send Bitcoin to family in Africa who receive local currency cash via SMS.
                     </p>
@@ -311,15 +311,15 @@ const SendMoney: React.FC = () => {
               {/* Exchange Bitcoin for Cash */}
               <button
                 onClick={() => navigate('/users/bitcoin/deposit')}
-                className="bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-orange-500 hover:shadow-lg transition-all text-left group"
+                className="bg-white p-6 md:p-8 border-2 border-gray-200 rounded-xl md:rounded-2xl hover:border-orange-500 hover:shadow-lg transition-all text-left group"
               >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
-                    <Bitcoin className="w-8 h-8 text-orange-600" />
+                <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-orange-50 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
+                    <Bitcoin className="w-6 h-6 md:w-8 md:h-8 text-orange-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">Exchange Bitcoin for Cash</h3>
-                    <p className="text-sm text-gray-600 mb-2">Convert Bitcoin to local currency via agents</p>
+                    <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1 md:mb-2">Exchange Bitcoin for Cash</h3>
+                    <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2">Convert Bitcoin to local currency via agents</p>
                     <p className="text-xs text-gray-500">
                       Send Bitcoin from your hardware wallet and receive cash from nearby agents.
                     </p>
@@ -332,57 +332,57 @@ const SendMoney: React.FC = () => {
 
           {/* Step 1: International Recipient Form */}
           {sendStep === 1 && sendType === 'international' && (
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Who are you sending to?</h2>
-                <p className="text-gray-600">Enter your recipient's details in Africa</p>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Who are you sending to?</h2>
+                <p className="text-gray-600 text-sm md:text-base">Enter your recipient&apos;s details in Africa</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
                     First Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                     <input
                       type="text"
                       value={internationalRecipient.firstName}
                       onChange={(e) => setInternationalRecipient({...internationalRecipient, firstName: e.target.value})}
                       placeholder="Enter first name"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
                     Last Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                     <input
                       type="text"
                       value={internationalRecipient.lastName}
                       onChange={(e) => setInternationalRecipient({...internationalRecipient, lastName: e.target.value})}
                       placeholder="Enter last name"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
                     Phone Number
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                     <input
                       type="tel"
                       value={internationalRecipient.phone}
                       onChange={(e) => setInternationalRecipient({...internationalRecipient, phone: e.target.value})}
                       placeholder="+256 701 234 5678"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                     />
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
@@ -391,11 +391,11 @@ const SendMoney: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
                     Country & Currency
                   </label>
                   <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                     <select
                       value={internationalRecipient.currency}
                       onChange={(e) => {
@@ -407,7 +407,7 @@ const SendMoney: React.FC = () => {
                           country: currencyInfo?.name || ''
                         });
                       }}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                      className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm md:text-base"
                     >
                       {Object.entries(AFRICAN_CURRENCIES).map(([code, info]) => (
                         <option key={code} value={code}>
@@ -419,14 +419,14 @@ const SendMoney: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-4 h-4 text-blue-600" />
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-3 h-3 md:w-4 md:h-4 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-blue-900 mb-1">SMS Notification</h3>
-                    <p className="text-sm text-blue-700">
+                    <h3 className="font-semibold text-blue-900 mb-1 text-sm md:text-base">SMS Notification</h3>
+                    <p className="text-xs md:text-sm text-blue-700">
                       Your recipient will receive an SMS notification when the money is ready for pickup. 
                       No smartphone or app required.
                     </p>
@@ -437,7 +437,7 @@ const SendMoney: React.FC = () => {
               <button
                 onClick={() => setSendStep(2)}
                 disabled={!internationalRecipient.firstName || !internationalRecipient.lastName || !internationalRecipient.phone}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm md:text-base"
               >
                 Continue to Amount
               </button>
@@ -446,13 +446,13 @@ const SendMoney: React.FC = () => {
 
           {/* Step 1: Enter recipient and amount (User Transfer Only) */}
           {sendStep === 1 && sendType === 'user' && (
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-4 md:space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 sm:mb-3">
+                <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
                   Recipient Search (Phone / Name)
                 </label>
                 <div className="relative" ref={searchContainerRef}>
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 z-10" />
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400 z-10" />
                   <input
                     type="tel"
                     value={recipientPhone}
@@ -463,20 +463,20 @@ const SendMoney: React.FC = () => {
                       }
                     }}
                     placeholder="Enter phone number, first name, or last name"
-                    className="w-full pl-9 sm:pl-10 pr-10 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
+                    className="w-full pl-9 md:pl-10 pr-10 py-2.5 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
                   />
                   {isSearchingUser && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 animate-spin z-10" />
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400 animate-spin z-10" />
                   )}
                   
                   {/* Search Results Dropdown */}
                   {showSearchResults && searchResults.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 md:max-h-60 overflow-y-auto">
                       {searchResults.map((user, index) => (
                         <div
                           key={`${user.id}-${index}`}
                           onClick={() => handleUserSelection(user)}
-                          className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          className="flex items-center space-x-2 md:space-x-3 p-2 md:p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                         >
                           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <User className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
