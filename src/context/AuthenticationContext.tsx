@@ -367,14 +367,14 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Initialize user from stored data and subscribe to Juno auth changes
   useEffect(() => {
     // Subscribe to Juno authentication state changes
-    const unsubscribe = onAuthStateChange((junoUser: JunoUser | null) => {
+    const unsubscribe = onAuthStateChange(async (junoUser: JunoUser | null) => {
       console.log("Juno auth state changed:", junoUser);
       if (junoUser) {
-        // For ICP users, check their role and redirect accordingly
-        checkAndRedirectRef.current(junoUser);
         // User is authenticated with Juno/ICP
-        // Load or create user profile from Juno datastore
-        loadOrCreateUserFromJuno(junoUser);
+        // Load or create user profile from Juno datastore FIRST
+        await loadOrCreateUserFromJuno(junoUser);
+        // THEN check their role and redirect accordingly (after user state is set)
+        checkAndRedirectRef.current(junoUser);
       } else {
         // User is not authenticated with Juno - but check if we have SMS users stored
         const storedData = getStoredUserData();
