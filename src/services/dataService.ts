@@ -89,6 +89,7 @@ export interface WithdrawalRequest {
   status: 'pending' | 'confirmed' | 'completed' | 'rejected';
   createdAt: string;
   updatedAt: string;
+  withdrawalType?: 'digital_balance' | 'ckbtc' | 'ckusdc'; // Source of withdrawal
   userName?: string; // Added when fetching with user info
   userPhone?: string; // Added when fetching with user info
   userLocation?: string; // Added when fetching with user info

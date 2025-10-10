@@ -134,6 +134,7 @@ const App: FC = () => {
                 <Route path="deposit" element={<ProcessDeposits/>} />
                 <Route path="customers" element={<AgentCustomers/>} />
                 <Route path="location" element={<div>Location Page</div>} />
+                <Route path="dao" element={<DAODashboard />} />
                 <Route path="settings" element={<AgentSettings/>} />
                 <Route path="funding" element={<AgentFunding/>} />
                 <Route path="settlement" element={<AgentSettlement/>} />

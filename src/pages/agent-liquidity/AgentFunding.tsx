@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowLeft, DollarSign, CreditCard, Building2, Smartphone, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { DollarSign, CreditCard, Building2, Smartphone, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
 import { NotificationService } from '../../services/notificationService';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { AgentDemoDataService } from '../../services/agentDemoDataService';
+import { useAuthentication } from '../../context/AuthenticationContext';
 
 type FundingMethod = 'bank_transfer' | 'mobile_money' | 'cash_deposit';
 
@@ -24,9 +27,15 @@ interface FundingRequest {
 
 const AgentFunding: React.FC = () => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuthentication();
   const { user, agent, refreshData } = useAfriTokeni();
+  const { isDemoMode } = useDemoMode();
   const [amount, setAmount] = useState<string>('');
   const [selectedMethod, setSelectedMethod] = useState<FundingMethod>('bank_transfer');
+
+  // Get agent currency
+  const currentAgent = authUser.agent || agent;
+  const agentCurrency = (currentAgent as any)?.preferredCurrency || 'UGX';
   const [bankDetails, setBankDetails] = useState({
     accountNumber: '',
     bankName: '',
@@ -77,16 +86,29 @@ const AgentFunding: React.FC = () => {
       return;
     }
 
-    if (!agent) {
-      alert('Agent information not found');
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
       const fundingAmount = parseFloat(amount);
       const reference = generateReference();
+
+      // Demo mode - instant funding
+      if (isDemoMode) {
+        AgentDemoDataService.fundAccount(fundingAmount, agentCurrency, selectedMethod.replace('_', ' '));
+        setFundingReference(reference);
+        setShowSuccess(true);
+        setAmount('');
+        setIsSubmitting(false);
+        console.log('🎭 Demo funding completed:', fundingAmount, agentCurrency);
+        return;
+      }
+
+      // Real mode
+      if (!agent) {
+        alert('Agent information not found');
+        setIsSubmitting(false);
+        return;
+      }
 
       const fundingRequest: FundingRequest = {
         amount: fundingAmount,
@@ -278,19 +300,6 @@ const AgentFunding: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="max-w-4xl mx-auto p-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <button
-            onClick={() => navigate('/agents/dashboard')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Fund Your Account</h1>
-            <p className="text-gray-600">Add digital balance to process customer deposits</p>
-          </div>
-        </div>
 
         {/* Current Balance Alert */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">

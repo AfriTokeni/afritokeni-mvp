@@ -6,7 +6,7 @@ import {
   Banknote,
   Home,
   LayoutDashboard,
-  Send
+  Vote
 } from 'lucide-react';
 
 export interface Route {
@@ -36,10 +36,10 @@ export const agent_desktop_routes: Route[] = [
     icon: Banknote,
   },
   {
-    id: 'lightning',
-    path: '/agents/lightning',
-    label: 'Send Bitcoin',
-    icon: Send,
+    id: 'dao',
+    path: '/agents/dao',
+    label: 'DAO Governance',
+    icon: Vote,
   },
   {
     id: 'customers',
@@ -75,10 +75,10 @@ export const agent_mobile_routes: Route[] = [
     icon: Banknote,
   },
   {
-    id: 'lightning',
-    path: '/agents/lightning',
-    label: 'Send Bitcoin',
-    icon: Send,
+    id: 'dao',
+    path: '/agents/dao',
+    label: 'DAO',
+    icon: Vote,
   },
   {
     id: 'customers',

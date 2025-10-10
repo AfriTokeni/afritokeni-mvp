@@ -49,7 +49,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       if (!formData.phone.trim()) {
         newErrors.phone = 'Phone number is required';
       } else if (!formData.phone.startsWith('+')) {
-        newErrors.phone = 'Phone must start with country code (e.g., +256)';
+        newErrors.phone = 'Phone must start with country code (e.g., +234, +254, +256)';
       }
     } else if (currentStep === 3) {
       if (!formData.country.trim()) newErrors.country = 'Country is required';
@@ -178,7 +178,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 ${
                     errors.phone ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="+256 700 000 000"
+                  placeholder="+234 800 123 456"
                 />
                 {errors.phone && (
                   <p className="text-red-500 text-xs mt-1">{errors.phone}</p>

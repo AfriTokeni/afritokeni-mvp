@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Search, X } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
 import { DataService } from '../../services/dataService';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { AgentDemoDataService } from '../../services/agentDemoDataService';
+import { CurrencySelector } from '../../components/CurrencySelector';
+import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
+import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
 
 
 
@@ -25,6 +30,7 @@ interface DepositRequest {
 
 const ProcessDeposits: React.FC = () => {
   const { user } = useAuthentication();
+  const { isDemoMode } = useDemoMode();
   const [depositRequests, setDepositRequests] = useState<DepositRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<DepositRequest | null>(null);
   const [verificationCodes, setVerificationCodes] = useState<{[requestId: string]: string}>({});
@@ -32,17 +38,57 @@ const ProcessDeposits: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('pending');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Get agent currency
+  const currentAgent = user.agent;
+  const agentCurrency = selectedCurrency || (currentAgent as any)?.preferredCurrency || 'UGX';
+
+  // Initialize demo data if needed
+  useEffect(() => {
+    if (isDemoMode && (currentAgent as any)?.email) {
+      AgentDemoDataService.initializeDemoAgent((currentAgent as any).email);
+    }
+  }, [isDemoMode, currentAgent]);
 
   const loadDepositRequests = useCallback(async () => {
-    const userId = user?.agent?.id || user?.user?.id;
-    
-    if (!userId) {
-      console.error('No user ID available');
-      return;
-    }
-
     setLoading(true);
     try {
+      // Demo mode - load from demo service
+      if (isDemoMode) {
+        const demoDeposits = AgentDemoDataService.getPendingDeposits();
+        const transformedRequests = demoDeposits
+          .map(deposit => ({
+            id: deposit.id,
+            userId: deposit.userId,
+            userName: deposit.userName,
+            userPhone: deposit.userPhone,
+            agentId: currentAgent?.id || 'demo-agent',
+            amount: {
+              local: deposit.amount,
+              currency: deposit.currency
+            },
+            depositCode: deposit.code,
+            status: deposit.status as 'pending' | 'confirmed' | 'completed' | 'rejected',
+            createdAt: deposit.createdAt,
+            userLocation: 'Kampala, Uganda'
+          }));
+        setDepositRequests(transformedRequests);
+        setLoading(false);
+        return;
+      }
+
+      // Real mode
+      const userId = user?.agent?.id || user?.user?.id;
+      
+      if (!userId) {
+        console.error('No user ID available');
+        setDepositRequests([]);
+        setLoading(false);
+        return;
+      }
+
       // First, get the agent record for this user to get the actual agent ID
       console.log('🏦 ProcessDeposits - Looking up agent record for user ID:', userId);
       const agentRecord = await DataService.getAgentByUserId(userId);
@@ -80,7 +126,7 @@ const ProcessDeposits: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, filter]);
+  }, [user, filter, isDemoMode, currentAgent]);
 
   // Load deposit requests for this agent
   useEffect(() => {
@@ -88,15 +134,33 @@ const ProcessDeposits: React.FC = () => {
   }, [loadDepositRequests]);
 
   const handleVerifyCode = async (request: DepositRequest) => {
-    const currentCode = verificationCodes[request.id] || '';
-    if (currentCode === request.depositCode) {
+    const currentCode = (verificationCodes[request.id] || '').trim().toUpperCase();
+    const expectedCode = request.depositCode.trim().toUpperCase();
+    
+    console.log('🔍 Verifying code:', { 
+      currentCode, 
+      expectedCode, 
+      match: currentCode === expectedCode,
+      isDemoMode 
+    });
+    
+    if (currentCode === expectedCode) {
       try {
-        // Update request status to confirmed
+        // Demo mode - confirm deposit (change status to confirmed)
+        if (isDemoMode) {
+          AgentDemoDataService.confirmDeposit(request.id);
+          setSelectedRequest(request);
+          setError('');
+          await loadDepositRequests();
+          console.log('✅ Demo mode: Code verified, status changed to confirmed');
+          return;
+        }
+
+        // Real mode - update via DataService
         const success = await DataService.updateDepositRequestStatus(request.id, 'confirmed');
         if (success) {
           setSelectedRequest(request);
           setError('');
-          // Reload to show updated status
           await loadDepositRequests();
         } else {
           setError('Failed to confirm deposit request. Please try again.');
@@ -106,13 +170,26 @@ const ProcessDeposits: React.FC = () => {
         setError('Failed to confirm deposit request. Please try again.');
       }
     } else {
-      setError('Invalid deposit code. Please check and try again.');
+      setError(`Invalid deposit code. Expected: ${expectedCode}, Got: ${currentCode}`);
     }
   };
 
   const handleConfirmDeposit = async (request: DepositRequest) => {
     setIsProcessing(true);
     try {
+      // Demo mode - approve deposit
+      if (isDemoMode) {
+        AgentDemoDataService.approveDeposit(request.id);
+        await loadDepositRequests();
+        setSelectedRequest(null);
+        setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
+        setError('');
+        setIsProcessing(false);
+        console.log('🎭 Demo deposit approved:', request.id);
+        return;
+      }
+
+      // Real mode
       const userId = user?.agent?.id || user?.user?.id;
       if (!userId) {
         throw new Error('No user ID available');
@@ -212,8 +289,15 @@ const ProcessDeposits: React.FC = () => {
   };
 
   const filteredRequests = depositRequests.filter(request => {
-    if (filter === 'all') return true;
-    return request.status === filter;
+    // Filter by status
+    const statusMatch = filter === 'all' || request.status === filter;
+    
+    // Filter by search query (name or phone)
+    const searchMatch = !searchQuery || 
+      request.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.userPhone.includes(searchQuery);
+    
+    return statusMatch && searchMatch;
   });
 
   const getStatusIcon = (status: string) => {
@@ -248,14 +332,127 @@ const ProcessDeposits: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Process Deposits</h1>
-        <p className="text-gray-600">Manage customer cash deposits and digital balance credits</p>
+      {/* Balance Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Digital Balance Card */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-sm font-medium text-gray-600">Digital Balance</p>
+                <span className="text-xs text-gray-400">Operations</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 font-mono">
+                {formatCurrencyAmount(
+                  isDemoMode 
+                    ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+                    : ((currentAgent as any)?.digitalBalance || 0),
+                  agentCurrency as AfricanCurrency
+                )}
+              </p>
+            </div>
+            <CurrencySelector
+              currentCurrency={agentCurrency}
+              onCurrencyChange={(currency) => setSelectedCurrency(currency)}
+            />
+          </div>
+        </div>
+
+        {/* Cash Balance Card */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-sm font-medium text-gray-600">Cash Balance</p>
+                <span className="text-xs text-gray-400">Earnings</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 font-mono">
+                {formatCurrencyAmount(
+                  isDemoMode 
+                    ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+                    : ((currentAgent as any)?.cashBalance || 0),
+                  agentCurrency as AfricanCurrency
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-        {/* Filter Tabs */}
+      {/* ckBTC and ckUSDC Balance Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <CkBTCBalanceCard
+          principalId={currentAgent?.id || 'demo-agent'}
+          preferredCurrency={agentCurrency}
+          showActions={false}
+        />
+        <CkUSDCBalanceCard
+          principalId={currentAgent?.id || 'demo-agent'}
+          preferredCurrency={agentCurrency}
+          showActions={false}
+        />
+      </div>
+
+      {/* Error Message - Move to top for visibility */}
+      {error && (
+        <div className="bg-red-50 border-2 border-red-500 rounded-2xl p-4 shadow-lg">
+          <div className="flex items-start">
+            <AlertCircle className="h-6 w-6 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-red-900 mb-1">Verification Failed</h3>
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+            <button 
+              onClick={() => setError('')}
+              className="text-red-400 hover:text-red-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Instructions */}
+      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+        <h3 className="font-semibold text-blue-900 mb-3">Deposit Process:</h3>
+        <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+          <li>Customer shows you their deposit code</li>
+          <li>Verify the code matches the request</li>
+          <li>Collect the cash amount from customer</li>
+          <li>Complete the deposit to credit their digital balance</li>
+          <li>Customer receives confirmation notification</li>
+        </ol>
+        <div className="mt-4 p-3 bg-blue-100 rounded-lg">
+          <p className="text-sm text-blue-900 font-medium">
+            ⚠️ Always verify the deposit code before accepting cash. Rejected deposits cannot be reversed.
+          </p>
+        </div>
+        {isDemoMode && (
+          <div className="mt-4 p-3 bg-purple-100 rounded-lg border border-purple-200">
+            <p className="text-sm text-purple-900 font-medium">
+              🎭 Demo Mode: For testing, use these codes - John: DEP8BL, Sarah: DEP6CP, David: DEPKY3
+            </p>
+          </div>
+        )}
+      </div>
+
+        {/* Search and Filter */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by name or phone number..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Filter Tabs */}
           <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 mb-6">
             {(['all', 'pending', 'confirmed', 'completed'] as const).map((tab) => (
               <button
@@ -318,6 +515,11 @@ const ProcessDeposits: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right">
+                      <div className="flex items-center justify-end gap-2 mb-1">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">
+                          Digital Balance
+                        </span>
+                      </div>
                       <div className="text-2xl font-bold text-gray-900 font-mono">
                         {formatCurrencyAmount(request.amount.local, request.amount.currency as AfricanCurrency)}
                       </div>
@@ -330,9 +532,13 @@ const ProcessDeposits: React.FC = () => {
 
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600">
-                      <span>Deposit Code: </span>
-                      <span className="font-mono font-semibold text-gray-900">{request.depositCode}</span>
-                      <span className="ml-4">
+                      {!isDemoMode && (
+                        <>
+                          <span>Deposit Code: </span>
+                          <span className="font-mono font-semibold text-gray-900">{request.depositCode}</span>
+                        </>
+                      )}
+                      <span className={!isDemoMode ? "ml-4" : ""}>
                         {new Date(request.createdAt).toLocaleString()}
                       </span>
                     </div>
@@ -397,32 +603,6 @@ const ProcessDeposits: React.FC = () => {
           </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
-            <div className="flex items-start">
-              <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Instructions */}
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <h3 className="font-semibold text-blue-900 mb-3">Deposit Process:</h3>
-          <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-            <li>Customer shows you their deposit code</li>
-            <li>Verify the code matches the request</li>
-            <li>Collect the cash amount from customer</li>
-            <li>Complete the deposit to credit their digital balance</li>
-            <li>Customer receives confirmation notification</li>
-          </ol>
-          <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-            <p className="text-sm text-blue-900 font-medium">
-              ⚠️ Always verify the deposit code before accepting cash. Rejected deposits cannot be reversed.
-            </p>
-          </div>
-        </div>
     </div>
   );
 };

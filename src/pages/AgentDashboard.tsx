@@ -3,40 +3,53 @@ import { useNavigate } from "react-router-dom";
 import {
   TrendingUp,
   Users,
-  Plus,
-  Minus,
   Eye,
   EyeOff,
   Wallet,
   CreditCard,
-  ArrowRightLeft,
   X,
 } from "lucide-react";
 import { BalanceService } from "../services/BalanceService";
-import { formatCurrencyAmount } from "../types/currency";
+import { formatCurrencyAmount, AfricanCurrency } from "../types/currency";
 import { useAfriTokeni } from "../hooks/useAfriTokeni";
 import { useDemoMode } from "../context/DemoModeContext";
-import { DemoDataService } from "../services/demoDataService";
+import { AgentDemoDataService } from "../services/agentDemoDataService";
 import { DataService } from "../services/dataService";
 import { Transaction } from "../types/transaction";
+import { CurrencySelector } from "../components/CurrencySelector";
+import { CkBTCBalanceCard } from "../components/CkBTCBalanceCard";
+import { CkUSDCBalanceCard } from "../components/CkUSDCBalanceCard";
+import { AgentOnboardingModal, AgentOnboardingData } from "../components/AgentOnboardingModal";
+import { AgentKYCBanner } from "../components/AgentKYCBanner";
+import { useAuthentication } from "../context/AuthenticationContext";
 
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { agent } = useAfriTokeni();
+  const { user } = useAuthentication();
   const { isDemoMode } = useDemoMode();
   const [showBalance, setShowBalance] = useState(true);
   const [showVerificationAlert, setShowVerificationAlert] = useState(true);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
+
+  // Get current agent
+  const currentAgent = user.agent || agent;
+  const agentCurrency = selectedCurrency || (currentAgent as any)?.preferredCurrency || 'UGX';
 
   // Initialize demo data if demo mode is enabled
   useEffect(() => {
-    if (isDemoMode && agent?.id) {
-      DemoDataService.initializeDemoAgent(agent.id);
+    if (isDemoMode && (currentAgent as any)?.email) {
+      AgentDemoDataService.initializeDemoAgent((currentAgent as any).email);
     }
-  }, [isDemoMode, agent?.id]);
+  }, [isDemoMode, currentAgent]);
 
   // Get customers count
   const [customersCount, setCustomersCount] = useState(0);
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showKYCBanner, setShowKYCBanner] = useState(true);
+  const [kycStatus, setKycStatus] = useState<'pending' | 'verified' | 'rejected' | 'not_started'>('not_started');
 
   // Calculate real daily earnings from actual transactions
   const calculateDailyEarnings = (): number => {
@@ -65,60 +78,93 @@ const AgentDashboard: React.FC = () => {
     return totalEarnings;
   };
 
-  React.useEffect(() => {
-    // Load customers count asynchronously
-    DataService.getAllCustomers().then((customers) => {
-      setCustomersCount(customers.length);
-    });
-
-    // Load agent transactions
-    if (agent) {
-      // Use agent.userId for BalanceService since it tracks by user ID, not agent ID
+  useEffect(() => {
+    if (isDemoMode) {
+      // Load demo transactions
+      const demoTransactions = AgentDemoDataService.getTransactions();
+      setAgentTransactions(demoTransactions as any);
+    } else if (agent) {
       const transactions = BalanceService.getTransactionHistory(
         agent.userId || agent.id,
       );
       setAgentTransactions(transactions);
     }
-  }, [agent]);
-
-  const dailyEarnings = calculateDailyEarnings();
-
-  // Combine regular transactions for display
-  const allTransactions = React.useMemo(() => {
-    const combined = [
-      ...agentTransactions.map((tx) => ({
-        ...tx,
-        source: "regular" as const,
-        displayType:
-          tx.type.charAt(0).toUpperCase() +
-          tx.type.slice(1).replace(/[_-]/g, " "),
-        displayAmount: formatCurrencyAmount(tx.amount, tx.currency as "UGX"),
-        commission: formatCurrencyAmount(
-          Math.round(tx.amount * 0.02),
-          tx.currency as "UGX",
-        ),
-        description: tx.description || "Transaction",
-      })),
-    ];
-
-    // Sort by creation date, newest first
-    return combined.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-  }, [agentTransactions]);
+  }, [agent, isDemoMode]);
 
   const formatCurrency = (amount: number): string => {
-    return formatCurrencyAmount(amount, "UGX");
+    return formatCurrencyAmount(amount, agentCurrency as AfricanCurrency);
   };
+
+  // Check if profile is complete
+  const getMissingFields = (): string[] => {
+    const missing: string[] = [];
+    const agentData = currentAgent as any;
+    
+    if (!agentData?.businessName) missing.push('Business Name');
+    if (!agentData?.phone) missing.push('Phone Number');
+    if (!agentData?.address) missing.push('Business Address');
+    if (!agentData?.city) missing.push('City');
+    if (!agentData?.country) missing.push('Country');
+    
+    return missing;
+  };
+
+  const handleOnboardingComplete = async (data: AgentOnboardingData) => {
+    console.log('Agent onboarding data:', data);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('agent_profile_data', JSON.stringify(data));
+    localStorage.setItem('agent_kyc_status', 'verified'); // Auto-verify in demo
+    
+    setShowOnboarding(false);
+    setKycStatus('verified');
+    setShowKYCBanner(false); // Hide banner after completion
+  };
+
+  // Load saved profile data and KYC status
+  useEffect(() => {
+    // Load KYC status from localStorage
+    const savedKycStatus = localStorage.getItem('agent_kyc_status');
+    if (savedKycStatus) {
+      setKycStatus(savedKycStatus as 'pending' | 'verified' | 'rejected' | 'not_started');
+    }
+    
+    // Load profile data
+    const savedProfileData = localStorage.getItem('agent_profile_data');
+    if (savedProfileData) {
+      const profileData = JSON.parse(savedProfileData);
+      console.log('Loaded agent profile data:', profileData);
+      // Profile data is loaded, so hide banner if KYC is verified
+      if (savedKycStatus === 'verified') {
+        setShowKYCBanner(false);
+      }
+    }
+    
+    // Show onboarding on first visit
+    const hasSeenOnboarding = localStorage.getItem('agent_onboarding_seen');
+    if (!hasSeenOnboarding && !savedProfileData && !isDemoMode) {
+      setShowOnboarding(true);
+      localStorage.setItem('agent_onboarding_seen', 'true');
+    }
+    
+    // In demo mode, auto-verify KYC
+    if (isDemoMode) {
+      setKycStatus('verified');
+      setShowKYCBanner(false);
+    }
+  }, [isDemoMode]);
 
 
   const getLiquidityAlerts = () => {
-    if (!agent) return [];
-
     const alerts = [];
-    const digitalBalance = agent.digitalBalance || 0;
-    const cashBalance = agent.cashBalance || 0;
+    
+    // Get balances from demo mode or real agent
+    const digitalBalance = isDemoMode 
+      ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+      : (agent?.digitalBalance || 0);
+    const cashBalance = isDemoMode 
+      ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+      : (agent?.cashBalance || 0);
 
     // Critical digital balance
     if (digitalBalance < 50000) {
@@ -159,14 +205,43 @@ const AgentDashboard: React.FC = () => {
   };
 
   const liquidityAlerts = getLiquidityAlerts();
+  const missingFields = getMissingFields();
 
   return (
     <div className="space-y-6">
+      {/* Onboarding Modal */}
+      <AgentOnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={handleOnboardingComplete}
+        currentData={{
+          businessName: (currentAgent as any)?.businessName,
+          ownerName: (currentAgent as any)?.ownerName,
+          email: (currentAgent as any)?.email,
+          phone: (currentAgent as any)?.phone,
+          preferredCurrency: agentCurrency as AfricanCurrency,
+          country: (currentAgent as any)?.country,
+          city: (currentAgent as any)?.city,
+          address: (currentAgent as any)?.address,
+          kycStatus: kycStatus
+        }}
+      />
+
       {/* <NotificationSystem 
         notifications={notifications}
         onDismiss={dismissNotification}
       /> */}
       <div className="space-y-6">
+        {/* KYC Banner - Critical if not verified */}
+        {showKYCBanner && (kycStatus !== 'verified' || missingFields.length > 0) && (
+          <AgentKYCBanner
+            missingFields={missingFields}
+            kycStatus={kycStatus}
+            onDismiss={() => setShowKYCBanner(false)}
+            onComplete={() => setShowOnboarding(true)}
+          />
+        )}
+
         {/* Agent Verification Status */}
         {showVerificationAlert &&
           (agent?.isActive ? (
@@ -297,78 +372,78 @@ const AgentDashboard: React.FC = () => {
           </div>
         </div> */}
 
-        {/* Liquidity Alerts */}
-        {/* {liquidityAlerts.length > 0 && (
-          <div className="space-y-3">
-            {liquidityAlerts.map((alert, index) => (
-              <LiquidityAlert
-                key={index}
-                type={alert.type}
-                currentBalance={alert.balance}
-                threshold={alert.threshold}
-                onActionClick={() => {
-                  if (alert.type.includes('digital')) {
-                    navigate('/agents/funding');
-                  } else {
-                    navigate('/agents/settlement');
-                  }
-                }}
-              />
-            ))}
-          </div>
-        )} */}
-
-        {/* Balance Cards Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Cash Balance Card */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-8">
-            <div className="mb-6 flex items-start justify-between">
-              <div>
-                <p className="mb-2 text-sm font-medium text-gray-600">
-                  Cash Balance
-                </p>
-                <div className="flex items-center space-x-3">
-                  <p className="font-mono text-3xl font-bold text-gray-900">
-                    {showBalance
-                      ? formatCurrency(agent?.cashBalance || 0)
-                      : "••••••"}
-                  </p>
-                  <button
-                    onClick={() => setShowBalance(!showBalance)}
-                    className="text-gray-400"
-                  >
-                    {showBalance ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-                <p className="mt-2 text-sm text-gray-500">Earnings</p>
+        {/* Stats Row - AT THE TOP */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3 mb-6">
+          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
+                <TrendingUp className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
               </div>
-              <div className="rounded-xl bg-green-50 p-3">
-                <Wallet className="h-6 w-6 text-green-600" />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
+                  Daily Earnings
+                </p>
+                <p className="text-lg font-bold text-neutral-900 sm:text-2xl">
+                  {isDemoMode 
+                    ? formatCurrencyAmount(125000, agentCurrency as AfricanCurrency)
+                    : formatCurrencyAmount(0, agentCurrency as AfricanCurrency)}
+                </p>
               </div>
             </div>
-            <button
-              onClick={() => navigate("/agents/settlement")}
-              className="w-full rounded-xl bg-gray-900 py-3 font-semibold text-white transition-colors hover:bg-gray-800"
-            >
-              Withdraw
-            </button>
           </div>
 
-          {/* Digital Balance Card */}
+          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
+                <CreditCard className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
+                  Today's Transactions
+                </p>
+                <p className="text-lg font-bold text-neutral-900 sm:text-2xl">
+                  {isDemoMode ? '47' : '0'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
+                <Users className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
+                  Active Customers
+                </p>
+                <p className="text-lg font-bold text-neutral-900 sm:text-2xl">
+                  {isDemoMode ? '28' : '2'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Balance Cards Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Digital Balance Card (Primary - Operations) */}
           <div className="rounded-2xl border border-gray-200 bg-white p-8">
             <div className="mb-6 flex items-start justify-between">
-              <div>
-                <p className="mb-2 text-sm font-medium text-gray-600">
-                  Digital Balance
-                </p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm font-medium text-gray-600">Digital Balance</p>
+                  <span className="text-xs text-gray-400">Operations</span>
+                </div>
                 <div className="flex items-center space-x-3">
                   <p className="font-mono text-3xl font-bold text-gray-900">
                     {showBalance
-                      ? formatCurrency(agent?.digitalBalance || 0)
+                      ? formatCurrencyAmount(
+                          isDemoMode 
+                            ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+                            : (agent?.digitalBalance || 0),
+                          agentCurrency as AfricanCurrency
+                        )
                       : "••••••"}
                   </p>
                   <button
@@ -382,10 +457,15 @@ const AgentDashboard: React.FC = () => {
                     )}
                   </button>
                 </div>
-                <p className="mt-2 text-sm text-gray-500">Operations</p>
               </div>
-              <div className="rounded-xl bg-blue-50 p-3">
-                <CreditCard className="h-6 w-6 text-blue-600" />
+              <div className="flex flex-col items-end gap-2">
+                <div className="rounded-xl bg-blue-50 p-3">
+                  <CreditCard className="h-6 w-6 text-blue-600" />
+                </div>
+                <CurrencySelector
+                  currentCurrency={agentCurrency}
+                  onCurrencyChange={(currency) => setSelectedCurrency(currency)}
+                />
               </div>
             </div>
             <button
@@ -396,68 +476,71 @@ const AgentDashboard: React.FC = () => {
             </button>
           </div>
 
+          {/* Cash Balance Card (Earnings) */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-8">
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm font-medium text-gray-600">Cash Balance</p>
+                  <span className="text-xs text-gray-400">Earnings</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <p className="font-mono text-3xl font-bold text-gray-900">
+                    {showBalance
+                      ? formatCurrencyAmount(
+                          isDemoMode 
+                            ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+                            : (agent?.cashBalance || 0),
+                          agentCurrency as AfricanCurrency
+                        )
+                      : "••••••"}
+                  </p>
+                  <button
+                    onClick={() => setShowBalance(!showBalance)}
+                    className="text-gray-400"
+                  >
+                    {showBalance ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="rounded-xl bg-green-50 p-3">
+                <Wallet className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+            <button
+              onClick={() => navigate("/agents/settlement")}
+              className="w-full rounded-xl bg-gray-900 py-3 font-semibold text-white transition-colors hover:bg-gray-800"
+            >
+              Withdraw Earnings
+            </button>
+          </div>
         </div>
 
-        {/* Quick Actions - Reorganized by Category */}
-        <div className="space-y-6">
-          {/* Transaction Processing */}
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-neutral-700">
-              Transaction Processing
-            </h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-              <button
-                onClick={() => navigate("/agents/deposit")}
-                className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-neutral-300 hover:shadow-md sm:p-6"
-              >
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 sm:mb-3 sm:h-12 sm:w-12">
-                  <Plus className="h-5 w-5 text-green-600 sm:h-6 sm:w-6" />
-                </div>
-                <span className="block text-center text-xs font-semibold text-neutral-900 sm:text-sm">
-                  Process Deposits
-                </span>
-              </button>
-
-              <button
-                onClick={() => navigate("/agents/withdraw")}
-                className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-neutral-300 hover:shadow-md sm:p-6"
-              >
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 sm:mb-3 sm:h-12 sm:w-12">
-                  <Minus className="h-5 w-5 text-red-600 sm:h-6 sm:w-6" />
-                </div>
-                <span className="block text-center text-xs font-semibold text-neutral-900 sm:text-sm">
-                  Process Withdrawals
-                </span>
-              </button>
-
-              <button
-                onClick={() => navigate("/agents/customers")}
-                className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-neutral-300 hover:shadow-md sm:p-6"
-              >
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 sm:mb-3 sm:h-12 sm:w-12">
-                  <Users className="h-5 w-5 text-blue-600 sm:h-6 sm:w-6" />
-                </div>
-                <span className="block text-center text-xs font-semibold text-neutral-900 sm:text-sm">
-                  Manage Customers
-                </span>
-              </button>
-
-              <button
-                onClick={() => navigate("/agents/exchange")}
-                className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-neutral-300 hover:shadow-md sm:p-6"
-              >
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 sm:mb-3 sm:h-12 sm:w-12">
-                  <ArrowRightLeft className="h-5 w-5 text-purple-600 sm:h-6 sm:w-6" />
-                </div>
-                <span className="block text-center text-xs font-semibold text-neutral-900 sm:text-sm">
-                  Exchange Center
-                </span>
-                <p className="mt-1 text-xs text-neutral-600">
-                  Bitcoin ↔ Cash trades
-                </p>
-              </button>
-            </div>
+        {/* ckBTC and ckUSDC Balance Cards */}
+        {((isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckBTCBalance || 0) > 0) || 
+          (AgentDemoDataService.getDemoAgent()?.ckUSDCBalance || 0) > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {(isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckBTCBalance || 0) > 0) && (
+              <CkBTCBalanceCard
+                principalId={currentAgent?.id || 'demo-agent'}
+                preferredCurrency={agentCurrency}
+                showActions={false}
+              />
+            )}
+            {(isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckUSDCBalance || 0) > 0) && (
+              <CkUSDCBalanceCard
+                principalId={currentAgent?.id || 'demo-agent'}
+                preferredCurrency={agentCurrency}
+                showActions={false}
+              />
+            )}
           </div>
+        )}
+
 
           {/* Liquidity Management */}
           {/* <div>
@@ -503,86 +586,55 @@ const AgentDashboard: React.FC = () => {
               </button>
 
               <button 
-                onClick={() => navigate('/agents/exchange')}
-                className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-purple-300 transition-all duration-200"
+                onClick={() => navigate('/agents/process-withdrawals')}
+                className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-red-300 transition-all duration-200"
               >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                  <ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                 </div>
-                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Exchange Center</span>
-                <p className="text-xs text-neutral-600 mt-1">Bitcoin ↔ Cash trades</p>
+                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Process Withdrawals</span>
+                <p className="text-xs text-neutral-600 mt-1">Cash to customers</p>
               </button>
             </div>
           </div> */}
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
-                <TrendingUp className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
-                  Daily Earnings
-                </p>
-                <p className="mt-1 truncate font-mono text-lg font-bold text-neutral-900 sm:text-xl">
-                  {formatCurrency(dailyEarnings)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
-                <CreditCard className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
-                  Today&apos;s Transactions
-                </p>
-                <p className="mt-1 font-mono text-lg font-bold text-neutral-900 sm:text-xl">
-                  {allTransactions.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
-                <Users className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
-                  Active Customers
-                </p>
-                <p className="mt-1 font-mono text-lg font-bold text-neutral-900 sm:text-xl">
-                  {customersCount}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Recent Transactions */}
         <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 sm:px-6 sm:py-4">
-            <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
-              Recent Transactions
-            </h2>
-            <button
-              onClick={() => navigate("/agents/transactions")}
-              className="text-xs font-semibold text-neutral-600 transition-colors duration-200 hover:text-neutral-900 sm:text-sm"
-            >
-              View All
-            </button>
+          <div className="border-b border-neutral-200 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-neutral-900 sm:text-lg">
+                Recent Transactions
+              </h3>
+              <CurrencySelector
+                currentCurrency={agentCurrency}
+                onCurrencyChange={(currency) => setSelectedCurrency(currency)}
+              />
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search transactions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              />
+            </div>
           </div>
-          <div className="p-4 sm:p-6">
-            <div className="space-y-3 sm:space-y-4">
-              {allTransactions.slice(0, 4).map((transaction) => (
+          <div className="divide-y divide-neutral-100 p-4 sm:p-6 max-h-96 overflow-y-auto">
+            {agentTransactions.filter(tx => 
+              !searchQuery || 
+              tx.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              tx.type.toLowerCase().includes(searchQuery.toLowerCase())
+            ).length === 0 ? (
+              <p className="py-8 text-center text-sm text-neutral-500">
+                No recent transactions
+              </p>
+            ) : (
+              agentTransactions.filter(tx => 
+                !searchQuery || 
+                tx.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                tx.type.toLowerCase().includes(searchQuery.toLowerCase())
+              ).slice(0, 20).map((transaction: Transaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between border-b border-neutral-100 py-3 last:border-b-0"
@@ -590,58 +642,34 @@ const AgentDashboard: React.FC = () => {
                   <div className="flex min-w-0 flex-1 items-center space-x-3 sm:space-x-4">
                     <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-neutral-100 sm:h-10 sm:w-10">
                       <span className="text-xs font-bold text-neutral-600 sm:text-sm">
-                        {transaction.description
-                          ? transaction.description
-                              .split(" ")
-                              .map((n: string) => n[0])
-                              .join("")
-                              .slice(0, 2)
-                          : "TX"}
+                        {transaction.type === "send" ? "S" : transaction.type === "receive" ? "R" : transaction.type === "withdraw" ? "W" : "TX"}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-neutral-900 sm:text-sm">
-                        {transaction.description}
+                        {transaction.description || `${transaction.type} transaction`}
                       </p>
                       <p className="mt-1 truncate text-xs font-medium text-neutral-600">
-                        {transaction.displayType}
+                        {new Date(transaction.createdAt).toLocaleString()}
                       </p>
                     </div>
                   </div>
                   <div className="ml-2 flex-shrink-0 text-right">
                     <div className="font-mono text-xs font-bold text-neutral-900 sm:text-sm">
-                      {transaction.displayAmount}
+                      {formatCurrencyAmount(transaction.amount, agentCurrency as AfricanCurrency)}
                     </div>
                     <div className="mt-1 text-xs">
                       <span className="font-mono font-bold text-green-600">
-                        +{transaction.commission}
+                        +{formatCurrencyAmount(Math.round(transaction.amount * 0.02), agentCurrency as AfricanCurrency)}
                       </span>
-                      <div
-                        className={`mt-1 text-xs font-semibold ${
-                          transaction.status === "completed"
-                            ? "text-green-600"
-                            : transaction.status === "pending"
-                              ? "text-yellow-600"
-                              : "text-red-600"
-                        }`}
-                      >
-                        {transaction.status.charAt(0).toUpperCase() +
-                          transaction.status.slice(1)}
-                      </div>
                     </div>
                   </div>
                 </div>
-              ))}
-              {allTransactions.length === 0 && (
-                <div className="py-6 text-center sm:py-8">
-                  <p className="text-sm text-neutral-600">
-                    No transactions yet
-                  </p>
-                </div>
-              )}
-            </div>
+              ))
+            )}
           </div>
         </div>
+
       </div>
     </div>
   );
