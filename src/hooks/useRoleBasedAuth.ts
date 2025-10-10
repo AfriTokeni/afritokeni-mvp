@@ -77,8 +77,16 @@ export const useRoleBasedAuth = () => {
         // Just redirect based on role
         const target = roleData.role === 'agent' ? '/agents/dashboard' : '/users/dashboard';
         if (location.pathname !== target) {
+          console.log(`Redirecting ${roleData.role} to ${target}`);
           navigate(target, { replace: true });
           lastNavigatedPathRef.current = target;
+          // Force a small delay to ensure navigation completes
+          setTimeout(() => {
+            if (window.location.pathname !== target) {
+              console.log('Navigation did not complete, forcing reload');
+              window.location.href = target;
+            }
+          }, 500);
         }
       } else {
         // New user - need to determine role
