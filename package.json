@@ -33,6 +33,7 @@
     "@headlessui/react": "^2.2.7",
     "@junobuild/core": "^2.2.0",
     "@junobuild/functions": "^0.3.3",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/bitcoinjs-lib": "^4.0.1",
     "@types/qrcode": "^1.5.5",
     "@userback/widget": "^0.3.11",

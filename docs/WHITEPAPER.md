@@ -91,45 +91,23 @@ AfriTokeni provides **instant, low-cost crypto banking accessible via USSD** on 
 
 ### 2.2 How It Works
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    USER EXPERIENCE                       │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  Feature Phone          Smartphone                      │
-│  ┌──────────┐          ┌──────────┐                    │
-│  │ Dial     │          │  Web     │                    │
-│  │ *123#    │          │  App     │                    │
-│  │          │          │          │                    │
-│  │ USSD     │          │ Full UI  │                    │
-│  │ Menu     │          │ Dashboard│                    │
-│  └──────────┘          └──────────┘                    │
-│       │                     │                           │
-│       └─────────┬───────────┘                          │
-│                 │                                       │
-│                 ▼                                       │
-│      ┌─────────────────────┐                          │
-│      │  ICP Blockchain     │                          │
-│      │  (Juno Platform)    │                          │
-│      └─────────────────────┘                          │
-│                 │                                       │
-│       ┌─────────┴─────────┐                           │
-│       │                   │                           │
-│       ▼                   ▼                           │
-│  ┌─────────┐         ┌─────────┐                     │
-│  │ ckBTC   │         │ ckUSDC  │                     │
-│  │ Service │         │ Service │                     │
-│  └─────────┘         └─────────┘                     │
-│       │                   │                           │
-│       └─────────┬─────────┘                          │
-│                 │                                       │
-│                 ▼                                       │
-│      ┌─────────────────────┐                          │
-│      │  Agent Network      │                          │
-│      │  (Cash Exchange)    │                          │
-│      └─────────────────────┘                          │
-└─────────────────────────────────────────────────────────┘
-```
+**User Access:**
+1. **Feature Phone** → Dial *123# → USSD Menu
+2. **Smartphone** → Web App → Full Dashboard
+
+↓
+
+**ICP Blockchain (Juno Platform)**
+
+↓
+
+**Crypto Services:**
+- ckBTC Service (ICP Bitcoin)
+- ckUSDC Service (Stablecoin)
+
+↓
+
+**Agent Network** (Cash Exchange)
 
 ### 2.3 Key Differentiators
 
@@ -177,35 +155,23 @@ AfriTokeni provides **instant, low-cost crypto banking accessible via USSD** on 
 
 AfriTokeni runs entirely on the Internet Computer Protocol:
 
-```
-┌────────────────────────────────────────────────────┐
-│              ICP CANISTER ARCHITECTURE             │
-├────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────────┐  ┌──────────────┐              │
-│  │  Frontend    │  │  Datastore   │              │
-│  │  Canister    │  │  Canister    │              │
-│  │  (Juno)      │  │  (Juno)      │              │
-│  └──────────────┘  └──────────────┘              │
-│         │                  │                       │
-│         └────────┬─────────┘                      │
-│                  │                                 │
-│         ┌────────┴────────┐                       │
-│         │                 │                       │
-│    ┌────▼────┐      ┌────▼────┐                 │
-│    │ ckBTC   │      │ ckUSDC  │                 │
-│    │ Ledger  │      │ Ledger  │                 │
-│    │ Canister│      │ Canister│                 │
-│    └────┬────┘      └────┬────┘                 │
-│         │                 │                       │
-│    ┌────▼────┐      ┌────▼────┐                 │
-│    │ ckBTC   │      │ ckUSDC  │                 │
-│    │ Minter  │      │ Minter  │                 │
-│    │ Canister│      │ Canister│                 │
-│    └─────────┘      └─────────┘                 │
-│                                                     │
-└────────────────────────────────────────────────────┘
-```
+**ICP Canister Architecture:**
+
+**Application Layer:**
+- Frontend Canister (Juno)
+- Datastore Canister (Juno)
+
+↓
+
+**Ledger Layer:**
+- ckBTC Ledger Canister
+- ckUSDC Ledger Canister
+
+↓
+
+**Minter Layer:**
+- ckBTC Minter Canister
+- ckUSDC Minter Canister
 
 **Key Benefits**:
 - **No AWS/Google Cloud**: Pure blockchain infrastructure
