@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { X, User, Phone, Mail, MapPin, Globe } from 'lucide-react';
+import { X, User, Phone, MapPin } from 'lucide-react';
 import { getActiveCurrencies, AfricanCurrency } from '../types/currency';
-import { CurrencySelector } from './CurrencySelector';
 
 interface OnboardingModalProps {
   isOpen: boolean;

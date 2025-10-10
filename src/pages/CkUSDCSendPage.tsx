@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { Send, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthentication } from '../context/AuthenticationContext';
 
 export const CkUSDCSendPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuthentication();
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');

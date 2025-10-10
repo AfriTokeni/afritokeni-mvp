@@ -24,6 +24,7 @@ const DAODashboard: React.FC = () => {
   const [totalHolders, setTotalHolders] = useState(0);
   const [showEarnInfo, setShowEarnInfo] = useState(false);
   const [showDistribution, setShowDistribution] = useState(false);
+  const [totalSupply, setTotalSupply] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -59,6 +60,10 @@ const DAODashboard: React.FC = () => {
         // Get demo proposals
         const demoProposals = GovernanceService.getDemoProposals();
         setProposals(demoProposals);
+        
+        // Load total supply
+        const supply = await AfriTokenService.getTotalSupply();
+        setTotalSupply(supply);
       } else {
         if (user?.user?.id) {
           const balance = await AfriTokenService.getBalance(user.user.id);
@@ -71,6 +76,10 @@ const DAODashboard: React.FC = () => {
         const leaderboardData = await AfriTokenService.getLeaderboard(10);
         setLeaderboard(leaderboardData);
         setTotalHolders(leaderboardData.length);
+        
+        // Load total supply
+        const supply = await AfriTokenService.getTotalSupply();
+        setTotalSupply(supply);
       }
     } catch (error) {
       console.error('Error loading DAO data:', error);
@@ -522,7 +531,7 @@ const DAODashboard: React.FC = () => {
               {leaderboard.map((holder, index) => {
                 const rank = holder.rank || index + 1;
                 const displayName = holder.name || holder.userId || 'Anonymous';
-                const votingPower = holder.votingPower || `${((holder.balance / AfriTokenService.getTotalSupply()) * 100).toFixed(2)}%`;
+                const votingPower = holder.votingPower || `${((holder.balance / totalSupply) * 100).toFixed(2)}%`;
                 
                 return (
                   <div key={holder.address || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
