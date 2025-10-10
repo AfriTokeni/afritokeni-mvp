@@ -230,14 +230,14 @@ const UserDashboard: React.FC = () => {
             </button>
 
             <button 
-              onClick={() => navigate('/users/bitcoin')}
+              onClick={() => navigate('/users/agents')}
               className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-14 h-14 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-100 transition-colors">
-                <Bitcoin className="w-7 h-7 text-orange-600" />
+              <div className="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-100 transition-colors">
+                <Bitcoin className="w-7 h-7 text-purple-600" />
               </div>
-              <span className="text-gray-900 font-semibold text-sm">Bitcoin Exchange</span>
-              <p className="text-gray-500 text-xs mt-1">Convert BTC to cash</p>
+              <span className="text-gray-900 font-semibold text-sm">Find Agents</span>
+              <p className="text-gray-500 text-xs mt-1">Locate nearby agents</p>
             </button>
           </div>
         </div>

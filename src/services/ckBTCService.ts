@@ -319,29 +319,48 @@ export class CkBTCService {
    */
   static async getExchangeRate(currency: string): Promise<BitcoinExchangeRate> {
     try {
-      const currencyLower = currency.toLowerCase();
+      const currencyUpper = currency.toUpperCase();
       
-      // Fetch real Bitcoin exchange rate from CoinGecko
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currencyLower}`
+      // Step 1: Get BTC/USD rate from CoinGecko
+      const btcResponse = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
       );
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch exchange rate from CoinGecko');
+      if (!btcResponse.ok) {
+        throw new Error('Failed to fetch BTC/USD rate');
       }
       
-      const data = await response.json();
-      const rate = data['bitcoin']?.[currencyLower];
+      const btcData = await btcResponse.json();
+      const btcUsdRate = btcData['bitcoin']?.['usd'];
       
-      if (!rate) {
+      if (!btcUsdRate) {
+        throw new Error('BTC/USD rate not available');
+      }
+      
+      // Step 2: Get USD to local currency rate from exchangerate-api.com (free, no key needed)
+      const fxResponse = await fetch(
+        `https://api.exchangerate-api.com/v4/latest/USD`
+      );
+      
+      if (!fxResponse.ok) {
+        throw new Error('Failed to fetch forex rates');
+      }
+      
+      const fxData = await fxResponse.json();
+      const usdToLocalRate = fxData.rates[currencyUpper];
+      
+      if (!usdToLocalRate) {
         throw new Error(`Exchange rate not available for ${currency}`);
       }
+      
+      // Step 3: Calculate BTC to local currency rate
+      const btcToLocalRate = btcUsdRate * usdToLocalRate;
 
       return {
         currency,
-        rate,
+        rate: btcToLocalRate,
         lastUpdated: new Date(),
-        source: 'coingecko',
+        source: 'coingecko+exchangerate-api',
       };
     } catch (error) {
       console.error('Error fetching exchange rate:', error);

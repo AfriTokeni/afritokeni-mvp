@@ -502,19 +502,20 @@ export class CkUSDCService {
    */
   static async getExchangeRate(currency: string): Promise<CkUSDCExchangeRate> {
     try {
-      const currencyLower = currency.toLowerCase();
+      const currencyUpper = currency.toUpperCase();
       
-      // Fetch real USD exchange rate from CoinGecko
+      // ckUSDC is pegged 1:1 with USD, so we just need USD to local currency rate
+      // Use exchangerate-api.com (free, no key needed, supports all currencies)
       const response = await fetch(
-        `https://api.coingecko.com/api/v3/simple/price?ids=usd-coin&vs_currencies=${currencyLower}`
+        `https://api.exchangerate-api.com/v4/latest/USD`
       );
       
       if (!response.ok) {
-        throw new Error('Failed to fetch exchange rate from CoinGecko');
+        throw new Error('Failed to fetch forex rates');
       }
       
       const data = await response.json();
-      const rate = data['usd-coin']?.[currencyLower];
+      const rate = data.rates[currencyUpper];
       
       if (!rate) {
         throw new Error(`Exchange rate not available for ${currency}`);
@@ -522,9 +523,9 @@ export class CkUSDCService {
 
       return {
         currency,
-        rate,
+        rate, // 1 USDC = X local currency
         lastUpdated: new Date(),
-        source: 'coingecko',
+        source: 'exchangerate-api',
       };
     } catch (error) {
       console.error('Error fetching exchange rate:', error);
