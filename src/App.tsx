@@ -19,14 +19,12 @@ import TransactionLimits from "./pages/profile/TransactionLimits.tsx";
 import HelpSupport from "./pages/profile/HelpSupport.tsx";
 import WithdrawMoney from "./pages/withdraw/Withdraw.tsx";
 import DepositPage from "./pages/deposit/DepositPage.tsx";
-import BitcoinPage from "./pages/users/BitcoinPage.tsx";
-import LightningPage from "./pages/users/LightningPage.tsx";
-import ExchangePage from "./pages/users/ExchangePage.tsx";
-import BitcoinDepositPage from "./pages/users/BitcoinDepositPage.tsx";
 import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
 import AgentMapPage from "./pages/users/AgentMapPage.tsx";
 import DAODashboard from "./pages/dao/DAODashboard.tsx";
 import LeaderboardPage from "./pages/users/LeaderboardPage.tsx";
+import { CkBTCSendPage } from "./pages/CkBTCSendPage.tsx";
+import { CkBTCDepositPage } from "./pages/CkBTCDepositPage.tsx";
 
 //Agent Pages
 import AgentDashboard from './pages/AgentDashboard';
@@ -34,12 +32,8 @@ import ProcessWithdrawal from './pages/withdraw/ProcessWithdrawal';
 import ProcessDeposits from './pages/agents/ProcessDeposits';
 import ProcessWithdrawals from './pages/agents/ProcessWithdrawals';
 import AgentCustomers from './pages/AgentCustomers';
-import AgentBitcoinPage from './pages/agents/AgentBitcoinPage';
-import AgentLightningPage from './pages/agents/AgentLightningPage';
-import AgentExchangePage from './pages/agents/AgentExchangePage';
 import AgentSettings from './pages/agent-settings';
 import RoleSelection from './pages/auth/RoleSelection';
-import AgentTransactions from "./pages/transactions/AgentTransactions.tsx";
 import AgentFunding from './pages/agent-liquidity/AgentFunding';
 import AgentSettlement from './pages/agent-liquidity/AgentSettlement';
 
@@ -56,7 +50,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Landing Page
 import LandingPage from "./pages/LandingPage";
 import TariffPage from "./pages/TariffPage";
-import SMSPlayground from "./pages/SMSPlayground";
+import USSDPlayground from "./pages/USSDPlayground";
 import BecomeAgentPage from "./pages/BecomeAgentPage";
 import AboutPage from "./pages/AboutPage";
 
@@ -103,10 +97,8 @@ const App: FC = () => {
                 <Route path="profile/transaction-limits" element={<TransactionLimits />} />
                 <Route path="profile/help-support" element={<HelpSupport />} />
                 <Route path="user-kyc" element={<UserKYCPage />} />
-                <Route path="bitcoin" element={<BitcoinPage />} />
-                <Route path="bitcoin/deposit" element={<BitcoinDepositPage />} />
-                <Route path="lightning" element={<LightningPage />} />
-                <Route path="exchange" element={<ExchangePage />} />
+                <Route path="ckbtc/send" element={<CkBTCSendPage />} />
+                <Route path="ckbtc/deposit" element={<CkBTCDepositPage />} />
                 <Route path="dao" element={<DAODashboard />} />
                 <Route path="leaderboard" element={<LeaderboardPage />} />
               </Routes>
@@ -125,10 +117,6 @@ const App: FC = () => {
                 <Route path="process-withdrawals" element={<ProcessWithdrawals/>} />
                 <Route path="deposit" element={<ProcessDeposits/>} />
                 <Route path="customers" element={<AgentCustomers/>} />
-                <Route path="transactions" element={<AgentTransactions/>} />
-                <Route path="bitcoin" element={<AgentBitcoinPage/>} />
-                <Route path="lightning" element={<AgentLightningPage/>} />
-                <Route path="exchange" element={<AgentExchangePage/>} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="settings" element={<AgentSettings/>} />
                 <Route path="funding" element={<AgentFunding/>} />
@@ -154,8 +142,9 @@ const App: FC = () => {
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
           
-          {/* Bitcoin Exchange Info Page */}
-          <Route path="/bitcoin-exchange" element={<BitcoinExchangePage />} />
+          {/* How It Works Page */}
+          <Route path="/how-it-works" element={<BitcoinExchangePage />} />
+          <Route path="/bitcoin-exchange" element={<Navigate to="/how-it-works" replace />} />
           
           {/* Tariff Page */}
           <Route path="/tariff" element={<TariffPage />} />
@@ -163,8 +152,8 @@ const App: FC = () => {
           {/* About Page */}
           <Route path="/about" element={<AboutPage />} />
           
-          {/* SMS Playground */}
-          <Route path="/sms" element={<SMSPlayground />} />
+          {/* USSD Playground */}
+          <Route path="/ussd" element={<USSDPlayground />} />
           
           {/* Become an Agent */}
           <Route path="/become-agent" element={<BecomeAgentPage />} />

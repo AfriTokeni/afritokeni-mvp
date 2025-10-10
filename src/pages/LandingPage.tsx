@@ -33,14 +33,17 @@ const LandingPage: React.FC = () => {
             
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link to="/bitcoin-exchange" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <Link to="/how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 How It Works
               </Link>
               <Link to="/tariff" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
                 Pricing
               </Link>
-              <Link to="/sms" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                Try SMS
+              <Link to="/ussd" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Try USSD
+              </Link>
+              <Link to="/about" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                About
               </Link>
             </nav>
 
@@ -67,9 +70,6 @@ const LandingPage: React.FC = () => {
               <br />
               <span className="text-orange-600">in under 1 second</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto">
-              Lightning Network fees under $0.001. Works on any phone. 39 African currencies.
-            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleICPLogin}
@@ -113,33 +113,33 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Escrow Protected</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                AfriTokeni holds Bitcoin in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
+                AfriTokeni holds ckBTC/ckUSDC in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
               </p>
               <div className="text-sm font-semibold text-blue-600 mt-auto">Zero fraud risk</div>
             </div>
 
             {/* Lightning Speed */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200">
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200 flex flex-col">
               <div className="w-16 h-16 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Lightning Fast</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">ckBTC Instant</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Transfers complete in under 1 second. $0.001 fees. Perfect for daily payments under $100.
+                ICP-native Bitcoin transfers in &lt;1 second. ~$0.01 fees. Instant and secure.
               </p>
-              <div className="text-sm font-semibold text-orange-600 mt-auto">99% cheaper</div>
+              <div className="text-sm font-semibold text-orange-600 mt-auto">Instant transfers</div>
             </div>
 
-            {/* Agent Incentives */}
+            {/* ckUSDC Stable Value */}
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200">
               <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
-                <Bitcoin className="w-8 h-8 text-white" />
+                <Lock className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Agent Earnings</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">ckUSDC Stable</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Agents earn 2-12% commission based on location. Remote areas pay more. Fair compensation system.
+                Protect yourself from Bitcoin volatility. ckUSDC stays pegged to $1 USD. Instant transfers, stable value.
               </p>
-              <div className="text-sm font-semibold text-green-600 mt-auto">Up to 12% commission</div>
+              <div className="text-sm font-semibold text-green-600 mt-auto">No volatility risk</div>
             </div>
 
             {/* DAO Governance */}
@@ -149,9 +149,9 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">DAO Governed</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Community-owned. Vote on fees, currencies, and policies via SMS. Agents and users control the platform.
+                Community-owned. Vote on fees, currencies, and policies via USSD. Agents and users control the platform.
               </p>
-              <div className="text-sm font-semibold text-purple-600 mt-auto">Vote via SMS</div>
+              <div className="text-sm font-semibold text-purple-600 mt-auto">Vote via USSD</div>
             </div>
           </div>
         </div>
@@ -163,13 +163,13 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm font-medium mb-4">
               <Zap className="w-4 h-4 mr-2" />
-              Lightning Network
+              ICP-Native Assets
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Instant Bitcoin Transfers
+              ckBTC + ckUSDC Instant Transfers
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              Send Bitcoin in under 1 second with fees less than $0.001. The future of payments is here.
+              Send ckBTC (Bitcoin) or ckUSDC (stablecoin) in under 1 second with ~$0.01 fees. Choose speed or stability.
             </p>
           </div>
 
@@ -196,13 +196,13 @@ const LandingPage: React.FC = () => {
                 <span className="text-2xl font-bold text-white">$</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                $0.001 Fee
+                ~$0.01 Fee
               </h3>
               <p className="text-gray-600 mb-4">
-                99% cheaper than traditional Bitcoin transactions.
+                99% cheaper than traditional transfers.
               </p>
               <div className="text-sm text-gray-500">
-                vs $5-20 on-chain
+                vs $1-50 on-chain
               </div>
             </div>
 
@@ -227,36 +227,38 @@ const LandingPage: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-3xl mx-auto">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Bitcoin Transfers via SMS
+                ckBTC + ckUSDC via USSD
               </h3>
               <p className="text-gray-600">
-                Send Bitcoin from any phone - auto-optimized for speed and cost
+                Menu-driven interface - works on any phone, no internet needed
               </p>
             </div>
             
             <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
-              <div className="text-green-400 mb-2">$ Send Bitcoin (auto-optimized):</div>
-              <div className="text-white mb-4">BTC SEND +234... 5000 NGN</div>
+              <div className="text-green-400 mb-2">$ Dial USSD menu:</div>
+              <div className="text-white mb-4">*AFRI#</div>
               
-              <div className="text-green-400 mb-2">$ Check Bitcoin balance:</div>
-              <div className="text-white mb-4">BTC BAL</div>
-              
-              <div className="text-yellow-400 mb-2">⚡ Response (instant):</div>
-              <div className="text-gray-300">
-                ✓ Instant Transfer Complete!<br/>
-                ✓ Sent: 5,000 NGN<br/>
-                ✓ Fee: $0.001 | Time: &lt;1 sec
+              <div className="text-yellow-400 mb-2">⚡ Menu appears:</div>
+              <div className="text-gray-300 mb-4">
+                1. Send Money<br/>
+                2. Check Balance<br/>
+                5. Check ckBTC Balance<br/>
+                6. Send ckBTC<br/>
+                8. Check ckUSDC Balance
               </div>
+              
+              <div className="text-green-400 mb-2">$ Select option:</div>
+              <div className="text-white">6 (Send ckBTC)</div>
             </div>
 
             <div className="mt-6 flex items-center justify-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Auto-Optimized</span>
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span>ckBTC (Fast)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Best Rates</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>ckUSDC (Stable)</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
@@ -273,13 +275,13 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-12 sm:mb-16">
             <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-orange-50 border border-orange-100 text-orange-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
               <Bitcoin className="w-3 h-3 mr-2" />
-              Bitcoin Integration
+              Dual Asset System
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4 sm:px-0">
-              Bitcoin Banking for Africa
+              ckBTC + ckUSDC Banking
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
-              Exchange Bitcoin for 39 African currencies. SMS + USSD (*123#) or web - works on any phone.
+              ckBTC (ICP Bitcoin - fast) + ckUSDC (stablecoin - no volatility) for 39 African currencies. USSD or web.
             </p>
             <div className="mt-8 px-4 max-w-4xl mx-auto">
               <div className="flex flex-wrap justify-center gap-3 mb-3">
@@ -310,30 +312,30 @@ const LandingPage: React.FC = () => {
                   🇲🇼 Malawi
                 </span>
                 <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-sm text-blue-700 font-medium shadow-sm">
-                  +31 more (SMS + web)
+                  +31 more (USSD + web)
                 </span>
               </div>
             </div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {/* SMS Interface */}
+            {/* USSD Interface */}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 lg:p-8">
               <div className="space-y-6">
                 <div className="text-center">
                   <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium mb-4">
                     <Smartphone className="w-4 h-4 mr-2" />
-                    SMS Interface
+                    USSD Interface
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Any Phone Works</h3>
-                  <p className="text-gray-600">SMS commands or USSD menu - no internet required</p>
+                  <p className="text-gray-600">USSD menu - no internet required</p>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">SMS Commands</div>
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">USSD Menu</div>
                     <div className="inline-flex items-center px-2 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium">
-                      or dial *123#
+                      Dial *AFRI#
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -348,23 +350,23 @@ const LandingPage: React.FC = () => {
                     </div>
                     
                     <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BAL</div>
-                      <div className="text-gray-500 text-xs mt-1">Bitcoin</div>
+                      <div className="font-mono text-orange-600 font-medium text-xs">CKBTC BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">ckBTC</div>
                     </div>
                     
-                    <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="font-mono text-orange-600 font-medium text-xs">BTC BUY</div>
-                      <div className="text-gray-500 text-xs mt-1">Buy BTC</div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="font-mono text-green-600 font-medium text-xs">USDC BAL</div>
+                      <div className="text-gray-500 text-xs mt-1">ckUSDC</div>
                     </div>
                   </div>
                 </div>
                 
                 <div className="text-center pt-4 border-t border-gray-200">
                   <Link
-                    to="/sms"
+                    to="/ussd"
                     className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
                   >
-                    Try SMS Banking →
+                    Try USSD Banking →
                   </Link>
                 </div>
               </div>
@@ -379,7 +381,7 @@ const LandingPage: React.FC = () => {
                     Web Interface
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Full Dashboard</h3>
-                  <p className="text-gray-600">Complete Bitcoin banking with charts & analytics</p>
+                  <p className="text-gray-600">Complete crypto banking: ckBTC + ckUSDC with charts & analytics</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">

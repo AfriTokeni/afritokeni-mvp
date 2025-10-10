@@ -7,8 +7,10 @@ import { DemoModeModal } from '../components/DemoModeModal';
 import { DemoDataService } from '../services/demoDataService';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
+import { CkUSDCBalanceCard } from '../components/CkUSDCBalanceCard';
+import { CkBTCBalanceCard } from '../components/CkBTCBalanceCard';
 import { 
-  Send, 
+  Send,
   Bitcoin,
   ArrowUp,
   ArrowDown,
@@ -132,8 +134,9 @@ const UserDashboard: React.FC = () => {
         {/* KYC Status Alert */}
         <KYCStatusAlert user_type="user" />
 
-        {/* Balance Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Balance Cards - Now 3 columns to include ckUSDC */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Local Currency Balance */}
           <div className="bg-white border border-gray-200 p-8 rounded-2xl hover:border-gray-300 transition-all">
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="flex-1">
@@ -168,33 +171,25 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-gray-200 p-8 rounded-2xl hover:border-gray-300 transition-all">
-            <div className="flex justify-between items-start mb-4 sm:mb-6">
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
-                    <Bitcoin className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-gray-900 font-semibold text-base">Bitcoin Balance</p>
-                    <p className="text-gray-500 text-sm">Bitcoin wallet</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-4xl font-bold text-gray-900 font-mono">
-                    ₿0.00000000
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-              <span className="text-gray-500 text-sm">≈ {formatCurrency(0)}</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-orange-600 font-medium text-sm">Bitcoin</span>
-              </div>
-            </div>
-          </div>
+          {/* ckBTC Balance - ICP-NATIVE BITCOIN (Instant transfers!) */}
+          <CkBTCBalanceCard
+            principalId={currentUser?.id || ''}
+            preferredCurrency={userCurrency}
+            showActions={true}
+            onDeposit={() => navigate('/users/ckbtc/deposit')}
+            onSend={() => navigate('/users/ckbtc/send')}
+            onExchange={() => navigate('/users/ckbtc/exchange')}
+          />
+
+          {/* ckUSDC Balance - NEW STABLECOIN SUPPORT */}
+          <CkUSDCBalanceCard
+            principalId={currentUser?.id || ''}
+            preferredCurrency={userCurrency}
+            showActions={true}
+            onDeposit={() => navigate('/users/ckusdc/deposit')}
+            onSend={() => navigate('/users/ckusdc/send')}
+            onExchange={() => navigate('/users/ckusdc/exchange')}
+          />
         </div>
 
         {/* Quick Actions */}
