@@ -415,7 +415,9 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           internet_identity: {
             options: {
               domain: "id.ai",
+              derivationOrigin: "https://afritokeni.com",
             },
+            
           },
         });
         return true;

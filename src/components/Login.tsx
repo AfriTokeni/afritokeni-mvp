@@ -9,6 +9,7 @@ export const Login: FC = () => {
           internet_identity: {
             options: {
               domain: "id.ai",
+              derivationOrigin: "https://afritokeni.com",
             },
           },
         });
