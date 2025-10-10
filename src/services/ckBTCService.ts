@@ -6,11 +6,14 @@
  * - No external APIs (BlockCypher, bitcoinjs-lib removed)
  * - Direct ICP canister calls
  * - Lightning-like performance without Lightning complexity
+ * - Supports both Web and SMS/USSD operations
  */
 
 // import { Principal } from '@dfinity/principal'; // Use when connecting to real ICP canisters
 import { nanoid } from 'nanoid';
-import { getDoc, listDocs } from '@junobuild/core';
+import { getDoc, listDocs, setDoc } from '@junobuild/core';
+import { SatelliteOptions } from '@junobuild/core';
+import { AnonymousIdentity } from '@dfinity/agent';
 import {
   CkBTCConfig,
   CkBTCBalance,
@@ -24,14 +27,22 @@ import {
   CkBTCExchangeResponse,
   BitcoinExchangeRate,
   CkBTCTransaction,
+  CkBTCTransactionStatus,
   BitcoinDepositAddress,
   CKBTC_CONSTANTS,
   CKBTC_TESTNET_CONFIG,
   CkBTCUtils,
-} from '../types/ckbtc';
+} from '../types/ckbtc.js';
 
 export class CkBTCService {
   private static config: CkBTCConfig = CKBTC_TESTNET_CONFIG;
+  
+  // Default satellite configuration for SMS/USSD operations
+  private static defaultSatellite: SatelliteOptions = {
+    identity: new AnonymousIdentity(),
+    satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
+    container: true
+  };
 
   /**
    * Initialize ckBTC service with configuration
@@ -47,13 +58,23 @@ export class CkBTCService {
     return this.config;
   }
 
+  /**
+   * Get satellite configuration for Juno operations
+   * Returns satellite config for SMS/USSD operations, undefined for web operations
+   */
+  private static getSatelliteConfig(useSatellite?: boolean): SatelliteOptions | undefined {
+    return useSatellite ? this.defaultSatellite : undefined;
+  }
+
   // ==================== BALANCE OPERATIONS ====================
 
   /**
    * Get ckBTC balance for a user
    * Uses ICP ledger canister (ICRC-1 standard)
+   * @param principalId - User's principal ID
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async getBalance(_principalId: string): Promise<CkBTCBalance> {
+  static async getBalance(principalId: string, useSatellite?: boolean): Promise<CkBTCBalance> {
     try {
       // ICP ledger canister integration (production)
       // const principal = Principal.fromText(principalId);
@@ -79,12 +100,16 @@ export class CkBTCService {
 
   /**
    * Get ckBTC balance with local currency equivalent
+   * @param principalId - User's principal ID
+   * @param currency - Local currency code
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
   static async getBalanceWithLocalCurrency(
     principalId: string,
-    currency: string
+    currency: string,
+    useSatellite?: boolean
   ): Promise<CkBTCBalance> {
-    const balance = await this.getBalance(principalId);
+    const balance = await this.getBalance(principalId, useSatellite);
     const exchangeRate = await this.getExchangeRate(currency);
     
     const btcAmount = CkBTCUtils.satoshisToBTC(balance.balanceSatoshis);
@@ -102,9 +127,12 @@ export class CkBTCService {
   /**
    * Get Bitcoin deposit address for user
    * ICP minter canister generates unique BTC address per user
+   * @param request - Deposit request with principal ID and optional subaccount
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
   static async getDepositAddress(
-    request: CkBTCDepositRequest
+    request: CkBTCDepositRequest,
+    useSatellite?: boolean
   ): Promise<CkBTCDepositResponse> {
     try {
       // ICP minter canister integration (production)
@@ -118,16 +146,37 @@ export class CkBTCService {
       // Mock implementation - generate deterministic address
       const mockAddress = this.generateMockBitcoinAddress(request.principalId);
 
+      // Store deposit address information if using satellite (SMS/USSD)
+      if (useSatellite) {
+        const satellite = this.getSatelliteConfig(useSatellite);
+        const depositAddressDoc = {
+          principalId: request.principalId,
+          address: mockAddress,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+        };
+
+        await setDoc({
+          collection: 'ckbtc_deposit_addresses',
+          doc: {
+            key: `addr_${request.principalId}`,
+            data: depositAddressDoc,
+            version: 1n
+          },
+          satellite
+        });
+      }
+
       return {
         success: true,
         depositAddress: mockAddress,
         minConfirmations: this.config.minConfirmations,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error getting deposit address:', error);
       return {
         success: false,
-        error: error.message || 'Failed to get deposit address',
+        error: error instanceof Error ? error.message : 'Failed to get deposit address',
       };
     }
   }
@@ -135,14 +184,39 @@ export class CkBTCService {
   /**
    * Check deposit status
    * ICP minter automatically mints ckBTC when BTC is received
+   * @param btcTxId - Bitcoin transaction ID to check
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async checkDepositStatus(_btcTxId: string): Promise<CkBTCTransaction | null> {
+  static async checkDepositStatus(btcTxId: string, useSatellite?: boolean): Promise<CkBTCTransaction | null> {
     try {
       // ICP minter canister status check (production)
       // const minterActor = await this.getMinterActor();
       // const status = await minterActor.get_deposit_status(btcTxId);
 
-      // Mock implementation
+      // Mock implementation - for SMS/USSD, check stored deposits
+      if (useSatellite) {
+        const satellite = this.getSatelliteConfig(useSatellite);
+        const results = await listDocs({
+          collection: 'ckbtc_transactions',
+          satellite
+        });
+
+        const depositTransaction = results.items.find(item => {
+          const txData = item.data as CkBTCTransaction;
+          return txData.btcTxId === btcTxId && txData.type === 'deposit';
+        });
+
+        if (depositTransaction) {
+          const data = depositTransaction.data as CkBTCTransaction;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            updatedAt: new Date(data.updatedAt),
+          };
+        }
+      }
+
+      // Mock implementation for web users
       return null;
     } catch (error) {
       console.error('Error checking deposit status:', error);
@@ -155,9 +229,12 @@ export class CkBTCService {
   /**
    * Withdraw ckBTC to Bitcoin address
    * ICP minter burns ckBTC and sends real BTC
+   * @param request - Withdrawal request with principal ID, amount, and Bitcoin address
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
   static async withdraw(
-    request: CkBTCWithdrawalRequest
+    request: CkBTCWithdrawalRequest,
+    useSatellite?: boolean
   ): Promise<CkBTCWithdrawalResponse> {
     try {
       // Validate amount
@@ -184,17 +261,43 @@ export class CkBTCService {
       const transactionId = nanoid();
       const mockFeeSatoshis = 1000; // ~$1 at $100k BTC
 
+      // Store withdrawal transaction if using satellite (SMS/USSD)
+      if (useSatellite) {
+        const satellite = this.getSatelliteConfig(useSatellite);
+        const withdrawalDoc = {
+          id: transactionId,
+          userId: request.principalId,
+          type: 'withdrawal',
+          amountSatoshis: request.amountSatoshis,
+          btcAddress: request.btcAddress,
+          feeSatoshis: mockFeeSatoshis,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        await setDoc({
+          collection: 'ckbtc_transactions',
+          doc: {
+            key: transactionId,
+            data: withdrawalDoc,
+            version: 1n
+          },
+          satellite
+        });
+      }
+
       return {
         success: true,
         transactionId,
         feeSatoshis: mockFeeSatoshis,
         estimatedConfirmationTime: 60, // ~1 hour for Bitcoin confirmations
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error withdrawing ckBTC:', error);
       return {
         success: false,
-        error: error.message || 'Failed to withdraw ckBTC',
+        error: error instanceof Error ? error.message : 'Failed to withdraw ckBTC',
       };
     }
   }
@@ -204,9 +307,12 @@ export class CkBTCService {
   /**
    * Transfer ckBTC between ICP users (INSTANT, <$0.01 fee)
    * This is the killer feature - Lightning-like speed without Lightning!
+   * @param request - Transfer request with sender, recipient, and amount
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
   static async transfer(
-    request: CkBTCTransferRequest
+    request: CkBTCTransferRequest,
+    useSatellite?: boolean
   ): Promise<CkBTCTransferResponse> {
     try {
       // Validate amount
@@ -232,16 +338,43 @@ export class CkBTCService {
       // Mock implementation
       const transactionId = nanoid();
 
+      // Store transfer transaction if using satellite (SMS/USSD)
+      if (useSatellite) {
+        const satellite = this.getSatelliteConfig(useSatellite);
+        const transferDoc = {
+          id: transactionId,
+          userId: request.senderId,
+          type: 'transfer',
+          amountSatoshis: request.amountSatoshis,
+          recipient: request.recipient,
+          feeSatoshis: CKBTC_CONSTANTS.TRANSFER_FEE_SATOSHIS,
+          status: 'completed',
+          memo: request.memo,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        await setDoc({
+          collection: 'ckbtc_transactions',
+          doc: {
+            key: transactionId,
+            data: transferDoc,
+            version: 1n
+          },
+          satellite
+        });
+      }
+
       return {
         success: true,
         transactionId,
         feeSatoshis: CKBTC_CONSTANTS.TRANSFER_FEE_SATOSHIS,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error transferring ckBTC:', error);
       return {
         success: false,
-        error: error.message || 'Failed to transfer ckBTC',
+        error: error instanceof Error ? error.message : 'Failed to transfer ckBTC',
         feeSatoshis: 0,
       };
     }
@@ -251,9 +384,12 @@ export class CkBTCService {
 
   /**
    * Exchange ckBTC with local currency via agent
+   * @param request - Exchange request with type, amount, currency, and agent info
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
   static async exchange(
-    request: CkBTCExchangeRequest
+    request: CkBTCExchangeRequest,
+    useSatellite?: boolean
   ): Promise<CkBTCExchangeResponse> {
     try {
       // Get exchange rate
@@ -282,10 +418,42 @@ export class CkBTCService {
 
       // Generate exchange code for in-person verification
       const exchangeCode = `BTC-${nanoid(6).toUpperCase()}`;
+      const transactionId = nanoid();
+
+      // Store exchange transaction if using satellite (SMS/USSD)
+      if (useSatellite) {
+        const satellite = this.getSatelliteConfig(useSatellite);
+        const exchangeDoc = {
+          id: transactionId,
+          userId: request.userId,
+          type: 'exchange',
+          exchangeType: request.type,
+          amountSatoshis,
+          localCurrencyAmount,
+          currency: request.currency,
+          exchangeRate: exchangeRate.rate,
+          feeSatoshis,
+          agentId: request.agentId,
+          exchangeCode,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        await setDoc({
+          collection: 'ckbtc_transactions',
+          doc: {
+            key: transactionId,
+            data: exchangeDoc,
+            version: 1n
+          },
+          satellite
+        });
+      }
 
       return {
         success: true,
-        transactionId: nanoid(),
+        transactionId,
         exchangeRate: exchangeRate.rate,
         amountSatoshis,
         amountBTC: CkBTCUtils.satoshisToBTC(amountSatoshis),
@@ -295,7 +463,7 @@ export class CkBTCService {
         agentCommission,
         exchangeCode,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error exchanging ckBTC:', error);
       return {
         success: false,
@@ -306,7 +474,7 @@ export class CkBTCService {
         feeSatoshis: 0,
         feePercentage: 0,
         agentCommission: 0,
-        error: error.message || 'Failed to exchange ckBTC',
+        error: error instanceof Error ? error.message : 'Failed to exchange ckBTC',
       };
     }
   }
@@ -403,17 +571,21 @@ export class CkBTCService {
 
   /**
    * Get transaction by ID
+   * @param transactionId - Transaction ID to look up
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async getTransaction(transactionId: string): Promise<CkBTCTransaction | null> {
+  static async getTransaction(transactionId: string, useSatellite?: boolean): Promise<CkBTCTransaction | null> {
     try {
+      const satellite = this.getSatelliteConfig(useSatellite);
       const result = await getDoc({
         collection: 'ckbtc_transactions',
-        key: transactionId
+        key: transactionId,
+        satellite
       });
 
       if (!result) return null;
 
-      const data = result.data as any;
+      const data = result.data as CkBTCTransaction;
       return {
         ...data,
         createdAt: new Date(data.createdAt),
@@ -427,9 +599,12 @@ export class CkBTCService {
 
   /**
    * Get user's transaction history
+   * @param userId - User ID to get transactions for
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async getTransactionHistory(userId: string): Promise<CkBTCTransaction[]> {
+  static async getTransactionHistory(userId: string, useSatellite?: boolean): Promise<CkBTCTransaction[]> {
     try {
+      const satellite = this.getSatelliteConfig(useSatellite);
       const results = await listDocs({
         collection: 'ckbtc_transactions',
         filter: {
@@ -437,13 +612,14 @@ export class CkBTCService {
             desc: true,
             field: 'created_at'
           }
-        }
+        },
+        satellite
       });
 
       return results.items
-        .filter((item: any) => item.data.userId === userId)
-        .map((item: any) => {
-          const data = item.data;
+        .filter((item) => (item.data as CkBTCTransaction).userId === userId)
+        .map((item) => {
+          const data = item.data as CkBTCTransaction;
           return {
             ...data,
             createdAt: new Date(data.createdAt),
@@ -458,12 +634,15 @@ export class CkBTCService {
 
   /**
    * Get Bitcoin deposit address info
+   * @param principalId - User's principal ID
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
   static async getDepositAddressInfo(
-    principalId: string
+    principalId: string,
+    useSatellite?: boolean
   ): Promise<BitcoinDepositAddress | null> {
     try {
-      const response = await this.getDepositAddress({ principalId });
+      const response = await this.getDepositAddress({ principalId }, useSatellite);
       if (!response.success || !response.depositAddress) {
         return null;
       }
@@ -477,6 +656,101 @@ export class CkBTCService {
     } catch (error) {
       console.error('Error getting deposit address info:', error);
       return null;
+    }
+  }
+
+  /**
+   * Store a ckBTC transaction in the datastore
+   * @param transaction - Transaction data to store
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async storeTransaction(transaction: CkBTCTransaction, useSatellite?: boolean): Promise<boolean> {
+    try {
+      const satellite = this.getSatelliteConfig(useSatellite);
+      const transactionDoc = {
+        ...transaction,
+        createdAt: transaction.createdAt.toISOString(),
+        updatedAt: transaction.updatedAt.toISOString(),
+      };
+
+      await setDoc({
+        collection: 'ckbtc_transactions',
+        doc: {
+          key: transaction.id,
+          data: transactionDoc,
+          version: 1n
+        },
+        satellite
+      });
+
+      console.log(`✅ ckBTC transaction ${transaction.id} stored successfully`);
+      return true;
+    } catch (error) {
+      console.error('Error storing ckBTC transaction:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Update transaction status
+   * @param transactionId - Transaction ID to update
+   * @param status - New status
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async updateTransactionStatus(
+    transactionId: string, 
+    status: CkBTCTransactionStatus, 
+    useSatellite?: boolean
+  ): Promise<boolean> {
+    try {
+      const satellite = this.getSatelliteConfig(useSatellite);
+      const existingDoc = await getDoc({
+        collection: 'ckbtc_transactions',
+        key: transactionId,
+        satellite
+      });
+
+      if (!existingDoc) {
+        console.error(`Transaction ${transactionId} not found`);
+        return false;
+      }
+
+      const updatedData = {
+        ...existingDoc.data,
+        status,
+        updatedAt: new Date().toISOString()
+      };
+
+      await setDoc({
+        collection: 'ckbtc_transactions',
+        doc: {
+          key: transactionId,
+          data: updatedData,
+          version: existingDoc.version || 1n
+        },
+        satellite
+      });
+
+      console.log(`✅ Transaction ${transactionId} status updated to ${status}`);
+      return true;
+    } catch (error) {
+      console.error('Error updating transaction status:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get pending transactions for a user (useful for SMS/USSD operations)
+   * @param userId - User ID to get pending transactions for
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async getPendingTransactions(userId: string, useSatellite?: boolean): Promise<CkBTCTransaction[]> {
+    try {
+      const allTransactions = await this.getTransactionHistory(userId, useSatellite);
+      return allTransactions.filter(tx => tx.status === 'pending');
+    } catch (error) {
+      console.error('Error getting pending transactions:', error);
+      return [];
     }
   }
 

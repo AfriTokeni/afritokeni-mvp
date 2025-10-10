@@ -66,7 +66,7 @@ const App: FC = () => {
         const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
         const satelliteId = isProduction 
           ? (junoConfig.satellite.ids?.production || "dkk74-oyaaa-aaaal-askxq-cai")
-          : (junoConfig.satellite.ids?.development || "atbka-rp777-77775-aaaaq-cai");
+          : (junoConfig.satellite.ids?.development || "uxrrr-q7777-77774-qaaaq-cai");
         
         console.log(`Initializing Juno with ${isProduction ? 'production' : 'development'} satellite:`, satelliteId);
         
