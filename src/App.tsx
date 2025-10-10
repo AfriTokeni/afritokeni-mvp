@@ -53,6 +53,7 @@ import TariffPage from "./pages/TariffPage";
 import USSDPlayground from "./pages/USSDPlayground";
 import BecomeAgentPage from "./pages/BecomeAgentPage";
 import AboutPage from "./pages/AboutPage";
+import WhitepaperPage from "./pages/WhitepaperPage";
 
 const App: FC = () => {
   useEffect(() => {
@@ -151,6 +152,9 @@ const App: FC = () => {
           
           {/* About Page */}
           <Route path="/about" element={<AboutPage />} />
+          
+          {/* Whitepaper Page */}
+          <Route path="/whitepaper" element={<WhitepaperPage />} />
           
           {/* USSD Playground */}
           <Route path="/ussd" element={<USSDPlayground />} />

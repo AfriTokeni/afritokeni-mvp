@@ -83,6 +83,7 @@ const PublicFooter: React.FC = () => {
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h4>
               <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                 <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/whitepaper" className="hover:text-white transition-colors">Whitepaper</Link></li>
                 <li><a href="mailto:info@afritokeni.com" className="hover:text-white transition-colors">Contact</a></li>
               </ul>
               
