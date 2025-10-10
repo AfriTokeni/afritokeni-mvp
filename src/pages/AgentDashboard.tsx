@@ -94,6 +94,14 @@ const AgentDashboard: React.FC = () => {
 
   // Load saved profile data and KYC status
   useEffect(() => {
+    // In demo mode, auto-verify KYC and hide everything
+    if (isDemoMode) {
+      setKycStatus('verified');
+      setShowKYCBanner(false);
+      setShowOnboarding(false);
+      return;
+    }
+    
     // Load KYC status from localStorage
     const savedKycStatus = localStorage.getItem('agent_kyc_status');
     if (savedKycStatus) {
@@ -111,17 +119,15 @@ const AgentDashboard: React.FC = () => {
       }
     }
     
-    // Show onboarding on first visit
+    // Show onboarding on first visit (only if NOT in demo mode)
     const hasSeenOnboarding = localStorage.getItem('agent_onboarding_seen');
-    if (!hasSeenOnboarding && !savedProfileData && !isDemoMode) {
-      setShowOnboarding(true);
+    if (!hasSeenOnboarding && !savedProfileData) {
+      // Delay showing onboarding to let user see demo mode toggle first
+      const timer = setTimeout(() => {
+        setShowOnboarding(true);
+      }, 500);
       localStorage.setItem('agent_onboarding_seen', 'true');
-    }
-    
-    // In demo mode, auto-verify KYC
-    if (isDemoMode) {
-      setKycStatus('verified');
-      setShowKYCBanner(false);
+      return () => clearTimeout(timer);
     }
   }, [isDemoMode]);
 
