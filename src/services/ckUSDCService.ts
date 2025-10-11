@@ -30,7 +30,7 @@ import {
   HELPER_CONTRACT_ABI,
   CKUSDC_CONSTANTS,
   SEPOLIA_CONFIG,
-} from '../types/ckusdc';
+} from '../types/ckusdc.js';
 import { setDoc, getDoc, listDocs } from '@junobuild/core';
 
 export class CkUSDCService {
