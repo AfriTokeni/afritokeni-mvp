@@ -39,6 +39,7 @@ import AgentSettings from './pages/agent-settings';
 import RoleSelection from './pages/auth/RoleSelection';
 import AgentFunding from './pages/agent-liquidity/AgentFunding';
 import AgentSettlement from './pages/agent-liquidity/AgentSettlement';
+import AgentExchangePage from "./pages/agents/AgentExchangePage.tsx";
 
 // Auth Pages - Only KYC pages needed
 import UserKYCPage from "./pages/auth/UserKYCPage";
@@ -133,6 +134,7 @@ const App: FC = () => {
                 <Route path="process-withdrawals" element={<ProcessWithdrawals/>} />
                 <Route path="deposit" element={<ProcessDeposits/>} />
                 <Route path="customers" element={<AgentCustomers/>} />
+                <Route path="exchanges" element={<AgentExchangePage />} />
                 <Route path="location" element={<div>Location Page</div>} />
                 <Route path="dao" element={<DAODashboard />} />
                 <Route path="settings" element={<AgentSettings/>} />

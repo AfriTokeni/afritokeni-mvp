@@ -72,6 +72,8 @@ export interface CkBTCTransaction {
   agentId?: string;
   /** Local currency amount (for exchanges) */
   localCurrencyAmount?: number;
+  /** Currency code (for exchanges) */
+  currency?: string;
   /** Local currency code (for exchanges) */
   localCurrency?: string;
   /** Exchange rate used (for exchanges) */

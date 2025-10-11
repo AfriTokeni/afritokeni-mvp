@@ -70,7 +70,7 @@ export class CkBTCService {
 
   /**
    * Get ckBTC balance for a user
-   * Uses ICP ledger canister (ICRC-1 standard)
+   * Calculates balance from completed transactions in Juno datastore
    * @param principalId - User's principal ID
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
@@ -84,12 +84,56 @@ export class CkBTCService {
       //   subaccount: []
       // });
 
-      // Mock implementation for now
-      const mockBalanceSatoshis = 0; // Start with 0 balance
+      // Calculate balance from transaction history in Juno datastore
+      const transactions = await this.getTransactionHistory(principalId, useSatellite);
+      let balanceSatoshis = 0;
+
+      // Process completed transactions to calculate balance
+      for (const tx of transactions) {
+        if (tx.status !== 'completed') {
+          continue; // Only count completed transactions
+        }
+
+        switch (tx.type) {
+          case 'deposit':
+            // Deposits add to balance
+            balanceSatoshis += tx.amountSatoshis;
+            break;
+          
+          case 'withdrawal':
+            // Withdrawals subtract from balance (including fees)
+            balanceSatoshis -= (tx.amountSatoshis + tx.feeSatoshis);
+            break;
+          
+          case 'transfer':
+            // For transfers, check if user is sender or recipient
+            if (tx.userId === principalId) {
+              // User is sender - subtract amount and fees
+              balanceSatoshis -= (tx.amountSatoshis + tx.feeSatoshis);
+            } else if (tx.recipient === principalId) {
+              // User is recipient - add amount (no fees for recipient)
+              balanceSatoshis += tx.amountSatoshis;
+            }
+            break;
+          
+          case 'exchange_buy':
+            // User bought ckBTC - add to balance (minus fees)
+            balanceSatoshis += (tx.amountSatoshis - tx.feeSatoshis);
+            break;
+          
+          case 'exchange_sell':
+            // User sold ckBTC - subtract from balance (including fees)
+            balanceSatoshis -= (tx.amountSatoshis + tx.feeSatoshis);
+            break;
+        }
+      }
+
+      // Ensure balance doesn't go negative
+      balanceSatoshis = Math.max(0, balanceSatoshis);
       
       return {
-        balanceSatoshis: mockBalanceSatoshis,
-        balanceBTC: CkBTCUtils.formatBTC(mockBalanceSatoshis),
+        balanceSatoshis,
+        balanceBTC: CkBTCUtils.formatBTC(balanceSatoshis),
         lastUpdated: new Date(),
       };
     } catch (error) {
@@ -426,7 +470,7 @@ export class CkBTCService {
         const exchangeDoc = {
           id: transactionId,
           userId: request.userId,
-          type: 'exchange',
+          type: request.type === 'buy' ? 'exchange_buy' : 'exchange_sell',
           exchangeType: request.type,
           amountSatoshis,
           localCurrencyAmount,
@@ -752,6 +796,197 @@ export class CkBTCService {
       console.error('Error getting pending transactions:', error);
       return [];
     }
+  }
+
+  /**
+   * Get exchange requests for a specific agent
+   * @param agentId - Agent ID to get exchange requests for
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async getAgentExchangeRequests(agentId?: string, useSatellite?: boolean): Promise<CkBTCTransaction[]> {
+    try {
+      if (!agentId) {
+        console.log('No agent ID provided, returning empty array');
+        return [];
+      }
+
+      const satellite = this.getSatelliteConfig(useSatellite);
+      const results = await listDocs({
+        collection: 'ckbtc_transactions',
+        filter: {
+          order: {
+            desc: true,
+            field: 'created_at'
+          }
+        },
+        satellite
+      });
+
+      // Filter transactions for this agent that are exchanges
+      const agentExchanges = results.items
+        .map((item) => {
+          const data = item.data as CkBTCTransaction;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            updatedAt: new Date(data.updatedAt),
+          };
+        })
+        .filter((tx) => 
+          tx.agentId === agentId && 
+          (tx.type === 'exchange_buy' || tx.type === 'exchange_sell')
+        );
+
+      return agentExchanges;
+    } catch (error) {
+      console.error('Error getting agent exchange requests:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Format raw exchange transactions for agent interface display
+   * @param exchanges - Raw exchange transactions from getAgentExchangeRequests
+   */
+  static formatExchangeRequestsForAgent(
+    exchanges: CkBTCTransaction[]
+  ): Array<{
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    type: 'buy' | 'sell';
+    amount: number;
+    currency: string;
+    bitcoinAmount: number;
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    createdAt: Date;
+    location?: string;
+    exchangeRate?: number;
+    agentFee?: number;
+  }> {
+    try {
+      // Transform to match the expected format without user data lookups
+      const formattedRequests = exchanges.map((tx) => {
+        // Use userId as fallback for customer identification
+        // The actual user data fetching should be handled by the calling component
+        const customerName = 'Customer'; // Will be populated by calling component
+        const customerPhone = tx.userId; // Use userId as identifier
+        
+        return {
+          id: tx.id,
+          customerName,
+          customerPhone: this.formatPhoneNumber(customerPhone),
+          type: tx.type === 'exchange_buy' ? 'buy' as const : 'sell' as const,
+          amount: tx.localCurrencyAmount || 0,
+          currency: tx.currency || tx.localCurrency || 'UGX',
+          bitcoinAmount: CkBTCUtils.satoshisToBTC(tx.amountSatoshis),
+          status: tx.status as 'pending' | 'processing' | 'completed' | 'cancelled',
+          createdAt: tx.createdAt,
+          location: undefined, // Could be added from user data if available
+          exchangeRate: tx.exchangeRate,
+          agentFee: tx.feeSatoshis && tx.exchangeRate ? 
+            (CkBTCUtils.satoshisToBTC(tx.feeSatoshis) * tx.exchangeRate * 0.8) : undefined
+        };
+      });
+
+      return formattedRequests;
+    } catch (error) {
+      console.error('Error formatting exchange requests:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update transaction status for agent interface compatibility
+   * @param transactionId - Transaction ID to update
+   * @param status - New status
+   * @param agentId - Agent ID (for logging/validation, currently unused)
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async updateExchangeTransactionStatus(
+    transactionId: string,
+    status: 'pending' | 'confirmed' | 'completed' | 'failed',
+    agentId?: string,
+    useSatellite?: boolean
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Map status to CkBTCTransactionStatus
+      let ckBTCStatus: CkBTCTransactionStatus;
+      switch (status) {
+        case 'completed':
+          ckBTCStatus = 'completed';
+          break;
+        case 'failed':
+          ckBTCStatus = 'failed';
+          break;
+        case 'confirmed':
+          ckBTCStatus = 'confirming';
+          break;
+        case 'pending':
+        default:
+          ckBTCStatus = 'pending';
+          break;
+      }
+
+      const success = await this.updateTransactionStatus(transactionId, ckBTCStatus, useSatellite);
+      
+      if (success) {
+        console.log(`✅ Transaction ${transactionId} status updated to ${status} by agent ${agentId || 'unknown'}`);
+        return {
+          success: true,
+          message: `Transaction status updated to ${status}`
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Failed to update transaction status'
+        };
+      }
+    } catch (error) {
+      console.error('Error updating exchange transaction status:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to update transaction status'
+      };
+    }
+  }
+
+  /**
+   * Helper method to determine if a string is a phone number
+   * Phone numbers typically start with + and contain only digits and some special characters
+   */
+  private static isPhoneNumber(identifier: string): boolean {
+    // Check if it looks like a phone number (starts with + or contains only digits)
+    const phonePattern = /^(\+)?[0-9\s\-()]+$/;
+    return phonePattern.test(identifier) && identifier.length >= 10;
+  }
+
+  /**
+   * Helper method to format phone numbers for display
+   */
+  private static formatPhoneNumber(phone: string): string {
+    if (!phone || phone === 'Unknown' || phone === 'Web User') {
+      return phone;
+    }
+    
+    // If it's already a formatted phone number, return as is
+    if (this.isPhoneNumber(phone)) {
+      // Ensure it starts with + for international format
+      if (!phone.startsWith('+')) {
+        // Assume it's a Ugandan number if it doesn't have country code
+        if (phone.startsWith('256')) {
+          return `+${phone}`;
+        } else if (phone.length === 9) {
+          return `+256${phone}`;
+        } else {
+          return `+${phone}`;
+        }
+      }
+      return phone;
+    }
+    
+    // If it's an email or other identifier, return as is
+    return phone;
   }
 
 }

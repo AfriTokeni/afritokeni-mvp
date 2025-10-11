@@ -1,13 +1,14 @@
-import {  
-  Users, 
-  CreditCard, 
+import {
+  Users,
+  CreditCard,
   Settings,
   LucideIcon,
   Banknote,
   Home,
   LayoutDashboard,
-  Vote
-} from 'lucide-react';
+  Vote,
+  Bitcoin,
+} from "lucide-react";
 
 export interface Route {
   id: string;
@@ -18,78 +19,90 @@ export interface Route {
 
 export const agent_desktop_routes: Route[] = [
   {
-    id: 'home',
-    path: '/agents/dashboard',
-    label: 'Dashboard',
+    id: "home",
+    path: "/agents/dashboard",
+    label: "Dashboard",
     icon: LayoutDashboard,
   },
   {
-    id: 'process-deposits',
-    path: '/agents/process-deposits',
-    label: 'Process Deposits',
+    id: "process-deposits",
+    path: "/agents/process-deposits",
+    label: "Process Deposits",
     icon: CreditCard,
   },
   {
-    id: 'process-withdrawals',
-    path: '/agents/process-withdrawals',
-    label: 'Process Withdrawals',
+    id: "process-withdrawals",
+    path: "/agents/process-withdrawals",
+    label: "Process Withdrawals",
     icon: Banknote,
   },
   {
-    id: 'dao',
-    path: '/agents/dao',
-    label: 'DAO Governance',
+    id: "exchanges",
+    path: "/agents/exchanges",
+    label: "Exchanges",
+    icon: Bitcoin,
+  },
+  {
+    id: "dao",
+    path: "/agents/dao",
+    label: "DAO Governance",
     icon: Vote,
   },
   {
-    id: 'customers',
-    path: '/agents/customers',
-    label: 'Customers',
+    id: "customers",
+    path: "/agents/customers",
+    label: "Customers",
     icon: Users,
   },
   {
-    id: 'settings',
-    path: '/agents/settings',
-    label: 'Settings',
+    id: "settings",
+    path: "/agents/settings",
+    label: "Settings",
     icon: Settings,
   },
 ];
 
 export const agent_mobile_routes: Route[] = [
   {
-    id: 'home',
-    path: '/agents/dashboard',
-    label: 'Home',
+    id: "home",
+    path: "/agents/dashboard",
+    label: "Home",
     icon: Home,
   },
   {
-    id: 'process-deposits',
-    path: '/agents/process-deposits',
-    label: 'Deposits',
+    id: "process-deposits",
+    path: "/agents/process-deposits",
+    label: "Deposits",
     icon: CreditCard,
   },
   {
-    id: 'process-withdrawals',
-    path: '/agents/process-withdrawals',
-    label: 'Withdrawals',
+    id: "process-withdrawals",
+    path: "/agents/process-withdrawals",
+    label: "Withdrawals",
     icon: Banknote,
   },
   {
-    id: 'dao',
-    path: '/agents/dao',
-    label: 'DAO',
+    id: "exchanges",
+    path: "/agents/exchanges",
+    label: "Exchanges",
+    icon: Bitcoin,
+  },
+  {
+    id: "dao",
+    path: "/agents/dao",
+    label: "DAO",
     icon: Vote,
   },
   {
-    id: 'customers',
-    path: '/agents/customers',
-    label: 'Customers',
+    id: "customers",
+    path: "/agents/customers",
+    label: "Customers",
     icon: Users,
   },
   {
-    id: 'settings',
-    path: '/agents/settings',
-    label: 'Settings',
+    id: "settings",
+    path: "/agents/settings",
+    label: "Settings",
     icon: Settings,
   },
 ];
