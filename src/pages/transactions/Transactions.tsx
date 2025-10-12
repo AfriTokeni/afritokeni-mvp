@@ -6,6 +6,9 @@ import {
   Plus,
   Minus,
   Search,
+  Send,
+  Banknote,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Transaction } from '../../types/transaction';
 import { normalizeTransaction } from '../../utils/transactionUtils';
@@ -132,29 +135,70 @@ const UserTransactions: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search transactions..."
-            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-          />
-        </div>
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by description, type, or status..."
+          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+        />
+      </div>
+
+      {/* Filter Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setFilterType('all')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterType === 'all'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
         >
-          <option value="all">All Types</option>
-          <option value="send">Send</option>
-          <option value="receive">Receive</option>
-          <option value="deposit">Deposit</option>
-          <option value="withdraw">Withdraw</option>
-        </select>
+          All
+        </button>
+        <button
+          onClick={() => setFilterType('send')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterType === 'send'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Send
+        </button>
+        <button
+          onClick={() => setFilterType('receive')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterType === 'receive'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Receive
+        </button>
+        <button
+          onClick={() => setFilterType('deposit')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterType === 'deposit'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Deposit
+        </button>
+        <button
+          onClick={() => setFilterType('withdraw')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterType === 'withdraw'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Withdraw
+        </button>
       </div>
 
       {/* Transactions List */}

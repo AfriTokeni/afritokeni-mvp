@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { DataService, Agent } from '../services/dataService';
 import { TransactionService } from '../services/TransactionService';
-import { User } from '../types/auth';
-import { Transaction } from '../types/transaction';
+import { CentralizedDemoService } from '../services/centralizedDemoService';
 import { useDemoMode } from '../context/DemoModeContext';
+import { Transaction } from '../types/transaction';
 
 interface UserBalance {
   balance: number;
@@ -42,10 +42,11 @@ export const useAfriTokeni = () => {
       // Load regular user data if user is logged in
       if (user?.user?.id) {
         if (isDemoMode) {
-          // Use demo data - simplified for now
+          // Use demo data from CentralizedDemoService
+          const demoTransactions = await CentralizedDemoService.getTransactions(user.user.id);
           dataPromises.push(
             Promise.resolve({ balance: 500000, currency: 'UGX' }),
-            Promise.resolve([])
+            Promise.resolve(demoTransactions)
           );
         } else {
           await DataService.initializeUserData(user.user.id);
@@ -132,7 +133,7 @@ export const useAfriTokeni = () => {
   const sendMoney = async (
     amount: number,
     recipientPhone: string,
-    recipient: User
+    recipient: any
   ): Promise<{ 
     success: boolean; 
     message: string; 
