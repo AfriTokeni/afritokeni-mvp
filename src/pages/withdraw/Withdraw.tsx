@@ -193,7 +193,16 @@ const WithdrawPage: React.FC = () => {
               setFinalBtcAmount(btcAmount);
               setWithdrawType(withdrawType);
               setWithdrawalFee(fee);
-              setCurrentStep(withdrawType === 'cash' ? 'agent' : 'confirmation');
+              
+              // For crypto withdrawals, generate code and go to confirmation
+              if (withdrawType === 'bitcoin' || withdrawType === 'ckusdc') {
+                const code = generateWithdrawalCode();
+                setWithdrawalCode(code);
+                setCurrentStep('confirmation');
+              } else {
+                // For cash withdrawals, go to agent selection
+                setCurrentStep('agent');
+              }
             }}
           />
         )}
