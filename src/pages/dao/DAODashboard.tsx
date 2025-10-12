@@ -14,7 +14,6 @@ import CreateProposalModal from '../../components/CreateProposalModal';
 
 const DAODashboard: React.FC = () => {
   const { user } = useAuthentication();
-  const { isDemoMode } = useDemoMode();
   const [tokenBalance, setTokenBalance] = useState<TokenBalance | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
@@ -28,7 +27,7 @@ const DAODashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [user, isDemoMode]);
+  }, [user]);
 
   const loadData = async () => {
     setLoading(true);
@@ -64,6 +63,13 @@ const DAODashboard: React.FC = () => {
         const supply = await AfriTokenService.getTotalSupply();
         setTotalSupply(supply);
       }
+      const activeProposals = await GovernanceService.getActiveProposals();
+      setProposals(activeProposals);
+      
+      // Load real leaderboard data
+      const leaderboardData = await AfriTokenService.getLeaderboard(10);
+      setLeaderboard(leaderboardData);
+      setTotalHolders(leaderboardData.length);
     } catch (error) {
       console.error('Error loading DAO data:', error);
     } finally {

@@ -3,7 +3,7 @@ import { defineConfig } from "@junobuild/config";
 export default defineConfig({
   satellite: {
     ids: {
-      development: "atbka-rp777-77775-aaaaq-cai",
+      development: "uxrrr-q7777-77774-qaaaq-cai",
       production: "dkk74-oyaaa-aaaal-askxq-cai"
     },
     source: "dist",
@@ -86,6 +86,12 @@ export default defineConfig({
           collection: "platform_revenue",
           read: "managed",
           write: "managed",
+          memory: "stable",
+        },
+         {
+          collection: "ckbtc_deposit_addresses",
+          read: "public",
+          write: "public",
           memory: "stable",
         },
         {
