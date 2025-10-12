@@ -43,14 +43,18 @@ const UserDashboard: React.FC = () => {
   // Get user's preferred currency or default to UGX
   const currentUser = user.user;
 
-  // Show demo modal on first visit
+  // Show demo modal ONLY on first login for this user (not on every page)
   useEffect(() => {
-    const hasSeenModal = localStorage.getItem('afritokeni_seen_demo_modal');
+    if (!currentUser?.id) return; // Wait for user to be loaded
+    
+    const globalModalKey = `afritokeni_first_login_${currentUser.id}`;
+    const hasSeenModal = localStorage.getItem(globalModalKey);
+    
     if (!hasSeenModal) {
       setShowDemoModal(true);
-      localStorage.setItem('afritokeni_seen_demo_modal', 'true');
+      localStorage.setItem(globalModalKey, 'true');
     }
-  }, []);
+  }, [currentUser?.id]);
 
   // Initialize demo data if demo mode is enabled
   useEffect(() => {
@@ -61,7 +65,7 @@ const UserDashboard: React.FC = () => {
 
   // Check for missing profile fields and show onboarding/banner
   useEffect(() => {
-    if (!currentUser || isDemoMode) return;
+    if (!currentUser) return;
 
     const missing: string[] = [];
     
@@ -81,7 +85,8 @@ const UserDashboard: React.FC = () => {
     setMissingFields(missing);
 
     // Only show onboarding/banner AFTER demo modal has been seen
-    const hasSeenDemoModal = localStorage.getItem('afritokeni_seen_demo_modal');
+    const globalModalKey = `afritokeni_first_login_${currentUser.id}`;
+    const hasSeenDemoModal = localStorage.getItem(globalModalKey);
     if (!hasSeenDemoModal) return; // Wait for demo modal first
 
     // Show onboarding modal on first login if profile is incomplete
@@ -92,7 +97,7 @@ const UserDashboard: React.FC = () => {
       // Show banner if onboarding was skipped but profile still incomplete
       setShowBanner(true);
     }
-  }, [currentUser, isDemoMode, bannerDismissed]);
+  }, [currentUser, bannerDismissed]);
 
   const handleOnboardingComplete = async (data: OnboardingData) => {
     if (!currentUser) return;

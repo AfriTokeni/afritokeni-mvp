@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import { Vote as VoteIcon, TrendingUp, Users, Coins, Plus, CheckCircle, XCircle, Clock, HelpCircle, ChevronDown, ChevronUp, DollarSign, Globe, Shield, FileText, Lightbulb } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoModeModal } from '../../components/DemoModeModal';
 import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
 import { GovernanceService, Proposal } from '../../services/governanceService';
 import { DaoDemoDataService } from '../../services/daoDemoDataService';
@@ -16,7 +15,6 @@ import CreateProposalModal from '../../components/CreateProposalModal';
 const DAODashboard: React.FC = () => {
   const { user } = useAuthentication();
   const { isDemoMode } = useDemoMode();
-  const [showDemoModal, setShowDemoModal] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<TokenBalance | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
@@ -27,15 +25,6 @@ const DAODashboard: React.FC = () => {
   const [showEarnInfo, setShowEarnInfo] = useState(false);
   const [showDistribution, setShowDistribution] = useState(false);
   const [totalSupply, setTotalSupply] = useState(0);
-
-  // Show demo modal on first visit
-  useEffect(() => {
-    const hasSeenDemoModal = localStorage.getItem('afritokeni_dao_seen_demo_modal');
-    if (!hasSeenDemoModal) {
-      setShowDemoModal(true);
-      localStorage.setItem('afritokeni_dao_seen_demo_modal', 'true');
-    }
-  }, []);
 
   useEffect(() => {
     loadData();
@@ -117,13 +106,6 @@ const DAODashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Demo Mode Modal */}
-      <DemoModeModal 
-        isOpen={showDemoModal} 
-        onClose={() => setShowDemoModal(false)}
-        userType="user"
-      />
-
       {/* Token Balance Card - Same style as Dashboard */}
       <div className="bg-white rounded-2xl p-8 border border-gray-200">
         <div className="flex items-center justify-between mb-6">

@@ -94,24 +94,22 @@ const AgentDashboard: React.FC = () => {
     setShowKYCBanner(false); // Hide banner after completion
   };
 
-  // Show demo modal on first visit
+  // Show demo modal ONLY on first login for this agent (not on every page)
   useEffect(() => {
-    const hasSeenDemoModal = localStorage.getItem('afritokeni_agent_seen_demo_modal');
+    if (!currentAgent?.id) return; // Wait for agent to be loaded
+    
+    const globalModalKey = `afritokeni_first_login_${currentAgent.id}`;
+    const hasSeenDemoModal = localStorage.getItem(globalModalKey);
+    
     if (!hasSeenDemoModal) {
       setShowDemoModal(true);
-      localStorage.setItem('afritokeni_agent_seen_demo_modal', 'true');
+      localStorage.setItem(globalModalKey, 'true');
     }
-  }, []);
+  }, [currentAgent?.id]);
 
   // Load saved profile data and KYC status
   useEffect(() => {
-    // In demo mode, auto-verify KYC and hide everything
-    if (isDemoMode) {
-      setKycStatus('verified');
-      setShowKYCBanner(false);
-      setShowOnboarding(false);
-      return;
-    }
+    if (!currentAgent?.id) return; // Wait for agent to be loaded
     
     // Load KYC status from localStorage
     const savedKycStatus = localStorage.getItem('agent_kyc_status');
@@ -131,16 +129,17 @@ const AgentDashboard: React.FC = () => {
     }
     
     // Only show onboarding/banner AFTER demo modal has been seen
-    const hasSeenDemoModal = localStorage.getItem('afritokeni_agent_seen_demo_modal');
+    const globalModalKey = `afritokeni_first_login_${currentAgent.id}`;
+    const hasSeenDemoModal = localStorage.getItem(globalModalKey);
     if (!hasSeenDemoModal) return; // Wait for demo modal first
 
-    // Show onboarding on first visit (only if NOT in demo mode)
+    // Show onboarding on first visit if profile incomplete
     const hasSeenOnboarding = localStorage.getItem('agent_onboarding_seen');
     if (!hasSeenOnboarding && !savedProfileData) {
       setShowOnboarding(true);
       localStorage.setItem('agent_onboarding_seen', 'true');
     }
-  }, [isDemoMode]);
+  }, [currentAgent?.id]);
 
 
   const getLiquidityAlerts = () => {
