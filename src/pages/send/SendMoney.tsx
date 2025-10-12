@@ -182,6 +182,36 @@ const SendMoney: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Step Indicator */}
+      <div className="mb-8 flex items-center justify-center">
+        <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
+          <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : 'text-green-600'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : 'bg-green-600 text-white'}`}>
+              1
+            </div>
+            <span className="text-xs font-medium whitespace-nowrap">Enter Amount</span>
+          </div>
+          
+          <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'recipient' || currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          
+          <div className={`flex items-center space-x-2 ${currentStep === 'recipient' ? 'text-gray-900' : currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'recipient' ? 'bg-gray-900 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+              2
+            </div>
+            <span className="text-xs font-medium whitespace-nowrap">Recipient Details</span>
+          </div>
+          
+          <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          
+          <div className={`flex items-center space-x-2 ${currentStep === 'confirmation' ? 'text-gray-900' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'confirmation' ? 'bg-gray-900 text-white' : 'bg-gray-200'}`}>
+              3
+            </div>
+            <span className="text-xs font-medium whitespace-nowrap">Confirmation</span>
+          </div>
+        </div>
+      </div>
+
       {/* Amount Step */}
       {currentStep === 'amount' && (
           <div className="bg-white rounded-2xl border border-gray-200 p-8">
