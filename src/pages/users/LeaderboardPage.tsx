@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Medal, Award } from 'lucide-react';
 import { AfriTokenService } from '../../services/afriTokenService';
+import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { useDemoMode } from '../../context/DemoModeContext';
 
 export default function LeaderboardPage() {
@@ -18,11 +19,11 @@ export default function LeaderboardPage() {
       setLoading(true);
       
       if (isDemoMode) {
-        // Use demo data
-        const demoLeaderboard: any[] = [];
+        // Use demo data from CentralizedDemoService
+        const demoLeaderboard = await CentralizedDemoService.getDemoLeaderboard();
         setLeaderboard(demoLeaderboard);
-        const supply = await AfriTokenService.getTotalSupply();
-        setTotalSupply(supply);
+        const stats = CentralizedDemoService.getDemoDAOStats();
+        setTotalSupply(stats.totalSupply);
       } else {
         const data = await AfriTokenService.getLeaderboard(10);
         const supply = await AfriTokenService.getTotalSupply();

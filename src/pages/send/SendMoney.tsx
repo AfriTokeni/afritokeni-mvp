@@ -8,7 +8,7 @@ import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { CurrencySelector } from '../../components/CurrencySelector';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
+import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { DataService } from '../../services/dataService';
 
 type SendType = 'local' | 'ckbtc' | 'ckusdc';
@@ -16,9 +16,9 @@ type SendStep = 'amount' | 'recipient' | 'confirmation';
 
 const SendMoney: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuthentication();
-  const { balance } = useAfriTokeni();
+  const { user, updateUserCurrency } = useAuthentication();
   const { isDemoMode } = useDemoMode();
+  const { balance } = useAfriTokeni();
 
   const [currentStep, setCurrentStep] = useState<SendStep>('amount');
   const [sendType, setSendType] = useState<SendType>('local');
@@ -33,7 +33,6 @@ const SendMoney: React.FC = () => {
   const currentUser = user.user;
   const defaultCurrency = currentUser?.preferredCurrency || 'UGX';
   const userCurrency = selectedCurrency || defaultCurrency;
-  const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
 
   // Get balance from CentralizedDemoService or real balance
   const [displayBalance, setDisplayBalance] = React.useState(0);
@@ -279,9 +278,17 @@ const SendMoney: React.FC = () => {
 
             {/* Amount Input */}
             <div className="mb-6">
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-3">
-                Amount in {userCurrency} ({currencyInfo?.name})
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                  Amount
+                </label>
+                <CurrencySelector
+                  currentCurrency={userCurrency}
+                  onCurrencyChange={(currency) => {
+                    updateUserCurrency(currency);
+                  }}
+                />
+              </div>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input

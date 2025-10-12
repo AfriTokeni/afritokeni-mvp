@@ -127,59 +127,55 @@ const AgentMapPage: React.FC = () => {
     const loadAgents = async () => {
       try {
         setLoading(true);
-        console.log('Loading agents from Juno datastore...');
         
-        // Get agents from Juno datastore
-        const result = await listDocs({
-          collection: 'agents'
-        });
-        
-        console.log('Raw agent docs:', result);
-        
-        // Transform Juno docs to Agent interface
-        const agentsData = result.items.map((doc: any) => {
-          const data = doc.data;
-          return {
-            id: doc.key,
-            userId: data.userId || '',
-            businessName: data.businessName || 'Unknown Agent',
-            location: {
-              country: data.location?.country || 'Uganda',
-              state: data.location?.state || 'Central',
-              city: data.location?.city || 'Kampala',
-              address: data.location?.address || 'Address not available',
-              coordinates: {
-                lat: data.location?.coordinates?.lat || (0.3476 + (Math.random() - 0.5) * 0.1),
-                lng: data.location?.coordinates?.lng || (32.5825 + (Math.random() - 0.5) * 0.1)
-              }
-            },
-            isActive: data.status === 'available' || data.status === 'online',
-            cashBalance: data.cashBalance || 0,
-            digitalBalance: data.digitalBalance || 0,
-            commissionRate: data.commissionRate || 0.025,
-            createdAt: data.createdAt || new Date().toISOString()
-          };
-        });
-        
-        console.log('Transformed agents:', agentsData);
-        setAgents(agentsData);
-        
-        // If no agents found, fall back to demo data if in demo mode
-        if (agentsData.length === 0 && isDemoMode) {
-          console.log('No agents found in datastore, loading demo data...');
-          const demoAgents: any[] = [];
-          setAgents(demoAgents);
+        if (isDemoMode) {
+          // Load from /data/agents.json in demo mode
+          console.log('Loading agents from /data/agents.json...');
+          const response = await fetch('/data/agents.json');
+          const agentsData = await response.json();
+          console.log('Loaded agents from JSON:', agentsData);
+          setAgents(agentsData);
+        } else {
+          // Get agents from Juno datastore in production
+          console.log('Loading agents from Juno datastore...');
+          const result = await listDocs({
+            collection: 'agents'
+          });
+          
+          console.log('Raw agent docs:', result);
+          
+          // Transform Juno docs to Agent interface
+          const agentsData = result.items.map((doc: any) => {
+            const data = doc.data;
+            return {
+              id: doc.key,
+              userId: data.userId || '',
+              businessName: data.businessName || 'Unknown Agent',
+              location: {
+                country: data.location?.country || 'Uganda',
+                state: data.location?.state || 'Central',
+                city: data.location?.city || 'Kampala',
+                address: data.location?.address || 'Address not available',
+                coordinates: {
+                  lat: data.location?.coordinates?.lat || (0.3476 + (Math.random() - 0.5) * 0.1),
+                  lng: data.location?.coordinates?.lng || (32.5825 + (Math.random() - 0.5) * 0.1)
+                }
+              },
+              isActive: data.status === 'available' || data.status === 'online',
+              cashBalance: data.cashBalance || 0,
+              digitalBalance: data.digitalBalance || 0,
+              commissionRate: data.commissionRate || 0.025,
+              createdAt: data.createdAt || new Date().toISOString()
+            };
+          });
+          
+          console.log('Transformed agents:', agentsData);
+          setAgents(agentsData);
         }
         
       } catch (error) {
         console.error('Error loading agents:', error);
-        
-        // Fallback to demo data if Juno fails and in demo mode
-        if (isDemoMode) {
-          console.log('Falling back to demo data...');
-          const demoAgents: any[] = [];
-          setAgents(demoAgents);
-        }
+        setAgents([]);
       } finally {
         setLoading(false);
       }

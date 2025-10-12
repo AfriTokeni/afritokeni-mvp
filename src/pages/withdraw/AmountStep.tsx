@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DollarSign, AlertCircle, Bitcoin } from 'lucide-react';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
+import { formatCurrencyAmount, type AfricanCurrency } from '../../types/currency';
 import { CurrencySelector } from '../../components/CurrencySelector';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
@@ -35,7 +35,6 @@ const AmountStep: React.FC<AmountStepProps> = ({
   
   // Use the user's preferred currency passed as prop (consistent with dashboard)
   const selectedCurrency = preferredCurrency;
-  const currencyInfo = AFRICAN_CURRENCIES[selectedCurrency as keyof typeof AFRICAN_CURRENCIES];
 
   // Calculate 1% fee
   const calculateFee = (amount: number): number => {
@@ -251,9 +250,19 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
         {/* Local Currency Input */}
         <div>
-          <label htmlFor="local-amount" className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
-            Amount in {selectedCurrency} ({currencyInfo?.name})
-          </label>
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <label htmlFor="local-amount" className="block text-xs sm:text-sm font-medium text-gray-700">
+              Amount
+            </label>
+            <CurrencySelector
+              currentCurrency={selectedCurrency}
+              onCurrencyChange={(currency) => {
+                if (onCurrencyChange) {
+                  onCurrencyChange(currency);
+                }
+              }}
+            />
+          </div>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <input
