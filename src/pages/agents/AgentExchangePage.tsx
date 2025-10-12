@@ -12,6 +12,7 @@ import {
   Calculator
 } from 'lucide-react';
 import { CkBTCService } from '../../services/ckBTCService';
+import { CkUSDCService } from '../../services/ckUSDCService';
 import { DataService } from '../../services/dataService';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import DynamicFeeCalculator from '../../components/DynamicFeeCalculator';
@@ -23,7 +24,9 @@ interface ExchangeRequest {
   type: 'buy' | 'sell';
   amount: number;
   currency: string;
-  bitcoinAmount: number;
+  bitcoinAmount?: number; // Optional for USDC requests
+  usdcAmount?: number; // Add USDC amount field
+  currencyType: 'BTC' | 'USDC'; // Add currency type field
   status: 'pending' | 'processing' | 'completed' | 'cancelled';
   createdAt: Date;
   location?: string;
@@ -33,13 +36,15 @@ const AgentExchangePage: React.FC = () => {
   const { user } = useAuthentication();
   const [activeTab, setActiveTab] = useState<'requests' | 'calculator'>('requests');
   const [exchangeRequests, setExchangeRequests] = useState<ExchangeRequest[]>([]);
-  const [exchangeRate, setExchangeRate] = useState<number>(0);
+  const [btcExchangeRate, setBtcExchangeRate] = useState<number>(0);
+  const [usdcExchangeRate, setUsdcExchangeRate] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // Calculator state
   const [calcAmount, setCalcAmount] = useState<string>('');
-  const [calcCurrency, setCalcCurrency] = useState<'UGX' | 'BTC'>('UGX');
+  const [calcCurrency, setCalcCurrency] = useState<'UGX' | 'BTC' | 'USDC'>('UGX');
+  const [calcCryptoType, setCalcCryptoType] = useState<'BTC' | 'USDC'>('BTC');
   const [calcResult, setCalcResult] = useState<number>(0);
 
   // Helper function to format phone numbers for display
@@ -77,9 +82,13 @@ const AgentExchangePage: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Get current exchange rate
-        const rate = await CkBTCService.getExchangeRate('UGX');
-        setExchangeRate(rate.rate);
+        // Get current exchange rates for both BTC and USDC
+        const [btcRate, usdcRate] = await Promise.all([
+          CkBTCService.getExchangeRate('UGX'),
+          CkUSDCService.getExchangeRate('ugx')
+        ]);
+        setBtcExchangeRate(btcRate.rate);
+        setUsdcExchangeRate(usdcRate.rate);
 
         // Get agent data for current user
         let agentId: string | undefined;
@@ -94,22 +103,48 @@ const AgentExchangePage: React.FC = () => {
           }
         }
         
-        // Fetch real ckBTC exchange requests from Juno store
-        const rawExchangeRequests = await CkBTCService.getAgentExchangeRequests(agentId);
-        console.log('Fetched raw exchange requests:', rawExchangeRequests);
+        // Fetch real exchange requests from both BTC and USDC services
+        const [btcRequests, usdcRequests] = await Promise.all([
+          CkBTCService.getAgentExchangeRequests(agentId),
+          CkUSDCService.getAgentExchangeRequests(agentId)
+        ]);
         
-        // Format the requests for agent interface display (without user data)
-        const baseFormattedRequests = CkBTCService.formatExchangeRequestsForAgent(rawExchangeRequests);
+        console.log('Fetched BTC exchange requests:', btcRequests);
+        console.log('Fetched USDC exchange requests:', usdcRequests);
+        
+        // Format the requests for agent interface display
+        const btcFormattedRequests = CkBTCService.formatExchangeRequestsForAgent(btcRequests);
+        const usdcFormattedRequests = CkUSDCService.formatExchangeRequestsForAgent(usdcRequests);
+        
+        // Add currency type to each request
+        const btcRequestsWithCurrency = btcFormattedRequests.map(req => ({
+          ...req,
+          currencyType: 'BTC' as const,
+          usdcAmount: 0 // Default USDC amount for BTC requests
+        }));
+        
+        const usdcRequestsWithCurrency = usdcFormattedRequests.map(req => ({
+          ...req,
+          currencyType: 'USDC' as const,
+          bitcoinAmount: 0, // Default Bitcoin amount for USDC requests
+          usdcAmount: req.amount / usdcRate.rate // Calculate USDC amount for USDC requests
+        }));
+        
+        // Combine both request types
+        const allRequests = [...btcRequestsWithCurrency, ...usdcRequestsWithCurrency];
         
         // Enhance with user data for each request
         const enhancedRequests = await Promise.all(
-          baseFormattedRequests.map(async (request) => {
+          allRequests.map(async (request) => {
             let customerName = 'Unknown Customer';
             let formattedPhoneNumber = 'Unknown';
             
             try {
               // Find the original transaction to get the userId
-              const originalTx = rawExchangeRequests.find(tx => tx.id === request.id);
+              const originalTx = request.currencyType === 'BTC' 
+                ? btcRequests.find(tx => tx.id === request.id)
+                : usdcRequests.find(tx => tx.id === request.id);
+                
               if (originalTx) {
                 // Determine if userId is a phone number (SMS user) or web user ID
                 const isPhoneNumber = /^(\+)?[0-9\s\-()]+$/.test(originalTx.userId) && originalTx.userId.length >= 10;
@@ -182,18 +217,51 @@ const AgentExchangePage: React.FC = () => {
         }
       }
       
-      const rawExchangeRequests = await CkBTCService.getAgentExchangeRequests(agentId);
-      const baseFormattedRequests = CkBTCService.formatExchangeRequestsForAgent(rawExchangeRequests);
+      // Fetch from both services
+      const [btcRequests, usdcRequests, btcRate, usdcRate] = await Promise.all([
+        CkBTCService.getAgentExchangeRequests(agentId),
+        CkUSDCService.getAgentExchangeRequests(agentId),
+        CkBTCService.getExchangeRate('UGX'),
+        CkUSDCService.getExchangeRate('ugx')
+      ]);
+      
+      // Update rates
+      setBtcExchangeRate(btcRate.rate);
+      setUsdcExchangeRate(usdcRate.rate);
+      
+      // Format the requests
+      const btcFormattedRequests = CkBTCService.formatExchangeRequestsForAgent(btcRequests);
+      const usdcFormattedRequests = CkUSDCService.formatExchangeRequestsForAgent(usdcRequests);
+      
+      // Add currency type to each request
+      const btcRequestsWithCurrency = btcFormattedRequests.map(req => ({
+        ...req,
+        currencyType: 'BTC' as const,
+        usdcAmount: 0
+      }));
+      
+      const usdcRequestsWithCurrency = usdcFormattedRequests.map(req => ({
+        ...req,
+        currencyType: 'USDC' as const,
+        bitcoinAmount: 0,
+        usdcAmount: req.amount / usdcRate.rate
+      }));
+      
+      // Combine requests
+      const allRequests = [...btcRequestsWithCurrency, ...usdcRequestsWithCurrency];
       
       // Enhance with user data for each request
       const enhancedRequests = await Promise.all(
-        baseFormattedRequests.map(async (request) => {
+        allRequests.map(async (request) => {
           let customerName = 'Unknown Customer';
           let formattedPhoneNumber = 'Unknown';
           
           try {
             // Find the original transaction to get the userId
-            const originalTx = rawExchangeRequests.find(tx => tx.id === request.id);
+            const originalTx = request.currencyType === 'BTC' 
+              ? btcRequests.find((tx) => tx.id === request.id)
+              : usdcRequests.find((tx) => tx.id === request.id);
+              
             if (originalTx) {
               // Determine if userId is a phone number (SMS user) or web user ID
               const isPhoneNumber = /^(\+)?[0-9\s\-()]+$/.test(originalTx.userId) && originalTx.userId.length >= 10;
@@ -244,13 +312,20 @@ const AgentExchangePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (calcAmount && exchangeRate) {
+    if (calcAmount && ((calcCryptoType === 'BTC' && btcExchangeRate) || (calcCryptoType === 'USDC' && usdcExchangeRate))) {
       const amount = parseFloat(calcAmount);
       if (!isNaN(amount)) {
         if (calcCurrency === 'UGX') {
-          setCalcResult(amount / exchangeRate);
-        } else {
-          setCalcResult(amount * exchangeRate);
+          // Converting UGX to crypto
+          if (calcCryptoType === 'BTC') {
+            setCalcResult(amount / btcExchangeRate);
+          } else {
+            setCalcResult(amount / usdcExchangeRate);
+          }
+        } else if (calcCurrency === 'BTC') {
+          setCalcResult(amount * btcExchangeRate);
+        } else if (calcCurrency === 'USDC') {
+          setCalcResult(amount * usdcExchangeRate);
         }
       } else {
         setCalcResult(0);
@@ -258,13 +333,21 @@ const AgentExchangePage: React.FC = () => {
     } else {
       setCalcResult(0);
     }
-  }, [calcAmount, calcCurrency, exchangeRate]);
+  }, [calcAmount, calcCurrency, calcCryptoType, btcExchangeRate, usdcExchangeRate]);
 
   const handleRequestAction = async (requestId: string, action: 'approve' | 'reject') => {
     try {
       // Backend uses 'failed' for rejected transactions, frontend uses 'cancelled'
       const backendStatus = action === 'approve' ? 'completed' : 'failed';
       const frontendStatus = action === 'approve' ? 'completed' : 'cancelled';
+      
+      // Find the request to determine currency type
+      const request = exchangeRequests.find(req => req.id === requestId);
+      if (!request) {
+        console.error('Request not found:', requestId);
+        alert('Request not found');
+        return;
+      }
       
       // Get the actual agent ID by looking up the agent record using the user ID
       let agentId: string | undefined;
@@ -281,7 +364,10 @@ const AgentExchangePage: React.FC = () => {
         console.error('Error looking up agent record:', error);
       }
       
-      const result = await CkBTCService.updateExchangeTransactionStatus(requestId, backendStatus, agentId);
+      // Call the appropriate service based on currency type
+      const result = request.currencyType === 'BTC' 
+        ? await CkBTCService.updateExchangeTransactionStatus(requestId, backendStatus, agentId)
+        : await CkUSDCService.updateExchangeTransactionStatus(requestId, backendStatus, agentId);
       
       if (result.success) {
         // Update local state with frontend status mapping
@@ -292,7 +378,7 @@ const AgentExchangePage: React.FC = () => {
               : req
           )
         );
-        console.log(`✅ ${action === 'approve' ? 'Approved' : 'Rejected'} transaction ${requestId}`);
+        console.log(`✅ ${action === 'approve' ? 'Approved' : 'Rejected'} ${request.currencyType} transaction ${requestId}`);
       } else {
         console.error(`Failed to ${action} transaction:`, result.message);
         alert(`Failed to ${action} transaction: ${result.message}`);
@@ -332,8 +418,8 @@ const AgentExchangePage: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Bitcoin Exchange</h1>
-            <p className="text-gray-600 mt-1">Manage customer Bitcoin exchanges</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Crypto Exchange</h1>
+            <p className="text-gray-600 mt-1">Manage customer Bitcoin & USDC exchanges</p>
           </div>
           <div className="flex items-center space-x-4">
             <button
@@ -344,9 +430,15 @@ const AgentExchangePage: React.FC = () => {
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
-            <div className="flex items-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-neutral-600">1 BTC = UGX {exchangeRate.toLocaleString()}</span>
+            <div className="flex items-center space-x-4 text-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span className="text-neutral-600">1 BTC = UGX {btcExchangeRate.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-neutral-600">1 USDC = UGX {usdcExchangeRate.toLocaleString()}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -460,12 +552,14 @@ const AgentExchangePage: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-3">
                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              request.type === 'buy' ? 'bg-green-100' : 'bg-orange-100'
+                              request.currencyType === 'BTC'
+                                ? (request.type === 'buy' ? 'bg-orange-100' : 'bg-orange-100')
+                                : (request.type === 'buy' ? 'bg-blue-100' : 'bg-blue-100')
                             }`}>
-                              {request.type === 'buy' ? (
-                                <Bitcoin className="w-5 h-5 text-green-600" />
+                              {request.currencyType === 'BTC' ? (
+                                <Bitcoin className="w-5 h-5 text-orange-600" />
                               ) : (
-                                <DollarSign className="w-5 h-5 text-orange-600" />
+                                <DollarSign className="w-5 h-5 text-blue-600" />
                               )}
                             </div>
                             <div>
@@ -474,11 +568,15 @@ const AgentExchangePage: React.FC = () => {
                                   {request.customerName}
                                 </h3>
                                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                  request.type === 'buy' 
-                                    ? 'bg-green-100 text-green-700' 
-                                    : 'bg-orange-100 text-orange-700'
+                                  request.currencyType === 'BTC'
+                                    ? (request.type === 'buy' 
+                                        ? 'bg-orange-100 text-orange-700' 
+                                        : 'bg-orange-100 text-orange-700')
+                                    : (request.type === 'buy' 
+                                        ? 'bg-blue-100 text-blue-700' 
+                                        : 'bg-blue-100 text-blue-700')
                                 }`}>
-                                  {request.type === 'buy' ? 'BUYING' : 'SELLING'} BTC
+                                  {request.type === 'buy' ? 'BUYING' : 'SELLING'} {request.currencyType}
                                 </span>
                               </div>
                               <div className="flex items-center space-x-3 text-sm">
@@ -516,30 +614,40 @@ const AgentExchangePage: React.FC = () => {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
                               <p className="text-gray-500">
-                                {request.type === 'buy' ? 'Local Amount' : 'Bitcoin Amount'}
+                                {request.type === 'buy' ? 'Local Amount' : 
+                                 request.currencyType === 'BTC' ? 'Bitcoin Amount' : 'USDC Amount'}
                               </p>
                               <p className="font-semibold text-gray-900 font-mono">
                                 {request.type === 'buy' 
                                   ? `UGX ${request.amount.toLocaleString()}`
-                                  : `₿${request.bitcoinAmount.toFixed(8)}`
+                                  : request.currencyType === 'BTC'
+                                    ? `₿${(request.bitcoinAmount || 0).toFixed(8)}`
+                                    : `$${(request.usdcAmount || 0).toFixed(6)}`
                                 }
                               </p>
                             </div>
                             <div>
                               <p className="text-gray-500">
-                                {request.type === 'buy' ? 'Bitcoin Amount' : 'Local Amount'}
+                                {request.type === 'buy' ? 
+                                  (request.currencyType === 'BTC' ? 'Bitcoin Amount' : 'USDC Amount') : 
+                                  'Local Amount'}
                               </p>
                               <p className="font-semibold text-gray-900 font-mono">
                                 {request.type === 'buy'
-                                  ? `₿${request.bitcoinAmount.toFixed(8)}`
-                                  : `UGX ${(request.bitcoinAmount * (exchangeRate || 0)).toLocaleString()}`
+                                  ? (request.currencyType === 'BTC' 
+                                      ? `₿${(request.bitcoinAmount || 0).toFixed(8)}` 
+                                      : `$${(request.usdcAmount || 0).toFixed(6)}`)
+                                  : `UGX ${request.amount.toLocaleString()}`
                                 }
                               </p>
                             </div>
                             <div>
                               <p className="text-gray-500">Exchange Rate</p>
                               <p className="font-semibold text-gray-900 font-mono">
-                                UGX {exchangeRate ? exchangeRate.toLocaleString() : 'Loading...'}
+                                {request.currencyType === 'BTC' 
+                                  ? `1 BTC = UGX ${btcExchangeRate ? btcExchangeRate.toLocaleString() : 'Loading...'}`
+                                  : `1 USDC = UGX ${usdcExchangeRate ? usdcExchangeRate.toLocaleString() : 'Loading...'}`
+                                }
                               </p>
                             </div>
                             <div>
@@ -608,7 +716,7 @@ const AgentExchangePage: React.FC = () => {
                 <span>Simple Exchange Rate Calculator</span>
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Amount
@@ -624,17 +732,34 @@ const AgentExchangePage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Currency
+                    From Currency
                   </label>
                   <select
                     value={calcCurrency}
-                    onChange={(e) => setCalcCurrency(e.target.value as 'UGX' | 'BTC')}
+                    onChange={(e) => setCalcCurrency(e.target.value as 'UGX' | 'BTC' | 'USDC')}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="UGX">UGX (Ugandan Shilling)</option>
                     <option value="BTC">BTC (Bitcoin)</option>
+                    <option value="USDC">USDC (USD Coin)</option>
                   </select>
                 </div>
+
+                {calcCurrency === 'UGX' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      To Cryptocurrency
+                    </label>
+                    <select
+                      value={calcCryptoType}
+                      onChange={(e) => setCalcCryptoType(e.target.value as 'BTC' | 'USDC')}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="BTC">BTC (Bitcoin)</option>
+                      <option value="USDC">USDC (USD Coin)</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               {calcAmount && (
@@ -643,13 +768,18 @@ const AgentExchangePage: React.FC = () => {
                     <p className="text-gray-600 text-sm mb-2">Converts to:</p>
                     <p className="text-2xl font-bold text-gray-900 font-mono">
                       {calcCurrency === 'UGX' 
-                        ? `₿${calcResult.toFixed(8)}`
-                        : `UGX ${calcResult.toLocaleString()}`
+                        ? calcCryptoType === 'BTC'
+                          ? `₿${calcResult.toFixed(8)}`
+                          : `$${calcResult.toFixed(6)} USDC`
+                        : calcCurrency === 'BTC'
+                          ? `UGX ${calcResult.toLocaleString()}`
+                          : `UGX ${calcResult.toLocaleString()}`
                       }
                     </p>
-                    <p className="text-gray-500 text-sm mt-2">
-                      Rate: 1 BTC = UGX {exchangeRate.toLocaleString()}
-                    </p>
+                    <div className="space-y-1 text-gray-500 text-sm mt-2">
+                      <p>BTC Rate: 1 BTC = UGX {btcExchangeRate.toLocaleString()}</p>
+                      <p>USDC Rate: 1 USDC = UGX {usdcExchangeRate.toLocaleString()}</p>
+                    </div>
                   </div>
                 </div>
               )}
