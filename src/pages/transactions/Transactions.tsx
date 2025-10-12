@@ -148,55 +148,60 @@ const UserTransactions: React.FC = () => {
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
         <button
           onClick={() => setFilterType('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
             filterType === 'all'
               ? 'bg-black text-white'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
+          <LayoutDashboard className="w-4 h-4" />
           All
         </button>
         <button
           onClick={() => setFilterType('send')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
             filterType === 'send'
               ? 'bg-black text-white'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
+          <Send className="w-4 h-4" />
           Send
         </button>
         <button
           onClick={() => setFilterType('receive')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
             filterType === 'receive'
               ? 'bg-black text-white'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
+          <ArrowDown className="w-4 h-4" />
           Receive
         </button>
         <button
           onClick={() => setFilterType('deposit')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
             filterType === 'deposit'
               ? 'bg-black text-white'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
+          <Plus className="w-4 h-4" />
           Deposit
         </button>
         <button
           onClick={() => setFilterType('withdraw')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
             filterType === 'withdraw'
               ? 'bg-black text-white'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
+          <Banknote className="w-4 h-4" />
           Withdraw
         </button>
       </div>
