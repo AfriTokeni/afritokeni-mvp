@@ -135,7 +135,7 @@ const ussdSessions = new Map<string, USSDSession>();
 class USSDSessionImpl implements USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_buy' | 'btc_sell' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell';
   data: Record<string, any>;
   step: number;
   lastActivity: number;
@@ -418,8 +418,9 @@ Please select an option:
 3. Withdraw Money
 4. Transaction History
 5. Deposit Money
-6. Bitcoin Services
-7. Help`);
+6. Bitcoin(ckBTC)
+7. USDC(ckUSDC)
+8. Help`);
       }
     }
   }
@@ -608,8 +609,9 @@ Please select an option:
 3. Withdraw Money
 4. Transaction History
 5. Deposit Money
-6. Bitcoin Services
-7. Help`);
+6. Bitcoin(ckBTC)
+7. USDC(ckUSDC)
+8. Help`);
       } else {
         // PIN is incorrect
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
@@ -684,8 +686,9 @@ Please select an option:
 3. Withdraw Money
 4. Transaction History
 5. Deposit Money
-6. Bitcoin Services
-7. Help`);
+6. Bitcoin(ckBTC)
+7. USDC(ckUSDC)
+8. Help`);
         } else {
           // PIN save failed, retry
           session.step = 1;
@@ -711,8 +714,8 @@ Please select an option:
 3. Withdraw Money
 4. Transaction History
 5. Deposit Money
-6. Bitcoin Services
-7. USDC Services
+6. Bitcoin(ckBTC)
+7. USDC(ckUSDC)
 8. Help`);
   }
 
@@ -790,8 +793,8 @@ Please select an option:
 3. Withdraw Money
 4. Transaction History
 5. Deposit Money
-6. Bitcoin Services
-7. USDC Services
+6. Bitcoin(ckBTC)
+7. USDC(ckUSDC)
 8. Help`);
   }
 }
@@ -1507,7 +1510,7 @@ Receive: ₿${btcAmount.toFixed(8)} BTC
 Select an agent:
 `;
         
-        availableAgents.slice(0, 5).forEach((agent: any, index: number) => {
+        availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
           agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
         });
         
@@ -1834,7 +1837,7 @@ You receive: UGX ${ugxNet.toLocaleString()}
 Select an agent:
 `;
         
-        availableAgents.slice(0, 5).forEach((agent: any, index: number) => {
+        availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
           agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
         });
         
@@ -2045,19 +2048,30 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Get USDC balance and real-time rate
+      // Get USDC balance using real CkUSDCService
       try {
-        // Mock USDC balance - in real implementation, this would come from CkUSDCService
-        const usdcBalance = 50.25; // Mock USDC balance
-        const usdcRateUGX = await CkUSDCService.getExchangeRate('ugx');
-        const ugxEquivalent = usdcBalance * usdcRateUGX.rate;
+        // Get user from DataService to get Principal ID
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession(`User not found.
+Please contact support.
+
+Thank you for using AfriTokeni!`);
+        }
+
+        // Use CkUSDCService with satellite config for SMS users
+        const balance = await CkUSDCService.getBalanceWithLocalCurrency(
+          user.id, // Principal ID
+          'ugx',   // Local currency
+          true     // useSatellite = true for SMS users
+        );
         
         return endSession(`Your USDC Balance
 
-$${usdcBalance.toFixed(2)} USDC
-≈ UGX ${ugxEquivalent.toLocaleString()}
+$${balance.balanceFormatted} USDC
+≈ UGX ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}
 
-Current Rate: 1 USDC = UGX ${usdcRateUGX.rate.toLocaleString()}
+Current Rate: 1 USDC = UGX ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
         
@@ -2156,41 +2170,66 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
         return continueSession('Minimum purchase: UGX 1,000\nEnter amount in UGX:');
       }
       
+      // Check user balance first
+      const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
+      if (!userBalance || userBalance.balance < amountUGX) {
+        const currentBalance = userBalance ? userBalance.balance : 0;
+        return endSession(`Insufficient balance!
+Your balance: UGX ${currentBalance.toLocaleString()}
+Required: UGX ${amountUGX.toLocaleString()}
+
+Thank you for using AfriTokeni!`);
+      }
+
       try {
-        // Get current USDC rate
-        const usdcRate = await CkUSDCService.getExchangeRate('ugx');
-        const usdcAmount = amountUGX / usdcRate.rate;
-        const fee = usdcAmount * 0.02; // 2% fee
-        const finalUSDCAmount = usdcAmount - fee;
+        // Get real available agents for USDC exchange
+        console.log('Getting available agents for USDC purchase...');
+        const agents = await DataService.getAvailableAgents();
+        const availableAgents = agents.filter((agent: Agent) => 
+          agent.isActive
+          // Additional filters for USDC-capable agents could be added here
+        );
         
-        // Find nearby agents (mock implementation)
-        const nearbyAgents = [
-          { name: 'Agent John', location: 'Kampala Central', rating: 4.8, distance: '0.5 km' },
-          { name: 'Agent Mary', location: 'Wandegeya', rating: 4.9, distance: '1.2 km' },
-          { name: 'Agent Peter', location: 'Ntinda', rating: 4.7, distance: '2.1 km' }
-        ];
+        if (availableAgents.length === 0) {
+          return endSession(`No agents available for USDC purchase at this time.
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
         
         session.data.usdcPurchaseAmount = amountUGX;
-        session.data.usdcAmount = finalUSDCAmount;
-        session.data.usdcFee = fee;
-        session.data.availableAgents = nearbyAgents;
+        session.data.availableAgents = availableAgents;
         session.step = 3;
         
-        let agentList = 'Select an agent:\n';
-        nearbyAgents.slice(0, 3).forEach((agent: { name: string; location: string; rating: number; distance: string }, index: number) => {
-          agentList += `${index + 1}. ${agent.name} (${agent.location}) - ${agent.distance}\n`;
+        // Get current USDC rate for display
+        const usdcRate = await CkUSDCService.getExchangeRate('ugx');
+        const usdcAmount = amountUGX / usdcRate.rate;
+        const fee = Math.round(usdcAmount * 0.025 * usdcRate.rate); // 2.5% fee in UGX
+        const netAmount = amountUGX - fee;
+        const finalUSDCAmount = netAmount / usdcRate.rate;
+        
+        let agentList = `USDC Purchase Quote
+
+Spend: UGX ${amountUGX.toLocaleString()}
+Fee (2.5%): UGX ${fee.toLocaleString()}
+Net: UGX ${netAmount.toLocaleString()}
+Receive: $${finalUSDCAmount.toFixed(6)} USDC
+
+Select an agent:
+`;
+        
+        availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
+          agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
         });
         
-        return continueSession(`Buy USDC Summary
-Amount: UGX ${amountUGX.toLocaleString()}
-USDC: $${finalUSDCAmount.toFixed(2)}
-Fee: $${fee.toFixed(2)}
-Rate: 1 USDC = UGX ${usdcRate.rate.toLocaleString()}
-
-${agentList}0. Cancel`);
+        agentList += '0. Cancel';
+        
+        return continueSession(agentList);
+        
       } catch (error) {
-        console.error('Error processing USDC purchase:', error);
-        return endSession('Error processing purchase. Please try again later.');
+        console.error('Error getting agents for USDC purchase:', error);
+        return endSession('Error loading agents. Please try again later.');
       }
     }
     
@@ -2207,29 +2246,77 @@ ${agentList}0. Cancel`);
       }
       
       try {
+        // Get user information
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
         const selectedAgent = session.data.availableAgents![selection - 1];
+        const ugxAmount = session.data.usdcPurchaseAmount || 0;
         
-        // Mock exchange code generation
-        const exchangeCode = `USDC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        // Generate a unique purchase code for the user to give to agent
+        const purchaseCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.purchaseCode = purchaseCode;
         
-        // In real implementation, this would use CkUSDCService.exchange()
+        // Process USDC purchase through agent using CkUSDCService.exchange
+        const exchangeResult = await CkUSDCService.exchange({
+          amount: ugxAmount,
+          currency: 'ugx',
+          type: 'buy',
+          userId: user.id,
+          agentId: selectedAgent.id
+        }, true); // Use satellite for SMS/USSD operations
         
-        return endSession(`USDC Purchase Confirmed!
+        if (exchangeResult.success && exchangeResult.transactionId) {
+          const usdcAmount = exchangeResult.ckusdcAmount;
+          
+          // Send SMS with purchase details and code
+          const smsMessage = `AfriTokeni USDC Purchase
+Code: ${purchaseCode}
+Amount: UGX ${ugxAmount.toLocaleString()}
+USDC to receive: $${usdcAmount.toFixed(6)}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+Transaction ID: ${exchangeResult.transactionId}
 
-Agent: ${selectedAgent.name}
-Location: ${selectedAgent.location}
-Amount: UGX ${session.data.usdcPurchaseAmount?.toLocaleString()}
-You'll receive: $${session.data.usdcAmount?.toFixed(2)} USDC
+Give this code and payment to the agent to complete your USDC purchase.`;
 
-Exchange Code: ${exchangeCode}
+          console.log(`Sending USDC purchase SMS to ${session.phoneNumber}`);
 
-Show this code to your agent to complete the transaction.
+          try {
+            await sendSMSNotification(session.phoneNumber, smsMessage);
+          } catch (smsError) {
+            console.error('SMS sending failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ USDC Purchase Initiated!
+
+Purchase Code: ${purchaseCode}
+Transaction ID: ${exchangeResult.transactionId}
+You will receive: $${usdcAmount.toFixed(6)} USDC
+Amount to pay: UGX ${ugxAmount.toLocaleString()}
+
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+
+Give the code ${purchaseCode} and payment to the agent to complete your purchase.
+
+SMS sent with details.
 
 Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Purchase failed: ${exchangeResult.error || 'Unknown error'}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
         
       } catch (error) {
-        console.error('Error confirming USDC purchase:', error);
-        return endSession('Error confirming purchase. Please try again later.');
+        console.error('Error processing USDC purchase:', error);
+        return endSession('Error processing purchase. Please try again later.');
       }
     }
     
@@ -2259,20 +2346,41 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
       
       session.step = 2;
       
-      // Mock USDC balance check
-      const usdcBalance = 50.25; // This would come from CkUSDCService.getBalance()
-      
-      return continueSession(`Sell USDC
+      try {
+        // Get user from DataService to get Principal ID
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession(`User not found.
+Please contact support.
+
+Thank you for using AfriTokeni!`);
+        }
+
+        // Get real USDC balance using CkUSDCService
+        const balance = await CkUSDCService.getBalance(user.id, true); // useSatellite = true for SMS
+        const usdcBalance = parseFloat(balance.balanceFormatted);
+        
+        // Store balance for later use
+        session.data.usdcBalance = usdcBalance;
+        
+        return continueSession(`Sell USDC
 Your Balance: $${usdcBalance.toFixed(2)} USDC
 
 Enter amount to sell (USDC):
 (Min: $1.00, Max: $${usdcBalance.toFixed(2)})`);
+      } catch (error) {
+        console.error('Error getting USDC balance:', error);
+        return continueSession(`Error getting balance.
+Please try again later.
+
+Enter your 4-digit PIN:`);
+      }
     }
     
     case 2: {
       // Amount entry step
       const usdcAmount = parseFloat(currentInput);
-      const mockBalance = 50.25;
+      const userBalance = session.data.usdcBalance || 0;
       
       if (isNaN(usdcAmount) || usdcAmount <= 0) {
         return continueSession('Invalid amount.\nEnter USDC amount to sell:');
@@ -2282,85 +2390,181 @@ Enter amount to sell (USDC):
         return continueSession('Minimum sale: $1.00 USDC\nEnter USDC amount to sell:');
       }
       
-      if (usdcAmount > mockBalance) {
+      if (usdcAmount > userBalance) {
         return continueSession(`Insufficient balance.
-Your balance: $${mockBalance.toFixed(2)} USDC
+Your balance: $${userBalance.toFixed(2)} USDC
 Enter USDC amount to sell:`);
       }
       
       try {
-        // Get current USDC rate
+        // Get current USDC rate and calculate fees
         const usdcRate = await CkUSDCService.getExchangeRate('ugx');
-        const ugxAmount = usdcAmount * usdcRate.rate;
-        const fee = usdcAmount * 0.02; // 2% fee
-        const finalUGXAmount = ugxAmount - (fee * usdcRate.rate);
+        const ugxGross = usdcAmount * usdcRate.rate;
+        const fee = Math.round(ugxGross * 0.025); // 2.5% fee in UGX
+        const ugxNet = ugxGross - fee;
         
         session.data.usdcSellAmount = usdcAmount;
-        session.data.ugxAmount = finalUGXAmount;
-        session.data.usdcFee = fee;
+        session.data.ugxGross = ugxGross;
+        session.data.ugxNet = ugxNet;
+        session.data.fee = fee;
         session.step = 3;
         
-        return continueSession(`Sell USDC Summary
-USDC Amount: $${usdcAmount.toFixed(2)}
-UGX Amount: UGX ${ugxAmount.toLocaleString()}
-Fee: $${fee.toFixed(2)}
-You'll receive: UGX ${finalUGXAmount.toLocaleString()}
-Rate: 1 USDC = UGX ${usdcRate.rate.toLocaleString()}
-
-1. Confirm Sale
-2. Cancel`);
-      } catch (error) {
-        console.error('Error calculating USDC sale:', error);
-        return continueSession('Error calculating sale. Please try again.');
-      }
-    }
-    
-    case 3: {
-      // Confirmation step
-      if (currentInput === '1') {
-        try {
-          // Mock exchange code generation
-          const exchangeCode = `USDC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-          
-          // In real implementation, this would use CkUSDCService.exchange()
-          
-          return endSession(`USDC Sale Confirmed!
-
-Sold: $${session.data.usdcSellAmount?.toFixed(2)} USDC
-You'll receive: UGX ${session.data.ugxAmount?.toLocaleString()}
-
-Exchange Code: ${exchangeCode}
-
-Visit any AfriTokeni agent to complete the transaction and receive your cash.
-
-Thank you for using AfriTokeni!`);
-          
-        } catch (error) {
-          console.error('Error processing USDC sale:', error);
-          return endSession('Error processing sale. Please try again later.');
-        }
-      } else if (currentInput === '2') {
-        return endSession('USDC sale cancelled.\nThank you for using AfriTokeni!');
-      } else {
-        return continueSession(`Invalid option.
-1. Confirm Sale
-2. Cancel`);
-      }
-    }
-    
-    case 4: {
-      // Agent instructions (if needed)
-      try {
-        return endSession(`USDC Sale Instructions
-
-Visit any AfriTokeni agent with your exchange code to receive cash.
-
-Exchange Code: ${session.data.exchangeCode}
-Amount: UGX ${session.data.ugxAmount?.toLocaleString()}
+        // Get available agents for USDC exchange
+        console.log('Getting available agents for USDC sale...');
+        const agents = await DataService.getAvailableAgents();
+        const availableAgents = agents.filter((agent: Agent) => 
+          agent.isActive
+          // Additional filters for agents with sufficient cash could be added
+        );
+        
+        if (availableAgents.length === 0) {
+          return endSession(`No agents available for USDC sale at this time.
 
 Please try again later.
 
 Thank you for using AfriTokeni!`);
+        }
+        
+        session.data.availableAgents = availableAgents;
+        
+        let agentList = `USDC Sale Quote
+
+Sell: $${usdcAmount.toFixed(6)} USDC
+Gross: UGX ${ugxGross.toLocaleString()}
+Fee (2.5%): UGX ${fee.toLocaleString()}
+You receive: UGX ${ugxNet.toLocaleString()}
+
+Select an agent:
+`;
+        
+        availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
+          agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
+        });
+        
+        agentList += '0. Cancel';
+        
+        return continueSession(agentList);
+        
+      } catch (error) {
+        console.error('Error getting agents for USDC sale:', error);
+        return endSession('Error loading agents. Please try again later.');
+      }
+    }
+    
+    case 3: {
+      // Agent selection
+      const agentChoice = parseInt(currentInput);
+      
+      if (agentChoice === 0) {
+        session.currentMenu = 'usdc';
+        session.step = 0;
+        return handleUSDC('', session);
+      }
+      
+      const agents = session.data.availableAgents;
+      if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
+        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+      }
+      
+      const selectedAgent = agents[agentChoice - 1];
+      session.data.selectedAgent = selectedAgent;
+      session.step = 4;
+      
+      const usdcAmount = session.data.usdcSellAmount || 0;
+      const ugxNet = session.data.ugxNet || 0;
+      const fee = session.data.fee || 0;
+      
+      return continueSession(`Selected Agent:
+${selectedAgent.businessName}
+${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
+
+Sale Details:
+Sell: $${usdcAmount.toFixed(6)} USDC
+Fee: UGX ${fee.toLocaleString()}
+You receive: UGX ${ugxNet.toLocaleString()}
+
+Enter your PIN to confirm:`);
+    }
+    
+    case 4: {
+      // PIN verification and process USDC sale
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      try {
+        // Get user information
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        const selectedAgent = session.data.selectedAgent;
+        const usdcAmount = session.data.usdcSellAmount || 0;
+        
+        // Generate a unique sale code for the user to give to agent
+        const saleCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        session.data.saleCode = saleCode;
+        
+        // Process USDC to local currency exchange through agent
+        const exchangeResult = await CkUSDCService.exchange({
+          userId: user.id,
+          agentId: selectedAgent.id,
+          amount: usdcAmount,
+          currency: 'ugx',
+          type: 'sell'
+        }, true);
+        
+        if (exchangeResult.success && exchangeResult.transactionId) {
+          const ugxAmount = exchangeResult.localCurrencyAmount || 0;
+          
+          // Send SMS with sale details and code
+          const smsMessage = `AfriTokeni USDC Sale
+Code: ${saleCode}
+USDC to sell: $${usdcAmount.toFixed(6)}
+You will receive: UGX ${ugxAmount.toLocaleString()}
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+Transaction ID: ${exchangeResult.transactionId}
+
+Give this code to the agent to complete your USDC sale and collect cash.`;
+
+          console.log(`Sending USDC sale SMS to ${session.phoneNumber}`);
+
+          try {
+            await sendSMSNotification(session.phoneNumber, smsMessage);
+          } catch (smsError) {
+            console.error('SMS sending failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ USDC Sale Initiated!
+
+Sale Code: ${saleCode}
+Transaction ID: ${exchangeResult.transactionId}
+Selling: $${usdcAmount.toFixed(6)} USDC
+You will receive: UGX ${ugxAmount.toLocaleString()}
+
+Agent: ${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+
+Give the code ${saleCode} to the agent to complete your sale and collect cash.
+
+SMS sent with details.
+
+Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Sale failed: ${exchangeResult.error || 'Unknown error'}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
         
       } catch (error) {
         console.error('Error processing USDC sale:', error);

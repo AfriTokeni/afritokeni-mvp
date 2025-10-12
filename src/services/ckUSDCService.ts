@@ -1,18 +1,23 @@
 /**
  * ckUSDC Service for AfriTokeni
  * 
- * Handles all ckUSDC operations:
+ * Handles all ckUSDC operations for both SMS/USSD and Web users:
  * - Deposits (USDC → ckUSDC via Ethereum bridge)
  * - Withdrawals (ckUSDC → USDC)
  * - Transfers (ckUSDC between ICP users)
  * - Balance queries
  * - Exchange rate fetching
+ * - Exchange operations with agents
+ * - Supports both Web and SMS/USSD operations with satellite configuration
  */
 
 import { ethers } from 'ethers';
 import { Principal } from '@dfinity/principal';
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { nanoid } from 'nanoid';
+import { setDoc, getDoc, listDocs } from '@junobuild/core';
+import { SatelliteOptions } from '@junobuild/core';
+import { AnonymousIdentity } from '@dfinity/agent';
 import {
   CkUSDCConfig,
   CkUSDCBalance,
@@ -31,10 +36,16 @@ import {
   CKUSDC_CONSTANTS,
   SEPOLIA_CONFIG,
 } from '../types/ckusdc.js';
-import { setDoc, getDoc, listDocs } from '@junobuild/core';
 
 export class CkUSDCService {
   private static config: CkUSDCConfig = SEPOLIA_CONFIG;
+  
+  // Default satellite configuration for SMS/USSD operations
+  private static defaultSatellite: SatelliteOptions = {
+    identity: new AnonymousIdentity(),
+    satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
+    container: true
+  };
 
   /**
    * Initialize ckUSDC service with configuration
@@ -50,16 +61,28 @@ export class CkUSDCService {
     return this.config;
   }
 
+  /**
+   * Get satellite configuration for Juno operations
+   * Returns satellite config for SMS/USSD operations, undefined for web operations
+   */
+  private static getSatelliteConfig(useSatellite?: boolean): SatelliteOptions | undefined {
+    return useSatellite ? this.defaultSatellite : undefined;
+  }
+
   // ==================== BALANCE OPERATIONS ====================
 
   /**
    * Get ckUSDC balance for a user
+   * @param principalId - User's Principal ID
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async getBalance(principalId: string): Promise<CkUSDCBalance> {
+  static async getBalance(principalId: string, useSatellite?: boolean): Promise<CkUSDCBalance> {
     try {
       // Fetch balance from Juno datastore
+      const satellite = this.getSatelliteConfig(useSatellite);
       const results = await listDocs({
         collection: 'ckusdc_transactions',
+        satellite,
         filter: {
           order: {
             desc: true,
@@ -101,12 +124,16 @@ export class CkUSDCService {
 
   /**
    * Get ckUSDC balance with local currency equivalent
+   * @param principalId - User's Principal ID
+   * @param currency - Local currency code (e.g., 'KES', 'NGN')
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
   static async getBalanceWithLocalCurrency(
     principalId: string,
-    currency: string
+    currency: string,
+    useSatellite?: boolean
   ): Promise<CkUSDCBalance> {
-    const balance = await this.getBalance(principalId);
+    const balance = await this.getBalance(principalId, useSatellite);
     const exchangeRate = await this.getExchangeRate(currency);
     
     const localCurrencyEquivalent = 
@@ -181,8 +208,10 @@ export class CkUSDCService {
 
   /**
    * Deposit USDC to get ckUSDC
+   * @param request - Deposit request with amount and principal ID
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async deposit(request: CkUSDCDepositRequest): Promise<CkUSDCDepositResponse> {
+  static async deposit(request: CkUSDCDepositRequest, useSatellite?: boolean): Promise<CkUSDCDepositResponse> {
     try {
       // Validate amount
       if (request.amount < CKUSDC_CONSTANTS.MIN_DEPOSIT) {
@@ -240,8 +269,10 @@ export class CkUSDCService {
         expiresAt: new Date(Date.now() + CKUSDC_CONSTANTS.TX_EXPIRATION_MS),
       };
 
+      const satellite = this.getSatelliteConfig(useSatellite);
       await setDoc({
         collection: 'ckusdc_transactions',
+        satellite,
         doc: {
           key: transactionId,
           data: {
@@ -273,8 +304,10 @@ export class CkUSDCService {
 
   /**
    * Withdraw ckUSDC to get USDC on Ethereum
+   * @param request - Withdrawal request with amount, principal ID, and Ethereum address
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async withdraw(request: CkUSDCWithdrawalRequest): Promise<CkUSDCWithdrawalResponse> {
+  static async withdraw(request: CkUSDCWithdrawalRequest, useSatellite?: boolean): Promise<CkUSDCWithdrawalResponse> {
     try {
       // Validate amount
       if (request.amount < CKUSDC_CONSTANTS.MIN_TRANSFER) {
@@ -308,8 +341,10 @@ export class CkUSDCService {
         updatedAt: new Date(),
       };
 
+      const satellite = this.getSatelliteConfig(useSatellite);
       await setDoc({
         collection: 'ckusdc_transactions',
+        satellite,
         doc: {
           key: transactionId,
           data: {
@@ -338,8 +373,10 @@ export class CkUSDCService {
 
   /**
    * Transfer ckUSDC between ICP users
+   * @param request - Transfer request with amount, sender, and recipient principal IDs
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async transfer(request: CkUSDCTransferRequest): Promise<CkUSDCTransferResponse> {
+  static async transfer(request: CkUSDCTransferRequest, useSatellite?: boolean): Promise<CkUSDCTransferResponse> {
     try {
       // Validate amount
       if (request.amount < CKUSDC_CONSTANTS.MIN_TRANSFER) {
@@ -379,8 +416,10 @@ export class CkUSDCService {
         updatedAt: new Date(),
       };
 
+      const satellite = this.getSatelliteConfig(useSatellite);
       await setDoc({
         collection: 'ckusdc_transactions',
+        satellite,
         doc: {
           key: transactionId,
           data: {
@@ -410,8 +449,10 @@ export class CkUSDCService {
 
   /**
    * Exchange ckUSDC with local currency via agent
+   * @param request - Exchange request with amount, type, currency, user and agent IDs
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async exchange(request: CkUSDCExchangeRequest): Promise<CkUSDCExchangeResponse> {
+  static async exchange(request: CkUSDCExchangeRequest, useSatellite?: boolean): Promise<CkUSDCExchangeResponse> {
     try {
       // Get exchange rate
       const exchangeRate = await this.getExchangeRate(request.currency);
@@ -456,8 +497,10 @@ export class CkUSDCService {
         expiresAt: new Date(Date.now() + CKUSDC_CONSTANTS.TX_EXPIRATION_MS),
       };
 
+      const satellite = this.getSatelliteConfig(useSatellite);
       await setDoc({
         collection: 'ckusdc_transactions',
+        satellite,
         doc: {
           key: transactionId,
           data: {
@@ -581,13 +624,83 @@ export class CkUSDCService {
   }
 
   /**
-   * Get transaction by ID
+   * Format phone number for agent interface
    */
-  static async getTransaction(transactionId: string): Promise<CkUSDCTransaction | null> {
+  private static formatPhoneNumber(phoneNumber: string): string {
+    // Remove any non-digit characters and format for display
+    const digits = phoneNumber.replace(/\D/g, '');
+    if (digits.length >= 10) {
+      return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+    }
+    return phoneNumber;
+  }
+
+  /**
+   * Format exchange requests for agent interface
+   * Used by agent pages to display pending exchange requests
+   * @param exchanges - Array of ckUSDC exchange transactions
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static formatExchangeRequestsForAgent(
+    exchanges: CkUSDCTransaction[]
+  ): Array<{
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    type: 'buy' | 'sell';
+    amount: number;
+    currency: string;
+    usdcAmount: number;
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    createdAt: Date;
+    location?: string;
+    exchangeRate?: number;
+    agentFee?: number;
+  }> {
     try {
+      // Transform to match the expected format without user data lookups
+      const formattedRequests = exchanges.map((tx) => {
+        // Use userId as fallback for customer identification
+        // The actual user data fetching should be handled by the calling component
+        const customerName = 'Customer'; // Will be populated by calling component
+        const customerPhone = tx.userId; // Use userId as identifier
+        
+        return {
+          id: tx.id,
+          customerName,
+          customerPhone: this.formatPhoneNumber(customerPhone),
+          type: tx.type === 'exchange_buy' ? 'buy' as const : 'sell' as const,
+          amount: tx.localCurrencyAmount || 0,
+          currency: tx.localCurrency || 'UGX',
+          usdcAmount: parseFloat(this.formatAmount(tx.amount)),
+          status: tx.status as 'pending' | 'processing' | 'completed' | 'cancelled',
+          createdAt: tx.createdAt,
+          location: undefined, // Could be added from user data if available
+          exchangeRate: tx.exchangeRate,
+          agentFee: tx.fee && tx.exchangeRate ? 
+            (tx.fee * tx.exchangeRate * 0.8) : undefined
+        };
+      });
+
+      return formattedRequests;
+    } catch (error) {
+      console.error('Error formatting exchange requests for agent:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get transaction by ID
+   * @param transactionId - Transaction ID to retrieve
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async getTransaction(transactionId: string, useSatellite?: boolean): Promise<CkUSDCTransaction | null> {
+    try {
+      const satellite = this.getSatelliteConfig(useSatellite);
       const result = await getDoc({
         collection: 'ckusdc_transactions',
-        key: transactionId
+        key: transactionId,
+        satellite
       });
 
       if (!result) return null;
@@ -607,11 +720,15 @@ export class CkUSDCService {
 
   /**
    * Get user's transaction history
+   * @param userId - User's Principal ID
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
    */
-  static async getTransactionHistory(userId: string): Promise<CkUSDCTransaction[]> {
+  static async getTransactionHistory(userId: string, useSatellite?: boolean): Promise<CkUSDCTransaction[]> {
     try {
+      const satellite = this.getSatelliteConfig(useSatellite);
       const results = await listDocs({
         collection: 'ckusdc_transactions',
+        satellite,
         filter: {
           order: {
             desc: true,
