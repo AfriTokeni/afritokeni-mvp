@@ -88,6 +88,12 @@ export default defineConfig({
           write: "managed",
           memory: "stable",
         },
+         {
+          collection: "ckbtc_deposit_addresses",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
         {
           collection: "ckbtc_transactions",
           read: "public",
