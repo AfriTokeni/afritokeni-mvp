@@ -10,7 +10,7 @@ import { DollarSign, TrendingUp, Send, Download, RefreshCw } from 'lucide-react'
 import { CkUSDCService } from '../services/ckUSDCService';
 import { CkUSDCBalance } from '../types/ckusdc';
 import { useDemoMode } from '../context/DemoModeContext';
-import { DemoDataService } from '../services/demoDataService';
+import { CentralizedDemoService } from '../services/centralizedDemoService';
 
 interface CkUSDCBalanceCardProps {
   /** User's Principal ID */
@@ -19,6 +19,8 @@ interface CkUSDCBalanceCardProps {
   preferredCurrency?: string;
   /** Show quick actions */
   showActions?: boolean;
+  /** Is this for an agent? */
+  isAgent?: boolean;
   /** Callback for deposit action */
   onDeposit?: () => void;
   /** Callback for send action */
@@ -31,6 +33,7 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
   principalId,
   preferredCurrency = 'UGX',
   showActions = true,
+  isAgent = false,
   onDeposit,
   onSend,
   onExchange,
@@ -46,19 +49,22 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
       setError(null);
       
       if (isDemoMode) {
-        // Use demo data
-        const demoUser = DemoDataService.getDemoUser();
-        if (demoUser) {
+        // Initialize and get centralized demo data from Juno
+        const demoBalance = isAgent 
+          ? await CentralizedDemoService.initializeAgent(principalId, preferredCurrency)
+          : await CentralizedDemoService.initializeUser(principalId, preferredCurrency);
+        
+        if (demoBalance) {
           const exchangeRate = await CkUSDCService.getExchangeRate(preferredCurrency);
+          const usdcAmount = demoBalance.ckUSDCBalance / 100; // cents to dollars
           setBalance({
-            balance: demoUser.ckUSDCBalance * 1000000, // Convert to smallest unit
-            balanceFormatted: demoUser.ckUSDCBalance.toFixed(2),
-            localCurrencyEquivalent: demoUser.ckUSDCBalance * exchangeRate.rate,
+            balanceUSDC: usdcAmount.toFixed(2),
+            localCurrencyEquivalent: usdcAmount * exchangeRate.rate,
             localCurrency: preferredCurrency,
             lastUpdated: new Date(),
           });
         }
-      } else {
+      } else{
         const balanceData = await CkUSDCService.getBalanceWithLocalCurrency(
           principalId,
           preferredCurrency
@@ -154,7 +160,7 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
       <div className="mb-4">
         <div className="flex items-baseline gap-2 mb-2">
           <span className="text-3xl font-bold text-neutral-900 font-mono">
-            ${balance?.balanceFormatted || '0.00'}
+            ${balance?.balanceUSDC || '0.00'}
           </span>
           <span className="text-sm text-neutral-600 font-semibold">ckUSDC</span>
         </div>
@@ -169,8 +175,8 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
         )}
       </div>
 
-      {/* Info Badge */}
-      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-green-200">
+      {/* Info Badge - Hidden on mobile */}
+      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-green-200 hidden md:block">
         <p className="text-xs text-neutral-700">
           <span className="font-semibold">Stable Value:</span> ckUSDC is pegged 1:1 with USD, 
           protecting you from Bitcoin volatility.

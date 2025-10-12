@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, MapPin, Phone, Clock } from 'lucide-react';
 import { formatCurrencyAmount } from '../../types/currency';
 import { Agent as DBAgent } from '../../services/dataService';
 import TransactionCodeDisplay from '../../components/TransactionCodeDisplay';
+import ReviewModal from '../../components/ReviewModal';
 
 interface ConfirmationStepProps {
   localAmount: number;
@@ -27,11 +28,19 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   withdrawalCode,
   onMakeAnotherWithdrawal
 }) => {
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
-    const handleGetDirections = (agentLocation: [number, number]) => {
+  const handleGetDirections = (agentLocation: [number, number]) => {
     if (!userLocation) return;
     const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation[0]},${userLocation[1]}&destination=${agentLocation[0]},${agentLocation[1]}`;
     window.open(url, '_blank');
+  };
+
+  const handleSubmitReview = async (rating: number, comment: string) => {
+    console.log('Review submitted:', { rating, comment, agentId: selectedAgent?.id });
+    // In production, this would save to backend
+    setShowReviewModal(false);
+    alert('Thank you for your review!');
   };
 
   return (
@@ -69,7 +78,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
               </div>
             )}
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 font-medium">Transaction Fee (1%):</span>
+              <span className="text-gray-600 font-medium">Transaction Fee (0.5%):</span>
               <span className="font-mono font-bold text-red-600 text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(fee, userCurrency as any)}</span>
             </div>
             <div className="flex justify-between items-center pt-2 border-t border-gray-200">
@@ -139,7 +148,15 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
           </div>
         )}
 
-        <div className="mt-6 sm:mt-8 flex space-x-4">
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
+          {selectedAgent && withdrawType === 'cash' && (
+            <button
+              onClick={() => setShowReviewModal(true)}
+              className="flex-1 bg-yellow-400 text-gray-900 py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-yellow-500 transition-colors duration-200 text-sm sm:text-base"
+            >
+              ⭐ Rate Agent
+            </button>
+          )}
           <button
             onClick={onMakeAnotherWithdrawal}
             className="flex-1 bg-gray-100 text-gray-700 py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-gray-200 transition-colors duration-200 text-sm sm:text-base"
@@ -148,6 +165,15 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {showReviewModal && selectedAgent && (
+        <ReviewModal
+          agent={selectedAgent}
+          onClose={() => setShowReviewModal(false)}
+          onSubmit={handleSubmitReview}
+        />
+      )}
     </div>
   );
 };

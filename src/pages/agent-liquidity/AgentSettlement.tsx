@@ -5,7 +5,6 @@ import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
 import { NotificationService } from '../../services/notificationService';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { AgentDemoDataService } from '../../services/agentDemoDataService';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { useAuthentication } from '../../context/AuthenticationContext';
 
@@ -171,7 +170,7 @@ const AgentSettlement: React.FC = () => {
 
       // Demo mode - instant settlement
       if (isDemoMode) {
-        AgentDemoDataService.requestSettlement(settlementAmount, agentCurrency, selectedMethod.replace('_', ' '));
+        // Demo mode: settlement simulated
         
         const newSettlement: SettlementRequest = {
           id: reference,

@@ -113,8 +113,7 @@ export class CkUSDCService {
         });
       
       return {
-        balance,
-        balanceFormatted: this.formatAmount(balance),
+        balanceUSDC: this.formatAmount(balance),
         lastUpdated: new Date(),
       };
     } catch (error) {
@@ -138,7 +137,7 @@ export class CkUSDCService {
     const exchangeRate = await this.getExchangeRate(currency);
     
     const localCurrencyEquivalent = 
-      parseFloat(balance.balanceFormatted) * exchangeRate.rate;
+      parseFloat(balance.balanceUSDC) * exchangeRate.rate;
 
     return {
       ...balance,

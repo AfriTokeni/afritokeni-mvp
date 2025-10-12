@@ -13,13 +13,14 @@ import { BalanceService } from "../services/BalanceService";
 import { formatCurrencyAmount, AfricanCurrency } from "../types/currency";
 import { useAfriTokeni } from "../hooks/useAfriTokeni";
 import { useDemoMode } from "../context/DemoModeContext";
-import { AgentDemoDataService } from "../services/agentDemoDataService";
+import { CentralizedDemoService } from "../services/centralizedDemoService";
 import { Transaction } from "../types/transaction";
 import { CurrencySelector } from "../components/CurrencySelector";
 import { CkBTCBalanceCard } from "../components/CkBTCBalanceCard";
 import { CkUSDCBalanceCard } from "../components/CkUSDCBalanceCard";
 import { AgentOnboardingModal, AgentOnboardingData } from "../components/AgentOnboardingModal";
 import { AgentKYCBanner } from "../components/AgentKYCBanner";
+import { DemoModeModal } from "../components/DemoModeModal";
 import { useAuthentication } from "../context/AuthenticationContext";
 
 const AgentDashboard: React.FC = () => {
@@ -35,32 +36,42 @@ const AgentDashboard: React.FC = () => {
   const currentAgent = user.agent || agent;
   const agentCurrency = selectedCurrency || (currentAgent as any)?.preferredCurrency || 'UGX';
 
-  // Initialize demo data if demo mode is enabled
+  // Load demo balance from CentralizedDemoService
+  const [demoBalance, setDemoBalance] = useState<any>(null);
   useEffect(() => {
-    if (isDemoMode && (currentAgent as any)?.email) {
-      AgentDemoDataService.initializeDemoAgent((currentAgent as any).email);
-    }
-  }, [isDemoMode, currentAgent]);
+    const loadDemoBalance = async () => {
+      if (isDemoMode && currentAgent?.id) {
+        const balance = await CentralizedDemoService.initializeAgent(currentAgent.id, agentCurrency);
+        setDemoBalance(balance);
+      }
+    };
+    loadDemoBalance();
+  }, [isDemoMode, currentAgent, agentCurrency]);
 
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showKYCBanner, setShowKYCBanner] = useState(true);
   const [kycStatus, setKycStatus] = useState<'pending' | 'verified' | 'rejected' | 'not_started'>('not_started');
 
 
   useEffect(() => {
-    if (isDemoMode) {
-      // Load demo transactions
-      const demoTransactions = AgentDemoDataService.getTransactions();
-      setAgentTransactions(demoTransactions as any);
-    } else if (agent) {
-      const transactions = BalanceService.getTransactionHistory(
-        agent.userId || agent.id,
-      );
-      setAgentTransactions(transactions);
-    }
-  }, [agent, isDemoMode]);
+    const loadTransactions = async () => {
+      if (isDemoMode && currentAgent?.id) {
+        // Load demo transactions
+        const demoTransactions = await CentralizedDemoService.getTransactions(currentAgent.id);
+        setAgentTransactions(demoTransactions as any);
+      } else if (agent) {
+        const transactions = BalanceService.getTransactionHistory(
+          agent.userId || agent.id,
+        );
+        setAgentTransactions(transactions);
+      }
+    };
+    
+    loadTransactions();
+  }, [agent, isDemoMode, currentAgent]);
 
   const formatCurrency = (amount: number): string => {
     return formatCurrencyAmount(amount, agentCurrency as AfricanCurrency);
@@ -92,15 +103,22 @@ const AgentDashboard: React.FC = () => {
     setShowKYCBanner(false); // Hide banner after completion
   };
 
+  // Show demo modal ONLY on first login for this agent (not on every page)
+  useEffect(() => {
+    if (!currentAgent?.id) return; // Wait for agent to be loaded
+    
+    const globalModalKey = `afritokeni_first_login_${currentAgent.id}`;
+    const hasSeenDemoModal = localStorage.getItem(globalModalKey);
+    
+    if (!hasSeenDemoModal) {
+      setShowDemoModal(true);
+      localStorage.setItem(globalModalKey, 'true');
+    }
+  }, [currentAgent?.id]);
+
   // Load saved profile data and KYC status
   useEffect(() => {
-    // In demo mode, auto-verify KYC and hide everything
-    if (isDemoMode) {
-      setKycStatus('verified');
-      setShowKYCBanner(false);
-      setShowOnboarding(false);
-      return;
-    }
+    if (!currentAgent?.id) return; // Wait for agent to be loaded
     
     // Load KYC status from localStorage
     const savedKycStatus = localStorage.getItem('agent_kyc_status');
@@ -119,17 +137,18 @@ const AgentDashboard: React.FC = () => {
       }
     }
     
-    // Show onboarding on first visit (only if NOT in demo mode)
+    // Only show onboarding/banner AFTER demo modal has been seen
+    const globalModalKey = `afritokeni_first_login_${currentAgent.id}`;
+    const hasSeenDemoModal = localStorage.getItem(globalModalKey);
+    if (!hasSeenDemoModal) return; // Wait for demo modal first
+
+    // Show onboarding on first visit if profile incomplete
     const hasSeenOnboarding = localStorage.getItem('agent_onboarding_seen');
     if (!hasSeenOnboarding && !savedProfileData) {
-      // Delay showing onboarding to let user see demo mode toggle first
-      const timer = setTimeout(() => {
-        setShowOnboarding(true);
-      }, 500);
+      setShowOnboarding(true);
       localStorage.setItem('agent_onboarding_seen', 'true');
-      return () => clearTimeout(timer);
     }
-  }, [isDemoMode]);
+  }, [currentAgent?.id]);
 
 
   const getLiquidityAlerts = () => {
@@ -137,10 +156,10 @@ const AgentDashboard: React.FC = () => {
     
     // Get balances from demo mode or real agent
     const digitalBalance = isDemoMode 
-      ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+      ? (demoBalance?.digitalBalance || 0)
       : (agent?.digitalBalance || 0);
     const cashBalance = isDemoMode 
-      ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+      ? (demoBalance?.cashBalance || 0)
       : (agent?.cashBalance || 0);
 
     // Critical digital balance
@@ -186,6 +205,13 @@ const AgentDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Demo Mode Modal */}
+      <DemoModeModal 
+        isOpen={showDemoModal} 
+        onClose={() => setShowDemoModal(false)}
+        userType="agent"
+      />
+
       {/* Onboarding Modal */}
       <AgentOnboardingModal
         isOpen={showOnboarding}
@@ -219,8 +245,8 @@ const AgentDashboard: React.FC = () => {
           />
         )}
 
-        {/* Agent Verification Status */}
-        {showVerificationAlert &&
+        {/* Agent Verification Status - Only show if KYC is verified */}
+        {showVerificationAlert && kycStatus === 'verified' &&
           (agent?.isActive ? (
             <div className="relative rounded-lg border border-green-200 bg-green-50 p-4">
               <div className="flex items-center justify-between">
@@ -416,8 +442,8 @@ const AgentDashboard: React.FC = () => {
                   <p className="font-mono text-3xl font-bold text-gray-900">
                     {showBalance
                       ? formatCurrencyAmount(
-                          isDemoMode 
-                            ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+                          isDemoMode
+                            ? (demoBalance?.digitalBalance || 0)
                             : (agent?.digitalBalance || 0),
                           agentCurrency as AfricanCurrency
                         )
@@ -456,7 +482,7 @@ const AgentDashboard: React.FC = () => {
           {/* Cash Balance Card (Earnings) */}
           <div className="rounded-2xl border border-gray-200 bg-white p-8">
             <div className="mb-6 flex items-start justify-between">
-              <div>
+              <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <p className="text-sm font-medium text-gray-600">Cash Balance</p>
                   <span className="text-xs text-gray-400">Earnings</span>
@@ -465,8 +491,8 @@ const AgentDashboard: React.FC = () => {
                   <p className="font-mono text-3xl font-bold text-gray-900">
                     {showBalance
                       ? formatCurrencyAmount(
-                          isDemoMode 
-                            ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+                          isDemoMode
+                            ? (demoBalance?.cashBalance || 0)
                             : (agent?.cashBalance || 0),
                           agentCurrency as AfricanCurrency
                         )
@@ -484,8 +510,14 @@ const AgentDashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="rounded-xl bg-green-50 p-3">
-                <Wallet className="h-6 w-6 text-green-600" />
+              <div className="flex flex-col items-end gap-2">
+                <div className="rounded-xl bg-green-50 p-3">
+                  <Wallet className="h-6 w-6 text-green-600" />
+                </div>
+                <CurrencySelector
+                  currentCurrency={agentCurrency}
+                  onCurrencyChange={(currency) => setSelectedCurrency(currency)}
+                />
               </div>
             </div>
             <button
@@ -497,26 +529,21 @@ const AgentDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* ckBTC and ckUSDC Balance Cards */}
-        {((isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckBTCBalance || 0) > 0) || 
-          (AgentDemoDataService.getDemoAgent()?.ckUSDCBalance || 0) > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {(isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckBTCBalance || 0) > 0) && (
-              <CkBTCBalanceCard
-                principalId={currentAgent?.id || 'demo-agent'}
-                preferredCurrency={agentCurrency}
-                showActions={false}
-              />
-            )}
-            {(isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckUSDCBalance || 0) > 0) && (
-              <CkUSDCBalanceCard
-                principalId={currentAgent?.id || 'demo-agent'}
-                preferredCurrency={agentCurrency}
-                showActions={false}
-              />
-            )}
-          </div>
-        )}
+        {/* ckBTC and ckUSDC Balance Cards - Always show */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <CkBTCBalanceCard
+            principalId={currentAgent?.id || 'demo-agent'}
+            preferredCurrency={agentCurrency}
+            showActions={false}
+            isAgent={true}
+          />
+          <CkUSDCBalanceCard
+            principalId={currentAgent?.id || 'demo-agent'}
+            preferredCurrency={agentCurrency}
+            showActions={false}
+            isAgent={true}
+          />
+        </div>
 
 
           {/* Liquidity Management */}

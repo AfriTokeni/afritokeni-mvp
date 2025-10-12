@@ -115,17 +115,60 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
           />
         </div>
         
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-colors duration-200 text-sm sm:text-base"
+      </div>
+
+      {/* Filter Buttons */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+        <button
+          onClick={() => setFilterStatus('all')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+            filterStatus === 'all'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
         >
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="verified">Verified</option>
-          <option value="approved">Approved</option>
-          <option value="completed">Completed</option>
-        </select>
+          All
+        </button>
+        <button
+          onClick={() => setFilterStatus('pending')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+            filterStatus === 'pending'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Pending
+        </button>
+        <button
+          onClick={() => setFilterStatus('verified')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+            filterStatus === 'verified'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Verified
+        </button>
+        <button
+          onClick={() => setFilterStatus('approved')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+            filterStatus === 'approved'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Approved
+        </button>
+        <button
+          onClick={() => setFilterStatus('completed')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+            filterStatus === 'completed'
+              ? 'bg-black text-white'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Completed
+        </button>
       </div>
 
       {/* Withdrawal Requests List */}

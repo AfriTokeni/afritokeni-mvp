@@ -34,6 +34,12 @@ export const user_desktop_routes: Route[] = [
         icon: Send,
     },
     {
+        id: "withdraw" as RouteID,
+        path: "/users/withdraw",
+        label: "Withdraw",
+        icon: Banknote,
+    },
+    {
         id: "dao" as RouteID,
         path: "/users/dao",
         label: "DAO Governance",
@@ -58,12 +64,6 @@ export const user_desktop_routes: Route[] = [
         icon: History,
     },
     {
-        id: "withdraw" as RouteID,
-        path: "/users/withdraw",
-        label: "Withdraw Money",
-        icon: Banknote,
-    },
-    {
         id: "profile" as RouteID,
         path: "/users/profile",
         label: "Profile & Settings",
@@ -85,6 +85,12 @@ export const user_mobile_routes: Route[] = [
     icon: Send,
   },
   {
+    id: "withdraw" as RouteID,
+    path: "/users/withdraw",
+    label: "Withdraw",
+    icon: Banknote,
+  },
+  {
     id: "dao" as RouteID,
     path: "/users/dao",
     label: "DAO",
@@ -101,12 +107,6 @@ export const user_mobile_routes: Route[] = [
     path: "/users/history",
     label: "History",
     icon: History,
-  },
-  {
-    id: "withdraw" as RouteID,
-    path: "/users/withdraw",
-    label: "Withdraw",
-    icon: Banknote,
   },
   {
     id: "profile" as RouteID,

@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../context/AuthenticationContext';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
 import { useDemoMode } from '../context/DemoModeContext';
+import { CentralizedDemoService } from '../services/centralizedDemoService';
 import { DemoModeModal } from '../components/DemoModeModal';
-import { DemoDataService } from '../services/demoDataService';
 import KYCStatusAlert from '../components/KYCStatusAlert';
 import { CurrencySelector } from '../components/CurrencySelector';
 import { CkUSDCBalanceCard } from '../components/CkUSDCBalanceCard';
@@ -43,25 +43,24 @@ const UserDashboard: React.FC = () => {
   // Get user's preferred currency or default to UGX
   const currentUser = user.user;
 
-  // Show demo modal on first visit
+  // Show demo modal ONLY on first login for this user (not on every page)
   useEffect(() => {
-    const hasSeenModal = localStorage.getItem('afritokeni_seen_demo_modal');
+    if (!currentUser?.id) return; // Wait for user to be loaded
+    
+    const globalModalKey = `afritokeni_first_login_${currentUser.id}`;
+    const hasSeenModal = localStorage.getItem(globalModalKey);
+    
     if (!hasSeenModal) {
       setShowDemoModal(true);
-      localStorage.setItem('afritokeni_seen_demo_modal', 'true');
+      localStorage.setItem(globalModalKey, 'true');
     }
-  }, []);
+  }, [currentUser?.id]);
 
-  // Initialize demo data if demo mode is enabled
-  useEffect(() => {
-    if (isDemoMode && currentUser?.email) {
-      DemoDataService.initializeDemoUser(currentUser.email);
-    }
-  }, [isDemoMode, currentUser?.email]);
+  // Demo data loaded on-demand
 
   // Check for missing profile fields and show onboarding/banner
   useEffect(() => {
-    if (!currentUser || isDemoMode) return;
+    if (!currentUser) return;
 
     const missing: string[] = [];
     
@@ -81,7 +80,8 @@ const UserDashboard: React.FC = () => {
     setMissingFields(missing);
 
     // Only show onboarding/banner AFTER demo modal has been seen
-    const hasSeenDemoModal = localStorage.getItem('afritokeni_seen_demo_modal');
+    const globalModalKey = `afritokeni_first_login_${currentUser.id}`;
+    const hasSeenDemoModal = localStorage.getItem(globalModalKey);
     if (!hasSeenDemoModal) return; // Wait for demo modal first
 
     // Show onboarding modal on first login if profile is incomplete
@@ -92,7 +92,7 @@ const UserDashboard: React.FC = () => {
       // Show banner if onboarding was skipped but profile still incomplete
       setShowBanner(true);
     }
-  }, [currentUser, isDemoMode, bannerDismissed]);
+  }, [currentUser, bannerDismissed]);
 
   const handleOnboardingComplete = async (data: OnboardingData) => {
     if (!currentUser) return;
@@ -129,21 +129,43 @@ const UserDashboard: React.FC = () => {
     return formatCurrencyAmount(amount, userCurrency as any);
   };
 
+  // Load demo balance from CentralizedDemoService
+  const [demoBalance, setDemoBalance] = React.useState<any>(null);
+  React.useEffect(() => {
+    const loadDemoBalance = async () => {
+      if (isDemoMode && currentUser?.id) {
+        const bal = await CentralizedDemoService.initializeUser(currentUser.id, userCurrency);
+        setDemoBalance(bal);
+      }
+    };
+    loadDemoBalance();
+  }, [isDemoMode, currentUser, userCurrency]);
+
   // Get balance - use demo data if demo mode is enabled
   const getDisplayBalance = (): number => {
     if (isDemoMode) {
-      const demoUser = DemoDataService.getDemoUser();
-      return demoUser?.balance || 150000; // Default demo balance
+      return demoBalance?.digitalBalance || 0;
     }
     if (!balance) return 0;
-    // Return the balance if it matches the user's currency, otherwise return 0
-    return balance.currency === userCurrency ? balance.balance : 0;
+    return balance.balance;
   };
+
+  // Load demo transactions from CentralizedDemoService
+  const [demoTransactions, setDemoTransactions] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    const loadDemoTransactions = async () => {
+      if (isDemoMode && currentUser?.id) {
+        const txs = await CentralizedDemoService.getTransactions(currentUser.id);
+        setDemoTransactions(txs);
+      }
+    };
+    loadDemoTransactions();
+  }, [isDemoMode, currentUser]);
 
   // Get transactions - use demo data if demo mode is enabled
   const getDisplayTransactions = () => {
     if (isDemoMode) {
-      return DemoDataService.getUserTransactions().slice(0, 5);
+      return demoTransactions.slice(0, 5);
     }
     return transactions.slice(0, 5);
   };
@@ -383,7 +405,7 @@ const UserDashboard: React.FC = () => {
           </div>
           <div className="divide-y divide-gray-100">
             {getDisplayTransactions().length > 0 ? (
-              getDisplayTransactions().map((transaction) => (
+              getDisplayTransactions().map((transaction: any) => (
                 <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
                   {/* Mobile Layout */}
                   <div className="sm:hidden">

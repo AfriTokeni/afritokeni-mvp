@@ -6,8 +6,10 @@
 import React, { useState, useEffect } from 'react';
 import { Vote as VoteIcon, TrendingUp, Users, Coins, Plus, CheckCircle, XCircle, Clock, HelpCircle, ChevronDown, ChevronUp, DollarSign, Globe, Shield, FileText, Lightbulb } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { useDemoMode } from '../../context/DemoModeContext';
 import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
 import { GovernanceService, Proposal } from '../../services/governanceService';
+import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import CreateProposalModal from '../../components/CreateProposalModal';
 
 const DAODashboard: React.FC = () => {
@@ -30,11 +32,36 @@ const DAODashboard: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Always load real mainnet data - DAO is never in demo mode
-      if (user?.user?.id || user?.agent?.id) {
-        const userId = user?.user?.id || user?.agent?.id;
-        const balance = await AfriTokenService.getBalance(userId!);
-        setTokenBalance(balance);
+      // Use demo data if in demo mode
+      if (isDemoMode) {
+        const stats = CentralizedDemoService.getDemoDAOStats();
+        setTokenBalance({
+          balance: 1000,
+        } as TokenBalance);
+        const proposals = await CentralizedDemoService.getDemoProposals();
+        const leaderboard = await CentralizedDemoService.getDemoLeaderboard();
+        setProposals(proposals as any);
+        setLeaderboard(leaderboard);
+        setTotalHolders(stats.totalHolders);
+        setTotalSupply(stats.totalSupply);
+      } else {
+        // Load real data from SNS
+        if (user?.user?.id || user?.agent?.id) {
+          const userId = user?.user?.id || user?.agent?.id;
+          const balance = await AfriTokenService.getBalance(userId!);
+          setTokenBalance(balance);
+        }
+        const activeProposals = await GovernanceService.getActiveProposals();
+        setProposals(activeProposals);
+        
+        // Load leaderboard data
+        const leaderboardData = await AfriTokenService.getLeaderboard(10);
+        setLeaderboard(leaderboardData);
+        setTotalHolders(leaderboardData.length);
+        
+        // Load total supply
+        const supply = await AfriTokenService.getTotalSupply();
+        setTotalSupply(supply);
       }
       const activeProposals = await GovernanceService.getActiveProposals();
       setProposals(activeProposals);
@@ -173,9 +200,9 @@ const DAODashboard: React.FC = () => {
             </div>
             <div>
               <div className="text-3xl font-bold text-gray-900">
-                {tokenBalance?.earned.transactions || 0}
+                {tokenBalance?.balance || 0}
               </div>
-              <div className="text-sm text-gray-600">AFRI Earned</div>
+              <div className="text-sm text-gray-600">AFRI Balance</div>
             </div>
           </div>
         </div>
@@ -287,10 +314,10 @@ const DAODashboard: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
+      <div className="flex gap-1 sm:gap-2 mb-6 border-b border-gray-200">
         <button
           onClick={() => setActiveTab('proposals')}
-          className={`px-6 py-3 font-semibold transition-colors ${
+          className={`px-4 sm:px-6 py-3 font-semibold transition-colors ${
             activeTab === 'proposals'
               ? 'text-gray-900 border-b-2 border-gray-900'
               : 'text-gray-600 hover:text-gray-900'
@@ -300,7 +327,7 @@ const DAODashboard: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('my-tokens')}
-          className={`px-6 py-3 font-semibold transition-colors ${
+          className={`px-4 sm:px-6 py-3 font-semibold transition-colors whitespace-nowrap ${
             activeTab === 'my-tokens'
               ? 'text-gray-900 border-b-2 border-gray-900'
               : 'text-gray-600 hover:text-gray-900'
@@ -310,7 +337,7 @@ const DAODashboard: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('leaderboard')}
-          className={`px-6 py-3 font-semibold transition-colors ${
+          className={`px-4 sm:px-6 py-3 font-semibold transition-colors ${
             activeTab === 'leaderboard'
               ? 'text-gray-900 border-b-2 border-gray-900'
               : 'text-gray-600 hover:text-gray-900'
@@ -393,21 +420,21 @@ const DAODashboard: React.FC = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleVote(proposal.id, 'yes')}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-4 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      Vote Yes
+                      <span className="hidden xs:inline">Vote </span>Yes
                     </button>
                     <button
                       onClick={() => handleVote(proposal.id, 'no')}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-4 sm:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
                     >
                       <XCircle className="w-4 h-4" />
-                      Vote No
+                      <span className="hidden xs:inline">Vote </span>No
                     </button>
                     <button
                       onClick={() => handleVote(proposal.id, 'abstain')}
-                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      className="px-4 py-2.5 sm:px-6 sm:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base"
                     >
                       Abstain
                     </button>
@@ -436,25 +463,25 @@ const DAODashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">From Transactions</span>
                 <span className="font-semibold text-gray-900">
-                  {tokenBalance.earned.transactions.toLocaleString()} AFRI
+                  {isDemoMode ? '250' : (tokenBalance.earned?.transactions || 0).toLocaleString()} AFRI
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">From Agent Activity</span>
                 <span className="font-semibold text-gray-900">
-                  {tokenBalance.earned.agentActivity.toLocaleString()} AFRI
+                  {isDemoMode ? '500' : (tokenBalance.earned?.agentActivity || 0).toLocaleString()} AFRI
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">From Referrals</span>
                 <span className="font-semibold text-gray-900">
-                  {tokenBalance.earned.referrals.toLocaleString()} AFRI
+                  {isDemoMode ? '150' : (tokenBalance.earned?.referrals || 0).toLocaleString()} AFRI
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">From Staking</span>
                 <span className="font-semibold text-gray-900">
-                  {tokenBalance.earned.staking.toLocaleString()} AFRI
+                  {isDemoMode ? '100' : (tokenBalance.earned?.staking || 0).toLocaleString()} AFRI
                 </span>
               </div>
               <div className="pt-3 border-t border-gray-200 flex items-center justify-between">

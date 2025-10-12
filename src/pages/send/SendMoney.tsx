@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Send, Bitcoin, DollarSign, AlertCircle } from 'lucide-react';
+import { Send, Bitcoin, DollarSign, AlertCircle, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
+import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { CurrencySelector } from '../../components/CurrencySelector';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
-import { AFRICAN_CURRENCIES, formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
+import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { DataService } from '../../services/dataService';
 
 type SendType = 'local' | 'ckbtc' | 'ckusdc';
@@ -16,9 +16,9 @@ type SendStep = 'amount' | 'recipient' | 'confirmation';
 
 const SendMoney: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuthentication();
-  const { balance } = useAfriTokeni();
+  const { user, updateUserCurrency } = useAuthentication();
   const { isDemoMode } = useDemoMode();
+  const { balance } = useAfriTokeni();
 
   const [currentStep, setCurrentStep] = useState<SendStep>('amount');
   const [sendType, setSendType] = useState<SendType>('local');
@@ -28,30 +28,62 @@ const SendMoney: React.FC = () => {
   const [recipientName, setRecipientName] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [transactionCode, setTransactionCode] = useState<string>('');
+  const [ckBTCBalance, setCkBTCBalance] = useState<number>(0);
+  const [ckUSDCBalance, setCkUSDCBalance] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showContactDropdown, setShowContactDropdown] = useState<boolean>(false);
+  const [walletAddress, setWalletAddress] = useState<string>('');
+
+  // Demo contacts for search
+  const demoContacts = [
+    { name: 'Jane Doe', phone: '+256 700 123 456', btcWallet: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', usdcWallet: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' },
+    { name: 'John Smith', phone: '+256 701 234 567', btcWallet: '', usdcWallet: '0x8ba1f109551bD432803012645Ac136ddd64DBA72' },
+    { name: 'Janet Mukasa', phone: '+256 702 345 678', btcWallet: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq', usdcWallet: '' },
+    { name: 'James Okello', phone: '+256 703 456 789', btcWallet: '', usdcWallet: '' },
+    { name: 'Sarah Nakato', phone: '+256 704 567 890', btcWallet: 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4', usdcWallet: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+  ];
+
+  // Filter contacts based on search
+  const filteredContacts = demoContacts.filter(contact =>
+    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    contact.phone.includes(searchQuery)
+  );
 
   // Get user's preferred currency
   const currentUser = user.user;
   const defaultCurrency = currentUser?.preferredCurrency || 'UGX';
   const userCurrency = selectedCurrency || defaultCurrency;
-  const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
 
-  // Get balance
-  const getDisplayBalance = (): number => {
+  // Load ckBTC and ckUSDC balances in demo mode
+  React.useEffect(() => {
     if (isDemoMode) {
-      const demoUser = DemoDataService.getDemoUser();
-      return demoUser?.balance || 150000;
+      // Demo balances
+      setCkBTCBalance(0.005); // 0.005 BTC
+      setCkUSDCBalance(500); // 500 USDC
     }
-    if (!balance) return 0;
-    return balance.currency === userCurrency ? balance.balance : 0;
+  }, [isDemoMode]);
+
+  // Get balance from CentralizedDemoService or real balance
+  const [displayBalance, setDisplayBalance] = React.useState(0);
+  React.useEffect(() => {
+    const loadBalance = async () => {
+      if (isDemoMode && user?.user?.id) {
+        const demoBalance = await CentralizedDemoService.getBalance(user.user.id);
+        setDisplayBalance(demoBalance?.digitalBalance || 0);
+      } else if (balance) {
+        setDisplayBalance(balance.balance);
+      }
+    };
+    loadBalance();
+  }, [isDemoMode, user, balance]);
+
+  const getDisplayBalance = (): number => {
+    return displayBalance;
   };
 
-  // Get ckBTC and ckUSDC balances
-  const ckBTCBalance = isDemoMode ? DemoDataService.getDemoUser()?.ckBTCBalance || 0 : 0;
-  const ckUSDCBalance = isDemoMode ? DemoDataService.getDemoUser()?.ckUSDCBalance || 0 : 0;
-
-  // Calculate fee (1%)
+  // Calculate fee (0.5% platform fee per whitepaper)
   const calculateFee = (amount: number): number => {
-    return Math.round(amount * 0.01);
+    return Math.round(amount * 0.005);
   };
 
   const handleAmountChange = (value: string) => {
@@ -92,8 +124,14 @@ const SendMoney: React.FC = () => {
   };
 
   const handleSendMoney = async () => {
-    if (!recipientPhone.trim()) {
-      setError('Please enter recipient phone number');
+    // Validate based on send type
+    if (sendType === 'local' && !recipientPhone.trim()) {
+      setError('Please select a recipient or enter phone number');
+      return;
+    }
+    
+    if ((sendType === 'ckbtc' || sendType === 'ckusdc') && !walletAddress.trim()) {
+      setError('Please enter wallet address');
       return;
     }
 
@@ -144,6 +182,36 @@ const SendMoney: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Step Indicator */}
+      <div className="mb-8 flex items-center justify-center">
+        <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
+          <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : 'text-green-600'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : 'bg-green-600 text-white'}`}>
+              1
+            </div>
+            <span className="text-xs font-medium whitespace-nowrap">Enter Amount</span>
+          </div>
+          
+          <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'recipient' || currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          
+          <div className={`flex items-center space-x-2 ${currentStep === 'recipient' ? 'text-gray-900' : currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'recipient' ? 'bg-gray-900 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+              2
+            </div>
+            <span className="text-xs font-medium whitespace-nowrap">Recipient Details</span>
+          </div>
+          
+          <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          
+          <div className={`flex items-center space-x-2 ${currentStep === 'confirmation' ? 'text-gray-900' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'confirmation' ? 'bg-gray-900 text-white' : 'bg-gray-200'}`}>
+              3
+            </div>
+            <span className="text-xs font-medium whitespace-nowrap">Confirmation</span>
+          </div>
+        </div>
+      </div>
+
       {/* Amount Step */}
       {currentStep === 'amount' && (
           <div className="bg-white rounded-2xl border border-gray-200 p-8">
@@ -177,22 +245,20 @@ const SendMoney: React.FC = () => {
               </div>
 
               {/* ckBTC and ckUSDC Balance Cards */}
-              {(ckBTCBalance > 0 || ckUSDCBalance > 0) && (
+              {isDemoMode && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {ckBTCBalance > 0 && (
-                    <CkBTCBalanceCard
-                      principalId="demo-user"
-                      preferredCurrency={userCurrency}
-                      showActions={false}
-                    />
-                  )}
-                  {ckUSDCBalance > 0 && (
-                    <CkUSDCBalanceCard
-                      principalId="demo-user"
-                      preferredCurrency={userCurrency}
-                      showActions={false}
-                    />
-                  )}
+                  <CkBTCBalanceCard
+                    principalId={user?.user?.id || "demo-user"}
+                    preferredCurrency={userCurrency}
+                    showActions={false}
+                    isAgent={false}
+                  />
+                  <CkUSDCBalanceCard
+                    principalId={user?.user?.id || "demo-user"}
+                    preferredCurrency={userCurrency}
+                    showActions={false}
+                    isAgent={false}
+                  />
                 </div>
               )}
             </div>
@@ -277,9 +343,19 @@ const SendMoney: React.FC = () => {
 
             {/* Amount Input */}
             <div className="mb-6">
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-3">
-                Amount in {userCurrency} ({currencyInfo?.name})
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                  Amount {sendType === 'ckbtc' && '(ckBTC)'} {sendType === 'ckusdc' && '(ckUSDC)'}
+                </label>
+                {sendType === 'local' && (
+                  <CurrencySelector
+                    currentCurrency={userCurrency}
+                    onCurrencyChange={(currency) => {
+                      updateUserCurrency(currency);
+                    }}
+                  />
+                )}
+              </div>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -292,7 +368,11 @@ const SendMoney: React.FC = () => {
                 />
               </div>
               <p className="mt-2 text-sm text-gray-500">
-                Available: {formatCurrencyAmount(getDisplayBalance(), userCurrency as AfricanCurrency)}
+                Available: {
+                  sendType === 'ckbtc' ? `${ckBTCBalance} BTC` :
+                  sendType === 'ckusdc' ? `${ckUSDCBalance} USDC` :
+                  formatCurrencyAmount(getDisplayBalance(), userCurrency as AfricanCurrency)
+                }
               </p>
             </div>
 
@@ -304,7 +384,7 @@ const SendMoney: React.FC = () => {
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Fee (1%):</span>
+                  <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium text-orange-600">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
@@ -330,31 +410,114 @@ const SendMoney: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Recipient Details</h2>
 
             <div className="space-y-4 mb-6">
+              {/* Contact Search - shown for all send types */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Recipient Phone Number *
+                  Search Recipient (by name or phone) *
                 </label>
-                <input
-                  type="tel"
-                  value={recipientPhone}
-                  onChange={(e) => setRecipientPhone(e.target.value)}
-                  placeholder="+256 700 000 000"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowContactDropdown(true);
+                      // Clear wallet address when searching
+                      setWalletAddress('');
+                    }}
+                    onFocus={() => setShowContactDropdown(true)}
+                    placeholder="Search by name or enter phone number..."
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  />
+                  
+                  {/* Contact Dropdown */}
+                  {showContactDropdown && searchQuery && filteredContacts.length > 0 && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredContacts.map((contact, index) => {
+                        const hasWallet = sendType === 'ckbtc' ? contact.btcWallet : 
+                                        sendType === 'ckusdc' ? contact.usdcWallet : true;
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              setRecipientPhone(contact.phone);
+                              setRecipientName(contact.name);
+                              setSearchQuery(contact.name);
+                              setShowContactDropdown(false);
+                              // Auto-fill wallet if available
+                              if (sendType === 'ckbtc' && contact.btcWallet) {
+                                setWalletAddress(contact.btcWallet);
+                              } else if (sendType === 'ckusdc' && contact.usdcWallet) {
+                                setWalletAddress(contact.usdcWallet);
+                              }
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium text-gray-900">{contact.name}</div>
+                                <div className="text-sm text-gray-500">{contact.phone}</div>
+                              </div>
+                              {(sendType === 'ckbtc' || sendType === 'ckusdc') && (
+                                <div className="text-xs">
+                                  {hasWallet ? (
+                                    <span className="text-green-600">✓ Has wallet</span>
+                                  ) : (
+                                    <span className="text-gray-400">No wallet</span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {sendType === 'local' 
+                    ? 'Search contacts or enter phone number'
+                    : 'Search registered users or enter wallet address below'}
+                </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Recipient Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={recipientName}
-                  onChange={(e) => setRecipientName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                />
-              </div>
+              {/* Wallet Address - shown for crypto if not auto-filled */}
+              {(sendType === 'ckbtc' || sendType === 'ckusdc') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {sendType === 'ckbtc' ? 'Bitcoin' : 'USDC'} Wallet Address {walletAddress && '✓'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={walletAddress}
+                      onChange={(e) => setWalletAddress(e.target.value)}
+                      placeholder={sendType === 'ckbtc' ? 'bc1q... or select contact above' : '0x... or select contact above'}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent font-mono text-sm"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {walletAddress ? 'Wallet address ready' : 'Enter manually or select a contact with registered wallet'}
+                  </p>
+                </div>
+              )}
+
+              {/* Recipient Name - shown when contact selected */}
+              {recipientName && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Recipient Name ✓
+                  </label>
+                  <input
+                    type="text"
+                    value={recipientName}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Transaction Summary */}
@@ -366,7 +529,7 @@ const SendMoney: React.FC = () => {
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Fee (1%):</span>
+                  <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium text-orange-600">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
@@ -391,7 +554,11 @@ const SendMoney: React.FC = () => {
               </button>
               <button
                 onClick={handleSendMoney}
-                disabled={!recipientPhone.trim()}
+                disabled={
+                  sendType === 'local' ? !recipientPhone.trim() : 
+                  (sendType === 'ckbtc' || sendType === 'ckusdc') ? !walletAddress.trim() : 
+                  true
+                }
                 className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 Send Money
@@ -426,7 +593,7 @@ const SendMoney: React.FC = () => {
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Fee:</span>
+                  <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
               </div>

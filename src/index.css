@@ -3,6 +3,22 @@
 @plugin "@tailwindcss/typography";
 @import 'leaflet/dist/leaflet.css';
 
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Currency animation */
 @keyframes fade-in {
   0% {

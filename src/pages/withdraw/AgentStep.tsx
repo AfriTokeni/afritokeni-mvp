@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { ArrowLeft, MapPin, Star, List, MapIcon as Map, X, Navigation, Phone, Clock } from 'lucide-react';
 import L from 'leaflet';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
 import { useMap } from 'react-leaflet';
 
 // Fix for default Leaflet icon paths in Vite/Webpack
@@ -143,9 +142,32 @@ const AgentStep: React.FC<AgentStepProps> = ({
       setIsLoading(true);
       try {
         if (isDemoMode) {
-          // Load demo agents
-          const demoAgents = await DemoDataService.loadAgents();
-          setAgents(demoAgents);
+          // Load demo agents from agents.json
+          console.log('Loading agents from /data/agents.json...');
+          const [agentsResponse, reviewsResponse] = await Promise.all([
+            fetch('/data/agents.json'),
+            fetch('/data/agent-reviews.json')
+          ]);
+          const agentsData = await agentsResponse.json();
+          const reviewsData = await reviewsResponse.json();
+          
+          // Attach reviews and ratings to agents
+          const agentsWithReviews = agentsData.map((agent: any) => {
+            const agentReviews = reviewsData.filter((r: any) => r.agentId === agent.id);
+            const avgRating = agentReviews.length > 0
+              ? agentReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / agentReviews.length
+              : 0;
+            
+            return {
+              ...agent,
+              reviews: agentReviews.slice(0, 3), // Show top 3 reviews
+              rating: avgRating,
+              reviewCount: agentReviews.length
+            };
+          });
+          
+          console.log('Loaded agents with reviews:', agentsWithReviews);
+          setAgents(agentsWithReviews);
         } else {
           const [lat, lng] = userLocation;
           const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
@@ -256,20 +278,54 @@ const AgentStep: React.FC<AgentStepProps> = ({
         </div>
       </div>
 
-      {/* Rating (Mock) */}
-      <div className="flex items-center mb-4">
-        <div className="flex items-center">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              className={`h-4 w-4 ${
-                star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-              }`}
-            />
-          ))}
+      {/* Rating */}
+      {agent.rating && agent.reviewCount ? (
+        <div className="mb-4">
+          <div className="flex items-center mb-2">
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star <= Math.round(agent.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="ml-2 text-sm text-gray-600">
+              {agent.rating.toFixed(1)} ({agent.reviewCount} reviews)
+            </span>
+          </div>
+          
+          {/* Recent Reviews */}
+          {agent.reviews && agent.reviews.length > 0 && (
+            <div className="space-y-2 mt-3 max-h-40 overflow-y-auto">
+              {agent.reviews.map((review: any) => (
+                <div key={review.id} className="bg-gray-50 rounded-lg p-2 text-xs">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-gray-900">{review.userName}</span>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-3 w-3 ${
+                            star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-gray-600 line-clamp-2">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
-      </div>
+      ) : (
+        <div className="flex items-center mb-4 text-sm text-gray-500">
+          <span>No reviews yet</span>
+        </div>
+      )}
 
       {/* Services */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -401,23 +457,22 @@ const AgentStep: React.FC<AgentStepProps> = ({
               </MapContainer>
             </div>
 
-            {/* Custom Popup Overlay */}
+            {/* Custom Popup Overlay - Mobile Optimized */}
             {popupAgent && (
-              <div
-                className="fixed z-[10000] bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm"
+              <div className="fixed inset-x-0 bottom-0 z-[10000] bg-white rounded-t-2xl shadow-2xl border-t border-gray-200 p-4 sm:p-6 max-h-[70vh] overflow-y-auto sm:absolute sm:inset-auto sm:rounded-lg sm:max-w-sm sm:bottom-auto"
                 style={{
-                  left: `${popupPosition.x - 200}px`, // Center popup relative to marker
-                  top: `${popupPosition.y - 20}px`,
-                  transform: 'translateY(-100%)'
+                  left: window.innerWidth >= 640 ? `${popupPosition.x - 200}px` : undefined,
+                  top: window.innerWidth >= 640 ? `${popupPosition.y - 20}px` : undefined,
+                  transform: window.innerWidth >= 640 ? 'translateY(-100%)' : undefined
                 }}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-gray-900">Agent Details</h4>
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-semibold text-gray-900 text-base sm:text-sm">Agent Details</h4>
                   <button
                     onClick={closePopup}
-                    className="text-gray-400 hover:text-gray-600 ml-2"
+                    className="text-gray-400 hover:text-gray-600 ml-2 p-1"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5 sm:h-4 sm:w-4" />
                   </button>
                 </div>
                 {renderAgentDetails(popupAgent)}
@@ -425,7 +480,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
             )}
           </div>
         ) : viewMode === 'list' ? (
-          <div className="w-full h-64 sm:h-80 lg:h-[500px] overflow-y-auto">
+          <div className="w-full h-96 sm:h-[500px] lg:h-[600px] overflow-y-auto">
             {availableAgents.length === 0 ? (
               <div className="p-6 sm:p-8 text-center text-gray-500">
                 <p className="font-medium text-xs sm:text-sm lg:text-base">No available agents at the moment.</p>
@@ -485,23 +540,57 @@ const AgentStep: React.FC<AgentStepProps> = ({
                       </div>
                     </div>
 
+                    {/* Rating Preview */}
+                    {agent.rating && agent.reviewCount && (
+                      <div className="flex items-center mb-3">
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`h-4 w-4 ${
+                                star <= Math.round(agent.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="ml-2 text-sm text-gray-600">
+                          {agent.rating.toFixed(1)} ({agent.reviewCount} reviews)
+                        </span>
+                      </div>
+                    )}
+
                     {/* Expandable Details */}
                     {selectedAgent?.id === agent.id && (
                       <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
-                        {/* Rating */}
-                        <div className="flex items-center">
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-4 w-4 ${
-                                  star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                }`}
-                              />
-                            ))}
+                        {/* Recent Reviews */}
+                        {agent.reviews && agent.reviews.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-gray-700 mb-2">Recent Reviews</p>
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                              {agent.reviews.map((review: any) => (
+                                <div key={review.id} className="bg-gray-50 rounded-lg p-3 text-xs">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-medium text-gray-900">{review.userName}</span>
+                                    <div className="flex items-center">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                          key={star}
+                                          className={`h-3 w-3 ${
+                                            star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <p className="text-gray-600">{review.comment}</p>
+                                  <p className="text-gray-400 mt-1">
+                                    {new Date(review.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                          <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
-                        </div>
+                        )}
 
                         {/* Services */}
                         <div className="flex flex-wrap gap-2">

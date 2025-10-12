@@ -4,7 +4,17 @@ import { Search, MapPin, Star, Phone, Clock, List, MapIcon as Map, Navigation, U
 import L from 'leaflet';
 import { listDocs } from '@junobuild/core';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
+
+interface AgentReview {
+  id: string;
+  agentId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  transactionId?: string;
+  createdAt: string;
+}
 
 interface Agent {
   id: string;
@@ -25,6 +35,9 @@ interface Agent {
   digitalBalance: number;
   commissionRate: number;
   createdAt: string;
+  rating?: number;
+  reviewCount?: number;
+  reviews?: AgentReview[];
 }
 
 interface UserLocation {
@@ -128,59 +141,75 @@ const AgentMapPage: React.FC = () => {
     const loadAgents = async () => {
       try {
         setLoading(true);
-        console.log('Loading agents from Juno datastore...');
         
-        // Get agents from Juno datastore
-        const result = await listDocs({
-          collection: 'agents'
-        });
-        
-        console.log('Raw agent docs:', result);
-        
-        // Transform Juno docs to Agent interface
-        const agentsData = result.items.map((doc: any) => {
-          const data = doc.data;
-          return {
-            id: doc.key,
-            userId: data.userId || '',
-            businessName: data.businessName || 'Unknown Agent',
-            location: {
-              country: data.location?.country || 'Uganda',
-              state: data.location?.state || 'Central',
-              city: data.location?.city || 'Kampala',
-              address: data.location?.address || 'Address not available',
-              coordinates: {
-                lat: data.location?.coordinates?.lat || (0.3476 + (Math.random() - 0.5) * 0.1),
-                lng: data.location?.coordinates?.lng || (32.5825 + (Math.random() - 0.5) * 0.1)
-              }
-            },
-            isActive: data.status === 'available' || data.status === 'online',
-            cashBalance: data.cashBalance || 0,
-            digitalBalance: data.digitalBalance || 0,
-            commissionRate: data.commissionRate || 0.025,
-            createdAt: data.createdAt || new Date().toISOString()
-          };
-        });
-        
-        console.log('Transformed agents:', agentsData);
-        setAgents(agentsData);
-        
-        // If no agents found, fall back to demo data if in demo mode
-        if (agentsData.length === 0 && isDemoMode) {
-          console.log('No agents found in datastore, loading demo data...');
-          const demoAgents = await DemoDataService.loadAgents();
-          setAgents(demoAgents);
+        if (isDemoMode) {
+          // Load from /data/agents.json in demo mode
+          console.log('Loading agents from /data/agents.json...');
+          const [agentsResponse, reviewsResponse] = await Promise.all([
+            fetch('/data/agents.json'),
+            fetch('/data/agent-reviews.json')
+          ]);
+          const agentsData = await agentsResponse.json();
+          const reviewsData = await reviewsResponse.json();
+          
+          // Attach reviews and ratings to agents
+          const agentsWithReviews = agentsData.map((agent: any) => {
+            const agentReviews = reviewsData.filter((r: any) => r.agentId === agent.id);
+            const avgRating = agentReviews.length > 0
+              ? agentReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / agentReviews.length
+              : 0;
+            
+            return {
+              ...agent,
+              reviews: agentReviews.slice(0, 3), // Show top 3 reviews
+              rating: avgRating,
+              reviewCount: agentReviews.length
+            };
+          });
+          
+          console.log('Loaded agents with reviews:', agentsWithReviews);
+          setAgents(agentsWithReviews);
+        } else {
+          // Get agents from Juno datastore in production
+          console.log('Loading agents from Juno datastore...');
+          const result = await listDocs({
+            collection: 'agents'
+          });
+          
+          console.log('Raw agent docs:', result);
+          
+          // Transform Juno docs to Agent interface
+          const agentsData = result.items.map((doc: any) => {
+            const data = doc.data;
+            return {
+              id: doc.key,
+              userId: data.userId || '',
+              businessName: data.businessName || 'Unknown Agent',
+              location: {
+                country: data.location?.country || 'Uganda',
+                state: data.location?.state || 'Central',
+                city: data.location?.city || 'Kampala',
+                address: data.location?.address || 'Address not available',
+                coordinates: {
+                  lat: data.location?.coordinates?.lat || (0.3476 + (Math.random() - 0.5) * 0.1),
+                  lng: data.location?.coordinates?.lng || (32.5825 + (Math.random() - 0.5) * 0.1)
+                }
+              },
+              isActive: data.status === 'available' || data.status === 'online',
+              cashBalance: data.cashBalance || 0,
+              digitalBalance: data.digitalBalance || 0,
+              commissionRate: data.commissionRate || 0.025,
+              createdAt: data.createdAt || new Date().toISOString()
+            };
+          });
+          
+          console.log('Transformed agents:', agentsData);
+          setAgents(agentsData);
         }
         
       } catch (error) {
         console.error('Error loading agents:', error);
-        
-        // Fallback to demo data if Juno fails and in demo mode
-        if (isDemoMode) {
-          console.log('Falling back to demo data...');
-          const demoAgents = await DemoDataService.loadAgents();
-          setAgents(demoAgents);
-        }
+        setAgents([]);
       } finally {
         setLoading(false);
       }
@@ -436,20 +465,58 @@ const AgentMapPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Rating (Mock) */}
-              <div className="flex items-center mb-4">
-                <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-4 w-4 ${
-                        star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
+              {/* Rating */}
+              {agent.rating && agent.reviewCount ? (
+                <div className="mb-4">
+                  <div className="flex items-center mb-2">
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-4 w-4 ${
+                            star <= Math.round(agent.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="ml-2 text-sm text-gray-600">
+                      {agent.rating.toFixed(1)} ({agent.reviewCount} reviews)
+                    </span>
+                  </div>
+                  
+                  {/* Recent Reviews */}
+                  {agent.reviews && agent.reviews.length > 0 && selectedAgent?.id === agent.id && (
+                    <div className="space-y-2 mt-3 max-h-48 overflow-y-auto">
+                      <p className="text-xs font-medium text-gray-700 mb-2">Recent Reviews</p>
+                      {agent.reviews.map((review) => (
+                        <div key={review.id} className="bg-gray-50 rounded-lg p-3 text-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium text-gray-900">{review.userName}</span>
+                            <div className="flex items-center">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-3 w-3 ${
+                                    star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-gray-600">{review.comment}</p>
+                          <p className="text-gray-400 mt-1">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
-              </div>
+              ) : (
+                <div className="flex items-center mb-4 text-sm text-gray-500">
+                  <span>No reviews yet</span>
+                </div>
+              )}
 
               {/* Services */}
               <div className="flex flex-wrap gap-2 mb-4">

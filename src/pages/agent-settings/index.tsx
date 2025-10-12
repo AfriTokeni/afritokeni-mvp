@@ -546,11 +546,11 @@ const AgentSettings: React.FC = () => {
         )}
 
         {/* Save Button */}
-        <div className="flex justify-end pt-6">
+        <div className="flex justify-center pt-6">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center space-x-2 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors duration-200"
+            className="flex items-center space-x-2 bg-gray-900 text-white px-8 py-2.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors duration-200"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save Settings'}</span>

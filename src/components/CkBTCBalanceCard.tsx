@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, Send, RefreshCw, Bitcoin, Zap, TrendingUp } from 'lucide-react';
 import { CkBTCService } from '../services/ckBTCService';
 import { useDemoMode } from '../context/DemoModeContext';
-import { DemoDataService } from '../services/demoDataService';
+import { CentralizedDemoService } from '../services/centralizedDemoService';
 import { CkBTCBalance } from '../types/ckbtc';
 
 interface CkBTCBalanceCardProps {
@@ -19,6 +19,8 @@ interface CkBTCBalanceCardProps {
   preferredCurrency?: string;
   /** Show quick actions */
   showActions?: boolean;
+  /** Is this for an agent? */
+  isAgent?: boolean;
   /** Callback for deposit action */
   onDeposit?: () => void;
   /** Callback for send action */
@@ -31,6 +33,7 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
   principalId,
   preferredCurrency = 'UGX',
   showActions = true,
+  isAgent = false,
   onDeposit,
   onSend,
   onExchange,
@@ -46,13 +49,16 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
       setError(null);
       
       if (isDemoMode) {
-        // Use demo data
-        const demoUser = DemoDataService.getDemoUser();
-        if (demoUser) {
+        // Initialize and get centralized demo data from Juno
+        const demoBalance = isAgent 
+          ? await CentralizedDemoService.initializeAgent(principalId, preferredCurrency)
+          : await CentralizedDemoService.initializeUser(principalId, preferredCurrency);
+        
+        if (demoBalance) {
           const exchangeRate = await CkBTCService.getExchangeRate(preferredCurrency);
-          const btcAmount = demoUser.ckBTCBalance / 100000000; // satoshis to BTC
+          const btcAmount = demoBalance.ckBTCBalance / 100000000; // satoshis to BTC
           setBalance({
-            balanceSatoshis: demoUser.ckBTCBalance,
+            balanceSatoshis: demoBalance.ckBTCBalance,
             balanceBTC: btcAmount.toFixed(8),
             localCurrencyEquivalent: btcAmount * exchangeRate.rate,
             localCurrency: preferredCurrency,
@@ -172,8 +178,8 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
         )}
       </div>
 
-      {/* Info Badge */}
-      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-orange-200">
+      {/* Info Badge - Hidden on mobile */}
+      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-orange-200 hidden md:block">
         <div className="flex items-start gap-2">
           <Zap className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-neutral-700">
