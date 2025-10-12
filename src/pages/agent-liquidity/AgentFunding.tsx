@@ -5,7 +5,6 @@ import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
 import { NotificationService } from '../../services/notificationService';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { AgentDemoDataService } from '../../services/agentDemoDataService';
 import { useAuthentication } from '../../context/AuthenticationContext';
 
 type FundingMethod = 'bank_transfer' | 'mobile_money' | 'cash_deposit';
@@ -94,7 +93,7 @@ const AgentFunding: React.FC = () => {
 
       // Demo mode - instant funding
       if (isDemoMode) {
-        AgentDemoDataService.fundAccount(fundingAmount, agentCurrency, selectedMethod.replace('_', ' '));
+        // Demo mode: funding simulated
         setFundingReference(reference);
         setShowSuccess(true);
         setAmount('');

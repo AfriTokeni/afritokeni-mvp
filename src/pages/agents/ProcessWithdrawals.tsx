@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Minus, Search } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
 import { DataService, WithdrawalRequest } from '../../services/dataService';
-import { useDemoMode } from '../../context/DemoModeContext';
-import { AgentDemoDataService } from '../../services/agentDemoDataService';
 import { CurrencySelector } from '../../components/CurrencySelector';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
@@ -27,21 +27,27 @@ const ProcessWithdrawals: React.FC = () => {
   const currentAgent = user.agent;
   const agentCurrency = selectedCurrency || (currentAgent as any)?.preferredCurrency || 'UGX';
 
-  // Initialize demo data if needed
+  // Load demo balance from CentralizedDemoService
+  const [demoBalance, setDemoBalance] = useState<any>(null);
   useEffect(() => {
-    if (isDemoMode && (currentAgent as any)?.email) {
-      AgentDemoDataService.initializeDemoAgent((currentAgent as any).email);
-    }
-  }, [isDemoMode, currentAgent]);
+    const loadDemoBalance = async () => {
+      if (isDemoMode && currentAgent?.id) {
+        const balance = await CentralizedDemoService.initializeAgent(currentAgent.id, agentCurrency);
+        setDemoBalance(balance);
+      }
+    };
+    loadDemoBalance();
+  }, [isDemoMode, currentAgent, agentCurrency]);
 
   const loadWithdrawalRequests = useCallback(async () => {
     setLoading(true);
     try {
-      // Demo mode - load from demo service
+      // Demo mode - load from /data folder
       if (isDemoMode) {
-        const demoWithdrawals = AgentDemoDataService.getPendingWithdrawals();
+        const response = await fetch('/data/demo-withdrawal-requests.json');
+        const demoWithdrawals = await response.json();
         const transformedRequests = demoWithdrawals
-          .map(withdrawal => ({
+          .map((withdrawal: any) => ({
             id: withdrawal.id,
             userId: withdrawal.userId,
             userName: withdrawal.userName,
@@ -49,11 +55,11 @@ const ProcessWithdrawals: React.FC = () => {
             agentId: currentAgent?.id || 'demo-agent',
             amount: withdrawal.amount,
             currency: withdrawal.currency,
-            withdrawalCode: withdrawal.code,
+            withdrawalCode: withdrawal.withdrawalCode,
             withdrawalType: withdrawal.withdrawalType,
             status: withdrawal.status as 'pending' | 'confirmed' | 'completed' | 'rejected',
-            createdAt: withdrawal.createdAt.toISOString(),
-            updatedAt: withdrawal.createdAt.toISOString(),
+            createdAt: new Date(withdrawal.createdAt).toISOString(),
+            updatedAt: new Date(withdrawal.createdAt).toISOString(),
             userLocation: 'Kampala, Uganda',
             fee: Math.round(withdrawal.amount * 0.02)
           }));
@@ -124,7 +130,7 @@ const ProcessWithdrawals: React.FC = () => {
       try {
         // Demo mode - confirm withdrawal (change status to confirmed)
         if (isDemoMode) {
-          AgentDemoDataService.confirmWithdrawal(request.id);
+          // Demo: withdrawal confirmed
           setSelectedRequest(request);
           setError('');
           await loadWithdrawalRequests();
@@ -155,87 +161,85 @@ const ProcessWithdrawals: React.FC = () => {
     try {
       // Demo mode - approve withdrawal
       if (isDemoMode) {
-        AgentDemoDataService.approveWithdrawal(request.id);
+        // Demo: withdrawal approved
         await loadWithdrawalRequests();
         setSelectedRequest(null);
         setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
         setError('');
         setIsProcessing(false);
-        console.log('🎭 Demo withdrawal approved:', request.id);
-        return;
-      }
-
-      // Real mode
-      const userId = user?.agent?.id || user?.user?.id;
-      if (!userId) {
-        throw new Error('No user ID available');
-      }
-
-      // Get the agent record to get the correct agent ID
-      console.log('🏦 handleConfirmWithdrawal - Looking up agent record for user ID:', userId);
-      const agentRecord = await DataService.getAgentByUserId(userId);
-      
-      if (!agentRecord) {
-        throw new Error('Agent record not found');
-      }
-      
-      console.log('🏦 handleConfirmWithdrawal - Found agent record:', agentRecord);
-      const agentId = agentRecord.id;
-
-      // Process the withdrawal using DataService
-      console.log('🏦 handleConfirmWithdrawal - Processing withdrawal with agentId:', agentId);
-      const result = await DataService.processWithdrawalRequest(request.id, agentId, agentId);
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to process withdrawal');
-      }
-      
-      // Reload withdrawal requests to reflect the updated status
-      await loadWithdrawalRequests();
-      
-      setSelectedRequest(null);
-      setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
-      setError('');
-      
-      // Send notifications to both agent and user
-      try {
-        const [agentUser, customerUser] = await Promise.all([
-          DataService.getUserByKey(user.agent?.id || user.user?.id || ''),
-          DataService.getUserByKey(request.userId)
-        ]);
-
-        // Notify agent of successful withdrawal processing
-        if (agentUser) {
-          await NotificationService.sendNotification(agentUser, {
-            userId: agentUser.id,
-            type: 'withdrawal',
-            amount: request.amount,
-            currency: request.currency,
-            transactionId: request.id,
-            message: `Withdrawal processed successfully for ${request.userName}. Commission earned.`
-          });
+      } else {
+        // Real mode
+        const userId = user?.agent?.id || user?.user?.id;
+        if (!userId) {
+          throw new Error('No user ID available');
         }
 
-        // Notify customer of withdrawal confirmation
-        if (customerUser) {
-          await DataService.createTransaction({
-            userId: request.userId,
-            amount: request.amount,
-            currency: 'UGX',
-            status: 'completed',
-            type: 'withdraw',
-            agentId: user.agent?.id || '',
-            description: `Withdrawal completed by agent ${user.agent?.firstName || 'Unknown'} ${user.agent?.lastName || 'Agent'}`
-          });
-
-          // Note: We'll add notification creation when the method is implemented in DataService
+        // Get the agent record to get the correct agent ID
+        console.log('🏦 handleConfirmWithdrawal - Looking up agent record for user ID:', userId);
+        const agentRecord = await DataService.getAgentByUserId(userId);
+        
+        if (!agentRecord) {
+          throw new Error('Agent record not found');
         }
-      } catch (notificationError) {
-        console.error('Failed to send withdrawal notifications:', notificationError);
-      }
+        
+        console.log('🏦 handleConfirmWithdrawal - Found agent record:', agentRecord);
+        const agentId = agentRecord.id;
 
-      // Show success message
-      alert(`Withdrawal completed! ${formatCurrencyAmount(request.amount, request.currency as AfricanCurrency)} debited from ${request.userName}'s account.`);
+        // Process the withdrawal using DataService
+        console.log('🏦 handleConfirmWithdrawal - Processing withdrawal with agentId:', agentId);
+        const result = await DataService.processWithdrawalRequest(request.id, agentId, agentId);
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to process withdrawal');
+        }
+        
+        // Reload withdrawal requests to reflect the updated status
+        await loadWithdrawalRequests();
+        
+        setSelectedRequest(null);
+        setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
+        setError('');
+        
+        // Send notifications to both agent and user
+        try {
+          const [agentUser, customerUser] = await Promise.all([
+            DataService.getUserByKey(user.agent?.id || user.user?.id || ''),
+            DataService.getUserByKey(request.userId)
+          ]);
+
+          // Notify agent of successful withdrawal processing
+          if (agentUser) {
+            await NotificationService.sendNotification(agentUser, {
+              userId: agentUser.id,
+              type: 'withdrawal',
+              amount: request.amount,
+              currency: request.currency,
+              transactionId: request.id,
+              message: `Withdrawal processed successfully for ${request.userName}. Commission earned.`
+            });
+          }
+
+          // Notify customer of withdrawal confirmation
+          if (customerUser) {
+            await DataService.createTransaction({
+              userId: request.userId,
+              amount: request.amount,
+              currency: 'UGX',
+              status: 'completed',
+              type: 'withdraw',
+              agentId: user.agent?.id || '',
+              description: `Withdrawal completed by agent ${user.agent?.firstName || 'Unknown'} ${user.agent?.lastName || 'Agent'}`
+            });
+
+            // Note: We'll add notification creation when the method is implemented in DataService
+          }
+        } catch (notificationError) {
+          console.error('Failed to send withdrawal notifications:', notificationError);
+        }
+
+        // Show success message
+        alert(`Withdrawal completed! ${formatCurrencyAmount(request.amount, request.currency as AfricanCurrency)} debited from ${request.userName}'s account.`);
+      }
     } catch (error) {
       console.error('Failed to process withdrawal:', error);
       setError('Failed to process withdrawal. Please try again.');
@@ -324,7 +328,7 @@ const ProcessWithdrawals: React.FC = () => {
                 <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
                   {formatCurrencyAmount(
                     isDemoMode 
-                      ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+                      ? (demoBalance?.digitalBalance || 0)
                       : ((currentAgent as any)?.digitalBalance || 0),
                     agentCurrency as AfricanCurrency
                   )}
@@ -348,7 +352,7 @@ const ProcessWithdrawals: React.FC = () => {
                 <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
                   {formatCurrencyAmount(
                     isDemoMode 
-                      ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+                      ? (demoBalance?.cashBalance || 0)
                       : ((currentAgent as any)?.cashBalance || 0),
                     agentCurrency as AfricanCurrency
                   )}
@@ -368,11 +372,13 @@ const ProcessWithdrawals: React.FC = () => {
           principalId={currentAgent?.id || 'demo-agent'}
           preferredCurrency={agentCurrency}
           showActions={false}
+          isAgent={true}
         />
         <CkUSDCBalanceCard
           principalId={currentAgent?.id || 'demo-agent'}
           preferredCurrency={agentCurrency}
           showActions={false}
+          isAgent={true}
         />
       </div>
 
@@ -455,63 +461,54 @@ const ProcessWithdrawals: React.FC = () => {
               filteredRequests.map((request) => (
                 <div
                   key={request.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+                  className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors space-y-4"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-gray-600" />
+                  {/* Header: User Info + Status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start space-x-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-gray-600" />
                       </div>
-                      <div className="flex flex-col">
-                        <h3 className="font-semibold text-gray-900">{request.userName}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 truncate">{request.userName}</h3>
+                        <div className="flex flex-col text-sm text-gray-600 mt-0.5">
                           <div className="flex items-center space-x-1">
-                            <Phone className="w-4 h-4" />
-                            <span>{request.userPhone}</span>
+                            <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="truncate">{request.userPhone}</span>
                           </div>
                           {request.userLocation && (
-                            <div className="flex items-center space-x-1">
-                              <MapPin className="w-4 h-4" />
-                              <span>{request.userLocation}</span>
+                            <div className="flex items-center space-x-1 mt-0.5">
+                              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span className="truncate">{request.userLocation}</span>
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center justify-end gap-2 mb-1">
-                        {request.withdrawalType === 'ckbtc' && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium">
-                            ckBTC
-                          </span>
-                        )}
-                        {request.withdrawalType === 'ckusdc' && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">
-                            ckUSDC
-                          </span>
-                        )}
-                        {(!request.withdrawalType || request.withdrawalType === 'digital_balance') && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">
-                            Digital Balance
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-2xl font-bold text-red-600">
-                        -{formatCurrencyAmount(request.amount, request.currency as AfricanCurrency)}
-                      </p>
-                      <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md border text-xs font-medium ${getStatusColor(request.status)}`}>
-                        {getStatusIcon(request.status)}
-                        <span className="capitalize">{request.status}</span>
-                      </div>
-                      {request.fee > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Fee: {formatCurrencyAmount(request.fee, request.currency as AfricanCurrency)}
-                        </div>
-                      )}
+                    <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md border text-xs font-medium flex-shrink-0 ${getStatusColor(request.status)}`}>
+                      {getStatusIcon(request.status)}
+                      <span className="capitalize">{request.status}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  {/* Amount Section */}
+                  <div className="bg-red-50 rounded-lg p-3">
+                    <div className="text-xs text-gray-500 mb-1">
+                      {request.withdrawalType === 'ckbtc' && 'ckBTC'}
+                      {request.withdrawalType === 'ckusdc' && 'ckUSDC'}
+                      {(!request.withdrawalType || request.withdrawalType === 'digital_balance') && 'Digital Balance'}
+                    </div>
+                    <div className="text-2xl font-bold text-red-600 font-mono">
+                      -{formatCurrencyAmount(request.amount, request.currency as AfricanCurrency)}
+                    </div>
+                    {request.fee > 0 && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Fee: {formatCurrencyAmount(request.fee, request.currency as AfricanCurrency)}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="text-sm text-gray-600">
                       {!isDemoMode && (
                         <>
@@ -524,22 +521,22 @@ const ProcessWithdrawals: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       {request.status === 'pending' && (
                         <>
                           <div className="flex items-center space-x-2">
                             <input
                               type="text"
-                              placeholder="Enter withdrawal code"
+                              placeholder="Enter code"
                               value={verificationCodes[request.id] || ''}
                               onChange={(e) => setVerificationCodes(prev => ({ ...prev, [request.id]: e.target.value }))}
-                              className="px-3 py-1 border border-gray-300 rounded text-sm font-mono"
+                              className="flex-1 sm:w-32 px-3 py-1 border border-gray-300 rounded text-sm font-mono"
                               maxLength={6}
                             />
                             <button
                               onClick={() => handleVerifyCode(request)}
                               disabled={!(verificationCodes[request.id] || '')}
-                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-300"
+                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-300 whitespace-nowrap"
                             >
                               Verify
                             </button>

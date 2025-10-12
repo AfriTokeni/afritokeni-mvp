@@ -4,7 +4,6 @@ import { Search, MapPin, Star, Phone, Clock, List, MapIcon as Map, Navigation, U
 import L from 'leaflet';
 import { listDocs } from '@junobuild/core';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
 
 interface Agent {
   id: string;
@@ -168,7 +167,7 @@ const AgentMapPage: React.FC = () => {
         // If no agents found, fall back to demo data if in demo mode
         if (agentsData.length === 0 && isDemoMode) {
           console.log('No agents found in datastore, loading demo data...');
-          const demoAgents = await DemoDataService.loadAgents();
+          const demoAgents: any[] = [];
           setAgents(demoAgents);
         }
         
@@ -178,7 +177,7 @@ const AgentMapPage: React.FC = () => {
         // Fallback to demo data if Juno fails and in demo mode
         if (isDemoMode) {
           console.log('Falling back to demo data...');
-          const demoAgents = await DemoDataService.loadAgents();
+          const demoAgents: any[] = [];
           setAgents(demoAgents);
         }
       } finally {

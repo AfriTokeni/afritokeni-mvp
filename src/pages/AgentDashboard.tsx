@@ -13,7 +13,7 @@ import { BalanceService } from "../services/BalanceService";
 import { formatCurrencyAmount, AfricanCurrency } from "../types/currency";
 import { useAfriTokeni } from "../hooks/useAfriTokeni";
 import { useDemoMode } from "../context/DemoModeContext";
-import { AgentDemoDataService } from "../services/agentDemoDataService";
+import { CentralizedDemoService } from "../services/centralizedDemoService";
 import { Transaction } from "../types/transaction";
 import { CurrencySelector } from "../components/CurrencySelector";
 import { CkBTCBalanceCard } from "../components/CkBTCBalanceCard";
@@ -36,12 +36,17 @@ const AgentDashboard: React.FC = () => {
   const currentAgent = user.agent || agent;
   const agentCurrency = selectedCurrency || (currentAgent as any)?.preferredCurrency || 'UGX';
 
-  // Initialize demo data if demo mode is enabled
+  // Load demo balance from CentralizedDemoService
+  const [demoBalance, setDemoBalance] = useState<any>(null);
   useEffect(() => {
-    if (isDemoMode && (currentAgent as any)?.email) {
-      AgentDemoDataService.initializeDemoAgent((currentAgent as any).email);
-    }
-  }, [isDemoMode, currentAgent]);
+    const loadDemoBalance = async () => {
+      if (isDemoMode && currentAgent?.id) {
+        const balance = await CentralizedDemoService.initializeAgent(currentAgent.id, agentCurrency);
+        setDemoBalance(balance);
+      }
+    };
+    loadDemoBalance();
+  }, [isDemoMode, currentAgent, agentCurrency]);
 
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,17 +57,21 @@ const AgentDashboard: React.FC = () => {
 
 
   useEffect(() => {
-    if (isDemoMode) {
-      // Load demo transactions
-      const demoTransactions = AgentDemoDataService.getTransactions();
-      setAgentTransactions(demoTransactions as any);
-    } else if (agent) {
-      const transactions = BalanceService.getTransactionHistory(
-        agent.userId || agent.id,
-      );
-      setAgentTransactions(transactions);
-    }
-  }, [agent, isDemoMode]);
+    const loadTransactions = async () => {
+      if (isDemoMode && currentAgent?.id) {
+        // Load demo transactions
+        const demoTransactions = await CentralizedDemoService.getTransactions(currentAgent.id);
+        setAgentTransactions(demoTransactions as any);
+      } else if (agent) {
+        const transactions = BalanceService.getTransactionHistory(
+          agent.userId || agent.id,
+        );
+        setAgentTransactions(transactions);
+      }
+    };
+    
+    loadTransactions();
+  }, [agent, isDemoMode, currentAgent]);
 
   const formatCurrency = (amount: number): string => {
     return formatCurrencyAmount(amount, agentCurrency as AfricanCurrency);
@@ -147,10 +156,10 @@ const AgentDashboard: React.FC = () => {
     
     // Get balances from demo mode or real agent
     const digitalBalance = isDemoMode 
-      ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+      ? (demoBalance?.digitalBalance || 0)
       : (agent?.digitalBalance || 0);
     const cashBalance = isDemoMode 
-      ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+      ? (demoBalance?.cashBalance || 0)
       : (agent?.cashBalance || 0);
 
     // Critical digital balance
@@ -433,8 +442,8 @@ const AgentDashboard: React.FC = () => {
                   <p className="font-mono text-3xl font-bold text-gray-900">
                     {showBalance
                       ? formatCurrencyAmount(
-                          isDemoMode 
-                            ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+                          isDemoMode
+                            ? (demoBalance?.digitalBalance || 0)
                             : (agent?.digitalBalance || 0),
                           agentCurrency as AfricanCurrency
                         )
@@ -482,8 +491,8 @@ const AgentDashboard: React.FC = () => {
                   <p className="font-mono text-3xl font-bold text-gray-900">
                     {showBalance
                       ? formatCurrencyAmount(
-                          isDemoMode 
-                            ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+                          isDemoMode
+                            ? (demoBalance?.cashBalance || 0)
                             : (agent?.cashBalance || 0),
                           agentCurrency as AfricanCurrency
                         )
@@ -526,11 +535,13 @@ const AgentDashboard: React.FC = () => {
             principalId={currentAgent?.id || 'demo-agent'}
             preferredCurrency={agentCurrency}
             showActions={false}
+            isAgent={true}
           />
           <CkUSDCBalanceCard
             principalId={currentAgent?.id || 'demo-agent'}
             preferredCurrency={agentCurrency}
             showActions={false}
+            isAgent={true}
           />
         </div>
 

@@ -5,7 +5,6 @@ import { TransactionService } from '../services/TransactionService';
 import { User } from '../types/auth';
 import { Transaction } from '../types/transaction';
 import { useDemoMode } from '../context/DemoModeContext';
-import { DemoDataService } from '../services/demoDataService';
 
 interface UserBalance {
   balance: number;
@@ -43,12 +42,10 @@ export const useAfriTokeni = () => {
       // Load regular user data if user is logged in
       if (user?.user?.id) {
         if (isDemoMode) {
-          // Use demo data
-          const demoUser = DemoDataService.getDemoUser();
-          const demoTransactions = DemoDataService.getUserTransactions();
+          // Use demo data - simplified for now
           dataPromises.push(
-            Promise.resolve({ balance: demoUser?.balance || 0, currency: 'UGX' }),
-            Promise.resolve(demoTransactions)
+            Promise.resolve({ balance: 500000, currency: 'UGX' }),
+            Promise.resolve([])
           );
         } else {
           await DataService.initializeUserData(user.user.id);

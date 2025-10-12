@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
+import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { CurrencySelector } from '../../components/CurrencySelector';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
@@ -35,19 +35,23 @@ const SendMoney: React.FC = () => {
   const userCurrency = selectedCurrency || defaultCurrency;
   const currencyInfo = AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES];
 
-  // Get balance
-  const getDisplayBalance = (): number => {
-    if (isDemoMode) {
-      const demoUser = DemoDataService.getDemoUser();
-      return demoUser?.balance || 150000;
-    }
-    if (!balance) return 0;
-    return balance.currency === userCurrency ? balance.balance : 0;
-  };
+  // Get balance from CentralizedDemoService or real balance
+  const [displayBalance, setDisplayBalance] = React.useState(0);
+  React.useEffect(() => {
+    const loadBalance = async () => {
+      if (isDemoMode && user?.user?.id) {
+        const demoBalance = await CentralizedDemoService.getBalance(user.user.id);
+        setDisplayBalance(demoBalance?.digitalBalance || 0);
+      } else if (balance) {
+        setDisplayBalance(balance.balance);
+      }
+    };
+    loadBalance();
+  }, [isDemoMode, user, balance]);
 
-  // Get ckBTC and ckUSDC balances
-  const ckBTCBalance = isDemoMode ? DemoDataService.getDemoUser()?.ckBTCBalance || 0 : 0;
-  const ckUSDCBalance = isDemoMode ? DemoDataService.getDemoUser()?.ckUSDCBalance || 0 : 0;
+  const getDisplayBalance = (): number => {
+    return displayBalance;
+  };
 
   // Calculate fee (1%)
   const calculateFee = (amount: number): number => {
@@ -177,22 +181,20 @@ const SendMoney: React.FC = () => {
               </div>
 
               {/* ckBTC and ckUSDC Balance Cards */}
-              {(ckBTCBalance > 0 || ckUSDCBalance > 0) && (
+              {isDemoMode && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {ckBTCBalance > 0 && (
-                    <CkBTCBalanceCard
-                      principalId="demo-user"
-                      preferredCurrency={userCurrency}
-                      showActions={false}
-                    />
-                  )}
-                  {ckUSDCBalance > 0 && (
-                    <CkUSDCBalanceCard
-                      principalId="demo-user"
-                      preferredCurrency={userCurrency}
-                      showActions={false}
-                    />
-                  )}
+                  <CkBTCBalanceCard
+                    principalId={user?.user?.id || "demo-user"}
+                    preferredCurrency={userCurrency}
+                    showActions={false}
+                    isAgent={false}
+                  />
+                  <CkUSDCBalanceCard
+                    principalId={user?.user?.id || "demo-user"}
+                    preferredCurrency={userCurrency}
+                    showActions={false}
+                    isAgent={false}
+                  />
                 </div>
               )}
             </div>

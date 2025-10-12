@@ -88,10 +88,8 @@ export interface CkUSDCTransaction {
  * ckUSDC balance information
  */
 export interface CkUSDCBalance {
-  /** Balance in ckUSDC (smallest unit: 1e-6) */
-  balance: number;
-  /** Balance in human-readable format (e.g., "100.50") */
-  balanceFormatted: string;
+  /** Balance in USDC (e.g., "100.50") */
+  balanceUSDC: string;
   /** Equivalent in user's preferred local currency */
   localCurrencyEquivalent?: number;
   /** Local currency code */

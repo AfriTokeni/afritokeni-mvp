@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { ArrowLeft, MapPin, Star, List, MapIcon as Map, X, Navigation, Phone, Clock } from 'lucide-react';
 import L from 'leaflet';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
 import { useMap } from 'react-leaflet';
 
 // Fix for default Leaflet icon paths in Vite/Webpack
@@ -144,7 +143,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
       try {
         if (isDemoMode) {
           // Load demo agents
-          const demoAgents = await DemoDataService.loadAgents();
+          const demoAgents: any[] = [];
           setAgents(demoAgents);
         } else {
           const [lat, lng] = userLocation;

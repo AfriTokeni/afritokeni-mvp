@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Clock, User, Phone, MapPin, AlertCircle, Search, X } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
 import { DataService } from '../../services/dataService';
-import { useDemoMode } from '../../context/DemoModeContext';
-import { AgentDemoDataService } from '../../services/agentDemoDataService';
 import { CurrencySelector } from '../../components/CurrencySelector';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
@@ -45,21 +45,27 @@ const ProcessDeposits: React.FC = () => {
   const currentAgent = user.agent;
   const agentCurrency = selectedCurrency || (currentAgent as any)?.preferredCurrency || 'UGX';
 
-  // Initialize demo data if needed
+  // Load demo balance from CentralizedDemoService
+  const [demoBalance, setDemoBalance] = useState<any>(null);
   useEffect(() => {
-    if (isDemoMode && (currentAgent as any)?.email) {
-      AgentDemoDataService.initializeDemoAgent((currentAgent as any).email);
-    }
-  }, [isDemoMode, currentAgent]);
+    const loadDemoBalance = async () => {
+      if (isDemoMode && currentAgent?.id) {
+        const balance = await CentralizedDemoService.initializeAgent(currentAgent.id, agentCurrency);
+        setDemoBalance(balance);
+      }
+    };
+    loadDemoBalance();
+  }, [isDemoMode, currentAgent, agentCurrency]);
 
   const loadDepositRequests = useCallback(async () => {
     setLoading(true);
     try {
-      // Demo mode - load from demo service
+      // Demo mode - load from /data folder
       if (isDemoMode) {
-        const demoDeposits = AgentDemoDataService.getPendingDeposits();
+        const response = await fetch('/data/demo-deposit-requests.json');
+        const demoDeposits = await response.json();
         const transformedRequests = demoDeposits
-          .map(deposit => ({
+          .map((deposit: any) => ({
             id: deposit.id,
             userId: deposit.userId,
             userName: deposit.userName,
@@ -148,7 +154,7 @@ const ProcessDeposits: React.FC = () => {
       try {
         // Demo mode - confirm deposit (change status to confirmed)
         if (isDemoMode) {
-          AgentDemoDataService.confirmDeposit(request.id);
+          // Demo: deposit confirmed
           setSelectedRequest(request);
           setError('');
           await loadDepositRequests();
@@ -179,7 +185,7 @@ const ProcessDeposits: React.FC = () => {
     try {
       // Demo mode - approve deposit
       if (isDemoMode) {
-        AgentDemoDataService.approveDeposit(request.id);
+        // Demo: deposit approved
         await loadDepositRequests();
         setSelectedRequest(null);
         setVerificationCodes(prev => ({ ...prev, [request.id]: '' }));
@@ -345,7 +351,7 @@ const ProcessDeposits: React.FC = () => {
               <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
                 {formatCurrencyAmount(
                   isDemoMode 
-                    ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
+                    ? (demoBalance?.digitalBalance || 0)
                     : ((currentAgent as any)?.digitalBalance || 0),
                   agentCurrency as AfricanCurrency
                 )}
@@ -369,7 +375,7 @@ const ProcessDeposits: React.FC = () => {
               <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
                 {formatCurrencyAmount(
                   isDemoMode 
-                    ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
+                    ? (demoBalance?.cashBalance || 0)
                     : ((currentAgent as any)?.cashBalance || 0),
                   agentCurrency as AfricanCurrency
                 )}
@@ -389,11 +395,13 @@ const ProcessDeposits: React.FC = () => {
           principalId={currentAgent?.id || 'demo-agent'}
           preferredCurrency={agentCurrency}
           showActions={false}
+          isAgent={true}
         />
         <CkUSDCBalanceCard
           principalId={currentAgent?.id || 'demo-agent'}
           preferredCurrency={agentCurrency}
           showActions={false}
+          isAgent={true}
         />
       </div>
 
@@ -495,46 +503,45 @@ const ProcessDeposits: React.FC = () => {
               filteredRequests.map((request) => (
                 <div
                   key={request.id}
-                  className="border border-gray-200 rounded-2xl p-4 hover:border-gray-300 transition-colors"
+                  className="border border-gray-200 rounded-2xl p-4 hover:border-gray-300 transition-colors space-y-4"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-gray-600" />
+                  {/* Header: User Info + Status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start space-x-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-gray-600" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{request.userName}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 truncate">{request.userName}</h3>
+                        <div className="flex flex-col text-sm text-gray-600 mt-0.5">
                           <div className="flex items-center space-x-1">
-                            <Phone className="w-4 h-4" />
-                            <span>{request.userPhone}</span>
+                            <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="truncate">{request.userPhone}</span>
                           </div>
                           {request.userLocation && (
-                            <div className="flex items-center space-x-1">
-                              <MapPin className="w-4 h-4" />
-                              <span>{request.userLocation}</span>
+                            <div className="flex items-center space-x-1 mt-0.5">
+                              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span className="truncate">{request.userLocation}</span>
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center justify-end gap-2 mb-1">
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">
-                          Digital Balance
-                        </span>
-                      </div>
-                      <div className="text-2xl font-bold text-gray-900 font-mono">
-                        {formatCurrencyAmount(request.amount.local, request.amount.currency as AfricanCurrency)}
-                      </div>
-                      <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md border text-xs font-medium ${getStatusColor(request.status)}`}>
-                        {getStatusIcon(request.status)}
-                        <span className="capitalize">{request.status}</span>
-                      </div>
+                    <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md border text-xs font-medium flex-shrink-0 ${getStatusColor(request.status)}`}>
+                      {getStatusIcon(request.status)}
+                      <span className="capitalize">{request.status}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  {/* Amount Section */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-xs text-gray-500 mb-1">Digital Balance</div>
+                    <div className="text-2xl font-bold text-gray-900 font-mono">
+                      {formatCurrencyAmount(request.amount.local, request.amount.currency as AfricanCurrency)}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="text-sm text-gray-600">
                       {!isDemoMode && (
                         <>
@@ -547,22 +554,22 @@ const ProcessDeposits: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       {request.status === 'pending' && (
                         <>
                           <div className="flex items-center space-x-2">
                             <input
                               type="text"
-                              placeholder="Enter deposit code"
+                              placeholder="Enter code"
                               value={verificationCodes[request.id] || ''}
                               onChange={(e) => setVerificationCodes(prev => ({ ...prev, [request.id]: e.target.value }))}
-                              className="px-3 py-1 border border-neutral-300 rounded text-sm font-mono"
+                              className="flex-1 sm:w-32 px-3 py-1 border border-neutral-300 rounded text-sm font-mono"
                               maxLength={6}
                             />
                             <button
                               onClick={() => handleVerifyCode(request)}
                               disabled={!(verificationCodes[request.id] || '')}
-                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-neutral-300"
+                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-neutral-300 whitespace-nowrap"
                             >
                               Verify
                             </button>

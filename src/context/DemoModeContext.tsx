@@ -4,7 +4,6 @@
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { DemoDataService } from '../services/demoDataService';
 
 interface DemoModeContextType {
   isDemoMode: boolean;
@@ -24,18 +23,8 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Save preference to localStorage
-    localStorage.setItem('afritokeni_demo_mode', isDemoMode.toString());
-
-    if (isDemoMode) {
-      // Initialize demo data when enabling demo mode
-      const existingUser = DemoDataService.getDemoUser();
-      if (!existingUser) {
-        DemoDataService.initializeDemoUser('+256700000000');
-      }
-    } else {
-      // Reset demo data when disabling demo mode
-      DemoDataService.reset();
-    }
+    localStorage.setItem('afritokeni_demo_mode', JSON.stringify(isDemoMode));
+    // Demo data is now loaded on-demand from /data folder
   }, [isDemoMode]);
 
   const enableDemoMode = () => {

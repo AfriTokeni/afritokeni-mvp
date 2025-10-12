@@ -2208,7 +2208,7 @@ Dial *AFRI# for menu`;
       const balance = await CkUSDCService.getBalanceWithLocalCurrency(userId, 'UGX');
       
       return `ckUSDC Balance (Stable):
-$${balance.balanceFormatted} ckUSDC
+$${balance.balanceUSDC} ckUSDC
 ≈ UGX ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}
 
 💵 1:1 USD peg (stable value)

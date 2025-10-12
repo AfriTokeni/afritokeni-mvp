@@ -7,7 +7,6 @@ import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { DemoDataService } from '../../services/demoDataService';
 
 import type { WithdrawStep } from './types';
 import { Agent as DBAgent } from '../../services/dataService';
@@ -185,8 +184,8 @@ const WithdrawPage: React.FC = () => {
             exchangeRate={exchangeRate}
             userBalance={getBalanceForCurrency()}
             preferredCurrency={userCurrency}
-            ckBTCBalance={isDemoMode ? DemoDataService.getDemoUser()?.ckBTCBalance : 0}
-            ckUSDCBalance={isDemoMode ? DemoDataService.getDemoUser()?.ckUSDCBalance : 0}
+            ckBTCBalance={isDemoMode ? 50000 : 0}
+            ckUSDCBalance={isDemoMode ? 10000 : 0}
             onCurrencyChange={(currency) => setSelectedCurrency(currency)}
             onContinue={(localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin' | 'ckusdc') => {
               // Store the amounts for the confirmation step
