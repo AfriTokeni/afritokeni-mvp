@@ -31,6 +31,7 @@ import {
   CkUSDCExchangeResponse,
   CkUSDCExchangeRate,
   CkUSDCTransaction,
+  CkUSDCTransactionStatus,
   ERC20_APPROVE_ABI,
   HELPER_CONTRACT_ABI,
   CKUSDC_CONSTANTS,
@@ -97,9 +98,9 @@ export class CkUSDCService {
         .filter((item: any) => item.data.userId === principalId)
         .forEach((item: any) => {
           const tx = item.data;
-          if (tx.type === 'deposit' && tx.status === 'completed') {
+          if (tx.type === 'exchange_buy' && tx.status === 'completed') {
             balance += tx.amount;
-          } else if (tx.type === 'withdrawal' && tx.status === 'completed') {
+          } else if (tx.type === 'exchange_sell' && tx.status === 'completed') {
             balance -= tx.amount;
           } else if (tx.type === 'transfer') {
             if (tx.userId === principalId) {
@@ -633,6 +634,155 @@ export class CkUSDCService {
       return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
     }
     return phoneNumber;
+  }
+
+  /**
+   * Get agent exchange requests (USDC transactions that involve agents)
+   * @param agentId - Agent ID to filter transactions
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async getAgentExchangeRequests(agentId?: string, useSatellite?: boolean): Promise<CkUSDCTransaction[]> {
+    try {
+      if (!agentId) {
+        console.log('No agent ID provided, returning empty array');
+        return [];
+      }
+
+      const satellite = this.getSatelliteConfig(useSatellite);
+      const results = await listDocs({
+        collection: 'ckusdc_transactions',
+        filter: {
+          order: {
+            desc: true,
+            field: 'created_at'
+          }
+        },
+        satellite
+      });
+
+      // Filter transactions for this agent that are exchanges
+      const agentExchanges = results.items
+        .map((item) => {
+          const data = item.data as CkUSDCTransaction;
+          return {
+            ...data,
+            createdAt: new Date(data.createdAt),
+            updatedAt: new Date(data.updatedAt),
+          };
+        })
+        .filter((tx) => 
+          tx.agentId === agentId && 
+          (tx.type === 'exchange_buy' || tx.type === 'exchange_sell')
+        );
+
+      return agentExchanges;
+    } catch (error) {
+      console.error('Error getting agent exchange requests:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update transaction status
+   * @param transactionId - Transaction ID to update
+   * @param status - New status to set
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async updateTransactionStatus(
+    transactionId: string, 
+    status: CkUSDCTransactionStatus, 
+    useSatellite?: boolean
+  ): Promise<boolean> {
+    try {
+      const satellite = this.getSatelliteConfig(useSatellite);
+      const existingDoc = await getDoc({
+        collection: 'ckusdc_transactions',
+        key: transactionId,
+        satellite
+      });
+
+      if (!existingDoc) {
+        console.error(`USDC Transaction ${transactionId} not found`);
+        return false;
+      }
+
+      const updatedData = {
+        ...existingDoc.data,
+        status,
+        updatedAt: new Date().toISOString()
+      };
+
+      await setDoc({
+        collection: 'ckusdc_transactions',
+        doc: {
+          key: transactionId,
+          data: updatedData,
+          version: existingDoc.version || 1n
+        },
+        satellite
+      });
+
+      console.log(`✅ USDC Transaction ${transactionId} status updated to ${status}`);
+      return true;
+    } catch (error) {
+      console.error('Error updating USDC transaction status:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Update exchange transaction status for agent operations
+   * @param transactionId - Transaction ID to update
+   * @param status - New status to set
+   * @param agentId - Agent ID performing the update
+   * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   */
+  static async updateExchangeTransactionStatus(
+    transactionId: string,
+    status: 'pending' | 'confirmed' | 'completed' | 'failed',
+    agentId?: string,
+    useSatellite?: boolean
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Map status to CkUSDCTransactionStatus
+      let ckUSDCStatus: CkUSDCTransactionStatus;
+      switch (status) {
+        case 'completed':
+          ckUSDCStatus = 'completed';
+          break;
+        case 'failed':
+          ckUSDCStatus = 'failed';
+          break;
+        case 'confirmed':
+          ckUSDCStatus = 'confirming';
+          break;
+        case 'pending':
+        default:
+          ckUSDCStatus = 'pending';
+          break;
+      }
+
+      const success = await this.updateTransactionStatus(transactionId, ckUSDCStatus, useSatellite);
+      
+      if (success) {
+        console.log(`✅ USDC Transaction ${transactionId} status updated to ${status} by agent ${agentId || 'unknown'}`);
+        return {
+          success: true,
+          message: `USDC transaction status updated to ${status}`
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Failed to update USDC transaction status'
+        };
+      }
+    } catch (error) {
+      console.error('Error updating USDC exchange transaction status:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to update USDC transaction status'
+      };
+    }
   }
 
   /**
