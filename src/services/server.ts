@@ -67,7 +67,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 interface USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'local_currency' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'find_agent' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell' | 'usdc_send';
   data: {
     amount?: number;
     withdrawAmount?: number;
@@ -413,14 +413,10 @@ async function handleRegistrationCheck(input: string, session: USSDSession): Pro
         console.log(`➡️ User ${session.phoneNumber} has PIN, going directly to main menu`);
         return continueSession(`Welcome back to AfriTokeni USSD Service!
 Please select an option:
-1. Send Money
-2. Check Balance
-3. Withdraw Money
-4. Transaction History
-5. Deposit Money
-6. Bitcoin(ckBTC)
-7. USDC(ckUSDC)
-8. Help`);
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. Help`);
       }
     }
   }
@@ -604,14 +600,10 @@ async function handlePinCheck(input: string, session: USSDSession): Promise<stri
         session.step = 0;
         return continueSession(`Welcome back to AfriTokeni USSD Service
 Please select an option:
-1. Send Money
-2. Check Balance
-3. Withdraw Money
-4. Transaction History
-5. Deposit Money
-6. Bitcoin(ckBTC)
-7. USDC(ckUSDC)
-8. Help`);
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. Help`);
       } else {
         // PIN is incorrect
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
@@ -681,14 +673,10 @@ async function handlePinSetup(input: string, session: USSDSession): Promise<stri
 
 Welcome to AfriTokeni USSD Service
 Please select an option:
-1. Send Money
-2. Check Balance
-3. Withdraw Money
-4. Transaction History
-5. Deposit Money
-6. Bitcoin(ckBTC)
-7. USDC(ckUSDC)
-8. Help`);
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. Help`);
         } else {
           // PIN save failed, retry
           session.step = 1;
@@ -709,14 +697,10 @@ async function handleMainMenu(input: string, session: USSDSession): Promise<stri
   if (!input) {
     return continueSession(`Welcome to AfriTokeni USSD Service
 Please select an option:
-1. Send Money
-2. Check Balance
-3. Withdraw Money
-4. Transaction History
-5. Deposit Money
-6. Bitcoin(ckBTC)
-7. USDC(ckUSDC)
-8. Help`);
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. Help`);
   }
 
   console.log(`Main menu input: ${input}`);
@@ -727,9 +711,62 @@ Please select an option:
 
   switch (sanitized_input) {
     case '1':
+      session.currentMenu = 'local_currency';
+      session.step = 0;
+      return handleLocalCurrency('', session);
+    
+    case '2':
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return handleBitcoin('', session);
+    
+    case '3':
+      session.currentMenu = 'usdc';
+      session.step = 0;
+      return handleUSDC('', session);
+    
+    case '4':
+      return endSession(`AfriTokeni Help
+
+Local Currency: Send, deposit, withdraw UGX
+Bitcoin: Buy, sell, send ckBTC
+USDC: Buy, sell, send USDC stablecoin
+
+For support: Call +256-XXX-XXXX
+Visit: afritokeni.com
+
+Thank you for using AfriTokeni!`);
+    
+    default:
+      return continueSession(`Invalid option. Please try again:
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. Help`);
+  }
+}
+
+async function handleLocalCurrency(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  if (!currentInput) {
+    return continueSession(`Local Currency (UGX)
+Please select an option:
+1. Send Money
+2. Check Balance
+3. Deposit
+4. Withdraw
+5. Transactions
+6. Find Agent
+0. Back to Main Menu`);
+  }
+  
+  switch (currentInput) {
+    case '1':
       session.currentMenu = 'send_money';
       session.step = 1;
-      return continueSession('Send Money\nEnter amount to send (UGX):');
+      return continueSession('Send Money\nEnter recipient phone number:');
     
     case '2':
       // Check Balance - requires PIN verification if not already verified
@@ -738,65 +775,125 @@ Please select an option:
       } else {
         session.currentMenu = 'check_balance';
         session.step = 1;
-        return await handleCheckBalance('', session); // Directly proceed to balance check
+        return await handleCheckBalance('', session);
       }
     
     case '3':
-      session.currentMenu = 'withdraw';
+      session.currentMenu = 'deposit';
       session.step = 1;
-      return continueSession('Withdraw Money\nEnter amount (UGX):');
+      return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
     
     case '4':
+      session.currentMenu = 'withdraw';
+      session.step = 1;
+      return continueSession('Withdraw Money\nEnter amount to withdraw (UGX):');
+    
+    case '5':
       // Transaction History - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Transaction History', 'transaction_history');
       } else {
         session.currentMenu = 'transaction_history';
         session.step = 1;
-        return await handleTransactionHistory('', session); // Directly proceed to transaction history
+        return await handleTransactionHistory('', session);
       }
     
-    case '5':
-      session.currentMenu = 'deposit';
-      session.step = 1;
-      return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
-    
     case '6':
-      session.currentMenu = 'bitcoin';
+      session.currentMenu = 'find_agent';
       session.step = 1;
-      return continueSession(`Bitcoin Services
-Please select an option:
-1. BTC Balance
-2. BTC Rate
-3. Buy BTC
-4. Sell BTC
-5. Send BTC
-0. Back to Main Menu`);
+      return handleFindAgent('', session);
     
-    case '7':
-      session.currentMenu = 'usdc';
-      session.step = 1;
-      return continueSession(`USDC Services
-Please select an option:
-1. USDC Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-0. Back to Main Menu`);
-    
-    case '8':
-      return endSession('Help: Call +256700000000 for support\nSMS: help to 6969');
+    case '0':
+      session.currentMenu = 'main';
+      session.step = 0;
+      return handleMainMenu('', session);
     
     default:
       return continueSession(`Invalid option. Please try again:
 1. Send Money
 2. Check Balance
-3. Withdraw Money
-4. Transaction History
-5. Deposit Money
-6. Bitcoin(ckBTC)
-7. USDC(ckUSDC)
-8. Help`);
+3. Deposit
+4. Withdraw
+5. Transactions
+6. Find Agent
+0. Back to Main Menu`);
+  }
+}
+
+async function handleFindAgent(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  try {
+    // Get list of available agents
+    const agents = await DataService.getAvailableAgents();
+    const availableAgents = agents.filter((agent: Agent) => agent.isActive);
+    
+    if (availableAgents.length === 0) {
+      return endSession(`No agents available at this time.
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+    }
+    
+    let agentList = `Find Agent
+
+Available agents near you:
+
+`;
+    
+    availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
+      agentList += `${index + 1}. ${agent.businessName}
+   ${agent.location?.city || 'Location'}, ${agent.location?.address || ''}
+
+`;
+    });
+    
+    agentList += `For directions or to contact agents directly, visit them at their listed locations.
+
+0. Back to Local Currency Menu`;
+    
+    if (!currentInput) {
+      return continueSession(agentList);
+    }
+    
+    if (currentInput === '0') {
+      session.currentMenu = 'local_currency';
+      session.step = 0;
+      return handleLocalCurrency('', session);
+    }
+    
+    // If user selects an agent number, show detailed info
+    const agentChoice = parseInt(currentInput);
+    if (!isNaN(agentChoice) && agentChoice >= 1 && agentChoice <= availableAgents.length) {
+      const selectedAgent = availableAgents[agentChoice - 1];
+      return endSession(`Agent Details
+
+${selectedAgent.businessName}
+Location: ${selectedAgent.location?.city || 'Location'}
+Address: ${selectedAgent.location?.address || 'N/A'}
+
+Services:
+- Deposit money
+- Withdraw money
+- Buy/Sell Bitcoin
+- Buy/Sell USDC
+
+Visit the agent at their location for assistance.
+
+Thank you for using AfriTokeni!`);
+    }
+    
+    return continueSession(`Invalid selection.
+${agentList}`);
+    
+  } catch (error) {
+    console.error('Error getting agents:', error);
+    return endSession(`Error loading agents.
+Please try again later.
+
+Thank you for using AfriTokeni!`);
   }
 }
 
@@ -1237,13 +1334,13 @@ async function handleBitcoin(input: string, session: USSDSession): Promise<strin
   const currentInput = inputParts[inputParts.length - 1] || '';
   
   if (!currentInput) {
-    return continueSession(`Bitcoin Services
+    return continueSession(`Bitcoin (ckBTC)
 Please select an option:
-1. BTC Balance
-2. BTC Rate
-3. Buy BTC
-4. Sell BTC
-5. Send BTC
+1. Check Balance
+2. Bitcoin Rate
+3. Buy Bitcoin
+4. Sell Bitcoin
+5. Send Bitcoin
 0. Back to Main Menu`);
   }
   
@@ -1251,17 +1348,17 @@ Please select an option:
     case '1':
       session.currentMenu = 'btc_balance';
       session.step = 1;
-      return continueSession('BTC Balance\nEnter your 4-digit PIN:');
+      return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
     case '2':
       session.currentMenu = 'btc_rate';
       session.step = 1;
-      return continueSession('BTC Rate\nEnter your 4-digit PIN:');
+      return continueSession('Bitcoin Rate\nEnter your 4-digit PIN:');
     
     case '3':
       session.currentMenu = 'btc_buy';
       session.step = 1;
-      return continueSession('Buy BTC\nEnter UGX amount to spend:');
+      return continueSession('Buy Bitcoin\nEnter UGX amount to spend:');
     
     case '4':
       session.currentMenu = 'btc_sell';
@@ -1271,7 +1368,7 @@ Please select an option:
     case '5':
       session.currentMenu = 'btc_send';
       session.step = 1;
-      return continueSession('Send BTC\nEnter your 4-digit PIN:');
+      return continueSession('Send Bitcoin\nEnter your 4-digit PIN:');
     
     case '0':
       session.currentMenu = 'main';
@@ -1280,11 +1377,11 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-1. BTC Balance
-2. BTC Rate
-3. Buy BTC
-4. Sell BTC
-5. Send BTC
+1. Check Balance
+2. Bitcoin Rate
+3. Buy Bitcoin
+4. Sell Bitcoin
+5. Send Bitcoin
 0. Back to Main Menu`);
   }
 }
@@ -2265,12 +2362,13 @@ async function handleUSDC(input: string, session: USSDSession): Promise<string> 
   const currentInput = inputParts[inputParts.length - 1] || '';
   
   if (!currentInput) {
-    return continueSession(`USDC Services
+    return continueSession(`USDC (ckUSDC)
 Please select an option:
-1. USDC Balance
+1. Check Balance
 2. USDC Rate
 3. Buy USDC
 4. Sell USDC
+5. Send USDC
 0. Back to Main Menu`);
   }
   
@@ -2278,22 +2376,27 @@ Please select an option:
     case '1':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
-      return continueSession('Enter your 4-digit PIN:');
+      return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
     case '2':
       session.currentMenu = 'usdc_rate';
       session.step = 1;
-      return continueSession('Enter your 4-digit PIN:');
+      return continueSession('USDC Rate\nEnter your 4-digit PIN:');
     
     case '3':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
-      return continueSession('Enter your 4-digit PIN:');
+      return continueSession('Buy USDC\nEnter your 4-digit PIN:');
     
     case '4':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
-      return continueSession('Enter your 4-digit PIN:');
+      return continueSession('Sell USDC\nEnter your 4-digit PIN:');
+    
+    case '5':
+      session.currentMenu = 'usdc_send';
+      session.step = 1;
+      return continueSession('Send USDC\nEnter your 4-digit PIN:');
     
     case '0':
       session.currentMenu = 'main';
@@ -2302,10 +2405,11 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-1. USDC Balance
+1. Check Balance
 2. USDC Rate
 3. Buy USDC
 4. Sell USDC
+5. Send USDC
 0. Back to Main Menu`);
   }
 }
@@ -2848,6 +2952,237 @@ Thank you for using AfriTokeni!`);
       } catch (error) {
         console.error('Error processing USDC sale:', error);
         return endSession('Error processing sale. Please try again later.');
+      }
+    }
+    
+    default:
+      session.currentMenu = 'usdc';
+      session.step = 0;
+      return handleUSDC('', session);
+  }
+}
+
+async function handleUSDCSend(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // PIN verification step
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      // Verify PIN
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      session.step = 2;
+      
+      try {
+        // Get user from DataService to get Principal ID
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession(`User not found.
+Please contact support.
+
+Thank you for using AfriTokeni!`);
+        }
+
+        // Get real USDC balance using CkUSDCService
+        const balance = await CkUSDCService.getBalance(user.id, true); // useSatellite = true for SMS
+        const usdcBalance = parseFloat(balance.balanceFormatted);
+        
+        // Store balance for later use
+        session.data.usdcBalance = usdcBalance;
+        
+        return continueSession(`Send USDC
+Your Balance: $${usdcBalance.toFixed(6)} USDC
+
+Enter amount to send (USDC):
+(Min: $0.01)`);
+      } catch (error) {
+        console.error('Error getting USDC balance:', error);
+        return continueSession(`Error getting balance.
+Please try again later.
+
+Enter your 4-digit PIN:`);
+      }
+    }
+    
+    case 2: {
+      // Amount entry step
+      const usdcAmount = parseFloat(currentInput);
+      const userBalance = session.data.usdcBalance || 0;
+      
+      if (isNaN(usdcAmount) || usdcAmount <= 0) {
+        return continueSession('Invalid amount.\nEnter USDC amount to send:');
+      }
+      
+      if (usdcAmount < 0.01) {
+        return continueSession('Minimum send: $0.01 USDC\nEnter USDC amount to send:');
+      }
+      
+      // Calculate transaction fee (0.0001 USDC)
+      const transactionFee = 0.0001;
+      const totalRequired = usdcAmount + transactionFee;
+      
+      if (totalRequired > userBalance) {
+        return continueSession(`Insufficient balance.
+Amount: $${usdcAmount.toFixed(6)} USDC
+Fee: $${transactionFee.toFixed(6)} USDC
+Total needed: $${totalRequired.toFixed(6)} USDC
+Your balance: $${userBalance.toFixed(6)} USDC
+Enter USDC amount to send:`);
+      }
+      
+      session.data.usdcAmount = usdcAmount;
+      session.data.transactionFee = transactionFee;
+      session.step = 3;
+      
+      return continueSession(`Amount: $${usdcAmount.toFixed(6)} USDC
+Fee: $${transactionFee.toFixed(6)} USDC
+Total: $${totalRequired.toFixed(6)} USDC
+
+Enter recipient phone number:
+(Format: +256701234567)`);
+    }
+    
+    case 3: {
+      // Recipient phone number entry
+      let recipientPhone = currentInput.trim();
+      
+      // Handle different phone number formats
+      if (recipientPhone.startsWith('0')) {
+        recipientPhone = '+256' + recipientPhone.substring(1);
+      } else if (recipientPhone.startsWith('256')) {
+        recipientPhone = '+' + recipientPhone;
+      } else if (!recipientPhone.startsWith('+')) {
+        recipientPhone = '+256' + recipientPhone;
+      }
+      
+      // Basic phone number validation
+      const phoneRegex = /^\+256[0-9]{9}$/;
+      if (!phoneRegex.test(recipientPhone)) {
+        return continueSession('Invalid phone number format.\nEnter recipient phone:\n(Format: +256701234567)');
+      }
+      
+      // Check if recipient exists
+      try {
+        const recipient = await DataService.findUserByPhoneNumber(recipientPhone);
+        if (!recipient) {
+          return continueSession(`Recipient ${recipientPhone} not found.
+Please ensure they have an AfriTokeni account.
+Enter recipient phone number:`);
+        }
+        
+        // Don't allow sending to yourself
+        if (recipientPhone === `+${session.phoneNumber}`) {
+          return continueSession('Cannot send to your own number.\nEnter recipient phone number:');
+        }
+        
+        session.data.recipientPhone = recipientPhone;
+        session.data.recipientName = recipient.firstName || 'User';
+        session.step = 4;
+        
+        const usdcAmount = session.data.usdcAmount || 0;
+        const transactionFee = session.data.transactionFee || 0;
+        const totalAmount = usdcAmount + transactionFee;
+        
+        return continueSession(`Confirm USDC Transfer:
+
+To: ${recipient.firstName || 'User'} (${recipientPhone})
+Amount: $${usdcAmount.toFixed(6)} USDC
+Fee: $${transactionFee.toFixed(6)} USDC
+Total: $${totalAmount.toFixed(6)} USDC
+
+Enter your PIN to confirm:`);
+        
+      } catch (error) {
+        console.error('Error finding recipient:', error);
+        return continueSession('Error verifying recipient.\nPlease try again.\nEnter recipient phone number:');
+      }
+    }
+    
+    case 4: {
+      // Final PIN verification and process transfer
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      try {
+        // Get user information
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        const recipient = await DataService.findUserByPhoneNumber(session.data.recipientPhone);
+        
+        if (!user || !recipient) {
+          return endSession('User verification failed. Please try again later.');
+        }
+        
+        const usdcAmount = session.data.usdcAmount || 0;
+        const transactionFee = session.data.transactionFee || 0;
+        
+        // Process USDC transfer
+        const transferResult = await CkUSDCService.transfer({
+          senderId: user.id,
+          recipient: recipient.id,
+          amount: usdcAmount,
+          memo: `USSD transfer to ${session.data.recipientPhone}`
+        }, true); // useSatellite = true for SMS
+        
+        if (transferResult.success && transferResult.transactionId) {
+          // Send confirmation SMS to sender
+          const senderSMS = `AfriTokeni USDC Transfer Sent ✅
+To: ${session.data.recipientName} (${session.data.recipientPhone})
+Amount: $${usdcAmount.toFixed(6)} USDC
+Fee: $${transactionFee.toFixed(6)} USDC
+Transaction ID: ${transferResult.transactionId}
+Time: ${new Date().toLocaleString()}`;
+          
+          // Send notification SMS to recipient
+          const recipientSMS = `AfriTokeni USDC Received ✅
+From: ${user.firstName || 'User'} (+${session.phoneNumber})
+Amount: $${usdcAmount.toFixed(6)} USDC
+Transaction ID: ${transferResult.transactionId}
+Time: ${new Date().toLocaleString()}`;
+          
+          try {
+            await sendSMSNotification(session.phoneNumber, senderSMS);
+            await sendSMSNotification(session.data.recipientPhone.replace('+', ''), recipientSMS);
+          } catch (smsError) {
+            console.error('SMS sending failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ USDC Transfer Successful!
+
+To: ${session.data.recipientName}
+Phone: ${session.data.recipientPhone}
+Amount: $${usdcAmount.toFixed(6)} USDC
+Fee: $${transactionFee.toFixed(6)} USDC
+Transaction ID: ${transferResult.transactionId}
+
+SMS confirmations sent.
+
+Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Transfer failed: ${transferResult.error || 'Unknown error'}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+      } catch (error) {
+        console.error('Error processing USDC transfer:', error);
+        return endSession('Error processing transfer. Please try again later.');
       }
     }
     
@@ -3453,6 +3788,12 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
       case 'main':
         response = await handleMainMenu(text, session);
         break;
+      case 'local_currency':
+        response = await handleLocalCurrency(text, session);
+        break;
+      case 'find_agent':
+        response = await handleFindAgent(text, session);
+        break;
       case 'send_money':
         response = await handleSendMoney(text, session);
         break;
@@ -3497,6 +3838,9 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
         break;
       case 'usdc_sell':
         response = await handleUSDCSell(text, session);
+        break;
+      case 'usdc_send':
+        response = await handleUSDCSend(text, session);
         break;
       case 'withdraw':
         response = await handleWithdraw(text, session);
