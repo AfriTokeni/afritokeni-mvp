@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Bitcoin, DollarSign, AlertCircle } from 'lucide-react';
+import { Send, Bitcoin, DollarSign, AlertCircle, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
@@ -28,11 +28,40 @@ const SendMoney: React.FC = () => {
   const [recipientName, setRecipientName] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [transactionCode, setTransactionCode] = useState<string>('');
+  const [ckBTCBalance, setCkBTCBalance] = useState<number>(0);
+  const [ckUSDCBalance, setCkUSDCBalance] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showContactDropdown, setShowContactDropdown] = useState<boolean>(false);
+  const [walletAddress, setWalletAddress] = useState<string>('');
+
+  // Demo contacts for search
+  const demoContacts = [
+    { name: 'Jane Doe', phone: '+256 700 123 456', btcWallet: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', usdcWallet: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' },
+    { name: 'John Smith', phone: '+256 701 234 567', btcWallet: '', usdcWallet: '0x8ba1f109551bD432803012645Ac136ddd64DBA72' },
+    { name: 'Janet Mukasa', phone: '+256 702 345 678', btcWallet: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq', usdcWallet: '' },
+    { name: 'James Okello', phone: '+256 703 456 789', btcWallet: '', usdcWallet: '' },
+    { name: 'Sarah Nakato', phone: '+256 704 567 890', btcWallet: 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4', usdcWallet: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+  ];
+
+  // Filter contacts based on search
+  const filteredContacts = demoContacts.filter(contact =>
+    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    contact.phone.includes(searchQuery)
+  );
 
   // Get user's preferred currency
   const currentUser = user.user;
   const defaultCurrency = currentUser?.preferredCurrency || 'UGX';
   const userCurrency = selectedCurrency || defaultCurrency;
+
+  // Load ckBTC and ckUSDC balances in demo mode
+  React.useEffect(() => {
+    if (isDemoMode) {
+      // Demo balances
+      setCkBTCBalance(0.005); // 0.005 BTC
+      setCkUSDCBalance(500); // 500 USDC
+    }
+  }, [isDemoMode]);
 
   // Get balance from CentralizedDemoService or real balance
   const [displayBalance, setDisplayBalance] = React.useState(0);
@@ -95,8 +124,14 @@ const SendMoney: React.FC = () => {
   };
 
   const handleSendMoney = async () => {
-    if (!recipientPhone.trim()) {
-      setError('Please enter recipient phone number');
+    // Validate based on send type
+    if (sendType === 'local' && !recipientPhone.trim()) {
+      setError('Please select a recipient or enter phone number');
+      return;
+    }
+    
+    if ((sendType === 'ckbtc' || sendType === 'ckusdc') && !walletAddress.trim()) {
+      setError('Please enter wallet address');
       return;
     }
 
@@ -280,14 +315,16 @@ const SendMoney: React.FC = () => {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
                 <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                  Amount
+                  Amount {sendType === 'ckbtc' && '(ckBTC)'} {sendType === 'ckusdc' && '(ckUSDC)'}
                 </label>
-                <CurrencySelector
-                  currentCurrency={userCurrency}
-                  onCurrencyChange={(currency) => {
-                    updateUserCurrency(currency);
-                  }}
-                />
+                {sendType === 'local' && (
+                  <CurrencySelector
+                    currentCurrency={userCurrency}
+                    onCurrencyChange={(currency) => {
+                      updateUserCurrency(currency);
+                    }}
+                  />
+                )}
               </div>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -301,7 +338,11 @@ const SendMoney: React.FC = () => {
                 />
               </div>
               <p className="mt-2 text-sm text-gray-500">
-                Available: {formatCurrencyAmount(getDisplayBalance(), userCurrency as AfricanCurrency)}
+                Available: {
+                  sendType === 'ckbtc' ? `${ckBTCBalance} BTC` :
+                  sendType === 'ckusdc' ? `${ckUSDCBalance} USDC` :
+                  formatCurrencyAmount(getDisplayBalance(), userCurrency as AfricanCurrency)
+                }
               </p>
             </div>
 
@@ -339,31 +380,114 @@ const SendMoney: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Recipient Details</h2>
 
             <div className="space-y-4 mb-6">
+              {/* Contact Search - shown for all send types */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Recipient Phone Number *
+                  Search Recipient (by name or phone) *
                 </label>
-                <input
-                  type="tel"
-                  value={recipientPhone}
-                  onChange={(e) => setRecipientPhone(e.target.value)}
-                  placeholder="+256 700 000 000"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowContactDropdown(true);
+                      // Clear wallet address when searching
+                      setWalletAddress('');
+                    }}
+                    onFocus={() => setShowContactDropdown(true)}
+                    placeholder="Search by name or enter phone number..."
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  />
+                  
+                  {/* Contact Dropdown */}
+                  {showContactDropdown && searchQuery && filteredContacts.length > 0 && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredContacts.map((contact, index) => {
+                        const hasWallet = sendType === 'ckbtc' ? contact.btcWallet : 
+                                        sendType === 'ckusdc' ? contact.usdcWallet : true;
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              setRecipientPhone(contact.phone);
+                              setRecipientName(contact.name);
+                              setSearchQuery(contact.name);
+                              setShowContactDropdown(false);
+                              // Auto-fill wallet if available
+                              if (sendType === 'ckbtc' && contact.btcWallet) {
+                                setWalletAddress(contact.btcWallet);
+                              } else if (sendType === 'ckusdc' && contact.usdcWallet) {
+                                setWalletAddress(contact.usdcWallet);
+                              }
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium text-gray-900">{contact.name}</div>
+                                <div className="text-sm text-gray-500">{contact.phone}</div>
+                              </div>
+                              {(sendType === 'ckbtc' || sendType === 'ckusdc') && (
+                                <div className="text-xs">
+                                  {hasWallet ? (
+                                    <span className="text-green-600">✓ Has wallet</span>
+                                  ) : (
+                                    <span className="text-gray-400">No wallet</span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {sendType === 'local' 
+                    ? 'Search contacts or enter phone number'
+                    : 'Search registered users or enter wallet address below'}
+                </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Recipient Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={recipientName}
-                  onChange={(e) => setRecipientName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                />
-              </div>
+              {/* Wallet Address - shown for crypto if not auto-filled */}
+              {(sendType === 'ckbtc' || sendType === 'ckusdc') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {sendType === 'ckbtc' ? 'Bitcoin' : 'USDC'} Wallet Address {walletAddress && '✓'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={walletAddress}
+                      onChange={(e) => setWalletAddress(e.target.value)}
+                      placeholder={sendType === 'ckbtc' ? 'bc1q... or select contact above' : '0x... or select contact above'}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent font-mono text-sm"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {walletAddress ? 'Wallet address ready' : 'Enter manually or select a contact with registered wallet'}
+                  </p>
+                </div>
+              )}
+
+              {/* Recipient Name - shown when contact selected */}
+              {recipientName && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Recipient Name ✓
+                  </label>
+                  <input
+                    type="text"
+                    value={recipientName}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Transaction Summary */}
@@ -400,7 +524,11 @@ const SendMoney: React.FC = () => {
               </button>
               <button
                 onClick={handleSendMoney}
-                disabled={!recipientPhone.trim()}
+                disabled={
+                  sendType === 'local' ? !recipientPhone.trim() : 
+                  (sendType === 'ckbtc' || sendType === 'ckusdc') ? !walletAddress.trim() : 
+                  true
+                }
                 className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 Send Money

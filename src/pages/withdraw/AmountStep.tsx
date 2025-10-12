@@ -252,16 +252,18 @@ const AmountStep: React.FC<AmountStepProps> = ({
         <div>
           <div className="flex items-center justify-between mb-2 sm:mb-3">
             <label htmlFor="local-amount" className="block text-xs sm:text-sm font-medium text-gray-700">
-              Amount
+              Amount {withdrawType === 'bitcoin' && '(to convert to BTC)'} {withdrawType === 'ckusdc' && '(to convert to USDC)'}
             </label>
-            <CurrencySelector
-              currentCurrency={selectedCurrency}
-              onCurrencyChange={(currency) => {
-                if (onCurrencyChange) {
-                  onCurrencyChange(currency);
-                }
-              }}
-            />
+            {withdrawType === 'cash' && (
+              <CurrencySelector
+                currentCurrency={selectedCurrency}
+                onCurrencyChange={(currency) => {
+                  if (onCurrencyChange) {
+                    onCurrencyChange(currency);
+                  }
+                }}
+              />
+            )}
           </div>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
