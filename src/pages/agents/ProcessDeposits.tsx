@@ -6,7 +6,7 @@ import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
 import { DataService } from '../../services/dataService';
-import { CurrencySelector } from '../../components/CurrencySelector';
+import { BalanceCard } from '../../components/BalanceCard';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
 
@@ -340,53 +340,27 @@ const ProcessDeposits: React.FC = () => {
     <div className="space-y-6">
       {/* Balance Cards - Compact on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* Digital Balance Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 md:p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-sm font-medium text-gray-600">Digital Balance</p>
-                <span className="text-xs text-gray-400">Operations</span>
-              </div>
-              <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
-                {formatCurrencyAmount(
-                  isDemoMode 
-                    ? (demoBalance?.digitalBalance || 0)
-                    : ((currentAgent as any)?.digitalBalance || 0),
-                  agentCurrency as AfricanCurrency
-                )}
-              </p>
-            </div>
-            <CurrencySelector
-              currentCurrency={agentCurrency}
-              onCurrencyChange={(currency) => setSelectedCurrency(currency)}
-            />
-          </div>
-        </div>
-
-        {/* Cash Balance Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 md:p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-sm font-medium text-gray-600">Cash Balance</p>
-                <span className="text-xs text-gray-400">Earnings</span>
-              </div>
-              <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
-                {formatCurrencyAmount(
-                  isDemoMode 
-                    ? (demoBalance?.cashBalance || 0)
-                    : ((currentAgent as any)?.cashBalance || 0),
-                  agentCurrency as AfricanCurrency
-                )}
-              </p>
-            </div>
-            <CurrencySelector
-              currentCurrency={agentCurrency}
-              onCurrencyChange={(currency) => setSelectedCurrency(currency)}
-            />
-          </div>
-        </div>
+        <BalanceCard
+          title="Digital Balance"
+          subtitle="Operations"
+          balance={isDemoMode ? (demoBalance?.digitalBalance || 0) : ((currentAgent as any)?.digitalBalance || 0)}
+          currency={agentCurrency}
+          showBalance={true}
+          onToggleBalance={() => {}}
+          showCurrencySelector={true}
+          onCurrencyChange={(currency: string) => setSelectedCurrency(currency)}
+        />
+        
+        <BalanceCard
+          title="Cash Balance"
+          subtitle="Earnings"
+          balance={isDemoMode ? (demoBalance?.cashBalance || 0) : ((currentAgent as any)?.cashBalance || 0)}
+          currency={agentCurrency}
+          showBalance={true}
+          onToggleBalance={() => {}}
+          showCurrencySelector={true}
+          onCurrencyChange={(currency: string) => setSelectedCurrency(currency)}
+        />
       </div>
 
       {/* ckBTC and ckUSDC Balance Cards - Compact on mobile */}

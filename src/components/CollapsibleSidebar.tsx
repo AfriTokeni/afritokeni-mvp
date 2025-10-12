@@ -120,6 +120,15 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ routes, userTyp
               </button>
             );
           })}
+          
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors flex-shrink-0 min-w-[70px] text-gray-400 hover:text-red-500"
+          >
+            <LogOut className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium whitespace-nowrap">Sign Out</span>
+          </button>
         </div>
       </div>
     </>
