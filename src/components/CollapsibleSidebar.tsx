@@ -32,13 +32,15 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ routes, userTyp
   };
 
   return (
-    <div
-      className={`fixed left-0 top-0 h-screen bg-black text-white transition-all duration-300 ease-in-out z-50 ${
-        isExpanded ? 'w-64' : 'w-16'
-      }`}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
-    >
+    <>
+      {/* Desktop Sidebar */}
+      <div
+        className={`fixed left-0 top-0 h-screen bg-black text-white transition-all duration-300 ease-in-out z-50 hidden md:block ${
+          isExpanded ? 'w-64' : 'w-16'
+        }`}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
+      >
       {/* Logo Section */}
       <div className="h-16 flex items-center justify-center border-b border-gray-800">
         <div className="flex items-center gap-3">
@@ -97,6 +99,30 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ routes, userTyp
         </button>
       </div>
     </div>
+
+      {/* Mobile Bottom Navigation - Black & Scrollable */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 z-50 md:hidden">
+        <div className="flex items-center gap-1 py-2 px-2 overflow-x-auto scrollbar-hide">
+          {routes.map((route) => {
+            const Icon = route.icon;
+            const active = isActive(route.path);
+            
+            return (
+              <button
+                key={route.id}
+                onClick={() => navigate(route.path)}
+                className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors flex-shrink-0 min-w-[70px] ${
+                  active ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Icon className="w-5 h-5 mb-1" />
+                <span className="text-xs font-medium whitespace-nowrap">{route.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -169,8 +169,8 @@ export const CkUSDCBalanceCard: React.FC<CkUSDCBalanceCardProps> = ({
         )}
       </div>
 
-      {/* Info Badge */}
-      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-green-200">
+      {/* Info Badge - Hidden on mobile */}
+      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-green-200 hidden md:block">
         <p className="text-xs text-neutral-700">
           <span className="font-semibold">Stable Value:</span> ckUSDC is pegged 1:1 with USD, 
           protecting you from Bitcoin volatility.

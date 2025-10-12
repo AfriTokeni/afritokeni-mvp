@@ -311,17 +311,17 @@ const ProcessWithdrawals: React.FC = () => {
 
   return (
     <div className="space-y-6">
-        {/* Balance Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Balance Cards - Compact on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {/* Digital Balance Card */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <div className="flex items-start justify-between mb-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-4 md:p-6">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-1">
                   <p className="text-sm font-medium text-gray-600">Digital Balance</p>
                   <span className="text-xs text-gray-400">Operations</span>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 font-mono">
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
                   {formatCurrencyAmount(
                     isDemoMode 
                       ? (AgentDemoDataService.getDemoAgent()?.digitalBalance || 0)
@@ -338,14 +338,14 @@ const ProcessWithdrawals: React.FC = () => {
           </div>
 
           {/* Cash Balance Card */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <div className="flex items-start justify-between mb-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-4 md:p-6">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-1">
                   <p className="text-sm font-medium text-gray-600">Cash Balance</p>
                   <span className="text-xs text-gray-400">Earnings</span>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 font-mono">
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
                   {formatCurrencyAmount(
                     isDemoMode 
                       ? (AgentDemoDataService.getDemoAgent()?.cashBalance || 0)
@@ -362,8 +362,8 @@ const ProcessWithdrawals: React.FC = () => {
           </div>
         </div>
 
-      {/* ckBTC and ckUSDC Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* ckBTC and ckUSDC Balance Cards - Compact on mobile */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <CkBTCBalanceCard
           principalId={currentAgent?.id || 'demo-agent'}
           preferredCurrency={agentCurrency}

@@ -172,8 +172,8 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
         )}
       </div>
 
-      {/* Info Badge */}
-      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-orange-200">
+      {/* Info Badge - Hidden on mobile */}
+      <div className="mb-4 p-3 bg-white/60 rounded-lg border border-orange-200 hidden md:block">
         <div className="flex items-start gap-2">
           <Zap className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-neutral-700">

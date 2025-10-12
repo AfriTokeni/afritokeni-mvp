@@ -236,8 +236,8 @@ const AgentDashboard: React.FC = () => {
           />
         )}
 
-        {/* Agent Verification Status */}
-        {showVerificationAlert &&
+        {/* Agent Verification Status - Only show if KYC is verified */}
+        {showVerificationAlert && kycStatus === 'verified' &&
           (agent?.isActive ? (
             <div className="relative rounded-lg border border-green-200 bg-green-50 p-4">
               <div className="flex items-center justify-between">
@@ -473,7 +473,7 @@ const AgentDashboard: React.FC = () => {
           {/* Cash Balance Card (Earnings) */}
           <div className="rounded-2xl border border-gray-200 bg-white p-8">
             <div className="mb-6 flex items-start justify-between">
-              <div>
+              <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <p className="text-sm font-medium text-gray-600">Cash Balance</p>
                   <span className="text-xs text-gray-400">Earnings</span>
@@ -501,8 +501,14 @@ const AgentDashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="rounded-xl bg-green-50 p-3">
-                <Wallet className="h-6 w-6 text-green-600" />
+              <div className="flex flex-col items-end gap-2">
+                <div className="rounded-xl bg-green-50 p-3">
+                  <Wallet className="h-6 w-6 text-green-600" />
+                </div>
+                <CurrencySelector
+                  currentCurrency={agentCurrency}
+                  onCurrencyChange={(currency) => setSelectedCurrency(currency)}
+                />
               </div>
             </div>
             <button
@@ -514,26 +520,19 @@ const AgentDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* ckBTC and ckUSDC Balance Cards */}
-        {((isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckBTCBalance || 0) > 0) || 
-          (AgentDemoDataService.getDemoAgent()?.ckUSDCBalance || 0) > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {(isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckBTCBalance || 0) > 0) && (
-              <CkBTCBalanceCard
-                principalId={currentAgent?.id || 'demo-agent'}
-                preferredCurrency={agentCurrency}
-                showActions={false}
-              />
-            )}
-            {(isDemoMode && (AgentDemoDataService.getDemoAgent()?.ckUSDCBalance || 0) > 0) && (
-              <CkUSDCBalanceCard
-                principalId={currentAgent?.id || 'demo-agent'}
-                preferredCurrency={agentCurrency}
-                showActions={false}
-              />
-            )}
-          </div>
-        )}
+        {/* ckBTC and ckUSDC Balance Cards - Always show */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <CkBTCBalanceCard
+            principalId={currentAgent?.id || 'demo-agent'}
+            preferredCurrency={agentCurrency}
+            showActions={false}
+          />
+          <CkUSDCBalanceCard
+            principalId={currentAgent?.id || 'demo-agent'}
+            preferredCurrency={agentCurrency}
+            showActions={false}
+          />
+        </div>
 
 
           {/* Liquidity Management */}

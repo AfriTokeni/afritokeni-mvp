@@ -69,19 +69,19 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
       <CollapsibleSidebar routes={routes} userType={userType} />
       
       {/* Main Content Area */}
-      <div className="ml-16 transition-all duration-300">
+      <div className="md:ml-16 transition-all duration-300">
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-black">{getPageTitle()}</h1>
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <h1 className="text-base md:text-xl lg:text-2xl font-bold text-black truncate">{getPageTitle()}</h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
             {/* Demo Mode Toggle */}
             <DemoModeToggle />
             
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="relative">
+            {/* Search Bar - Hidden on mobile */}
+            <form onSubmit={handleSearch} className="relative hidden lg:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
@@ -92,10 +92,10 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
               />
             </form>
             
-            {/* User Avatar - Clickable */}
+            {/* User Avatar - Clickable, hidden on small mobile */}
             <button
               onClick={handleAvatarClick}
-              className="w-10 h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden"
+              className="w-10 h-10 bg-black rounded-full items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden hidden sm:flex"
             >
               {profileImage ? (
                 <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
@@ -109,7 +109,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children, routes, userType 
         </header>
 
         {/* Page Content */}
-        <main className="p-8">
+        <main className="p-4 md:p-8 pb-20 md:pb-8">
           {children}
         </main>
       </div>
