@@ -106,7 +106,7 @@ export class CkBTCService {
             break;
           
           case 'transfer':
-            // For transfers, check if user is sender or recipient
+            // Legacy transfer handling - check if user is sender or recipient
             if (tx.userId === principalId) {
               // User is sender - subtract amount and fees
               balanceSatoshis -= (tx.amountSatoshis + tx.feeSatoshis);
@@ -114,6 +114,17 @@ export class CkBTCService {
               // User is recipient - add amount (no fees for recipient)
               balanceSatoshis += tx.amountSatoshis;
             }
+            break;
+          
+          case 'transfer_out':
+            // User sent ckBTC - amount is already negative, fees are additional deduction
+            balanceSatoshis += tx.amountSatoshis; // Add negative amount (subtract)
+            balanceSatoshis -= tx.feeSatoshis;   // Subtract fees
+            break;
+          
+          case 'transfer_in':
+            // User received ckBTC - amount is positive, no fees for recipient
+            balanceSatoshis += tx.amountSatoshis;
             break;
           
           case 'exchange_buy':
@@ -385,12 +396,7 @@ export class CkBTCService {
       // Store transfer transaction if using satellite (SMS/USSD)
       if (useSatellite) {
         const satellite = this.getSatelliteConfig(useSatellite);
-        const transferDoc = {
-          id: transactionId,
-          userId: request.senderId,
-          type: 'transfer',
-          amountSatoshis: request.amountSatoshis,
-          recipient: request.recipient,
+        const baseTransactionData = {
           feeSatoshis: CKBTC_CONSTANTS.TRANSFER_FEE_SATOSHIS,
           status: 'completed',
           memo: request.memo,
@@ -398,15 +404,48 @@ export class CkBTCService {
           updatedAt: new Date().toISOString(),
         };
 
-        await setDoc({
-          collection: 'ckbtc_transactions',
-          doc: {
-            key: transactionId,
-            data: transferDoc,
-            version: 1n
-          },
-          satellite
-        });
+        // Create sender transaction (debit)
+        const senderTransferDoc = {
+          id: transactionId,
+          userId: request.senderId,
+          type: 'transfer_out',
+          amountSatoshis: -request.amountSatoshis, // Negative amount for sender (debit)
+          recipient: request.recipient,
+          ...baseTransactionData,
+        };
+
+        // Create recipient transaction (credit)
+        const recipientTransactionId = `${transactionId}_recv`;
+        const recipientTransferDoc = {
+          id: recipientTransactionId,
+          userId: request.recipient,
+          type: 'transfer_in',
+          amountSatoshis: request.amountSatoshis, // Positive amount for recipient (credit)
+          sender: request.senderId,
+          ...baseTransactionData,
+        };
+
+        // Store both transactions
+        await Promise.all([
+          setDoc({
+            collection: 'ckbtc_transactions',
+            doc: {
+              key: transactionId,
+              data: senderTransferDoc,
+              version: 1n
+            },
+            satellite
+          }),
+          setDoc({
+            collection: 'ckbtc_transactions',
+            doc: {
+              key: recipientTransactionId,
+              data: recipientTransferDoc,
+              version: 1n
+            },
+            satellite
+          })
+        ]);
       }
 
       return {

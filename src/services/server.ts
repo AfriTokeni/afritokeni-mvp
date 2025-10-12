@@ -67,7 +67,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 interface USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell';
   data: {
     amount?: number;
     withdrawAmount?: number;
@@ -770,6 +770,7 @@ Please select an option:
 2. BTC Rate
 3. Buy BTC
 4. Sell BTC
+5. Send BTC
 0. Back to Main Menu`);
     
     case '7':
@@ -1242,6 +1243,7 @@ Please select an option:
 2. BTC Rate
 3. Buy BTC
 4. Sell BTC
+5. Send BTC
 0. Back to Main Menu`);
   }
   
@@ -1266,6 +1268,11 @@ Please select an option:
       session.step = 1;
       return await handleBTCSell('', session);
     
+    case '5':
+      session.currentMenu = 'btc_send';
+      session.step = 1;
+      return continueSession('Send BTC\nEnter your 4-digit PIN:');
+    
     case '0':
       session.currentMenu = 'main';
       session.step = 0;
@@ -1277,6 +1284,7 @@ Please select an option:
 2. BTC Rate
 3. Buy BTC
 4. Sell BTC
+5. Send BTC
 0. Back to Main Menu`);
   }
 }
@@ -1969,6 +1977,277 @@ Thank you for using AfriTokeni!`);
       } catch (error) {
         console.error('Error processing Bitcoin sale:', error);
         return endSession('Error processing sale. Please try again later.');
+      }
+    }
+    
+    default:
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return handleBitcoin('', session);
+  }
+}
+
+async function handleBTCSend(input: string, session: USSDSession): Promise<string> {
+  const inputParts = input.split('*');
+  const currentInput = inputParts[inputParts.length - 1] || '';
+  
+  switch (session.step) {
+    case 1: {
+      // PIN verification step
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      // Verify PIN
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // PIN is correct, proceed to get balance and show send options
+      try {
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        // Get ckBTC balance with local currency equivalent
+        const balance = await CkBTCService.getBalanceWithLocalCurrency(
+          user.id, 
+          'UGX', 
+          true // Use satellite for SMS/USSD operations
+        );
+        
+        if (balance.balanceSatoshis <= 0) {
+          return endSession(`Insufficient ckBTC balance!
+
+Your balance: ₿${balance.balanceBTC} BTC
+≈ UGX ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
+
+You need ckBTC to send. Please buy some first.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+        session.data.userBalance = balance;
+        session.step = 2;
+        
+        return continueSession(`Send ckBTC
+
+Your Balance: ₿${balance.balanceBTC} BTC
+≈ UGX ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
+
+Enter recipient phone number:
+(Format: +256XXXXXXXXX)`);
+        
+      } catch (error) {
+        console.error('Error checking ckBTC balance:', error);
+        return endSession('Error checking balance. Please try again later.');
+      }
+    }
+    
+    case 2: {
+      // Recipient phone number entry
+      if (!currentInput) {
+        return continueSession('Enter recipient phone number:\n(Format: +256XXXXXXXXX)');
+      }
+      
+      // Validate and format phone number
+      let recipientPhone = currentInput.trim();
+      
+      // Add + if missing
+      if (!recipientPhone.startsWith('+')) {
+        if (recipientPhone.startsWith('256')) {
+          recipientPhone = '+' + recipientPhone;
+        } else if (recipientPhone.startsWith('0')) {
+          recipientPhone = '+256' + recipientPhone.substring(1);
+        } else if (recipientPhone.length === 9) {
+          recipientPhone = '+256' + recipientPhone;
+        } else {
+          return continueSession('Invalid phone number format.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+        }
+      }
+      
+      // Basic validation
+      if (!/^\+256[0-9]{9}$/.test(recipientPhone)) {
+        return continueSession('Invalid phone number format.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+      }
+      
+      // Check if recipient is same as sender
+      if (recipientPhone === `+${session.phoneNumber}`) {
+        return continueSession('Cannot send to yourself.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+      }
+      
+      // Check if recipient is registered
+      try {
+        const recipientUser = await DataService.findUserByPhoneNumber(recipientPhone);
+        if (!recipientUser) {
+          return continueSession(`Recipient ${recipientPhone} is not registered with AfriTokeni.\nThey need to register first.\n\nEnter different phone number:\n(Format: +256XXXXXXXXX)`);
+        }
+        
+        session.data.recipientPhone = recipientPhone;
+        session.data.recipientUser = recipientUser;
+        session.step = 3;
+        
+        return continueSession(`Recipient: ${recipientPhone}
+Name: ${recipientUser.firstName} ${recipientUser.lastName}
+
+Enter BTC amount to send:
+(Min: ₿0.00001, Max: ₿${session.data.userBalance.balanceBTC})`);
+        
+      } catch (error) {
+        console.error('Error checking recipient:', error);
+        return continueSession('Error checking recipient. Please try again.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+      }
+    }
+    
+    case 3: {
+      // BTC amount entry
+      const btcAmount = parseFloat(currentInput);
+      
+      if (isNaN(btcAmount) || btcAmount <= 0) {
+        return continueSession('Invalid amount.\nEnter BTC amount to send:\n(Min: ₿0.00001)');
+      }
+      
+      if (btcAmount < 0.00001) {
+        return continueSession('Minimum send: ₿0.00001 BTC\nEnter BTC amount to send:');
+      }
+      
+      const userBalance = session.data.userBalance;
+      if (btcAmount > parseFloat(userBalance.balanceBTC)) {
+        return continueSession(`Insufficient balance!
+Your balance: ₿${userBalance.balanceBTC} BTC
+Enter BTC amount to send:\n(Max: ₿${userBalance.balanceBTC})`);
+      }
+      
+      // Calculate fees and equivalent amounts
+      try {
+        const exchangeRate = await CkBTCService.getExchangeRate('UGX');
+        const btcRate = exchangeRate.rate;
+        const ugxEquivalent = btcAmount * btcRate;
+        const networkFee = 0.000001; // 1 satoshi network fee
+        const totalBTC = btcAmount + networkFee;
+        
+        if (totalBTC > parseFloat(userBalance.balanceBTC)) {
+          return continueSession(`Insufficient balance for amount + network fee!
+Amount: ₿${btcAmount.toFixed(8)} BTC
+Network fee: ₿${networkFee.toFixed(8)} BTC
+Total needed: ₿${totalBTC.toFixed(8)} BTC
+Your balance: ₿${userBalance.balanceBTC} BTC
+
+Enter smaller amount:`);
+        }
+        
+        session.data.sendAmount = btcAmount;
+        session.data.networkFee = networkFee;
+        session.data.totalBTC = totalBTC;
+        session.data.ugxEquivalent = ugxEquivalent;
+        session.step = 4;
+        
+        const recipientPhone = session.data.recipientPhone;
+        const recipientUser = session.data.recipientUser;
+        
+        return continueSession(`Send ckBTC Confirmation
+
+To: ${recipientPhone}
+Name: ${recipientUser.firstName} ${recipientUser.lastName}
+Amount: ₿${btcAmount.toFixed(8)} BTC
+≈ UGX ${ugxEquivalent.toLocaleString()}
+Network fee: ₿${networkFee.toFixed(8)} BTC
+Total: ₿${totalBTC.toFixed(8)} BTC
+
+Enter your PIN to confirm:`);
+        
+      } catch (error) {
+        console.error('Error calculating send details:', error);
+        return continueSession('Error calculating fees. Please try again.\nEnter BTC amount to send:');
+      }
+    }
+    
+    case 4: {
+      // Final PIN verification and send transaction
+      if (!/^\d{4}$/.test(currentInput)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
+      
+      const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // Process the BTC send transaction
+      try {
+        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        if (!user) {
+          return endSession('User not found. Please contact support.');
+        }
+        
+        const recipientUser = session.data.recipientUser;
+        const sendAmount = session.data.sendAmount;
+        const networkFee = session.data.networkFee;
+        const ugxEquivalent = session.data.ugxEquivalent;
+        
+        // Generate transaction ID for tracking
+        const transactionId = `btc_send_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        
+        // Use CkBTCService to process the send transaction
+        const sendResult = await CkBTCService.transfer({
+          senderId: user.id,
+          recipient: recipientUser.id,
+          amountSatoshis: CkBTCUtils.btcToSatoshis(sendAmount),
+          memo: `BTC send via USSD - ${transactionId}`
+        }, true); // Use satellite for SMS operations
+        
+        if (sendResult.success && sendResult.transactionId) {
+          // Send SMS notifications to both sender and recipient
+          const senderSMS = `AfriTokeni BTC Sent ✅
+
+Sent: ₿${sendAmount.toFixed(8)} BTC
+≈ UGX ${ugxEquivalent.toLocaleString()}
+To: ${session.data.recipientPhone}
+Transaction ID: ${sendResult.transactionId}
+Network fee: ₿${networkFee.toFixed(8)} BTC
+
+Your new balance will be updated shortly.`;
+
+          const recipientSMS = `AfriTokeni BTC Received 🎉
+
+Received: ₿${sendAmount.toFixed(8)} BTC
+≈ UGX ${ugxEquivalent.toLocaleString()}
+From: +${session.phoneNumber}
+Transaction ID: ${sendResult.transactionId}
+
+Check your balance by dialing *255#`;
+
+          try {
+            await sendSMSNotification(session.phoneNumber, senderSMS);
+            await sendSMSNotification(session.data.recipientPhone.replace('+', ''), recipientSMS);
+          } catch (smsError) {
+            console.error('SMS notification failed:', smsError);
+            // Continue even if SMS fails
+          }
+          
+          return endSession(`✅ BTC Sent Successfully!
+
+Sent: ₿${sendAmount.toFixed(8)} BTC
+≈ UGX ${ugxEquivalent.toLocaleString()}
+To: ${session.data.recipientPhone}
+Transaction ID: ${sendResult.transactionId}
+
+SMS notifications sent to both parties.
+
+Thank you for using AfriTokeni!`);
+        } else {
+          return endSession(`❌ Send failed: ${sendResult.error || 'Unknown error'}
+
+Please try again later.
+
+Thank you for using AfriTokeni!`);
+        }
+        
+      } catch (error) {
+        console.error('Error processing BTC send:', error);
+        return endSession('Error processing send. Please try again later.');
       }
     }
     
@@ -3200,6 +3479,9 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
         break;
       case 'btc_sell':
         response = await handleBTCSell(text, session);
+        break;
+      case 'btc_send':
+        response = await handleBTCSend(text, session);
         break;
       case 'usdc':
         response = await handleUSDC(text, session);

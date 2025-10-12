@@ -29,7 +29,9 @@ export interface CkBTCConfig {
 export type CkBTCTransactionType =
   | 'deposit'      // BTC → ckBTC (Bitcoin to ICP)
   | 'withdrawal'   // ckBTC → BTC (ICP to Bitcoin)
-  | 'transfer'     // ckBTC → ckBTC (ICP to ICP, instant!)
+  | 'transfer'     // ckBTC → ckBTC (ICP to ICP, instant!) - legacy
+  | 'transfer_out' // ckBTC sent to another user (debit)
+  | 'transfer_in'  // ckBTC received from another user (credit)
   | 'exchange_buy' // Local currency → ckBTC via agent
   | 'exchange_sell'; // ckBTC → Local currency via agent
 
