@@ -142,9 +142,12 @@ const AgentStep: React.FC<AgentStepProps> = ({
       setIsLoading(true);
       try {
         if (isDemoMode) {
-          // Load demo agents
-          const demoAgents: any[] = [];
-          setAgents(demoAgents);
+          // Load demo agents from agents.json
+          console.log('Loading agents from /data/agents.json...');
+          const response = await fetch('/data/agents.json');
+          const agentsData = await response.json();
+          console.log('Loaded agents from JSON:', agentsData);
+          setAgents(agentsData);
         } else {
           const [lat, lng] = userLocation;
           const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
@@ -400,23 +403,22 @@ const AgentStep: React.FC<AgentStepProps> = ({
               </MapContainer>
             </div>
 
-            {/* Custom Popup Overlay */}
+            {/* Custom Popup Overlay - Mobile Optimized */}
             {popupAgent && (
-              <div
-                className="fixed z-[10000] bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm"
+              <div className="fixed inset-x-0 bottom-0 z-[10000] bg-white rounded-t-2xl shadow-2xl border-t border-gray-200 p-4 sm:p-6 max-h-[70vh] overflow-y-auto sm:absolute sm:inset-auto sm:rounded-lg sm:max-w-sm sm:bottom-auto"
                 style={{
-                  left: `${popupPosition.x - 200}px`, // Center popup relative to marker
-                  top: `${popupPosition.y - 20}px`,
-                  transform: 'translateY(-100%)'
+                  left: window.innerWidth >= 640 ? `${popupPosition.x - 200}px` : undefined,
+                  top: window.innerWidth >= 640 ? `${popupPosition.y - 20}px` : undefined,
+                  transform: window.innerWidth >= 640 ? 'translateY(-100%)' : undefined
                 }}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-gray-900">Agent Details</h4>
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-semibold text-gray-900 text-base sm:text-sm">Agent Details</h4>
                   <button
                     onClick={closePopup}
-                    className="text-gray-400 hover:text-gray-600 ml-2"
+                    className="text-gray-400 hover:text-gray-600 ml-2 p-1"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5 sm:h-4 sm:w-4" />
                   </button>
                 </div>
                 {renderAgentDetails(popupAgent)}
@@ -424,7 +426,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
             )}
           </div>
         ) : viewMode === 'list' ? (
-          <div className="w-full h-64 sm:h-80 lg:h-[500px] overflow-y-auto">
+          <div className="w-full h-96 sm:h-[500px] lg:h-[600px] overflow-y-auto">
             {availableAgents.length === 0 ? (
               <div className="p-6 sm:p-8 text-center text-gray-500">
                 <p className="font-medium text-xs sm:text-sm lg:text-base">No available agents at the moment.</p>

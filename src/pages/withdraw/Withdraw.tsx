@@ -7,6 +7,7 @@ import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { DataService } from '../../services/dataService';
 import { useDemoMode } from '../../context/DemoModeContext';
+import { formatCurrencyAmount } from '../../types/currency';
 
 import type { WithdrawStep } from './types';
 import { Agent as DBAgent } from '../../services/dataService';
@@ -43,6 +44,8 @@ const WithdrawPage: React.FC = () => {
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingAgent, setPendingAgent] = useState<DBAgent | null>(null);
 
   // Get user's preferred currency or default to UGX (same as dashboard)
   const currentUser = user.user;
@@ -87,7 +90,15 @@ const WithdrawPage: React.FC = () => {
     return code;
   };
 
-  const handleAgentSelect = async (agent: DBAgent) => {
+  const handleAgentSelect = (agent: DBAgent) => {
+    // Show confirmation modal first
+    setPendingAgent(agent);
+    setShowConfirmModal(true);
+  };
+
+  const confirmWithdrawal = async () => {
+    if (!pendingAgent) return;
+    
     if (!user.user?.id && !isDemoMode) {
       setTransactionError('User not authenticated');
       return;
@@ -95,6 +106,7 @@ const WithdrawPage: React.FC = () => {
 
     setIsCreatingTransaction(true);
     setTransactionError(null);
+    setShowConfirmModal(false);
 
     try {
       // Generate withdrawal code
@@ -104,7 +116,7 @@ const WithdrawPage: React.FC = () => {
         // Create withdrawal request in Juno backend
         await DataService.createWithdrawalRequest(
           user.user.id,
-          agent.id,
+          pendingAgent.id,
           finalLocalAmount,
           userCurrency,
           code,
@@ -114,7 +126,7 @@ const WithdrawPage: React.FC = () => {
         // Demo mode - just simulate delay
         await new Promise(resolve => setTimeout(resolve, 500));
         console.log('🎭 Demo withdrawal created:', {
-          agent: agent.businessName,
+          agent: pendingAgent.businessName,
           amount: finalLocalAmount,
           currency: userCurrency,
           code
@@ -122,7 +134,7 @@ const WithdrawPage: React.FC = () => {
       }
 
       // Set selected agent and proceed to confirmation
-      setSelectedAgent(agent);
+      setSelectedAgent(pendingAgent);
       setWithdrawalCode(code);
       setCurrentStep('confirmation');
     } catch (error) {
@@ -130,6 +142,7 @@ const WithdrawPage: React.FC = () => {
       setTransactionError('Failed to create withdrawal. Please try again.');
     } finally {
       setIsCreatingTransaction(false);
+      setPendingAgent(null);
     }
   };
 
@@ -151,8 +164,8 @@ const WithdrawPage: React.FC = () => {
         {/* Step Indicator */}
         <div className="mb-8 flex items-center justify-center">
           <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
-            <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : currentStep === 'agent' || currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : currentStep === 'agent' || currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+            <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : 'text-green-600'}`}>
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : 'bg-green-600 text-white'}`}>
                 1
               </div>
               <span className="text-xs font-medium whitespace-nowrap">Enter Amount</span>
@@ -231,6 +244,61 @@ const WithdrawPage: React.FC = () => {
             withdrawalCode={withdrawalCode}
             onMakeAnotherWithdrawal={handleMakeAnotherWithdrawal}
           />
+        )}
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && pendingAgent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+              <h3 className="text-xl font-bold text-gray-900">Confirm Withdrawal</h3>
+              
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p className="text-sm text-amber-800 font-medium mb-2">⚠️ Legal Binding Agreement</p>
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  By confirming this withdrawal, you are entering into a legally binding agreement between you and <strong>{pendingAgent.businessName}</strong>. 
+                  You agree to meet the agent at the specified location to collect your cash withdrawal of <strong>{formatCurrencyAmount(finalLocalAmount, userCurrency as any)}</strong>.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Agent:</span>
+                  <span className="font-medium text-gray-900">{pendingAgent.businessName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Location:</span>
+                  <span className="font-medium text-gray-900">{pendingAgent.location.city}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Amount:</span>
+                  <span className="font-medium text-gray-900">{formatCurrencyAmount(finalLocalAmount, userCurrency as any)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Fee:</span>
+                  <span className="font-medium text-red-600">{formatCurrencyAmount(withdrawalFee, userCurrency as any)}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    setPendingAgent(null);
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmWithdrawal}
+                  disabled={isCreatingTransaction}
+                  className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isCreatingTransaction ? 'Processing...' : 'I Agree & Confirm'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
     </div>
   );
