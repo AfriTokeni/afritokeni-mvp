@@ -20,6 +20,7 @@ import { CkBTCBalanceCard } from "../components/CkBTCBalanceCard";
 import { CkUSDCBalanceCard } from "../components/CkUSDCBalanceCard";
 import { AgentOnboardingModal, AgentOnboardingData } from "../components/AgentOnboardingModal";
 import { AgentKYCBanner } from "../components/AgentKYCBanner";
+import { DemoModeModal } from "../components/DemoModeModal";
 import { useAuthentication } from "../context/AuthenticationContext";
 
 const AgentDashboard: React.FC = () => {
@@ -44,6 +45,7 @@ const AgentDashboard: React.FC = () => {
 
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showKYCBanner, setShowKYCBanner] = useState(true);
   const [kycStatus, setKycStatus] = useState<'pending' | 'verified' | 'rejected' | 'not_started'>('not_started');
@@ -92,6 +94,15 @@ const AgentDashboard: React.FC = () => {
     setShowKYCBanner(false); // Hide banner after completion
   };
 
+  // Show demo modal on first visit
+  useEffect(() => {
+    const hasSeenDemoModal = localStorage.getItem('afritokeni_agent_seen_demo_modal');
+    if (!hasSeenDemoModal) {
+      setShowDemoModal(true);
+      localStorage.setItem('afritokeni_agent_seen_demo_modal', 'true');
+    }
+  }, []);
+
   // Load saved profile data and KYC status
   useEffect(() => {
     // In demo mode, auto-verify KYC and hide everything
@@ -119,15 +130,15 @@ const AgentDashboard: React.FC = () => {
       }
     }
     
+    // Only show onboarding/banner AFTER demo modal has been seen
+    const hasSeenDemoModal = localStorage.getItem('afritokeni_agent_seen_demo_modal');
+    if (!hasSeenDemoModal) return; // Wait for demo modal first
+
     // Show onboarding on first visit (only if NOT in demo mode)
     const hasSeenOnboarding = localStorage.getItem('agent_onboarding_seen');
     if (!hasSeenOnboarding && !savedProfileData) {
-      // Delay showing onboarding to let user see demo mode toggle first
-      const timer = setTimeout(() => {
-        setShowOnboarding(true);
-      }, 500);
+      setShowOnboarding(true);
       localStorage.setItem('agent_onboarding_seen', 'true');
-      return () => clearTimeout(timer);
     }
   }, [isDemoMode]);
 
@@ -186,6 +197,13 @@ const AgentDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Demo Mode Modal */}
+      <DemoModeModal 
+        isOpen={showDemoModal} 
+        onClose={() => setShowDemoModal(false)}
+        userType="agent"
+      />
+
       {/* Onboarding Modal */}
       <AgentOnboardingModal
         isOpen={showOnboarding}
