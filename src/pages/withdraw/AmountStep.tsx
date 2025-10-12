@@ -36,9 +36,9 @@ const AmountStep: React.FC<AmountStepProps> = ({
   // Use the user's preferred currency passed as prop (consistent with dashboard)
   const selectedCurrency = preferredCurrency;
 
-  // Calculate 1% fee
+  // Calculate 0.5% platform fee (per whitepaper)
   const calculateFee = (amount: number): number => {
-    return Math.round(amount * 0.01);
+    return Math.round(amount * 0.005);
   };
 
   // Validate withdrawal amount
@@ -47,12 +47,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
     const totalRequired = amount + fee;
     
     if (totalRequired > userBalance) {
-      setError(`Insufficient balance. You need ${formatCurrencyAmount(totalRequired, selectedCurrency as AfricanCurrency)} (including 1% fee) but only have ${formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency)}`);
-      return false;
-    }
-    
-    if (amount < 1000) {
-      setError(`Minimum withdrawal amount is ${formatCurrencyAmount(1000, selectedCurrency as AfricanCurrency)}`);
+      setError(`Insufficient balance. You need ${formatCurrencyAmount(totalRequired, selectedCurrency as AfricanCurrency)} (including 0.5% fee) but only have ${formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency)}`);
       return false;
     }
     
@@ -324,7 +319,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
                 </div>
               )}
               <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-700">Transaction Fee (1%):</span>
+                <span className="font-medium text-gray-700">Transaction Fee (0.5%):</span>
                 <span className="font-mono font-bold text-red-600 text-xs sm:text-sm lg:text-base">{formatCurrencyAmount(currentFee, selectedCurrency as AfricanCurrency)}</span>
               </div>
               <div className="pt-2 border-t border-gray-200">

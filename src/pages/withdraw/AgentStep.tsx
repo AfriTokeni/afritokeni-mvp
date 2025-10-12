@@ -144,10 +144,30 @@ const AgentStep: React.FC<AgentStepProps> = ({
         if (isDemoMode) {
           // Load demo agents from agents.json
           console.log('Loading agents from /data/agents.json...');
-          const response = await fetch('/data/agents.json');
-          const agentsData = await response.json();
-          console.log('Loaded agents from JSON:', agentsData);
-          setAgents(agentsData);
+          const [agentsResponse, reviewsResponse] = await Promise.all([
+            fetch('/data/agents.json'),
+            fetch('/data/agent-reviews.json')
+          ]);
+          const agentsData = await agentsResponse.json();
+          const reviewsData = await reviewsResponse.json();
+          
+          // Attach reviews and ratings to agents
+          const agentsWithReviews = agentsData.map((agent: any) => {
+            const agentReviews = reviewsData.filter((r: any) => r.agentId === agent.id);
+            const avgRating = agentReviews.length > 0
+              ? agentReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / agentReviews.length
+              : 0;
+            
+            return {
+              ...agent,
+              reviews: agentReviews.slice(0, 3), // Show top 3 reviews
+              rating: avgRating,
+              reviewCount: agentReviews.length
+            };
+          });
+          
+          console.log('Loaded agents with reviews:', agentsWithReviews);
+          setAgents(agentsWithReviews);
         } else {
           const [lat, lng] = userLocation;
           const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
@@ -258,20 +278,54 @@ const AgentStep: React.FC<AgentStepProps> = ({
         </div>
       </div>
 
-      {/* Rating (Mock) */}
-      <div className="flex items-center mb-4">
-        <div className="flex items-center">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              className={`h-4 w-4 ${
-                star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-              }`}
-            />
-          ))}
+      {/* Rating */}
+      {agent.rating && agent.reviewCount ? (
+        <div className="mb-4">
+          <div className="flex items-center mb-2">
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star <= Math.round(agent.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="ml-2 text-sm text-gray-600">
+              {agent.rating.toFixed(1)} ({agent.reviewCount} reviews)
+            </span>
+          </div>
+          
+          {/* Recent Reviews */}
+          {agent.reviews && agent.reviews.length > 0 && (
+            <div className="space-y-2 mt-3 max-h-40 overflow-y-auto">
+              {agent.reviews.map((review: any) => (
+                <div key={review.id} className="bg-gray-50 rounded-lg p-2 text-xs">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-gray-900">{review.userName}</span>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-3 w-3 ${
+                            star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-gray-600 line-clamp-2">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
-      </div>
+      ) : (
+        <div className="flex items-center mb-4 text-sm text-gray-500">
+          <span>No reviews yet</span>
+        </div>
+      )}
 
       {/* Services */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -486,23 +540,57 @@ const AgentStep: React.FC<AgentStepProps> = ({
                       </div>
                     </div>
 
+                    {/* Rating Preview */}
+                    {agent.rating && agent.reviewCount && (
+                      <div className="flex items-center mb-3">
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`h-4 w-4 ${
+                                star <= Math.round(agent.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="ml-2 text-sm text-gray-600">
+                          {agent.rating.toFixed(1)} ({agent.reviewCount} reviews)
+                        </span>
+                      </div>
+                    )}
+
                     {/* Expandable Details */}
                     {selectedAgent?.id === agent.id && (
                       <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
-                        {/* Rating */}
-                        <div className="flex items-center">
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-4 w-4 ${
-                                  star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                }`}
-                              />
-                            ))}
+                        {/* Recent Reviews */}
+                        {agent.reviews && agent.reviews.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-gray-700 mb-2">Recent Reviews</p>
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                              {agent.reviews.map((review: any) => (
+                                <div key={review.id} className="bg-gray-50 rounded-lg p-3 text-xs">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-medium text-gray-900">{review.userName}</span>
+                                    <div className="flex items-center">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                          key={star}
+                                          className={`h-3 w-3 ${
+                                            star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <p className="text-gray-600">{review.comment}</p>
+                                  <p className="text-gray-400 mt-1">
+                                    {new Date(review.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                          <span className="ml-2 text-sm text-gray-600">4.0 (23 reviews)</span>
-                        </div>
+                        )}
 
                         {/* Services */}
                         <div className="flex flex-wrap gap-2">

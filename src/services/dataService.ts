@@ -135,6 +135,17 @@ export interface UserBalance {
   lastUpdated: Date;
 }
 
+export interface AgentReview {
+  id: string;
+  agentId: string;
+  userId: string;
+  userName: string;
+  rating: number; // 1-5
+  comment: string;
+  transactionId?: string;
+  createdAt: Date;
+}
+
 export interface Agent {
   id: string;
   userId: string;
@@ -155,6 +166,9 @@ export interface Agent {
   digitalBalance: number;
   commissionRate: number;
   createdAt: Date;
+  rating?: number; // Average rating
+  reviewCount?: number; // Total number of reviews
+  reviews?: AgentReview[]; // Recent reviews
 }
 
 export interface SMSMessage {

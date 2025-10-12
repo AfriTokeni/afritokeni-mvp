@@ -127,7 +127,7 @@ export const useAfriTokeni = () => {
   }, [user?.user?.id, user?.agent?.id, isDemoMode, loadUserData]);
 
   const calculateFee = (amount: number): number => {
-    return Math.round(amount * 0.01); // 1% fee
+    return Math.round(amount * 0.005); // 0.5% platform fee per whitepaper
   };
 
   const sendMoney = async (

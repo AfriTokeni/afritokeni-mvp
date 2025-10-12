@@ -81,9 +81,9 @@ const SendMoney: React.FC = () => {
     return displayBalance;
   };
 
-  // Calculate fee (1%)
+  // Calculate fee (0.5% platform fee per whitepaper)
   const calculateFee = (amount: number): number => {
-    return Math.round(amount * 0.01);
+    return Math.round(amount * 0.005);
   };
 
   const handleAmountChange = (value: string) => {
@@ -384,7 +384,7 @@ const SendMoney: React.FC = () => {
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Fee (1%):</span>
+                  <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium text-orange-600">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
@@ -529,7 +529,7 @@ const SendMoney: React.FC = () => {
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Fee (1%):</span>
+                  <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium text-orange-600">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
@@ -593,7 +593,7 @@ const SendMoney: React.FC = () => {
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Fee:</span>
+                  <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
               </div>
