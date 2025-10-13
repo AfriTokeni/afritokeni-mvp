@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone, Send } from 'lucide-react';
+import { Smartphone, Send, Globe } from 'lucide-react';
 import PublicHeader from '../components/PublicHeader';
 import PublicFooter from '../components/PublicFooter';
+import { CentralizedDemoService } from '../services/centralizedDemoService';
 
 interface Message {
   type: 'sent' | 'received';
@@ -12,77 +13,366 @@ interface Message {
 
 const USSDPlayground: React.FC = () => {
   const [phoneNumber] = useState('+256 700 123 456');
+  const [demoUserId] = useState('demo_ussd_user');
   const [inputCommand, setInputCommand] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'received',
-      text: 'Welcome to AfriTokeni! 🎉\n\nDial *AFRI# to get started or send HELP for commands.',
+      text: '🌍 USSD Demo Mode\n\nWelcome to AfriTokeni!\n\nType *384*22948# to start\nor type 4 for Help',
       timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const ussdCommands = [
-    { cmd: '*AFRI#', desc: 'Main menu (USSD)', category: 'Basic' },
-    { cmd: 'BAL', desc: 'Check balance', category: 'Basic' },
-    { cmd: 'SEND +256... 10000', desc: 'Send money', category: 'Transfers' },
-    { cmd: 'CKBTC BAL', desc: 'ckBTC balance', category: 'Bitcoin' },
-    { cmd: 'CKBTC SEND', desc: 'Send ckBTC', category: 'Bitcoin' },
-    { cmd: 'USDC BAL', desc: 'ckUSDC balance', category: 'Stablecoin' },
-    { cmd: 'USDC SEND', desc: 'Send ckUSDC', category: 'Stablecoin' },
-    { cmd: 'WITHDRAW 50000', desc: 'Cash withdrawal', category: 'Cash' },
-    { cmd: 'AGENTS', desc: 'Find nearby agents', category: 'Agents' },
-    { cmd: 'HISTORY', desc: 'Transaction history', category: 'Basic' },
-    { cmd: 'HELP', desc: 'Show all commands', category: 'Basic' }
-  ];
+  // Initialize demo user
+  useEffect(() => {
+    const init = async () => {
+      await CentralizedDemoService.initializeUser(demoUserId, 'UGX');
+      setIsInitialized(true);
+    };
+    init();
+  }, [demoUserId]);
 
-  const processCommand = (cmd: string): string => {
+  // Auto-scroll to bottom when messages change (only scroll the messages container, not the page)
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+
+  const processCommand = async (cmd: string): Promise<string> => {
     const upperCmd = cmd.toUpperCase().trim();
     
-    if (upperCmd === 'BAL' || upperCmd === 'BALANCE') {
-      return `💰 Your Balance:\n\nUGX: 125,000\nckBTC: 0.00234\nckUSDC: $50.00\n\nSend SEND to transfer money`;
+    // Ensure initialization is complete
+    if (!isInitialized) {
+      return '⏳ Initializing... Please wait.';
     }
     
-    if (upperCmd === 'CKBTC BAL') {
-      return `₿ ckBTC Balance:\n\n0.00234 BTC\n≈ UGX 325,000\n\nRate: 1 BTC = 138,500,000 UGX\n\nInstant transfers <1 sec!`;
+    // Get demo balance
+    let balance = await CentralizedDemoService.getBalance(demoUserId);
+    
+    // If still null, try to initialize again
+    if (!balance) {
+      console.log('Balance not found, re-initializing...');
+      balance = await CentralizedDemoService.initializeUser(demoUserId, 'UGX');
     }
     
-    if (upperCmd === 'USDC BAL' || upperCmd === 'USDC BALANCE') {
-      return `💵 ckUSDC Balance:\n\n$50.00 USDC\n≈ UGX 187,500\n\nRate: 1 USD = 3,750 UGX\n\nStable value guaranteed!`;
+    if (!balance) {
+      return '❌ Error loading balance. Please try again.';
     }
     
-    if (upperCmd.startsWith('CKBTC SEND')) {
-      return `✅ ckBTC Transfer:\n\nTo: Principal ID\nAmount: 0.001 BTC\nFee: ~$0.01\nTime: <1 second\n\nReply YES to confirm`;
+    const transactions = await CentralizedDemoService.getTransactions(demoUserId);
+
+    // Main menu
+    if (upperCmd === '*384*22948#') {
+      return `📱 AfriTokeni Menu
+
+Please select an option:
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. Help`;
     }
-    
-    if (upperCmd.startsWith('USDC SEND')) {
-      return `✅ ckUSDC Transfer:\n\nTo: Principal ID\nAmount: $10.00\nFee: ~$0.01\nTime: <1 second\n\nReply YES to confirm`;
+
+    // Option 1: Local Currency
+    if (upperCmd === '1') {
+      return `💵 Local Currency (UGX)
+
+Please select an option:
+11. Send Money
+12. Check Balance
+13. Deposit
+14. Withdraw
+15. Transactions
+16. Find Agent
+0. Back to Main Menu`;
     }
-    
-    if (upperCmd.startsWith('SEND')) {
-      return `✅ Money Transfer:\n\nTo: +256 700 XXX XXX\nAmount: UGX 10,000\nFee: UGX 0 (free!)\n\nReply YES to confirm`;
+
+    // Local Currency - Check Balance (12)
+    if (upperCmd === '12' || upperCmd === 'BAL') {
+      return `💰 Your Balance
+
+UGX: ${balance.digitalBalance.toLocaleString()}
+ckBTC: ${(balance.ckBTCBalance / 100000000).toFixed(8)} BTC
+ckUSDC: $${(balance.ckUSDCBalance / 100).toFixed(2)}
+
+Thank you for using AfriTokeni!`;
     }
-    
-    if (upperCmd.startsWith('WITHDRAW')) {
-      return `💵 Cash Withdrawal:\n\nAmount: UGX 50,000\nNearest agent: 2.3 km away\nFee: 3% (UGX 1,500)\n\nReply YES to get code`;
+
+    // Option 2: Bitcoin (ckBTC)
+    if (upperCmd === '2') {
+      return `₿ Bitcoin (ckBTC)
+
+Please select an option:
+21. Check Balance
+22. Bitcoin Rate
+23. Buy Bitcoin
+24. Sell Bitcoin
+25. Send Bitcoin
+0. Back to Main Menu`;
     }
-    
-    if (upperCmd === 'AGENTS') {
-      return `📍 Nearby Agents:\n\n1. Kampala Shop - 2.3km\n2. Main Street - 4.1km\n3. City Center - 5.8km\n\nSend number for details`;
+
+    if (upperCmd === '21' || upperCmd === 'BTC BAL' || upperCmd === 'CKBTC BAL') {
+      const btc = (balance.ckBTCBalance / 100000000).toFixed(8);
+      const ugxValue = balance.ckBTCBalance * 1385; // ~138.5M UGX per BTC
+      return `₿ Your ckBTC Balance
+
+${btc} BTC
+≈ UGX ${ugxValue.toLocaleString()}
+
+Current Rate: 1 BTC = 138,500,000 UGX
+
+Instant transfers <1 second!
+
+Thank you for using AfriTokeni!`;
     }
-    
+
+    if (upperCmd === '22' || upperCmd === 'BTC RATE') {
+      return `₿ Bitcoin Exchange Rate
+
+1 BTC = 138,500,000 UGX
+1 UGX = 0.00000000722 BTC
+
+Last Updated: ${new Date().toLocaleTimeString()}
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Buy Bitcoin (23)
+    if (upperCmd === '23') {
+      return `₿ Buy Bitcoin
+
+Enter UGX amount to spend:
+Example: 100000
+
+Agent will provide Bitcoin at current rate.
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Sell Bitcoin (24)
+    if (upperCmd === '24') {
+      return `₿ Sell Bitcoin
+
+Enter Bitcoin amount to sell (satoshis):
+Example: 50000
+
+Agent will pay you UGX at current rate.
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Send Bitcoin (25)
+    if (upperCmd === '25') {
+      return `₿ Send Bitcoin
+
+To: Principal ID or Phone
+Amount: 10000 satoshis
+Fee: <$0.01
+Time: <1 second
+
+Reply YES to confirm
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Option 3: USDC (ckUSDC)
+    if (upperCmd === '3') {
+      return `💵 USDC (ckUSDC)
+
+Please select an option:
+31. Check Balance
+32. USDC Rate
+33. Buy USDC
+34. Sell USDC
+35. Send USDC
+0. Back to Main Menu`;
+    }
+
+    if (upperCmd === '31' || upperCmd === 'USDC BAL') {
+      const usdc = (balance.ckUSDCBalance / 100).toFixed(2);
+      const ugxValue = balance.ckUSDCBalance * 37.5; // 1 USD = 3750 UGX
+      return `💵 Your ckUSDC Balance
+
+$${usdc} USDC
+≈ UGX ${ugxValue.toLocaleString()}
+
+Current Rate: 1 USDC = 3,750 UGX
+
+Stable value guaranteed!
+
+Thank you for using AfriTokeni!`;
+    }
+
+    if (upperCmd === '32' || upperCmd === 'USDC RATE') {
+      return `💵 USDC Exchange Rate
+
+1 USDC = 3,750 UGX
+1 UGX = $0.000267 USDC
+
+Last Updated: ${new Date().toLocaleTimeString()}
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Buy USDC (33)
+    if (upperCmd === '33') {
+      return `💵 Buy USDC
+
+Enter UGX amount to spend:
+Example: 100000
+
+Agent will provide USDC at current rate.
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Sell USDC (34)
+    if (upperCmd === '34') {
+      return `💵 Sell USDC
+
+Enter USDC amount to sell:
+Example: 50
+
+Agent will pay you UGX at current rate.
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Send USDC (35)
+    if (upperCmd === '35') {
+      return `💵 Send USDC
+
+To: Principal ID or Phone
+Amount: $10.00 USDC
+Fee: <$0.01
+Time: <1 second
+
+Reply YES to confirm
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Option 4: Help
+    if (upperCmd === '4' || upperCmd === 'HELP') {
+      return `📖 AfriTokeni Help
+
+Local Currency: Send, deposit, withdraw UGX
+Bitcoin: Buy, sell, send ckBTC
+USDC: Buy, sell, send USDC stablecoin
+
+For support: Call +256-700-AFRI (2374)
+Visit: afritokeni.com
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Back to Main Menu (0)
+    if (upperCmd === '0') {
+      return `📱 AfriTokeni Menu
+
+Please select an option:
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. Help`;
+    }
+
+    // Transaction history
     if (upperCmd === 'HISTORY') {
-      return `📊 Recent Transactions:\n\n1. Sent UGX 5,000 - Today\n2. Received UGX 10,000 - Yesterday\n3. ckBTC Transfer - 2 days ago\n\nSend number for details`;
+      const recent = transactions.slice(0, 3);
+      let history = '📊 Recent Transactions\n\n';
+      recent.forEach((tx, i) => {
+        history += `${i + 1}. ${tx.type} UGX ${tx.amount.toLocaleString()}\n   ${new Date(tx.createdAt).toLocaleDateString()}\n`;
+      });
+      return history + '\nThank you for using AfriTokeni!';
     }
-    
-    if (upperCmd === '*AFRI#' || upperCmd === 'AFRI') {
-      return `📱 AfriTokeni Menu:\n\n1. Check Balance\n2. Send Money\n3. ckBTC (ICP Bitcoin)\n4. ckUSDC (Stablecoin)\n5. Cash Out\n6. Agents\n7. History\n\nReply with number`;
+
+    // Find Agent (Option 16)
+    if (upperCmd === '16' || upperCmd === 'AGENTS') {
+      return `📍 Find Agent
+
+Available agents near you:
+
+1. Kampala Central - 2.3km
+   ⭐ 4.8 (23 reviews)
+   Services: Deposit, Withdraw, Bitcoin
+
+2. Nakawa Market - 4.1km
+   ⭐ 4.5 (15 reviews)
+   Services: Deposit, Withdraw
+
+3. City Center - 5.8km
+   ⭐ 4.9 (45 reviews)
+   Services: All services
+
+Reply with number for details.
+
+Thank you for using AfriTokeni!`;
     }
-    
-    if (upperCmd === 'HELP') {
-      return `📖 USSD Commands:\n\nBAL - Check balance\nSEND - Transfer money\nCKBTC BAL - Bitcoin balance\nUSDC BAL - Stablecoin balance\nWITHDRAW - Cash out\nAGENTS - Find agents\n*AFRI# - Main menu`;
+
+    // Transaction History (Option 15)
+    if (upperCmd === '15' || upperCmd === 'HISTORY') {
+      const recent = transactions.slice(0, 3);
+      let history = '📊 Transaction History\n\n';
+      recent.forEach((tx, i) => {
+        history += `${i + 1}. ${tx.type} UGX ${tx.amount.toLocaleString()}\n   ${new Date(tx.createdAt).toLocaleDateString()}\n`;
+      });
+      return history + '\nReply with number for details.\n\nThank you for using AfriTokeni!';
     }
-    
-    return `❓ Unknown command.\n\nSend HELP for available commands or dial *AFRI# for menu.`;
+
+    // Withdraw (Option 14)
+    if (upperCmd === '14' || upperCmd.startsWith('WITHDRAW')) {
+      return `💵 Cash Withdrawal
+
+Amount: UGX 50,000
+Nearest agent: 2.3 km away
+Fee: 3% (UGX 1,500)
+
+Code: WD-${Math.random().toString(36).substr(2, 6).toUpperCase()}
+
+Show this code to the agent to collect cash.
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Send money (Option 11)
+    if (upperCmd === '11' || upperCmd.startsWith('SEND')) {
+      return `✅ Money Transfer
+
+To: +256 700 XXX XXX
+Amount: UGX 10,000
+Fee: UGX 0 (free!)
+
+Reply YES to confirm
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Deposit (Option 13)
+    if (upperCmd === '13' || upperCmd.startsWith('DEPOSIT')) {
+      return `💰 Deposit Money
+
+Find nearest agent to deposit cash.
+
+Agent: Kampala Central - 2.3km
+Fee: 0% (free!)
+
+Show this code to agent:
+DEP-${Math.random().toString(36).substr(2, 6).toUpperCase()}
+
+Thank you for using AfriTokeni!`;
+    }
+
+    // Default
+    return `❓ Unknown command.
+
+Type HELP for commands or *384*22948# for main menu.
+
+Thank you for using AfriTokeni!`;
   };
 
   const handleSendMessage = () => {
@@ -101,8 +391,8 @@ const USSDPlayground: React.FC = () => {
     setMessages(prev => [...prev, sentMessage]);
 
     // Simulate response delay
-    setTimeout(() => {
-      const response = processCommand(inputCommand);
+    setTimeout(async () => {
+      const response = await processCommand(inputCommand);
       const receivedMessage: Message = {
         type: 'received',
         text: response,
@@ -114,8 +404,6 @@ const USSDPlayground: React.FC = () => {
     setInputCommand('');
   };
 
-  const quickCommands = ['BAL', 'CKBTC BAL', 'USDC BAL', '*AFRI#', 'HELP'];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <PublicHeader />
@@ -123,9 +411,13 @@ const USSDPlayground: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Hero */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <Globe className="w-4 h-4" />
+              🌍 Demo Mode - Works Worldwide
+            </div>
+            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-4 ml-2">
               <Smartphone className="w-4 h-4" />
-              Interactive USSD Demo
+              🇺🇬 Real USSD: Uganda Only
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
               Try USSD Banking
@@ -133,100 +425,123 @@ const USSDPlayground: React.FC = () => {
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Experience how AfriTokeni works on any phone - no internet required. Try the commands below!
             </p>
+            <div className="mt-6 bg-red-50 border-2 border-red-300 rounded-lg p-4 max-w-2xl mx-auto">
+              <h3 className="font-bold text-red-900 mb-2 text-sm sm:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
+              <p className="text-xs sm:text-sm text-red-800 mb-2">
+                <strong>Uganda:</strong> Dial <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*384*22948#</code> for real USSD!
+              </p>
+              <p className="text-xs text-red-700">
+                <strong>Other countries:</strong> Coming soon! Use playground to test.
+              </p>
+            </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Phone Simulator */}
-            <div>
-              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-gray-900 max-w-sm mx-auto">
-                {/* Phone Header */}
-                <div className="bg-gray-900 text-white px-6 py-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Smartphone className="w-5 h-5" />
-                    <span className="font-semibold">22948</span>
-                  </div>
-                  <span className="text-sm text-gray-400">{phoneNumber}</span>
-                </div>
-
-                {/* Messages */}
-                <div className="h-96 overflow-y-auto bg-gray-50 p-4 space-y-4">
-                  {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.type === 'sent' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs ${msg.type === 'sent' ? 'bg-blue-600 text-white' : 'bg-white text-gray-900'} rounded-2xl px-4 py-3 shadow-sm`}>
-                        <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                        <p className={`text-xs mt-1 ${msg.type === 'sent' ? 'text-blue-200' : 'text-gray-500'}`}>
-                          {msg.timestamp}
-                        </p>
+          {/* Phone Simulator - Centered */}
+          <div className="max-w-md mx-auto">
+            <div className="bg-black rounded-[3rem] shadow-2xl overflow-hidden p-3">
+                {/* Phone Notch */}
+                <div className="bg-gray-900 rounded-[2.5rem] overflow-hidden">
+                  {/* Status Bar */}
+                  <div className="bg-gray-900 px-6 py-2 flex items-center justify-between text-white text-xs">
+                    <span>9:21</span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-3 border border-white rounded-sm"></div>
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                      <div className="flex gap-0.5">
+                        <div className="w-0.5 h-3 bg-white"></div>
+                        <div className="w-0.5 h-3 bg-white"></div>
+                        <div className="w-0.5 h-3 bg-white"></div>
+                        <div className="w-0.5 h-3 bg-white"></div>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {/* Input */}
-                <div className="bg-white border-t border-gray-200 p-4">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={inputCommand}
-                      onChange={(e) => setInputCommand(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Type USSD command..."
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <button
-                      onClick={handleSendMessage}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
-                    >
-                      <Send className="w-5 h-5" />
-                    </button>
                   </div>
-                </div>
-              </div>
+                  {/* USSD Header */}
+                  <div className="bg-gray-800 text-white px-6 py-3 flex items-center justify-between border-b border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="w-4 h-4" />
+                      <span className="font-semibold text-sm">*384*22948#</span>
+                    </div>
+                    <span className="text-xs text-gray-400">{phoneNumber}</span>
+                  </div>
 
-              {/* Quick Commands */}
-              <div className="mt-6 max-w-sm mx-auto">
-                <p className="text-sm font-semibold text-gray-700 mb-3">Quick Commands:</p>
-                <div className="flex flex-wrap gap-2">
-                  {quickCommands.map((cmd) => (
+                  {/* Messages */}
+                  <div ref={messagesContainerRef} className="h-[600px] overflow-y-auto bg-gray-50 p-4 space-y-4 scroll-smooth">
+                    {messages.map((msg, idx) => (
+                      <div key={idx} className={`flex ${msg.type === 'sent' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-xs ${msg.type === 'sent' ? 'bg-blue-600 text-white' : 'bg-white text-gray-900'} rounded-2xl px-4 py-3 shadow-sm`}>
+                          <p className="text-sm whitespace-pre-line">{msg.text}</p>
+                          <p className={`text-xs mt-1 ${msg.type === 'sent' ? 'text-blue-200' : 'text-gray-500'}`}>
+                            {msg.timestamp}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  {/* Input */}
+                  <div className="bg-white border-t border-gray-200 p-4">
+                    {/* Quick Start Button */}
                     <button
-                      key={cmd}
                       onClick={() => {
-                        setInputCommand(cmd);
+                        setInputCommand('*384*22948#');
                         setTimeout(() => handleSendMessage(), 100);
                       }}
-                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-mono transition-colors"
+                      className="w-full mb-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
                     >
-                      {cmd}
+                      <Smartphone className="w-5 h-5" />
+                      Dial *384*22948#
                     </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Commands Reference */}
-            <div>
-              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">USSD Commands</h2>
-                
-                {['Basic', 'Transfers', 'Bitcoin', 'Stablecoin', 'Cash', 'Agents'].map((category) => (
-                  <div key={category} className="mb-6">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">{category}</h3>
-                    <div className="space-y-3">
-                      {ussdCommands
-                        .filter(cmd => cmd.category === category)
-                        .map((cmd, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                            onClick={() => setInputCommand(cmd.cmd)}>
-                            <code className="font-mono text-sm font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                              {cmd.cmd}
-                            </code>
-                            <p className="text-sm text-gray-600 flex-1">{cmd.desc}</p>
-                          </div>
-                        ))}
+                    
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={inputCommand}
+                        onChange={(e) => setInputCommand(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                        placeholder="Type USSD command..."
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
+                      >
+                        <Send className="w-5 h-5" />
+                      </button>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
+
+            {/* Number Pad */}
+            <div className="mt-8 grid grid-cols-3 gap-3">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, '*', 0, '#'].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => {
+                    setInputCommand(prev => prev + num);
+                  }}
+                  className="h-16 bg-white hover:bg-gray-100 text-gray-900 text-2xl font-semibold rounded-xl shadow-sm border border-gray-200 transition-colors active:scale-95"
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setInputCommand(prev => prev.slice(0, -1))}
+                className="h-14 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-sm transition-colors"
+              >
+                ← Delete
+              </button>
+              <button
+                onClick={handleSendMessage}
+                className="h-14 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow-sm transition-colors"
+              >
+                Send →
+              </button>
             </div>
           </div>
 

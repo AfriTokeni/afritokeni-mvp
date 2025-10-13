@@ -753,42 +753,42 @@ async function handleLocalCurrency(input: string, session: USSDSession): Promise
   if (!currentInput) {
     return continueSession(`Local Currency (UGX)
 Please select an option:
-1. Send Money
-2. Check Balance
-3. Deposit
-4. Withdraw
-5. Transactions
-6. Find Agent
+11. Send Money
+12. Check Balance
+13. Deposit
+14. Withdraw
+15. Transactions
+16. Find Agent
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '11':
       session.currentMenu = 'send_money';
       session.step = 1;
       return continueSession('Send Money\nEnter recipient phone number:');
     
-    case '2':
+    case '12':
       // Check Balance - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Check Balance', 'check_balance');
       } else {
+        // PIN already verified or not required
         session.currentMenu = 'check_balance';
-        session.step = 1;
         return await handleCheckBalance('', session);
       }
     
-    case '3':
+    case '13':
       session.currentMenu = 'deposit';
       session.step = 1;
       return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
     
-    case '4':
+    case '14':
       session.currentMenu = 'withdraw';
       session.step = 1;
       return continueSession('Withdraw Money\nEnter amount to withdraw (UGX):');
     
-    case '5':
+    case '15':
       // Transaction History - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Transaction History', 'transaction_history');
@@ -798,7 +798,7 @@ Please select an option:
         return await handleTransactionHistory('', session);
       }
     
-    case '6':
+    case '16':
       session.currentMenu = 'find_agent';
       session.step = 1;
       return handleFindAgent('', session);
@@ -1336,36 +1336,36 @@ async function handleBitcoin(input: string, session: USSDSession): Promise<strin
   if (!currentInput) {
     return continueSession(`Bitcoin (ckBTC)
 Please select an option:
-1. Check Balance
-2. Bitcoin Rate
-3. Buy Bitcoin
-4. Sell Bitcoin
-5. Send Bitcoin
+21. Check Balance
+22. Bitcoin Rate
+23. Buy Bitcoin
+24. Sell Bitcoin
+25. Send Bitcoin
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '21':
       session.currentMenu = 'btc_balance';
       session.step = 1;
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '2':
+    case '22':
       session.currentMenu = 'btc_rate';
       session.step = 1;
       return continueSession('Bitcoin Rate\nEnter your 4-digit PIN:');
     
-    case '3':
+    case '23':
       session.currentMenu = 'btc_buy';
       session.step = 1;
       return continueSession('Buy Bitcoin\nEnter UGX amount to spend:');
     
-    case '4':
+    case '24':
       session.currentMenu = 'btc_sell';
       session.step = 1;
       return await handleBTCSell('', session);
     
-    case '5':
+    case '25':
       session.currentMenu = 'btc_send';
       session.step = 1;
       return continueSession('Send Bitcoin\nEnter your 4-digit PIN:');
@@ -2364,36 +2364,36 @@ async function handleUSDC(input: string, session: USSDSession): Promise<string> 
   if (!currentInput) {
     return continueSession(`USDC (ckUSDC)
 Please select an option:
-1. Check Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-5. Send USDC
+31. Check Balance
+32. USDC Rate
+33. Buy USDC
+34. Sell USDC
+35. Send USDC
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '31':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '2':
+    case '32':
       session.currentMenu = 'usdc_rate';
       session.step = 1;
       return continueSession('USDC Rate\nEnter your 4-digit PIN:');
     
-    case '3':
+    case '33':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
       return continueSession('Buy USDC\nEnter your 4-digit PIN:');
     
-    case '4':
+    case '34':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
       return continueSession('Sell USDC\nEnter your 4-digit PIN:');
     
-    case '5':
+    case '35':
       session.currentMenu = 'usdc_send';
       session.step = 1;
       return continueSession('Send USDC\nEnter your 4-digit PIN:');
