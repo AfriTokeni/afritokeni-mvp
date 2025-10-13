@@ -330,9 +330,10 @@ export class CkBTCService {
       if (!isDemoMode) {
         // PRODUCTION: Execute real Bitcoin withdrawal via ICP minter
         console.log('🚀 Production: Withdrawing ckBTC to Bitcoin address...');
-        const principal = toPrincipal(request.principalId);
+        const userPrincipal = toPrincipal(request.principalId);
         const { getCkBTCMinterActor } = await import('./icpActors.js');
         const minterActor = await getCkBTCMinterActor();
+        console.log('Withdrawing for principal:', userPrincipal);
         
         const result = await minterActor.retrieve_btc({
           address: request.btcAddress,
@@ -423,6 +424,7 @@ export class CkBTCService {
         const senderPrincipal = toPrincipal(request.senderId);
         const recipientPrincipal = toPrincipal(request.recipient);
         const ledgerActor = await getCkBTCLedgerActor();
+        console.log('Transfer from:', senderPrincipal, 'to:', recipientPrincipal);
         
         const result = await ledgerActor.icrc1_transfer({
           from_subaccount: toSubaccount(),

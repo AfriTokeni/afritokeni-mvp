@@ -102,13 +102,8 @@ const UserDashboard: React.FC = () => {
       await DataService.updateUser(currentUser.id, {
         firstName: data.firstName,
         lastName: data.lastName,
-        email: data.email || currentUser.email,
-        preferredCurrency: data.preferredCurrency,
-        location: {
-          country: data.country,
-          city: data.city
-        }
-      });
+        email: data.email || currentUser.email
+      } as any);
 
       // Mark onboarding as completed
       localStorage.setItem(`onboarding_completed_${currentUser.id}`, 'true');

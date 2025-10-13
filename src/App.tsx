@@ -22,6 +22,10 @@ import DepositPage from "./pages/deposit/DepositPage.tsx";
 import BitcoinExchangePage from "./pages/BitcoinExchangePage.tsx";
 import AgentMapPage from "./pages/users/AgentMapPage.tsx";
 import DAODashboard from "./pages/dao/DAODashboard.tsx";
+import DAOLandingPage from "./pages/dao/DAOLandingPage.tsx";
+import EscrowPage from "./pages/EscrowPage.tsx";
+import CkBTCPage from "./pages/CkBTCPage.tsx";
+import CkUSDCPage from "./pages/CkUSDCPage.tsx";
 import LeaderboardPage from "./pages/users/LeaderboardPage.tsx";
 import { CkBTCSendPage } from "./pages/CkBTCSendPage.tsx";
 import { CkBTCDepositPage } from "./pages/CkBTCDepositPage.tsx";
@@ -167,6 +171,14 @@ const App: FC = () => {
           
           {/* Tariff Page */}
           <Route path="/tariff" element={<TariffPage />} />
+          
+          {/* DAO Landing Page */}
+          <Route path="/dao-info" element={<DAOLandingPage />} />
+          
+          {/* Feature Pages */}
+          <Route path="/escrow" element={<EscrowPage />} />
+          <Route path="/ckbtc" element={<CkBTCPage />} />
+          <Route path="/ckusdc" element={<CkUSDCPage />} />
           
           {/* About Page */}
           <Route path="/about" element={<AboutPage />} />

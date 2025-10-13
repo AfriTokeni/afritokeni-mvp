@@ -106,8 +106,8 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Escrow Security */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border-2 border-blue-200">
+            {/* Escrow Protection */}
+            <Link to="/escrow" className="block bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 border-2 border-blue-200 hover:border-blue-400 transition-all hover:shadow-lg flex flex-col">
               <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
                 <Lock className="w-8 h-8 text-white" />
               </div>
@@ -115,11 +115,13 @@ const LandingPage: React.FC = () => {
               <p className="text-gray-600 leading-relaxed mb-4">
                 AfriTokeni holds ckBTC/ckUSDC in escrow. Agents can't disappear with your money. 6-digit codes + 24hr refunds.
               </p>
-              <div className="text-sm font-semibold text-blue-600 mt-auto">Zero fraud risk</div>
-            </div>
+              <div className="text-sm font-semibold text-blue-600 mt-auto flex items-center gap-2">
+                Learn More →
+              </div>
+            </Link>
 
             {/* Lightning Speed */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200 flex flex-col">
+            <Link to="/ckbtc" className="block bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200 hover:border-orange-400 transition-all hover:shadow-lg flex flex-col">
               <div className="w-16 h-16 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-8 h-8 text-white" />
               </div>
@@ -127,11 +129,13 @@ const LandingPage: React.FC = () => {
               <p className="text-gray-600 leading-relaxed mb-4">
                 ICP-native Bitcoin transfers in &lt;1 second. ~$0.01 fees. Instant and secure.
               </p>
-              <div className="text-sm font-semibold text-orange-600 mt-auto">Instant transfers</div>
-            </div>
+              <div className="text-sm font-semibold text-orange-600 mt-auto flex items-center gap-2">
+                Learn More →
+              </div>
+            </Link>
 
             {/* ckUSDC Stable Value */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200">
+            <Link to="/ckusdc" className="block bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200 hover:border-green-400 transition-all hover:shadow-lg flex flex-col">
               <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
                 <Lock className="w-8 h-8 text-white" />
               </div>
@@ -139,11 +143,13 @@ const LandingPage: React.FC = () => {
               <p className="text-gray-600 leading-relaxed mb-4">
                 Protect yourself from Bitcoin volatility. ckUSDC stays pegged to $1 USD. Instant transfers, stable value.
               </p>
-              <div className="text-sm font-semibold text-green-600 mt-auto">No volatility risk</div>
-            </div>
+              <div className="text-sm font-semibold text-green-600 mt-auto flex items-center gap-2">
+                Learn More →
+              </div>
+            </Link>
 
             {/* DAO Governance */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-purple-200">
+            <Link to="/dao-info" className="block bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-purple-200 hover:border-purple-400 transition-all hover:shadow-lg flex flex-col">
               <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
                 <Globe className="w-8 h-8 text-white" />
               </div>
@@ -151,8 +157,10 @@ const LandingPage: React.FC = () => {
               <p className="text-gray-600 leading-relaxed mb-4">
                 Community-owned. Vote on fees, currencies, and policies via USSD. Agents and users control the platform.
               </p>
-              <div className="text-sm font-semibold text-purple-600 mt-auto">Vote via USSD</div>
-            </div>
+              <div className="text-sm font-semibold text-purple-600 mt-auto flex items-center gap-2">
+                Learn More →
+              </div>
+            </Link>
           </div>
         </div>
       </section>

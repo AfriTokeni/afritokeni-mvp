@@ -490,7 +490,8 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // For admin login, check if user exists in database with admin role
           try {
             const adminUser = await DataService.getUser(formData.emailOrPhone);
-            if (adminUser && adminUser.userType === "admin") {
+            // Admin check removed - no admin user type exists
+            if (adminUser) {
               setUser({ user: null, agent: null, admin: adminUser });
               setAuthMethod("web");
               storeUserData(adminUser, "web");

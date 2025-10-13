@@ -2451,7 +2451,7 @@ Thank you for using AfriTokeni!`);
         
         return endSession(`Your USDC Balance
 
-$${balance.balanceFormatted} USDC
+$${balance.balanceUSDC} USDC
 ≈ UGX ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}
 
 Current Rate: 1 USDC = UGX ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}
@@ -2741,7 +2741,7 @@ Thank you for using AfriTokeni!`);
 
         // Get real USDC balance using CkUSDCService
         const balance = await CkUSDCService.getBalance(user.id, true); // useSatellite = true for SMS
-        const usdcBalance = parseFloat(balance.balanceFormatted);
+        const usdcBalance = parseFloat(balance.balanceUSDC);
         
         // Store balance for later use
         session.data.usdcBalance = usdcBalance;
@@ -2993,7 +2993,7 @@ Thank you for using AfriTokeni!`);
 
         // Get real USDC balance using CkUSDCService
         const balance = await CkUSDCService.getBalance(user.id, true); // useSatellite = true for SMS
-        const usdcBalance = parseFloat(balance.balanceFormatted);
+        const usdcBalance = parseFloat(balance.balanceUSDC);
         
         // Store balance for later use
         session.data.usdcBalance = usdcBalance;

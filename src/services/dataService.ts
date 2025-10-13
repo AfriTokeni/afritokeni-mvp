@@ -1,7 +1,6 @@
 import { nanoid } from 'nanoid';
-import { getDoc, setDoc, listDocs, deleteDoc } from '@junobuild/core';
-import type { User, Transaction, Balance, Agent, KYCSubmission, DepositRequest, WithdrawalRequest } from '../types';
-import { formatCurrencyAmount } from '../utils/currencyFormatter';
+import { getDoc, setDoc, listDocs } from '@junobuild/core';
+import type { AfricanCurrency } from '../types/currency';
 import { AfriTokenService } from './afriTokenService';
 
 // Interface for user data as stored in Juno (with string dates)
@@ -17,7 +16,54 @@ export interface UserDataFromJuno {
   createdAt: string;
 }
 
-import { Transaction } from '../types/transaction';
+// User interface
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: 'user' | 'agent';
+  isVerified: boolean;
+  kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
+  pin?: string;
+  createdAt: Date;
+}
+
+// Balance interface
+export interface Balance {
+  userId: string;
+  balance: number;
+  currency: string;
+  lastUpdated: Date;
+}
+
+// Transaction interface
+export interface Transaction {
+  id: string;
+  userId: string;
+  type: 'send' | 'receive' | 'withdraw' | 'deposit' | 'bitcoin_buy' | 'bitcoin_sell' | 'bitcoin_to_ugx' | 'ugx_to_bitcoin' | 'bitcoin_send' | 'bitcoin_receive';
+  amount: number;
+  fee?: number;
+  currency: string;
+  recipientId?: string;
+  recipientPhone?: string;
+  recipientName?: string;
+  agentId?: string;
+  fromUserId?: string;
+  toUserId?: string;
+  status: 'pending' | 'completed' | 'failed' | 'cancelled' | 'confirmed';
+  smsCommand?: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  completedAt?: Date;
+  withdrawalCode?: string;
+  depositCode?: string;
+  bitcoinAddress?: string;
+  exchangeRate?: number;
+  location?: string;
+  metadata?: any;
+}
 
 // Bitcoin interfaces for DataService
 export interface BitcoinTransaction {

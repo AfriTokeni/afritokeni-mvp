@@ -48,6 +48,16 @@ const PublicHeader: React.FC = () => {
               Pricing
             </Link>
             <Link 
+              to="/dao-info" 
+              className={`font-medium transition-colors ${
+                isActive('/dao-info') 
+                  ? 'text-black font-semibold' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              DAO
+            </Link>
+            <Link 
               to="/ussd" 
               className={`font-medium transition-colors ${
                 isActive('/ussd') 
