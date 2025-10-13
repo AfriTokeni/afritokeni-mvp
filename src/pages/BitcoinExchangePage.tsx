@@ -32,30 +32,30 @@ const BitcoinExchangePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <PublicHeader />
-      <div className="max-w-4xl mx-auto space-y-12 py-12">
+      <div className="max-w-4xl mx-auto space-y-8 sm:space-y-10 lg:space-y-12 py-8 sm:py-10 lg:py-12 px-4 sm:px-6">
         {/* Hero Section */}
-        <div className="text-center space-y-6">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-sm font-medium mb-4">
-            <Bitcoin className="w-4 h-4 mr-2" />
+        <div className="text-center space-y-4 sm:space-y-6">
+          <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+            <Bitcoin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
             Bitcoin Exchange
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-neutral-900 mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-3 sm:mb-4">
             How AfriTokeni Works
           </h1>
-          <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
             Send money instantly across Africa using ckBTC (ICP Bitcoin) or ckUSDC (stablecoin). 
             No internet needed - works via USSD on any phone with secure escrow protection.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-6 sm:mt-8">
             <button
               onClick={handleStartExchange}
-              className="bg-orange-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+              className="bg-orange-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-orange-700 transition-colors"
             >
               {user.user ? 'Start Exchange' : 'Sign In to Exchange'}
             </button>
             <button
               onClick={handleBecomeAgent}
-              className="bg-neutral-100 text-neutral-700 px-8 py-3 rounded-lg font-medium hover:bg-neutral-200 transition-colors"
+              className="bg-neutral-100 text-neutral-700 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-200 transition-colors"
             >
               Become an Agent
             </button>
@@ -63,20 +63,20 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* Three-Asset System */}
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-8">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-6 text-center">Three Ways to Send Money</h2>
-          <p className="text-center text-neutral-600 mb-8 max-w-2xl mx-auto">
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 sm:p-6 lg:p-8">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 mb-4 sm:mb-6 text-center">Three Ways to Send Money</h2>
+          <p className="text-center text-neutral-600 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
             AfriTokeni gives you three options - choose what works best for your needs
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Local Currencies */}
-            <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                <DollarSign className="w-6 h-6 text-gray-600" />
+            <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-gray-200">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Local Currencies</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Local Currencies</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 leading-relaxed">
                 39 African currencies (UGX, NGN, KES, GHS, etc.)
               </p>
               <ul className="text-sm text-gray-600 space-y-2">
@@ -87,12 +87,12 @@ const BitcoinExchangePage: React.FC = () => {
             </div>
 
             {/* ckBTC */}
-            <div className="bg-white rounded-xl p-6 border-2 border-orange-200">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                <Bitcoin className="w-6 h-6 text-orange-600" />
+            <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-orange-200">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold text-orange-900 mb-2">ckBTC (ICP Bitcoin)</h3>
-              <p className="text-sm text-orange-700 mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-orange-900 mb-2">ckBTC (ICP Bitcoin)</h3>
+              <p className="text-xs sm:text-sm text-orange-700 mb-3 sm:mb-4 leading-relaxed">
                 Instant Bitcoin transfers on ICP blockchain
               </p>
               <ul className="text-sm text-orange-700 space-y-2">
@@ -103,12 +103,12 @@ const BitcoinExchangePage: React.FC = () => {
             </div>
 
             {/* ckUSDC */}
-            <div className="bg-white rounded-xl p-6 border-2 border-green-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-green-600" />
+            <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-green-200">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold text-green-900 mb-2">ckUSDC (Stablecoin)</h3>
-              <p className="text-sm text-green-700 mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-green-900 mb-2">ckUSDC (Stablecoin)</h3>
+              <p className="text-xs sm:text-sm text-green-700 mb-3 sm:mb-4 leading-relaxed">
                 Stable value pegged to US Dollar
               </p>
               <ul className="text-sm text-green-700 space-y-2">
@@ -121,10 +121,10 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* How It Works */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-8 shadow-sm">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-8 text-center">How It Works</h2>
+        <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 mb-6 sm:mb-8 text-center">How It Works</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mx-auto">
                 <Bitcoin className="w-8 h-8 text-orange-600" />
@@ -168,13 +168,13 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* Security Features */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-8">
-          <div className="flex items-center space-x-3 mb-6">
-            <Shield className="w-8 h-8 text-green-600" />
-            <h2 className="text-3xl font-bold text-neutral-900">🔒 Secure Escrow Protection</h2>
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-6 lg:p-8">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+            <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">🔒 Secure Escrow Protection</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             <div>
               <h3 className="text-xl font-semibold text-neutral-900 mb-4">For Users</h3>
               <div className="space-y-3">
@@ -246,10 +246,10 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* Step-by-Step Process */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-8 shadow-sm">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-8 text-center">Detailed Exchange Process</h2>
+        <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 mb-6 sm:mb-8 text-center">Detailed Exchange Process</h2>
           
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div className="flex items-start space-x-6">
               <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-orange-600 font-bold">1</span>
@@ -383,9 +383,9 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* Supported Features */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-neutral-900 mb-4">Supported Wallets</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-3 sm:mb-4">Supported Wallets</h3>
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -406,8 +406,8 @@ const BitcoinExchangePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-neutral-900 mb-4">Supported Currencies</h3>
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-3 sm:mb-4">Supported Currencies</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -438,8 +438,8 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-8 shadow-sm">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-8 text-center">Frequently Asked Questions</h2>
+        <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 mb-6 sm:mb-8 text-center">Frequently Asked Questions</h2>
           
           <div className="space-y-6">
             <div>
@@ -486,9 +486,9 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* Warning Section */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-          <div className="flex items-start space-x-3">
-            <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 sm:p-6">
+          <div className="flex items-start space-x-2 sm:space-x-3">
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600 flex-shrink-0 mt-1" />
             <div>
               <h3 className="text-lg font-semibold text-neutral-900 mb-2">Important Safety Tips</h3>
               <ul className="space-y-2 text-sm text-neutral-700">
@@ -504,21 +504,21 @@ const BitcoinExchangePage: React.FC = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-orange-600 to-yellow-600 rounded-xl p-8 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to Exchange Bitcoin?</h2>
-          <p className="text-xl mb-6 opacity-90">
+        <div className="bg-gradient-to-r from-orange-600 to-yellow-600 rounded-xl p-6 sm:p-8 lg:p-12 text-center text-white">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Ready to Exchange Bitcoin?</h2>
+          <p className="text-base sm:text-lg lg:text-xl mb-4 sm:mb-6 opacity-90">
             Join thousands of users safely converting Bitcoin to cash across Africa
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               onClick={handleStartExchange}
-              className="bg-white text-orange-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+              className="bg-white text-orange-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
             >
               {user.user ? 'Start Your Exchange' : 'Sign In to Exchange'}
             </button>
             <button
               onClick={handleBecomeAgent}
-              className="bg-white text-orange-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+              className="bg-white text-orange-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
             >
               Become an Agent
             </button>

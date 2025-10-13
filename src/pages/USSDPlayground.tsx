@@ -417,22 +417,24 @@ Thank you for using AfriTokeni!`;
   return (
     <div className="min-h-screen bg-gray-50">
       <PublicHeader />
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-8 sm:py-10 lg:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Hero */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-              <Globe className="w-4 h-4" />
-              🌍 Demo Mode - Works Worldwide
+          <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
+                <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
+                🌍 Demo Mode - Works Worldwide
+              </div>
+              <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
+                <Smartphone className="w-3 h-3 sm:w-4 sm:h-4" />
+                🇺🇬 Real USSD: Uganda Only
+              </div>
             </div>
-            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-4 ml-2">
-              <Smartphone className="w-4 h-4" />
-              🇺🇬 Real USSD: Uganda Only
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
               Try USSD Banking
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Experience how AfriTokeni works on any phone - no internet required. Try the commands below!
             </p>
             <div className="mt-6 bg-red-50 border-2 border-red-300 rounded-lg p-4 max-w-2xl mx-auto">
@@ -447,39 +449,39 @@ Thank you for using AfriTokeni!`;
           </div>
 
           {/* Phone Simulator - Centered */}
-          <div className="max-w-md mx-auto">
-            <div className="bg-black rounded-[3rem] shadow-2xl overflow-hidden p-3">
+          <div className="max-w-sm sm:max-w-md mx-auto">
+            <div className="bg-black rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden p-2 sm:p-3">
                 {/* Phone Notch */}
-                <div className="bg-gray-900 rounded-[2.5rem] overflow-hidden">
+                <div className="bg-gray-900 rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden">
                   {/* Status Bar */}
-                  <div className="bg-gray-900 px-6 py-2 flex items-center justify-between text-white text-xs">
+                  <div className="bg-gray-900 px-4 sm:px-6 py-2 flex items-center justify-between text-white text-xs">
                     <span>9:21</span>
                     <div className="flex items-center gap-1">
-                      <div className="w-4 h-3 border border-white rounded-sm"></div>
-                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                      <div className="w-3 h-2 sm:w-4 sm:h-3 border border-white rounded-sm"></div>
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white rounded-full"></div>
                       <div className="flex gap-0.5">
-                        <div className="w-0.5 h-3 bg-white"></div>
-                        <div className="w-0.5 h-3 bg-white"></div>
-                        <div className="w-0.5 h-3 bg-white"></div>
-                        <div className="w-0.5 h-3 bg-white"></div>
+                        <div className="w-0.5 h-2 sm:h-3 bg-white"></div>
+                        <div className="w-0.5 h-2 sm:h-3 bg-white"></div>
+                        <div className="w-0.5 h-2 sm:h-3 bg-white"></div>
+                        <div className="w-0.5 h-2 sm:h-3 bg-white"></div>
                       </div>
                     </div>
                   </div>
                   {/* USSD Header */}
-                  <div className="bg-gray-800 text-white px-6 py-3 flex items-center justify-between border-b border-gray-700">
+                  <div className="bg-gray-800 text-white px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between border-b border-gray-700">
                     <div className="flex items-center gap-2">
-                      <Smartphone className="w-4 h-4" />
-                      <span className="font-semibold text-sm">*384*22948#</span>
+                      <Smartphone className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="font-semibold text-xs sm:text-sm">*384*22948#</span>
                     </div>
-                    <span className="text-xs text-gray-400">{phoneNumber}</span>
+                    <span className="text-xs text-gray-400 hidden sm:inline">{phoneNumber}</span>
                   </div>
 
                   {/* Messages */}
-                  <div ref={messagesContainerRef} className="h-[600px] overflow-y-auto bg-gray-50 p-4 space-y-4 scroll-smooth">
+                  <div ref={messagesContainerRef} className="h-[400px] sm:h-[500px] lg:h-[600px] overflow-y-auto bg-gray-50 p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth">
                     {messages.map((msg, idx) => (
                       <div key={idx} className={`flex ${msg.type === 'sent' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs ${msg.type === 'sent' ? 'bg-blue-600 text-white' : 'bg-white text-gray-900'} rounded-2xl px-4 py-3 shadow-sm`}>
-                          <p className="text-sm whitespace-pre-line">{msg.text}</p>
+                        <div className={`max-w-[280px] sm:max-w-xs ${msg.type === 'sent' ? 'bg-blue-600 text-white' : 'bg-white text-gray-900'} rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-sm`}>
+                          <p className="text-xs sm:text-sm whitespace-pre-line">{msg.text}</p>
                           <p className={`text-xs mt-1 ${msg.type === 'sent' ? 'text-blue-200' : 'text-gray-500'}`}>
                             {msg.timestamp}
                           </p>
@@ -490,16 +492,16 @@ Thank you for using AfriTokeni!`;
                   </div>
 
                   {/* Input */}
-                  <div className="bg-white border-t border-gray-200 p-4">
+                  <div className="bg-white border-t border-gray-200 p-3 sm:p-4">
                     {/* Quick Start Button */}
                     <button
                       onClick={() => {
                         setInputCommand('*384*22948#');
                         setTimeout(() => handleSendMessage(), 100);
                       }}
-                      className="w-full mb-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                      className="w-full mb-2 sm:mb-3 bg-green-500 hover:bg-green-600 text-white font-bold py-2.5 sm:py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                     >
-                      <Smartphone className="w-5 h-5" />
+                      <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
                       Dial *384*22948#
                     </button>
                     
@@ -511,13 +513,13 @@ Thank you for using AfriTokeni!`;
                         onChange={(e) => setInputCommand(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                         placeholder="Type USSD command..."
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                       />
                       <button
                         onClick={handleSendMessage}
-                        className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
+                        className="bg-blue-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:bg-blue-700 transition-colors"
                       >
-                        <Send className="w-5 h-5" />
+                        <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
                   </div>
@@ -527,21 +529,21 @@ Thank you for using AfriTokeni!`;
           </div>
 
           {/* CTA Section */}
-          <div className="mt-12 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-12 text-center text-white">
-            <h2 className="text-3xl font-bold mb-4">Ready to Try USSD Banking?</h2>
-            <p className="text-xl mb-6 opacity-90">
-              Join thousands using AfriTokeni on any phone - no internet required
+                    <div className="mt-8 sm:mt-10 lg:mt-12 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-6 sm:p-8 lg:p-12 text-center text-white">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Ready to Start Banking?</h2>
+            <p className="text-base sm:text-lg lg:text-xl mb-4 sm:mb-6 opacity-90">
+              Experience the future of mobile banking with instant, fee-free transfers
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link
-                to="/"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+                to="/bitcoin-exchange"
+                className="bg-white text-blue-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
               >
                 Start Banking Now
               </Link>
               <Link
                 to="/become-agent"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+                className="bg-white text-blue-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
               >
                 Become an Agent
               </Link>
