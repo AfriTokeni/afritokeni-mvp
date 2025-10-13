@@ -73,10 +73,11 @@ const USSDPlayground: React.FC = () => {
       return `📱 AfriTokeni Menu
 
 Please select an option:
-1. Local Currency (UGX)
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. Help`;
+1. Register (New User)
+2. Local Currency (UGX)
+3. Bitcoin (ckBTC)
+4. USDC (ckUSDC)
+5. Help`;
     }
 
     // Force user to dial USSD code first

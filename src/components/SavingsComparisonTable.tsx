@@ -122,8 +122,97 @@ const SavingsComparisonTable: React.FC = () => {
           </div>
         </div>
 
-        {/* Comparison Table */}
-        <div className="overflow-x-auto">
+        {/* Comparison Table - Mobile Responsive */}
+        <div className="block sm:hidden">
+          {/* Mobile Card Layout */}
+          <div className="space-y-4">
+            {/* AfriTokeni Card */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center font-bold text-white">A</div>
+                <div>
+                  <div className="font-bold text-gray-900">AfriTokeni</div>
+                  <div className="text-xs text-gray-600 capitalize">{location} Rate</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-semibold">Fee:</span> ${afriTokeniFee.toFixed(2)} ({afriTokeniFeePercent}%)</div>
+                <div><span className="font-semibold">Speed:</span> Instant</div>
+                <div><span className="font-semibold">USSD:</span> Yes</div>
+                <div><span className="font-semibold">Countries:</span> 39</div>
+              </div>
+            </div>
+
+            {/* Western Union Card */}
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="font-semibold text-gray-900 mb-2">Western Union</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-semibold">Fee:</span> ${westernUnionFee.toFixed(2)}</div>
+                <div><span className="font-semibold">Speed:</span> Minutes-Hours</div>
+                <div><span className="font-semibold">USSD:</span> No</div>
+                <div><span className="font-semibold">Countries:</span> 200+</div>
+              </div>
+            </div>
+
+            {/* MoneyGram Card */}
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="font-semibold text-gray-900 mb-2">MoneyGram</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-semibold">Fee:</span> ${moneyGramFee.toFixed(2)}</div>
+                <div><span className="font-semibold">Speed:</span> Minutes-Hours</div>
+                <div><span className="font-semibold">USSD:</span> No</div>
+                <div><span className="font-semibold">Countries:</span> 200+</div>
+              </div>
+            </div>
+
+            {/* WorldRemit Card */}
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="font-semibold text-gray-900 mb-2">WorldRemit</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-semibold">Fee:</span> ${worldRemitFee.toFixed(2)}</div>
+                <div><span className="font-semibold">Speed:</span> Minutes-Days</div>
+                <div><span className="font-semibold">USSD:</span> No</div>
+                <div><span className="font-semibold">Countries:</span> 150+</div>
+              </div>
+            </div>
+
+            {/* M-Pesa Card */}
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="font-semibold text-gray-900 mb-2">M-Pesa</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-semibold">Fee:</span> ${mPesaFee.toFixed(2)}</div>
+                <div><span className="font-semibold">Speed:</span> Minutes-Hours</div>
+                <div><span className="font-semibold">USSD:</span> Yes</div>
+                <div><span className="font-semibold">Countries:</span> East Africa</div>
+              </div>
+            </div>
+
+            {/* MTN MoMo Card */}
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="font-semibold text-gray-900 mb-2">MTN MoMo</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-semibold">Fee:</span> ${mtnFee.toFixed(2)}</div>
+                <div><span className="font-semibold">Speed:</span> Minutes-Hours</div>
+                <div><span className="font-semibold">USSD:</span> Yes</div>
+                <div><span className="font-semibold">Countries:</span> West/Central</div>
+              </div>
+            </div>
+
+            {/* Airtel Money Card */}
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="font-semibold text-gray-900 mb-2">Airtel Money</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="font-semibold">Fee:</span> ${airtelFee.toFixed(2)}</div>
+                <div><span className="font-semibold">Speed:</span> Minutes-Hours</div>
+                <div><span className="font-semibold">USSD:</span> Yes</div>
+                <div><span className="font-semibold">Countries:</span> 14</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full border-collapse bg-white rounded-xl shadow-lg overflow-hidden">
             <thead>
               <tr className="bg-gray-50 border-b-2 border-gray-200">

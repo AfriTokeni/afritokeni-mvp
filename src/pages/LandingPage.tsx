@@ -335,6 +335,15 @@ const LandingPage: React.FC = () => {
                     <Smartphone className="w-4 h-4 mr-2" />
                     USSD Interface
                   </div>
+                  <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-4">
+                    <h3 className="font-bold text-red-900 mb-2 text-sm sm:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
+                    <p className="text-xs sm:text-sm text-red-800 mb-2">
+                      <strong>Uganda:</strong> Dial <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*384*22948#</code> for real USSD!
+                    </p>
+                    <p className="text-xs text-red-700">
+                      <strong>Other countries:</strong> Coming soon! Use USSD playground for demo.
+                    </p>
+                  </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Any Phone Works</h3>
                   <p className="text-gray-600">USSD menu - no internet required</p>
                 </div>
@@ -343,28 +352,28 @@ const LandingPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">USSD Menu</div>
                     <div className="inline-flex items-center px-2 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium">
-                      Dial *AFRI#
+                      Dial *384*22948#
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="font-mono text-blue-600 font-medium text-xs">REG John Doe</div>
-                      <div className="text-gray-500 text-xs mt-1">Register</div>
+                      <div className="font-mono text-blue-600 font-medium text-xs">*384*22948#</div>
+                      <div className="text-gray-500 text-xs mt-1">Start USSD</div>
                     </div>
                     
                     <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="font-mono text-blue-600 font-medium text-xs">BAL</div>
-                      <div className="text-gray-500 text-xs mt-1">Balance</div>
+                      <div className="font-mono text-blue-600 font-medium text-xs">1</div>
+                      <div className="text-gray-500 text-xs mt-1">Local Currency</div>
                     </div>
                     
                     <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="font-mono text-orange-600 font-medium text-xs">CKBTC BAL</div>
-                      <div className="text-gray-500 text-xs mt-1">ckBTC</div>
+                      <div className="font-mono text-orange-600 font-medium text-xs">12</div>
+                      <div className="text-gray-500 text-xs mt-1">Check Balance</div>
                     </div>
                     
                     <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="font-mono text-green-600 font-medium text-xs">USDC BAL</div>
-                      <div className="text-gray-500 text-xs mt-1">ckUSDC</div>
+                      <div className="font-mono text-green-600 font-medium text-xs">2</div>
+                      <div className="text-gray-500 text-xs mt-1">Bitcoin (ckBTC)</div>
                     </div>
                   </div>
                 </div>
