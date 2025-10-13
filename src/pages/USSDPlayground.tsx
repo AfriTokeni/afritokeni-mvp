@@ -16,10 +16,11 @@ const USSDPlayground: React.FC = () => {
   const [demoUserId] = useState('demo_ussd_user');
   const [inputCommand, setInputCommand] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
+  const [ussdStarted, setUssdStarted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'received',
-      text: '🌍 USSD Demo Mode\n\nWelcome to AfriTokeni!\n\nType *384*22948# to start\nor type 4 for Help',
+      text: '🌍 USSD Demo Mode\n\nWelcome to AfriTokeni!\n\nDial *384*22948# to start',
       timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -66,8 +67,9 @@ const USSDPlayground: React.FC = () => {
     
     const transactions = await CentralizedDemoService.getTransactions(demoUserId);
 
-    // Main menu
+    // Main menu - this starts the USSD session
     if (upperCmd === '*384*22948#') {
+      setUssdStarted(true);
       return `📱 AfriTokeni Menu
 
 Please select an option:
@@ -75,6 +77,13 @@ Please select an option:
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
 4. Help`;
+    }
+
+    // Force user to dial USSD code first
+    if (!ussdStarted) {
+      return `⚠️ Please dial *384*22948# first to start USSD service.
+
+Click the green button or type the code.`;
     }
 
     // Option 1: Local Currency
@@ -495,7 +504,8 @@ Thank you for using AfriTokeni!`;
                     
                     <div className="flex gap-2">
                       <input
-                        type="text"
+                        type="tel"
+                        inputMode="tel"
                         value={inputCommand}
                         onChange={(e) => setInputCommand(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -513,36 +523,6 @@ Thank you for using AfriTokeni!`;
                 </div>
               </div>
 
-            {/* Number Pad */}
-            <div className="mt-8 grid grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, '*', 0, '#'].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => {
-                    setInputCommand(prev => prev + num);
-                  }}
-                  className="h-16 bg-white hover:bg-gray-100 text-gray-900 text-2xl font-semibold rounded-xl shadow-sm border border-gray-200 transition-colors active:scale-95"
-                >
-                  {num}
-                </button>
-              ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setInputCommand(prev => prev.slice(0, -1))}
-                className="h-14 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-sm transition-colors"
-              >
-                ← Delete
-              </button>
-              <button
-                onClick={handleSendMessage}
-                className="h-14 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow-sm transition-colors"
-              >
-                Send →
-              </button>
-            </div>
           </div>
 
           {/* CTA Section */}
