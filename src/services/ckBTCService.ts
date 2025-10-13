@@ -9,11 +9,11 @@
  * - Supports both Web and SMS/USSD operations
  */
 
-// import { Principal } from '@dfinity/principal'; // Use when connecting to real ICP canisters
 import { nanoid } from 'nanoid';
 import { getDoc, listDocs, setDoc } from '@junobuild/core';
 import { SatelliteOptions } from '@junobuild/core';
 import { AnonymousIdentity } from '@dfinity/agent';
+import { getCkBTCLedgerActor, toPrincipal, toSubaccount } from './icpActors.js';
 import {
   CkBTCConfig,
   CkBTCBalance,
@@ -70,21 +70,36 @@ export class CkBTCService {
 
   /**
    * Get ckBTC balance for a user
-   * Calculates balance from completed transactions in Juno datastore
+   * PRODUCTION: Queries ICP mainnet ICRC-1 ledger canister
+   * DEMO: Calculates from mock transactions in Juno
    * @param principalId - User's principal ID
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   * @param isDemoMode - Whether in demo mode (uses mock data)
    */
-  static async getBalance(principalId: string, useSatellite?: boolean): Promise<CkBTCBalance> {
+  static async getBalance(principalId: string, useSatellite?: boolean, isDemoMode = false): Promise<CkBTCBalance> {
     try {
-      // ICP ledger canister integration (production)
-      // const principal = Principal.fromText(principalId);
-      // const ledgerActor = await this.getLedgerActor();
-      // const balance = await ledgerActor.icrc1_balance_of({
-      //   owner: principal,
-      //   subaccount: []
-      // });
+      if (!isDemoMode) {
+        // PRODUCTION MODE: Query ICP mainnet ledger canister
+        console.log('🚀 Production: Querying ICP mainnet for ckBTC balance...');
+        const principal = toPrincipal(principalId);
+        const ledgerActor = await getCkBTCLedgerActor();
+        const balance = await ledgerActor.icrc1_balance_of({
+          owner: principal,
+          subaccount: toSubaccount()
+        });
 
-      // Calculate balance from transaction history in Juno datastore
+        const balanceSatoshis = Number(balance);
+        console.log(`✅ ckBTC balance from ICP: ${balanceSatoshis} satoshis`);
+
+        return {
+          balanceSatoshis,
+          balanceBTC: CkBTCUtils.formatBTC(balanceSatoshis),
+          lastUpdated: new Date(),
+        };
+      }
+
+      // DEMO MODE: Calculate balance from transaction history in Juno datastore
+      console.log('🎭 Demo Mode: Calculating balance from mock transactions...');
       const transactions = await this.getTransactionHistory(principalId, useSatellite);
       let balanceSatoshis = 0;
 
@@ -96,51 +111,42 @@ export class CkBTCService {
 
         switch (tx.type) {
           case 'deposit':
-            // Deposits add to balance
             balanceSatoshis += tx.amountSatoshis;
             break;
           
           case 'withdrawal':
-            // Withdrawals subtract from balance (including fees)
             balanceSatoshis -= (tx.amountSatoshis + tx.feeSatoshis);
             break;
           
           case 'transfer':
-            // Legacy transfer handling - check if user is sender or recipient
             if (tx.userId === principalId) {
-              // User is sender - subtract amount and fees
               balanceSatoshis -= (tx.amountSatoshis + tx.feeSatoshis);
             } else if (tx.recipient === principalId) {
-              // User is recipient - add amount (no fees for recipient)
               balanceSatoshis += tx.amountSatoshis;
             }
             break;
           
           case 'transfer_out':
-            // User sent ckBTC - amount is already negative, fees are additional deduction
-            balanceSatoshis += tx.amountSatoshis; // Add negative amount (subtract)
-            balanceSatoshis -= tx.feeSatoshis;   // Subtract fees
+            balanceSatoshis += tx.amountSatoshis; // negative amount
+            balanceSatoshis -= tx.feeSatoshis;
             break;
           
           case 'transfer_in':
-            // User received ckBTC - amount is positive, no fees for recipient
             balanceSatoshis += tx.amountSatoshis;
             break;
           
           case 'exchange_buy':
-            // User bought ckBTC - add to balance (minus fees)
             balanceSatoshis += (tx.amountSatoshis - tx.feeSatoshis);
             break;
           
           case 'exchange_sell':
-            // User sold ckBTC - subtract from balance (including fees)
             balanceSatoshis -= (tx.amountSatoshis + tx.feeSatoshis);
             break;
         }
       }
 
-      // Ensure balance doesn't go negative
       balanceSatoshis = Math.max(0, balanceSatoshis);
+      console.log(`✅ Demo balance calculated: ${balanceSatoshis} satoshis`);
       
       return {
         balanceSatoshis,
@@ -158,13 +164,15 @@ export class CkBTCService {
    * @param principalId - User's principal ID
    * @param currency - Local currency code
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   * @param isDemoMode - Whether in demo mode
    */
   static async getBalanceWithLocalCurrency(
     principalId: string,
     currency: string,
-    useSatellite?: boolean
+    useSatellite?: boolean,
+    isDemoMode = false
   ): Promise<CkBTCBalance> {
-    const balance = await this.getBalance(principalId, useSatellite);
+    const balance = await this.getBalance(principalId, useSatellite, isDemoMode);
     const exchangeRate = await this.getExchangeRate(currency);
     
     const btcAmount = CkBTCUtils.satoshisToBTC(balance.balanceSatoshis);
@@ -181,32 +189,43 @@ export class CkBTCService {
 
   /**
    * Get Bitcoin deposit address for user
-   * ICP minter canister generates unique BTC address per user
    * @param request - Deposit request with principal ID and optional subaccount
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   * @param isDemoMode - Whether in demo mode
    */
   static async getDepositAddress(
     request: CkBTCDepositRequest,
-    useSatellite?: boolean
+    useSatellite?: boolean,
+    isDemoMode = false
   ): Promise<CkBTCDepositResponse> {
     try {
-      // ICP minter canister integration (production)
-      // const principal = Principal.fromText(request.principalId);
-      // const minterActor = await this.getMinterActor();
-      // const result = await minterActor.get_btc_address({
-      //   owner: principal,
-      //   subaccount: request.subaccount
-      // });
+      let depositAddress: string;
 
-      // Mock implementation - generate deterministic address
-      const mockAddress = this.generateMockBitcoinAddress(request.principalId);
+      if (!isDemoMode) {
+        // PRODUCTION: Get real Bitcoin address from ICP minter canister
+        console.log('🚀 Production: Getting Bitcoin address from ICP minter...');
+        const principal = toPrincipal(request.principalId);
+        const { getCkBTCMinterActor } = await import('./icpActors.js');
+        const minterActor = await getCkBTCMinterActor();
+        
+        depositAddress = await minterActor.get_btc_address({
+          owner: [principal],
+          subaccount: request.subaccount ? [request.subaccount] : []
+        });
+        
+        console.log(`✅ Got Bitcoin address from ICP: ${depositAddress}`);
+      } else {
+        // DEMO: Generate fake address
+        console.log('🎭 Demo Mode: Generating mock Bitcoin address...');
+        depositAddress = this.generateMockBitcoinAddress(request.principalId);
+      }
 
       // Store deposit address information if using satellite (SMS/USSD)
       if (useSatellite) {
         const satellite = this.getSatelliteConfig(useSatellite);
         const depositAddressDoc = {
           principalId: request.principalId,
-          address: mockAddress,
+          address: depositAddress,
           createdAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
         };
@@ -224,7 +243,7 @@ export class CkBTCService {
 
       return {
         success: true,
-        depositAddress: mockAddress,
+        depositAddress,
         minConfirmations: this.config.minConfirmations,
       };
     } catch (error: unknown) {
@@ -283,13 +302,14 @@ export class CkBTCService {
 
   /**
    * Withdraw ckBTC to Bitcoin address
-   * ICP minter burns ckBTC and sends real BTC
    * @param request - Withdrawal request with principal ID, amount, and Bitcoin address
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   * @param isDemoMode - Whether in demo mode
    */
   static async withdraw(
     request: CkBTCWithdrawalRequest,
-    useSatellite?: boolean
+    useSatellite?: boolean,
+    isDemoMode = false
   ): Promise<CkBTCWithdrawalResponse> {
     try {
       // Validate amount
@@ -304,17 +324,34 @@ export class CkBTCService {
         throw new Error('Invalid Bitcoin address');
       }
 
-      // ICP minter canister withdrawal (production)
-      // const principal = Principal.fromText(request.principalId);
-      // const minterActor = await this.getMinterActor();
-      // const result = await minterActor.retrieve_btc({
-      //   address: request.btcAddress,
-      //   amount: request.amountSatoshis
-      // });
+      let transactionId: string;
+      let feeSatoshis: number;
 
-      // Mock implementation
-      const transactionId = nanoid();
-      const mockFeeSatoshis = 1000; // ~$1 at $100k BTC
+      if (!isDemoMode) {
+        // PRODUCTION: Execute real Bitcoin withdrawal via ICP minter
+        console.log('🚀 Production: Withdrawing ckBTC to Bitcoin address...');
+        const principal = toPrincipal(request.principalId);
+        const { getCkBTCMinterActor } = await import('./icpActors.js');
+        const minterActor = await getCkBTCMinterActor();
+        
+        const result = await minterActor.retrieve_btc({
+          address: request.btcAddress,
+          amount: BigInt(request.amountSatoshis)
+        });
+
+        if ('Err' in result) {
+          throw new Error(`Withdrawal failed: ${JSON.stringify(result.Err)}`);
+        }
+
+        transactionId = result.Ok.block_index.toString();
+        feeSatoshis = 1000; // ckBTC withdrawal fee
+        console.log(`✅ Bitcoin withdrawal initiated: ${transactionId}`);
+      } else {
+        // DEMO: Mock withdrawal
+        console.log('🎭 Demo Mode: Creating mock withdrawal...');
+        transactionId = nanoid();
+        feeSatoshis = 1000;
+      }
 
       // Store withdrawal transaction if using satellite (SMS/USSD)
       if (useSatellite) {
@@ -325,7 +362,7 @@ export class CkBTCService {
           type: 'withdrawal',
           amountSatoshis: request.amountSatoshis,
           btcAddress: request.btcAddress,
-          feeSatoshis: mockFeeSatoshis,
+          feeSatoshis,
           status: 'pending',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -345,7 +382,7 @@ export class CkBTCService {
       return {
         success: true,
         transactionId,
-        feeSatoshis: mockFeeSatoshis,
+        feeSatoshis,
         estimatedConfirmationTime: 60, // ~1 hour for Bitcoin confirmations
       };
     } catch (error: unknown) {
@@ -361,13 +398,14 @@ export class CkBTCService {
 
   /**
    * Transfer ckBTC between ICP users (INSTANT, <$0.01 fee)
-   * This is the killer feature - Lightning-like speed without Lightning!
    * @param request - Transfer request with sender, recipient, and amount
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   * @param isDemoMode - Whether in demo mode
    */
   static async transfer(
     request: CkBTCTransferRequest,
-    useSatellite?: boolean
+    useSatellite?: boolean,
+    isDemoMode = false
   ): Promise<CkBTCTransferResponse> {
     try {
       // Validate amount
@@ -377,21 +415,35 @@ export class CkBTCService {
         );
       }
 
-      // ICP ICRC-1 transfer via ledger canister (production)
-      // const senderPrincipal = Principal.fromText(request.senderId);
-      // const recipientPrincipal = Principal.fromText(request.recipient);
-      // const ledgerActor = await this.getLedgerActor();
-      // const result = await ledgerActor.icrc1_transfer({
-      //   from_subaccount: [],
-      //   to: { owner: recipientPrincipal, subaccount: [] },
-      //   amount: request.amountSatoshis,
-      //   fee: [CKBTC_CONSTANTS.TRANSFER_FEE_SATOSHIS],
-      //   memo: request.memo ? new TextEncoder().encode(request.memo) : [],
-      //   created_at_time: []
-      // });
+      let transactionId: string;
 
-      // Mock implementation
-      const transactionId = nanoid();
+      if (!isDemoMode) {
+        // PRODUCTION: Execute real ICRC-1 transfer on ICP mainnet
+        console.log('🚀 Production: Executing ICRC-1 transfer on ICP...');
+        const senderPrincipal = toPrincipal(request.senderId);
+        const recipientPrincipal = toPrincipal(request.recipient);
+        const ledgerActor = await getCkBTCLedgerActor();
+        
+        const result = await ledgerActor.icrc1_transfer({
+          from_subaccount: toSubaccount(),
+          to: { owner: recipientPrincipal, subaccount: toSubaccount() },
+          amount: BigInt(request.amountSatoshis),
+          fee: [BigInt(CKBTC_CONSTANTS.TRANSFER_FEE_SATOSHIS)],
+          memo: request.memo ? [new TextEncoder().encode(request.memo)] : [],
+          created_at_time: []
+        });
+
+        if ('Err' in result) {
+          throw new Error(`Transfer failed: ${JSON.stringify(result.Err)}`);
+        }
+
+        transactionId = result.Ok.toString();
+        console.log(`✅ Transfer executed on ICP: ${transactionId}`);
+      } else {
+        // DEMO: Mock transaction
+        console.log('🎭 Demo Mode: Creating mock transfer...');
+        transactionId = nanoid();
+      }
 
       // Store transfer transaction if using satellite (SMS/USSD)
       if (useSatellite) {

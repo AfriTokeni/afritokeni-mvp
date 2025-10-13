@@ -68,7 +68,9 @@ export const CkBTCBalanceCard: React.FC<CkBTCBalanceCardProps> = ({
       } else {
         const balanceData = await CkBTCService.getBalanceWithLocalCurrency(
           principalId,
-          preferredCurrency
+          preferredCurrency,
+          false, // useSatellite
+          isDemoMode
         );
         setBalance(balanceData);
       }

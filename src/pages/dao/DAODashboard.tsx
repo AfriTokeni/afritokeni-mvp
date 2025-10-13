@@ -14,6 +14,7 @@ import CreateProposalModal from '../../components/CreateProposalModal';
 
 const DAODashboard: React.FC = () => {
   const { user } = useAuthentication();
+  const { isDemoMode } = useDemoMode();
   const [tokenBalance, setTokenBalance] = useState<TokenBalance | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [activeTab, setActiveTab] = useState<'proposals' | 'my-tokens' | 'leaderboard'>('proposals');
