@@ -1,13 +1,8 @@
-import { 
-  setDoc, 
-  getDoc, 
-  listDocs
-} from '@junobuild/core';
 import { nanoid } from 'nanoid';
-import { User } from '../types/auth';
-import { AfricanCurrency } from '../types/currency';
-
-
+import { getDoc, setDoc, listDocs, deleteDoc } from '@junobuild/core';
+import type { User, Transaction, Balance, Agent, KYCSubmission, DepositRequest, WithdrawalRequest } from '../types';
+import { formatCurrencyAmount } from '../utils/currencyFormatter';
+import { AfriTokenService } from './afriTokenService';
 
 // Interface for user data as stored in Juno (with string dates)
 export interface UserDataFromJuno {
@@ -487,6 +482,17 @@ export class DataService {
         version: existingDoc?.version ? existingDoc.version : 1n
       }
     });
+
+    // Reward user with AFRI tokens for transaction
+    try {
+      if (transaction.userId && transaction.amount) {
+        await AfriTokenService.rewardTransaction(transaction.userId, transaction.amount);
+        console.log(`✅ Rewarded user ${transaction.userId} with AFRI for transaction`);
+      }
+    } catch (error) {
+      console.error('Error rewarding user with AFRI:', error);
+      // Don't fail the transaction if reward fails
+    }
 
     return newTransaction;
   }
@@ -2755,6 +2761,14 @@ Quote expires in 5 minutes.`;
       // Mark deposit request as completed
       await this.updateDepositRequestStatus(requestId, 'completed');
 
+      // Reward agent with AFRI tokens for processing deposit
+      try {
+        await AfriTokenService.rewardAgentService(agentId, 'deposit');
+        console.log(`✅ Rewarded agent ${agentId} with 50 AFRI for deposit`);
+      } catch (error) {
+        console.error('Error rewarding agent with AFRI:', error);
+      }
+
       // Send SMS notification to user
       try {
         const user = await this.getUserByKey(request.userId);
@@ -3026,6 +3040,14 @@ Quote expires in 5 minutes.`;
         cashBalance: agent.cashBalance - transaction.amount,
         digitalBalance: agent.digitalBalance + transaction.amount
       });
+
+      // Reward agent with AFRI tokens for processing withdrawal
+      try {
+        await AfriTokenService.rewardAgentService(agentId, 'withdrawal');
+        console.log(`✅ Rewarded agent ${agentId} with 50 AFRI for withdrawal`);
+      } catch (error) {
+        console.error('Error rewarding agent with AFRI:', error);
+      }
 
       // Send SMS notification to user
       try {

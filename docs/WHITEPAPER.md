@@ -1,7 +1,7 @@
 # AfriTokeni Whitepaper
 ## SMS-Accessible Crypto Banking for Africa
 
-**Version 1.0 | October 2025**
+**Version 1.3 | October 2025**
 
 ---
 
@@ -695,6 +695,72 @@ Thank you for participating!
 - Marketing campaigns
 - Community grants
 - Emergency reserves
+
+### 8.5 Token Allocation & Distribution
+
+**Initial Allocation (1 Billion AFRI Total):**
+- **40% Community** (400M AFRI)
+  - 25% Agents (250M AFRI)
+  - 15% Users (150M AFRI)
+- **30% Treasury** (300M AFRI) - DAO-controlled for ecosystem growth
+- **20% Investors** (200M AFRI)
+  - 5% Seed (50M AFRI)
+  - 10% Private Sale (100M AFRI)
+  - 5% Public Sale (50M AFRI)
+- **10% Team** (100M AFRI) - 4-year vesting with 1-year cliff
+
+**Automatic Reward Distribution:**
+
+The platform automatically distributes AFRI tokens from the treasury to users and agents based on their activity:
+
+**Users Earn AFRI For:**
+- **Transactions**: 10 AFRI per transaction
+  - Large transactions (>100K UGX): 15 AFRI (50% bonus)
+- **Referrals**: 25 AFRI per successful referral
+- **Staking**: 5 AFRI per day per 1,000 AFRI staked (0.5% daily APY)
+- **Early Adoption**: Bonus multipliers for first 10,000 users
+
+**Agents Earn AFRI For:**
+- **Deposit Processing**: 50 AFRI per deposit
+- **Withdrawal Processing**: 50 AFRI per withdrawal
+- **Bitcoin Exchange**: 100 AFRI per exchange
+- **High Ratings**: Bonus multipliers for 5-star service
+- **Remote Service**: 2x multiplier for serving rural areas
+- **Uptime**: 10 AFRI per day for being online and available
+
+**Distribution Mechanism:**
+1. User/agent completes qualifying action (transaction, deposit, etc.)
+2. Backend validates action and calculates reward
+3. AFRI tokens automatically transferred from treasury to user's principal
+4. Balance updated in real-time
+5. User can immediately stake for voting power or hold
+
+**Example Scenarios:**
+
+*Urban User (Kampala):*
+- Makes 10 transactions per month: 100 AFRI
+- Refers 2 friends: 50 AFRI
+- Stakes 1,000 AFRI for 30 days: 150 AFRI
+- **Total monthly earnings: 300 AFRI**
+
+*Rural Agent (Gulu):*
+- Processes 20 deposits: 1,000 AFRI
+- Processes 15 withdrawals: 750 AFRI
+- 5 Bitcoin exchanges: 500 AFRI
+- Remote service multiplier (2x): +2,250 AFRI
+- **Total monthly earnings: 4,500 AFRI**
+
+**Vesting & Lockup:**
+- Team tokens: 4-year vesting, 1-year cliff
+- Investor tokens: Immediate liquid, optional staking for voting
+- Community rewards: Immediate liquid upon earning
+- Treasury: DAO-controlled, requires governance vote for large allocations
+
+**Token Utility:**
+- **Governance**: 1 AFRI = 1 vote (multiplied by staking duration)
+- **Fee Discounts**: Token holders get reduced transaction fees
+- **Premium Features**: Access to advanced platform features
+- **Staking Rewards**: Earn additional AFRI by locking tokens
 
 ---
 
