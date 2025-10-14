@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthentication } from '../context/AuthenticationContext';
-import { DataService, Agent } from '../services/dataService';
+import { Agent } from '../services/dataService';
+import { UserService } from '../services/UserService';
+import { AgentService } from '../services/AgentService';
 import { TransactionService } from '../services/TransactionService';
+import { BalanceService } from '../services/BalanceService';
+import { SMSService } from '../services/SMSService';
 import { CentralizedDemoService } from '../services/centralizedDemoService';
 import { useDemoMode } from '../context/DemoModeContext';
 import { Transaction } from '../types/transaction';
@@ -49,10 +53,10 @@ export const useAfriTokeni = () => {
             Promise.resolve(demoTransactions)
           );
         } else {
-          await DataService.initializeUserData(user.user.id);
+          // User data initialization handled by services
           dataPromises.push(
-            DataService.getUserBalance(user.user.id),
-            DataService.getUserTransactions(user.user.id)
+            BalanceService.getUserBalance(user.user.id),
+            TransactionService.getUserTransactions(user.user.id)
           );
         }
       }
@@ -61,12 +65,12 @@ export const useAfriTokeni = () => {
       
       // Load agent data if agent is logged in
       if (user?.agent?.id) {
-        await DataService.initializeUserData(user.agent.id);
+        await // UserService.initializeUserData(user.agent.id);
         
         // First get agent data, then get all agent-related transactions
-        const agentData = await DataService.getAgentByUserId(user.agent.id);
+        const agentData = await AgentService.getAgentByUserId(user.agent.id);
         const agentTransactionsData = agentData ? 
-          await DataService.getAllAgentTransactions(agentData.id, user.agent.id) : [];
+          await TransactionService.getAgentTransactions(agentData.id, user.agent.id) : [];
         
         // Add to results manually instead of using promises array
         dataPromises.push(
@@ -148,7 +152,7 @@ export const useAfriTokeni = () => {
     const totalAmount = amount + fee;
 
     // Check if sender has sufficient balance
-    const senderBalance = await DataService.getUserBalance(user.user.id);
+    const senderBalance = await BalanceService.getUserBalance(user.user.id);
     if (!senderBalance || senderBalance.balance < totalAmount) {
       return { success: false, message: 'Insufficient balance' };
     }
@@ -158,7 +162,7 @@ export const useAfriTokeni = () => {
 
     try {
       // Create send transaction for sender
-      const sendTransaction = await DataService.createTransaction({
+      const sendTransaction = await TransactionService.createTransaction({
         userId: user.user.id,
         type: 'send',
         amount: amount,
@@ -175,7 +179,7 @@ export const useAfriTokeni = () => {
       });
 
       // Create receive transaction for recipient
-      await DataService.createTransaction({
+      await TransactionService.createTransaction({
         userId: recipient.id,
         type: 'receive',
         amount: amount,
@@ -195,13 +199,13 @@ export const useAfriTokeni = () => {
         totalAmount,
         newBalance: senderBalance.balance - totalAmount
       });
-      const senderUpdateSuccess = await DataService.updateUserBalance(user.user.id, senderBalance.balance - totalAmount);
+      const senderUpdateSuccess = await BalanceService.updateUserBalance(user.user.id, senderBalance.balance - totalAmount);
       if (!senderUpdateSuccess) {
         throw new Error('Failed to update sender balance');
       }
 
       // Update recipient balance (add amount)
-      const recipientBalance = await DataService.getUserBalance(recipient.id);
+      const recipientBalance = await BalanceService.getUserBalance(recipient.id);
       const newRecipientBalance = (recipientBalance?.balance || 0) + amount;
       console.log('Updating recipient balance:', {
         userId: recipient.id,
@@ -209,7 +213,7 @@ export const useAfriTokeni = () => {
         amount,
         newBalance: newRecipientBalance
       });
-      const recipientUpdateSuccess = await DataService.updateUserBalance(recipient.id, newRecipientBalance);
+      const recipientUpdateSuccess = await BalanceService.updateUserBalance(recipient.id, newRecipientBalance);
       if (!recipientUpdateSuccess) {
         throw new Error('Failed to update recipient balance');
       }
@@ -301,7 +305,7 @@ export const useAfriTokeni = () => {
 
     try {
       // Create transaction
-      await DataService.createTransaction({
+      await TransactionService.createTransaction({
         userId: user.user.id,
         type: 'deposit',
         amount,
@@ -313,7 +317,7 @@ export const useAfriTokeni = () => {
 
       // Update balance
       const newBalance = (balance?.balance || 0) + amount;
-      await DataService.updateUserBalance(user.user.id, newBalance);
+      await BalanceService.updateUserBalance(user.user.id, newBalance);
 
       // Refresh data
       await loadUserData();
@@ -336,7 +340,7 @@ export const useAfriTokeni = () => {
   // Get nearby agents
   const getNearbyAgents = useCallback(async (lat: number, lng: number, radius: number = 5, includeStatuses?: ('available' | 'busy' | 'cash_out' | 'offline')[]) => {
     try {
-      return await DataService.getNearbyAgents(lat, lng, radius, includeStatuses);
+      return await AgentService.getNearbyAgents(lat, lng, radius, includeStatuses);
     } catch (error) {
       console.error('Error getting nearby agents:', error);
       return [];
@@ -347,7 +351,7 @@ export const useAfriTokeni = () => {
   // Process SMS command
   const processSMSCommand = useCallback(async (command: string) => {
     try {
-      return await DataService.processSMSCommand(command, user?.user?.id || '');
+      return await SMSService.processSMSCommand(command, user?.user?.id || '');
     } catch (error) {
       console.error('Error processing SMS command:', error);
       return 'Error processing command';
@@ -361,7 +365,7 @@ export const useAfriTokeni = () => {
     }
 
     try {
-      const success = await DataService.updateAgentStatusByUserId(user.agent.id, status);
+      const success = await AgentService.updateAgentStatusByUserId(user.agent.id, status);
       if (success) {
         // Refresh agent data to reflect the status change
         await loadUserData();
