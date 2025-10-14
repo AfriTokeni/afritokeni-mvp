@@ -22,6 +22,9 @@ export interface Agent {
   digitalBalance: number;
   commissionRate: number;
   createdAt: Date | string;
+  rating?: number;
+  reviewCount?: number;
+  reviews?: any[];
 }
 
 export class AgentService {

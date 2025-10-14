@@ -347,7 +347,7 @@ function requestPinVerification(session: USSDSession, operation: string, nextMen
 async function getUserBalance(phoneNumber: string): Promise<number | null> {
   try {
     console.log(`Getting balance for user: ${phoneNumber}`);
-    const balance = await UserService.getUserBalance(`+${phoneNumber}`);
+    const balance = await BalanceService.getUserBalance(`+${phoneNumber}`);
     
     if (balance) {
       console.log(`✅ Balance retrieved: UGX ${balance.balance}`);
@@ -991,7 +991,7 @@ async function handleTransactionHistory(input: string, session: USSDSession): Pr
     console.log(`PIN already verified for ${session.phoneNumber}, showing transaction history directly`);
     try {
       console.log(`Getting transaction history for ${session.phoneNumber}`);
-      const transactions = await UserService.getUserTransactions(session.phoneNumber, 5);
+      const transactions = await TransactionService.getUserTransactions(session.phoneNumber, 5);
       
       if (transactions.length === 0) {
         return endSession(`Transaction History:
@@ -1061,7 +1061,7 @@ Thank you for using AfriTokeni!`);
       // PIN is correct, get transaction history
       try {
         console.log(`Getting transaction history for ${session.phoneNumber}`);
-        const transactions = await UserService.getUserTransactions(session.phoneNumber, 5);
+        const transactions = await TransactionService.getUserTransactions(session.phoneNumber, 5);
         
         if (transactions.length === 0) {
           return endSession(`Transaction History:
@@ -1566,7 +1566,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       }
       
       // Check user balance first
-      const userBalance = await UserService.getUserBalance(`+${session.phoneNumber}`);
+      const userBalance = await BalanceService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < ugxAmount) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
@@ -2556,7 +2556,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       }
       
       // Check user balance first
-      const userBalance = await UserService.getUserBalance(`+${session.phoneNumber}`);
+      const userBalance = await BalanceService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < amountUGX) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
@@ -3213,7 +3213,7 @@ async function handleSendMoney(input: string, session: USSDSession): Promise<str
       const totalRequired = amount + fee;
 
       // Check user balance
-      const userBalance = await UserService.getUserBalance(`+${session.phoneNumber}`);
+      const userBalance = await BalanceService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < totalRequired) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
@@ -3407,7 +3407,7 @@ async function handleWithdraw(input: string, session: USSDSession): Promise<stri
       // Step 2: Check user balance
       console.log(`Checking balance for ${session.phoneNumber}`);
       try {
-        const userBalance = await UserService.getUserBalance(session.phoneNumber);
+        const userBalance = await BalanceService.getUserBalance(session.phoneNumber);
         
         if (!userBalance) {
           return endSession('Unable to check balance. Please try again later.');

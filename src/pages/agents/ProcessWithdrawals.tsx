@@ -101,7 +101,7 @@ const ProcessWithdrawals: React.FC = () => {
       // Convert filter to status for API call
       const statusFilter = filter === 'all' ? undefined : filter;
       console.log('🏦 ProcessWithdrawals - Calling getAgentWithdrawalRequests with:', { agentId, statusFilter });
-      const rawRequests = await AgentService.getAgentWithdrawalRequests(agentId, statusFilter);
+      const rawRequests = await DepositWithdrawalService.getAgentWithdrawalRequests(agentId, statusFilter);
       console.log('🏦 ProcessWithdrawals - Raw requests received:', rawRequests);
       
       // Use the requests as-is since they already match the WithdrawalRequest interface

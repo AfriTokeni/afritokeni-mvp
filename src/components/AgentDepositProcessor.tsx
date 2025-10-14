@@ -22,7 +22,7 @@ const AgentDepositProcessor: React.FC<AgentDepositProcessorProps> = ({
   const loadDepositRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const requests = await AgentService.getAgentDepositRequests(agentId, 'pending');
+      const requests = await DepositWithdrawalService.getAgentDepositRequests(agentId, 'pending');
       setDepositRequests(requests);
     } catch (error) {
       console.error('Error loading deposit requests:', error);

@@ -49,7 +49,7 @@ const AgentCustomers: React.FC = () => {
           users.map(async (user: UserType) => {
             try {
               // Get user transactions to calculate stats
-              const transactions = await UserService.getUserTransactions(user.id);
+              const transactions = await TransactionService.getUserTransactions(user.id);
               
               // Calculate total volume and transaction count
               const totalVolume = transactions.reduce((sum, transaction) => {

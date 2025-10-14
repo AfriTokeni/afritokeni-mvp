@@ -203,7 +203,7 @@ const ProcessDeposit: React.FC = () => {
       let currentBalance = 0;
       
       try {
-        const balanceData = await UserService.getUserBalance(customerId);
+        const balanceData = await BalanceService.getUserBalance(customerId);
         currentBalance = balanceData?.balance || 0;
       } catch {
         console.log('No existing balance found, starting with 0');
@@ -257,7 +257,7 @@ const ProcessDeposit: React.FC = () => {
       });
 
       // 5. Agent gets commission added to their main balance (both balances and agents collections)
-      const agentBalance = await UserService.getUserBalance(user.agent.id);
+      const agentBalance = await BalanceService.getUserBalance(user.agent.id);
       const currentAgentBalance = agentBalance?.balance || 0;
       const newAgentBalance = currentAgentBalance + commissionAmount;
       

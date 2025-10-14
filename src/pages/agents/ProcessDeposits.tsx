@@ -113,7 +113,7 @@ const ProcessDeposits: React.FC = () => {
       
       // Convert filter to status for API call
       const statusFilter = filter === 'all' ? undefined : filter;
-      const rawRequests = await AgentService.getAgentDepositRequests(agentId, statusFilter);
+      const rawRequests = await DepositWithdrawalService.getAgentDepositRequests(agentId, statusFilter);
       
       // Transform the requests to match the component's expected structure
       const transformedRequests = rawRequests.map(request => ({
