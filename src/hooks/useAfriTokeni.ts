@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthentication } from '../context/AuthenticationContext';
-import { Agent } from '../services/agentService';
-import { UserService } from '../services/UserService';
-import { AgentService } from '../services/AgentService';
-import { TransactionService } from '../services/TransactionService';
-import { BalanceService } from '../services/BalanceService';
-import { SMSService } from '../services/SMSService';
+import { Agent, AgentService } from '../services/agentService';
+import { UserService } from '../services/userService';
+import { TransactionService } from '../services/transactionService';
+import { BalanceService } from '../services/balanceService';
+import { SMSService } from '../services/smsService';
 import { CentralizedDemoService } from '../services/centralizedDemoService';
 import { useDemoMode } from '../context/DemoModeContext';
 import { Transaction } from '../types/transaction';
