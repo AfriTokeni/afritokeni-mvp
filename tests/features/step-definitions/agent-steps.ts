@@ -1,7 +1,7 @@
 import { Given, When, Then } from "@cucumber/cucumber";
 import assert from "assert";
 import { world } from "./shared-steps.js";
-import { DataService } from '../../../src/services/dataService.js';
+// DataService eliminated - using specialized services
 
 Given('I am an agent with {int} {word} digital balance', async function (amount: number, currency: string) {
   const agent = await DataService.createAgent({

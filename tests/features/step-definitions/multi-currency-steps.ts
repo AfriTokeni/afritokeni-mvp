@@ -1,7 +1,7 @@
 import { Given, When, Then } from "@cucumber/cucumber";
 import assert from "assert";
 import { world } from "./shared-steps.js";
-import { DataService } from '../../../src/services/dataService.js';
+// DataService eliminated - using specialized services
 
 Given('I am a user in {word}', async function (country: string) {
   world.country = country;
