@@ -296,47 +296,47 @@ const AgentMapPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
         {/* Search and Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Search & Filter Agents</h2>
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Search & Filter Agents</h2>
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
               <button
                 onClick={() => setViewMode('list')}
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center justify-center flex-1 sm:flex-initial px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
                   viewMode === 'list'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <List className="h-4 w-4 mr-2" />
+                <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                 List
               </button>
               <button
                 onClick={() => setViewMode('map')}
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center justify-center flex-1 sm:flex-initial px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
                   viewMode === 'map'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Map className="h-4 w-4 mr-2" />
+                <Map className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                 Map
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             {/* Search */}
             <div className="relative md:col-span-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search agents or locations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
               />
             </div>
 
@@ -346,7 +346,7 @@ const AgentMapPage: React.FC = () => {
                 value={filterRadius}
                 onChange={(e) => setFilterRadius(Number(e.target.value))}
                 disabled={!userLocation}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
+                className={`w-full px-2.5 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
                   !userLocation ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''
                 }`}
               >
@@ -365,30 +365,30 @@ const AgentMapPage: React.FC = () => {
                 id="onlineOnly"
                 checked={showOnlineOnly}
                 onChange={(e) => setShowOnlineOnly(e.target.checked)}
-                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
               />
-              <label htmlFor="onlineOnly" className="ml-2 text-sm text-gray-700">
+              <label htmlFor="onlineOnly" className="ml-2 text-xs sm:text-sm text-gray-700">
                 Online agents only
               </label>
             </div>
           </div>
 
           {/* Location Status - Moved below filters */}
-          <div className="mt-4 flex items-center justify-between text-sm">
+          <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs sm:text-sm gap-2">
             {locationPermission === 'granted' ? (
               <span className="text-green-600 font-medium flex items-center">
-                <Navigation className="h-4 w-4 mr-2" />
-                📍 Location enabled - showing agents near you
+                <Navigation className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                <span className="break-words">📍 Location enabled - showing agents near you</span>
               </span>
             ) : (
-              <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-2">
                 <span className="text-orange-600 font-medium flex items-center">
-                  <Navigation className="h-4 w-4 mr-2" />
-                  ⚠️ Location disabled - distance filter unavailable
+                  <Navigation className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                  <span className="break-words">⚠️ Location disabled - distance filter unavailable</span>
                 </span>
                 <button
                   onClick={getUserLocation}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
                 >
                   Enable location
                 </button>
@@ -398,14 +398,14 @@ const AgentMapPage: React.FC = () => {
         </div>
 
         {/* Results Summary */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <p className="text-gray-600">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <p className="text-sm sm:text-base text-gray-600">
               Found {sortedAgents.length} agent{sortedAgents.length !== 1 ? 's' : ''} 
               {userLocation && ` within ${filterRadius}km`}
             </p>
-            <div className="flex items-center text-sm text-gray-500">
-              <Users className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
               {sortedAgents.filter(a => a.isActive).length} online
             </div>
           </div>
@@ -414,33 +414,33 @@ const AgentMapPage: React.FC = () => {
         {/* Agent Display */}
         {viewMode === 'list' ? (
           /* Agent Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {sortedAgents.map((agent) => (
             <div
               key={agent.id}
-              className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+              className={`bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                 selectedAgent?.id === agent.id ? 'ring-2 ring-gray-500' : ''
               }`}
               onClick={() => setSelectedAgent(selectedAgent?.id === agent.id ? null : agent)}
             >
               {/* Agent Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1">
+              <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 break-words">
                     {agent.businessName}
                   </h3>
-                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    {agent.location.address}
+                  <div className="flex items-start text-xs sm:text-sm text-gray-600 mb-2">
+                    <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 flex-shrink-0 mt-0.5" />
+                    <span className="break-words">{agent.location.address}</span>
                   </div>
                   {userLocation && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Navigation className="h-4 w-4 mr-1" />
-                      {formatDistance(agent)} away
+                    <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                      <Navigation className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                      <span className="whitespace-nowrap">{formatDistance(agent)} away</span>
                     </div>
                   )}
                 </div>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                <div className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 ${
                   agent.isActive 
                     ? 'bg-green-100 text-green-800' 
                     : 'bg-gray-100 text-gray-600'
@@ -450,16 +450,16 @@ const AgentMapPage: React.FC = () => {
               </div>
 
               {/* Agent Stats */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="min-w-0">
                   <p className="text-xs text-gray-500 mb-1">Cash Available</p>
-                  <p className="font-mono font-semibold text-gray-900">
+                  <p className="text-sm sm:text-base font-mono font-semibold text-gray-900 break-all">
                     {formatBalance(agent.cashBalance)} UGX
                   </p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs text-gray-500 mb-1">Commission</p>
-                  <p className="font-mono font-semibold text-gray-900">
+                  <p className="text-sm sm:text-base font-mono font-semibold text-gray-900">
                     {(agent.commissionRate < 1 ? agent.commissionRate * 100 : agent.commissionRate).toFixed(1)}%
                   </p>
                 </div>
@@ -467,44 +467,44 @@ const AgentMapPage: React.FC = () => {
 
               {/* Rating */}
               {agent.rating && agent.reviewCount ? (
-                <div className="mb-4">
+                <div className="mb-3 sm:mb-4">
                   <div className="flex items-center mb-2">
-                    <div className="flex items-center">
+                    <div className="flex items-center flex-shrink-0">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`h-4 w-4 ${
+                          className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
                             star <= Math.round(agent.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="ml-2 text-sm text-gray-600">
+                    <span className="ml-2 text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                       {agent.rating.toFixed(1)} ({agent.reviewCount} reviews)
                     </span>
                   </div>
                   
                   {/* Recent Reviews */}
                   {agent.reviews && agent.reviews.length > 0 && selectedAgent?.id === agent.id && (
-                    <div className="space-y-2 mt-3 max-h-48 overflow-y-auto">
+                    <div className="space-y-2 mt-2 sm:mt-3 max-h-48 overflow-y-auto">
                       <p className="text-xs font-medium text-gray-700 mb-2">Recent Reviews</p>
                       {agent.reviews.map((review) => (
-                        <div key={review.id} className="bg-gray-50 rounded-lg p-3 text-xs">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-gray-900">{review.userName}</span>
-                            <div className="flex items-center">
+                        <div key={review.id} className="bg-gray-50 rounded-lg p-2.5 sm:p-3 text-xs">
+                          <div className="flex items-center justify-between mb-1 gap-2">
+                            <span className="font-medium text-gray-900 truncate">{review.userName}</span>
+                            <div className="flex items-center flex-shrink-0">
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
                                   key={star}
-                                  className={`h-3 w-3 ${
+                                  className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${
                                     star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
                                   }`}
                                 />
                               ))}
                             </div>
                           </div>
-                          <p className="text-gray-600">{review.comment}</p>
-                          <p className="text-gray-400 mt-1">
+                          <p className="text-gray-600 break-words">{review.comment}</p>
+                          <p className="text-gray-400 mt-1 text-xs">
                             {new Date(review.createdAt).toLocaleDateString()}
                           </p>
                         </div>
@@ -513,58 +513,58 @@ const AgentMapPage: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center mb-4 text-sm text-gray-500">
+                <div className="flex items-center mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500">
                   <span>No reviews yet</span>
                 </div>
               )}
 
               {/* Services */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full whitespace-nowrap">
                   Cash Deposit
                 </span>
-                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full whitespace-nowrap">
                   Withdrawal
                 </span>
-                <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full whitespace-nowrap">
                   Bitcoin Exchange
                 </span>
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <button className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-200">
+                <button className="flex-1 bg-gray-900 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors duration-200">
                   Contact Agent
                 </button>
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
-                  <Phone className="h-4 w-4" />
+                <button className="px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
+                  <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               </div>
 
               {/* Expanded Details */}
               {selectedAgent?.id === agent.id && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="space-y-3">
+                <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                  <div className="space-y-2.5 sm:space-y-3">
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Operating Hours</p>
-                      <div className="flex items-center text-sm text-gray-700">
-                        <Clock className="h-4 w-4 mr-2" />
-                        Mon-Sat: 8:00 AM - 8:00 PM
+                      <div className="flex items-center text-xs sm:text-sm text-gray-700">
+                        <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                        <span className="break-words">Mon-Sat: 8:00 AM - 8:00 PM</span>
                       </div>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Services Available</p>
-                      <ul className="text-sm text-gray-700 space-y-1">
-                        <li>• Cash deposits and withdrawals</li>
-                        <li>• Bitcoin buying and selling</li>
-                        <li>• Money transfers</li>
-                        <li>• Account verification</li>
+                      <ul className="text-xs sm:text-sm text-gray-700 space-y-1">
+                        <li className="break-words">• Cash deposits and withdrawals</li>
+                        <li className="break-words">• Bitcoin buying and selling</li>
+                        <li className="break-words">• Money transfers</li>
+                        <li className="break-words">• Account verification</li>
                       </ul>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Contact Information</p>
-                      <p className="text-sm text-gray-700">+256 700 123 456</p>
-                      <p className="text-sm text-gray-700">agent@afritokeni.com</p>
+                      <p className="text-xs sm:text-sm text-gray-700 break-words">+256 700 123 456</p>
+                      <p className="text-xs sm:text-sm text-gray-700 break-all">agent@afritokeni.com</p>
                     </div>
                   </div>
                 </div>
@@ -574,8 +574,8 @@ const AgentMapPage: React.FC = () => {
           </div>
         ) : (
           /* Map View */
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <div className="h-[600px] rounded-lg overflow-hidden">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden">
               <MapContainer
                 center={userLocation ? [userLocation.lat, userLocation.lng] : [0, 20]}
                 zoom={userLocation ? 13 : 3}
@@ -659,29 +659,29 @@ const AgentMapPage: React.FC = () => {
             
             {/* Selected Agent Details */}
             {selectedAgent && viewMode === 'map' && (
-              <div className="mt-6 bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">{selectedAgent.businessName}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div>
+              <div className="mt-4 sm:mt-6 bg-gray-50 rounded-lg p-3 sm:p-4">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3 break-words">{selectedAgent.businessName}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <div className="min-w-0">
                     <span className="text-gray-500">Address:</span>
-                    <p className="text-gray-900">{selectedAgent.location.address}</p>
+                    <p className="text-gray-900 break-words">{selectedAgent.location.address}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-gray-500">Cash Available:</span>
-                    <p className="font-mono text-gray-900">{formatBalance(selectedAgent.cashBalance)} UGX</p>
+                    <p className="font-mono text-gray-900 break-all">{formatBalance(selectedAgent.cashBalance)} UGX</p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-gray-500">Commission:</span>
                     <p className="font-mono text-gray-900">{selectedAgent.commissionRate < 1 ? (selectedAgent.commissionRate * 100).toFixed(1) : selectedAgent.commissionRate}%</p>
                   </div>
                 </div>
-                <div className="flex gap-2 mt-4">
-                  <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-200">
+                <div className="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-4">
+                  <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors duration-200">
                     Contact Agent
                   </button>
                   <button 
                     onClick={() => setSelectedAgent(null)}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200"
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors duration-200"
                   >
                     Close
                   </button>
@@ -693,10 +693,10 @@ const AgentMapPage: React.FC = () => {
 
         {/* Empty State */}
         {sortedAgents.length === 0 && (
-          <div className="text-center py-12">
-            <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No agents found</h3>
-            <p className="text-gray-600 mb-4">
+          <div className="text-center py-8 sm:py-12">
+            <MapPin className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No agents found</h3>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 px-4">
               Try adjusting your search criteria or increasing the distance radius.
             </p>
             <button
@@ -705,7 +705,7 @@ const AgentMapPage: React.FC = () => {
                 setFilterRadius(50);
                 setShowOnlineOnly(false);
               }}
-              className="bg-gray-900 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200"
+              className="bg-gray-900 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-800 transition-colors duration-200"
             >
               Clear Filters
             </button>

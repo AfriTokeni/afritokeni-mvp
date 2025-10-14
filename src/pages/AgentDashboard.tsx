@@ -204,7 +204,7 @@ const AgentDashboard: React.FC = () => {
   const missingFields = getMissingFields();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6">
       {/* Demo Mode Modal */}
       <DemoModeModal 
         isOpen={showDemoModal} 
@@ -234,7 +234,7 @@ const AgentDashboard: React.FC = () => {
         notifications={notifications}
         onDismiss={dismissNotification}
       /> */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-5 md:space-y-6">
         {/* KYC Banner - Critical if not verified */}
         {showKYCBanner && (kycStatus !== 'verified' || missingFields.length > 0) && (
           <AgentKYCBanner
@@ -248,30 +248,30 @@ const AgentDashboard: React.FC = () => {
         {/* Agent Verification Status - Only show if KYC is verified */}
         {showVerificationAlert && kycStatus === 'verified' &&
           (agent?.isActive ? (
-            <div className="relative rounded-lg border border-green-200 bg-green-50 p-4">
+            <div className="relative rounded-lg border border-green-200 bg-green-50 p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-green-800">
+                <p className="text-xs sm:text-sm text-green-800">
                   ✓ Agent verified and active
                 </p>
                 <button
                   onClick={() => setShowVerificationAlert(false)}
-                  className="text-green-600 transition-colors hover:text-green-800"
+                  className="text-green-600 transition-colors hover:text-green-800 flex-shrink-0"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="relative rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+            <div className="relative rounded-lg border border-yellow-200 bg-yellow-50 p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-yellow-800">
+                <p className="text-xs sm:text-sm text-yellow-800">
                   ⚠ Agent verification pending
                 </p>
                 <button
                   onClick={() => setShowVerificationAlert(false)}
-                  className="text-yellow-600 transition-colors hover:text-yellow-800"
+                  className="text-yellow-600 transition-colors hover:text-yellow-800 flex-shrink-0"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               </div>
             </div>
@@ -281,16 +281,16 @@ const AgentDashboard: React.FC = () => {
         {liquidityAlerts.map((alert, index) => (
           <div
             key={index}
-            className={`rounded-2xl border p-4 ${
+            className={`rounded-xl sm:rounded-2xl border p-3 sm:p-4 ${
               alert.type === "critical"
                 ? "border-red-200 bg-red-50"
                 : "border-yellow-200 bg-yellow-50"
             }`}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
                 <h4
-                  className={`mb-1 text-sm font-semibold ${
+                  className={`mb-1 text-xs sm:text-sm md:text-base font-semibold break-words ${
                     alert.type === "critical"
                       ? "text-red-800"
                       : "text-yellow-800"
@@ -299,7 +299,7 @@ const AgentDashboard: React.FC = () => {
                   {alert.title}
                 </h4>
                 <p
-                  className={`text-sm ${
+                  className={`text-xs sm:text-sm break-words ${
                     alert.type === "critical"
                       ? "text-red-700"
                       : "text-yellow-700"
@@ -308,7 +308,7 @@ const AgentDashboard: React.FC = () => {
                   {alert.message}
                 </p>
                 <p
-                  className={`mt-1 font-mono text-xs ${
+                  className={`mt-1 font-mono text-xs break-words ${
                     alert.type === "critical"
                       ? "text-red-600"
                       : "text-yellow-600"
@@ -319,7 +319,7 @@ const AgentDashboard: React.FC = () => {
               </div>
               <button
                 onClick={() => navigate(alert.link)}
-                className={`ml-4 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                className={`w-full sm:w-auto flex-shrink-0 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
                   alert.type === "critical"
                     ? "bg-red-600 text-white hover:bg-red-700"
                     : "bg-yellow-600 text-white hover:bg-yellow-700"
@@ -376,17 +376,17 @@ const AgentDashboard: React.FC = () => {
         </div> */}
 
         {/* Stats Row - AT THE TOP */}
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3 mb-6">
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
-                <TrendingUp className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-5 md:grid-cols-3 mb-4 sm:mb-5 md:mb-6">
+          <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm sm:p-4 md:p-5 lg:p-6">
+            <div className="flex items-center space-x-2.5 sm:space-x-3 md:space-x-4">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-10 sm:w-10 md:h-12 md:w-12">
+                <TrendingUp className="h-4 w-4 text-neutral-600 sm:h-5 sm:w-5 md:h-6 md:w-6 flex-shrink-0" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
                   Daily Earnings
                 </p>
-                <p className="text-lg font-bold text-neutral-900 sm:text-2xl">
+                <p className="text-base font-bold text-neutral-900 sm:text-lg md:text-xl lg:text-2xl break-words">
                   {isDemoMode 
                     ? formatCurrencyAmount(125000, agentCurrency as AfricanCurrency)
                     : formatCurrencyAmount(0, agentCurrency as AfricanCurrency)}
@@ -395,32 +395,32 @@ const AgentDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
-                <CreditCard className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
+          <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm sm:p-4 md:p-5 lg:p-6">
+            <div className="flex items-center space-x-2.5 sm:space-x-3 md:space-x-4">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-10 sm:w-10 md:h-12 md:w-12">
+                <CreditCard className="h-4 w-4 text-neutral-600 sm:h-5 sm:w-5 md:h-6 md:w-6 flex-shrink-0" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
-                  Today's Transactions
+                  Today&apos;s Transactions
                 </p>
-                <p className="text-lg font-bold text-neutral-900 sm:text-2xl">
+                <p className="text-base font-bold text-neutral-900 sm:text-lg md:text-xl lg:text-2xl">
                   {isDemoMode ? '47' : '0'}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-12 sm:w-12">
-                <Users className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
+          <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm sm:p-4 md:p-5 lg:p-6">
+            <div className="flex items-center space-x-2.5 sm:space-x-3 md:space-x-4">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-10 sm:w-10 md:h-12 md:w-12">
+                <Users className="h-4 w-4 text-neutral-600 sm:h-5 sm:w-5 md:h-6 md:w-6 flex-shrink-0" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-neutral-600 sm:text-sm">
                   Active Customers
                 </p>
-                <p className="text-lg font-bold text-neutral-900 sm:text-2xl">
+                <p className="text-base font-bold text-neutral-900 sm:text-lg md:text-xl lg:text-2xl">
                   {isDemoMode ? '28' : '2'}
                 </p>
               </div>
@@ -429,17 +429,17 @@ const AgentDashboard: React.FC = () => {
         </div>
 
         {/* Balance Cards Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mb-4 sm:mb-5 md:mb-6">
           {/* Digital Balance Card (Primary - Operations) */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-8">
-            <div className="mb-6 flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <p className="text-sm font-medium text-gray-600">Digital Balance</p>
+          <div className="rounded-xl sm:rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 md:p-7 lg:p-8">
+            <div className="mb-4 sm:mb-5 md:mb-6 flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0 w-full sm:w-auto">
+                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Digital Balance</p>
                   <span className="text-xs text-gray-400">Operations</span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <p className="font-mono text-3xl font-bold text-gray-900">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <p className="font-mono text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 break-words">
                     {showBalance
                       ? formatCurrencyAmount(
                           isDemoMode
@@ -451,19 +451,19 @@ const AgentDashboard: React.FC = () => {
                   </p>
                   <button
                     onClick={() => setShowBalance(!showBalance)}
-                    className="text-gray-400"
+                    className="text-gray-400 flex-shrink-0"
                   >
                     {showBalance ? (
-                      <EyeOff className="h-5 w-5" />
+                      <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
                     ) : (
-                      <Eye className="h-5 w-5" />
+                      <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
                     )}
                   </button>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="rounded-xl bg-blue-50 p-3">
-                  <CreditCard className="h-6 w-6 text-blue-600" />
+              <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                <div className="rounded-xl bg-blue-50 p-2 sm:p-2.5 md:p-3">
+                  <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
                 </div>
                 <CurrencySelector
                   currentCurrency={agentCurrency}
@@ -473,22 +473,22 @@ const AgentDashboard: React.FC = () => {
             </div>
             <button
               onClick={() => navigate("/agents/funding")}
-              className="w-full rounded-xl bg-gray-900 py-3 font-semibold text-white transition-colors hover:bg-gray-800"
+              className="w-full rounded-lg sm:rounded-xl bg-gray-900 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-semibold text-white transition-colors hover:bg-gray-800"
             >
               Add Funds
             </button>
           </div>
 
           {/* Cash Balance Card (Earnings) */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-8">
-            <div className="mb-6 flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <p className="text-sm font-medium text-gray-600">Cash Balance</p>
+          <div className="rounded-xl sm:rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 md:p-7 lg:p-8">
+            <div className="mb-4 sm:mb-5 md:mb-6 flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0 w-full sm:w-auto">
+                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Cash Balance</p>
                   <span className="text-xs text-gray-400">Earnings</span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <p className="font-mono text-3xl font-bold text-gray-900">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <p className="font-mono text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 break-words">
                     {showBalance
                       ? formatCurrencyAmount(
                           isDemoMode
@@ -500,19 +500,19 @@ const AgentDashboard: React.FC = () => {
                   </p>
                   <button
                     onClick={() => setShowBalance(!showBalance)}
-                    className="text-gray-400"
+                    className="text-gray-400 flex-shrink-0"
                   >
                     {showBalance ? (
-                      <EyeOff className="h-5 w-5" />
+                      <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
                     ) : (
-                      <Eye className="h-5 w-5" />
+                      <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
                     )}
                   </button>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="rounded-xl bg-green-50 p-3">
-                  <Wallet className="h-6 w-6 text-green-600" />
+              <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                <div className="rounded-xl bg-green-50 p-2 sm:p-2.5 md:p-3">
+                  <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 flex-shrink-0" />
                 </div>
                 <CurrencySelector
                   currentCurrency={agentCurrency}
@@ -522,7 +522,7 @@ const AgentDashboard: React.FC = () => {
             </div>
             <button
               onClick={() => navigate("/agents/settlement")}
-              className="w-full rounded-xl bg-gray-900 py-3 font-semibold text-white transition-colors hover:bg-gray-800"
+              className="w-full rounded-lg sm:rounded-xl bg-gray-900 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-semibold text-white transition-colors hover:bg-gray-800"
             >
               Withdraw Earnings
             </button>
@@ -530,7 +530,7 @@ const AgentDashboard: React.FC = () => {
         </div>
 
         {/* ckBTC and ckUSDC Balance Cards - Always show */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mb-4 sm:mb-5 md:mb-6">
           <CkBTCBalanceCard
             principalId={currentAgent?.id || 'demo-agent'}
             preferredCurrency={agentCurrency}
@@ -604,9 +604,9 @@ const AgentDashboard: React.FC = () => {
 
         {/* Recent Transactions */}
         <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
-          <div className="border-b border-neutral-200 p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-neutral-900 sm:text-lg">
+          <div className="border-b border-neutral-200 p-3 sm:p-4 md:p-5 lg:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+              <h3 className="text-sm font-bold text-neutral-900 sm:text-base md:text-lg">
                 Recent Transactions
               </h3>
               <CurrencySelector
@@ -620,17 +620,17 @@ const AgentDashboard: React.FC = () => {
                 placeholder="Search transactions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 border border-neutral-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               />
             </div>
           </div>
-          <div className="divide-y divide-neutral-100 p-4 sm:p-6 max-h-96 overflow-y-auto">
+          <div className="divide-y divide-neutral-100 p-3 sm:p-4 md:p-5 lg:p-6 max-h-96 overflow-y-auto">
             {agentTransactions.filter(tx => 
               !searchQuery || 
               tx.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
               tx.type.toLowerCase().includes(searchQuery.toLowerCase())
             ).length === 0 ? (
-              <p className="py-8 text-center text-sm text-neutral-500">
+              <p className="py-6 sm:py-8 text-center text-xs sm:text-sm text-neutral-500">
                 No recent transactions
               </p>
             ) : (
@@ -641,11 +641,11 @@ const AgentDashboard: React.FC = () => {
               ).slice(0, 20).map((transaction: Transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between border-b border-neutral-100 py-3 last:border-b-0"
+                  className="flex items-center justify-between border-b border-neutral-100 py-2.5 sm:py-3 last:border-b-0 gap-2 sm:gap-3"
                 >
-                  <div className="flex min-w-0 flex-1 items-center space-x-3 sm:space-x-4">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-neutral-100 sm:h-10 sm:w-10">
-                      <span className="text-xs font-bold text-neutral-600 sm:text-sm">
+                  <div className="flex min-w-0 flex-1 items-center space-x-2 sm:space-x-3 md:space-x-4">
+                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-neutral-100 sm:h-8 sm:w-8 md:h-10 md:w-10">
+                      <span className="text-xs font-bold text-neutral-600 sm:text-xs md:text-sm">
                         {transaction.type === "send" ? "S" : transaction.type === "receive" ? "R" : transaction.type === "withdraw" ? "W" : "TX"}
                       </span>
                     </div>
@@ -653,16 +653,16 @@ const AgentDashboard: React.FC = () => {
                       <p className="truncate text-xs font-semibold text-neutral-900 sm:text-sm">
                         {transaction.description || `${transaction.type} transaction`}
                       </p>
-                      <p className="mt-1 truncate text-xs font-medium text-neutral-600">
+                      <p className="mt-0.5 sm:mt-1 truncate text-xs font-medium text-neutral-600">
                         {new Date(transaction.createdAt).toLocaleString()}
                       </p>
                     </div>
                   </div>
-                  <div className="ml-2 flex-shrink-0 text-right">
-                    <div className="font-mono text-xs font-bold text-neutral-900 sm:text-sm">
+                  <div className="flex-shrink-0 text-right">
+                    <div className="font-mono text-xs font-bold text-neutral-900 sm:text-sm break-words">
                       {formatCurrencyAmount(transaction.amount, agentCurrency as AfricanCurrency)}
                     </div>
-                    <div className="mt-1 text-xs">
+                    <div className="mt-0.5 sm:mt-1 text-xs">
                       <span className="font-mono font-bold text-green-600">
                         +{formatCurrencyAmount(Math.round(transaction.amount * 0.02), agentCurrency as AfricanCurrency)}
                       </span>

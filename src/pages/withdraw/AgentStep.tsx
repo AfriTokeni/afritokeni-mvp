@@ -235,23 +235,23 @@ const AgentStep: React.FC<AgentStepProps> = ({
   const renderAgentDetails = (agent: DBAgent) => (
     <div className="min-w-48">
       {/* Agent Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1">
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 break-words">
             {agent.businessName}
           </h3>
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            <MapPin className="h-4 w-4 mr-1" />
-            {agent.location.address}
+          <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-2">
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+            <span className="break-words">{agent.location.address}</span>
           </div>
           {userLocation && (
-            <div className="flex items-center text-sm text-gray-500">
-              <Navigation className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <Navigation className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
               {formatDistance(agent, userLocation)} away
             </div>
           )}
         </div>
-        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+        <div className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-2 ${
           agent.status === 'available'
             ? 'bg-green-100 text-green-800' 
             : agent.status === 'busy'
@@ -263,16 +263,16 @@ const AgentStep: React.FC<AgentStepProps> = ({
       </div>
 
       {/* Agent Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
         <div>
           <p className="text-xs text-gray-500 mb-1">Digital Balance</p>
-          <p className="font-mono font-semibold text-gray-900">
+          <p className="text-xs sm:text-sm font-mono font-semibold text-gray-900 break-words">
             {formatBalance(agent.digitalBalance || 0)} {userCurrency || 'UGX'}
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1">Cash Available</p>
-          <p className="font-mono font-semibold text-gray-900">
+          <p className="text-xs sm:text-sm font-mono font-semibold text-gray-900 break-words">
             {formatBalance(agent.cashBalance || 0)} {userCurrency || 'UGX'}
           </p>
         </div>
@@ -328,7 +328,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
       )}
 
       {/* Services */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
           Cash Deposit
         </span>
@@ -348,30 +348,30 @@ const AgentStep: React.FC<AgentStepProps> = ({
             onAgentSelect(agent);
           }}
           disabled={isCreatingTransaction}
-          className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
+          className="flex-1 bg-gray-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
         >
-          {isCreatingTransaction ? 'Creating Withdrawal...' : 'Select Agent'}
+          {isCreatingTransaction ? 'Creating...' : 'Select Agent'}
         </button>
-        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
-          <Phone className="h-4 w-4" />
+        <button className="px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 text-gray-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors duration-200">
+          <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
       </div>
     </div>
   );
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex items-center space-x-4">
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+      <div className="flex items-center space-x-3 sm:space-x-4">
         <button
           onClick={onBackToAmount}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
           <span className="font-medium text-xs sm:text-sm lg:text-base">Back to Amount</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-3 sm:p-6 border-b border-gray-200">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0 mb-4 sm:mb-6">
             <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">Select Agent</h2>
             {localAmount && (

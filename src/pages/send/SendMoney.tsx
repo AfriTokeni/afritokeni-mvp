@@ -181,53 +181,53 @@ const SendMoney: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Step Indicator */}
-      <div className="mb-8 flex items-center justify-center">
-        <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
-          <div className={`flex items-center space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : 'text-green-600'}`}>
-            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'amount' ? 'bg-gray-900 text-white' : 'bg-green-600 text-white'}`}>
+      <div className="mb-6 sm:mb-8 flex items-center justify-center px-2">
+        <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto pb-2">
+          <div className={`flex items-center space-x-1.5 sm:space-x-2 ${currentStep === 'amount' ? 'text-gray-900' : 'text-green-600'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold flex-shrink-0 ${currentStep === 'amount' ? 'bg-gray-900 text-white' : 'bg-green-600 text-white'}`}>
               1
             </div>
-            <span className="text-xs font-medium whitespace-nowrap">Enter Amount</span>
+            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Enter Amount</span>
           </div>
           
-          <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'recipient' || currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          <div className={`w-4 sm:w-8 h-0.5 flex-shrink-0 ${currentStep === 'recipient' || currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
           
-          <div className={`flex items-center space-x-2 ${currentStep === 'recipient' ? 'text-gray-900' : currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'recipient' ? 'bg-gray-900 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+          <div className={`flex items-center space-x-1.5 sm:space-x-2 ${currentStep === 'recipient' ? 'text-gray-900' : currentStep === 'confirmation' ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold flex-shrink-0 ${currentStep === 'recipient' ? 'bg-gray-900 text-white' : currentStep === 'confirmation' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
               2
             </div>
-            <span className="text-xs font-medium whitespace-nowrap">Recipient Details</span>
+            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Recipient Details</span>
           </div>
           
-          <div className={`w-4 sm:w-8 h-0.5 ${currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+          <div className={`w-4 sm:w-8 h-0.5 flex-shrink-0 ${currentStep === 'confirmation' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
           
-          <div className={`flex items-center space-x-2 ${currentStep === 'confirmation' ? 'text-gray-900' : 'text-gray-400'}`}>
-            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${currentStep === 'confirmation' ? 'bg-gray-900 text-white' : 'bg-gray-200'}`}>
+          <div className={`flex items-center space-x-1.5 sm:space-x-2 ${currentStep === 'confirmation' ? 'text-gray-900' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold flex-shrink-0 ${currentStep === 'confirmation' ? 'bg-gray-900 text-white' : 'bg-gray-200'}`}>
               3
             </div>
-            <span className="text-xs font-medium whitespace-nowrap">Confirmation</span>
+            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Confirmation</span>
           </div>
         </div>
       </div>
 
       {/* Amount Step */}
       {currentStep === 'amount' && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Send Amount</h2>
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Enter Send Amount</h2>
 
             {/* Balance Cards - Reusing Dashboard Components */}
-            <div className="mb-6 space-y-4">
+            <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
               {/* Primary Balance Card */}
-              <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
+              <div className="bg-white rounded-lg sm:rounded-xl border border-neutral-200 p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-medium text-neutral-500">{userCurrency}</span>
                       <span className="text-xs text-neutral-400">Primary Balance</span>
                     </div>
-                    <p className="text-3xl font-bold text-neutral-900 font-mono">
+                    <p className="text-2xl sm:text-3xl font-bold text-neutral-900 font-mono truncate">
                       {userCurrency} {formatCurrencyAmount(getDisplayBalance(), userCurrency as AfricanCurrency).replace(userCurrency, '').trim()}
                     </p>
                   </div>
@@ -246,7 +246,7 @@ const SendMoney: React.FC = () => {
 
               {/* ckBTC and ckUSDC Balance Cards */}
               {isDemoMode && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <CkBTCBalanceCard
                     principalId={user?.user?.id || "demo-user"}
                     preferredCurrency={userCurrency}
@@ -264,27 +264,27 @@ const SendMoney: React.FC = () => {
             </div>
 
             {/* Send Type Selection */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-900 mb-3">What would you like to send?</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mb-4 sm:mb-6">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2 sm:mb-3">What would you like to send?</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 <button
                   type="button"
                   onClick={() => setSendType('local')}
-                  className={`p-6 border-2 rounded-2xl text-left transition-all ${
+                  className={`p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all ${
                     sendType === 'local'
                       ? 'border-gray-900 bg-gray-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start space-x-3">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${
                       sendType === 'local' ? 'bg-gray-100' : 'bg-gray-50'
                     }`}>
-                      <Send className="w-6 h-6 text-gray-900" />
+                      <Send className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
                     </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 mb-1">Send Local Currency</h3>
-                      <p className="text-sm text-gray-600">Send {userCurrency} to another user</p>
+                    <div className="min-w-0">
+                      <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Send Local Currency</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Send {userCurrency} to another user</p>
                     </div>
                   </div>
                 </button>
@@ -292,19 +292,19 @@ const SendMoney: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSendType('ckbtc')}
-                  className={`p-6 border-2 rounded-2xl text-left transition-all ${
+                  className={`p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all ${
                     sendType === 'ckbtc'
                       ? 'border-gray-900 bg-gray-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start space-x-3">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-orange-50">
-                      <Bitcoin className="w-6 h-6 text-orange-600" />
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center bg-orange-50 flex-shrink-0">
+                      <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
                     </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 mb-1">Send ckBTC</h3>
-                      <p className="text-sm text-gray-600">Send Chain Key Bitcoin</p>
+                    <div className="min-w-0">
+                      <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Send ckBTC</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Send Chain Key Bitcoin</p>
                     </div>
                   </div>
                 </button>
@@ -312,19 +312,19 @@ const SendMoney: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSendType('ckusdc')}
-                  className={`p-6 border-2 rounded-2xl text-left transition-all ${
+                  className={`p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all ${
                     sendType === 'ckusdc'
                       ? 'border-gray-900 bg-gray-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start space-x-3">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-50">
-                      <DollarSign className="w-6 h-6 text-green-600" />
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center bg-green-50 flex-shrink-0">
+                      <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                     </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 mb-1">Send ckUSDC</h3>
-                      <p className="text-sm text-gray-600">Send Chain Key USDC</p>
+                    <div className="min-w-0">
+                      <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Send ckUSDC</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Send Chain Key USDC</p>
                     </div>
                   </div>
                 </button>
@@ -333,18 +333,18 @@ const SendMoney: React.FC = () => {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-start">
-                  <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-red-700">{error}</p>
+                  <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-red-700">{error}</p>
                 </div>
               </div>
             )}
 
             {/* Amount Input */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <label htmlFor="amount" className="block text-xs sm:text-sm font-medium text-gray-700">
                   Amount {sendType === 'ckbtc' && '(ckBTC)'} {sendType === 'ckusdc' && '(ckUSDC)'}
                 </label>
                 {sendType === 'local' && (
@@ -357,17 +357,17 @@ const SendMoney: React.FC = () => {
                 )}
               </div>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                 <input
                   type="number"
                   id="amount"
                   value={localAmount}
                   onChange={(e) => handleAmountChange(e.target.value)}
-                  className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-lg font-mono"
+                  className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-3 sm:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-base sm:text-lg font-mono"
                   placeholder="0"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-xs sm:text-sm text-gray-500">
                 Available: {
                   sendType === 'ckbtc' ? `${ckBTCBalance} BTC` :
                   sendType === 'ckusdc' ? `${ckUSDCBalance} USDC` :
@@ -378,16 +378,16 @@ const SendMoney: React.FC = () => {
 
             {/* Fee Summary */}
             {localAmount && parseFloat(localAmount) > 0 && (
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex justify-between text-sm mb-2">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                <div className="flex justify-between text-xs sm:text-sm mb-2">
                   <span className="text-gray-600">Amount:</span>
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
-                <div className="flex justify-between text-sm mb-2">
+                <div className="flex justify-between text-xs sm:text-sm mb-2">
                   <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium text-orange-600">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
+                <div className="border-t border-gray-200 pt-2 flex justify-between text-sm sm:text-base font-semibold">
                   <span>Total:</span>
                   <span>{formatCurrencyAmount(parseFloat(localAmount) + calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
@@ -397,7 +397,7 @@ const SendMoney: React.FC = () => {
             <button
               onClick={handleContinueToRecipient}
               disabled={!localAmount || parseFloat(localAmount) <= 0 || !!error}
-              className="w-full bg-gray-900 text-white py-4 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-gray-900 text-white py-3 sm:py-4 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Continue
             </button>
@@ -406,17 +406,17 @@ const SendMoney: React.FC = () => {
 
       {/* Recipient Step */}
       {currentStep === 'recipient' && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Recipient Details</h2>
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Enter Recipient Details</h2>
 
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
               {/* Contact Search - shown for all send types */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   Search Recipient (by name or phone) *
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 z-10" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -428,7 +428,7 @@ const SendMoney: React.FC = () => {
                     }}
                     onFocus={() => setShowContactDropdown(true)}
                     placeholder="Search by name or enter phone number..."
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm sm:text-base"
                   />
                   
                   {/* Contact Dropdown */}
@@ -453,15 +453,15 @@ const SendMoney: React.FC = () => {
                                 setWalletAddress(contact.usdcWallet);
                               }
                             }}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                           >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium text-gray-900">{contact.name}</div>
-                                <div className="text-sm text-gray-500">{contact.phone}</div>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <div className="text-sm sm:text-base font-medium text-gray-900 truncate">{contact.name}</div>
+                                <div className="text-xs sm:text-sm text-gray-500 truncate">{contact.phone}</div>
                               </div>
                               {(sendType === 'ckbtc' || sendType === 'ckusdc') && (
-                                <div className="text-xs">
+                                <div className="text-xs flex-shrink-0">
                                   {hasWallet ? (
                                     <span className="text-green-600">✓ Has wallet</span>
                                   ) : (
@@ -486,7 +486,7 @@ const SendMoney: React.FC = () => {
               {/* Wallet Address - shown for crypto if not auto-filled */}
               {(sendType === 'ckbtc' || sendType === 'ckusdc') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     {sendType === 'ckbtc' ? 'Bitcoin' : 'USDC'} Wallet Address {walletAddress && '✓'}
                   </label>
                   <div className="relative">
@@ -495,7 +495,7 @@ const SendMoney: React.FC = () => {
                       value={walletAddress}
                       onChange={(e) => setWalletAddress(e.target.value)}
                       placeholder={sendType === 'ckbtc' ? 'bc1q... or select contact above' : '0x... or select contact above'}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent font-mono text-sm"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent font-mono text-xs sm:text-sm break-all"
                     />
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
@@ -507,23 +507,23 @@ const SendMoney: React.FC = () => {
               {/* Recipient Name - shown when contact selected */}
               {recipientName && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Recipient Name ✓
                   </label>
                   <input
                     type="text"
                     value={recipientName}
                     readOnly
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 text-sm sm:text-base"
                   />
                 </div>
               )}
             </div>
 
             {/* Transaction Summary */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold mb-3">Transaction Summary</h3>
-              <div className="space-y-2 text-sm">
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+              <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">Transaction Summary</h3>
+              <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Amount:</span>
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
@@ -532,7 +532,7 @@ const SendMoney: React.FC = () => {
                   <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium text-orange-600">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
+                <div className="border-t border-gray-200 pt-2 flex justify-between text-sm sm:text-base font-semibold">
                   <span>Total:</span>
                   <span>{formatCurrencyAmount(parseFloat(localAmount) + calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
@@ -540,15 +540,15 @@ const SendMoney: React.FC = () => {
             </div>
 
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-xs sm:text-sm text-red-700">{error}</p>
               </div>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4">
               <button
                 onClick={() => setCurrentStep('amount')}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                className="flex-1 bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-200 transition-colors"
               >
                 Back
               </button>
@@ -559,7 +559,7 @@ const SendMoney: React.FC = () => {
                   (sendType === 'ckbtc' || sendType === 'ckusdc') ? !walletAddress.trim() : 
                   true
                 }
-                className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 bg-gray-900 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 Send Money
               </button>
@@ -569,40 +569,40 @@ const SendMoney: React.FC = () => {
 
       {/* Confirmation Step */}
       {currentStep === 'confirmation' && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Send className="w-10 h-10 text-green-600" />
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-6 sm:p-8 text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Send className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Money Sent Successfully!</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Money Sent Successfully!</h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-2">
               {formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)} has been sent to {recipientPhone}
             </p>
 
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
+            <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+              <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                <div className="flex justify-between gap-2">
                   <span className="text-gray-600">Transaction Code:</span>
-                  <span className="font-mono font-bold">{transactionCode}</span>
+                  <span className="font-mono font-bold break-all">{transactionCode}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-gray-600">Recipient:</span>
-                  <span className="font-medium">{recipientName || recipientPhone}</span>
+                  <span className="font-medium truncate">{recipientName || recipientPhone}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-gray-600">Amount:</span>
                   <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-gray-600">Fee (0.5%):</span>
                   <span className="font-medium">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={() => navigate('/users/dashboard')}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                className="flex-1 bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-200 transition-colors"
               >
                 Back to Dashboard
               </button>
@@ -614,7 +614,7 @@ const SendMoney: React.FC = () => {
                   setRecipientName('');
                   setError('');
                 }}
-                className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+                className="flex-1 bg-gray-900 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-800 transition-colors"
               >
                 Send Another
               </button>

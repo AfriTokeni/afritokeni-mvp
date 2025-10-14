@@ -97,20 +97,20 @@ const AmountStep: React.FC<AmountStepProps> = ({
   const totalRequired = currentAmount + currentFee;
   const isValidAmount = currentAmount > 0 && !error;
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Withdrawal Amount</h2>
+    <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Enter Withdrawal Amount</h2>
       
       {/* Balance Cards - Reusing Dashboard Components */}
-      <div className="mb-6 space-y-4">
+      <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
         {/* Primary Balance Card */}
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
+        <div className="bg-white rounded-lg sm:rounded-xl border border-neutral-200 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-medium text-neutral-500">{selectedCurrency}</span>
                 <span className="text-xs text-neutral-400">Primary Balance</span>
               </div>
-              <p className="text-3xl font-bold text-neutral-900 font-mono">
+              <p className="text-2xl sm:text-3xl font-bold text-neutral-900 font-mono truncate">
                 {selectedCurrency} {formatCurrencyAmount(userBalance, selectedCurrency as AfricanCurrency).replace(selectedCurrency, '').trim()}
               </p>
             </div>
@@ -129,7 +129,7 @@ const AmountStep: React.FC<AmountStepProps> = ({
 
         {/* ckBTC and ckUSDC Balance Cards */}
         {(ckBTCBalance > 0 || ckUSDCBalance > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {ckBTCBalance > 0 && (
               <CkBTCBalanceCard
                 principalId="demo-user"
@@ -149,30 +149,30 @@ const AmountStep: React.FC<AmountStepProps> = ({
       </div>
 
       {/* Withdrawal Type Selection */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-900 mb-3">What would you like to withdraw?</label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mb-4 sm:mb-6">
+        <label className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2 sm:mb-3">What would you like to withdraw?</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => {
               setWithdrawType('cash');
               setBtcAmount('');
             }}
-            className={`p-6 border-2 rounded-2xl text-left transition-all ${
+            className={`p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all ${
               withdrawType === 'cash'
                 ? 'border-gray-900 bg-gray-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
-            <div className="flex items-start space-x-3">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            <div className="flex items-start space-x-2 sm:space-x-3">
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${
                 withdrawType === 'cash' ? 'bg-gray-100' : 'bg-gray-50'
               }`}>
-                <DollarSign className="w-6 h-6 text-gray-900" />
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900" />
               </div>
-              <div>
-                <h3 className="font-bold text-gray-900 mb-1">Withdraw Cash</h3>
-                <p className="text-sm text-gray-600">Get local currency cash from nearby agents</p>
+              <div className="min-w-0">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Withdraw Cash</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Get local currency cash from nearby agents</p>
               </div>
             </div>
           </button>
@@ -186,19 +186,19 @@ const AmountStep: React.FC<AmountStepProps> = ({
                 setBtcAmount(btcEquivalent);
               }
             }}
-            className={`p-6 border-2 rounded-2xl text-left transition-all ${
+            className={`p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all ${
               withdrawType === 'bitcoin'
                 ? 'border-gray-900 bg-gray-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
-            <div className="flex items-start space-x-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-orange-50">
-                <Bitcoin className="w-6 h-6 text-orange-600" />
+            <div className="flex items-start space-x-2 sm:space-x-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center bg-orange-50 flex-shrink-0">
+                <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
-              <div>
-                <h3 className="font-bold text-gray-900 mb-1">Convert to ckBTC</h3>
-                <p className="text-sm text-gray-600">Exchange local currency for Chain Key Bitcoin</p>
+              <div className="min-w-0">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Convert to ckBTC</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Exchange local currency for Chain Key Bitcoin</p>
               </div>
             </div>
           </button>
@@ -212,19 +212,19 @@ const AmountStep: React.FC<AmountStepProps> = ({
                 setBtcAmount(usdcEquivalent);
               }
             }}
-            className={`p-6 border-2 rounded-2xl text-left transition-all ${
+            className={`p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all ${
               withdrawType === 'ckusdc'
                 ? 'border-gray-900 bg-gray-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
-            <div className="flex items-start space-x-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-50">
-                <DollarSign className="w-6 h-6 text-green-600" />
+            <div className="flex items-start space-x-2 sm:space-x-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center bg-green-50 flex-shrink-0">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <div>
-                <h3 className="font-bold text-gray-900 mb-1">Convert to ckUSDC</h3>
-                <p className="text-sm text-gray-600">Exchange local currency for Chain Key USDC</p>
+              <div className="min-w-0">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Convert to ckUSDC</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Exchange local currency for Chain Key USDC</p>
               </div>
             </div>
           </button>

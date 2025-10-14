@@ -440,7 +440,7 @@ Thank you for using AfriTokeni!`;
             <div className="mt-6 bg-red-50 border-2 border-red-300 rounded-lg p-4 max-w-2xl mx-auto">
               <h3 className="font-bold text-red-900 mb-2 text-sm sm:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
               <p className="text-xs sm:text-sm text-red-800 mb-2">
-                <strong>Uganda:</strong> Dial <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*384*22948#</code> for real USSD!
+                <strong>Uganda:</strong> Dial <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*284*78909#</code> for real USSD!
               </p>
               <p className="text-xs text-red-700">
                 <strong>Other countries:</strong> Coming soon! Use playground to test.
