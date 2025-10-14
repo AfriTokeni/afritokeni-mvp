@@ -7,12 +7,21 @@ Given('I am an agent with {int} {word} digital balance', async function (amount:
   const agent = await DataService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
-    location: 'Kampala',
-    latitude: 0.3476,
-    longitude: 32.5825,
+    location: {
+      country: 'Uganda',
+      state: 'Central',
+      city: 'Kampala',
+      address: 'Test Street',
+      coordinates: {
+        lat: 0.3476,
+        lng: 32.5825
+      }
+    },
     digitalBalance: amount,
     cashBalance: 0,
-    commissionRate: 0.03
+    commissionRate: 0.03,
+    isActive: true,
+    status: 'available'
   });
   
   world.agentId = agent.id;
@@ -65,12 +74,21 @@ Given('I am an agent with {int} {word} cash', async function (amount: number, cu
   const agent = await DataService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
-    location: 'Kampala',
-    latitude: 0.3476,
-    longitude: 32.5825,
+    location: {
+      country: 'Uganda',
+      state: 'Central',
+      city: 'Kampala',
+      address: 'Test Street',
+      coordinates: {
+        lat: 0.3476,
+        lng: 32.5825
+      }
+    },
     digitalBalance: 0,
     cashBalance: amount,
-    commissionRate: 0.03
+    commissionRate: 0.03,
+    isActive: true,
+    status: 'available'
   });
   
   world.agentId = agent.id;
@@ -108,12 +126,21 @@ Given('I am an agent with {int} {word} digital balance', async function (amount:
   const agent = await DataService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
-    location: 'Kampala',
-    latitude: 0.3476,
-    longitude: 32.5825,
+    location: {
+      country: 'Uganda',
+      state: 'Central',
+      city: 'Kampala',
+      address: 'Test Street',
+      coordinates: {
+        lat: 0.3476,
+        lng: 32.5825
+      }
+    },
     digitalBalance: amount,
     cashBalance: 0,
-    commissionRate: 0.03
+    commissionRate: 0.03,
+    isActive: true,
+    status: 'available'
   });
   
   world.agentId = agent.id;
@@ -140,12 +167,21 @@ Given('I am an agent with ckBTC available', async function () {
   const agent = await DataService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Bitcoin Agent',
-    location: 'Kampala',
-    latitude: 0.3476,
-    longitude: 32.5825,
+    location: {
+      country: 'Uganda',
+      state: 'Central',
+      city: 'Kampala',
+      address: 'Test Street',
+      coordinates: {
+        lat: 0.3476,
+        lng: 32.5825
+      }
+    },
     digitalBalance: 1000000,
     cashBalance: 500000,
-    commissionRate: 0.03
+    commissionRate: 0.03,
+    isActive: true,
+    status: 'available'
   });
   
   world.agentId = agent.id;
@@ -182,12 +218,21 @@ Given('I am an agent with low digital balance', async function () {
   const agent = await DataService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
-    location: 'Kampala',
-    latitude: 0.3476,
-    longitude: 32.5825,
+    location: {
+      country: 'Uganda',
+      state: 'Central',
+      city: 'Kampala',
+      address: 'Test Street',
+      coordinates: {
+        lat: 0.3476,
+        lng: 32.5825
+      }
+    },
     digitalBalance: 10000,
     cashBalance: 0,
-    commissionRate: 0.03
+    commissionRate: 0.03,
+    isActive: true,
+    status: 'available'
   });
   
   world.agentId = agent.id;
@@ -247,12 +292,21 @@ Given('I am an agent', async function () {
   const agent = await DataService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
-    location: 'Kampala',
-    latitude: 0.3476,
-    longitude: 32.5825,
+    location: {
+      country: 'Uganda',
+      state: 'Central',
+      city: 'Kampala',
+      address: 'Test Street',
+      coordinates: {
+        lat: 0.3476,
+        lng: 32.5825
+      }
+    },
     digitalBalance: 1000000,
     cashBalance: 500000,
-    commissionRate: 0.03
+    commissionRate: 0.03,
+    isActive: true,
+    status: 'available'
   });
   
   world.agentId = agent.id;
@@ -292,12 +346,21 @@ Given('I am an agent with {int} {word} cash', async function (amount: number, cu
   const agent = await DataService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
-    location: 'Kampala',
-    latitude: 0.3476,
-    longitude: 32.5825,
+    location: {
+      country: 'Uganda',
+      state: 'Central',
+      city: 'Kampala',
+      address: 'Test Street',
+      coordinates: {
+        lat: 0.3476,
+        lng: 32.5825
+      }
+    },
     digitalBalance: 0,
     cashBalance: amount,
-    commissionRate: 0.03
+    commissionRate: 0.03,
+    isActive: true,
+    status: 'available'
   });
   
   world.agentId = agent.id;
