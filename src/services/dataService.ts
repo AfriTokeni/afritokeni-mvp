@@ -287,221 +287,45 @@ export interface PlatformRevenueInput {
 
 // Simplified data service following Juno patterns
 export class DataService {
-  // User operations
-  static async createUser(userData: {
-    id?: string; // Optional ID, if not provided will generate new one
-    firstName: string;
-    lastName: string;
-    email: string; // This will be the phone number for SMS users, or user ID for web users
-    userType: 'user' | 'agent';
-    kycStatus?: 'pending' | 'approved' | 'rejected' | 'not_started';
-    pin?: string; // USSD PIN for mobile users
-    authMethod?: 'sms' | 'web'; // To determine key strategy
-  }): Promise<User> {
-    const now = new Date();
-    const newUser: User = {
-      id: userData.id || nanoid(), // Use provided ID or generate new one
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
-      userType: userData.userType,
-      isVerified: false,
-      kycStatus: userData.kycStatus || 'not_started',
-      pin: userData.pin,
-      createdAt: now
-    };
-
-    // Convert Date fields to ISO strings for Juno storage
-    const dataForJuno = {
-      ...newUser,
-      createdAt: now.toISOString()
-    };
-
-    // Determine key based on auth method
-    // For web users: use ID as key
-    // For SMS users: use phone number (email field) as key
-    const documentKey = userData.authMethod === 'web' ? newUser.id : userData.email;
-
-     const existingDoc = await getDoc({
-        collection: 'users',
-        key: documentKey,
-      });
-
-    // Save user to Juno datastore
-    await setDoc({
-      collection: 'users',
-      doc: {
-        key: documentKey,
-        data: dataForJuno,
-        version: existingDoc?.version ? existingDoc.version : 1n
-      
-      },     
-    });
-
-    return newUser;
+  // User operations - MOVED TO UserService
+  static async createUser(userData: any): Promise<User> {
+    return UserService.createUser(userData);
   }
 
-  // Get user by key (either ID for web users or phone for SMS users)
   static async getUserByKey(key: string): Promise<User | null> {
-    console.log('Getting user by key:', key);
-    try {
-      const doc = await getDoc({
-        collection: 'users',
-        key: key,
-      });
-
-      if (!doc?.data) {
-        return null;
-      }
-
-      // Convert string date back to Date object
-      const rawData = doc.data as UserDataFromJuno;
-      const user: User = {
-        id: rawData.id,
-        firstName: rawData.firstName,
-        lastName: rawData.lastName,
-        email: rawData.email,
-        userType: rawData.userType,
-        isVerified: rawData.isVerified,
-        kycStatus: rawData.kycStatus,
-        pin: rawData.pin,
-        createdAt: new Date(rawData.createdAt)
-      };
-
-      return user;
-    } catch (error) {
-      console.error('Error getting user by key:', error);
-      return null;
-    }
+    return UserService.getUserByKey(key);
   }
 
-  // Legacy method for SMS users - get user by phone number
   static async getUser(phoneNumber: string): Promise<User | null> {
-    return this.getUserByKey(phoneNumber);
+    return UserService.getUser(phoneNumber);
   }
 
-  // Get web user by ID
   static async getWebUserById(userId: string): Promise<User | null> {
-    return this.getUserByKey(userId);
+    return UserService.getWebUserById(userId);
   }
 
-  static async updateUser(key: string, updates: Partial<User>, _authMethod?: 'sms' | 'web'): Promise<boolean> {
-    try {
-      const existingUser = await this.getUserByKey(key);
-      if (!existingUser) return false;
-
-      // Get the current document to retrieve its version
-      const existingDoc = await getDoc({
-        collection: 'users',
-        key: key,
-      });
-
-      if (!existingDoc) return false;
-
-      const updatedUser = { ...existingUser, ...updates };
-      
-      // Convert Date fields to ISO strings for Juno storage - handle both Date objects and strings
-      const dataForJuno = {
-        ...updatedUser,
-        createdAt: updatedUser.createdAt 
-          ? (updatedUser.createdAt instanceof Date ? updatedUser.createdAt.toISOString() : String(updatedUser.createdAt))
-          : new Date().toISOString()
-      };
-
-      // Use the same key for updates with current version
-      await setDoc({
-        collection: 'users',
-        doc: {
-          key: key,
-          data: dataForJuno,
-          version: existingDoc.version ? existingDoc.version : 1n
-        },
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error updating user:', error);
-      return false;
-    }
+  static async updateUser(key: string, updates: Partial<User>, authMethod?: 'sms' | 'web'): Promise<boolean> {
+    return UserService.updateUser(key, updates, authMethod);
   }
 
-  // Legacy method for SMS users
   static async updateUserByPhone(phoneNumber: string, updates: Partial<User>): Promise<boolean> {
-    return this.updateUser(phoneNumber, updates, 'sms');
+    return UserService.updateUserByPhone(phoneNumber, updates);
   }
 
-  // Method for web users
   static async updateWebUser(userId: string, updates: Partial<User>): Promise<boolean> {
-    return this.updateUser(userId, updates, 'web');
+    return UserService.updateWebUser(userId, updates);
   }
 
-  // Enhanced search functionality - search by phone, first name, or last name
   static async searchUsers(searchTerm: string): Promise<User[]> {
-    try {
-      // First, try to find user by exact phone number match (for SMS users)
-      // Try both original case and formatted phone number
-      let directMatch = await this.getUserByKey(searchTerm);
-      if (!directMatch && searchTerm.match(/^\d+$/)) {
-        // If it's a number, try formatting as phone number
-        const formattedPhone = searchTerm.startsWith('+') ? searchTerm : `+256${searchTerm.replace(/^0/, '')}`;
-        directMatch = await this.getUserByKey(formattedPhone);
-      }
-      
-      if (directMatch) {
-        return [directMatch];
-      }
-
-      // If not found by direct key match, search through all users
-      const allUsersResult = await listDocs({
-        collection: 'users'
-      });
-
-      if (!allUsersResult.items) {
-        return [];
-      }
-
-      const searchTermLower = searchTerm.toLowerCase().trim();
-      const matchedUsers: User[] = [];
-
-      for (const doc of allUsersResult.items) {
-        const rawData = doc.data as UserDataFromJuno;
-        const user: User = {
-          id: rawData.id,
-          firstName: rawData.firstName,
-          lastName: rawData.lastName,
-          email: rawData.email,
-          userType: rawData.userType,
-          isVerified: rawData.isVerified,
-          kycStatus: rawData.kycStatus,
-          createdAt: new Date(rawData.createdAt)
-        };
-
-        // Check if search term matches phone (email field), first name, or last name (case insensitive)
-        const matchesPhone = user.email.toLowerCase().includes(searchTermLower);
-        const matchesFirstName = user.firstName.toLowerCase().includes(searchTermLower);
-        const matchesLastName = user.lastName.toLowerCase().includes(searchTermLower);
-        
-        // Also check for partial phone number matches (last digits)
-        const phoneDigits = user.email.replace(/\D/g, ''); // Extract only digits
-        const searchDigits = searchTerm.replace(/\D/g, '');
-        const matchesPhoneDigits = searchDigits.length >= 3 && phoneDigits.includes(searchDigits);
-
-        if (matchesPhone || matchesFirstName || matchesLastName || matchesPhoneDigits) {
-          matchedUsers.push(user);
-        }
-      }
-
-      return matchedUsers;
-    } catch (error) {
-      console.error('Error searching users:', error);
-      return [];
-    }
+    return UserService.searchUsers(searchTerm);
   }
 
-  // Search specifically by phone number (legacy method)
   static async searchUserByPhone(phoneNumber: string): Promise<User | null> {
-    const users = await this.searchUsers(phoneNumber);
-    return users.length > 0 ? users[0] : null;
+    return UserService.searchUserByPhone(phoneNumber);
+  }
+
+  static async getAllCustomers(): Promise<User[]> {
+    return UserService.getAllCustomers();
   }
 
   // Transaction operations
@@ -703,33 +527,6 @@ export class DataService {
   }
 
   // Get all customers (users of type 'user')
-  static async getAllCustomers(): Promise<User[]> {
-    try {
-      const docs = await listDocs({
-        collection: 'users'
-      });
-      
-      return docs.items
-        .map(doc => {
-          const rawData = doc.data as UserDataFromJuno;
-          return {
-            id: rawData.id,
-            firstName: rawData.firstName,
-            lastName: rawData.lastName,
-            email: rawData.email,
-            userType: rawData.userType,
-            isVerified: rawData.isVerified,
-            kycStatus: rawData.kycStatus,
-            createdAt: new Date(rawData.createdAt)
-          } as User;
-        })
-        .filter(user => user.userType === 'user')
-        .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
-    } catch (error) {
-      console.error('Error getting all customers:', error);
-      return [];
-    }
-  }
 
   static async updateTransaction(id: string, updates: Partial<Transaction>): Promise<boolean> {
     try {
