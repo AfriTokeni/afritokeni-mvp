@@ -757,47 +757,13 @@ export class DataService {
     }
   }
 
-  // SMS operations
+  // SMS operations - MOVED TO SMSService
   static async logSMSMessage(message: Omit<SMSMessage, 'id' | 'createdAt'>): Promise<SMSMessage> {
-    const now = new Date();
-    const newMessage: SMSMessage = {
-      ...message,
-      id: nanoid(),
-      createdAt: now
-    };
-
-    // Convert Date field to ISO string
-    const dataForJuno = {
-      ...newMessage,
-      createdAt: now.toISOString()
-    };
-
-    await setDoc({
-      collection: 'sms_messages',
-      doc: {
-        key: newMessage.id,
-        data: dataForJuno,
-        version: 1n
-      }
-    });
-
-    return newMessage;
+    return SMSService.logSMSMessage(message);
   }
 
   static async getUserSMSHistory(userId: string): Promise<SMSMessage[]> {
-    try {
-      const docs = await listDocs({
-        collection: 'sms_messages'
-      });
-      
-      return docs.items
-        .map(doc => doc.data as SMSMessage)
-        .filter(message => message.userId === userId)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } catch (error) {
-      console.error('Error getting SMS history:', error);
-      return [];
-    }
+    return SMSService.getUserSMSHistory(userId);
   }
 
   // Utility functions
@@ -813,176 +779,25 @@ export class DataService {
     }
   }
 
-  // USSD Operations
+  // USSD Operations - MOVED TO USSDService
   static async getUserPin(phoneNumber: string, satellite?: any): Promise<UserPin | null> {
-    console.log(`Satellite ID here: ${satellite}`);
-    try {
-      // Get user by phone number (which is stored as email for SMS users)
-      const user = await this.getUserByKey(phoneNumber);
-      
-      if (!user || !user.pin) {
-        return null;
-      }
-
-      return {
-        userId: user.id,
-        phoneNumber: phoneNumber,
-        pin: user.pin,
-        isSet: true,
-        createdAt: user.createdAt || new Date(),
-        lastUpdated: user.createdAt || new Date()
-      };
-    } catch (error) {
-      console.error('Error getting user pin:', error);
-      return null;
-    }
+    return UserService.getUserPin(phoneNumber, satellite);
   }
 
-  static async createOrUpdateUserPin(phoneNumber: string, pin: string, _satellite?: any): Promise<boolean> {
-    try {
-      // Get user by phone number (stored as email for SMS users)
-      let user = await this.getUserByKey(phoneNumber);
-
-      if (!user) {
-        // Create new user if doesn't exist
-        user = await this.createUser({
-          firstName: 'USSD',
-          lastName: 'User',
-          email: phoneNumber,
-          userType: 'user',
-          pin: pin,
-          authMethod: 'sms'
-        });
-        return true;
-      } else {
-        // Update existing user with PIN
-        return await this.updateUser(phoneNumber, { pin: pin }, 'sms');
-      }
-    } catch (error) {
-      console.error('Error creating/updating user pin:', error);
-      return false;
-    }
+  static async createOrUpdateUserPin(phoneNumber: string, pin: string, satellite?: any): Promise<boolean> {
+    return UserService.createOrUpdateUserPin(phoneNumber, pin, satellite);
   }
 
   static async createUSSDSession(sessionId: string, phoneNumber: string): Promise<USSDSession> {
-    const now = new Date();
-    const session: USSDSession = {
-      sessionId,
-      phoneNumber,
-      currentMenu: 'pin_check', // Start with PIN check
-      step: 0,
-      createdAt: now,
-      lastActivity: now,
-      isExpired(): boolean {
-        return Date.now() - this.lastActivity.getTime() > 180000; // 3 minutes
-      },
-      updateActivity(): void {
-        this.lastActivity = new Date();
-      }
-    };
-
-    const dataForJuno = {
-      ...session,
-      createdAt: now.toISOString(),
-      lastActivity: now.toISOString()
-    };
-
-    await setDoc({
-      collection: 'ussd_sessions',
-      doc: {
-        key: sessionId,
-        data: dataForJuno,
-        version: 1n
-      }
-    });
-
-    return session;
+    return USSDService.createUSSDSession(sessionId, phoneNumber);
   }
 
   static async getUSSDSession(sessionId: string): Promise<USSDSession | null> {
-    try {
-      const doc = await getDoc({
-        collection: 'ussd_sessions',
-        key: sessionId
-      });
-
-      if (!doc?.data) {
-        return null;
-      }
-
-      const rawData = doc.data as {
-        sessionId: string;
-        phoneNumber: string;
-        userId?: string;
-        currentMenu: string;
-        step: number;
-        tempData?: any;
-        createdAt: string;
-        lastActivity: string;
-      };
-      
-      const session: USSDSession = {
-        sessionId: rawData.sessionId,
-        phoneNumber: rawData.phoneNumber,
-        userId: rawData.userId,
-        currentMenu: rawData.currentMenu as any,
-        step: rawData.step || 0,
-        tempData: rawData.tempData,
-        createdAt: new Date(rawData.createdAt),
-        lastActivity: new Date(rawData.lastActivity),
-        isExpired(): boolean {
-          return Date.now() - this.lastActivity.getTime() > 180000; // 3 minutes
-        },
-        updateActivity(): void {
-          this.lastActivity = new Date();
-        }
-      };
-      
-      return session;
-    } catch (error) {
-      console.error('Error getting USSD session:', error);
-      return null;
-    }
+    return USSDService.getUSSDSession(sessionId);
   }
 
   static async updateUSSDSession(sessionId: string, updates: Partial<USSDSession>): Promise<boolean> {
-    try {
-      const existingSession = await this.getUSSDSession(sessionId);
-      if (!existingSession) {
-        return false;
-      }
-
-      const existingDoc = await getDoc({
-        collection: 'ussd_sessions',
-        key: sessionId
-      });
-
-      const updatedSession = {
-        ...existingSession,
-        ...updates,
-        lastActivity: new Date()
-      };
-
-      const dataForJuno = {
-        ...updatedSession,
-        createdAt: updatedSession.createdAt instanceof Date ? updatedSession.createdAt.toISOString() : String(updatedSession.createdAt),
-        lastActivity: updatedSession.lastActivity instanceof Date ? updatedSession.lastActivity.toISOString() : String(updatedSession.lastActivity)
-      };
-
-      await setDoc({
-        collection: 'ussd_sessions',
-        doc: {
-          key: sessionId,
-          data: dataForJuno,
-          version: existingDoc?.version ? existingDoc.version : 1n
-        }
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error updating USSD session:', error);
-      return false;
-    }
+    return USSDService.updateUSSDSession(sessionId, updates);
   }
 
   // Main USSD handler
