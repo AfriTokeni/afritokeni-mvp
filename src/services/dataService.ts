@@ -366,78 +366,25 @@ export class DataService {
     return TransactionService.updateTransaction(id, updates);
   }
 
-  // Balance operations
+  // Balance operations - MOVED TO BalanceService
   static async getUserBalance(userId: string): Promise<UserBalance | null> {
-    try {
-      const doc = await getDoc({
-        collection: 'balances',
-        key: userId
-      });
-      
-      if (!doc?.data) {
-        return null;
-      }
-
-      // Convert string date back to Date object
-      const rawData = doc.data as {
-        userId: string;
-        balance: number;
-        currency: 'UGX';
-        lastUpdated: string;
-      };
-      const userBalance: UserBalance = {
-        userId: rawData.userId,
-        balance: rawData.balance,
-        currency: rawData.currency,
-        lastUpdated: new Date(rawData.lastUpdated)
-      };
-
-      return userBalance;
-    } catch (error) {
-      console.error('Error getting user balance:', error);
-      return null;
-    }
+    return BalanceService.getUserBalance(userId);
   }
 
-  static async updateUserBalance(userId: string, balance: number): Promise<boolean> {
-    try {
-      const now = new Date();
-      const userBalance: UserBalance = {
-        userId,
-        balance,
-        currency: 'UGX',
-        lastUpdated: now
-      };
+  static async updateUserBalance(userId: string, balance: number, currency?: string): Promise<boolean> {
+    return BalanceService.updateUserBalance(userId, balance, currency);
+  }
 
-      // Convert Date field to ISO string
-      const dataForJuno = {
-        ...userBalance,
-        lastUpdated: now.toISOString()
-      };
+  static async getBalance(userId: string, currency: string): Promise<number> {
+    return BalanceService.getBalance(userId, currency);
+  }
 
-      // Get current document to obtain its version
-      const existingDoc = await getDoc({
-        collection: 'balances',
-        key: userId
-      });
+  static async transfer(senderId: string, recipientId: string, amount: number, currency: string): Promise<void> {
+    return BalanceService.transfer(senderId, recipientId, amount, currency);
+  }
 
-      // Update with proper version handling
-      await setDoc({
-        collection: 'balances',
-        doc: {
-          key: userId,
-          data: dataForJuno,
-          version: existingDoc?.version ? existingDoc.version : 1n
-        }
-      });
-
-      console.log('Balance updated successfully:', { userId, balance, hadExisting: !!existingDoc });
-      return true;
-    } catch (error) {
-      console.error('Error updating user balance:', error);
-      console.error('Update details:', { userId, balance });
-      return false;
-    }
+  static async transferWithConversion(senderId: string, recipientId: string, amount: number, fromCurrency: string, toCurrency: string): Promise<void> {
+    return BalanceService.transferWithConversion(senderId, recipientId, amount, fromCurrency, toCurrency);
   }
 
   // Agent operations
@@ -2960,87 +2907,4 @@ Quote expires in 5 minutes.`;
   /**
    * Transfer money between users
    */
-  static async transfer(
-    senderId: string,
-    recipientId: string,
-    amount: number,
-    currency: string
-  ): Promise<Transaction> {
-    // Get sender balance
-    const senderBalance = await this.getUserBalance(senderId);
-    if (!senderBalance || senderBalance.balance < amount) {
-      throw new Error('Insufficient balance');
-    }
-
-    // Update sender balance
-    await this.updateUserBalance(senderId, senderBalance.balance - amount);
-
-    // Update recipient balance
-    const recipientBalance = await this.getUserBalance(recipientId);
-    const newRecipientBalance = (recipientBalance?.balance || 0) + amount;
-    await this.updateUserBalance(recipientId, newRecipientBalance);
-
-    // Create transaction record
-    const transaction = await this.createTransaction({
-      userId: senderId,
-      type: 'send',
-      amount,
-      currency,
-      recipientId,
-      status: 'completed',
-      description: `Transfer to ${recipientId}`
-    });
-
-    return transaction;
-  }
-
-  /**
-   * Get balance for a specific currency
-   */
-  static async getBalance(userId: string, currency: string): Promise<number> {
-    const balance = await this.getUserBalance(userId);
-    return balance?.balance || 0;
-  }
-
-  /**
-   * Transfer with currency conversion
-   */
-  static async transferWithConversion(
-    senderId: string,
-    recipientId: string,
-    amount: number,
-    fromCurrency: string,
-    toCurrency: string
-  ): Promise<Transaction> {
-    // Simple conversion rate (in real app, use actual exchange rates)
-    const conversionRate = 0.03; // Example: 1 UGX = 0.03 KES
-    const convertedAmount = amount * conversionRate;
-
-    // Get sender balance
-    const senderBalance = await this.getUserBalance(senderId);
-    if (!senderBalance || senderBalance.balance < amount) {
-      throw new Error('Insufficient balance');
-    }
-
-    // Update sender balance
-    await this.updateUserBalance(senderId, senderBalance.balance - amount);
-
-    // Update recipient balance
-    const recipientBalance = await this.getUserBalance(recipientId);
-    const newRecipientBalance = (recipientBalance?.balance || 0) + convertedAmount;
-    await this.updateUserBalance(recipientId, newRecipientBalance);
-
-    // Create transaction record
-    const transaction = await this.createTransaction({
-      userId: senderId,
-      type: 'send',
-      amount,
-      currency: fromCurrency,
-      recipientId,
-      status: 'completed',
-      description: `Cross-currency transfer: ${amount} ${fromCurrency} → ${convertedAmount} ${toCurrency}`
-    });
-
-    return transaction;
-  }
 }
