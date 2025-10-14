@@ -2,6 +2,10 @@ import { nanoid } from 'nanoid';
 import { getDoc, setDoc, listDocs } from '@junobuild/core';
 import type { AfricanCurrency } from '../types/currency';
 import { AfriTokenService } from './afriTokenService';
+import { UserService } from './UserService';
+import { AgentService } from './AgentService';
+import { TransactionService } from './TransactionService';
+import { BalanceService } from './BalanceService';
 
 // Interface for user data as stored in Juno (with string dates)
 export interface UserDataFromJuno {
