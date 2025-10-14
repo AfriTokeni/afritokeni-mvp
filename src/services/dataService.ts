@@ -520,159 +520,27 @@ export class DataService {
 
   // Update agent status
   static async updateAgentStatus(agentId: string, status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> {
-    try {
-      const existingAgent = await this.getAgent(agentId);
-      if (!existingAgent) return false;
-
-      // Get current document to obtain its version
-      const existingDoc = await getDoc({
-        collection: 'agents',
-        key: agentId
-      });
-
-      if (!existingDoc) return false;
-
-      const updatedAgent = { 
-        ...existingAgent, 
-        status,
-        // Ensure createdAt is a string for Juno storage
-        createdAt: typeof existingAgent.createdAt === 'string' 
-          ? existingAgent.createdAt 
-          : existingAgent.createdAt.toISOString()
-      };
-
-      await setDoc({
-        collection: 'agents',
-        doc: {
-          key: agentId,
-          data: updatedAgent,
-          version: existingDoc.version
-        }
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error updating agent status:', error);
-      return false;
-    }
+    return AgentService.updateAgentStatus(agentId, status);
   }
 
-  // Update agent status by userId (convenience method)
   static async updateAgentStatusByUserId(userId: string, status: 'available' | 'busy' | 'cash_out' | 'offline'): Promise<boolean> {
-    try {
-      console.log('updateAgentStatusByUserId called with userId:', userId);
-      const agent = await this.getAgentByUserId(userId);
-      console.log('getAgentByUserId result:', agent);
-      
-      if (!agent) {
-        console.error('No agent found for userId:', userId);
-        return false;
-      }
-      
-      console.log('Calling updateAgentStatus with agentId:', agent.id);
-      const result = await this.updateAgentStatus(agent.id, status);
-      console.log('updateAgentStatus result:', result);
-      return result;
-    } catch (error) {
-      console.error('Error updating agent status by userId:', error);
-      return false;
-    }
+    return AgentService.updateAgentStatusByUserId(userId, status);
   }
 
-  // Update agent balances (cash and digital)
-  static async updateAgentBalance(agentId: string, updates: { 
-    cashBalance?: number; 
-    digitalBalance?: number; 
-  }): Promise<boolean> {
-    try {
-      const existingAgent = await this.getAgent(agentId);
-      if (!existingAgent) return false;
-
-      // Get current document to obtain its version
-      const existingDoc = await getDoc({
-        collection: 'agents',
-        key: agentId
-      });
-
-      if (!existingDoc) return false;
-
-      const updatedAgent = { 
-        ...existingAgent,
-        ...(updates.cashBalance !== undefined && { cashBalance: updates.cashBalance }),
-        ...(updates.digitalBalance !== undefined && { digitalBalance: updates.digitalBalance }),
-        // Ensure createdAt is a string for Juno storage
-        createdAt: typeof existingAgent.createdAt === 'string' 
-          ? existingAgent.createdAt 
-          : existingAgent.createdAt.toISOString()
-      };
-
-      await setDoc({
-        collection: 'agents',
-        doc: {
-          key: agentId,
-          data: updatedAgent,
-          version: existingDoc.version
-        }
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error updating agent balance:', error);
-      return false;
-    }
+  static async updateAgentBalance(agentId: string, updates: { cashBalance?: number; digitalBalance?: number; }): Promise<boolean> {
+    return AgentService.updateAgentBalance(agentId, updates);
   }
 
-  // Update agent balance by userId (convenience method)
-  static async updateAgentBalanceByUserId(userId: string, updates: { 
-    cashBalance?: number; 
-    digitalBalance?: number; 
-  }): Promise<boolean> {
-    try {
-      const agent = await this.getAgentByUserId(userId);
-      if (!agent) return false;
-      
-      return await this.updateAgentBalance(agent.id, updates);
-    } catch (error) {
-      console.error('Error updating agent balance by userId:', error);
-      return false;
-    }
+  static async updateAgentBalanceByUserId(userId: string, updates: { cashBalance?: number; digitalBalance?: number; }): Promise<boolean> {
+    return AgentService.updateAgentBalanceByUserId(userId, updates);
   }
 
-  // Agent Cash Deposit Methods
   static async depositCashToAgent(agentId: string, amount: number, description?: string): Promise<boolean> {
-    try {
-      console.log(`💰 Agent ${agentId} depositing ${amount} cash`);
-      
-      const agent = await this.getAgent(agentId);
-      if (!agent) {
-        throw new Error('Agent not found');
-      }
-
-      // Update agent's cash balance
-      const success = await this.updateAgentBalance(agentId, {
-        cashBalance: agent.cashBalance + amount
-      });
-
-      if (success && description) {
-        console.log(`💰 Cash deposit successful: ${description}`);
-      }
-
-      return success;
-    } catch (error) {
-      console.error('Error depositing cash to agent:', error);
-      return false;
-    }
+    return AgentService.depositCashToAgent(agentId, amount, description);
   }
 
-  // Development/Testing helper - give agent initial cash balance
   static async initializeAgentCashForTesting(agentId: string, initialCashAmount: number = 10000): Promise<boolean> {
-    try {
-      console.log(`🧪 [DEV] Initializing agent ${agentId} with ${initialCashAmount} cash for testing`);
-      return await this.depositCashToAgent(agentId, initialCashAmount, `Initial cash balance for testing`);
-    } catch (error) {
-      console.error('Error initializing agent cash for testing:', error);
-      return false;
-    }
+    return AgentService.depositCashToAgent(agentId, initialCashAmount, 'Initial cash balance for testing');
   }
 
   static async getNearbyAgents(lat: number, lng: number, radius: number = 5, includeStatuses?: ('available' | 'busy' | 'cash_out' | 'offline')[]): Promise<Agent[]> {
