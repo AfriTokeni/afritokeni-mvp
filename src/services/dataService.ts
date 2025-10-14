@@ -392,122 +392,8 @@ export class DataService {
     return AgentService.createAgent(agent);
   }
 
-  // Complete Agent KYC process - updates user details and creates agent record
-  static async completeAgentKYC(agentKYCData: {
-    // User details to update
-    userId: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string; // This becomes the email field
-    
-    // Agent-specific details
-    businessName?: string;
-    location: {
-      country: string;
-      state: string;
-      city: string;
-      address: string;
-      coordinates: {
-        lat: number;
-        lng: number;
-      };
-    };
-    operatingHours?: string;
-    operatingDays?: string[];
-    
-    // Optional documents (for future use)
-    documentType?: string;
-    documentNumber?: string;
-    businessLicense?: string;
-  }): Promise<{ user: User; agent: Agent }> {
-    try {
-      // 1. Update user details in users collection
-      const userUpdates: Partial<User> = {
-        firstName: agentKYCData.firstName,
-        lastName: agentKYCData.lastName,
-        email: agentKYCData.phoneNumber,
-        kycStatus: 'approved', // Set to approved after KYC completion
-        isVerified: true
-      };
-
-      const userUpdateSuccess = await this.updateUser(agentKYCData.userId, userUpdates, 'web');
-      if (!userUpdateSuccess) {
-        throw new Error('Failed to update user details');
-      }
-
-      // Get the updated user
-      const updatedUser = await this.getUserByKey(agentKYCData.userId);
-      if (!updatedUser) {
-        throw new Error('Failed to retrieve updated user');
-      }
-
-      // 2. Get digital balance for agent from balances collection
-      const userBalance = await this.getUserBalance(agentKYCData.userId);
-      let digitalBalance = userBalance?.balance || 0;
-
-      // Digital balance comes from real transactions only - no hardcoded amounts
-      // Agent starts with 0 balance and must receive deposits to have digital funds
-      
-      // 3. Cash balance starts at 0 - agents must deposit their own cash to start operations
-      // For development/testing, give agents some initial cash (set via env VITE_AGENT_INITIAL_CASH_BALANCE, defaults to 0 for production)
-      const cashBalance = Number(process.env.VITE_AGENT_INITIAL_CASH_BALANCE ?? 0);
-
-      // 4. Create or update agent record in agents collection
-      // First check if agent already exists to prevent duplication
-      const existingAgent = await this.getAgentByUserId(agentKYCData.userId);
-      
-      let newAgent: Agent;
-      
-      if (existingAgent) {
-        console.log(`Agent already exists for userId ${agentKYCData.userId}, updating KYC data instead of creating duplicate`);
-        
-        // Update the existing agent with KYC completion data
-        // Use the specific update methods available
-        await this.updateAgentStatus(existingAgent.id, 'available'); // Activate agent after KYC
-        
-        // Update balances if needed
-        await this.updateAgentBalance(existingAgent.id, {
-          cashBalance: cashBalance,
-          digitalBalance: digitalBalance
-        });
-        
-        // Get the updated agent record to return
-        const updatedAgent = await this.getAgentByUserId(agentKYCData.userId);
-        if (!updatedAgent) {
-          throw new Error('Failed to retrieve updated agent after KYC completion');
-        }
-        newAgent = updatedAgent;
-        
-      } else {
-        console.log(`Creating new agent for userId ${agentKYCData.userId} - no existing agent found`);
-        
-        const agentData: Omit<Agent, 'id' | 'createdAt'> = {
-          userId: agentKYCData.userId,
-          businessName: agentKYCData.businessName || `${agentKYCData.firstName} ${agentKYCData.lastName} Agent`,
-          location: agentKYCData.location,
-          isActive: true,
-          status: 'available', // Default status when agent is created
-          cashBalance: cashBalance,
-          digitalBalance: digitalBalance,
-          commissionRate: 0.02 // Default 2% commission rate
-        };
-
-        newAgent = await this.createAgent(agentData);
-      }
-
-      // 5. Initialize user balance if it doesn't exist (but don't override the random balance we just set)
-      if (!userBalance && digitalBalance === 0) {
-        await this.updateUserBalance(agentKYCData.userId, 0);
-      }
-
-      return {
-        user: updatedUser,
-        agent: newAgent
-      };
-    } catch (error) {
-      console.error('Error completing agent KYC:', error);
-      throw error;
-    }
+  static async completeAgentKYC(agentKYCData: any): Promise<{ user: User; agent: Agent }> {
+    return AgentService.completeAgentKYC(agentKYCData);
   }
 
   static async getAgent(id: string): Promise<Agent | null> {
@@ -544,85 +430,7 @@ export class DataService {
   }
 
   static async getNearbyAgents(lat: number, lng: number, radius: number = 5, includeStatuses?: ('available' | 'busy' | 'cash_out' | 'offline')[]): Promise<Agent[]> {
-    try {
-      console.log('🔍 getNearbyAgents called with:', { lat, lng, radius, includeStatuses });
-      
-      const docs = await listDocs({
-        collection: 'agents'
-      });
-      
-      console.log('📊 Total agents in collection:', docs.items.length);
-      
-      // Default to only available agents if no statuses specified
-      const allowedStatuses = includeStatuses || ['available'];
-      console.log('✅ Allowed statuses:', allowedStatuses);
-      
-      const allAgents = docs.items.map(doc => doc.data as Agent);
-      console.log('👥 All agents:', allAgents.map(a => ({ 
-        id: a.id, 
-        businessName: a.businessName, 
-        status: a.status, 
-        isActive: a.isActive,
-        location: a.location?.coordinates 
-      })));
-      
-      const filteredAgents = allAgents.filter(agent => {
-        console.log(`🔍 Checking agent ${agent.businessName}:`, { 
-          isActive: agent.isActive, 
-          status: agent.status, 
-          statusAllowed: allowedStatuses.includes(agent.status),
-          coordinates: agent.location?.coordinates
-        });
-        
-        if (!agent.isActive) {
-          console.log(`❌ Agent ${agent.businessName} is not active`);
-          return false;
-        }
-        if (!allowedStatuses.includes(agent.status)) {
-          console.log(`❌ Agent ${agent.businessName} status ${agent.status} not in allowed statuses`);
-          return false;
-        }
-        
-        // Simple distance calculation (not precise but good for demo)
-        const agentLat = agent.location.coordinates.lat;
-        const agentLng = agent.location.coordinates.lng;
-        const distance = Math.sqrt(
-          Math.pow(lat - agentLat, 2) + Math.pow(lng - agentLng, 2)
-        );
-        
-        console.log(`📏 Agent ${agent.businessName} distance: ${distance.toFixed(4)} (radius: ${radius})`);
-        const withinRadius = distance <= radius;
-        if (!withinRadius) {
-          console.log(`❌ Agent ${agent.businessName} outside radius`);
-        } else {
-          console.log(`✅ Agent ${agent.businessName} within radius`);
-        }
-        
-        return withinRadius;
-      });
-      
-      console.log('🎯 Filtered agents (within radius and active):', filteredAgents.length);
-      
-      const sortedAgents = filteredAgents.sort((a, b) => {
-        // Sort by distance (simplified)
-        const distA = Math.sqrt(
-          Math.pow(lat - a.location.coordinates.lat, 2) + 
-          Math.pow(lng - a.location.coordinates.lng, 2)
-        );
-        const distB = Math.sqrt(
-          Math.pow(lat - b.location.coordinates.lat, 2) + 
-          Math.pow(lng - b.location.coordinates.lng, 2)
-        );
-        return distA - distB;
-      });
-      
-      console.log('🏆 Final nearby agents:', sortedAgents.map(a => ({ id: a.id, businessName: a.businessName })));
-      return sortedAgents;
-      
-    } catch (error) {
-      console.error('❌ Error getting nearby agents:', error);
-      return [];
-    }
+    return AgentService.getNearbyAgents(lat, lng, radius, includeStatuses);
   }
 
   // SMS operations - MOVED TO SMSService
@@ -1633,6 +1441,7 @@ Quote expires in 5 minutes.`;
   }
 
   static async getAgentDepositRequests(agentId: string, status?: string): Promise<DepositRequest[]> {
+    return DepositWithdrawalService.getAgentDepositRequests(agentId, status);
     try {
       console.log('🔍 getAgentDepositRequests called with:', { agentId, status });
       const docs = await listDocs({
@@ -1766,135 +1575,18 @@ Quote expires in 5 minutes.`;
     }
   }
 
+  // Deposit/Withdrawal Processing - MOVED TO DepositWithdrawalService
   static async processDepositRequest(
     requestId: string,
     agentId: string,
     processedBy?: string
   ): Promise<{ success: boolean; transactionId?: string; userTransactionId?: string; error?: string }> {
-    try {
-      // Get the deposit request
-      const requestDoc = await getDoc({
-        collection: 'deposit_requests',
-        key: requestId
-      });
-
-      if (!requestDoc?.data) {
-        return { success: false, error: 'Deposit request not found' };
-      }
-
-      const request = requestDoc.data as DepositRequest;
-
-      if (request.status !== 'pending' && request.status !== 'confirmed') {
-        return { success: false, error: 'Deposit request is not available for processing' };
-      }
-
-      if (request.agentId !== agentId) {
-        return { success: false, error: 'Agent not authorized for this deposit request' };
-      }
-
-      // Get current user and agent balances
-      const userBalance = await this.getUserBalance(request.userId);
-      const agent = await this.getAgent(agentId);
-      
-      if (!agent) {
-        return { success: false, error: 'Agent not found' };
-      }
-
-      // Check if agent has sufficient digital balance
-      if (agent.digitalBalance < request.amount) {
-        return { success: false, error: 'Insufficient agent digital balance' };
-      }
-
-      // Create the user deposit transaction (user receives money)
-      const userTransaction = await this.createTransaction({
-        userId: request.userId,
-        type: 'deposit',
-        amount: request.amount,
-        currency: request.currency as AfricanCurrency,
-        agentId: agentId,
-        status: 'completed',
-        description: `Cash deposit via agent - Code: ${request.depositCode}`,
-        metadata: {
-          depositRequestId: requestId,
-          depositCode: request.depositCode,
-          processedBy: processedBy || agentId
-        }
-      });
-
-      // Create the agent transaction (agent sends money to user)
-      const agentTransaction = await this.createTransaction({
-        userId: agent.userId,
-        type: 'send',
-        amount: request.amount,
-        currency: request.currency as AfricanCurrency,
-        recipientId: request.userId,
-        agentId: agentId,
-        status: 'completed',
-        description: `Deposit facilitation - Code: ${request.depositCode}`,
-        metadata: {
-          depositRequestId: requestId,
-          depositCode: request.depositCode,
-          processedBy: processedBy || agentId
-        }
-      });
-
-      // Update user balance (increase)
-      const currentUserBalance = userBalance?.balance || 0;
-      await this.updateUserBalance(request.userId, currentUserBalance + request.amount);
-
-      // Update agent digital balance (decrease)
-      await this.updateAgentBalance(agentId, {
-        digitalBalance: agent.digitalBalance - request.amount
-      });
-
-      // Mark deposit request as completed
-      await this.updateDepositRequestStatus(requestId, 'completed');
-
-      // Reward agent with AFRI tokens for processing deposit
-      try {
-        await AfriTokenService.rewardAgentService(agentId, 'deposit');
-        console.log(`✅ Rewarded agent ${agentId} with 50 AFRI for deposit`);
-      } catch (error) {
-        console.error('Error rewarding agent with AFRI:', error);
-      }
-
-      // Send SMS notification to user
-      try {
-        const user = await this.getUserByKey(request.userId);
-        if (user?.email && user.email.match(/^\d+$/)) { // Check if email is a phone number
-          await this.sendDepositSuccessSMS(
-            user.email, 
-            request.amount, 
-            request.currency, 
-            request.depositCode
-          );
-        }
-      } catch (smsError) {
-        console.warn('Failed to send SMS notification:', smsError);
-        // Don't fail the transaction if SMS fails
-      }
-
-      console.log(`Successfully processed deposit request ${requestId}, user transaction ${userTransaction.id}, agent transaction ${agentTransaction.id}`);
-      return { 
-        success: true, 
-        transactionId: agentTransaction.id, 
-        userTransactionId: userTransaction.id 
-      };
-    } catch (error) {
-      console.error('Error processing deposit request:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
+    return DepositWithdrawalService.processDepositRequest(requestId, agentId, processedBy);
   }
 
   // Withdrawal Transaction Management Methods (using transactions collection)
-  static async createWithdrawalRequest(
-    userId: string,
-    agentId: string,
-    amount: number,
-    currency: string,
-    withdrawalCode: string,
-    fee: number
-  ): Promise<string> {
+  static async createWithdrawalRequest(userId: string, agentId: string, amount: number, currency: string, withdrawalCode: string, fee: number): Promise<string> {
+    return DepositWithdrawalService.createWithdrawalRequest(userId, agentId, amount, currency, fee).then(r => r.id);
     try {
       const transactionData = {
         userId,
@@ -1918,6 +1610,7 @@ Quote expires in 5 minutes.`;
   }
 
   static async getAgentWithdrawalRequests(agentId: string, status?: string): Promise<WithdrawalRequest[]> {
+    return DepositWithdrawalService.getAgentWithdrawalRequests(agentId, status);
     try {
       console.log('🔍 getAgentWithdrawalRequests called with:', { agentId, status });
       const docs = await listDocs({
@@ -2047,123 +1740,7 @@ Quote expires in 5 minutes.`;
     agentId: string,
     processedBy?: string
   ): Promise<{ success: boolean; transactionId?: string; userTransactionId?: string; error?: string }> {
-    try {
-      // Get the withdrawal transaction
-      const transactionDoc = await getDoc({
-        collection: 'transactions',
-        key: requestId
-      });
-
-      if (!transactionDoc?.data) {
-        return { success: false, error: 'Withdrawal transaction not found' };
-      }
-
-      const transaction = transactionDoc.data as Transaction;
-
-      if (transaction.type !== 'withdraw') {
-        return { success: false, error: 'Transaction is not a withdrawal' };
-      }
-
-      if (transaction.status !== 'pending' && transaction.status !== 'confirmed') {
-        return { success: false, error: 'Withdrawal transaction is not available for processing' };
-      }
-
-      if (transaction.agentId !== agentId) {
-        return { success: false, error: 'Agent not authorized for this withdrawal transaction' };
-      }
-
-      // Get current user and agent balances
-      const userBalance = await this.getUserBalance(transaction.userId);
-      const agent = await this.getAgent(agentId);
-      
-      if (!agent) {
-        return { success: false, error: 'Agent not found' };
-      }
-
-      // Check if user has sufficient balance
-      if (!userBalance || userBalance.balance < transaction.amount) {
-        return { success: false, error: 'Insufficient user balance' };
-      }
-
-      // Check if agent has sufficient cash balance
-      console.log(`🏦 Agent balance check: cashBalance=${agent.cashBalance}, withdrawal amount=${transaction.amount}, digitalBalance=${agent.digitalBalance}`);
-      if (agent.cashBalance < transaction.amount) {
-        return { success: false, error: `Insufficient agent cash balance. Agent has ${agent.cashBalance}, needs ${transaction.amount}` };
-      }
-
-      // Update the existing withdrawal transaction to completed status
-      await this.updateTransaction(requestId, {
-        status: 'completed',
-        completedAt: new Date(),
-        description: `Cash withdrawal completed via agent - Code: ${transaction.withdrawalCode}`,
-        metadata: {
-          ...transaction.metadata,
-          processedBy: processedBy || agentId,
-          completedAt: new Date().toISOString()
-        }
-      });
-
-      // Create the agent transaction (agent receives money for facilitation)
-      const agentTransaction = await this.createTransaction({
-        userId: agent.userId,
-        type: 'receive',
-        amount: transaction.amount,
-        currency: transaction.currency,
-        fromUserId: transaction.userId,
-        agentId: agentId,
-        status: 'completed',
-        description: `Withdrawal facilitation - Code: ${transaction.withdrawalCode}`,
-        metadata: {
-          originalWithdrawalId: requestId,
-          withdrawalCode: transaction.withdrawalCode,
-          processedBy: processedBy || agentId
-        }
-      });
-
-      // Update user balance (decrease)
-      const currentUserBalance = userBalance.balance;
-      await this.updateUserBalance(transaction.userId, currentUserBalance - (transaction.amount + (transaction.fee || 0)));
-
-      // Update agent cash balance (decrease) and digital balance (increase)
-      await this.updateAgentBalance(agentId, {
-        cashBalance: agent.cashBalance - transaction.amount,
-        digitalBalance: agent.digitalBalance + transaction.amount
-      });
-
-      // Reward agent with AFRI tokens for processing withdrawal
-      try {
-        await AfriTokenService.rewardAgentService(agentId, 'withdrawal');
-        console.log(`✅ Rewarded agent ${agentId} with 50 AFRI for withdrawal`);
-      } catch (error) {
-        console.error('Error rewarding agent with AFRI:', error);
-      }
-
-      // Send SMS notification to user
-      try {
-        const user = await this.getUserByKey(transaction.userId);
-        if (user?.email && user.email.match(/^\d+$/)) { // Check if email is a phone number
-          await this.sendWithdrawalSuccessSMS(
-            user.email, 
-            transaction.amount, 
-            transaction.currency, 
-            transaction.withdrawalCode || ''
-          );
-        }
-      } catch (smsError) {
-        console.warn('Failed to send SMS notification:', smsError);
-        // Don't fail the transaction if SMS fails
-      }
-
-      console.log(`Successfully processed withdrawal transaction ${requestId}, agent transaction ${agentTransaction.id}`);
-      return { 
-        success: true, 
-        transactionId: agentTransaction.id, 
-        userTransactionId: requestId // The original withdrawal transaction ID
-      };
-    } catch (error) {
-      console.error('Error processing withdrawal request:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
+    return DepositWithdrawalService.processWithdrawalRequest(requestId, agentId, processedBy);
   }
 
   // SMS Notification Methods - MOVED TO SMSService
@@ -2175,50 +1752,16 @@ Quote expires in 5 minutes.`;
     return SMSService.sendWithdrawalSuccessSMS(phoneNumber, amount, currency, withdrawalCode);
   }
 
-  // Get deposit request by code (for agent lookup)
   static async getDepositRequestByCode(depositCode: string): Promise<DepositRequest | null> {
-    try {
-      const allRequests = await listDocs({
-        collection: 'deposit_requests'
-      });
-
-      if (!allRequests.items) return null;
-
-      for (const doc of allRequests.items) {
-        const request = doc.data as DepositRequest;
-        if (request.depositCode === depositCode && request.status === 'pending') {
-          return request;
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error getting deposit request by code:', error);
-      return null;
-    }
+    return DepositWithdrawalService.getDepositRequestByCode(depositCode);
   }
 
-  // Confirm deposit request (agent confirms they can fulfill it)
   static async confirmDepositRequest(requestId: string, agentId: string): Promise<boolean> {
-    try {
-      const requestDoc = await getDoc({
-        collection: 'deposit_requests',
-        key: requestId
-      });
-
-      if (!requestDoc?.data) return false;
-
-      const request = requestDoc.data as DepositRequest;
-      
-      if (request.agentId !== agentId || request.status !== 'pending') {
-        return false;
-      }
-
-      return await this.updateDepositRequestStatus(requestId, 'confirmed');
-    } catch (error) {
-      console.error('Error confirming deposit request:', error);
-      return false;
-    }
+    const requestDoc = await getDoc({ collection: 'deposit_requests', key: requestId });
+    if (!requestDoc?.data) return false;
+    const request = requestDoc.data as DepositRequest;
+    if (request.agentId !== agentId || request.status !== 'pending') return false;
+    return this.updateDepositRequestStatus(requestId, 'confirmed');
   }
 
   // ==================== PLATFORM REVENUE OPERATIONS ====================

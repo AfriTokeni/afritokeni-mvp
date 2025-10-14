@@ -258,4 +258,75 @@ export class AgentService {
   private static deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
+
+  static async completeAgentKYC(agentKYCData: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    businessName?: string;
+    location: {
+      country: string;
+      state: string;
+      city: string;
+      address: string;
+      coordinates: { lat: number; lng: number; };
+    };
+    operatingHours?: string;
+    operatingDays?: string[];
+    documentType?: string;
+    documentNumber?: string;
+    businessLicense?: string;
+  }): Promise<{ user: any; agent: Agent }> {
+    const { UserService } = await import('./UserService');
+    const { BalanceService } = await import('./BalanceService');
+
+    const userUpdates = {
+      firstName: agentKYCData.firstName,
+      lastName: agentKYCData.lastName,
+      email: agentKYCData.phoneNumber,
+      kycStatus: 'approved' as const,
+      isVerified: true
+    };
+
+    const userUpdateSuccess = await UserService.updateUser(agentKYCData.userId, userUpdates, 'web');
+    if (!userUpdateSuccess) throw new Error('Failed to update user details');
+
+    const updatedUser = await UserService.getUserByKey(agentKYCData.userId);
+    if (!updatedUser) throw new Error('Failed to retrieve updated user');
+
+    const userBalance = await BalanceService.getUserBalance(agentKYCData.userId);
+    let digitalBalance = userBalance?.balance || 0;
+    const cashBalance = Number(process.env.VITE_AGENT_INITIAL_CASH_BALANCE ?? 0);
+
+    const existingAgent = await this.getAgentByUserId(agentKYCData.userId);
+    let newAgent: Agent;
+
+    if (existingAgent) {
+      await this.updateAgentStatus(existingAgent.id, 'available');
+      await this.updateAgentBalance(existingAgent.id, { cashBalance, digitalBalance });
+      const updatedAgent = await this.getAgentByUserId(agentKYCData.userId);
+      if (!updatedAgent) throw new Error('Failed to retrieve updated agent');
+      newAgent = updatedAgent;
+    } else {
+      const agentData: Omit<Agent, 'id' | 'createdAt'> = {
+        userId: agentKYCData.userId,
+        businessName: agentKYCData.businessName || `${agentKYCData.firstName} ${agentKYCData.lastName} Agent`,
+        location: agentKYCData.location,
+        isActive: true,
+        status: 'available',
+        cashBalance,
+        digitalBalance,
+        commissionRate: 0.02
+      };
+      newAgent = await this.createAgent(agentData);
+    }
+
+    if (!userBalance && digitalBalance === 0) {
+      await BalanceService.updateUserBalance(agentKYCData.userId, 0);
+    }
+
+    return { user: updatedUser, agent: newAgent };
+  }
+
 }
