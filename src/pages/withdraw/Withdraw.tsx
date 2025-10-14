@@ -11,6 +11,7 @@ import { formatCurrencyAmount } from '../../types/currency';
 
 import type { WithdrawStep } from './types';
 import { Agent as DBAgent } from '../../services/agentService';
+import { DepositWithdrawalService } from '../../services/depositWithdrawalService';
 
 const WithdrawPage: React.FC = () => {
   const { user } = useAuthentication();

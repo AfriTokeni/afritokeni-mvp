@@ -22,6 +22,7 @@ import {
   Info
 } from 'lucide-react';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../types/currency';
+import { UserService } from '../../services/userService';
 
 
 

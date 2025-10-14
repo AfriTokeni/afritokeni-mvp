@@ -22,6 +22,7 @@ import {
 import { useRoleBasedAuth } from "../hooks/useRoleBasedAuth";
 
 import { nanoid } from "nanoid";
+import { UserService } from '../services/userService';
 // SMS service removed - using USSD via dataService
 
 const AuthenticationContext = createContext<AuthContextType | undefined>(

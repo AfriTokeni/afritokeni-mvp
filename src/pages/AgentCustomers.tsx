@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 import { User as UserType } from '../types/auth';
+import { UserService } from '../../services/userService';
 
 interface Customer {
   id: string;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AgentKYC from '../../components/AgentKYC';
 import { AgentKYCData } from '../../types/auth';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { AgentService } from '../../services/agentService';
 
 
 const AgentKYCPage: React.FC = () => {

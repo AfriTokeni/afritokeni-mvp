@@ -9,6 +9,10 @@ import { WithdrawalRequest } from '../../services/depositWithdrawalService';
 import { BalanceCard } from '../../components/BalanceCard';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
+import { UserService } from '../../services/userService';
+import { AgentService } from '../../services/agentService';
+import { TransactionService } from '../../services/transactionService';
+import { DepositWithdrawalService } from '../../services/depositWithdrawalService';
 
 const ProcessWithdrawals: React.FC = () => {
   const { user } = useAuthentication();

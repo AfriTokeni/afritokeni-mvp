@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { NotificationService } from './notificationService';
 
 import { UserKYCData } from '../types/auth';
+import { UserService } from './userService';
 
 export interface KYCSubmission {
   id: string;

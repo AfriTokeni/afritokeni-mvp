@@ -5,6 +5,7 @@ import UserKYC from '../../components/UserKYC';
 import { UserKYCData } from '../../types/auth';
 
 import { KYCService } from '../../services/kycService';
+import { UserService } from '../../services/userService';
 
 const UserKYCPage: React.FC = () => {
   const navigate = useNavigate();

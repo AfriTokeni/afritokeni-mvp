@@ -6,6 +6,7 @@ import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { formatCurrencyAmount, AfricanCurrency, getActiveCurrencies } from '../../types/currency';
 
 import { NotificationService } from '../../services/notificationService';
+import { UserService } from '../../services/userService';
 
 interface UserData {
   id: string;

@@ -7,6 +7,10 @@ import { NotificationService } from '../../services/notificationService';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { UserService } from '../../services/userService';
+import { AgentService } from '../../services/agentService';
+import { TransactionService } from '../../services/transactionService';
+import { RevenueService } from '../../services/revenueService';
 
 type SettlementMethod = 'bank_transfer' | 'mobile_money';
 type SettlementStatus = 'pending' | 'processing' | 'completed' | 'failed';

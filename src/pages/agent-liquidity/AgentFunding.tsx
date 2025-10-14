@@ -6,6 +6,9 @@ import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { NotificationService } from '../../services/notificationService';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { UserService } from '../../services/userService';
+import { AgentService } from '../../services/agentService';
+import { TransactionService } from '../../services/transactionService';
 
 type FundingMethod = 'bank_transfer' | 'mobile_money' | 'cash_deposit';
 

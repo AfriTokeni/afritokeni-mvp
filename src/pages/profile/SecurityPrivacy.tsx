@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Shield, Lock, Eye, EyeOff, Smartphone, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
+import { UserService } from '../../services/userService';
 
 
 const SecurityPrivacy: React.FC = () => {

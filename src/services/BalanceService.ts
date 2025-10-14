@@ -1,5 +1,5 @@
 import { getDoc, setDoc } from '@junobuild/core';
-import { TransactionService } from './TransactionService';
+import { TransactionService } from './transactionService';
 
 export interface UserBalance {
   userId: string;

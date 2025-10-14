@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DepositRequest } from '../services/depositWithdrawalService';
 import { formatCurrencyAmount, type AfricanCurrency } from '../types/currency';
+import { AgentService } from '../services/agentService';
+import { DepositWithdrawalService } from '../services/depositWithdrawalService';
 
 interface AgentDepositProcessorProps {
   agentId: string;

@@ -9,6 +9,7 @@ import { CurrencySelector } from '../../components/CurrencySelector';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
+import { TransactionService } from '../../services/transactionService';
 
 
 type SendType = 'local' | 'ckbtc' | 'ckusdc';

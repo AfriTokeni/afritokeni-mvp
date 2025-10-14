@@ -278,8 +278,8 @@ export class AgentService {
     documentNumber?: string;
     businessLicense?: string;
   }): Promise<{ user: any; agent: Agent }> {
-    const { UserService } = await import('./UserService');
-    const { BalanceService } = await import('./BalanceService');
+    const { UserService } = await import('./userService');
+    const { BalanceService } = await import('./balanceService');
 
     const userUpdates = {
       firstName: agentKYCData.firstName,

@@ -3,6 +3,7 @@ import { ArrowLeft, User, Mail, Globe, Save, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { AfricanCurrency, getActiveCurrencies } from '../../types/currency';
+import { UserService } from '../../services/userService';
 
 
 const AccountSettings: React.FC = () => {

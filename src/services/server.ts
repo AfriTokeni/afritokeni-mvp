@@ -56,6 +56,8 @@ declare const process: {
 // Configure dotenv with explicit path
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { UserService } from './userService';
+import { DepositWithdrawalService } from './depositWithdrawalService';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

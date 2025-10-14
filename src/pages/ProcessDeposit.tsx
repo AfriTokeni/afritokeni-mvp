@@ -12,6 +12,10 @@ import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types/auth';
 import PageLayout from '../components/PageLayout';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
+import { UserService } from '../../services/userService';
+import { AgentService } from '../../services/agentService';
+import { TransactionService } from '../../services/transactionService';
+import { SMSService } from '../../services/smsService';
 
 export interface DepositData {
   customerPhone: string;

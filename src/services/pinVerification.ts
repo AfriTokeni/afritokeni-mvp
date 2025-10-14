@@ -5,6 +5,7 @@
 
 
 import crypto from 'crypto';
+import { UserService } from './userService';
 
 interface PINAttempt {
   phoneNumber: string;

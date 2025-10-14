@@ -4,6 +4,7 @@ import { WithdrawalRequest } from './ProcessWithdrawal';
 import { WithdrawalRequest as DataServiceWithdrawalRequest } from '../../services/depositWithdrawalService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
+import { AgentService } from '../../services/agentService';
 
 interface WithdrawalListProps {
   onSelectWithdrawal: (withdrawal: WithdrawalRequest) => void;

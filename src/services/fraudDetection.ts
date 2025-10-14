@@ -1,4 +1,5 @@
 /**
+import { UserService } from './userService';
  * Fraud Detection Service
  * Detects suspicious activity and prevents fraud
  */

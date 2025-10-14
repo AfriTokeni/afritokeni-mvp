@@ -1,11 +1,11 @@
 import { nanoid } from 'nanoid';
 import { getDoc, setDoc, listDocs } from '@junobuild/core';
 import { FraudDetectionService } from './fraudDetection';
-import { UserService } from './UserService';
-import { AgentService } from './AgentService';
-import { TransactionService } from './TransactionService';
-import { BalanceService } from './BalanceService';
-import { SMSService } from './SMSService';
+import { UserService } from './userService';
+import { AgentService } from './agentService';
+import { TransactionService } from './transactionService';
+import { BalanceService } from './balanceService';
+import { SMSService } from './smsService';
 import { AfriTokenService } from './afritokenService';
 import type { AfricanCurrency } from '../types/currency';
 
