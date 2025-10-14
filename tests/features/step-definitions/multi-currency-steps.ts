@@ -39,12 +39,8 @@ Then('I should see {int} {word}', async function (amount: number, currency: stri
   assert.equal(balance, amount);
 });
 
-When('I send {int} {word} to another user', async function (amount: number, currency: string) {
-  // Skip if it's ckBTC or ckUSDC - those have specific steps in core-steps.ts
-  if (currency === 'ckBTC' || currency === 'ckUSDC') {
-    return;
-  }
-  
+// Fiat currency send steps - NOT for ckBTC/ckUSDC
+When(/^I send (\d+) (UGX|NGN|KES|GHS|ZAR|TZS|RWF|XAF|XOF|MAD|EGP|ZMW|BWP|MUR|SCR|SZL|LSL|NAD|AOA|MZN|MWK|BIF|DJF|ERN|ETB|GMD|GNF|KMF|LRD|MGA|SLL|SOS|SSP|STN|SDG|TND) to another user$/, async function (amount: number, currency: string) {
   try {
     const recipient = await UserService.createUser({
       phoneNumber: `+256700${Date.now().toString().slice(-6)}`,
@@ -213,13 +209,8 @@ Given('I am a user with {int} {word}', async function (amount: number, currency:
   await BalanceService.updateUserBalance(world.userId, amount);
 });
 
-// Additional currency-specific steps (excluding ckBTC/ckUSDC which have their own steps)
-Given('I have {int} {word}', async function (amount: number, currency: string) {
-  // Skip if it's ckBTC or ckUSDC - those have specific steps in core-steps.ts
-  if (currency === 'ckBTC' || currency === 'ckUSDC') {
-    return;
-  }
-  
+// Fiat currency steps (UGX, NGN, KES, GHS, ZAR, etc.) - NOT for ckBTC/ckUSDC
+Given(/^I have (\d+) (UGX|NGN|KES|GHS|ZAR|TZS|RWF|UGX|XAF|XOF|MAD|EGP|ZMW|BWP|MUR|SCR|SZL|LSL|NAD|AOA|MZN|MWK|BIF|DJF|ERN|ETB|GMD|GNF|KMF|LRD|MGA|SLL|SOS|SSP|STN|SDG|TND|UGX)$/, async function (amount: number, currency: string) {
   if (!world.userId) {
     const user = await UserService.createUser({
       phoneNumber: `+256700${Date.now().toString().slice(-6)}`,

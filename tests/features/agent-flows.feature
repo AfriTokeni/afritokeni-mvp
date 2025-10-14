@@ -85,7 +85,9 @@ Feature: Agent Operations
   Scenario: Agent processes multiple deposits
     Given I am an agent with 500000 UGX digital balance
     When a customer brings 50000 UGX cash
+    And I credit 50000 UGX to their account
     And another customer brings 30000 UGX cash
+    And I credit 30000 UGX to their account
     Then my digital balance should decrease by 80000 UGX
     And my cash balance should increase by 80000 UGX
 

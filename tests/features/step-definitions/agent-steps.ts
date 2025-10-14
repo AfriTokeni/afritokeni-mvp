@@ -103,6 +103,7 @@ Given('I am an agent with {int} {word} cash', async function (amount: number, cu
 
 Given('a customer requests {int} {word} withdrawal', function (amount: number, currency: string) {
   world.withdrawalAmount = amount;
+  world.customerCashAmount = amount;
 });
 
 When('I verify their withdrawal code', function () {
@@ -135,7 +136,10 @@ When('a customer wants to deposit {int} {word}', function (amount: number, curre
 });
 
 Then('I should see a liquidity warning', function () {
-  assert.ok(world.agentDigitalBalance < world.customerDepositAmount, 'Should have liquidity warning');
+  // Check for either deposit scenario (low digital balance) or withdrawal scenario (low cash balance)
+  const hasDepositWarning = world.customerDepositAmount && world.agentDigitalBalance < world.customerDepositAmount;
+  const hasWithdrawalWarning = world.withdrawalAmount && world.agentCashBalance < world.withdrawalAmount;
+  assert.ok(hasDepositWarning || hasWithdrawalWarning, 'Should have liquidity warning');
 });
 
 Then('be prompted to fund my account', function () {
@@ -143,7 +147,10 @@ Then('be prompted to fund my account', function () {
 });
 
 Then('the transaction should not proceed', function () {
-  assert.ok(world.agentDigitalBalance < world.customerDepositAmount, 'Transaction should not proceed');
+  // Check for either deposit scenario (low digital balance) or withdrawal scenario (low cash balance)
+  const depositBlocked = world.customerDepositAmount && world.agentDigitalBalance < world.customerDepositAmount;
+  const withdrawalBlocked = world.withdrawalAmount && world.agentCashBalance < world.withdrawalAmount;
+  assert.ok(depositBlocked || withdrawalBlocked, 'Transaction should not proceed');
 });
 
 Given('I am an agent with ckBTC available', async function () {
@@ -257,6 +264,7 @@ Then('be able to compare commission rates', function () {
 
 When('another customer brings {int} {word} cash', function (amount: number, currency: string) {
   world.secondCustomerAmount = amount;
+  world.customerCashAmount = amount;
 });
 
 When('I give {int} {word} cash to a customer', function (amount: number, currency: string) {
@@ -371,8 +379,9 @@ Given('I am a new agent with basic verification', function () {
 });
 
 When('I try to process transactions over {int} {word}', function (amount: number, currency: string) {
-  world.transactionAmount = amount;
-  world.limitExceeded = amount > world.dailyLimit;
+  // "over X" means we try to process X+1
+  world.transactionAmount = amount + 1;
+  world.limitExceeded = world.transactionAmount > world.dailyLimit;
 });
 
 Then('I should see a daily limit warning', function () {
