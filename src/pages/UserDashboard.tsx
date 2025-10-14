@@ -11,7 +11,7 @@ import { CkUSDCBalanceCard } from '../components/CkUSDCBalanceCard';
 import { CkBTCBalanceCard } from '../components/CkBTCBalanceCard';
 import { OnboardingModal, OnboardingData } from '../components/OnboardingModal';
 import { ProfileIncompleteBanner } from '../components/ProfileIncompleteBanner';
-import { DataService } from '../services/dataService';
+
 import { 
   Send,
   Bitcoin,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, CreditCard, Search } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
-import { DataService, WithdrawalRequest as DataServiceWithdrawalRequest } from '../../services/dataService';
+import { WithdrawalRequest as DataServiceWithdrawalRequest } from '../../services/depositWithdrawalService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
 

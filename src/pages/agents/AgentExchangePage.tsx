@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { CkBTCService } from '../../services/ckBTCService';
 import { CkUSDCService } from '../../services/ckUSDCService';
-import { DataService } from '../../services/dataService';
+
 import { useAuthentication } from '../../context/AuthenticationContext';
 import DynamicFeeCalculator from '../../components/DynamicFeeCalculator';
 

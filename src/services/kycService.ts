@@ -1,7 +1,7 @@
 import { setDoc, uploadFile, listDocs, getDoc } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { NotificationService } from './notificationService';
-import { DataService } from './dataService';
+
 import { UserKYCData } from '../types/auth';
 
 export interface KYCSubmission {

@@ -20,7 +20,7 @@ import LiquidityAlert from '../components/LiquidityAlert';
 import NotificationSystem from '../components/NotificationSystem';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';
-import { DataService } from '../services/dataService';
+
 import { Transaction } from '../types/transaction';
 
 

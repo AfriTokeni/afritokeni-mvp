@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { formatCurrencyAmount, AfricanCurrency, getActiveCurrencies } from '../../types/currency';
-import { DataService } from '../../services/dataService';
+
 import { NotificationService } from '../../services/notificationService';
 
 interface UserData {

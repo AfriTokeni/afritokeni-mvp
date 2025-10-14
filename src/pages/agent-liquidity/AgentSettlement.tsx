@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, Building2, Smartphone, Clock, CheckCircle, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { DataService } from '../../services/dataService';
+
 import { NotificationService } from '../../services/notificationService';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';

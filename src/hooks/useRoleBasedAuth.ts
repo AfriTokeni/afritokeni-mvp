@@ -2,7 +2,7 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import { getDoc, setDoc, type User as JunoUser } from '@junobuild/core';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { faker } from '@faker-js/faker';
-import { DataService } from '../services/dataService';
+
 
 export type UserRole = 'user' | 'agent';
 

@@ -5,7 +5,7 @@ import { useDemoMode } from '../../context/DemoModeContext';
 import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import { formatCurrencyAmount, AfricanCurrency } from '../../types/currency';
 import { NotificationService } from '../../services/notificationService';
-import { DataService, WithdrawalRequest } from '../../services/dataService';
+import { WithdrawalRequest } from '../../services/depositWithdrawalService';
 import { BalanceCard } from '../../components/BalanceCard';
 import { CkBTCBalanceCard } from '../../components/CkBTCBalanceCard';
 import { CkUSDCBalanceCard } from '../../components/CkUSDCBalanceCard';

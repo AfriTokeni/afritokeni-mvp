@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DollarSign, CreditCard, Building2, Smartphone, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { DataService } from '../../services/dataService';
+
 import { NotificationService } from '../../services/notificationService';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { useAuthentication } from '../../context/AuthenticationContext';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
-import { DataService, Agent } from '../../services/dataService';
+import { Agent } from '../../services/agentService';
 import { 
   AmountStep, 
   AgentSelectionStep, 

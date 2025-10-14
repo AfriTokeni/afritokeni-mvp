@@ -3,7 +3,7 @@
  * Detects suspicious activity and prevents fraud
  */
 
-import { DataService } from './dataService';
+
 
 interface TransactionPattern {
   phoneNumber: string;

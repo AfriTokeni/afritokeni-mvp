@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 import { AgentSelectionStepProps } from '../../types/depositTypes';
-import { Agent } from '../../services/dataService';
+import { Agent } from '../../services/agentService';
 
 // No need for leaflet popup CSS since we're using custom React popup
 

@@ -7,7 +7,7 @@ import {
   Calendar,
   Loader2
 } from 'lucide-react';
-import { DataService } from '../services/dataService';
+
 import { User as UserType } from '../types/auth';
 
 interface Customer {

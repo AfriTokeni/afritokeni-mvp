@@ -20,7 +20,7 @@ import {
   RegisterFormData,
 } from "../types/auth";
 import { useRoleBasedAuth } from "../hooks/useRoleBasedAuth";
-import { DataService } from "../services/dataService";
+
 import { nanoid } from "nanoid";
 // SMS service removed - using USSD via dataService
 

@@ -3,7 +3,7 @@ import { ArrowLeft, User, Mail, Globe, Save, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { AfricanCurrency, getActiveCurrencies } from '../../types/currency';
-import { DataService } from '../../services/dataService';
+
 
 const AccountSettings: React.FC = () => {
   const { user, authMethod } = useAuthentication();

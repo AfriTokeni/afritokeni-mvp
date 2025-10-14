@@ -12,7 +12,7 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
-import { DataService, Agent as DBAgent } from '../../services/dataService';
+import { Agent as DBAgent } from '../../services/agentService';
 
 interface AgentStepProps {
   userLocation: [number, number] | null;

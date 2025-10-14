@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AgentKYC from '../../components/AgentKYC';
 import { AgentKYCData } from '../../types/auth';
 import { useAuthentication } from '../../context/AuthenticationContext';
-import { DataService } from '../../services/dataService';
+
 
 const AgentKYCPage: React.FC = () => {
   const navigate = useNavigate();

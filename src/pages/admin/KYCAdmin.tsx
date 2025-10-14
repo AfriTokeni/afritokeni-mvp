@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Check, X, Eye, FileText, Calendar, User, DollarSign, AlertCircle } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { KYCService, KYCSubmission } from '../../services/kycService';
-import { DataService } from '../../services/dataService';
+
 
 const KYCAdmin: React.FC = () => {
   const [submissions, setSubmissions] = useState<KYCSubmission[]>([]);

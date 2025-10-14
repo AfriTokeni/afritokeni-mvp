@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthentication } from '../context/AuthenticationContext';
-import { Agent } from '../services/dataService';
+import { Agent } from '../services/agentService';
 import { UserService } from '../services/UserService';
 import { AgentService } from '../services/AgentService';
 import { TransactionService } from '../services/TransactionService';

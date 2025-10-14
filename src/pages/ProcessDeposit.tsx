@@ -8,7 +8,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { DataService } from '../services/dataService';
+
 import { User as UserType } from '../types/auth';
 import PageLayout from '../components/PageLayout';
 import { useAfriTokeni } from '../hooks/useAfriTokeni';

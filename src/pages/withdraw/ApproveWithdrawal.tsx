@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, User, Phone, MapPin, Clock, AlertCircle } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';
-import { DataService } from '../../services/dataService';
+import { DataService } from '../../services/depositWithdrawalService';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
 import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '../../types/currency';
 

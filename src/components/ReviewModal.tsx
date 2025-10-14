@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Star, X } from 'lucide-react';
-import { Agent } from '../services/dataService';
+import { Agent } from '../services/agentService';
 
 interface ReviewModalProps {
   agent: Agent;

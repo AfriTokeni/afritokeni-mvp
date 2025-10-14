@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Check, MapPin, Phone, Clock } from 'lucide-react';
 import { formatCurrencyAmount } from '../../types/currency';
-import { Agent as DBAgent } from '../../services/dataService';
+import { Agent as DBAgent } from '../../services/agentService';
 import TransactionCodeDisplay from '../../components/TransactionCodeDisplay';
 import ReviewModal from '../../components/ReviewModal';
 

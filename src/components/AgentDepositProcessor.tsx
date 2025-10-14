@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DataService, DepositRequest } from '../services/dataService';
+import { DepositRequest } from '../services/depositWithdrawalService';
 import { formatCurrencyAmount, type AfricanCurrency } from '../types/currency';
 
 interface AgentDepositProcessorProps {

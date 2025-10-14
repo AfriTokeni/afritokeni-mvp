@@ -5,12 +5,12 @@ import AgentStep from './AgentStep';
 import ConfirmationStep from './ConfirmationStep';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { DataService } from '../../services/dataService';
+import { DataService } from '../../services/agentService';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { formatCurrencyAmount } from '../../types/currency';
 
 import type { WithdrawStep } from './types';
-import { Agent as DBAgent } from '../../services/dataService';
+import { Agent as DBAgent } from '../../services/agentService';
 
 const WithdrawPage: React.FC = () => {
   const { user } = useAuthentication();
