@@ -387,44 +387,9 @@ export class DataService {
     return BalanceService.transferWithConversion(senderId, recipientId, amount, fromCurrency, toCurrency);
   }
 
-  // Agent operations
+  // Agent operations - MOVED TO AgentService
   static async createAgent(agent: Omit<Agent, 'id' | 'createdAt'>): Promise<Agent> {
-    // First check if an agent already exists for this userId to prevent duplicates
-    const existingAgent = await this.getAgentByUserId(agent.userId);
-    if (existingAgent) {
-      console.warn(`Agent already exists for userId ${agent.userId}, returning existing agent instead of creating duplicate`);
-      return existingAgent;
-    }
-
-    const now = new Date();
-    const newAgent: Agent = {
-      ...agent,
-      id: nanoid(),
-      createdAt: now
-    };
-
-    const existingDoc = await getDoc({
-      collection: 'agents',
-      key: newAgent.id
-    });
-
-    // Convert Date field to ISO string
-    const dataForJuno = {
-      ...newAgent,
-      createdAt: now.toISOString()
-    };
-
-    await setDoc({
-      collection: 'agents',
-      doc: {
-        key: newAgent.id,
-        data: dataForJuno,
-        version: existingDoc?.version ? existingDoc.version : 1n
-      }
-    });
-
-    console.log(`Successfully created new agent with ID ${newAgent.id} for userId ${agent.userId}`);
-    return newAgent;
+    return AgentService.createAgent(agent);
   }
 
   // Complete Agent KYC process - updates user details and creates agent record
@@ -546,47 +511,11 @@ export class DataService {
   }
 
   static async getAgent(id: string): Promise<Agent | null> {
-    try {
-      const doc = await getDoc({
-        collection: 'agents',
-        key: id
-      });
-      return doc?.data as Agent || null;
-    } catch (error) {
-      console.error('Error getting agent:', error);
-      return null;
-    }
+    return AgentService.getAgent(id);
   }
 
-  // Get agent by userId
   static async getAgentByUserId(userId: string): Promise<Agent | null> {
-    try {
-      console.log('getAgentByUserId called with userId:', userId);
-      const docs = await listDocs({
-        collection: 'agents'
-      });
-      console.log('Found agents in database:', docs.items.length);
-      console.log('Agent docs:', docs.items.map(doc => ({ key: doc.key, userId: (doc.data as Agent).userId })));
-
-      // Find agent with matching userId
-      for (const doc of docs.items) {
-        const agentData = doc.data as Agent;
-        console.log('Checking agent:', agentData.userId, 'against:', userId);
-        if (agentData.userId === userId) {
-          console.log('Found matching agent!');
-          return {
-            ...agentData,
-            createdAt: agentData.createdAt ? new Date(agentData.createdAt) : new Date()
-          };
-        }
-      }
-
-      console.log('No matching agent found for userId:', userId);
-      return null;
-    } catch (error) {
-      console.error('Error getting agent by userId:', error);
-      return null;
-    }
+    return AgentService.getAgentByUserId(userId);
   }
 
   // Update agent status
