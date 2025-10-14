@@ -19,7 +19,11 @@
     "src/services/webHookServices.ts",
     "src/services/ckBTCService.ts",
     "src/functions/notifications.ts",
-    "src/types/**/*"
+    "src/types/ckbtc.ts",
+    "src/types/ckusdc.ts",
+    "src/types/auth.ts",
+    "src/types/currency.ts",
+    "src/types/notification.ts",
   ],
   "exclude": [
     "node_modules",
