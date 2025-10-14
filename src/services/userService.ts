@@ -8,6 +8,7 @@ export interface UserDataFromJuno {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
   userType: 'user' | 'agent';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
@@ -20,6 +21,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
   userType: 'user' | 'agent';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
@@ -43,6 +45,7 @@ export class UserService {
     firstName: string;
     lastName: string;
     email: string;
+    phoneNumber?: string;
     userType: 'user' | 'agent';
     kycStatus?: 'pending' | 'approved' | 'rejected' | 'not_started';
     pin?: string;
@@ -56,6 +59,7 @@ export class UserService {
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
+      phoneNumber: userData.phoneNumber,
       userType: userData.userType,
       isVerified: false,
       kycStatus: userData.kycStatus || 'not_started',
@@ -94,6 +98,7 @@ export class UserService {
         firstName: rawData.firstName,
         lastName: rawData.lastName,
         email: rawData.email,
+        phoneNumber: rawData.phoneNumber,
         userType: rawData.userType,
         isVerified: rawData.isVerified,
         kycStatus: rawData.kycStatus,
@@ -172,6 +177,7 @@ export class UserService {
             firstName: rawData.firstName,
             lastName: rawData.lastName,
             email: rawData.email,
+            phoneNumber: rawData.phoneNumber,
             userType: rawData.userType,
             isVerified: rawData.isVerified,
             kycStatus: rawData.kycStatus,
@@ -197,7 +203,7 @@ export class UserService {
 
       const userDoc = docs.items.find(doc => {
         const data = doc.data as UserDataFromJuno;
-        return data.email === phoneNumber || data.id === phoneNumber;
+        return data.phoneNumber === phoneNumber || data.email === phoneNumber || data.id === phoneNumber;
       });
 
       if (!userDoc) return null;
@@ -208,6 +214,7 @@ export class UserService {
         firstName: rawData.firstName,
         lastName: rawData.lastName,
         email: rawData.email,
+        phoneNumber: rawData.phoneNumber,
         userType: rawData.userType,
         isVerified: rawData.isVerified,
         kycStatus: rawData.kycStatus,
@@ -234,6 +241,7 @@ export class UserService {
             firstName: rawData.firstName,
             lastName: rawData.lastName,
             email: rawData.email,
+            phoneNumber: rawData.phoneNumber,
             userType: rawData.userType,
             isVerified: rawData.isVerified,
             kycStatus: rawData.kycStatus,

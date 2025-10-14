@@ -6,9 +6,9 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'assert';
 import { world } from './shared-steps.js';
-import { CkBTCService } from '../../../src/services/ckBTCService.js';
-import { CkUSDCService } from '../../../src/services/ckUSDCService.js';
-import { EscrowService } from '../../../src/services/escrowService.js';
+import { CkBTCService } from '../../../src/services/ckBTCService';
+import { CkUSDCService } from '../../../src/services/ckUSDCService';
+import { EscrowService } from '../../../src/services/escrowService';
 
 // ========== ckBTC Steps ==========
 

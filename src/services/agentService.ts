@@ -6,6 +6,8 @@ export interface Agent {
   id: string;
   userId: string;
   businessName: string;
+  phoneNumber?: string;
+  email?: string;
   location: {
     country: string;
     state: string;

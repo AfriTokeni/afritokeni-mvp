@@ -1,9 +1,9 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'assert';
 import { world } from './shared-steps.js';
-import { UserService } from '../../../src/services/userService.js';
-import { BalanceService } from '../../../src/services/BalanceService.js';
-import { TransactionService } from '../../../src/services/transactionService.js';
+import { UserService } from '../../../src/services/userService';
+import { BalanceService } from '../../../src/services/balanceService';
+import { TransactionService } from '../../../src/services/transactionService';
 
 Given('I have {int} {word} in my account', async function (amount: number, currency: string) {
   world.currency = currency;

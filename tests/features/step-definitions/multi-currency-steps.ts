@@ -1,10 +1,10 @@
 import { Given, When, Then } from "@cucumber/cucumber";
 import assert from "assert";
 import { world } from "./shared-steps.js";
-import { UserService } from '../../../src/services/UserService.js';
-import { BalanceService } from '../../../src/services/BalanceService.js';
-import { TransactionService } from '../../../src/services/transactionService.js';
-import { AgentService } from '../../../src/services/AgentService.js';
+import { UserService } from '../../../src/services/userService';
+import { BalanceService } from '../../../src/services/balanceService';
+import { TransactionService } from '../../../src/services/transactionService';
+import { AgentService } from '../../../src/services/agentService';
 
 Given('I am a user in {word}', async function (country: string) {
   world.country = country;

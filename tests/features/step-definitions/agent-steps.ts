@@ -1,11 +1,9 @@
 import { Given, When, Then } from "@cucumber/cucumber";
 import assert from "assert";
 import { world } from "./shared-steps.js";
-import { AgentService } from '../../../src/services/AgentService.js';
-import { UserService } from '../../../src/services/UserService.js';
-import { BalanceService } from '../../../src/services/BalanceService.js';
-import { TransactionService } from '../../../src/services/transactionService.js';
-import { DepositWithdrawalService } from '../../../src/services/DepositWithdrawalService.js';
+import { AgentService } from '../../../src/services/agentService';
+import { UserService } from '../../../src/services/userService';
+import { BalanceService } from '../../../src/services/balanceService';
 
 Given('I am an agent with {int} {word} digital balance', async function (amount: number, currency: string) {
   const agent = await AgentService.createAgent({
