@@ -60,6 +60,9 @@ npm run dev
 
 # Build for production
 npm run build
+
+# Run tests (BDD with Cucumber)
+npm test
 ```
 
 ---

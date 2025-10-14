@@ -6,7 +6,8 @@
  */
 
 import { nanoid } from 'nanoid';
-import { setDoc, getDoc, listDocs } from '@junobuild/core';
+import { setDoc, getDoc, listDocs, SatelliteOptions } from '@junobuild/core';
+import { AnonymousIdentity } from '@dfinity/agent';
 import { AfricanCurrency } from '../types/currency';
 
 export type AssetType = 'ckBTC' | 'ckUSDC';
@@ -43,6 +44,13 @@ export interface Agent {
 
 export class EscrowService {
   private static readonly ESCROW_TIMEOUT_HOURS = 24;
+  
+  // Satellite configuration for Juno
+  private static satellite: SatelliteOptions = {
+    identity: new AnonymousIdentity(),
+    satelliteId: (typeof process !== 'undefined' ? process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID : undefined) || "uxrrr-q7777-77774-qaaaq-cai",
+    container: true
+  };
 
   /**
    * Create a new escrow transaction for ckBTC or ckUSDC exchange
@@ -90,6 +98,48 @@ export class EscrowService {
   }
 
   /**
+   * Update escrow transaction status (for testing/admin)
+   */
+  static async updateTransactionStatus(
+    transactionId: string,
+    status: 'pending' | 'funded' | 'completed' | 'disputed' | 'refunded' | 'expired',
+    fundedAt?: Date
+  ): Promise<EscrowTransaction | null> {
+    // Get the raw doc with version
+    const doc = await getDoc({
+      collection: 'escrow_transactions',
+      key: transactionId,
+      satellite: this.satellite
+    });
+    
+    if (!doc?.data) return null;
+    
+    const transaction = doc.data as any;
+    transaction.status = status;
+    if (fundedAt) transaction.fundedAt = fundedAt.toISOString();
+    
+    // Update with the current version from the doc (Juno auto-increments)
+    await setDoc({
+      collection: 'escrow_transactions',
+      doc: {
+        key: transactionId,
+        data: transaction,
+        version: doc.version // Use current version, Juno will increment it
+      },
+      satellite: this.satellite
+    });
+    
+    // Return the updated transaction
+    return {
+      ...transaction,
+      createdAt: new Date(transaction.createdAt),
+      expiresAt: new Date(transaction.expiresAt),
+      fundedAt: transaction.fundedAt ? new Date(transaction.fundedAt) : undefined,
+      completedAt: transaction.completedAt ? new Date(transaction.completedAt) : undefined,
+    };
+  }
+
+  /**
    * Verify exchange code and complete transaction
    */
   static async verifyAndComplete(exchangeCode: string, agentId: string): Promise<EscrowTransaction> {
@@ -115,9 +165,16 @@ export class EscrowService {
       // Transfer ckBTC from escrow to agent
       // In production, this would call ICP canister
       
-      transaction.status = 'completed';
-      transaction.completedAt = new Date();
-      await this.saveTransaction(transaction);
+      // Use updateTransactionStatus which handles versioning properly
+      const updated = await this.updateTransactionStatus(
+        transaction.id,
+        'completed',
+        undefined
+      );
+      
+      if (updated) {
+        updated.completedAt = new Date();
+      }
 
       // Update agent stats
       await this.updateAgentStats(agentId, true);
@@ -125,11 +182,10 @@ export class EscrowService {
       // Notify both parties
       await this.notifyTransactionComplete(transaction);
 
-      return transaction;
+      return updated || transaction;
     } catch (error) {
       console.error('Error completing transaction:', error);
-      transaction.status = 'disputed';
-      await this.saveTransaction(transaction);
+      await this.updateTransactionStatus(transaction.id, 'disputed');
       throw error;
     }
   }
@@ -192,15 +248,18 @@ export class EscrowService {
           fundedAt: transaction.fundedAt?.toISOString(),
           completedAt: transaction.completedAt?.toISOString(),
         }
-      }
+        // No version for new docs, Juno handles it automatically
+      },
+      satellite: this.satellite
     });
   }
 
-  static async getTransaction(id: string): Promise<EscrowTransaction | null> {
+  static async getTransaction(id: string): Promise<(EscrowTransaction & { _version?: bigint }) | null> {
     try {
       const doc = await getDoc({
         collection: 'escrow_transactions',
-        key: id
+        key: id,
+        satellite: this.satellite
       });
       
       if (!doc?.data) return null;
@@ -212,6 +271,7 @@ export class EscrowService {
         expiresAt: new Date(data.expiresAt),
         fundedAt: data.fundedAt ? new Date(data.fundedAt) : undefined,
         completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+        _version: doc.version // Store version for updates
       };
     } catch {
       return null;
@@ -221,7 +281,8 @@ export class EscrowService {
   private static async getTransactionByCode(code: string): Promise<EscrowTransaction | null> {
     try {
       const results = await listDocs({
-        collection: 'escrow_transactions'
+        collection: 'escrow_transactions',
+        satellite: this.satellite
       });
       
       const transaction = results.items.find((item: any) => item.data.exchangeCode === code);
@@ -243,7 +304,8 @@ export class EscrowService {
   private static async getExpiredTransactions(): Promise<EscrowTransaction[]> {
     try {
       const results = await listDocs({
-        collection: 'escrow_transactions'
+        collection: 'escrow_transactions',
+        satellite: this.satellite
       });
       
       const now = new Date();
@@ -332,7 +394,8 @@ export class EscrowService {
   static async getUserTransactions(userId: string): Promise<EscrowTransaction[]> {
     try {
       const results = await listDocs({
-        collection: 'escrow_transactions'
+        collection: 'escrow_transactions',
+        satellite: this.satellite
       });
       
       return results.items
@@ -358,7 +421,8 @@ export class EscrowService {
   static async getAgentTransactions(agentId: string): Promise<EscrowTransaction[]> {
     try {
       const results = await listDocs({
-        collection: 'escrow_transactions'
+        collection: 'escrow_transactions',
+        satellite: this.satellite
       });
       
       return results.items

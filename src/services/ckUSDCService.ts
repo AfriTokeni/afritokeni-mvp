@@ -13,11 +13,10 @@
 
 import { ethers } from 'ethers';
 import { Principal } from '@dfinity/principal';
-import { Actor, HttpAgent } from '@dfinity/agent';
+import { Actor, HttpAgent, AnonymousIdentity } from '@dfinity/agent';
 import { nanoid } from 'nanoid';
-import { setDoc, getDoc, listDocs } from '@junobuild/core';
-import { SatelliteOptions } from '@junobuild/core';
-import { AnonymousIdentity } from '@dfinity/agent';
+import { getDoc, listDocs, setDoc, SatelliteOptions } from '@junobuild/core';
+import { getCkUSDCLedgerActor, toPrincipal, toSubaccount } from './icpActors.js';
 import {
   CkUSDCConfig,
   CkUSDCBalance,
@@ -44,7 +43,7 @@ export class CkUSDCService {
   // Default satellite configuration for SMS/USSD operations
   private static defaultSatellite: SatelliteOptions = {
     identity: new AnonymousIdentity(),
-    satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
+    satelliteId: (typeof process !== 'undefined' ? process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID : undefined) || "uxrrr-q7777-77774-qaaaq-cai",
     container: true
   };
 
@@ -76,10 +75,31 @@ export class CkUSDCService {
    * Get ckUSDC balance for a user
    * @param principalId - User's Principal ID
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   * @param isDemoMode - Whether in demo mode (uses Juno transactions)
    */
-  static async getBalance(principalId: string, useSatellite?: boolean): Promise<CkUSDCBalance> {
+  static async getBalance(principalId: string, useSatellite?: boolean, isDemoMode = false): Promise<CkUSDCBalance> {
     try {
-      // Fetch balance from Juno datastore
+      if (!isDemoMode) {
+        // PRODUCTION MODE: Query ICP mainnet ledger canister
+        console.log('🚀 Production: Querying ICP mainnet for ckUSDC balance...');
+        const principal = toPrincipal(principalId);
+        const ledgerActor = await getCkUSDCLedgerActor();
+        const balance = await ledgerActor.icrc1_balance_of({
+          owner: principal,
+          subaccount: toSubaccount()
+        });
+
+        const balanceAmount = Number(balance) / Math.pow(10, CKUSDC_CONSTANTS.DECIMALS);
+        console.log(`✅ ckUSDC balance from ICP: ${balanceAmount} USDC`);
+
+        return {
+          balanceUSDC: this.formatAmount(balanceAmount),
+          lastUpdated: new Date(),
+        };
+      }
+
+      // DEMO MODE: Calculate balance from transaction history in Juno
+      console.log('🎭 Demo Mode: Calculating ckUSDC balance from mock transactions...');
       const satellite = this.getSatelliteConfig(useSatellite);
       const results = await listDocs({
         collection: 'ckusdc_transactions',
@@ -112,6 +132,7 @@ export class CkUSDCService {
           }
         });
       
+      console.log(`✅ Demo ckUSDC balance calculated: ${balance} USDC`);
       return {
         balanceUSDC: this.formatAmount(balance),
         lastUpdated: new Date(),

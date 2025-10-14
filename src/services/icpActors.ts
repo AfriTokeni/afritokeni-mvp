@@ -10,6 +10,9 @@ import { Principal } from '@dfinity/principal';
 export const CKBTC_LEDGER_CANISTER_ID = 'mxzaz-hqaaa-aaaar-qaada-cai';
 export const CKBTC_MINTER_CANISTER_ID = 'mqygn-kiaaa-aaaar-qaadq-cai';
 
+// ckUSDC Mainnet Canister ID (ICRC-1 ledger)
+export const CKUSDC_LEDGER_CANISTER_ID = 'xevnm-gaaaa-aaaar-qafnq-cai';
+
 // ICP Mainnet Host
 const IC_HOST = 'https://ic0.app';
 
@@ -204,6 +207,19 @@ export async function getCkBTCMinterActor(): Promise<ActorSubclass<any>> {
   return Actor.createActor(CKBTC_MINTER_IDL, {
     agent,
     canisterId: CKBTC_MINTER_CANISTER_ID
+  });
+}
+
+/**
+ * Get ckUSDC Ledger Actor (ICRC-1)
+ * Used for balance queries and transfers
+ */
+export async function getCkUSDCLedgerActor(): Promise<ActorSubclass<any>> {
+  const agent = await createAgent();
+  
+  return Actor.createActor(ICRC1_IDL, {
+    agent,
+    canisterId: CKUSDC_LEDGER_CANISTER_ID
   });
 }
 

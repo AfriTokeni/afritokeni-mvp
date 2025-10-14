@@ -17,7 +17,7 @@ import { AfricanCurrency } from '../types/currency';
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
-  satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
+  satelliteId: process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID || "uxrrr-q7777-77774-qaaaq-cai",
   container: true
 };
 

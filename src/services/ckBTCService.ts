@@ -40,7 +40,7 @@ export class CkBTCService {
   // Default satellite configuration for SMS/USSD operations
   private static defaultSatellite: SatelliteOptions = {
     identity: new AnonymousIdentity(),
-    satelliteId: "uxrrr-q7777-77774-qaaaq-cai",
+    satelliteId: (typeof process !== 'undefined' ? process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID : undefined) || "uxrrr-q7777-77774-qaaaq-cai",
     container: true
   };
 
