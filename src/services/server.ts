@@ -993,8 +993,7 @@ async function handleTransactionHistory(input: string, session: USSDSession): Pr
     console.log(`PIN already verified for ${session.phoneNumber}, showing transaction history directly`);
     try {
       console.log(`Getting transaction history for ${session.phoneNumber}`);
-      // @ts-ignore - Old webhook code, wrong signature
-      const transactions = await TransactionService.getUserTransactions(session.phoneNumber, 5);
+      const transactions = await TransactionService.getUserTransactions(session.phoneNumber);
       
       if (transactions.length === 0) {
         return endSession(`Transaction History:
@@ -1064,8 +1063,7 @@ Thank you for using AfriTokeni!`);
       // PIN is correct, get transaction history
       try {
         console.log(`Getting transaction history for ${session.phoneNumber}`);
-        // @ts-ignore - Old webhook code, wrong signature
-        const transactions = await TransactionService.getUserTransactions(session.phoneNumber, 5);
+        const transactions = await TransactionService.getUserTransactions(session.phoneNumber);
         
         if (transactions.length === 0) {
           return endSession(`Transaction History:
@@ -1271,18 +1269,15 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         }
         
         // Create pending deposit request in datastore
-      // @ts-ignore - Old webhook code, type mismatch
         let depositId: string;
         try {
-      // @ts-ignore - Old webhook code
-          depositId = await DepositWithdrawalService.createDepositRequest(
+          const depositRequest = await DepositWithdrawalService.createDepositRequest(
             user.id,
-      // @ts-ignore - Old webhook code, wrong signature
             selectedAgent.id,
             depositAmount,
             'UGX'
-      // @ts-ignore - Old webhook code - removed depositCode param
           );
+          depositId = depositRequest.id;
           session.data.depositId = depositId;
           console.log(`✅ Deposit request ${depositId} created successfully`);
         } catch (createError) {
@@ -3551,18 +3546,17 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         const withdrawAmount = session.data.withdrawAmount || 0;
         const selectedAgent = session.data.selectedAgent;
         
-      // @ts-ignore - Old webhook code, wrong signature
         if (!selectedAgent) {
           return endSession('Agent not selected. Please try again.');
         }
         
-        // @ts-ignore - Old webhook code - wrong signature
-        const transactionId = await DepositWithdrawalService.createWithdrawTransaction(
+        const withdrawalRequest = await DepositWithdrawalService.createWithdrawalRequest(
           user.id,
-          withdrawAmount,
           selectedAgent.id,
-          withdrawalCode
+          withdrawAmount,
+          'UGX'
         );
+        const transactionId = withdrawalRequest.id;
         
         if (!transactionId) {
           return endSession('Failed to create withdrawal transaction. Please try again later.');
