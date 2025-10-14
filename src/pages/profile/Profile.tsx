@@ -424,27 +424,27 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6">
 
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 md:p-8">
           {/* Profile Header */}
-          <div className="flex flex-col items-center text-center space-y-4 mb-8">
-            <div className="relative group">
-              <div className="w-24 h-24 bg-gray-900 rounded-full flex items-center justify-center overflow-hidden">
+          <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4 mb-6 sm:mb-7 md:mb-8">
+            <div className="relative group flex-shrink-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-900 rounded-full flex items-center justify-center overflow-hidden">
                 {profileImage ? (
                   <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-4xl font-bold text-white">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
                     {userData.name.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
-              <label className="absolute bottom-0 right-0 w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors">
+              <label className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-gray-900 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors border-2 sm:border-3 border-white">
                 {uploadingImage ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <Camera className="w-4 h-4 text-white" />
+                  <Camera className="w-3 h-3 sm:w-4 sm:h-4 text-white flex-shrink-0" />
                 )}
                 <input
                   type="file"
@@ -455,75 +455,75 @@ const UserProfile: React.FC = () => {
                 />
               </label>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0 w-full">
               <div className="flex items-center justify-center space-x-2 mb-2">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{userData.name}</h2>
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 break-words">{userData.name}</h2>
                 <button 
                   onClick={() => setIsEditing(!isEditing)}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-1 sm:p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                   title="Edit Profile"
                 >
-                  <Edit3 className="w-4 h-4 text-gray-500" />
+                  <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 text-gray-500 flex-shrink-0" />
                 </button>
               </div>
-              <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-1">
+              <p className="text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg mb-1.5 sm:mb-2 break-words">
                 {userData.location ? `${userData.location.city}, ${userData.location.country}` : 'Location not set'}
               </p>
-              <div className="flex items-center justify-center space-x-2 mb-2">
+              <div className="flex items-center justify-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
                 {userData.isVerified ? (
                   <>
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span className="text-sm font-medium text-green-600">Verified Account</span>
+                    <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-green-500 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium text-green-600">Verified Account</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-4 h-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm font-medium text-yellow-600">Pending Verification</span>
+                    <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                    <span className="text-xs sm:text-sm font-medium text-yellow-600">Pending Verification</span>
                   </>
                 )}
               </div>
-              <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <div className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs sm:text-xs md:text-sm font-medium bg-blue-100 text-blue-800">
                 {userData.authMethod === 'sms' ? '📱 SMS User' : '🌐 Web User'}
               </div>
             </div>
           </div>
 
           {/* Profile Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
             {/* Balance Card */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <CreditCard className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Current Balance</span>
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 mb-2">
+                <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 text-gray-600 flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-medium text-gray-700">Current Balance</span>
               </div>
-              <p className="text-2xl font-bold font-mono text-gray-900">
+              <p className="text-xl sm:text-2xl font-bold font-mono text-gray-900 break-words">
                 {formatCurrencyAmount(userData.balance, userData.currency)}
               </p>
             </div>
 
             {/* KYC Status Card */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">KYC Status</span>
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                  <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 text-gray-600 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">KYC Status</span>
                 </div>
                 {(userData.kycStatus === 'not_started' || userData.kycStatus === 'rejected') && (
                   <button
                     onClick={() => navigate('/auth/user-kyc')}
-                    className="text-xs px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    className="text-xs px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex-shrink-0"
                   >
                     {userData.kycStatus === 'rejected' ? 'Retry KYC' : 'Start KYC'}
                   </button>
                 )}
               </div>
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${
+              <div className="flex items-center space-x-1.5 sm:space-x-2">
+                <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${
                   userData.kycStatus === 'approved' ? 'bg-green-500' :
                   userData.kycStatus === 'pending' ? 'bg-yellow-500' :
                   userData.kycStatus === 'rejected' ? 'bg-red-500' : 'bg-gray-400'
                 }`}></div>
-                <span className="text-sm font-medium capitalize text-gray-900">
+                <span className="text-xs sm:text-sm font-medium capitalize text-gray-900">
                   {userData.kycStatus.replace('_', ' ')}
                 </span>
               </div>
@@ -545,26 +545,26 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Email */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-2">
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 mb-2">
                 {userData.authMethod === 'sms' ? 
-                  <Phone className="w-4 h-4 text-gray-600" /> : 
-                  <Mail className="w-4 h-4 text-gray-600" />
+                  <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 text-gray-600 flex-shrink-0" /> : 
+                  <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 text-gray-600 flex-shrink-0" />
                 }
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-xs sm:text-sm font-medium text-gray-700">
                   {userData.authMethod === 'sms' ? 'Phone' : 'Email'}
                 </span>
               </div>
-              <p className="text-sm font-mono text-gray-900">{userData.email}</p>
+              <p className="text-xs sm:text-sm font-mono text-gray-900 break-all">{userData.email}</p>
             </div>
 
             {/* Member Since */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <Calendar className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Member Since</span>
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 mb-2">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 text-gray-600 flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-medium text-gray-700">Member Since</span>
               </div>
-              <p className="text-sm text-gray-900">
+              <p className="text-xs sm:text-sm text-gray-900">
                 {userData.joinDate.toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -576,53 +576,53 @@ const UserProfile: React.FC = () => {
 
           {/* Edit Profile Form */}
           {isEditing && (
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Profile</h3>
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-5 sm:mb-6">
+              <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Edit Profile</h3>
               
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-red-600">{error}</p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
+                  <p className="text-xs sm:text-sm text-red-600">{error}</p>
                 </div>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {/* First Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">
                     First Name
                   </label>
                   <input
                     type="text"
                     value={editForm.firstName}
                     onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter first name"
                   />
                 </div>
                 
                 {/* Last Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">
                     Last Name
                   </label>
                   <input
                     type="text"
                     value={editForm.lastName}
                     onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter last name"
                   />
                 </div>
                 
                 {/* Preferred Currency */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">
                     Preferred Currency
                   </label>
                   <select
                     value={editForm.preferredCurrency}
                     onChange={(e) => setEditForm({ ...editForm, preferredCurrency: e.target.value as AfricanCurrency })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     {getActiveCurrencies().map((currency) => (
                       <option key={currency.code} value={currency.code}>
@@ -634,7 +634,7 @@ const UserProfile: React.FC = () => {
                 
                 {/* Country */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">
                     Country
                   </label>
                   <input
@@ -644,14 +644,14 @@ const UserProfile: React.FC = () => {
                       ...editForm, 
                       location: { ...editForm.location, country: e.target.value }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter country"
                   />
                 </div>
                 
                 {/* City */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">
                     City
                   </label>
                   <input
@@ -661,21 +661,21 @@ const UserProfile: React.FC = () => {
                       ...editForm, 
                       location: { ...editForm.location, city: e.target.value }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                     placeholder="Enter city"
                   />
                 </div>
                 
                 {/* Bitcoin Wallet */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">
                     Bitcoin Wallet Address (Optional)
                   </label>
                   <input
                     type="text"
                     value={editForm.btcWallet}
                     onChange={(e) => setEditForm({ ...editForm, btcWallet: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 font-mono text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 font-mono text-xs sm:text-sm break-all"
                     placeholder="bc1q..."
                   />
                   <p className="mt-1 text-xs text-gray-500">Allow others to send you ckBTC directly</p>
@@ -683,14 +683,14 @@ const UserProfile: React.FC = () => {
                 
                 {/* USDC Wallet */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">
                     USDC Wallet Address (Optional)
                   </label>
                   <input
                     type="text"
                     value={editForm.usdcWallet}
                     onChange={(e) => setEditForm({ ...editForm, usdcWallet: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 font-mono text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 font-mono text-xs sm:text-sm break-all"
                     placeholder="0x..."
                   />
                   <p className="mt-1 text-xs text-gray-500">Allow others to send you ckUSDC directly</p>
@@ -698,18 +698,18 @@ const UserProfile: React.FC = () => {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex space-x-3 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-4">
                 <button
                   onClick={handleSaveProfile}
                   disabled={saving}
-                  className="flex-1 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gray-900 text-white px-4 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
                   onClick={handleCancelEdit}
                   disabled={saving}
-                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -723,96 +723,96 @@ const UserProfile: React.FC = () => {
             <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('accountSettings')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-3.5 md:px-5 md:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
-                <div className="flex items-center space-x-3">
-                  <User className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
-                  <span className="text-sm sm:text-base text-gray-900">Account Settings</span>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base md:text-lg text-gray-900">Account Settings</span>
                 </div>
                 {expandedSections.accountSettings ? 
-                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" /> : 
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                 }
               </button>
               
               {expandedSections.accountSettings && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
-                  <div className="pt-4 space-y-4">
+                <div className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-5 md:pb-5 border-t border-gray-200">
+                  <div className="pt-3 sm:pt-4 space-y-3 sm:space-y-4">
                     {/* Success Message */}
                     {accountSuccess && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                        <div className="flex items-center space-x-2">
-                          <Check className="w-4 h-4 text-green-500" />
-                          <p className="text-sm text-green-600">{accountSuccess}</p>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 sm:p-3">
+                        <div className="flex items-center space-x-1.5 sm:space-x-2">
+                          <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                          <p className="text-xs sm:text-sm text-green-600">{accountSuccess}</p>
                         </div>
                       </div>
                     )}
 
                     {/* Error Message */}
                     {error && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <p className="text-sm text-red-600">{error}</p>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 sm:p-3">
+                        <p className="text-xs sm:text-sm text-red-600">{error}</p>
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">First Name</label>
                         <input
                           type="text"
                           value={accountForm.firstName}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, firstName: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                          className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter first name"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Last Name</label>
                         <input
                           type="text"
                           value={accountForm.lastName}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, lastName: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                          className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter last name"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Email Address</label>
                         <input
                           type="email"
                           value={accountForm.email}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, email: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                          className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 break-all"
                           placeholder="Enter email address"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Phone Number</label>
                         <input
                           type="tel"
                           value={accountForm.phone}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                          className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter phone number"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Country</label>
                         <input
                           type="text"
                           value={accountForm.country}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, country: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                          className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter country"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">City</label>
                         <input
                           type="text"
                           value={accountForm.city}
                           onChange={(e) => setAccountForm(prev => ({ ...prev, city: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                          className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                           placeholder="Enter city"
                         />
                       </div>
@@ -820,16 +820,16 @@ const UserProfile: React.FC = () => {
                     <button 
                       onClick={handleAccountSave}
                       disabled={savingAccount}
-                      className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                     >
                       {savingAccount ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
                           <span>Saving...</span>
                         </>
                       ) : (
                         <>
-                          <Save className="w-4 h-4" />
+                          <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                           <span>Save Account Settings</span>
                         </>
                       )}
@@ -843,52 +843,52 @@ const UserProfile: React.FC = () => {
             <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('securityPrivacy')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-3.5 md:px-5 md:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
-                <div className="flex items-center space-x-3">
-                  <Shield className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
-                  <span className="text-sm sm:text-base text-gray-900">Security & Privacy</span>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base md:text-lg text-gray-900">Security & Privacy</span>
                 </div>
                 {expandedSections.securityPrivacy ? 
-                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" /> : 
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                 }
               </button>
               
               {expandedSections.securityPrivacy && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
-                  <div className="pt-4 space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">Two-Factor Authentication</h4>
-                        <p className="text-sm text-gray-600">Add extra security to your account</p>
+                <div className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-5 md:pb-5 border-t border-gray-200">
+                  <div className="pt-3 sm:pt-4 space-y-3 sm:space-y-4">
+                    <div className="flex items-center justify-between p-2.5 sm:p-3 bg-white rounded-lg">
+                      <div className="flex-1 min-w-0 mr-2">
+                        <h4 className="font-medium text-gray-900 text-xs sm:text-sm md:text-base break-words">Two-Factor Authentication</h4>
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">Add extra security to your account</p>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
+                      <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                         <input type="checkbox" className="sr-only peer" />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                        <div className="w-9 h-5 sm:w-11 sm:h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
                       </label>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">SMS Notifications</h4>
-                        <p className="text-sm text-gray-600">Receive transaction alerts via SMS</p>
+                    <div className="flex items-center justify-between p-2.5 sm:p-3 bg-white rounded-lg">
+                      <div className="flex-1 min-w-0 mr-2">
+                        <h4 className="font-medium text-gray-900 text-xs sm:text-sm md:text-base break-words">SMS Notifications</h4>
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">Receive transaction alerts via SMS</p>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
+                      <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                         <input type="checkbox" defaultChecked className="sr-only peer" />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                        <div className="w-9 h-5 sm:w-11 sm:h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
                       </label>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">Searchable Profile</h4>
-                        <p className="text-sm text-gray-600">Allow others to find you by name or phone</p>
+                    <div className="flex items-center justify-between p-2.5 sm:p-3 bg-white rounded-lg">
+                      <div className="flex-1 min-w-0 mr-2">
+                        <h4 className="font-medium text-gray-900 text-xs sm:text-sm md:text-base break-words">Searchable Profile</h4>
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">Allow others to find you by name or phone</p>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
+                      <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                         <input type="checkbox" defaultChecked className="sr-only peer" />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                        <div className="w-9 h-5 sm:w-11 sm:h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
                       </label>
                     </div>
-                    <button className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                    <button className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
                       Change {authMethod === 'sms' ? 'PIN' : 'Password'}
                     </button>
                   </div>
@@ -900,76 +900,76 @@ const UserProfile: React.FC = () => {
             <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('transactionLimits')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-3.5 md:px-5 md:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
-                  <span className="text-sm sm:text-base text-gray-900">Transaction Limits</span>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base md:text-lg text-gray-900">Transaction Limits</span>
                 </div>
                 {expandedSections.transactionLimits ? 
-                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" /> : 
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                 }
               </button>
               
               {expandedSections.transactionLimits && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
-                  <div className="pt-4 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-white p-3 rounded-lg">
-                        <h4 className="font-medium text-gray-900 mb-2">Daily Limits</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Send:</span>
-                            <span className="font-medium">{formatCurrencyAmount(500000, userData?.currency || 'UGX')}</span>
+                <div className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-5 md:pb-5 border-t border-gray-200">
+                  <div className="pt-3 sm:pt-4 space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      <div className="bg-white p-2.5 sm:p-3 rounded-lg">
+                        <h4 className="font-medium text-gray-900 mb-2 text-xs sm:text-sm md:text-base">Daily Limits</h4>
+                        <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Send:</span>
+                            <span className="font-medium break-words text-right">{formatCurrencyAmount(500000, userData?.currency || 'UGX')}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Withdraw:</span>
-                            <span className="font-medium">{formatCurrencyAmount(300000, userData?.currency || 'UGX')}</span>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Withdraw:</span>
+                            <span className="font-medium break-words text-right">{formatCurrencyAmount(300000, userData?.currency || 'UGX')}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Bitcoin:</span>
-                            <span className="font-medium">0.01 BTC</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-white p-3 rounded-lg">
-                        <h4 className="font-medium text-gray-900 mb-2">Monthly Limits</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Send:</span>
-                            <span className="font-medium">{formatCurrencyAmount(10000000, userData?.currency || 'UGX')}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Withdraw:</span>
-                            <span className="font-medium">{formatCurrencyAmount(5000000, userData?.currency || 'UGX')}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Bitcoin:</span>
-                            <span className="font-medium">0.1 BTC</span>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Bitcoin:</span>
+                            <span className="font-medium text-right">0.01 BTC</span>
                           </div>
                         </div>
                       </div>
-                      <div className="bg-white p-3 rounded-lg">
-                        <h4 className="font-medium text-gray-900 mb-2">Per Transaction</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Send:</span>
-                            <span className="font-medium">{formatCurrencyAmount(100000, userData?.currency || 'UGX')}</span>
+                      <div className="bg-white p-2.5 sm:p-3 rounded-lg">
+                        <h4 className="font-medium text-gray-900 mb-2 text-xs sm:text-sm md:text-base">Monthly Limits</h4>
+                        <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Send:</span>
+                            <span className="font-medium break-words text-right">{formatCurrencyAmount(10000000, userData?.currency || 'UGX')}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Withdraw:</span>
-                            <span className="font-medium">{formatCurrencyAmount(50000, userData?.currency || 'UGX')}</span>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Withdraw:</span>
+                            <span className="font-medium break-words text-right">{formatCurrencyAmount(5000000, userData?.currency || 'UGX')}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Bitcoin:</span>
-                            <span className="font-medium">0.005 BTC</span>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Bitcoin:</span>
+                            <span className="font-medium text-right">0.1 BTC</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-white p-2.5 sm:p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+                        <h4 className="font-medium text-gray-900 mb-2 text-xs sm:text-sm md:text-base">Per Transaction</h4>
+                        <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Send:</span>
+                            <span className="font-medium break-words text-right">{formatCurrencyAmount(100000, userData?.currency || 'UGX')}</span>
+                          </div>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Withdraw:</span>
+                            <span className="font-medium break-words text-right">{formatCurrencyAmount(50000, userData?.currency || 'UGX')}</span>
+                          </div>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-600 flex-shrink-0">Bitcoin:</span>
+                            <span className="font-medium text-right">0.005 BTC</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-800">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-3">
+                      <p className="text-xs sm:text-sm text-blue-800 break-words">
                         {userData?.isVerified ? 'Verified Account - Full Limits' : 'Complete KYC verification to increase limits'}
                       </p>
                     </div>
@@ -982,53 +982,53 @@ const UserProfile: React.FC = () => {
             <div className="bg-gray-50 rounded-lg overflow-hidden">
               <button 
                 onClick={() => toggleSection('helpSupport')}
-                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 hover:bg-gray-100 transition-colors duration-200"
+                className="w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-3.5 md:px-5 md:py-4 hover:bg-gray-100 transition-colors duration-200"
               >
-                <div className="flex items-center space-x-3">
-                  <HelpCircle className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
-                  <span className="text-sm sm:text-base text-gray-900">Help & Support</span>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base md:text-lg text-gray-900">Help & Support</span>
                 </div>
                 {expandedSections.helpSupport ? 
-                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" /> : 
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                 }
               </button>
               
               {expandedSections.helpSupport && (
-                <div className="px-3 pb-4 sm:px-4 sm:pb-4 lg:px-5 lg:pb-4 border-t border-gray-200">
-                  <div className="pt-4 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <a href="tel:+256700123456" className="bg-white p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Phone className="w-4 h-4 text-gray-600" />
-                          <h4 className="font-medium text-gray-900">Phone Support</h4>
+                <div className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-5 md:pb-5 border-t border-gray-200">
+                  <div className="pt-3 sm:pt-4 space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      <a href="tel:+256700123456" className="bg-white p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
+                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 flex-shrink-0" />
+                          <h4 className="font-medium text-gray-900 text-xs sm:text-sm md:text-base">Phone Support</h4>
                         </div>
-                        <p className="text-sm text-gray-600">+256 700 123 456</p>
+                        <p className="text-xs sm:text-sm text-gray-600">+256 700 123 456</p>
                       </a>
-                      <a href="sms:6789?body=HELP" className="bg-white p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <MessageCircle className="w-4 h-4 text-gray-600" />
-                          <h4 className="font-medium text-gray-900">SMS Support</h4>
+                      <a href="sms:6789?body=HELP" className="bg-white p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
+                          <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 flex-shrink-0" />
+                          <h4 className="font-medium text-gray-900 text-xs sm:text-sm md:text-base">SMS Support</h4>
                         </div>
-                        <p className="text-sm text-gray-600">Send 'HELP' to 6789</p>
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">Send &apos;HELP&apos; to 6789</p>
                       </a>
-                      <a href="mailto:support@afritokeni.com" className="bg-white p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Mail className="w-4 h-4 text-gray-600" />
-                          <h4 className="font-medium text-gray-900">Email Support</h4>
+                      <a href="mailto:support@afritokeni.com" className="bg-white p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors sm:col-span-2 lg:col-span-1">
+                        <div className="flex items-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
+                          <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 flex-shrink-0" />
+                          <h4 className="font-medium text-gray-900 text-xs sm:text-sm md:text-base">Email Support</h4>
                         </div>
-                        <p className="text-sm text-gray-600">support@afritokeni.com</p>
+                        <p className="text-xs sm:text-sm text-gray-600 break-all">support@afritokeni.com</p>
                       </a>
                     </div>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <h4 className="font-medium text-red-900 mb-2">Emergency Support</h4>
-                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                        <a href="tel:+256700123456" className="inline-flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors">
-                          <Phone className="w-3 h-3 mr-1" />
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 sm:p-3">
+                      <h4 className="font-medium text-red-900 mb-2 text-xs sm:text-sm md:text-base">Emergency Support</h4>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <a href="tel:+256700123456" className="inline-flex items-center justify-center px-3 py-1.5 sm:py-2 bg-red-600 text-white rounded text-xs sm:text-sm hover:bg-red-700 transition-colors flex-shrink-0">
+                          <Phone className="w-3 h-3 mr-1 flex-shrink-0" />
                           Call Emergency
                         </a>
-                        <a href="sms:6789?body=EMERGENCY" className="inline-flex items-center justify-center px-3 py-2 bg-red-100 text-red-700 border border-red-300 rounded text-sm hover:bg-red-200 transition-colors">
-                          <MessageCircle className="w-3 h-3 mr-1" />
+                        <a href="sms:6789?body=EMERGENCY" className="inline-flex items-center justify-center px-3 py-1.5 sm:py-2 bg-red-100 text-red-700 border border-red-300 rounded text-xs sm:text-sm hover:bg-red-200 transition-colors flex-shrink-0">
+                          <MessageCircle className="w-3 h-3 mr-1 flex-shrink-0" />
                           SMS Emergency
                         </a>
                       </div>
@@ -1041,13 +1041,13 @@ const UserProfile: React.FC = () => {
             {/* Logout Button - Only visible on mobile */}
             <button 
               onClick={handleLogout}
-              className="md:hidden w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-4 bg-red-50 rounded-lg hover:bg-red-100 border border-red-200 transition-colors duration-200"
+              className="md:hidden w-full flex items-center justify-between px-3 py-3 sm:px-4 sm:py-3.5 bg-red-50 rounded-lg hover:bg-red-100 border border-red-200 transition-colors duration-200"
             >
-              <div className="flex items-center space-x-3">
-                <LogOut className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
                 <span className="text-sm sm:text-base text-red-700">Logout</span>
               </div>
-              <span className="text-red-400 text-lg">→</span>
+              <span className="text-red-400 text-base sm:text-lg flex-shrink-0">→</span>
             </button>
           </div>
         </div>

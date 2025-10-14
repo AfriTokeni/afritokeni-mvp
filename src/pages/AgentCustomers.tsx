@@ -161,22 +161,22 @@ const AgentCustomers: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6">
+      <div className="space-y-3 sm:space-y-4 md:space-y-6 px-2 sm:px-4 lg:px-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Customers</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your customer relationships</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Customers</h1>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-0.5 sm:mt-1">Manage your customer relationships</p>
           </div>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+        <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-5 lg:p-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <input
                 type="text"
                 placeholder="Search by name, phone, or location..."
@@ -189,10 +189,10 @@ const AgentCustomers: React.FC = () => {
           </div>
 
           {/* Filter Buttons */}
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-2 mt-3 sm:mt-4">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
                 statusFilter === 'all'
                   ? 'bg-black text-white'
                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -202,7 +202,7 @@ const AgentCustomers: React.FC = () => {
             </button>
             <button
               onClick={() => setStatusFilter('active')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
                 statusFilter === 'active'
                   ? 'bg-black text-white'
                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -212,7 +212,7 @@ const AgentCustomers: React.FC = () => {
             </button>
             <button
               onClick={() => setStatusFilter('inactive')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
                 statusFilter === 'inactive'
                   ? 'bg-black text-white'
                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -222,7 +222,7 @@ const AgentCustomers: React.FC = () => {
             </button>
             <button
               onClick={() => setStatusFilter('blocked')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
                 statusFilter === 'blocked'
                   ? 'bg-black text-white'
                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -236,26 +236,26 @@ const AgentCustomers: React.FC = () => {
         {/* Customer Stats */}
         {!isLoading && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+            <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-5 lg:p-6">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Customers</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 font-mono mt-1 lg:mt-2 truncate">{customers.length}</p>
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 font-mono mt-1 sm:mt-1.5 md:mt-2 truncate">{customers.length}</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+            <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-5 lg:p-6">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Active Customers</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 font-mono mt-1 lg:mt-2 truncate">
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 font-mono mt-1 sm:mt-1.5 md:mt-2 truncate">
                   {customers.filter(c => c.status === 'active').length}
                 </p>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+            <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-5 lg:p-6">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">KYC Verified</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 font-mono mt-1 lg:mt-2 truncate">
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 font-mono mt-1 sm:mt-1.5 md:mt-2 truncate">
                   {customers.filter(c => c.kycStatus === 'verified').length}
                 </p>
               </div>
@@ -264,36 +264,36 @@ const AgentCustomers: React.FC = () => {
         )}
 
         {/* Customer List */}
-        <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200">
-          <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-gray-200">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+        <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-sm border border-gray-200">
+          <div className="px-3 sm:px-4 md:px-5 lg:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900">
               Customer List ({filteredCustomers.length})
             </h2>
           </div>
 
-          <div className="p-3 sm:p-4 lg:p-6">
+          <div className="p-3 sm:p-4 md:p-5 lg:p-6">
             {isLoading ? (
-              <div className="text-center py-8 sm:py-12">
-                <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4 animate-spin" />
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Loading customers...</h3>
+              <div className="text-center py-8 sm:py-10 md:py-12">
+                <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400 mx-auto mb-3 sm:mb-4 animate-spin" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1.5 sm:mb-2">Loading customers...</h3>
                 <p className="text-sm sm:text-base text-gray-600">Please wait while we fetch your customer data.</p>
               </div>
             ) : error ? (
-              <div className="text-center py-8 sm:py-12">
-                <User className="w-8 h-8 sm:w-12 sm:h-12 text-red-400 mx-auto mb-3 sm:mb-4" />
-                <h3 className="text-base sm:text-lg font-semibold text-red-900 mb-2">Error Loading Customers</h3>
-                <p className="text-sm sm:text-base text-red-600 mb-4">{error}</p>
+              <div className="text-center py-8 sm:py-10 md:py-12">
+                <User className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-red-400 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-red-900 mb-1.5 sm:mb-2">Error Loading Customers</h3>
+                <p className="text-sm sm:text-base text-red-600 mb-3 sm:mb-4 break-words px-4">{error}</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm"
                 >
                   Retry
                 </button>
               </div>
             ) : filteredCustomers.length === 0 ? (
-              <div className="text-center py-8 sm:py-12">
-                <User className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No customers found</h3>
+              <div className="text-center py-8 sm:py-10 md:py-12">
+                <User className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1.5 sm:mb-2">No customers found</h3>
                 <p className="text-sm sm:text-base text-gray-600">Try adjusting your search or filter criteria.</p>
               </div>
             ) : (
@@ -301,49 +301,49 @@ const AgentCustomers: React.FC = () => {
                 {filteredCustomers.map((customer) => (
                   <div
                     key={customer.id}
-                    className="bg-white border border-gray-200 rounded-lg sm:rounded-2xl p-3 sm:p-4 lg:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
+                    className="bg-white border border-gray-200 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
                     onClick={() => console.log('Selected customer:', customer.name)}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 gap-3">
                       <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
                         {/* Customer Avatar - Hidden on mobile */}
-                        <div className="hidden sm:flex w-12 h-12 bg-gray-100 rounded-full items-center justify-center flex-shrink-0">
-                          <User className="w-6 h-6 text-gray-600" />
+                        <div className="hidden sm:flex w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-full items-center justify-center flex-shrink-0">
+                          <User className="w-5 h-5 md:w-6 md:h-6 text-gray-600" />
                         </div>
                         
                         {/* Customer Info */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{customer.name}</h3>
-                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-600 mt-1">
+                          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 truncate">{customer.name}</h3>
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 md:space-x-4 text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">
                             <div className="flex items-center space-x-1">
-                              <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0" />
                               <span className="truncate">{customer.phone}</span>
                             </div>
                             <div className="flex items-center space-x-1">
-                              <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0" />
                               <span className="truncate">{customer.location}</span>
                             </div>
                             <div className="flex items-center space-x-1">
-                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                              <span>Joined {customer.joinDate.toLocaleDateString()}</span>
+                              <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                              <span className="whitespace-nowrap">Joined {customer.joinDate.toLocaleDateString()}</span>
                             </div>
                           </div>
                         </div>
                       </div>
 
                       {/* Customer Stats and Status */}
-                      <div className="text-left sm:text-right">
+                      <div className="text-left sm:text-right flex-shrink-0">
                         {/* Transaction Count */}
-                        <div className="text-xs text-gray-500 mb-2">
+                        <div className="text-[10px] sm:text-xs text-gray-500 mb-1.5 sm:mb-2 break-words">
                           {customer.totalTransactions} transactions • Last: {getTimeAgo(customer.lastTransaction)}
                         </div>
                         
                         {/* Status Badges */}
-                        <div className="flex sm:justify-end space-x-2">
-                          <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusColor(customer.status)}`}>
+                        <div className="flex flex-wrap sm:justify-end gap-1.5 sm:gap-2">
+                          <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold border whitespace-nowrap ${getStatusColor(customer.status)}`}>
                             {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
                           </span>
-                          <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getKycStatusColor(customer.kycStatus)}`}>
+                          <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold border whitespace-nowrap ${getKycStatusColor(customer.kycStatus)}`}>
                             KYC: {customer.kycStatus.charAt(0).toUpperCase() + customer.kycStatus.slice(1)}
                           </span>
                         </div>

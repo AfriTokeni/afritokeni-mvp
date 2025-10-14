@@ -212,7 +212,7 @@ const UserDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
         {/* Onboarding Modal */}
         <OnboardingModal
           isOpen={showOnboarding}
@@ -258,18 +258,18 @@ const UserDashboard: React.FC = () => {
         <KYCStatusAlert user_type="user" />
 
         {/* Balance Cards - Now 3 columns to include ckUSDC */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Local Currency Balance */}
-          <div className="bg-white border border-gray-200 p-8 rounded-2xl hover:border-gray-300 transition-all">
-            <div className="flex justify-between items-start mb-4 sm:mb-6">
+          <div className="bg-white border border-gray-200 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl hover:border-gray-300 transition-all">
+            <div className="flex justify-between items-start mb-3 sm:mb-4 lg:mb-6">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
-                    <span className="text-gray-900 font-bold text-sm">{userCurrency}</span>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span className="text-gray-900 font-bold text-xs sm:text-sm">{userCurrency}</span>
                   </div>
-                  <div>
-                    <p className="text-gray-900 font-semibold text-base">{currencyInfo.name}</p>
-                    <p className="text-gray-500 text-sm">Primary balance</p>
+                  <div className="min-w-0">
+                    <p className="text-gray-900 font-semibold text-sm sm:text-base truncate">{currencyInfo.name}</p>
+                    <p className="text-gray-500 text-xs sm:text-sm">Primary balance</p>
                   </div>
                 </div>
               </div>
@@ -280,23 +280,23 @@ const UserDashboard: React.FC = () => {
                 }}
               />
             </div>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-gray-900 font-mono">
+            <div className="mb-4 sm:mb-6">
+              <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-mono break-all">
                 {formatCurrency(getDisplayBalance())}
               </span>
             </div>
-            <div className="pt-4 border-t border-gray-100 space-y-3">
+            <div className="pt-3 sm:pt-4 border-t border-gray-100 space-y-2 sm:space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-500 text-sm">Available Balance</span>
+                <span className="text-gray-500 text-xs sm:text-sm">Available Balance</span>
                 <div className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 font-medium text-sm">Active</span>
+                  <span className="text-green-600 font-medium text-xs sm:text-sm">Active</span>
                 </div>
               </div>
               
               {/* Info: How to add money */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start space-x-2">
-                <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 flex items-start space-x-2">
+                <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="text-xs text-blue-900">
                   <p className="font-semibold mb-1">How to add money:</p>
                   <ul className="space-y-0.5 text-blue-800">
@@ -337,62 +337,62 @@ const UserDashboard: React.FC = () => {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <button 
               onClick={() => navigate('/users/deposit')}
-              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
+              className="bg-white border border-gray-200 p-4 sm:p-6 rounded-xl sm:rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-colors">
-                <Plus className="w-7 h-7 text-green-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-green-50 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-green-100 transition-colors">
+                <Plus className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-green-600" />
               </div>
-              <span className="text-gray-900 font-semibold text-sm">Deposit Cash</span>
-              <p className="text-gray-500 text-xs mt-1">Add money via agents</p>
+              <span className="text-gray-900 font-semibold text-xs sm:text-sm block">Deposit Cash</span>
+              <p className="text-gray-500 text-xs mt-1 hidden sm:block">Add money via agents</p>
             </button>
 
             <button 
               onClick={() => navigate('/users/send')}
-              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
+              className="bg-white border border-gray-200 p-4 sm:p-6 rounded-xl sm:rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition-colors">
-                <Send className="w-7 h-7 text-blue-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-blue-50 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-blue-100 transition-colors">
+                <Send className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-blue-600" />
               </div>
-              <span className="text-gray-900 font-semibold text-sm">Send Money</span>
-              <p className="text-gray-500 text-xs mt-1">Transfer to contacts</p>
+              <span className="text-gray-900 font-semibold text-xs sm:text-sm block">Send Money</span>
+              <p className="text-gray-500 text-xs mt-1 hidden sm:block">Transfer to contacts</p>
             </button>
 
             <button 
               onClick={() => navigate('/users/withdraw')}
-              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
+              className="bg-white border border-gray-200 p-4 sm:p-6 rounded-xl sm:rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-red-100 transition-colors">
-                <Minus className="w-7 h-7 text-red-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-red-50 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-red-100 transition-colors">
+                <Minus className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-red-600" />
               </div>
-              <span className="text-gray-900 font-semibold text-sm">Withdraw Cash</span>
-              <p className="text-gray-500 text-xs mt-1">Get cash from agents</p>
+              <span className="text-gray-900 font-semibold text-xs sm:text-sm block">Withdraw Cash</span>
+              <p className="text-gray-500 text-xs mt-1 hidden sm:block">Get cash from agents</p>
             </button>
 
             <button 
               onClick={() => navigate('/users/agents')}
-              className="bg-white border border-gray-200 p-6 rounded-2xl hover:border-gray-400 transition-all text-center group"
+              className="bg-white border border-gray-200 p-4 sm:p-6 rounded-xl sm:rounded-2xl hover:border-gray-400 transition-all text-center group"
             >
-              <div className="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-100 transition-colors">
-                <Bitcoin className="w-7 h-7 text-purple-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-purple-50 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-purple-100 transition-colors">
+                <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-purple-600" />
               </div>
-              <span className="text-gray-900 font-semibold text-sm">Find Agents</span>
-              <p className="text-gray-500 text-xs mt-1">Locate nearby agents</p>
+              <span className="text-gray-900 font-semibold text-xs sm:text-sm block">Find Agents</span>
+              <p className="text-gray-500 text-xs mt-1 hidden sm:block">Locate nearby agents</p>
             </button>
           </div>
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-white rounded-2xl border border-gray-200">
-          <div className="p-6 border-b border-gray-100">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900">Recent Transactions</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">Recent Transactions</h3>
               <button 
                 onClick={() => navigate('/users/history')}
-                className="text-gray-600 text-sm font-medium hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+                className="text-gray-600 text-xs sm:text-sm font-medium hover:text-gray-900 transition-colors px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-gray-50"
               >
                 View All
               </button>
@@ -401,17 +401,17 @@ const UserDashboard: React.FC = () => {
           <div className="divide-y divide-gray-100">
             {getDisplayTransactions().length > 0 ? (
               getDisplayTransactions().map((transaction: any) => (
-                <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div key={transaction.id} className="p-3 sm:p-4 lg:p-6 hover:bg-gray-50 transition-colors">
                   {/* Mobile Layout */}
                   <div className="sm:hidden">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
                         {getTransactionIcon(transaction.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
-                          <p className="font-medium text-neutral-900 text-sm truncate pr-2">{transaction.description}</p>
-                          <p className={`font-semibold text-base font-mono flex-shrink-0 ${
+                          <p className="font-medium text-neutral-900 text-xs sm:text-sm truncate pr-2">{transaction.description}</p>
+                          <p className={`font-semibold text-sm sm:text-base font-mono flex-shrink-0 ${
                             transaction.type === 'send' || transaction.type === 'withdraw' 
                               ? 'text-red-600' : 'text-green-600'
                           }`}>
@@ -419,9 +419,9 @@ const UserDashboard: React.FC = () => {
                             {formatCurrency(transaction.amount)}
                           </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-xs text-neutral-500">{formatDate(transaction.createdAt)}</p>
-                          <p className="text-xs text-neutral-500 capitalize">{transaction.status}</p>
+                        <div className="flex justify-between items-center gap-2">
+                          <p className="text-xs text-neutral-500 truncate">{formatDate(transaction.createdAt)}</p>
+                          <p className="text-xs text-neutral-500 capitalize flex-shrink-0">{transaction.status}</p>
                         </div>
                       </div>
                     </div>
@@ -429,38 +429,38 @@ const UserDashboard: React.FC = () => {
                   
                   {/* Desktop Layout */}
                   <div className="hidden sm:flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-center space-x-3 lg:space-x-4 flex-1 min-w-0">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
                         {getTransactionIcon(transaction.type)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-neutral-900 text-sm truncate">{transaction.description}</p>
-                        <p className="text-sm text-neutral-500">{formatDate(transaction.createdAt)}</p>
+                        <p className="font-medium text-neutral-900 text-sm lg:text-base truncate">{transaction.description}</p>
+                        <p className="text-xs sm:text-sm text-neutral-500">{formatDate(transaction.createdAt)}</p>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0 ml-2">
-                      <p className={`font-semibold text-sm font-mono ${
+                    <div className="text-right flex-shrink-0 ml-2 lg:ml-4">
+                      <p className={`font-semibold text-sm lg:text-base font-mono ${
                         transaction.type === 'send' || transaction.type === 'withdraw' 
                           ? 'text-red-600' : 'text-green-600'
                       }`}>
                         {transaction.type === 'send' || transaction.type === 'withdraw' ? '-' : '+'}
                         {formatCurrency(transaction.amount)}
                       </p>
-                      <p className="text-sm text-neutral-500 capitalize">{transaction.status}</p>
+                      <p className="text-xs sm:text-sm text-neutral-500 capitalize">{transaction.status}</p>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-8 sm:p-12 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <ArrowUp className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
+              <div className="p-6 sm:p-8 lg:p-12 text-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-neutral-400" />
                 </div>
-                <h4 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">No transactions yet</h4>
-                <p className="text-neutral-500 mb-4 sm:mb-6 text-sm sm:text-base">Start by sending money or making a deposit</p>
+                <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-neutral-900 mb-2">No transactions yet</h4>
+                <p className="text-neutral-500 mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base">Start by sending money or making a deposit</p>
                 <button 
                   onClick={() => navigate('/users/send')}
-                  className="bg-neutral-900 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-neutral-800 transition-colors text-sm sm:text-base"
+                  className="bg-neutral-900 text-white px-4 sm:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg font-medium hover:bg-neutral-800 transition-colors text-xs sm:text-sm lg:text-base"
                 >
                   Send Money
                 </button>

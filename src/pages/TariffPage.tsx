@@ -99,22 +99,22 @@ const TariffPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <PublicHeader />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:py-12">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-            <Calculator className="w-4 h-4" />
+        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+          <div className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
+            <Calculator className="w-3 h-3 sm:w-4 sm:h-4" />
             Smart Pricing
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">Transparent Pricing System</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">Transparent Pricing System</h1>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Fair compensation for agents with transparent, location-based pricing across Africa
           </p>
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-gray-100 p-1 rounded-xl flex gap-1">
+        <div className="flex justify-center mb-8 sm:mb-10 lg:mb-12">
+          <div className="bg-gray-100 p-1 rounded-xl flex gap-1 w-full max-w-md sm:max-w-lg">
             {[
               { id: 'overview', label: 'Overview', icon: Info },
               { id: 'calculator', label: 'Calculator', icon: Calculator },
@@ -122,15 +122,16 @@ const TariffPage: React.FC = () => {
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setActiveSection(id as any)}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
+                onClick={() => setActiveSection(id as 'overview' | 'calculator' | 'examples')}
+                className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-base ${
                   activeSection === id
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span>{label}</span>
+                <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">{label}</span>
+                <span className="sm:hidden">{label.slice(0, 3)}</span>
               </button>
             ))}
           </div>
@@ -138,11 +139,11 @@ const TariffPage: React.FC = () => {
 
         {/* Overview Section */}
         {activeSection === 'overview' && (
-          <div className="space-y-12">
+          <div className="space-y-8 sm:space-y-10 lg:space-y-12">
             {/* Key Benefits */}
-            <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Why Smart Pricing?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white border border-gray-200 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-sm">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">Why Smart Pricing?</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <Shield className="w-8 h-8 text-blue-600" />
@@ -169,11 +170,11 @@ const TariffPage: React.FC = () => {
 
             {/* Location-Based Pricing */}
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center space-x-2">
-                <MapPin className="w-6 h-6 text-neutral-700" />
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-4 sm:mb-6 flex items-center space-x-2">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" />
                 <span>Location-Based Pricing</span>
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {locationTypes.map((location, index) => (
                   <div key={index} className={`border p-6 rounded-xl ${getColorClasses(location.color)}`}>
                     <div className="text-center mb-4">
@@ -198,11 +199,11 @@ const TariffPage: React.FC = () => {
 
             {/* Service Level Pricing */}
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center space-x-2">
-                <Zap className="w-6 h-6 text-neutral-700" />
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-4 sm:mb-6 flex items-center space-x-2">
+                <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" />
                 <span>Service Level Pricing</span>
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {serviceTypes.map((service, index) => (
                   <div key={index} className={`border p-6 rounded-xl ${getColorClasses(service.color)}`}>
                     <div className="text-center">
@@ -218,11 +219,11 @@ const TariffPage: React.FC = () => {
 
             {/* Time-Based Adjustments */}
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center space-x-2">
-                <Clock className="w-6 h-6 text-neutral-700" />
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-4 sm:mb-6 flex items-center space-x-2">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" />
                 <span>Time-Based Adjustments</span>
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {timeFactors.map((factor, index) => (
                   <div key={index} className={`border p-4 rounded-lg ${getColorClasses(factor.color)}`}>
                     <div className="text-center">
@@ -236,9 +237,9 @@ const TariffPage: React.FC = () => {
             </div>
 
             {/* How It Works */}
-            <div className="bg-neutral-50 border border-neutral-200 p-8 rounded-xl">
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6 text-center">How It Works</h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-neutral-50 border border-neutral-200 p-4 sm:p-6 lg:p-8 rounded-xl">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-4 sm:mb-6 text-center">How It Works</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-neutral-900 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">1</div>
                   <h3 className="font-semibold mb-2">Base Fee</h3>
@@ -266,10 +267,10 @@ const TariffPage: React.FC = () => {
 
         {/* Calculator Section */}
         {activeSection === 'calculator' && (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-neutral-900 mb-4">Fee Calculator</h2>
-              <p className="text-neutral-600">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-3 sm:mb-4">Fee Calculator</h2>
+              <p className="text-sm sm:text-base text-neutral-600">
                 Use this calculator to estimate fees for different transaction scenarios.
               </p>
             </div>
@@ -279,15 +280,15 @@ const TariffPage: React.FC = () => {
 
         {/* Examples Section */}
         {activeSection === 'examples' && (
-          <div className="space-y-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-neutral-900 mb-4">Real-World Examples</h2>
-              <p className="text-neutral-600">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-3 sm:mb-4">Real-World Examples</h2>
+              <p className="text-sm sm:text-base text-neutral-600">
                 See how our smart pricing works in different scenarios across Africa.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
               {/* Example 1: Urban Quick */}
               <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-xl">
                 <div className="flex items-center space-x-3 mb-4">
@@ -436,21 +437,21 @@ const TariffPage: React.FC = () => {
         )}
 
         {/* Call to Action */}
-        <div className="mt-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-12 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-xl mb-6 opacity-90">
+        <div className="mt-8 sm:mt-10 lg:mt-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 sm:p-8 lg:p-12 text-center text-white">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Ready to Get Started?</h2>
+          <p className="text-base sm:text-lg lg:text-xl mb-4 sm:mb-6 opacity-90">
             Join our network of agents or start exchanging Bitcoin with transparent, fair pricing
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Link
               to="/become-agent"
-              className="bg-white text-purple-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+              className="bg-white text-purple-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
             >
               Become an Agent
             </Link>
             <Link
               to="/bitcoin-exchange"
-              className="bg-white text-purple-600 px-8 py-3 rounded-lg font-medium hover:bg-neutral-100 transition-colors"
+              className="bg-white text-purple-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
             >
               Start Exchange
             </Link>

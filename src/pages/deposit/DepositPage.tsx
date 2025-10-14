@@ -232,8 +232,8 @@ const DepositPage: React.FC = () => {
   }, [updateState]);
 
   return (
-    <div className="space-y-6">
-      <div className="max-w-6xl mx-auto p-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6">
+      <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-5 lg:p-6">
         {/* Progress Indicator */}
         <ProgressIndicator
           steps={progressSteps}
@@ -242,7 +242,7 @@ const DepositPage: React.FC = () => {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 sm:px-4 sm:py-3 rounded text-xs sm:text-sm mb-3 sm:mb-4 break-words">
             {error}
           </div>
         )}
