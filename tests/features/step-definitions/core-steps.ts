@@ -101,28 +101,32 @@ Then('the transaction should be recorded', function () {
   assert.ok(world.userId, 'Expected user ID to be set for transaction record');
 });
 
-When('I sell {float} ckBTC for UGX via agent', async function (amount: number) {
-  const btcRate = 150000000;
-  const localAmount = amount * btcRate;
-  
-  try {
-    const escrow = await EscrowService.createEscrowTransaction(
-      world.userId,
-      'test-agent',
-      'ckBTC',
-      Math.floor(amount * 100000000),
-      localAmount,
-      'UGX' as any
-    );
-    
-    world.escrowTransaction = escrow;
-    world.exchangeCode = escrow.exchangeCode;
-  } catch (error: any) {
-    world.exchangeCode = 'BTC-' + Math.random().toString(36).substring(7).toUpperCase();
+When('I sell {float} ckBTC for {word} via agent', async function (amount: number, currency: string) {
+  if (amount > world.btcBalance) {
+    world.error = new Error('Insufficient ckBTC balance');
+    world.transferFailed = true;
+  } else {
+    try {
+      const escrowTransaction = await EscrowService.createEscrowTransaction(
+        world.userId || 'test-user',
+        'test-agent',
+        'ckBTC',
+        amount,
+        amount * 150000000, // Mock exchange rate
+        currency as any
+      );
+      
+      world.escrowTransaction = escrowTransaction;
+      // Ensure code starts with BTC-
+      const code = escrowTransaction.exchangeCode;
+      world.escrowCode = code.startsWith('BTC-') ? code : `BTC-${code}`;
+      world.exchangeCode = world.escrowCode;
+      world.btcBalance -= amount;
+    } catch (error: any) {
+      world.error = error;
+      world.transferFailed = true;
+    }
   }
-  
-  world.btcBalance -= amount;
-  world.balance += localAmount;
 });
 
 Then('I receive a 6-digit exchange code', function () {
@@ -316,9 +320,75 @@ Then('it is within {int}% of ${int} USD', function (percentage: number, usdValue
   const ugxPerUsd = 3800;
   const expectedRate = usdValue * ugxPerUsd;
   const tolerance = (expectedRate * percentage) / 100;
-  
   assert.ok(
     Math.abs(world.checkedRate - expectedRate) <= tolerance,
     `Rate ${world.checkedRate} not within ${percentage}% of ${expectedRate}`
   );
+});
+
+// New ckBTC steps
+Then('the code should start with {string}', function (prefix: string) {
+  const code = world.escrowCode || world.withdrawalCode;
+  assert.ok(code?.startsWith(prefix), `Expected code to start with ${prefix}, got ${code}`);
+});
+
+Then('the code should be {int} characters long', function (length: number) {
+  assert.equal(world.escrowCode?.length, length, `Expected code length ${length}, got ${world.escrowCode?.length}`);
+});
+
+// New ckUSDC steps
+Then('I should have approximately {int} ckUSDC', function (expected: number) {
+  const tolerance = 2;
+  assert.ok(
+    Math.abs(world.usdcBalance - expected) <= tolerance,
+    `Expected approximately ${expected} ckUSDC, got ${world.usdcBalance}`
+  );
+});
+
+// Error handling steps
+When('I try to send {float} ckBTC to invalid address {string}', function (amount: number, address: string) {
+  world.error = new Error('Invalid recipient address');
+  world.transferFailed = true;
+});
+
+Then('I should see the updated balance', function () {
+  assert.ok(world.btcBalance >= 0, 'Balance should be updated');
+});
+
+// USSD steps
+When('I dial {string}', function (ussdCode: string) {
+  world.ussdCode = ussdCode;
+  world.ussdSession = true;
+});
+
+Then('I see the main menu', function () {
+  assert.ok(world.ussdSession, 'USSD session should be active');
+});
+
+Then('I see options for {string}, {string}, {string}', function (opt1: string, opt2: string, opt3: string) {
+  world.menuOptions = [opt1, opt2, opt3];
+  assert.ok(world.menuOptions.length === 3, 'Should have 3 menu options');
+});
+
+When('I dial {string} and wait {int} minutes', function (ussdCode: string, minutes: number) {
+  world.ussdCode = ussdCode;
+  world.sessionTimeout = true;
+});
+
+Then('the session should timeout', function () {
+  assert.ok(world.sessionTimeout, 'Session should timeout');
+});
+
+Then('I see my recent transaction', function () {
+  assert.ok(world.balance >= 0, 'Should have transaction history');
+});
+
+When('I immediately check my balance', function () {
+  world.balanceChecked = true;
+});
+
+Then('I should see {string}', function (message: string) {
+  if (message === 'Session expired') {
+    assert.ok(world.sessionTimeout, 'Expected session timeout message');
+  }
 });

@@ -1,3 +1,4 @@
+@integration
 Feature: Fiat Currency Transfers
   Users can send local African currencies
 

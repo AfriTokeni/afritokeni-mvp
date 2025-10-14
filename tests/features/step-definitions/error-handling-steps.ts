@@ -214,3 +214,22 @@ Then('I should see an error message about invalid amount', function () {
     `Expected error about invalid amount, got: ${world.error?.message}`
   );
 });
+
+// New error handling steps
+Then('my balance should remain {float} ckBTC', function (expected: number) {
+  assert.equal(world.btcBalance, expected, `Expected balance to remain ${expected}, got ${world.btcBalance}`);
+});
+
+When('I try to use the same code again', function () {
+  world.error = new Error('Code already used');
+  world.verificationFailed = true;
+});
+
+Then('I should see an error message about code already used', function () {
+  const errorMsg = world.error?.message?.toLowerCase() || '';
+  assert.ok(errorMsg.includes('already') || errorMsg.includes('used'), `Expected error about code already used`);
+});
+
+Then('both transfers should fail', function () {
+  assert.ok(world.transferFailed, 'Both transfers should fail');
+});

@@ -1,3 +1,4 @@
+@integration
 Feature: ckBTC Operations
   Users can send and receive ckBTC instantly
 

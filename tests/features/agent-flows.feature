@@ -1,3 +1,4 @@
+@integration
 Feature: Agent Operations
   As an agent
   I want to process transactions and manage liquidity
@@ -80,3 +81,45 @@ Feature: Agent Operations
     When a customer searches for nearby agents
     Then they should see all 5 agents sorted by distance and rating
     And be able to compare commission rates
+
+  Scenario: Agent processes multiple deposits
+    Given I am an agent with 500000 UGX digital balance
+    When a customer brings 50000 UGX cash
+    And another customer brings 30000 UGX cash
+    Then my digital balance should decrease by 80000 UGX
+    And my cash balance should increase by 80000 UGX
+
+  Scenario: Agent cash balance tracking
+    Given I am an agent with 200000 UGX cash
+    When I give 50000 UGX cash to a customer
+    And I give 30000 UGX cash to another customer
+    Then my cash balance should be 120000 UGX
+
+  Scenario: Agent commission calculation
+    Given I am an agent
+    When I process a 100000 UGX deposit
+    Then I should earn 3000 UGX commission
+
+  Scenario: Agent Bitcoin exchange with rate
+    Given I am an agent with ckBTC available
+    And the Bitcoin rate is 150000000 UGX per BTC
+    When a customer wants to buy 0.001 ckBTC for UGX
+    Then the customer should pay 150000 UGX
+
+  Scenario: Agent verifies multiple escrows
+    Given I am an agent
+    And there are 3 pending escrow transactions
+    When I verify each escrow code
+    Then all transactions should complete successfully
+
+  Scenario: Agent low cash warning
+    Given I am an agent with 10000 UGX cash
+    When a customer requests 50000 UGX withdrawal
+    Then I should see a liquidity warning
+    And the transaction should not proceed
+
+  Scenario: Agent funding confirmation
+    Given I am an agent with low digital balance
+    When I fund my account via bank transfer with 500000 UGX
+    Then my digital balance should increase by 500000 UGX
+    And I should be able to process deposits again
