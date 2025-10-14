@@ -28,6 +28,7 @@ import { WebhookDataService as DataService, Agent } from './webHookServices.js';
 import { CkBTCService } from './ckBTCService.js';
 import { CkUSDCService } from './ckUSDCService.js';
 import { CkBTCUtils } from '../types/ckbtc.js';
+import { BalanceService } from './balanceService';
 import type { 
   NotificationRequest, 
   NotificationData,
