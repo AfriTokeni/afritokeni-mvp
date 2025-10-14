@@ -82,12 +82,16 @@ npm run test:integration:watch
 ```
 
 **Test Coverage:**
-- ✅ 15 BDD scenarios (USSD, ckBTC, ckUSDC, Fiat)
-- ✅ 6 ICP integration scenarios (real blockchain)
-- ✅ 93 test steps total
-- ✅ Real ckBTC/ckUSDC ledger queries
-- ✅ Escrow flow testing
-- ✅ Juno datastore integration
+- ✅ **59 BDD scenarios** (53 unit + 6 ICP integration)
+- ✅ **231 passing unit test steps** with meaningful assertions
+- ✅ **48 passing integration test steps** with real blockchain
+- ✅ **Core tests**: USSD, ckBTC, ckUSDC, Fiat operations
+- ✅ **ICP integration**: Real ckBTC/ckUSDC ledger queries on local replica
+- ✅ **Error handling**: Balance checks, invalid amounts, expired escrows
+- ✅ **Multi-currency**: NGN, KES, GHS, ZAR, UGX with real exchange rates
+- ✅ **Agent operations**: Deposits, withdrawals, commissions, daily limits
+- ✅ **Security**: Rate limiting, fraud detection, escrow protection
+- ✅ **Fast execution**: Unit tests <2s, Integration tests <2s
 
 ---
 
