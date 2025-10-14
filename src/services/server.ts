@@ -3546,7 +3546,7 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
           return endSession('Agent not selected. Please try again.');
         }
         
-        const transactionId = await DataService.createWithdrawTransaction(
+        const transactionId = await DepositWithdrawalService.createWithdrawTransaction(
           user.id,
           withdrawAmount,
           selectedAgent.id,

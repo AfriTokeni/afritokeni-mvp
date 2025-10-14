@@ -64,7 +64,7 @@ const ApproveWithdrawal: React.FC<ApproveWithdrawalProps> = ({ withdrawal, onApp
     
     try {
       // Call Juno backend to complete the withdrawal transaction
-      await DataService.completeWithdrawTransaction(
+      await DepositWithdrawalService.completeWithdrawTransaction(
         withdrawal.id,
         agent.id,
         withdrawalCode

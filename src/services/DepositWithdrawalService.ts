@@ -497,4 +497,121 @@ export class DepositWithdrawalService {
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
+
+  static async createWithdrawTransaction(
+    userId: string,
+    amount: number,
+    agentId: string,
+    withdrawalCode: string,
+    fee: number
+  ): Promise<any> {
+    const transaction = {
+      id: nanoid(),
+      userId,
+      type: 'withdraw' as const,
+      amount,
+      fee,
+      currency: 'UGX',
+      agentId,
+      status: 'pending' as const,
+      description: `Cash withdrawal of UGX ${amount.toLocaleString()}`,
+      createdAt: new Date(),
+      metadata: {
+        withdrawalCode,
+        agentLocation: '',
+      }
+    };
+
+    await setDoc({
+      collection: 'transactions',
+      doc: {
+        key: transaction.id,
+        data: {
+          ...transaction,
+          createdAt: transaction.createdAt.toISOString(),
+        }
+      }
+    });
+
+    await SMSService.logSMSMessage({
+      userId,
+      phoneNumber: '+256123456789',
+      message: `Withdrawal request created. Code: ${withdrawalCode}. Amount: UGX ${amount.toLocaleString()}. Show this code to agent ${agentId} to complete withdrawal.`,
+      direction: 'outbound',
+      status: 'sent',
+      transactionId: transaction.id
+    });
+
+    return transaction;
+  }
+
+  static async completeWithdrawTransaction(
+    transactionId: string,
+    agentId: string,
+    verificationCode: string
+  ): Promise<boolean> {
+    const transactionDoc = await getDoc({
+      collection: 'transactions',
+      key: transactionId
+    });
+
+    if (!transactionDoc?.data) {
+      throw new Error('Transaction not found');
+    }
+
+    const transaction = transactionDoc.data as any;
+    
+    if (transaction.withdrawalCode !== verificationCode) {
+      throw new Error('Invalid withdrawal code');
+    }
+
+    if (transaction.agentId !== agentId) {
+      throw new Error('Agent not authorized for this transaction');
+    }
+
+    const userBalance = await BalanceService.getUserBalance(transaction.userId);
+    if (!userBalance) {
+      throw new Error('User balance not found');
+    }
+    
+    const totalDeduction = transaction.amount + (transaction.amount * 0.01);
+    
+    if (userBalance.balance < totalDeduction) {
+      throw new Error('Insufficient balance');
+    }
+
+    await BalanceService.updateUserBalance(transaction.userId, userBalance.balance - totalDeduction);
+
+    const agent = await AgentService.getAgent(agentId);
+    if (!agent) {
+      throw new Error('Agent not found');
+    }
+
+    if (agent.cashBalance < transaction.amount) {
+      throw new Error(`Agent has insufficient cash balance. Agent has ${agent.cashBalance}, needs ${transaction.amount}`);
+    }
+
+    const agentDigitalReceives = transaction.amount + (transaction.fee || 0);
+    
+    await AgentService.updateAgentBalance(agentId, { 
+      cashBalance: agent.cashBalance - transaction.amount,
+      digitalBalance: agent.digitalBalance + agentDigitalReceives
+    });
+
+    await TransactionService.updateTransaction(transactionId, {
+      status: 'completed' as const,
+      completedAt: new Date()
+    });
+
+    await SMSService.logSMSMessage({
+      userId: transaction.userId,
+      phoneNumber: '+256123456789',
+      message: `Withdrawal completed! You received UGX ${transaction.amount.toLocaleString()} cash. Transaction ID: ${transactionId}`,
+      direction: 'outbound',
+      status: 'sent',
+      transactionId
+    });
+
+    return true;
+  }
 }

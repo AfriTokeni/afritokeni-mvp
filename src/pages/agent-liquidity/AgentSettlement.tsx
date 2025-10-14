@@ -231,7 +231,7 @@ const AgentSettlement: React.FC = () => {
       });
 
       // Record platform revenue from settlement fee
-      await DataService.recordPlatformRevenue({
+      await RevenueService.recordPlatformRevenue({
         amount: settlementFee,
         currency: 'UGX',
         source: 'settlement_fee',
