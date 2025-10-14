@@ -131,11 +131,17 @@ Then('I should see proper currency symbols', function () {
 });
 
 Then('amounts should be formatted correctly', function () {
-  assert.ok(true);
+  assert.ok(world.multiCurrency, 'Expected multi-currency balances');
+  Object.keys(world.multiCurrency).forEach(currency => {
+    assert.ok(world.multiCurrency[currency] >= 0, `Expected valid amount for ${currency}`);
+  });
 });
 
 Then('decimal places should match currency standards', function () {
-  assert.ok(true);
+  assert.ok(world.multiCurrency, 'Expected multi-currency balances');
+  // NGN, KES, UGX = 0 decimals, GHS = 2 decimals
+  assert.ok(Number.isInteger(world.multiCurrency.NGN), 'NGN should have 0 decimals');
+  assert.ok(Number.isInteger(world.multiCurrency.KES), 'KES should have 0 decimals');
 });
 
 Given('I am an agent in {word}', function (country: string) {

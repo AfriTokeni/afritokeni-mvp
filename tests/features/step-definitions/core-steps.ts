@@ -97,7 +97,8 @@ Then('my ckBTC balance should be {float}', function (expected: number) {
 });
 
 Then('the transaction should be recorded', function () {
-  assert.ok(true);
+  assert.ok(world.transferResult || world.btcBalance !== undefined, 'Expected transaction to be recorded');
+  assert.ok(world.userId, 'Expected user ID to be set for transaction record');
 });
 
 When('I sell {float} ckBTC for UGX via agent', async function (amount: number) {
@@ -244,7 +245,8 @@ Then('I should see my current balance', function () {
 });
 
 Then('the transaction history should update', function () {
-  assert.ok(true);
+  assert.ok(world.checkedBalance || world.balance !== undefined, 'Expected transaction history to be accessible');
+  assert.ok(world.userId, 'Expected user to have transaction history');
 });
 
 // Additional ckBTC steps

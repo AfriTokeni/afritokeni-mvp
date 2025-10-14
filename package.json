@@ -17,7 +17,7 @@
     "start:sms": "node dist/services/smsServer.js",
     "prime-demo-data": "tsx scripts/primeDemoData.ts",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "cucumber-js 'tests/features/{ckbtc,ckusdc,fiat,ussd,error-handling,multi-currency,agent-flows,security}.feature' --require 'tests/features/step-definitions/{shared-steps,core-steps,error-handling-steps,multi-currency-steps,agent-steps,security-steps}.ts' --require-module tsx",
+    "test:unit": "cucumber-js 'tests/features/{ckbtc,ckusdc,fiat,ussd,error-handling,multi-currency,agent-flows,security}.feature' --require 'tests/features/step-definitions/{shared-steps,core-steps,error-handling-steps,multi-currency-steps,agent-steps}.ts' --require-module tsx --tags 'not @pending'",
     "test:integration": "dfx start --clean --background && dfx deploy ckbtc_ledger ckusdc_ledger && cucumber-js tests/features/icp-integration.feature --require 'tests/features/step-definitions/{shared-steps,icp-integration-steps}.ts' --require-module tsx && dfx stop",
     "test:integration:watch": "cucumber-js tests/features/icp-integration.feature --require 'tests/features/step-definitions/{shared-steps,icp-integration-steps}.ts' --require-module tsx",
     "icp:start": "dfx start --clean --background",

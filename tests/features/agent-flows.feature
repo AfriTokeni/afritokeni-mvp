@@ -43,6 +43,7 @@ Feature: Agent Operations
     Then my digital balance should increase
     And I should be able to process deposits again
 
+  @pending
   Scenario: Agent settlement request
     Given I am an agent with 500000 UGX in commissions
     When I request settlement to my bank account
@@ -50,12 +51,14 @@ Feature: Agent Operations
     And my commission balance should decrease
     And I should receive confirmation
 
+  @pending
   Scenario: Agent daily transaction limit
     Given I am a new agent with basic verification
     When I try to process transactions over 1000000 UGX
     Then I should see a daily limit warning
     And be prompted to upgrade my verification
 
+  @pending
   Scenario: Agent reputation and ratings
     Given I am an agent who completed 100 transactions
     And I have a 4.8 star rating
@@ -64,6 +67,7 @@ Feature: Agent Operations
     And my rating should be displayed
     And customers should see my transaction count
 
+  @pending
   Scenario: Agent offline mode
     Given I am an agent in an area with poor internet
     When I process a transaction

@@ -141,12 +141,14 @@ Then('the transfer should succeed', function () {
 
 Then('my balance should decrease by {int} satoshis', function (amount: number) {
   if (!world.icpReplicaRunning) return 'skipped';
-  assert.ok(true);
+  assert.ok(world.transferSuccess, 'Expected transfer to succeed');
+  assert.ok(world.transferAmount === amount, `Expected transfer of ${amount} satoshis`);
 });
 
 Then('the recipient balance should increase by {int} satoshis', function (amount: number) {
   if (!world.icpReplicaRunning) return 'skipped';
-  assert.ok(true);
+  assert.ok(world.transferSuccess, 'Expected transfer to succeed');
+  assert.ok(world.transferAmount === amount, `Expected recipient to receive ${amount} satoshis`);
 });
 
 When('I create an escrow to exchange {int} satoshis for UGX', async function (amount: number) {

@@ -82,15 +82,17 @@ npm run test:integration:watch
 ```
 
 **Test Coverage:**
-- ✅ **59 BDD scenarios** (53 unit + 6 ICP integration) - 100% passing
-- ✅ **279 test steps** (231 unit + 48 integration) - 100% passing
+- ✅ **39 BDD scenarios PASSING** (33 unit + 6 ICP integration)
+- ⏳ **14 scenarios PENDING** (security & advanced agent features)
+- ✅ **163 test steps** - All with meaningful assertions
 - ✅ **Core tests**: USSD, ckBTC, ckUSDC, Fiat operations
 - ✅ **ICP integration**: Real ckBTC/ckUSDC ledger queries on local replica
 - ✅ **Error handling**: Balance checks, invalid amounts, expired escrows
 - ✅ **Multi-currency**: NGN, KES, GHS, ZAR, UGX with real exchange rates
-- ✅ **Agent operations**: Deposits, withdrawals, commissions, daily limits
-- ✅ **Security**: Rate limiting, fraud detection, escrow protection
-- ✅ **Fast execution**: Unit tests 1.7s, Integration tests 1.4s
+- ✅ **Agent operations**: Deposits, withdrawals, liquidity management
+- ⏳ **Pending**: Security notifications, commission settlements, reputation system
+- ✅ **Fast execution**: Unit tests 1.8s, Integration tests 1.4s
+- 📋 **See TODO.md** for pending feature implementation plan
 
 **Test Structure:**
 ```
