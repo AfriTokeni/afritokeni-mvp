@@ -45,7 +45,7 @@ const AgentDashboard: React.FC = () => {
 
   React.useEffect(() => {
     // Load customers count asynchronously
-    DataService.getAllCustomers().then(customers => {
+    UserService.getAllCustomers().then(customers => {
       setCustomersCount(customers.length);
     });
     

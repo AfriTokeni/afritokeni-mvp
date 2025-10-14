@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 
 import { User as UserType } from '../types/auth';
-import { UserService } from '../../services/userService';
+import { UserService } from '../services/userService';
+import { TransactionService } from '../services/transactionService';
 
 interface Customer {
   id: string;
@@ -42,7 +43,7 @@ const AgentCustomers: React.FC = () => {
         setError(null);
         
         // Get all users from Juno
-        const users = await DataService.getAllCustomers();
+        const users = await UserService.getAllCustomers();
         
         // Transform users into customer format with additional data
         const customerData = await Promise.all(

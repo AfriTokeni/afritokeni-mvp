@@ -58,7 +58,7 @@ const AgentDepositProcessor: React.FC<AgentDepositProcessorProps> = ({
 
   const confirmDeposit = async (requestId: string) => {
     try {
-      const success = await DataService.confirmDepositRequest(requestId, agentId);
+      const success = await DepositWithdrawalService.confirmDepositRequest(requestId, agentId);
       if (success) {
         // Reload requests to get updated status
         await loadDepositRequests();

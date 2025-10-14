@@ -29,6 +29,7 @@ import { CkBTCService } from './ckBTCService.js';
 import { CkUSDCService } from './ckUSDCService.js';
 import { CkBTCUtils } from '../types/ckbtc.js';
 import { BalanceService } from './balanceService';
+import { TransactionService } from './transactionService';
 import type { 
   NotificationRequest, 
   NotificationData,
