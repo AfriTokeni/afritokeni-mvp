@@ -9,7 +9,7 @@ import {
   CreditCard,
   X,
 } from "lucide-react";
-import { BalanceService } from "../services/BalanceService";
+import { BalanceService } from "../services/balanceService";
 import { formatCurrencyAmount, AfricanCurrency } from "../types/currency";
 import { useAfriTokeni } from "../hooks/useAfriTokeni";
 import { useDemoMode } from "../context/DemoModeContext";

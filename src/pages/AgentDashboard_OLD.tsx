@@ -13,7 +13,8 @@ import {
   CreditCard,
   X
 } from 'lucide-react';
-import { BalanceService } from '../services/BalanceService';
+import { BalanceService } from '../services/balanceService';
+import { UserService } from '../services/userService';
 import { formatCurrencyAmount } from '../types/currency';
 import AgentStatusIndicator from '../components/AgentStatusIndicator';
 import LiquidityAlert from '../components/LiquidityAlert';
