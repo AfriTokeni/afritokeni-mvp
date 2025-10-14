@@ -152,16 +152,16 @@ const DepositPage: React.FC = () => {
     
     try {
       // Generate a unique deposit code
-      const code = Math.random().toString(36).substr(2, 6).toUpperCase();
-      
       // Save deposit request to datastore
-      const requestId = await DepositWithdrawalService.createDepositRequest(
+      const depositRequest = await DepositWithdrawalService.createDepositRequest(
         user.user.id,
         agent.id,
         parseFloat(amount),
-        selectedCurrency,
-        code
+        selectedCurrency
       );
+      
+      const requestId = depositRequest.id;
+      const code = depositRequest.depositCode;
       
       console.log('Deposit request created:', {
         requestId,

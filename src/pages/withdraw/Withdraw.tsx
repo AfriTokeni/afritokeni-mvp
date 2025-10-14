@@ -119,7 +119,6 @@ const WithdrawPage: React.FC = () => {
           pendingAgent.id,
           finalLocalAmount,
           userCurrency,
-          code,
           withdrawalFee
         );
       } else {

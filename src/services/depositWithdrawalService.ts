@@ -441,11 +441,11 @@ export class DepositWithdrawalService {
       });
 
       const agentTransaction = await TransactionService.createTransaction({
-        userId: agent.userId,
+        userId: agentId,
         type: 'receive',
         amount: request.amount,
         currency: request.currency as AfricanCurrency,
-        senderId: request.userId,
+        recipientId: request.userId,
         agentId: agentId,
         status: 'completed',
         description: `Withdrawal facilitation - Code: ${request.withdrawalCode}`,
