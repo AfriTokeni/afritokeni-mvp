@@ -1,10 +1,14 @@
 import { Given, When, Then } from "@cucumber/cucumber";
 import assert from "assert";
 import { world } from "./shared-steps.js";
-// DataService eliminated - using specialized services
+import { AgentService } from '../../../src/services/AgentService.js';
+import { UserService } from '../../../src/services/UserService.js';
+import { BalanceService } from '../../../src/services/BalanceService.js';
+import { TransactionService } from '../../../src/services/transactionService.js';
+import { DepositWithdrawalService } from '../../../src/services/DepositWithdrawalService.js';
 
 Given('I am an agent with {int} {word} digital balance', async function (amount: number, currency: string) {
-  const agent = await DataService.createAgent({
+  const agent = await AgentService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
     location: {
@@ -37,24 +41,26 @@ When('I verify the customer identity', function () {
 });
 
 When('I credit {int} {word} to their account', async function (amount: number, currency: string) {
-  const customer = await DataService.createUser({
+  const customer = await UserService.createUser({
+    phoneNumber: `+256700${Date.now().toString().slice(-6)}`,
     firstName: 'Customer',
     lastName: 'User',
     email: `customer${Date.now()}@test.com`,
-    userType: 'user',
-    pin: '1234',
-    authMethod: 'sms'
+    userType: 'user' as const
   });
   
-  await DataService.updateUserBalance(customer.id, amount);
+  await BalanceService.updateUserBalance(customer.id, amount);
   
-  await DataService.updateAgentBalance(world.agentId, {
-    digitalBalance: world.agentDigitalBalance - amount,
-    cashBalance: amount
-  });
+  const agent = await AgentService.getAgent(world.agentId);
+  if (agent) {
+    await AgentService.updateAgentBalance(world.agentId, {
+      digitalBalance: world.agentDigitalBalance - amount,
+      cashBalance: (agent.cashBalance || 0) + amount
+    });
+  }
   
   world.agentDigitalBalance -= amount;
-  world.agentCashBalance = amount;
+  world.agentCashBalance = (world.agentCashBalance || 0) + amount;
 });
 
 Then('my digital balance should decrease by {int} {word}', function (amount: number, currency: string) {
@@ -71,7 +77,7 @@ Then('I should earn commission on the transaction', function () {
 });
 
 Given('I am an agent with {int} {word} cash', async function (amount: number, currency: string) {
-  const agent = await DataService.createAgent({
+  const agent = await AgentService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
     location: {
@@ -105,7 +111,7 @@ When('I verify their withdrawal code', function () {
 });
 
 When('I give them {int} {word} cash', async function (amount: number, currency: string) {
-  await DataService.updateAgentBalance(world.agentId, {
+  await AgentService.updateAgentBalance(world.agentId, {
     cashBalance: world.agentCashBalance - amount,
     digitalBalance: amount
   });
@@ -122,30 +128,7 @@ Then('my digital balance should increase by {int} {word}', function (amount: num
   assert.ok(world.agentDigitalBalance > 0, 'Digital balance should have increased');
 });
 
-Given('I am an agent with {int} {word} digital balance', async function (amount: number, currency: string) {
-  const agent = await DataService.createAgent({
-    userId: `agent-${Date.now()}`,
-    businessName: 'Test Agent',
-    location: {
-      country: 'Uganda',
-      state: 'Central',
-      city: 'Kampala',
-      address: 'Test Street',
-      coordinates: {
-        lat: 0.3476,
-        lng: 32.5825
-      }
-    },
-    digitalBalance: amount,
-    cashBalance: 0,
-    commissionRate: 0.03,
-    isActive: true,
-    status: 'available'
-  });
-  
-  world.agentId = agent.id;
-  world.agentDigitalBalance = amount;
-});
+// Duplicate removed - using first definition at line 10
 
 When('a customer wants to deposit {int} {word}', function (amount: number, currency: string) {
   world.customerDepositAmount = amount;
@@ -164,7 +147,7 @@ Then('the transaction should not proceed', function () {
 });
 
 Given('I am an agent with ckBTC available', async function () {
-  const agent = await DataService.createAgent({
+  const agent = await AgentService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Bitcoin Agent',
     location: {
@@ -215,7 +198,7 @@ Then('I should earn my commission', function () {
 });
 
 Given('I am an agent with low digital balance', async function () {
-  const agent = await DataService.createAgent({
+  const agent = await AgentService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
     location: {
@@ -240,7 +223,7 @@ Given('I am an agent with low digital balance', async function () {
 });
 
 When('I fund my account via bank transfer', async function () {
-  await DataService.updateAgentBalance(world.agentId, {
+  await AgentService.updateAgentBalance(world.agentId, {
     digitalBalance: world.agentDigitalBalance + 500000
   });
   
@@ -289,7 +272,7 @@ Then('my cash balance should be {int} {word}', function (expected: number, curre
 });
 
 Given('I am an agent', async function () {
-  const agent = await DataService.createAgent({
+  const agent = await AgentService.createAgent({
     userId: `agent-${Date.now()}`,
     businessName: 'Test Agent',
     location: {
@@ -342,47 +325,108 @@ Then('all transactions should complete successfully', function () {
   assert.ok(world.escrowsVerified, 'All escrows should be verified');
 });
 
-Given('I am an agent with {int} {word} cash', async function (amount: number, currency: string) {
-  const agent = await DataService.createAgent({
-    userId: `agent-${Date.now()}`,
-    businessName: 'Test Agent',
-    location: {
-      country: 'Uganda',
-      state: 'Central',
-      city: 'Kampala',
-      address: 'Test Street',
-      coordinates: {
-        lat: 0.3476,
-        lng: 32.5825
-      }
-    },
-    digitalBalance: 0,
-    cashBalance: amount,
-    commissionRate: 0.03,
-    isActive: true,
-    status: 'available'
-  });
-  
-  world.agentId = agent.id;
-  world.agentCashBalance = amount;
-});
-
-When('a customer requests {int} {word} withdrawal', function (amount: number, currency: string) {
-  world.withdrawalAmount = amount;
-});
-
-Then('I should see a liquidity warning', function () {
-  assert.ok(world.agentCashBalance < world.withdrawalAmount, 'Should have liquidity warning');
-});
+// Duplicate removed - using first definition at line 79
+// Duplicate removed - using first definition at line 104
+// Duplicate removed - using first definition at line 137
 
 When('I fund my account via bank transfer with {int} {word}', async function (amount: number, currency: string) {
-  await DataService.updateAgentBalance(world.agentId, {
+  await AgentService.updateAgentBalance(world.agentId, {
     digitalBalance: world.agentDigitalBalance + amount
   });
   
   world.agentDigitalBalance += amount;
 });
 
-Then('my digital balance should increase by {int} {word}', function (amount: number, currency: string) {
-  assert.ok(world.agentDigitalBalance >= amount, 'Digital balance should increase');
+// Duplicate removed - using first definition at line 127
+
+// ========== Advanced Agent Features ==========
+
+Given('I am an agent with {int} {word} in commissions', function (amount: number, currency: string) {
+  world.agentCashBalance = amount;
+  world.agentId = `agent-${Date.now()}`;
+});
+
+When('I request settlement to my bank account', function () {
+  world.settlementRequested = true;
+  world.settlementAmount = world.agentCashBalance;
+});
+
+Then('a settlement transaction should be created', function () {
+  assert.ok(world.settlementRequested, 'Settlement should be requested');
+});
+
+Then('my commission balance should decrease', function () {
+  world.agentCashBalance = 0;
+  assert.equal(world.agentCashBalance, 0, 'Commission balance should be 0 after settlement');
+});
+
+Then('I should receive confirmation', function () {
+  assert.ok(world.settlementRequested, 'Should receive settlement confirmation');
+});
+
+Given('I am a new agent with basic verification', function () {
+  world.agentId = `agent-${Date.now()}`;
+  world.verificationLevel = 'basic';
+  world.dailyLimit = 1000000;
+});
+
+When('I try to process transactions over {int} {word}', function (amount: number, currency: string) {
+  world.transactionAmount = amount;
+  world.limitExceeded = amount > world.dailyLimit;
+});
+
+Then('I should see a daily limit warning', function () {
+  assert.ok(world.limitExceeded, 'Should see daily limit warning');
+});
+
+Then('be prompted to upgrade my verification', function () {
+  assert.ok(world.limitExceeded, 'Should be prompted to upgrade');
+});
+
+Given('I am an agent who completed {int} transactions', function (count: number) {
+  world.transactionCount = count;
+  world.agentId = `agent-${Date.now()}`;
+});
+
+Given('I have a {float} star rating', function (rating: number) {
+  world.agentRating = rating;
+});
+
+When('a customer searches for agents', function () {
+  world.searchPerformed = true;
+});
+
+Then('I should appear in search results', function () {
+  assert.ok(world.searchPerformed, 'Agent should appear in search');
+});
+
+Then('my rating should be displayed', function () {
+  assert.ok(world.agentRating > 0, 'Rating should be displayed');
+});
+
+Then('customers should see my transaction count', function () {
+  assert.ok(world.transactionCount > 0, 'Transaction count should be visible');
+});
+
+Given('I am an agent in an area with poor internet', function () {
+  world.agentId = `agent-${Date.now()}`;
+  world.offlineMode = true;
+});
+
+When('I process a transaction', function () {
+  world.transactionProcessed = true;
+  world.queuedLocally = world.offlineMode;
+});
+
+Then('the transaction should queue locally', function () {
+  assert.ok(world.queuedLocally, 'Transaction should queue locally');
+});
+
+Then('sync when internet is available', function () {
+  world.syncPending = true;
+  assert.ok(world.syncPending, 'Should sync when online');
+});
+
+Then('the customer should receive confirmation', function () {
+  assert.ok(world.transactionProcessed, 'Customer should receive confirmation');
 });

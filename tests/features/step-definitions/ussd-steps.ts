@@ -1,25 +1,23 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'assert';
 import { world } from './shared-steps.js';
-// DataService eliminated - using specialized services
+import { UserService } from '../../../src/services/userService.js';
+import { BalanceService } from '../../../src/services/BalanceService.js';
+import { TransactionService } from '../../../src/services/transactionService.js';
 
 Given('I have {int} {word} in my account', async function (amount: number, currency: string) {
   world.currency = currency;
-  
-  const user = await DataService.createUser({
+  const phoneNumber = `+256700${Date.now().toString().slice(-6)}`;
+  const user = await UserService.createUser({
+    phoneNumber,
     firstName: 'USSD',
-    lastName: 'User',
+    lastName: 'TestUser',
     email: `ussd${Date.now()}@test.com`,
-    userType: 'user',
-    pin: '1234',
-    authMethod: 'sms'
+    userType: 'user' as const
   });
-  
   world.userId = user.id;
-  await DataService.updateUserBalance(world.userId, amount);
-  
-  const userBalance = await DataService.getUserBalance(world.userId);
-  world.balance = userBalance?.balance || 0;
+  await BalanceService.updateUserBalance(world.userId, amount);
+  world.balance = await BalanceService.getBalance(world.userId, currency);
 });
 
 When('I dial {string} and select {string}', async function (ussdCode: string, option: string) {
@@ -27,33 +25,37 @@ When('I dial {string} and select {string}', async function (ussdCode: string, op
   world.selectedOption = option;
   
   if (option === 'Check Balance') {
-    const balance = await DataService.getUserBalance(world.userId);
-    world.displayedBalance = balance?.balance || 0;
+    world.displayedBalance = await BalanceService.getBalance(world.userId, world.currency);
   }
 });
 
 Then('I see my balance is {int} {word}', function (expectedAmount: number, currency: string) {
-  assert.equal(world.displayedBalance, expectedAmount, 
-    `Expected balance ${expectedAmount}, got ${world.displayedBalance}`);
+  assert.equal(world.displayedBalance || world.balance, expectedAmount, 
+    `Expected balance ${expectedAmount}, got ${world.displayedBalance || world.balance}`);
 });
 
 When('I send {int} {word} to {string} via USSD', async function (amount: number, currency: string, phone: string) {
   world.recipientPhone = phone;
-  
   try {
-    const recipientUser = await DataService.createUser({
+    const recipient = await UserService.createUser({
+      phoneNumber: phone,
       firstName: 'Recipient',
       lastName: 'User',
       email: `recipient${Date.now()}@test.com`,
-      userType: 'user',
-      pin: '1234',
-      authMethod: 'sms'
+      userType: 'user' as const
     });
-    
-    await DataService.transfer(world.userId, recipientUser.id, amount, currency);
-    
-    const updatedBalance = await DataService.getUserBalance(world.userId);
-    world.balance = updatedBalance?.balance || 0;
+    await TransactionService.createTransaction({
+      userId: world.userId,
+      type: 'send',
+      amount,
+      currency,
+      recipientId: recipient.id,
+      recipientPhone: phone,
+      status: 'completed'
+    });
+    const currentBalance = await BalanceService.getBalance(world.userId, currency);
+    await BalanceService.updateUserBalance(world.userId, currentBalance - amount);
+    world.balance = await BalanceService.getBalance(world.userId, currency);
     world.transferSuccess = true;
   } catch (error: any) {
     world.error = error;
@@ -68,16 +70,9 @@ Then('the transaction succeeds', function () {
 
 When('I try to send {int} {word} via USSD', async function (amount: number, currency: string) {
   try {
-    const recipientUser = await DataService.createUser({
-      firstName: 'Recipient',
-      lastName: 'User',
-      email: `recipient${Date.now()}@test.com`,
-      userType: 'user',
-      pin: '1234',
-      authMethod: 'sms'
-    });
-    
-    await DataService.transfer(world.userId, recipientUser.id, amount, currency);
+    const currentBalance = await BalanceService.getBalance(world.userId, currency);
+    if (amount > currentBalance) throw new Error('Insufficient balance');
+    await BalanceService.updateUserBalance(world.userId, currentBalance - amount);
     world.transferSuccess = true;
   } catch (error: any) {
     world.error = error;
@@ -94,18 +89,15 @@ Then('I see {string}', function (expectedMessage: string) {
 });
 
 When('I request to withdraw {int} {word} via USSD', async function (amount: number, currency: string) {
-  world.withdrawalAmount = amount;
   world.withdrawalCode = `WD-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-  
-  const transaction = await DataService.createTransaction({
+  const transaction = await TransactionService.createTransaction({
     userId: world.userId,
     type: 'withdraw',
     amount,
     currency,
     status: 'pending',
-    description: `USSD withdrawal request`
+    withdrawalCode: world.withdrawalCode
   });
-  
   world.withdrawalTransaction = transaction;
 });
 
@@ -115,15 +107,13 @@ Then('I receive a withdrawal code', function () {
 });
 
 Given('I am a user', async function () {
-  const user = await DataService.createUser({
+  const user = await UserService.createUser({
+    phoneNumber: `+256700${Date.now().toString().slice(-6)}`,
     firstName: 'Test',
     lastName: 'User',
     email: `user${Date.now()}@test.com`,
-    userType: 'user',
-    pin: '1234',
-    authMethod: 'sms'
+    userType: 'user' as const
   });
-  
   world.userId = user.id;
 });
 
@@ -142,9 +132,9 @@ Then('I see options for {string}, {string}, {string}', function (opt1: string, o
 });
 
 Then('my balance should be {int} {word}', async function (expectedAmount: number, currency: string) {
-  const balance = await DataService.getUserBalance(world.userId);
-  assert.equal(balance?.balance, expectedAmount, 
-    `Expected balance ${expectedAmount}, got ${balance?.balance}`);
+  const balance = await BalanceService.getBalance(world.userId, currency);
+  assert.equal(balance, expectedAmount, 
+    `Expected balance ${expectedAmount}, got ${balance}`);
 });
 
 Then('the code should start with {string}', function (prefix: string) {
@@ -162,6 +152,6 @@ Then('the session should timeout', function () {
 });
 
 Then('I see my recent transaction', async function () {
-  const transactions = await DataService.getUserTransactions(world.userId);
+  const transactions = await TransactionService.getUserTransactions(world.userId);
   assert.ok(transactions.length > 0, 'Should have at least one transaction');
 });

@@ -7,10 +7,24 @@ import { Before, setDefaultTimeout } from '@cucumber/cucumber';
 import { mockJuno } from '../../mocks/juno.js';
 import * as junoCore from '@junobuild/core';
 
-// Mock Juno functions
+// Initialize Juno with satellite ID for tests
+const JUNO_SATELLITE_ID = 'uxrrr-q7777-77774-qaaaq-cai';
+
+// Set Juno satellite ID in environment for tests
+process.env.VITE_JUNO_SATELLITE_ID = JUNO_SATELLITE_ID;
+
+// Mock Juno internal state to bypass satellite ID check
+const junoState = { satelliteId: JUNO_SATELLITE_ID, container: null };
+(junoCore as any).satelliteId = () => JUNO_SATELLITE_ID;
+
+// Mock Juno functions completely - no real Juno calls in tests
 (junoCore as any).setDoc = mockJuno.setDoc;
 (junoCore as any).getDoc = mockJuno.getDoc;
 (junoCore as any).listDocs = mockJuno.listDocs;
+(junoCore as any).deleteDoc = async () => {};
+(junoCore as any).initSatellite = async () => junoState;
+(junoCore as any).authSubscribe = () => () => {}; // No-op unsubscribe
+(junoCore as any).listAssets = async () => ({ items: [], items_length: 0n, matches_length: 0n, items_page: 0n, matches_pages: 0n });
 
 setDefaultTimeout(30000);
 

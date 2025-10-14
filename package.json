@@ -17,7 +17,7 @@
     "start:sms": "node dist/services/smsServer.js",
     "prime-demo-data": "tsx scripts/primeDemoData.ts",
     "test": "npm run test:integration",
-    "test:integration": "cucumber-js 'tests/features/{ckbtc,ckusdc,fiat,ussd,error-handling,multi-currency,agent-flows,icp-integration}.feature' --require 'tests/features/step-definitions/*.ts' --require-module tsx --tags '@integration'",
+    "test:integration": "cucumber-js 'tests/features/{ckbtc,ckusdc,fiat,ussd,error-handling,multi-currency,agent-flows,icp-integration}.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx --tags '@integration'",
     "test:icp": "dfx start --clean --background && dfx deploy ckbtc_ledger ckusdc_ledger && npm run test:integration && dfx stop",
     "test:integration:watch": "cucumber-js tests/features/icp-integration.feature --require 'tests/features/step-definitions/{shared-steps,icp-integration-steps}.ts' --require-module tsx",
     "icp:start": "dfx start --clean --background",

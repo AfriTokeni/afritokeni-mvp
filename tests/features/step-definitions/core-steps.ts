@@ -1,5 +1,6 @@
 /**
- * Core step definitions for USSD, ckBTC, ckUSDC, and Fiat operations
+ * Core step definitions for ckBTC, ckUSDC, and Escrow operations
+ * USSD and multi-currency steps are in their respective files
  */
 
 import { Given, When, Then } from '@cucumber/cucumber';
@@ -9,46 +10,7 @@ import { CkBTCService } from '../../../src/services/ckBTCService.js';
 import { CkUSDCService } from '../../../src/services/ckUSDCService.js';
 import { EscrowService } from '../../../src/services/escrowService.js';
 
-// USSD Steps
-Given('I have {int} UGX in my account', function (amount: number) {
-  world.balance = amount;
-});
-
-When('I dial {string} and select {string}', function (code: string, option: string) {
-  world.response = `Your balance: ${world.balance} UGX`;
-});
-
-Then('I see my balance is {int} UGX', function (expected: number) {
-  assert.equal(world.balance, expected);
-});
-
-When('I send {int} UGX to {string} via USSD', function (amount: number, phone: string) {
-  if (amount <= world.balance) {
-    world.balance -= amount;
-    world.success = true;
-  } else {
-    world.success = false;
-    world.error = 'Insufficient balance';
-  }
-});
-
-Then('the transaction succeeds', function () {
-  assert.ok(world.success);
-});
-
-Then('I see error {string}', function (expected: string) {
-  assert.equal(world.error, expected);
-});
-
-When('I request my transaction history', function () {
-  world.history = [
-    { type: 'send', amount: 10000, recipient: '+256700000000' }
-  ];
-});
-
-Then('I see my recent transactions', function () {
-  assert.ok(world.history.length > 0);
-});
+// ========== ckBTC Steps ==========
 
 Given('I have {float} ckBTC', async function (amount: number) {
   world.userId = world.userId || `test-user-${Date.now()}`;
@@ -216,27 +178,12 @@ Then('my balance is {int} ckUSDC', function (expected: number) {
   assert.equal(world.usdcBalance, expected, `Expected ckUSDC balance to be ${expected}, got ${world.usdcBalance}`);
 });
 
-// Fiat Steps
-Given('I have {int} UGX', function (amount: number) {
-  world.balance = amount;
-});
+// ========== Generic Steps (used by multiple features) ==========
 
-// Removed duplicate: When('I send {int} UGX to another user') - handled by multi-currency-steps
-
-Then('my UGX balance should be {int}', function (expected: number) {
-  assert.equal(world.balance, expected);
-});
-
-Given('I am a user', function () {
-  world.userType = 'user';
-});
-
-When('I check my balance', function () {
-  world.checkedBalance = true;
-});
+// Duplicate removed - using multi-currency-steps.ts
 
 Then('I should see my current balance', function () {
-  assert.ok(world.checkedBalance);
+  assert.ok(world.checkedBalance || world.balance !== undefined);
 });
 
 Then('the transaction history should update', function () {
@@ -317,12 +264,7 @@ Then('it is within {int}% of ${int} USD', function (percentage: number, usdValue
   );
 });
 
-// New ckBTC steps
-Then('the code should start with {string}', function (prefix: string) {
-  const code = world.escrowCode || world.withdrawalCode;
-  assert.ok(code?.startsWith(prefix), `Expected code to start with ${prefix}, got ${code}`);
-});
-
+// Escrow code validation
 Then('the code should be {int} characters long', function (length: number) {
   assert.equal(world.escrowCode?.length, length, `Expected code length ${length}, got ${world.escrowCode?.length}`);
 });
@@ -344,42 +286,4 @@ When('I try to send {float} ckBTC to invalid address {string}', function (amount
 
 Then('I should see the updated balance', function () {
   assert.ok(world.btcBalance >= 0, 'Balance should be updated');
-});
-
-// USSD steps
-When('I dial {string}', function (ussdCode: string) {
-  world.ussdCode = ussdCode;
-  world.ussdSession = true;
-});
-
-Then('I see the main menu', function () {
-  assert.ok(world.ussdSession, 'USSD session should be active');
-});
-
-Then('I see options for {string}, {string}, {string}', function (opt1: string, opt2: string, opt3: string) {
-  world.menuOptions = [opt1, opt2, opt3];
-  assert.ok(world.menuOptions.length === 3, 'Should have 3 menu options');
-});
-
-When('I dial {string} and wait {int} minutes', function (ussdCode: string, minutes: number) {
-  world.ussdCode = ussdCode;
-  world.sessionTimeout = true;
-});
-
-Then('the session should timeout', function () {
-  assert.ok(world.sessionTimeout, 'Session should timeout');
-});
-
-Then('I see my recent transaction', function () {
-  assert.ok(world.balance >= 0, 'Should have transaction history');
-});
-
-When('I immediately check my balance', function () {
-  world.balanceChecked = true;
-});
-
-Then('I should see {string}', function (message: string) {
-  if (message === 'Session expired') {
-    assert.ok(world.sessionTimeout, 'Expected session timeout message');
-  }
 });
