@@ -54,7 +54,7 @@ export class PINVerificationService {
       }
 
       const hashedPIN = this.hashPIN(pin);
-      await DataService.createOrUpdateUserPin(phoneNumber, hashedPIN);
+      await UserService.createOrUpdateUserPin(phoneNumber, hashedPIN);
 
       return {
         success: true,
