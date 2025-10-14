@@ -1,297 +1,140 @@
-import { Transaction, UserBalance } from '../types/transaction';
+import { getDoc, setDoc } from '@junobuild/core';
+import { TransactionService } from './TransactionService';
+
+export interface UserBalance {
+  userId: string;
+  balance: number;
+  currency: string;
+  lastUpdated: Date;
+}
 
 export class BalanceService {
-  private static transactions: Transaction[] = [];
+  static async getUserBalance(userId: string): Promise<UserBalance | null> {
+    try {
+      const doc = await getDoc({
+        collection: 'balances',
+        key: userId
+      });
+      
+      if (!doc?.data) return null;
 
-  // Initialize with some sample transactions for demo
-  static initialize() {
-    this.transactions = [
-      // Original transactions for user_123
-      {
-        id: 'txn_001',
-        type: 'deposit',
-        amount: 50000,
-        currency: 'UGX',
-        userId: 'user_123',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        agentId: 'agent_1'
-      },
-      {
-        id: 'txn_002',
-        type: 'send',
-        amount: 10000,
-        currency: 'UGX',
-        userId: 'user_123',
-        toUserId: 'user_456',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-      },
-      {
-        id: 'txn_003',
-        type: 'receive',
-        amount: 15000,
-        currency: 'UGX',
-        userId: 'user_123',
-        fromUserId: 'user_789',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
-      },
-      // Transactions for real agent user IDs
-      {
-        id: 'txn_004',
-        type: 'deposit',
-        amount: 75000,
-        currency: 'UGX',
-        userId: 'usr_003', // Agent agt_001's userId
-        status: 'completed',
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-        agentId: 'agt_001',
-        description: 'Customer deposit'
-      },
-      {
-        id: 'txn_005',
-        type: 'withdraw',
-        amount: 25000,
-        currency: 'UGX',
-        userId: 'usr_003',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-        agentId: 'agt_001',
-        description: 'Customer withdrawal'
-      },
-      {
-        id: 'txn_006',
-        type: 'send',
-        amount: 30000,
-        currency: 'UGX',
-        userId: 'usr_003',
-        toUserId: 'usr_010',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        description: 'Money transfer'
-      },
-      {
-        id: 'txn_007',
-        type: 'deposit',
-        amount: 120000,
-        currency: 'UGX',
-        userId: 'usr_006', // Agent agt_002's userId
-        status: 'completed',
-        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
-        agentId: 'agt_002',
-        description: 'Large customer deposit'
-      },
-      {
-        id: 'txn_008',
-        type: 'withdraw',
-        amount: 45000,
-        currency: 'UGX',
-        userId: 'usr_006',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-        agentId: 'agt_002',
-        description: 'Customer withdrawal'
-      },
-      // More customer deposit examples
-      {
-        id: 'txn_009',
-        type: 'deposit',
-        amount: 50000,
-        currency: 'UGX',
-        userId: 'usr_003',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-        agentId: 'agt_001',
-        description: 'Mobile money deposit'
-      },
-      {
-        id: 'txn_010',
-        type: 'deposit',
-        amount: 200000,
-        currency: 'UGX',
-        userId: 'usr_006',
-        status: 'completed',
-        createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-        agentId: 'agt_002',
-        description: 'Business customer deposit'
-      },
-      {
-        id: 'txn_011',
-        type: 'deposit',
-        amount: 15000,
-        currency: 'UGX',
-        userId: 'usr_003',
-        status: 'pending',
-        createdAt: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
-        agentId: 'agt_001',
-        description: 'Cash deposit - verification needed'
-      }
-    ];
-  }
+      const rawData = doc.data as {
+        userId: string;
+        balance: number;
+        currency: 'UGX';
+        lastUpdated: string;
+      };
 
-  // Calculate balance for a specific user and currency
-  static calculateBalance(userId: string, currency: string): number {
-    if (this.transactions.length === 0) {
-      this.initialize();
+      return {
+        userId: rawData.userId,
+        balance: rawData.balance,
+        currency: rawData.currency,
+        lastUpdated: new Date(rawData.lastUpdated)
+      };
+    } catch (error) {
+      console.error('Error getting user balance:', error);
+      return null;
     }
+  }
 
-    const userTransactions = this.transactions.filter(
-      tx => (tx.userId === userId || tx.toUserId === userId || tx.fromUserId === userId) 
-        && tx.currency === currency 
-        && tx.status === 'completed'
-    );
+  static async updateUserBalance(userId: string, balance: number): Promise<boolean> {
+    try {
+      const now = new Date();
+      const userBalance: UserBalance = {
+        userId,
+        balance,
+        currency: 'UGX',
+        lastUpdated: now
+      };
 
-    let balance = 0;
+      const dataForJuno = {
+        ...userBalance,
+        lastUpdated: now.toISOString()
+      };
 
-    for (const tx of userTransactions) {
-      switch (tx.type) {
-        case 'deposit':
-        case 'bitcoin_sell':
-          if (tx.userId === userId) {
-            balance += tx.amount;
-          }
-          break;
-        
-        case 'withdraw':
-        case 'bitcoin_buy':
-          if (tx.userId === userId) {
-            balance -= tx.amount;
-          }
-          break;
-        
-        case 'send':
-          if (tx.userId === userId) {
-            balance -= tx.amount; // Sender loses money
-          }
-          break;
-        
-        case 'receive':
-          if (tx.userId === userId) {
-            balance += tx.amount; // Receiver gains money
-          }
-          break;
-      }
+      const existingDoc = await getDoc({
+        collection: 'balances',
+        key: userId
+      });
+
+      await setDoc({
+        collection: 'balances',
+        doc: {
+          key: userId,
+          data: dataForJuno,
+          version: existingDoc?.version ? existingDoc.version : 1n
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating user balance:', error);
+      return false;
     }
-
-    return Math.max(0, balance); // Never allow negative balances
   }
 
-  // Calculate all currency balances for a user
-  static calculateAllBalances(userId: string): UserBalance {
-    if (this.transactions.length === 0) {
-      this.initialize();
-    }
-
-    const currencies = new Set(
-      this.transactions
-        .filter(tx => tx.userId === userId || tx.toUserId === userId || tx.fromUserId === userId)
-        .map(tx => tx.currency)
-    );
-
-    const balances: UserBalance = {};
-    
-    for (const currency of currencies) {
-      balances[currency] = this.calculateBalance(userId, currency);
-    }
-
-    return balances;
+  static async getBalance(userId: string, currency: string): Promise<number> {
+    const balance = await this.getUserBalance(userId);
+    return balance?.balance || 0;
   }
 
-  // Add a new transaction
-  static addTransaction(transaction: Omit<Transaction, 'id' | 'createdAt'>): Transaction {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date()
-    };
-
-    this.transactions.push(newTransaction);
-    return newTransaction;
-  }
-
-  // Process a deposit transaction
-  static processDeposit(userId: string, amount: number, currency: string, agentId: string): Transaction {
-    return this.addTransaction({
-      type: 'deposit',
-      amount,
-      currency,
-      userId,
-      status: 'completed',
-      agentId
-    });
-  }
-
-  // Process a withdrawal transaction
-  static processWithdrawal(userId: string, amount: number, currency: string, agentId: string): Transaction {
-    const currentBalance = this.calculateBalance(userId, currency);
-    
-    if (currentBalance < amount) {
+  static async transfer(
+    senderId: string,
+    recipientId: string,
+    amount: number,
+    currency: string
+  ): Promise<void> {
+    const senderBalance = await this.getUserBalance(senderId);
+    if (!senderBalance || senderBalance.balance < amount) {
       throw new Error('Insufficient balance');
     }
 
-    return this.addTransaction({
-      type: 'withdraw',
-      amount,
-      currency,
-      userId,
-      status: 'completed',
-      agentId
-    });
-  }
+    await this.updateUserBalance(senderId, senderBalance.balance - amount);
 
-  // Process a send transaction
-  static processSend(fromUserId: string, toUserId: string, amount: number, currency: string): Transaction {
-    const currentBalance = this.calculateBalance(fromUserId, currency);
-    
-    if (currentBalance < amount) {
-      throw new Error('Insufficient balance');
-    }
+    const recipientBalance = await this.getUserBalance(recipientId);
+    const newRecipientBalance = (recipientBalance?.balance || 0) + amount;
+    await this.updateUserBalance(recipientId, newRecipientBalance);
 
-    // Create send transaction for sender
-    const sendTx = this.addTransaction({
+    await TransactionService.createTransaction({
+      userId: senderId,
       type: 'send',
       amount,
       currency,
-      userId: fromUserId,
-      toUserId,
-      status: 'completed'
+      recipientId,
+      status: 'completed',
+      description: `Transfer to ${recipientId}`
     });
-
-    // Create receive transaction for receiver
-    this.addTransaction({
-      type: 'receive',
-      amount,
-      currency,
-      userId: toUserId,
-      fromUserId,
-      status: 'completed'
-    });
-
-    return sendTx;
   }
 
-  // Get transaction history for a user
-  static getTransactionHistory(userId: string): Transaction[] {
-    if (this.transactions.length === 0) {
-      this.initialize();
+  static async transferWithConversion(
+    senderId: string,
+    recipientId: string,
+    amount: number,
+    fromCurrency: string,
+    toCurrency: string
+  ): Promise<void> {
+    const conversionRate = 0.03;
+    const convertedAmount = amount * conversionRate;
+
+    const senderBalance = await this.getUserBalance(senderId);
+    if (!senderBalance || senderBalance.balance < amount) {
+      throw new Error('Insufficient balance');
     }
 
-    return this.transactions
-      .filter(tx => tx.userId === userId || tx.toUserId === userId || tx.fromUserId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
+    await this.updateUserBalance(senderId, senderBalance.balance - amount);
 
-  // Check if user has sufficient balance
-  static hasSufficientBalance(userId: string, amount: number, currency: string): boolean {
-    const balance = this.calculateBalance(userId, currency);
-    return balance >= amount;
-  }
+    const recipientBalance = await this.getUserBalance(recipientId);
+    const newRecipientBalance = (recipientBalance?.balance || 0) + convertedAmount;
+    await this.updateUserBalance(recipientId, newRecipientBalance);
 
-  // Get pending transactions for a user
-  static getPendingTransactions(userId: string): Transaction[] {
-    return this.transactions.filter(
-      tx => (tx.userId === userId || tx.toUserId === userId) && tx.status === 'pending'
-    );
+    await TransactionService.createTransaction({
+      userId: senderId,
+      type: 'send',
+      amount,
+      currency: fromCurrency,
+      recipientId,
+      status: 'completed',
+      description: `Cross-currency transfer: ${amount} ${fromCurrency} → ${convertedAmount} ${toCurrency}`
+    });
   }
 }
