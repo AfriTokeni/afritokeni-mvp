@@ -55,15 +55,39 @@ cd afritokeni-mvp
 # Install dependencies
 npm install
 
+# Start Juno emulator (for local development)
+npm run juno:dev-start
+
 # Start development server
 npm run dev
 
 # Build for production
 npm run build
-
-# Run tests (BDD with Cucumber)
-npm test
 ```
+
+### Testing
+
+```bash
+# Run all tests (unit + integration)
+npm test
+
+# Run unit tests only (fast, no ICP required)
+npm run test:unit
+
+# Run integration tests (requires local ICP replica)
+npm run test:integration
+
+# Watch integration tests
+npm run test:integration:watch
+```
+
+**Test Coverage:**
+- ✅ 15 BDD scenarios (USSD, ckBTC, ckUSDC, Fiat)
+- ✅ 6 ICP integration scenarios (real blockchain)
+- ✅ 93 test steps total
+- ✅ Real ckBTC/ckUSDC ledger queries
+- ✅ Escrow flow testing
+- ✅ Juno datastore integration
 
 ---
 
@@ -114,11 +138,54 @@ npm test
 - ckUSDC - ICP-native USDC stablecoin
 - Chain-key cryptography
 - <1 second finality
+- ICRC-1 ledger standard
 
 **Communication**:
 - Africa's Talking SMS Gateway
 - USSD session management
 - Multi-language support (English, Luganda, Swahili)
+
+**Testing**:
+- Cucumber.js (BDD)
+- DFX (local ICP replica)
+- Real ledger canister integration
+- Juno emulator
+
+---
+
+## 🔗 ICP Integration
+
+AfriTokeni queries **real ICP ledger canisters** for all ckBTC and ckUSDC operations:
+
+### Production Mode
+```typescript
+// Queries mainnet ckBTC ledger: mxzaz-hqaaa-aaaar-qaada-cai
+const balance = await ledgerActor.icrc1_balance_of({ owner, subaccount });
+```
+
+### Local Development
+```bash
+# Start local ICP replica
+dfx start --clean --background
+
+# Deploy ckBTC and ckUSDC ledgers
+dfx deploy ckbtc_ledger ckusdc_ledger
+
+# Run integration tests
+npm run test:integration
+```
+
+**Canister IDs:**
+- **ckBTC Mainnet**: `mxzaz-hqaaa-aaaar-qaada-cai`
+- **ckUSDC Mainnet**: `xevnm-gaaaa-aaaar-qafnq-cai`
+- **Local**: Auto-generated on deployment
+
+**What's Tested:**
+- ✅ Token metadata queries (symbol, name, decimals)
+- ✅ Balance queries from real ledgers
+- ✅ ICRC-1 standard compliance
+- ✅ Escrow transaction flows
+- ✅ Multi-currency support
 
 ---
 

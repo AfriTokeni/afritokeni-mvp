@@ -30,3 +30,8 @@ public/workers
 target
 api/.env
 .env
+
+# DFX (Internet Computer)
+.dfx/
+.dfx.json
+canister_ids.json

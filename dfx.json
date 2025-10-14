@@ -24,6 +24,18 @@
       "type": "custom",
       "candid": "https://raw.githubusercontent.com/dfinity/ic/master/rs/rosetta-api/icrc1/index/index.did",
       "wasm": "https://download.dfinity.systems/ic/02571e8f58b4f6d90e1102a4e3f6a3e7e2c64fde/canisters/ic-icrc1-index-ng.wasm.gz"
+    },
+    "ckbtc_ledger": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/master/rs/ledger_suite/icrc1/ledger/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/d87954601e4b22972899e9957e800406a0a6b929/canisters/ic-icrc1-ledger.wasm.gz",
+      "init_arg": "(variant { Init = record { token_name = \"ckBTC\"; token_symbol = \"ckBTC\"; decimals = opt 8; minting_account = record { owner = principal \"aaaaa-aa\" }; transfer_fee = 10; metadata = vec {}; initial_balances = vec {}; archive_options = record { trigger_threshold = 2000; num_blocks_to_archive = 1000; controller_id = principal \"aaaaa-aa\" }; feature_flags = opt record { icrc2 = true }; } })"
+    },
+    "ckusdc_ledger": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/master/rs/ledger_suite/icrc1/ledger/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/d87954601e4b22972899e9957e800406a0a6b929/canisters/ic-icrc1-ledger.wasm.gz",
+      "init_arg": "(variant { Init = record { token_name = \"ckUSDC\"; token_symbol = \"ckUSDC\"; decimals = opt 6; minting_account = record { owner = principal \"aaaaa-aa\" }; transfer_fee = 10000; metadata = vec {}; initial_balances = vec {}; archive_options = record { trigger_threshold = 2000; num_blocks_to_archive = 1000; controller_id = principal \"aaaaa-aa\" }; feature_flags = opt record { icrc2 = true }; } })"
     }
   },
   "defaults": {
