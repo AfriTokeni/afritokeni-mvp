@@ -65,7 +65,7 @@ export const useAfriTokeni = () => {
       
       // Load agent data if agent is logged in
       if (user?.agent?.id) {
-        await // UserService.initializeUserData(user.agent.id);
+        // User data initialization handled by services
         
         // First get agent data, then get all agent-related transactions
         const agentData = await AgentService.getAgentByUserId(user.agent.id);
