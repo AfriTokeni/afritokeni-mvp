@@ -45,20 +45,22 @@ const AgentDashboard: React.FC = () => {
   const [agentTransactions, setAgentTransactions] = useState<Transaction[]>([]);
 
   React.useEffect(() => {
-    // Load customers count asynchronously
-    UserService.getAllCustomers().then(customers => {
+    const loadData = async () => {
+      // Load customers count asynchronously
+      const customers = await UserService.getAllCustomers();
       setCustomersCount(customers.length);
-    });
-    
-    // Load agent transactions
-    if (agent) {
-      const transactions = BalanceService.getTransactionHistory(agent.id);
-      setAgentTransactions(transactions);
-    }
+      
+      // Load agent transactions
+      if (agent) {
+        const transactions = await BalanceService.getTransactionHistory(agent.id);
+        setAgentTransactions(transactions);
+      }
+    };
+    loadData();
   }, [agent]);
 
   // Get agent's Bitcoin balance using BalanceService
-  const bitcoinBalance = agent ? BalanceService.calculateBalance(agent.id, 'BTC') : 0;
+  const bitcoinBalance = agent ? BalanceService.calculateBalance(agentTransactions) : 0;
   const dailyEarnings = calculateDailyEarnings();
   
 

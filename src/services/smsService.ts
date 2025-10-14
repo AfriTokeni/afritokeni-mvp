@@ -10,6 +10,7 @@ export interface SMSMessage {
   direction: 'inbound' | 'outbound';
   status: 'pending' | 'sent' | 'delivered' | 'failed';
   command?: string;
+  transactionId?: string;
   createdAt: Date;
 }
 

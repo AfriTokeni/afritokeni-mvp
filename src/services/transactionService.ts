@@ -195,4 +195,17 @@ export class TransactionService {
       completedCount: completedTransactions.length
     };
   }
+
+  static async processWithdrawal(transactionId: string): Promise<boolean> {
+    try {
+      await this.updateTransaction(transactionId, {
+        status: 'completed',
+        completedAt: new Date()
+      });
+      return true;
+    } catch (error) {
+      console.error('Error processing withdrawal:', error);
+      return false;
+    }
+  }
 }

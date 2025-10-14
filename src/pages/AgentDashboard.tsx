@@ -63,7 +63,7 @@ const AgentDashboard: React.FC = () => {
         const demoTransactions = await CentralizedDemoService.getTransactions(currentAgent.id);
         setAgentTransactions(demoTransactions as any);
       } else if (agent) {
-        const transactions = BalanceService.getTransactionHistory(
+        const transactions = await BalanceService.getTransactionHistory(
           agent.userId || agent.id,
         );
         setAgentTransactions(transactions);

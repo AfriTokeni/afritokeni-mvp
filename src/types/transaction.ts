@@ -5,6 +5,7 @@ export interface Transaction {
   amount: number;
   fee?: number;
   currency: string;
+  senderId?: string;
   recipientId?: string;
   recipientPhone?: string;
   recipientName?: string;
