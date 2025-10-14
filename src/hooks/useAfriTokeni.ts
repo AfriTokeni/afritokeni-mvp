@@ -5,6 +5,7 @@ import { UserService } from '../services/userService';
 import { TransactionService } from '../services/transactionService';
 import { BalanceService } from '../services/balanceService';
 import { SMSService } from '../services/smsService';
+import { DepositWithdrawalService } from '../services/depositWithdrawalService';
 import { CentralizedDemoService } from '../services/centralizedDemoService';
 import { useDemoMode } from '../context/DemoModeContext';
 import { Transaction } from '../types/transaction';
@@ -69,7 +70,7 @@ export const useAfriTokeni = () => {
         // First get agent data, then get all agent-related transactions
         const agentData = await AgentService.getAgentByUserId(user.agent.id);
         const agentTransactionsData = agentData ? 
-          await TransactionService.getAgentTransactions(agentData.id, user.agent.id) : [];
+          await TransactionService.getAgentTransactions(agentData.id) : [];
         
         // Add to results manually instead of using promises array
         dataPromises.push(
@@ -277,14 +278,25 @@ export const useAfriTokeni = () => {
     setError(null);
 
     try {
-      const result = await TransactionService.processWithdrawal(user.user.id, amount, currency, agentId);
+      // Create withdrawal request
+      const withdrawalRequest = await DepositWithdrawalService.createWithdrawalRequest(
+        user.user.id,
+        agentId || '',
+        amount,
+        currency
+      );
       
       // Refresh data after successful withdrawal
-      if (result.success) {
+      if (withdrawalRequest) {
         await loadUserData();
+        return { 
+          success: true, 
+          message: 'Withdrawal request created',
+          withdrawalCode: withdrawalRequest.withdrawalCode 
+        };
       }
 
-      return result;
+      return { success: false, message: 'Failed to create withdrawal request' };
     } catch (err) {
       setError('Failed to initiate withdrawal');
       console.error('Error withdrawing money:', err);
