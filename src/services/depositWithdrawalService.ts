@@ -614,4 +614,38 @@ export class DepositWithdrawalService {
 
     return true;
   }
+
+  static async confirmDepositRequest(requestId: string, agentId: string): Promise<boolean> {
+    try {
+      const requestDoc = await getDoc({
+        collection: 'deposit_requests',
+        key: requestId
+      });
+
+      if (!requestDoc?.data) return false;
+      
+      const request = requestDoc.data as DepositRequest;
+      if (request.agentId !== agentId || request.status !== 'pending') return false;
+      
+      return this.updateDepositRequestStatus(requestId, 'confirmed');
+    } catch (error) {
+      console.error('Error confirming deposit request:', error);
+      return false;
+    }
+  }
+
+  static async getTransactionHistory(userId: string): Promise<any[]> {
+    try {
+      const transactions = await listDocs({
+        collection: 'transactions'
+      });
+      
+      return transactions.items
+        .filter((doc: any) => doc.data.userId === userId)
+        .map((doc: any) => ({ id: doc.key, ...doc.data }));
+    } catch (error) {
+      console.error('Error getting transaction history:', error);
+      return [];
+    }
+  }
 }

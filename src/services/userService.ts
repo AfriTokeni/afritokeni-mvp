@@ -32,6 +32,9 @@ export interface UserPin {
   pin: string;
   createdAt: Date;
   updatedAt?: Date;
+  userId?: string;
+  isSet?: boolean;
+  lastUpdated?: Date;
 }
 
 export class UserService {
@@ -314,6 +317,27 @@ export class UserService {
     const user = await this.getUserByKey(userId);
     if (!user) {
       throw new Error('User not found');
+    }
+  }
+
+  static async updateUserBalance(userId: string, newBalance: number): Promise<void> {
+    const balanceDoc = await getDoc({
+      collection: 'balances',
+      key: userId
+    });
+
+    if (balanceDoc?.data) {
+      await setDoc({
+        collection: 'balances',
+        doc: {
+          key: userId,
+          data: {
+            ...balanceDoc.data,
+            balance: newBalance,
+            lastUpdated: new Date().toISOString()
+          }
+        }
+      });
     }
   }
 }

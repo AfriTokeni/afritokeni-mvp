@@ -1,3 +1,4 @@
+import { DepositWithdrawalService } from "../../services/depositWithdrawalService";
 import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, CreditCard, Search } from 'lucide-react';
 import { WithdrawalRequest } from './ProcessWithdrawal';

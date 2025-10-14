@@ -239,7 +239,7 @@ const AgentSettlement: React.FC = () => {
         amount: settlementFee,
         currency: 'UGX',
         source: 'settlement_fee',
-        sourceTransactionId: reference,
+        transactionId: reference,
         agentId: agent.id,
         description: `Settlement fee (2%) from agent ${agent.businessName}`
       });

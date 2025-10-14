@@ -1,4 +1,4 @@
-import { getDoc, setDoc } from '@junobuild/core';
+import { getDoc, setDoc, listDocs } from '@junobuild/core';
 import { TransactionService } from './transactionService';
 
 export interface UserBalance {
@@ -136,5 +136,32 @@ export class BalanceService {
       status: 'completed',
       description: `Cross-currency transfer: ${amount} ${fromCurrency} → ${convertedAmount} ${toCurrency}`
     });
+  }
+
+  static async getTransactionHistory(userId: string): Promise<any[]> {
+    try {
+      const transactions = await listDocs({
+        collection: 'transactions'
+      });
+      
+      return transactions.items
+        .filter((doc: any) => doc.data.userId === userId || doc.data.agentId === userId)
+        .map((doc: any) => ({ id: doc.key, ...doc.data }))
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      console.error('Error getting transaction history:', error);
+      return [];
+    }
+  }
+
+  static calculateBalance(transactions: any[]): number {
+    return transactions.reduce((sum, tx) => {
+      if (tx.type === 'deposit' || tx.type === 'receive') {
+        return sum + tx.amount;
+      } else if (tx.type === 'withdraw' || tx.type === 'send') {
+        return sum - tx.amount;
+      }
+      return sum;
+    }, 0);
   }
 }

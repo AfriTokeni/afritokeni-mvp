@@ -5,7 +5,6 @@ import AgentStep from './AgentStep';
 import ConfirmationStep from './ConfirmationStep';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useAfriTokeni } from '../../hooks/useAfriTokeni';
-import { DataService } from '../../services/agentService';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { formatCurrencyAmount } from '../../types/currency';
 
