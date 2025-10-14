@@ -328,239 +328,42 @@ export class DataService {
     return UserService.getAllCustomers();
   }
 
-  // Transaction operations
+  // Transaction operations - MOVED TO TransactionService
   static async createTransaction(transaction: Omit<Transaction, 'id' | 'createdAt'>): Promise<Transaction> {
-    const now = new Date();
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: nanoid(),
-      createdAt: now
-    };
-
-    // Convert Date fields to ISO strings - handle both Date objects and strings
-    const dataForJuno = {
-      ...newTransaction,
-      createdAt: now.toISOString(),
-      completedAt: newTransaction.completedAt 
-        ? (newTransaction.completedAt instanceof Date ? newTransaction.completedAt.toISOString() : String(newTransaction.completedAt))
-        : undefined
-    };
-
-    const existingDoc = await getDoc({
-      collection: 'transactions',
-      key: newTransaction.id
-    });
-
-    await setDoc({
-      collection: 'transactions',
-      doc: {
-        key: newTransaction.id,
-        data: dataForJuno,
-        version: existingDoc?.version ? existingDoc.version : 1n
-      }
-    });
-
-    // Reward user with AFRI tokens for transaction
-    try {
-      if (transaction.userId && transaction.amount) {
-        await AfriTokenService.rewardTransaction(transaction.userId, transaction.amount);
-        console.log(`✅ Rewarded user ${transaction.userId} with AFRI for transaction`);
-      }
-    } catch (error) {
-      console.error('Error rewarding user with AFRI:', error);
-      // Don't fail the transaction if reward fails
-    }
-
-    return newTransaction;
+    return TransactionService.createTransaction(transaction);
   }
 
   static async getTransaction(id: string): Promise<Transaction | null> {
-    try {
-      const doc = await getDoc({
-        collection: 'transactions',
-        key: id
-      });
-      return doc?.data as Transaction || null;
-    } catch (error) {
-      console.error('Error getting transaction:', error);
-      return null;
-    }
+    return TransactionService.getTransaction(id);
   }
 
   static async getUserTransactions(userId: string): Promise<Transaction[]> {
-    try {
-      const docs = await listDocs({
-        collection: 'transactions'
-      });
-      
-      return docs.items
-        .map(doc => doc.data as Transaction)
-        .filter(transaction => transaction.userId === userId)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } catch (error) {
-      console.error('Error getting user transactions:', error);
-      return [];
-    }
+    return TransactionService.getUserTransactions(userId);
   }
 
-  // Get agent facilitated transactions (transactions where agent helped customers)
   static async getAgentTransactions(agentId: string): Promise<Transaction[]> {
-    try {
-      const docs = await listDocs({
-        collection: 'transactions'
-      });
-      
-      return docs.items
-        .map(doc => doc.data as Transaction)
-        .filter(transaction => transaction.agentId === agentId)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } catch (error) {
-      console.error('Error getting agent transactions:', error);
-      return [];
-    }
+    return TransactionService.getAgentTransactions(agentId);
   }
 
-  // Get agent transactions by user ID (agent's own transactions, not facilitated ones)
   static async getAgentTransactionsByUserId(userId: string): Promise<Transaction[]> {
-    try {
-      // Return transactions where the agent is the actual user (userId), not just the facilitator
-      const docs = await listDocs({
-        collection: 'transactions'
-      });
-      
-      return docs.items
-        .map(doc => doc.data as Transaction)
-        .filter(transaction => transaction.userId === userId) // Agent's own transactions
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } catch (error) {
-      console.error('Error getting agent transactions by user ID:', error);
-      return [];
-    }
+    return TransactionService.getUserTransactions(userId);
   }
 
-  // Get all agent-related transactions (only agent commission/earnings transactions)
   static async getAllAgentTransactions(agentId: string, userId: string): Promise<Transaction[]> {
-    try {
-      const docs = await listDocs({
-        collection: 'transactions'
-      });
-      
-      const allTransactions = docs.items.map(doc => doc.data as Transaction);
-      
-      // Filter for agent commission/earnings transactions only:
-      const agentTransactions = allTransactions.filter(transaction => {
-        // 1. Agent commission transactions from deposits:
-        // These have userId = agent's user ID AND agentId = agent's ID
-        // These represent the agent's commission earnings from processing deposits
-        if (transaction.userId === userId && transaction.agentId === agentId && 
-            transaction.type === 'deposit') {
-          return true;
-        }
-        
-        // 2. Agent fee transactions from withdrawals:
-        // These have agentId = agent's ID but userId = customer's ID
-        // These represent transactions where the agent earned fees from facilitating withdrawals
-        if (transaction.agentId === agentId && transaction.userId !== userId && 
-            transaction.type === 'withdraw') {
-          return true;
-        }
-        
-        // 3. Agent's own business transactions (personal deposits/withdrawals)
-        // These have userId = agent's user ID but no agentId (agent acting as regular user)
-        if (transaction.userId === userId && !transaction.agentId && 
-            (transaction.type === 'withdraw' || transaction.type === 'deposit')) {
-          return true;
-        }
-        
-        return false;
-      });
-      
-      // Remove duplicates (in case a transaction matches multiple conditions)
-      const uniqueTransactions = agentTransactions.filter((transaction, index, self) =>
-        index === self.findIndex(t => t.id === transaction.id)
-      );
-      
-      return uniqueTransactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } catch (error) {
-      console.error('Error getting all agent transactions:', error);
-      return [];
-    }
+    return TransactionService.getAgentTransactions(agentId);
   }
 
-  // Calculate agent daily earnings
   static calculateAgentDailyEarnings(transactions: Transaction[]): {
     totalAmount: number;
     totalCommission: number;
     transactionCount: number;
     completedCount: number;
   } {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const todayTransactions = transactions.filter(transaction => {
-      const transactionDate = new Date(transaction.createdAt);
-      return transactionDate >= today && transactionDate < tomorrow;
-    });
-
-    const completedTransactions = todayTransactions.filter(
-      transaction => transaction.status === 'completed'
-    );
-
-    const totalAmount = completedTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-    const totalCommission = completedTransactions.reduce((sum, transaction) => {
-      // For withdrawal transactions, agent earns the fee
-      if (transaction.type === 'withdraw') {
-        return sum + (transaction.fee || 0);
-      }
-      // For other transactions, calculate 2% commission on amount
-      return sum + (transaction.amount * 0.02);
-    }, 0);
-
-    return {
-      totalAmount,
-      totalCommission,
-      transactionCount: todayTransactions.length,
-      completedCount: completedTransactions.length
-    };
+    return TransactionService.calculateAgentDailyEarnings(transactions);
   }
 
-  // Get all customers (users of type 'user')
-
   static async updateTransaction(id: string, updates: Partial<Transaction>): Promise<boolean> {
-    try {
-      const existing = await this.getTransaction(id);
-      if (!existing) return false;
-
-      const updated = { ...existing, ...updates };
-
-      // Convert Date fields to ISO strings - handle both Date objects and strings
-      const dataForJuno = {
-        ...updated,
-        createdAt: updated.createdAt ? (updated.createdAt instanceof Date ? updated.createdAt.toISOString() : String(updated.createdAt)) : undefined,
-        completedAt: updated.completedAt ? (updated.completedAt instanceof Date ? updated.completedAt.toISOString() : String(updated.completedAt)) : undefined
-      };
-
-      const existingDoc = await getDoc({
-        collection: 'transactions',
-        key: id
-      });
-
-      await setDoc({
-        collection: 'transactions',
-        doc: {
-          key: id,
-          data: dataForJuno,
-          version: existingDoc?.version ? existingDoc.version : 1n
-        }
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error updating transaction:', error);
-      return false;
-    }
+    return TransactionService.updateTransaction(id, updates);
   }
 
   // Balance operations
