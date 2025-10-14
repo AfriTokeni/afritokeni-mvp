@@ -329,4 +329,51 @@ export class AgentService {
     return { user: updatedUser, agent: newAgent };
   }
 
+  static async initializeAllAgentsCashBalance(): Promise<{ success: boolean; updated: number; errors: string[] }> {
+    try {
+      const agents = await listDocs({
+        collection: 'agents'
+      });
+
+      let updated = 0;
+      const errors: string[] = [];
+
+      for (const agentDoc of agents.items) {
+        try {
+          const agent = agentDoc.data as any;
+          
+          if (agent.cashBalance === undefined || agent.cashBalance === null) {
+            await setDoc({
+              collection: 'agents',
+              doc: {
+                key: agentDoc.key,
+                data: {
+                  ...agent,
+                  cashBalance: 0,
+                  digitalBalance: agent.digitalBalance || 0,
+                  updatedAt: new Date().toISOString(),
+                }
+              }
+            });
+            updated++;
+          }
+        } catch (error) {
+          errors.push(`Failed to update agent ${agentDoc.key}: ${error}`);
+        }
+      }
+
+      return {
+        success: errors.length === 0,
+        updated,
+        errors
+      };
+    } catch (error) {
+      console.error('Error initializing agent balances:', error);
+      return {
+        success: false,
+        updated: 0,
+        errors: [`Failed to initialize: ${error}`]
+      };
+    }
+  }
 }

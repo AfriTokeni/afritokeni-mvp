@@ -37,7 +37,7 @@ const KYCAdmin: React.FC = () => {
     setBalanceResult(null);
     try {
       console.log('🏦 Admin: Initializing all agent cash balances...');
-      const result = await DataService.initializeAllAgentsCashBalance();
+      const result = await AgentService.initializeAllAgentsCashBalance();
       setBalanceResult(result);
       console.log('📊 Balance initialization result:', result);
     } catch (error) {
