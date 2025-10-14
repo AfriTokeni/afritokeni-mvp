@@ -67,7 +67,7 @@ const KYCAdmin: React.FC = () => {
         // Update user's KYC status in main user record
         const submission = submissions.find(s => s.id === submissionId);
         if (submission) {
-          await DataService.updateUser(submission.userId, {
+          await UserService.updateUser(submission.userId, {
             kycStatus: status,
           });
         }

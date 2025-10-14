@@ -99,7 +99,7 @@ const UserDashboard: React.FC = () => {
 
     try {
       // Update user profile in database
-      await DataService.updateUser(currentUser.id, {
+      await UserService.updateUser(currentUser.id, {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email || currentUser.email

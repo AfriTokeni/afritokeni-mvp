@@ -242,7 +242,7 @@ export class FraudDetectionService {
    */
   private static async isNewAccount(phoneNumber: string): Promise<boolean> {
     try {
-      const user = await DataService.getUser(phoneNumber);
+      const user = await UserService.getUser(phoneNumber);
       if (!user || !user.createdAt) return true; // No user or no createdAt = treat as new
 
       const createdDate = typeof user.createdAt === 'string' ? new Date(user.createdAt) : user.createdAt;

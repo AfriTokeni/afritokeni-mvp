@@ -178,7 +178,7 @@ const UserProfile: React.FC = () => {
       };
       
       // Update in Juno datastore using DataService
-      const success = await DataService.updateUser(currentUser.id, updatedUserData, authMethod);
+      const success = await UserService.updateUser(currentUser.id, updatedUserData, authMethod);
       
       if (!success) {
         throw new Error('Failed to update user profile');
@@ -285,7 +285,7 @@ const UserProfile: React.FC = () => {
         }
       };
 
-      const success = await DataService.updateUser(currentUser.id, updatedData, authMethod);
+      const success = await UserService.updateUser(currentUser.id, updatedData, authMethod);
 
       if (!success) {
         throw new Error('Failed to update account settings');

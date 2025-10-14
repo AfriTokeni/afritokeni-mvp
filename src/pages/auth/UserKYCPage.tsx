@@ -34,7 +34,7 @@ const UserKYCPage: React.FC = () => {
       }
 
       // Update user's KYC status in the main user record
-      const updateSuccess = await DataService.updateUser(currentUser.id, {
+      const updateSuccess = await UserService.updateUser(currentUser.id, {
         firstName: data.firstName,
         lastName: data.lastName,
         kycStatus: 'pending',

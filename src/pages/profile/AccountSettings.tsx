@@ -56,7 +56,7 @@ const AccountSettings: React.FC = () => {
         location: formData.location
       };
 
-      const success = await DataService.updateUser(currentUser.id, updatedData, authMethod);
+      const success = await UserService.updateUser(currentUser.id, updatedData, authMethod);
 
       if (!success) {
         throw new Error('Failed to update account settings');

@@ -24,7 +24,7 @@ const AgentKYCPage: React.FC = () => {
       }
 
       // Complete the agent KYC process
-      const result = await DataService.completeAgentKYC({
+      const result = await AgentService.completeAgentKYC({
         userId: user.agent.id,
         firstName: data.firstName,
         lastName: data.lastName,

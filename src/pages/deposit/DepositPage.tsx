@@ -75,7 +75,7 @@ const DepositPage: React.FC = () => {
     console.log('Loading nearby agents...');
     updateState({ isLoadingAgents: true, error: '' });
     try {
-      const nearbyAgents = await DataService.getNearbyAgents(
+      const nearbyAgents = await AgentService.getNearbyAgents(
         userLocation[0], 
         userLocation[1], 
         10000
@@ -154,7 +154,7 @@ const DepositPage: React.FC = () => {
       const code = Math.random().toString(36).substr(2, 6).toUpperCase();
       
       // Save deposit request to datastore
-      const requestId = await DataService.createDepositRequest(
+      const requestId = await DepositWithdrawalService.createDepositRequest(
         user.user.id,
         agent.id,
         parseFloat(amount),

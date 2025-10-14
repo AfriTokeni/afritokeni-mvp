@@ -170,7 +170,7 @@ const AgentStep: React.FC<AgentStepProps> = ({
           setAgents(agentsWithReviews);
         } else {
           const [lat, lng] = userLocation;
-          const dbAgents = await DataService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
+          const dbAgents = await AgentService.getNearbyAgents(lat, lng, 10, ['available', 'busy']);
           setAgents(dbAgents);
         }
       } catch (error) {

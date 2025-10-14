@@ -114,7 +114,7 @@ const WithdrawPage: React.FC = () => {
       
       if (!isDemoMode && user.user?.id) {
         // Create withdrawal request in Juno backend
-        await DataService.createWithdrawalRequest(
+        await DepositWithdrawalService.createWithdrawalRequest(
           user.user.id,
           pendingAgent.id,
           finalLocalAmount,

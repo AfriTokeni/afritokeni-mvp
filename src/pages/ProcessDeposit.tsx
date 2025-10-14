@@ -75,7 +75,7 @@ const ProcessDeposit: React.FC = () => {
       console.log('Searching user by term:', searchTerm);
       
       // Use the new enhanced search functionality
-      const users = await DataService.searchUsers(searchTerm);
+      const users = await UserService.searchUsers(searchTerm);
 
       console.log('Users found:', users);
 
@@ -199,7 +199,7 @@ const ProcessDeposit: React.FC = () => {
       let currentBalance = 0;
       
       try {
-        const balanceData = await DataService.getUserBalance(customerId);
+        const balanceData = await UserService.getUserBalance(customerId);
         currentBalance = balanceData?.balance || 0;
       } catch {
         console.log('No existing balance found, starting with 0');
@@ -209,7 +209,7 @@ const ProcessDeposit: React.FC = () => {
       const commissionAmount = Math.round(depositData.amount.ugx * 0.02);
 
       // 1. Create transaction for the customer (user receiving the deposit)
-      const customerTransaction = await DataService.createTransaction({
+      const customerTransaction = await TransactionService.createTransaction({
         userId: customerId,
         type: 'deposit',
         amount: depositData.amount.ugx,
@@ -225,7 +225,7 @@ const ProcessDeposit: React.FC = () => {
       });
 
       // 2. Create transaction for the agent (agent processing the deposit)
-      const agentTransaction = await DataService.createTransaction({
+      const agentTransaction = await TransactionService.createTransaction({
         userId: user.agent.id,
         type: 'deposit',
         amount: depositData.amount.ugx,
@@ -242,33 +242,33 @@ const ProcessDeposit: React.FC = () => {
 
       // 3. Update customer balance (increase by deposit amount)
       const newCustomerBalance = currentBalance + depositData.amount.ugx;
-      await DataService.updateUserBalance(customerId, newCustomerBalance);
+      await UserService.updateUserBalance(customerId, newCustomerBalance);
 
       // 4. Update agent's digital balance (reduce by deposit amount)
       const newAgentDigitalBalance = currentAgent.digitalBalance - depositData.amount.ugx;
       
       // Update agent's digital balance in the agents collection
-      await DataService.updateAgentBalanceByUserId(user.agent.id, {
+      await AgentService.updateAgentBalanceByUserId(user.agent.id, {
         digitalBalance: newAgentDigitalBalance
       });
 
       // 5. Agent gets commission added to their main balance (both balances and agents collections)
-      const agentBalance = await DataService.getUserBalance(user.agent.id);
+      const agentBalance = await UserService.getUserBalance(user.agent.id);
       const currentAgentBalance = agentBalance?.balance || 0;
       const newAgentBalance = currentAgentBalance + commissionAmount;
       
       // Update main balance in balances collection
-      await DataService.updateUserBalance(user.agent.id, newAgentBalance);
+      await UserService.updateUserBalance(user.agent.id, newAgentBalance);
       
       // Also update cash balance in agents collection to keep them synchronized
       const newAgentCashBalance = currentAgent.cashBalance + commissionAmount;
-      await DataService.updateAgentBalanceByUserId(user.agent.id, {
+      await AgentService.updateAgentBalanceByUserId(user.agent.id, {
         cashBalance: newAgentCashBalance
       });
 
       // Initialize user data if new user
       if (!depositData.customer) {
-        await DataService.initializeUserData(customerId);
+        // await UserService.initializeUserData(customerId);
       }
 
       // Send SMS notification via our webhook API
@@ -289,7 +289,7 @@ const ProcessDeposit: React.FC = () => {
         });
 
         // Log SMS in Juno datastore
-        await DataService.logSMSMessage({
+        await SMSService.logSMSMessage({
           userId: customerId,
           phoneNumber: depositData.customerPhone,
           message: smsMessage,

@@ -20,7 +20,7 @@ const AgentDepositProcessor: React.FC<AgentDepositProcessorProps> = ({
   const loadDepositRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const requests = await DataService.getAgentDepositRequests(agentId, 'pending');
+      const requests = await AgentService.getAgentDepositRequests(agentId, 'pending');
       setDepositRequests(requests);
     } catch (error) {
       console.error('Error loading deposit requests:', error);
@@ -36,7 +36,7 @@ const AgentDepositProcessor: React.FC<AgentDepositProcessorProps> = ({
   const processDeposit = async (requestId: string) => {
     setProcessing(requestId);
     try {
-      const result = await DataService.processDepositRequest(requestId, agentId);
+      const result = await DepositWithdrawalService.processDepositRequest(requestId, agentId);
       
       if (result.success) {
         // Remove processed request from list
@@ -70,7 +70,7 @@ const AgentDepositProcessor: React.FC<AgentDepositProcessorProps> = ({
     if (!searchCode.trim()) return;
     
     try {
-      const request = await DataService.getDepositRequestByCode(searchCode.toUpperCase());
+      const request = await DepositWithdrawalService.getDepositRequestByCode(searchCode.toUpperCase());
       if (request && request.agentId === agentId) {
         // Add to list if not already there
         setDepositRequests(prev => {

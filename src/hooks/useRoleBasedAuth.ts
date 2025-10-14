@@ -154,7 +154,7 @@ export const useRoleBasedAuth = () => {
         };
 
         // Create user record in datastore with ID as key
-        await DataService.createUser({
+        await UserService.createUser({
           id: afritokeniUser.id,
           firstName: afritokeniUser.firstName,
           lastName: afritokeniUser.lastName,
@@ -275,7 +275,7 @@ export const useRoleBasedAuth = () => {
             // Randomly select a location from the array
             const randomLocation = kampalaNearbyLocations[Math.floor(Math.random() * kampalaNearbyLocations.length)];
 
-            const newAgent = await DataService.createAgent({
+            const newAgent = await AgentService.createAgent({
               userId: afritokeniUser.id,
               businessName: `${afritokeniUser.firstName} ${afritokeniUser.lastName} Agent Service`,
               location: {

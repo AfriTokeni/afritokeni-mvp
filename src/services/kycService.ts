@@ -87,7 +87,7 @@ export class KYCService {
 
       // Send notification to user about KYC submission
       try {
-        const user = await DataService.getUserByKey(userId);
+        const user = await UserService.getUserByKey(userId);
         if (user) {
           await NotificationService.sendNotification(user, {
             userId,
@@ -229,7 +229,7 @@ export class KYCService {
 
       // Send notification to user about KYC status update
       try {
-        const user = await DataService.getUserByKey(submission.userId);
+        const user = await UserService.getUserByKey(submission.userId);
         if (user) {
           const message = status === 'approved' 
             ? 'Congratulations! Your KYC verification has been approved. You can now access all platform features.'

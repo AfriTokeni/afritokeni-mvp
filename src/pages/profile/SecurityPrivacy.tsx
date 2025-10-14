@@ -68,7 +68,7 @@ const SecurityPrivacy: React.FC = () => {
       }));
 
       // In a real implementation, you'd save this to the backend
-      // await DataService.updateUserSecuritySettings(user.id, { [setting]: newValue });
+      // await UserService.updateUserSecuritySettings(user.id, { [setting]: newValue });
       
       setSuccess(`${setting.replace(/([A-Z])/g, ' $1').toLowerCase()} ${newValue ? 'enabled' : 'disabled'}`);
       setTimeout(() => setSuccess(null), 3000);
@@ -96,7 +96,7 @@ const SecurityPrivacy: React.FC = () => {
 
       // For SMS users, update PIN directly
       if (authMethod === 'sms') {
-        const success = await DataService.updateUser(currentUser.id, { pin: pinForm.newPin }, 'sms');
+        const success = await UserService.updateUser(currentUser.id, { pin: pinForm.newPin }, 'sms');
         if (!success) throw new Error('Failed to update PIN');
       }
 

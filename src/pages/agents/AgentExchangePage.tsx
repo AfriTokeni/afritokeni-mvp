@@ -95,7 +95,7 @@ const AgentExchangePage: React.FC = () => {
         if (user?.agent?.id || user?.user?.id) {
           try {
             const userId = user.agent?.id || user.user?.id;
-            const agentData = await DataService.getAgentByUserId(userId!);
+            const agentData = await AgentService.getAgentByUserId(userId!);
             agentId = agentData?.id;
             console.log('Found agent ID:', agentId);
           } catch (agentError) {
@@ -151,14 +151,14 @@ const AgentExchangePage: React.FC = () => {
                 
                 if (isPhoneNumber) {
                   // SMS user - userId is actually a phone number
-                  const user = await DataService.getUser(originalTx.userId);
+                  const user = await UserService.getUser(originalTx.userId);
                   if (user) {
                     customerName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                     formattedPhoneNumber = formatPhoneNumber(originalTx.userId);
                   }
                 } else {
                   // Web user - userId is a regular user ID
-                  const user = await DataService.getWebUserById(originalTx.userId);
+                  const user = await UserService.getWebUserById(originalTx.userId);
                   if (user) {
                     customerName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                     // For web users, use email or default identifier
@@ -210,7 +210,7 @@ const AgentExchangePage: React.FC = () => {
       if (user?.agent?.id || user?.user?.id) {
         try {
           const userId = user.agent?.id || user.user?.id;
-          const agentData = await DataService.getAgentByUserId(userId!);
+          const agentData = await AgentService.getAgentByUserId(userId!);
           agentId = agentData?.id;
         } catch (agentError) {
           console.warn('Could not find agent data for user:', agentError);
@@ -268,14 +268,14 @@ const AgentExchangePage: React.FC = () => {
               
               if (isPhoneNumber) {
                 // SMS user - userId is actually a phone number
-                const user = await DataService.getUser(originalTx.userId);
+                const user = await UserService.getUser(originalTx.userId);
                 if (user) {
                   customerName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                   formattedPhoneNumber = formatPhoneNumber(originalTx.userId);
                 }
               } else {
                 // Web user - userId is a regular user ID
-                const user = await DataService.getWebUserById(originalTx.userId);
+                const user = await UserService.getWebUserById(originalTx.userId);
                 if (user) {
                   customerName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                   // For web users, use email or default identifier
@@ -356,7 +356,7 @@ const AgentExchangePage: React.FC = () => {
         const userIdForAgent = user.agent?.id || user.user?.id;
         
         if (userIdForAgent) {
-          const agentRecord = await DataService.getAgentByUserId(userIdForAgent);
+          const agentRecord = await AgentService.getAgentByUserId(userIdForAgent);
           agentId = agentRecord?.id;
           console.log(`✅ Found agent ID: ${agentId} for user: ${userIdForAgent}`);
         }

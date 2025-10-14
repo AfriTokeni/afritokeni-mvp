@@ -44,7 +44,7 @@ export class PINVerificationService {
     }
 
     try {
-      const user = await DataService.getUser(phoneNumber);
+      const user = await UserService.getUser(phoneNumber);
       if (!user) {
         return {
           success: false,
@@ -82,7 +82,7 @@ export class PINVerificationService {
     }
 
     try {
-      const userPin = await DataService.getUserPin(phoneNumber);
+      const userPin = await UserService.getUserPin(phoneNumber);
       if (!userPin || !userPin.isSet) {
         return {
           success: false,

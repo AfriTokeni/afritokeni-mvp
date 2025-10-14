@@ -118,7 +118,7 @@ const AgentFunding: React.FC = () => {
       };
 
       // Create funding transaction record
-      await DataService.createTransaction({
+      await TransactionService.createTransaction({
         userId: user.agent!.id,
         type: 'deposit',
         amount: fundingAmount,
@@ -139,12 +139,12 @@ const AgentFunding: React.FC = () => {
           try {
             // Update agent's digital balance
             const newDigitalBalance = agent.digitalBalance + fundingAmount;
-            await DataService.updateAgentBalanceByUserId(user.agent!.id, {
+            await AgentService.updateAgentBalanceByUserId(user.agent!.id, {
               digitalBalance: newDigitalBalance
             });
 
             // Update transaction status
-            await DataService.createTransaction({
+            await TransactionService.createTransaction({
               userId: user.agent!.id,
               type: 'deposit',
               amount: fundingAmount,
@@ -161,7 +161,7 @@ const AgentFunding: React.FC = () => {
 
             // Send funding completion notification
             try {
-              const agentUser = await DataService.getUserByKey(user.agent!.id);
+              const agentUser = await UserService.getUserByKey(user.agent!.id);
               if (agentUser) {
                 await NotificationService.sendNotification(agentUser, {
                   userId: user.agent!.id,
@@ -185,7 +185,7 @@ const AgentFunding: React.FC = () => {
 
       // Send funding request notification
       try {
-        const agentUser = await DataService.getUserByKey(user.agent!.id);
+        const agentUser = await UserService.getUserByKey(user.agent!.id);
         if (agentUser) {
           await NotificationService.sendNotification(agentUser, {
             userId: user.agent!.id,

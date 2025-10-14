@@ -212,7 +212,7 @@ const AgentSettlement: React.FC = () => {
       };
 
       // Create settlement transaction record
-      await DataService.createTransaction({
+      await TransactionService.createTransaction({
         userId: user.agent!.id,
         type: 'withdraw',
         amount: settlementAmount,
@@ -242,7 +242,7 @@ const AgentSettlement: React.FC = () => {
 
       // Reduce agent's cash balance (they're withdrawing their earnings)
       const newCashBalance = agent.cashBalance - settlementAmount;
-      await DataService.updateAgentBalanceByUserId(user.agent!.id, {
+      await AgentService.updateAgentBalanceByUserId(user.agent!.id, {
         cashBalance: newCashBalance
       });
 
@@ -250,7 +250,7 @@ const AgentSettlement: React.FC = () => {
       if (selectedMethod === 'mobile_money') {
         setTimeout(async () => {
           try {
-            await DataService.createTransaction({
+            await TransactionService.createTransaction({
               userId: user.agent!.id,
               type: 'withdraw',
               amount: settlementAmount,
@@ -267,7 +267,7 @@ const AgentSettlement: React.FC = () => {
 
             // Send settlement completion notification
             try {
-              const agentUser = await DataService.getUserByKey(user.agent!.id);
+              const agentUser = await UserService.getUserByKey(user.agent!.id);
               if (agentUser) {
                 await NotificationService.sendNotification(agentUser, {
                   userId: user.agent!.id,
@@ -289,7 +289,7 @@ const AgentSettlement: React.FC = () => {
 
       // Send settlement request notification
       try {
-        const agentUser = await DataService.getUserByKey(user.agent!.id);
+        const agentUser = await UserService.getUserByKey(user.agent!.id);
         if (agentUser) {
           await NotificationService.sendNotification(agentUser, {
             userId: user.agent!.id,

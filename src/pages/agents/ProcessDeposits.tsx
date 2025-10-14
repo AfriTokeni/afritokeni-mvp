@@ -97,7 +97,7 @@ const ProcessDeposits: React.FC = () => {
 
       // First, get the agent record for this user to get the actual agent ID
       console.log('🏦 ProcessDeposits - Looking up agent record for user ID:', userId);
-      const agentRecord = await DataService.getAgentByUserId(userId);
+      const agentRecord = await AgentService.getAgentByUserId(userId);
       
       if (!agentRecord) {
         console.error('No agent record found for user ID:', userId);
@@ -110,7 +110,7 @@ const ProcessDeposits: React.FC = () => {
       
       // Convert filter to status for API call
       const statusFilter = filter === 'all' ? undefined : filter;
-      const rawRequests = await DataService.getAgentDepositRequests(agentId, statusFilter);
+      const rawRequests = await AgentService.getAgentDepositRequests(agentId, statusFilter);
       
       // Transform the requests to match the component's expected structure
       const transformedRequests = rawRequests.map(request => ({
@@ -163,7 +163,7 @@ const ProcessDeposits: React.FC = () => {
         }
 
         // Real mode - update via DataService
-        const success = await DataService.updateDepositRequestStatus(request.id, 'confirmed');
+        const success = await DepositWithdrawalService.updateDepositRequestStatus(request.id, 'confirmed');
         if (success) {
           setSelectedRequest(request);
           setError('');
@@ -203,7 +203,7 @@ const ProcessDeposits: React.FC = () => {
 
       // Get the agent record to get the correct agent ID
       console.log('🏦 handleConfirmDeposit - Looking up agent record for user ID:', userId);
-      const agentRecord = await DataService.getAgentByUserId(userId);
+      const agentRecord = await AgentService.getAgentByUserId(userId);
       
       if (!agentRecord) {
         throw new Error('Agent record not found');
@@ -214,7 +214,7 @@ const ProcessDeposits: React.FC = () => {
 
       // Process the deposit using DataService
       console.log('🏦 handleConfirmDeposit - Processing deposit with agentId:', agentId);
-      const result = await DataService.processDepositRequest(request.id, agentId, agentId);
+      const result = await DepositWithdrawalService.processDepositRequest(request.id, agentId, agentId);
       
       if (!result.success) {
         throw new Error(result.error || 'Failed to process deposit');
@@ -230,8 +230,8 @@ const ProcessDeposits: React.FC = () => {
       // Send notifications to both agent and user
       try {
         const [agentUser, customerUser] = await Promise.all([
-          DataService.getUserByKey(user.agent?.id || user.user?.id || ''),
-          DataService.getUserByKey(request.userId)
+          UserService.getUserByKey(user.agent?.id || user.user?.id || ''),
+          UserService.getUserByKey(request.userId)
         ]);
 
         // Notify agent of successful deposit processing
@@ -274,7 +274,7 @@ const ProcessDeposits: React.FC = () => {
   const handleRejectDeposit = async (request: DepositRequest) => {
     setIsProcessing(true);
     try {
-      const success = await DataService.updateDepositRequestStatus(request.id, 'rejected');
+      const success = await DepositWithdrawalService.updateDepositRequestStatus(request.id, 'rejected');
       
       if (success) {
         // Reload deposit requests to reflect the updated status

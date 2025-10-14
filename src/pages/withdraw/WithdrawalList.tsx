@@ -30,7 +30,7 @@ const WithdrawalList: React.FC<WithdrawalListProps> = ({ onSelectWithdrawal }) =
         setLoading(true);
         // Get withdrawal requests for this agent with optional status filter
         const statusFilter = filterStatus === 'all' ? undefined : filterStatus;
-        const withdrawalRequests = await DataService.getAgentWithdrawalRequests(agent.id, statusFilter);
+        const withdrawalRequests = await AgentService.getAgentWithdrawalRequests(agent.id, statusFilter);
 
         console.log(`Withdrawal requests for agent ${agent.id} with status ${statusFilter}:`, withdrawalRequests);
         

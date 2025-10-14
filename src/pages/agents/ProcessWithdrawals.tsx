@@ -83,7 +83,7 @@ const ProcessWithdrawals: React.FC = () => {
 
       // First, get the agent record for this user to get the actual agent ID
       console.log('🏦 ProcessWithdrawals - Looking up agent record for user ID:', userId);
-      const agentRecord = await DataService.getAgentByUserId(userId);
+      const agentRecord = await AgentService.getAgentByUserId(userId);
       
       if (!agentRecord) {
         console.error('No agent record found for user ID:', userId);
@@ -97,7 +97,7 @@ const ProcessWithdrawals: React.FC = () => {
       // Convert filter to status for API call
       const statusFilter = filter === 'all' ? undefined : filter;
       console.log('🏦 ProcessWithdrawals - Calling getAgentWithdrawalRequests with:', { agentId, statusFilter });
-      const rawRequests = await DataService.getAgentWithdrawalRequests(agentId, statusFilter);
+      const rawRequests = await AgentService.getAgentWithdrawalRequests(agentId, statusFilter);
       console.log('🏦 ProcessWithdrawals - Raw requests received:', rawRequests);
       
       // Use the requests as-is since they already match the WithdrawalRequest interface
@@ -139,7 +139,7 @@ const ProcessWithdrawals: React.FC = () => {
         }
 
         // Real mode - update via DataService
-        const success = await DataService.updateWithdrawalRequestStatus(request.id, 'confirmed');
+        const success = await DepositWithdrawalService.updateWithdrawalRequestStatus(request.id, 'confirmed');
         if (success) {
           setSelectedRequest(request);
           setError('');
@@ -176,7 +176,7 @@ const ProcessWithdrawals: React.FC = () => {
 
         // Get the agent record to get the correct agent ID
         console.log('🏦 handleConfirmWithdrawal - Looking up agent record for user ID:', userId);
-        const agentRecord = await DataService.getAgentByUserId(userId);
+        const agentRecord = await AgentService.getAgentByUserId(userId);
         
         if (!agentRecord) {
           throw new Error('Agent record not found');
@@ -187,7 +187,7 @@ const ProcessWithdrawals: React.FC = () => {
 
         // Process the withdrawal using DataService
         console.log('🏦 handleConfirmWithdrawal - Processing withdrawal with agentId:', agentId);
-        const result = await DataService.processWithdrawalRequest(request.id, agentId, agentId);
+        const result = await DepositWithdrawalService.processWithdrawalRequest(request.id, agentId, agentId);
         
         if (!result.success) {
           throw new Error(result.error || 'Failed to process withdrawal');
@@ -203,8 +203,8 @@ const ProcessWithdrawals: React.FC = () => {
         // Send notifications to both agent and user
         try {
           const [agentUser, customerUser] = await Promise.all([
-            DataService.getUserByKey(user.agent?.id || user.user?.id || ''),
-            DataService.getUserByKey(request.userId)
+            UserService.getUserByKey(user.agent?.id || user.user?.id || ''),
+            UserService.getUserByKey(request.userId)
           ]);
 
           // Notify agent of successful withdrawal processing
@@ -221,7 +221,7 @@ const ProcessWithdrawals: React.FC = () => {
 
           // Notify customer of withdrawal confirmation
           if (customerUser) {
-            await DataService.createTransaction({
+            await TransactionService.createTransaction({
               userId: request.userId,
               amount: request.amount,
               currency: 'UGX',
@@ -251,7 +251,7 @@ const ProcessWithdrawals: React.FC = () => {
   const handleRejectWithdrawal = async (request: WithdrawalRequest) => {
     setIsProcessing(true);
     try {
-      const success = await DataService.updateWithdrawalRequestStatus(request.id, 'rejected');
+      const success = await DepositWithdrawalService.updateWithdrawalRequestStatus(request.id, 'rejected');
       
       if (success) {
         // Reload withdrawal requests to reflect the updated status

@@ -155,7 +155,7 @@ const SendMoney: React.FC = () => {
         const amount = parseFloat(localAmount);
         const fee = calculateFee(amount);
 
-        await DataService.createTransaction({
+        await TransactionService.createTransaction({
           userId: currentUser?.id || '',
           type: 'send',
           amount: amount,

@@ -443,7 +443,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Try to get existing SMS user by phone
         let existingUser: User | null = null;
         try {
-          existingUser = await DataService.getUser(formattedPhone);
+          existingUser = await UserService.getUser(formattedPhone);
         } catch {
           console.log("User not found, will create new account");
         }
@@ -472,7 +472,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           // For demo purposes, we'll auto-verify and save the user
           // In production, you'd wait for the user to respond with the code
-          await DataService.createUser({
+          await UserService.createUser({
             id: newUser.id,
             firstName: newUser.firstName,
             lastName: newUser.lastName,
@@ -489,7 +489,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (formData.userType === "admin") {
           // For admin login, check if user exists in database with admin role
           try {
-            const adminUser = await DataService.getUser(formData.emailOrPhone);
+            const adminUser = await UserService.getUser(formData.emailOrPhone);
             // Admin check removed - no admin user type exists
             if (adminUser) {
               setUser({ user: null, agent: null, admin: adminUser });
@@ -625,7 +625,7 @@ const AuthenticationProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       try {
         // Store user in Juno datastore
-        const createdUser = await DataService.createUser({
+        const createdUser = await UserService.createUser({
           id: userData.id,
           firstName: userData.firstName,
           lastName: userData.lastName,
