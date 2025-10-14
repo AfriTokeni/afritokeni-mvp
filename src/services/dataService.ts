@@ -6,6 +6,9 @@ import { UserService } from './UserService';
 import { AgentService } from './AgentService';
 import { TransactionService } from './TransactionService';
 import { BalanceService } from './BalanceService';
+import { SMSService } from './SMSService';
+import { USSDService } from './USSDService';
+import { DepositWithdrawalService } from './DepositWithdrawalService';
 
 // Interface for user data as stored in Juno (with string dates)
 export interface UserDataFromJuno {
