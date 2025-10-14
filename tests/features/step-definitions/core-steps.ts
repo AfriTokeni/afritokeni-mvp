@@ -50,50 +50,41 @@ Then('I see my recent transactions', function () {
   assert.ok(world.history.length > 0);
 });
 
-// ckBTC Steps
 Given('I have {float} ckBTC', async function (amount: number) {
-  world.btcBalance = amount;
-  
-  try {
-    const balance = await CkBTCService.getBalance(world.userId, true);
-    world.actualBtcBalance = balance;
-  } catch (error: any) {
-    console.log('Mock balance:', amount);
-  }
+  world.userId = world.userId || `test-user-${Date.now()}`;
+  const balanceObj = await CkBTCService.getBalance(world.userId, true);
+  world.btcBalance = parseFloat(balanceObj.balanceBTC);
+  assert.ok(world.btcBalance >= 0, `Failed to get ckBTC balance for user ${world.userId}`);
 });
 
 When('I check my ckBTC balance', async function () {
-  try {
-    const balance = await CkBTCService.getBalance(world.userId, true);
-    world.queriedBalance = balance;
-  } catch (error: any) {
-    world.queriedBalance = world.btcBalance;
-  }
+  const balanceObj = await CkBTCService.getBalance(world.userId, true);
+  world.btcBalance = parseFloat(balanceObj.balanceBTC);
 });
 
 Then('I should see {float} ckBTC', function (expected: number) {
-  const balance = world.queriedBalance || world.btcBalance;
-  assert.ok(Math.abs(balance - expected) < 0.0001);
+  assert.ok(Math.abs(world.btcBalance - expected) < 0.0001, 
+    `Expected ${expected} ckBTC, got ${world.btcBalance}`);
 });
 
 When('I send {float} ckBTC to another user', async function (amount: number) {
-  try {
-    const result = await CkBTCService.transfer({
-      senderId: world.userId,
-      recipient: 'test-recipient',
-      amountSatoshis: Math.floor(amount * 100000000),
-    }, true, true);
-    
-    world.transferResult = result;
-    world.btcBalance -= amount;
-  } catch (error: any) {
-    console.log('Mock transfer:', amount);
-    world.btcBalance -= amount;
-  }
+  const result = await CkBTCService.transfer({
+    senderId: world.userId,
+    recipient: 'test-recipient',
+    amountSatoshis: Math.floor(amount * 100000000),
+  }, true, true);
+  
+  world.transferResult = result;
+  
+  const balanceObj = await CkBTCService.getBalance(world.userId, true);
+  world.btcBalance = parseFloat(balanceObj.balanceBTC);
 });
 
-Then('my ckBTC balance should be {float}', function (expected: number) {
-  assert.ok(Math.abs(world.btcBalance - expected) < 0.0001);
+Then('my ckBTC balance should be {float}', async function (expected: number) {
+  const balanceObj = await CkBTCService.getBalance(world.userId, true);
+  const balance = parseFloat(balanceObj.balanceBTC);
+  assert.ok(Math.abs(balance - expected) < 0.0001, 
+    `Expected balance ${expected}, got ${balance}`);
 });
 
 Then('the transaction should be recorded', function () {
