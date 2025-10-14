@@ -2421,57 +2421,13 @@ Quote expires in 5 minutes.`;
     }
   }
 
-  // SMS Notification Methods
-  static async sendDepositSuccessSMS(
-    phoneNumber: string,
-    amount: number,
-    currency: string,
-    depositCode: string
-  ): Promise<void> {
-    try {
-      const message = `Deposit successful! You received ${currency} ${amount.toLocaleString()} via AfriTokeni. Code: ${depositCode}. Your balance has been updated.`;
-      
-      // Log the SMS message to datastore
-      await this.logSMSMessage({
-        phoneNumber,
-        message,
-        direction: 'outbound',
-        status: 'pending',
-        command: 'DEPOSIT_SUCCESS'
-      });
-
-      // Here you would integrate with actual SMS service (Twilio, etc.)
-      console.log(`SMS sent to ${phoneNumber}: ${message}`);
-    } catch (error) {
-      console.error('Error sending deposit success SMS:', error);
-      throw error;
-    }
+  // SMS Notification Methods - MOVED TO SMSService
+  static async sendDepositSuccessSMS(phoneNumber: string, amount: number, currency: string, depositCode: string): Promise<void> {
+    return SMSService.sendDepositSuccessSMS(phoneNumber, amount, currency, depositCode);
   }
 
-  static async sendWithdrawalSuccessSMS(
-    phoneNumber: string,
-    amount: number,
-    currency: string,
-    withdrawalCode: string
-  ): Promise<void> {
-    try {
-      const message = `Withdrawal successful! You withdrew ${currency} ${amount.toLocaleString()} via AfriTokeni. Code: ${withdrawalCode}. Your balance has been updated.`;
-      
-      // Log the SMS message to datastore
-      await this.logSMSMessage({
-        phoneNumber,
-        message,
-        direction: 'outbound',
-        status: 'pending',
-        command: 'WITHDRAWAL_SUCCESS'
-      });
-
-      // Here you would integrate with actual SMS service (Twilio, etc.)
-      console.log(`SMS sent to ${phoneNumber}: ${message}`);
-    } catch (error) {
-      console.error('Error sending withdrawal success SMS:', error);
-      throw error;
-    }
+  static async sendWithdrawalSuccessSMS(phoneNumber: string, amount: number, currency: string, withdrawalCode: string): Promise<void> {
+    return SMSService.sendWithdrawalSuccessSMS(phoneNumber, amount, currency, withdrawalCode);
   }
 
   // Get deposit request by code (for agent lookup)
