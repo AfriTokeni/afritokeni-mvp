@@ -21,7 +21,7 @@ export class BalanceService {
       const rawData = doc.data as {
         userId: string;
         balance: number;
-        currency: 'UGX';
+        currency: string;
         lastUpdated: string;
       };
 
@@ -37,13 +37,13 @@ export class BalanceService {
     }
   }
 
-  static async updateUserBalance(userId: string, balance: number): Promise<boolean> {
+  static async updateUserBalance(userId: string, balance: number, currency: string = 'UGX'): Promise<boolean> {
     try {
       const now = new Date();
       const userBalance: UserBalance = {
         userId,
         balance,
-        currency: 'UGX',
+        currency,
         lastUpdated: now
       };
 
