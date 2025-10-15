@@ -17,8 +17,8 @@ import { AfricanCurrency } from '../types/currency';
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
-  satelliteId: process.env.VITE_DEVELOPMENT_JUNO_SATELLITE_ID || "atbka-rp777-77775-aaaaq-cai",
-  container: true
+  satelliteId: process.env.VITE_PRODUCTION_JUNO_SATELLITE_ID || "dkk74-oyaaa-aaaal-askxq-cai",
+  container: false
 };
 
 // Interface for user data as stored in Juno (with string dates)
