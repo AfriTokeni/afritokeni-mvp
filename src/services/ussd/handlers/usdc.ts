@@ -12,6 +12,15 @@ import { WebhookDataService as DataService, Agent } from '../../webHookServices.
 import { CkUSDCService } from '../../ckUSDCService.js';
 import { verifyUserPin } from './pinManagement.js';
 
+// These will be injected by the caller
+let sendSMSNotification: (phone: string, msg: string) => Promise<any>;
+let handleMainMenu: any;
+
+export function initUSDCHandlers(smsFunc: any, mainMenuFunc: any) {
+  sendSMSNotification = smsFunc;
+  handleMainMenu = mainMenuFunc;
+}
+
 async function handleUSDC(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
@@ -776,7 +785,8 @@ Enter your PIN to confirm:`);
       try {
         // Get user information
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
-        const recipient = await DataService.findUserByPhoneNumber(session.data.recipientPhone);
+        const recipient = session.data.recipientPhone ? 
+          await DataService.findUserByPhoneNumber(session.data.recipientPhone) : null;
         
         if (!user || !recipient) {
           return endSession('User verification failed. Please try again later.');
@@ -811,7 +821,9 @@ Time: ${new Date().toLocaleString()}`;
           
           try {
             await sendSMSNotification(session.phoneNumber, senderSMS);
-            await sendSMSNotification(session.data.recipientPhone.replace('+', ''), recipientSMS);
+            if (session.data.recipientPhone) {
+              await sendSMSNotification(session.data.recipientPhone.replace('+', ''), recipientSMS);
+            }
           } catch (smsError) {
             console.error('SMS sending failed:', smsError);
             // Continue even if SMS fails
@@ -848,32 +860,6 @@ Thank you for using AfriTokeni!`);
       return handleUSDC('', session);
   }
 }
-
-// Mock AfricasTalking SMS sending
-const sendSMS = async (phoneNumber: string, message: string) => {
-    console.log(`📱 Sending SMS to ${phoneNumber}: ${message}`);
-    console.log(`Using AfricasTalking credentials: ${JSON.stringify(credentials)}`);
-
-    try {
-        await sms.send({
-            to: phoneNumber,
-            message, 
-            senderId: process.env.AT_SHORT_CODE || "22948"
-        });
-        return {
-            status: 'Success',
-            message: 'Sent to 1/1 Total Cost: KES 0.8000'
-        };
-    } catch (error) {
-        console.log(error);
-        return {
-            status: 'Error',
-            message: 'Failed to send SMS'
-        };
-    }
-};
-
-// Route to send SMS verification code
 
 // Export all handlers
 export { handleUSDC, handleUSDCBalance, handleUSDCRate, handleUSDCBuy, handleUSDCSell, handleUSDCSend };

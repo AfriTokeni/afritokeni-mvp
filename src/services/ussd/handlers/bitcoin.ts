@@ -11,6 +11,15 @@ import { CkBTCService } from '../../ckBTCService.js';
 import { CkBTCUtils } from '../../../types/ckbtc.js';
 import { verifyUserPin } from './pinManagement.js';
 
+// These will be injected by the caller
+let sendSMSNotification: (phone: string, msg: string) => Promise<any>;
+let handleMainMenu: any;
+
+export function initBitcoinHandlers(smsFunc: any, mainMenuFunc: any) {
+  sendSMSNotification = smsFunc;
+  handleMainMenu = mainMenuFunc;
+}
+
 async function handleBitcoin(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
@@ -959,7 +968,9 @@ Check your balance by dialing *255#`;
 
           try {
             await sendSMSNotification(session.phoneNumber, senderSMS);
-            await sendSMSNotification(session.data.recipientPhone.replace('+', ''), recipientSMS);
+            if (session.data.recipientPhone) {
+              await sendSMSNotification(session.data.recipientPhone.replace('+', ''), recipientSMS);
+            }
           } catch (smsError) {
             console.error('SMS notification failed:', smsError);
             // Continue even if SMS fails
@@ -995,9 +1006,6 @@ Thank you for using AfriTokeni!`);
       return handleBitcoin('', session);
   }
 }
-
-// ==================== USDC SERVICE HANDLERS ====================
-
 
 // Export all handlers
 export { handleBitcoin, handleBTCBalance, handleBTCRate, handleBTCBuy, handleBTCSell, handleBTCSend };

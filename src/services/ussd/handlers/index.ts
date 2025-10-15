@@ -14,5 +14,9 @@ export * from './sendMoney.js';
 export * from './bitcoin.js';
 export * from './usdc.js';
 
+// Export init functions
+export { initBitcoinHandlers } from './bitcoin.js';
+export { initUSDCHandlers } from './usdc.js';
+
 // Note: USDC handlers should be REMOVED per business logic
 // AfriTokeni is Bitcoin ↔ African currencies ONLY, no stablecoins
