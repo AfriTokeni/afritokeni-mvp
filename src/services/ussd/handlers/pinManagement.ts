@@ -134,7 +134,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
           delete session.data.nextMenu;
           
           // Route to the appropriate handler
-          session.currentMenu = nextMenu;
+          session.currentMenu = nextMenu as any;
           session.step = 1;
           
           if (nextMenu === 'check_balance') {
@@ -241,7 +241,7 @@ Please select an option:
       }  
     
     default:
-      session.currentMenu = 'pin_check';
+      session.currentMenu = 'pin_check' as const;
       session.step = 0;
       return handlePinCheck('', session, null, null);
   }
