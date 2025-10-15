@@ -3,8 +3,6 @@
 /**
  * AfriTokeni SMS & USSD Webhook Server v3.0
  * 
- * Modular architecture with 86% code reduction from original monolith.
- * 
  * Structure:
  * - routes/ - Modular API endpoints (SMS, USSD, notifications, utilities)
  * - ussd/handlers/ - 15 business logic modules
@@ -18,6 +16,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import AfricasTalking from 'africastalking';
+import type { NotificationRequest } from '../types/notification.js';
+import { generateEmailContent, generateSMSContent } from './notificationTemplates.js';
 
 // Import route modules
 import {
