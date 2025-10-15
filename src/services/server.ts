@@ -28,8 +28,6 @@ import { WebhookDataService as DataService, Agent } from './webHookServices.js';
 import { CkBTCService } from './ckBTCService.js';
 import { CkUSDCService } from './ckUSDCService.js';
 import { CkBTCUtils } from '../types/ckbtc.js';
-import { BalanceService } from './balanceService';
-import { TransactionService } from './transactionService';
 import type { 
   NotificationRequest, 
   NotificationData,
@@ -58,8 +56,6 @@ declare const process: {
 // Configure dotenv with explicit path
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { UserService } from './userService';
-import { DepositWithdrawalService } from './depositWithdrawalService';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -233,7 +229,7 @@ async function isUserRegistered(phoneNumber: string): Promise<boolean> {
 async function registerNewUser(phoneNumber: string, firstName: string, lastName: string): Promise<boolean> {
   try {
     console.log(`Registering new user: ${firstName} ${lastName} with phone ${phoneNumber}`);
-    await UserService.createUser({
+    await DataService.createUser({
       firstName: firstName,
       lastName: lastName,
       email: `+${phoneNumber}`, // Store phone as email for SMS users
@@ -284,12 +280,12 @@ function verifyVerificationCode(phoneNumber: string, inputCode: string): boolean
 async function hasUserPin(phoneNumber: string): Promise<boolean> {
   try {
     console.log(`🔍 Checking if user has PIN for: ${phoneNumber}`);
-    const userPin = await UserService.getUserPin(`+${phoneNumber}`);
+    const userPin = await DataService.getUserPin(`+${phoneNumber}`);
     console.log(`🔍 getUserPin result for ${phoneNumber}:`, userPin);
     
     if (userPin) {
       console.log(`🔍 UserPin details - PIN: ${userPin.pin}, isSet: ${userPin.isSet}`);
-      const hasPin = userPin !== null && (userPin.isSet ?? false);
+      const hasPin = userPin !== null && userPin.isSet;
       console.log(`🔍 Final hasUserPin result for ${phoneNumber}: ${hasPin}`);
       return hasPin;
     } else {
@@ -321,7 +317,7 @@ async function setUserPin(phoneNumber: string, pin: string): Promise<boolean> {
 async function verifyUserPin(phoneNumber: string, pin: string): Promise<boolean> {
     console.log(`Verifying PIN for ${phoneNumber} ${pin}`);
   try {
-    const userPin = await UserService.getUserPin(`+${phoneNumber}`);
+    const userPin = await DataService.getUserPin(`+${phoneNumber}`);
     return userPin !== null && userPin.pin === pin;
   } catch (error) {
     console.error('Error verifying user PIN:', error);
@@ -349,7 +345,7 @@ function requestPinVerification(session: USSDSession, operation: string, nextMen
 async function getUserBalance(phoneNumber: string): Promise<number | null> {
   try {
     console.log(`Getting balance for user: ${phoneNumber}`);
-    const balance = await BalanceService.getUserBalance(`+${phoneNumber}`);
+    const balance = await DataService.getUserBalance(`+${phoneNumber}`);
     
     if (balance) {
       console.log(`✅ Balance retrieved: UGX ${balance.balance}`);
@@ -757,22 +753,22 @@ async function handleLocalCurrency(input: string, session: USSDSession): Promise
   if (!currentInput) {
     return continueSession(`Local Currency (UGX)
 Please select an option:
-1. Send Money
-2. Check Balance
-3. Deposit
-4. Withdraw
-5. Transactions
-6. Find Agent
+11. Send Money
+12. Check Balance
+13. Deposit
+14. Withdraw
+15. Transactions
+16. Find Agent
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '11':
       session.currentMenu = 'send_money';
       session.step = 1;
       return continueSession('Send Money\nEnter recipient phone number:');
     
-    case '2':
+    case '12':
       // Check Balance - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Check Balance', 'check_balance');
@@ -782,17 +778,17 @@ Please select an option:
         return await handleCheckBalance('', session);
       }
     
-    case '3':
+    case '13':
       session.currentMenu = 'deposit';
       session.step = 1;
       return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
     
-    case '4':
+    case '14':
       session.currentMenu = 'withdraw';
       session.step = 1;
       return continueSession('Withdraw Money\nEnter amount to withdraw (UGX):');
     
-    case '5':
+    case '15':
       // Transaction History - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Transaction History', 'transaction_history');
@@ -802,7 +798,7 @@ Please select an option:
         return await handleTransactionHistory('', session);
       }
     
-    case '6':
+    case '16':
       session.currentMenu = 'find_agent';
       session.step = 1;
       return handleFindAgent('', session);
@@ -993,7 +989,7 @@ async function handleTransactionHistory(input: string, session: USSDSession): Pr
     console.log(`PIN already verified for ${session.phoneNumber}, showing transaction history directly`);
     try {
       console.log(`Getting transaction history for ${session.phoneNumber}`);
-      const transactions = await TransactionService.getUserTransactions(session.phoneNumber);
+      const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
       
       if (transactions.length === 0) {
         return endSession(`Transaction History:
@@ -1063,7 +1059,7 @@ Thank you for using AfriTokeni!`);
       // PIN is correct, get transaction history
       try {
         console.log(`Getting transaction history for ${session.phoneNumber}`);
-        const transactions = await TransactionService.getUserTransactions(session.phoneNumber);
+        const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
         
         if (transactions.length === 0) {
           return endSession(`Transaction History:
@@ -1271,13 +1267,13 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         // Create pending deposit request in datastore
         let depositId: string;
         try {
-          const depositRequest = await DepositWithdrawalService.createDepositRequest(
+          depositId = await DataService.createDepositRequest(
             user.id,
             selectedAgent.id,
             depositAmount,
-            'UGX'
+            'UGX',
+            depositCode
           );
-          depositId = depositRequest.id;
           session.data.depositId = depositId;
           console.log(`✅ Deposit request ${depositId} created successfully`);
         } catch (createError) {
@@ -1340,36 +1336,36 @@ async function handleBitcoin(input: string, session: USSDSession): Promise<strin
   if (!currentInput) {
     return continueSession(`Bitcoin (ckBTC)
 Please select an option:
-1. Check Balance
-2. Bitcoin Rate
-3. Buy Bitcoin
-4. Sell Bitcoin
-5. Send Bitcoin
+21. Check Balance
+22. Bitcoin Rate
+23. Buy Bitcoin
+24. Sell Bitcoin
+25. Send Bitcoin
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '21':
       session.currentMenu = 'btc_balance';
       session.step = 1;
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '2':
+    case '22':
       session.currentMenu = 'btc_rate';
       session.step = 1;
       return continueSession('Bitcoin Rate\nEnter your 4-digit PIN:');
     
-    case '3':
+    case '23':
       session.currentMenu = 'btc_buy';
       session.step = 1;
       return continueSession('Buy Bitcoin\nEnter UGX amount to spend:');
     
-    case '4':
+    case '24':
       session.currentMenu = 'btc_sell';
       session.step = 1;
       return await handleBTCSell('', session);
     
-    case '5':
+    case '25':
       session.currentMenu = 'btc_send';
       session.step = 1;
       return continueSession('Send Bitcoin\nEnter your 4-digit PIN:');
@@ -1568,7 +1564,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       }
       
       // Check user balance first
-      const userBalance = await BalanceService.getUserBalance(`+${session.phoneNumber}`);
+      const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < ugxAmount) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
@@ -2368,36 +2364,36 @@ async function handleUSDC(input: string, session: USSDSession): Promise<string> 
   if (!currentInput) {
     return continueSession(`USDC (ckUSDC)
 Please select an option:
-1. Check Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-5. Send USDC
+31. Check Balance
+32. USDC Rate
+33. Buy USDC
+34. Sell USDC
+35. Send USDC
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '31':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '2':
+    case '32':
       session.currentMenu = 'usdc_rate';
       session.step = 1;
       return continueSession('USDC Rate\nEnter your 4-digit PIN:');
     
-    case '3':
+    case '33':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
       return continueSession('Buy USDC\nEnter your 4-digit PIN:');
     
-    case '4':
+    case '34':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
       return continueSession('Sell USDC\nEnter your 4-digit PIN:');
     
-    case '5':
+    case '35':
       session.currentMenu = 'usdc_send';
       session.step = 1;
       return continueSession('Send USDC\nEnter your 4-digit PIN:');
@@ -2558,7 +2554,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       }
       
       // Check user balance first
-      const userBalance = await BalanceService.getUserBalance(`+${session.phoneNumber}`);
+      const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < amountUGX) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
@@ -3215,7 +3211,7 @@ async function handleSendMoney(input: string, session: USSDSession): Promise<str
       const totalRequired = amount + fee;
 
       // Check user balance
-      const userBalance = await BalanceService.getUserBalance(`+${session.phoneNumber}`);
+      const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < totalRequired) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
@@ -3409,7 +3405,7 @@ async function handleWithdraw(input: string, session: USSDSession): Promise<stri
       // Step 2: Check user balance
       console.log(`Checking balance for ${session.phoneNumber}`);
       try {
-        const userBalance = await BalanceService.getUserBalance(session.phoneNumber);
+        const userBalance = await DataService.getUserBalance(session.phoneNumber);
         
         if (!userBalance) {
           return endSession('Unable to check balance. Please try again later.');
@@ -3550,13 +3546,12 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
           return endSession('Agent not selected. Please try again.');
         }
         
-        const withdrawalRequest = await DepositWithdrawalService.createWithdrawalRequest(
+        const transactionId = await DataService.createWithdrawTransaction(
           user.id,
-          selectedAgent.id,
           withdrawAmount,
-          'UGX'
+          selectedAgent.id,
+          withdrawalCode
         );
-        const transactionId = withdrawalRequest.id;
         
         if (!transactionId) {
           return endSession('Failed to create withdrawal transaction. Please try again later.');
