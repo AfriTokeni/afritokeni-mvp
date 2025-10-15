@@ -753,22 +753,22 @@ async function handleLocalCurrency(input: string, session: USSDSession): Promise
   if (!currentInput) {
     return continueSession(`Local Currency (UGX)
 Please select an option:
-1. Send Money
-2. Check Balance
-3. Deposit
-4. Withdraw
-5. Transactions
-6. Find Agent
+1.1 Send Money
+1.2 Check Balance
+1.3 Deposit
+1.4 Withdraw
+1.5 Transactions
+1.6 Find Agent
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '1.1':
       session.currentMenu = 'send_money';
       session.step = 1;
       return continueSession('Send Money\nEnter recipient phone number:');
     
-    case '2':
+    case '1.2':
       // Check Balance - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Check Balance', 'check_balance');
@@ -778,17 +778,17 @@ Please select an option:
         return await handleCheckBalance('', session);
       }
     
-    case '3':
+    case '1.3':
       session.currentMenu = 'deposit';
       session.step = 1;
       return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
     
-    case '4':
+    case '1.4':
       session.currentMenu = 'withdraw';
       session.step = 1;
       return continueSession('Withdraw Money\nEnter amount to withdraw (UGX):');
     
-    case '5':
+    case '1.5':
       // Transaction History - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Transaction History', 'transaction_history');
@@ -798,7 +798,7 @@ Please select an option:
         return await handleTransactionHistory('', session);
       }
     
-    case '6':
+    case '1.6':
       session.currentMenu = 'find_agent';
       session.step = 1;
       return handleFindAgent('', session);
@@ -810,12 +810,12 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-1. Send Money
-2. Check Balance
-3. Deposit
-4. Withdraw
-5. Transactions
-6. Find Agent
+1.1 Send Money
+1.2 Check Balance
+1.3 Deposit
+1.4 Withdraw
+1.5 Transactions
+1.6 Find Agent
 0. Back to Main Menu`);
   }
 }
@@ -1336,36 +1336,36 @@ async function handleBitcoin(input: string, session: USSDSession): Promise<strin
   if (!currentInput) {
     return continueSession(`Bitcoin (ckBTC)
 Please select an option:
-1. Check Balance
-2. Bitcoin Rate
-3. Buy Bitcoin
-4. Sell Bitcoin
-5. Send Bitcoin
+2.1 Check Balance
+2.2 Bitcoin Rate
+2.3 Buy Bitcoin
+2.4 Sell Bitcoin
+2.5 Send Bitcoin
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '2.1':
       session.currentMenu = 'btc_balance';
       session.step = 1;
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '2':
+    case '2.2':
       session.currentMenu = 'btc_rate';
       session.step = 1;
       return continueSession('Bitcoin Rate\nEnter your 4-digit PIN:');
     
-    case '3':
+    case '2.3':
       session.currentMenu = 'btc_buy';
       session.step = 1;
       return continueSession('Buy Bitcoin\nEnter UGX amount to spend:');
     
-    case '4':
+    case '2.4':
       session.currentMenu = 'btc_sell';
       session.step = 1;
       return await handleBTCSell('', session);
     
-    case '5':
+    case '2.5':
       session.currentMenu = 'btc_send';
       session.step = 1;
       return continueSession('Send Bitcoin\nEnter your 4-digit PIN:');
@@ -1377,11 +1377,11 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-1. Check Balance
-2. Bitcoin Rate
-3. Buy Bitcoin
-4. Sell Bitcoin
-5. Send Bitcoin
+2.1 Check Balance
+2.2 Bitcoin Rate
+2.3 Buy Bitcoin
+2.4 Sell Bitcoin
+2.5 Send Bitcoin
 0. Back to Main Menu`);
   }
 }
@@ -2364,36 +2364,36 @@ async function handleUSDC(input: string, session: USSDSession): Promise<string> 
   if (!currentInput) {
     return continueSession(`USDC (ckUSDC)
 Please select an option:
-1. Check Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-5. Send USDC
+3.1 Check Balance
+3.2 USDC Rate
+3.3 Buy USDC
+3.4 Sell USDC
+3.5 Send USDC
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1':
+    case '3.1':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '2':
+    case '3.2':
       session.currentMenu = 'usdc_rate';
       session.step = 1;
       return continueSession('USDC Rate\nEnter your 4-digit PIN:');
     
-    case '3':
+    case '3.3':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
       return continueSession('Buy USDC\nEnter your 4-digit PIN:');
     
-    case '4':
+    case '3.4':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
       return continueSession('Sell USDC\nEnter your 4-digit PIN:');
     
-    case '5':
+    case '3.5':
       session.currentMenu = 'usdc_send';
       session.step = 1;
       return continueSession('Send USDC\nEnter your 4-digit PIN:');
@@ -2405,11 +2405,11 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-1. Check Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-5. Send USDC
+3.1 Check Balance
+3.2 USDC Rate
+3.3 Buy USDC
+3.4 Sell USDC
+3.5 Send USDC
 0. Back to Main Menu`);
   }
 }
