@@ -11,8 +11,8 @@ export * from './agents.js';
 export * from './deposit.js';
 export * from './withdraw.js';
 export * from './sendMoney.js';
+export * from './bitcoin.js';
+export * from './usdc.js';
 
-// Note: Bitcoin and USDC handlers are still in server.ts
-// They need to be extracted following the same pattern
-// Bitcoin handler: ~1000 lines (lines 1473-2450 in server.ts)
-// USDC handler: ~850 lines (lines 2452-3278 in server.ts) - Consider removing per business logic
+// Note: USDC handlers should be REMOVED per business logic
+// AfriTokeni is Bitcoin ↔ African currencies ONLY, no stablecoins
