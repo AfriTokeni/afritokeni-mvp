@@ -18,7 +18,6 @@
     "src/services/server.ts",
     "src/services/webHookServices.ts",
     "src/services/ckBTCService.ts",
-    "src/functions/notifications.ts",
     "src/types/ckbtc.ts",
     "src/types/ckusdc.ts",
     "src/types/auth.ts",
