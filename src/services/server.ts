@@ -1817,7 +1817,7 @@ Give this code and payment to the agent to complete your ckBTC purchase.`;
 Purchase Code: ${purchaseCode}
 Transaction ID: ${exchangeResult.transactionId}
 You will receive: ₿${btcAmount.toFixed(8)} ckBTC
-Amount to pay: UGX ${ugxAmount.toLocaleString()}
+Amount to pay: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
 
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
@@ -1863,9 +1863,10 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
           }
           
           // Get ckBTC balance with local currency equivalent
+          const currency = getSessionCurrency(session);
           const balance = await CkBTCService.getBalanceWithLocalCurrency(
             user.id, 
-            'UGX', 
+            currency, 
             true // Use satellite for SMS/USSD operations
           );
           
@@ -1873,7 +1874,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
             return endSession(`No ckBTC available to sell.
 
 ckBTC Balance: ₿0.00000000
-≈ UGX 0
+≈ ${getSessionCurrency(session)} 0
 
 Thank you for using AfriTokeni!`);
           }
@@ -1882,10 +1883,10 @@ Thank you for using AfriTokeni!`);
 
 Your ckBTC Balance:
 ₿${balance.balanceBTC} BTC
-≈ UGX ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
+≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
 Choose amount type:
-1. Enter UGX amount
+1. Enter ${getSessionCurrency(session)} amount
 2. Enter BTC amount
 0. Cancel`);
           
@@ -1899,7 +1900,8 @@ Choose amount type:
       if (currentInput === '1') {
         session.data.amountType = 'ugx';
         session.step = 2;
-        return continueSession('Enter UGX amount to receive (min: UGX 1,000):');
+        const currency = getSessionCurrency(session);
+        return continueSession(`Enter ${currency} amount to receive (min: ${currency} 1,000):`);
       } else if (currentInput === '2') {
         session.data.amountType = 'btc';
         session.step = 2;
@@ -1912,7 +1914,7 @@ Choose amount type:
         return continueSession(`Invalid selection.
 
 Choose amount type:
-1. Enter UGX amount
+1. Enter ${getSessionCurrency(session)} amount
 2. Enter BTC amount
 0. Cancel`);
       }
@@ -1925,14 +1927,15 @@ Choose amount type:
       let ugxAmount: number;
       
       if (amountType === 'ugx') {
-        // User entered UGX amount, convert to BTC
+        // User entered local currency amount, convert to BTC
+        const currency = getSessionCurrency(session);
         ugxAmount = parseFloat(currentInput);
         if (isNaN(ugxAmount) || ugxAmount <= 0) {
-          return continueSession('Invalid amount.\nEnter UGX amount to receive (min: UGX 1,000):');
+          return continueSession(`Invalid amount.\nEnter ${currency} amount to receive (min: ${currency} 1,000):`);
         }
         
         if (ugxAmount < 1000) {
-          return continueSession('Minimum sale: UGX 1,000\nEnter UGX amount to receive:');
+          return continueSession(`Minimum sale: ${currency} 1,000\nEnter ${currency} amount to receive:`);
         }
         
         // Get exchange rate and calculate BTC amount (before fees)
@@ -1968,9 +1971,10 @@ Choose amount type:
           return endSession('User not found. Please contact support.');
         }
         
+        const currency = getSessionCurrency(session);
         const balance = await CkBTCService.getBalanceWithLocalCurrency(
           user.id, 
-          'UGX', 
+          currency, 
           true // Use satellite for SMS/USSD operations
         );
         
@@ -1978,7 +1982,7 @@ Choose amount type:
           return continueSession(`Insufficient ckBTC balance!
 
 Your balance: ₿${balance.balanceBTC} BTC
-≈ UGX ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
+≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
 Required: ₿${btcAmount.toFixed(8)} BTC
 
@@ -2026,9 +2030,9 @@ Thank you for using AfriTokeni!`);
         let agentList = `BTC Sale Quote
 
 Sell: ₿${btcAmount.toFixed(8)} BTC
-Gross: UGX ${ugxGross.toLocaleString()}
-Fee (2.5%): UGX ${fee.toLocaleString()}
-You receive: UGX ${ugxNet.toLocaleString()}
+Gross: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}
+Fee (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}
+You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
 Select an agent:
 `;
@@ -2076,8 +2080,8 @@ ${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address
 
 Sale Details:
 Sell: ₿${btcAmount.toFixed(8)} BTC
-Fee: UGX ${fee.toLocaleString()}
-You receive: UGX ${ugxNet.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
+You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
 Enter your PIN to confirm:`);
     }
@@ -2112,7 +2116,7 @@ Enter your PIN to confirm:`);
           userId: user.id,
           agentId: selectedAgent.id,
           amount: CkBTCUtils.btcToSatoshis(btcAmount),
-          currency: 'UGX',
+          currency: getSessionCurrency(session),
           type: 'sell'
         }, true);
         
@@ -2123,7 +2127,7 @@ Enter your PIN to confirm:`);
           const smsMessage = `AfriTokeni BTC Sale
 Code: ${saleCode}
 BTC to sell: ₿${btcAmount.toFixed(8)}
-You will receive: UGX ${ugxAmount.toLocaleString()}
+You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
 Transaction ID: ${exchangeResult.transactionId}
@@ -2144,7 +2148,7 @@ Give this code to the agent to complete your Bitcoin sale and collect cash.`;
 Sale Code: ${saleCode}
 Transaction ID: ${exchangeResult.transactionId}
 Selling: ₿${btcAmount.toFixed(8)} BTC
-You will receive: UGX ${ugxAmount.toLocaleString()}
+You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
 
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
@@ -2200,9 +2204,10 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         }
         
         // Get ckBTC balance with local currency equivalent
+        const currency = getSessionCurrency(session);
         const balance = await CkBTCService.getBalanceWithLocalCurrency(
           user.id, 
-          'UGX', 
+          currency, 
           true // Use satellite for SMS/USSD operations
         );
         
@@ -2210,7 +2215,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
           return endSession(`Insufficient ckBTC balance!
 
 Your balance: ₿${balance.balanceBTC} BTC
-≈ UGX ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
+≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
 You need ckBTC to send. Please buy some first.
 
@@ -2223,7 +2228,7 @@ Thank you for using AfriTokeni!`);
         return continueSession(`Send ckBTC
 
 Your Balance: ₿${balance.balanceBTC} BTC
-≈ UGX ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
+≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
 Enter recipient phone number:
 (Format: +256XXXXXXXXX)`);
@@ -2340,7 +2345,7 @@ Enter smaller amount:`);
 To: ${recipientPhone}
 Name: ${recipientUser.firstName} ${recipientUser.lastName}
 Amount: ₿${btcAmount.toFixed(8)} BTC
-≈ UGX ${ugxEquivalent.toLocaleString()}
+≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
 Network fee: ₿${networkFee.toFixed(8)} BTC
 Total: ₿${totalBTC.toFixed(8)} BTC
 
@@ -2391,7 +2396,7 @@ Enter your PIN to confirm:`);
           const senderSMS = `AfriTokeni BTC Sent ✅
 
 Sent: ₿${sendAmount.toFixed(8)} BTC
-≈ UGX ${ugxEquivalent.toLocaleString()}
+≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
 To: ${session.data.recipientPhone}
 Transaction ID: ${sendResult.transactionId}
 Network fee: ₿${networkFee.toFixed(8)} BTC
@@ -2401,7 +2406,7 @@ Your new balance will be updated shortly.`;
           const recipientSMS = `AfriTokeni BTC Received 🎉
 
 Received: ₿${sendAmount.toFixed(8)} BTC
-≈ UGX ${ugxEquivalent.toLocaleString()}
+≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
 From: +${session.phoneNumber}
 Transaction ID: ${sendResult.transactionId}
 
@@ -2418,7 +2423,7 @@ Check your balance by dialing *255#`;
           return endSession(`✅ BTC Sent Successfully!
 
 Sent: ₿${sendAmount.toFixed(8)} BTC
-≈ UGX ${ugxEquivalent.toLocaleString()}
+≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
 To: ${session.data.recipientPhone}
 Transaction ID: ${sendResult.transactionId}
 
@@ -2543,9 +2548,9 @@ Thank you for using AfriTokeni!`);
         return endSession(`Your USDC Balance
 
 $${balance.balanceUSDC} USDC
-≈ UGX ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}
+≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}
 
-Current Rate: 1 USDC = UGX ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}
+Current Rate: 1 USDC = ${getSessionCurrency(session)} ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
         
@@ -2588,8 +2593,8 @@ async function handleUSDCRate(input: string, session: USSDSession): Promise<stri
         
         return endSession(`Current USDC Exchange Rate
 
-1 USDC = UGX ${usdcRateUGX.rate.toLocaleString()}
-1 UGX = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC
+1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}
+1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC
 
 Last Updated: ${new Date().toLocaleTimeString()}
 
@@ -2641,7 +2646,8 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       }
       
       if (amountUGX < 1000) {
-        return continueSession('Minimum purchase: UGX 1,000\nEnter amount in UGX:');
+        const currency = getSessionCurrency(session);
+        return continueSession(`Minimum purchase: ${currency} 1,000\nEnter amount in ${currency}:`);
       }
       
       // Check user balance first
@@ -2649,8 +2655,8 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       if (!userBalance || userBalance.balance < amountUGX) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
-Your balance: UGX ${currentBalance.toLocaleString()}
-Required: UGX ${amountUGX.toLocaleString()}
+Your balance: ${getSessionCurrency(session)} ${currentBalance.toLocaleString()}
+Required: ${getSessionCurrency(session)} ${amountUGX.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
       }
@@ -2685,9 +2691,9 @@ Thank you for using AfriTokeni!`);
         
         let agentList = `USDC Purchase Quote
 
-Spend: UGX ${amountUGX.toLocaleString()}
-Fee (2.5%): UGX ${fee.toLocaleString()}
-Net: UGX ${netAmount.toLocaleString()}
+Spend: ${getSessionCurrency(session)} ${amountUGX.toLocaleString()}
+Fee (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}
+Net: ${getSessionCurrency(session)} ${netAmount.toLocaleString()}
 Receive: $${finalUSDCAmount.toFixed(6)} USDC
 
 Select an agent:
@@ -2748,7 +2754,7 @@ Select an agent:
           // Send SMS with purchase details and code
           const smsMessage = `AfriTokeni USDC Purchase
 Code: ${purchaseCode}
-Amount: UGX ${ugxAmount.toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
 USDC to receive: $${usdcAmount.toFixed(6)}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
@@ -2770,7 +2776,7 @@ Give this code and payment to the agent to complete your USDC purchase.`;
 Purchase Code: ${purchaseCode}
 Transaction ID: ${exchangeResult.transactionId}
 You will receive: $${usdcAmount.toFixed(6)} USDC
-Amount to pay: UGX ${ugxAmount.toLocaleString()}
+Amount to pay: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
 
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
@@ -2904,9 +2910,9 @@ Thank you for using AfriTokeni!`);
         let agentList = `USDC Sale Quote
 
 Sell: $${usdcAmount.toFixed(6)} USDC
-Gross: UGX ${ugxGross.toLocaleString()}
-Fee (2.5%): UGX ${fee.toLocaleString()}
-You receive: UGX ${ugxNet.toLocaleString()}
+Gross: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}
+Fee (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}
+You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
 Select an agent:
 `;
@@ -2954,8 +2960,8 @@ ${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address
 
 Sale Details:
 Sell: $${usdcAmount.toFixed(6)} USDC
-Fee: UGX ${fee.toLocaleString()}
-You receive: UGX ${ugxNet.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
+You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
 Enter your PIN to confirm:`);
     }
@@ -3001,7 +3007,7 @@ Enter your PIN to confirm:`);
           const smsMessage = `AfriTokeni USDC Sale
 Code: ${saleCode}
 USDC to sell: $${usdcAmount.toFixed(6)}
-You will receive: UGX ${ugxAmount.toLocaleString()}
+You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
 Transaction ID: ${exchangeResult.transactionId}
@@ -3022,7 +3028,7 @@ Give this code to the agent to complete your USDC sale and collect cash.`;
 Sale Code: ${saleCode}
 Transaction ID: ${exchangeResult.transactionId}
 Selling: $${usdcAmount.toFixed(6)} USDC
-You will receive: UGX ${ugxAmount.toLocaleString()}
+You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
 
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
@@ -3306,8 +3312,8 @@ async function handleSendMoney(input: string, session: USSDSession): Promise<str
       if (!userBalance || userBalance.balance < totalRequired) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
-Your balance: UGX ${currentBalance.toLocaleString()}
-Required: UGX ${totalRequired.toLocaleString()} (Amount: ${amount.toLocaleString()} + Fee: ${fee.toLocaleString()})
+Your balance: ${getSessionCurrency(session)} ${currentBalance.toLocaleString()}
+Required: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()} (Amount: ${amount.toLocaleString()} + Fee: ${fee.toLocaleString()})
 
 Thank you for using AfriTokeni!`);
       }
@@ -3316,9 +3322,9 @@ Thank you for using AfriTokeni!`);
       session.data.amount = amount;
       session.data.fee = fee;
       session.step = 2;
-      return continueSession(`Amount: UGX ${amount.toLocaleString()}
-Fee: UGX ${fee.toLocaleString()}
-Total: UGX ${totalRequired.toLocaleString()}
+      return continueSession(`Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
+Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 
 Enter recipient phone number (256XXXXXXXXX):`);
     }
@@ -3362,9 +3368,9 @@ Please enter a different recipient phone number (256XXXXXXXXX):`);
       
       return continueSession(`Recipient: ${recipient.firstName} ${recipient.lastName}
 Phone: ${currentInput}
-Amount: UGX ${amount.toLocaleString()}
-Fee: UGX ${fee.toLocaleString()}
-Total: UGX ${(amount + fee).toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
+Total: ${getSessionCurrency(session)} ${(amount + fee).toLocaleString()}
 
 Enter your PIN to confirm:`);
     }
@@ -3420,9 +3426,9 @@ Thank you for using AfriTokeni!`);
         await sendSMSNotification(
           session.phoneNumber,
           `Money sent successfully!
-Amount: UGX ${amount.toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
 To: ${recipientName} (${recipientPhone})
-Fee: UGX ${fee.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
         );
@@ -3431,7 +3437,7 @@ Thank you for using AfriTokeni!`
         await sendSMSNotification(
           recipientPhone,
           `You received money!
-Amount: UGX ${amount.toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
 From: ${senderPhone}
 Reference: ${transactionId}
 Thank you for using AfriTokeni!`
@@ -3439,10 +3445,10 @@ Thank you for using AfriTokeni!`
 
         return endSession(`✅ Transaction Successful!
 
-Sent: UGX ${amount.toLocaleString()}
+Sent: ${getSessionCurrency(session)} ${amount.toLocaleString()}
 To: ${recipientName}
 Phone: ${recipientPhone}
-Fee: UGX ${fee.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 Reference: ${transactionId}
 
 Thank you for using AfriTokeni!`);
@@ -3483,11 +3489,13 @@ async function handleWithdraw(input: string, session: USSDSession): Promise<stri
       }
       
       if (amount < 1000) {
-        return continueSession('Minimum withdrawal: UGX 1,000\nEnter amount (UGX):');
+        const currency = getSessionCurrency(session);
+        return continueSession(`Minimum withdrawal: ${currency} 1,000\nEnter amount (${currency}):`);
       }
       
       if (amount > 2000000) {
-        return continueSession('Maximum withdrawal: UGX 2,000,000\nEnter amount (UGX):');
+        const currency = getSessionCurrency(session);
+        return continueSession(`Maximum withdrawal: ${currency} 2,000,000\nEnter amount (${currency}):`);
       }
 
       session.data.withdrawAmount = amount;
@@ -3506,8 +3514,8 @@ async function handleWithdraw(input: string, session: USSDSession): Promise<stri
         
         if (userBalance.balance < totalRequired) {
           return endSession(`Insufficient balance.
-Available: UGX ${userBalance.balance.toLocaleString()}
-Required: UGX ${totalRequired.toLocaleString()} (including fee)
+Available: ${getSessionCurrency(session)} ${userBalance.balance.toLocaleString()}
+Required: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()} (including fee)
 
 Thank you for using AfriTokeni!`);
         }
@@ -3529,9 +3537,9 @@ Thank you for using AfriTokeni!`);
         session.data.availableAgents = displayAgents;
         
         let agentList = `Select an agent:
-Amount: UGX ${amount.toLocaleString()}
-Fee: UGX ${session.data.withdrawFee.toLocaleString()}
-Total: UGX ${totalRequired.toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${session.data.withdrawFee.toLocaleString()}
+Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 
 `;
         
@@ -3577,8 +3585,8 @@ Total: UGX ${totalRequired.toLocaleString()}
 ${selectedAgent.businessName}
 ${selectedAgent.location.city}, ${selectedAgent.location.address}
 
-Amount: UGX ${withdrawAmount.toLocaleString()}
-Fee: UGX ${withdrawFee.toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
 
 Enter your 4-digit PIN to confirm:`);
     }
@@ -3655,8 +3663,8 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         // Send SMS with withdrawal details
         const smsMessage = `AfriTokeni Withdrawal
 Code: ${withdrawalCode}
-Amount: UGX ${withdrawAmount.toLocaleString()}
-Fee: UGX ${withdrawFee.toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location.city}
 Valid: 24 hours
@@ -3677,8 +3685,8 @@ console.log(`Sending withdrawal SMS to ${session.phoneNumber}`);
         return endSession(`✅ Withdrawal Created!
 
 Code: ${withdrawalCode}
-Amount: UGX ${withdrawAmount.toLocaleString()}
-Fee: UGX ${withdrawFee.toLocaleString()}
+Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
+Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location.city}
 
