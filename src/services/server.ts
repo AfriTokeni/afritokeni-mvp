@@ -1495,7 +1495,8 @@ Please select an option:
     case '2.3':
       session.currentMenu = 'btc_buy';
       session.step = 1;
-      return continueSession('Buy Bitcoin\nEnter UGX amount to spend:');
+      const currency = getSessionCurrency(session);
+      return continueSession(`Buy Bitcoin\nEnter ${currency} amount to spend:`);
     
     case '2.4':
       session.currentMenu = 'btc_sell';
@@ -1547,16 +1548,17 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
         }
         
         // Use CkBTCService to get balance with local currency equivalent
+        const currency = getSessionCurrency(session);
         const balance = await CkBTCService.getBalanceWithLocalCurrency(
           user.id, 
-          'UGX', 
+          currency, 
           true // Use satellite for SMS/USSD operations
         );
         
         return endSession(`Your ckBTC Balance
 
 ₿${balance.balanceBTC} BTC
-≈ UGX ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
+≈ ${currency} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
 Last Updated: ${balance.lastUpdated.toLocaleString()}
 
@@ -1577,57 +1579,6 @@ Thank you for using AfriTokeni!`);
   }
 }
 
-// async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
-//   const inputParts = input.split('*');
-//   const sanitized_input = inputParts[inputParts.length - 1] || '';
-  
-//   switch (session.step) {
-//     case 1: {
-//       // PIN verification step
-//       if (!/^\d{4}$/.test(sanitized_input)) {
-//         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
-//       }
-      
-//       // Verify PIN
-//       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
-//       if (!pinCorrect) {
-//         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
-//       }
-      
-//       // Get BTC balance and real-time rate
-//       try {
-//         const { BitcoinRateService } = await import('./bitcoinRateService.js');
-        
-//         // In a real implementation, this would get actual BTC balance from datastore
-//         const btcBalance = 0.00125; // Mock BTC balance
-//         const btcRateUGX = await BitcoinRateService.getBitcoinRate('ugx');
-//         const ugxEquivalent = btcBalance * btcRateUGX;
-        
-//         return endSession(`Your Bitcoin Balance
-
-// ₿${btcBalance.toFixed(8)} BTC
-// ≈ UGX ${ugxEquivalent.toLocaleString()}
-
-// Current Rate: 1 BTC = UGX ${btcRateUGX.toLocaleString()}
-
-// Thank you for using AfriTokeni!`);
-        
-//       } catch (error) {
-//         console.error('Error retrieving BTC balance:', error);
-//         return endSession(`Error retrieving BTC balance.
-// Please try again later.
-
-// Thank you for using AfriTokeni!`);
-//       }
-//     }
-    
-//     default:
-//       session.currentMenu = 'bitcoin';
-//       session.step = 0;
-//       return handleBitcoin('', session);
-//   }
-// }
-
 async function handleBTCRate(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
@@ -1647,12 +1598,12 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
       
       // Display current BTC rate using getExchangeRate
       try {
-        const exchangeRate = await CkBTCService.getExchangeRate('UGX');
+        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
         const lastUpdated = exchangeRate.lastUpdated.toLocaleString();
         
         return endSession(`Bitcoin Exchange Rate
 
-1 BTC = UGX ${exchangeRate.rate.toLocaleString()}
+1 BTC = ${getSessionCurrency(session)} ${exchangeRate.rate.toLocaleString()}
 
 Last Updated: ${lastUpdated}
 Source: ${exchangeRate.source}
@@ -1686,18 +1637,19 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
   
   switch (session.step) {
     case 1: {
-      // Enter UGX amount to spend
+      // Enter amount to spend
+      const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession('Buy BTC\nEnter UGX amount to spend:');
+        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:`);
       }
       
       const ugxAmount = parseInt(currentInput);
       if (isNaN(ugxAmount) || ugxAmount <= 0) {
-        return continueSession('Invalid amount.\nEnter UGX amount to spend:');
+        return continueSession(`Invalid amount.\nEnter ${currency} amount to spend:`);
       }
       
       if (ugxAmount < 10000) {
-        return continueSession('Minimum purchase: UGX 10,000\nEnter UGX amount to spend:');
+        return continueSession(`Minimum purchase: ${currency} 10,000\nEnter ${currency} amount to spend:`);
       }
       
       // Check user balance first
@@ -1705,14 +1657,14 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       if (!userBalance || userBalance.balance < ugxAmount) {
         const currentBalance = userBalance ? userBalance.balance : 0;
         return endSession(`Insufficient balance!
-Your balance: UGX ${currentBalance.toLocaleString()}
-Required: UGX ${ugxAmount.toLocaleString()}
+Your balance: ${currency} ${currentBalance.toLocaleString()}
+Required: ${currency} ${ugxAmount.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
       }
       
       // Calculate BTC amount and fees with real rate
-      const exchangeRate = await CkBTCService.getExchangeRate('UGX');
+      const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
       const btcRate = exchangeRate.rate;
       const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
       const netAmount = ugxAmount - fee;
@@ -1744,9 +1696,9 @@ Thank you for using AfriTokeni!`);
         
         let agentList = `BTC Purchase Quote
 
-Spend: UGX ${ugxAmount.toLocaleString()}
-Fee (2.5%): UGX ${fee.toLocaleString()}
-Net: UGX ${netAmount.toLocaleString()}
+Spend: ${currency} ${ugxAmount.toLocaleString()}
+Fee (2.5%): ${currency} ${fee.toLocaleString()}
+Net: ${currency} ${netAmount.toLocaleString()}
 Receive: ₿${btcAmount.toFixed(8)} BTC
 
 Select an agent:
@@ -1785,6 +1737,7 @@ Select an agent:
       session.data.selectedAgent = selectedAgent;
       session.step = 3;
       
+      const currency = getSessionCurrency(session);
       const ugxAmount = session.data.ugxAmount || 0;
       const btcAmount = session.data.btcAmount || 0;
       const fee = session.data.fee || 0;
@@ -1794,8 +1747,8 @@ ${selectedAgent.businessName}
 ${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
 
 Purchase Details:
-Amount: UGX ${ugxAmount.toLocaleString()}
-Fee: UGX ${fee.toLocaleString()}
+Amount: ${currency} ${ugxAmount.toLocaleString()}
+Fee: ${currency} ${fee.toLocaleString()}
 Receive: ₿${btcAmount.toFixed(8)} BTC
 
 Enter your PIN to confirm:`);
@@ -1827,9 +1780,10 @@ Enter your PIN to confirm:`);
         session.data.purchaseCode = purchaseCode;
         
         // Process ckBTC purchase through agent using CkBTCService.exchange
+        const currency = getSessionCurrency(session);
         const exchangeResult = await CkBTCService.exchange({
           amount: ugxAmount,
-          currency: 'UGX',
+          currency: currency,
           type: 'buy',
           userId: user.id,
           agentId: selectedAgent.id
@@ -1841,7 +1795,7 @@ Enter your PIN to confirm:`);
           // Send SMS with purchase details and code
           const smsMessage = `AfriTokeni ckBTC Purchase
 Code: ${purchaseCode}
-Amount: UGX ${ugxAmount.toLocaleString()}
+Amount: ${currency} ${ugxAmount.toLocaleString()}
 ckBTC to receive: ₿${btcAmount.toFixed(8)}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location?.city || 'Location'}
@@ -1982,7 +1936,7 @@ Choose amount type:
         }
         
         // Get exchange rate and calculate BTC amount (before fees)
-        const exchangeRate = await CkBTCService.getExchangeRate('UGX');
+        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
         const btcRate = exchangeRate.rate;
         
         // Calculate gross UGX needed (including fees) to get the desired net amount
@@ -2002,7 +1956,7 @@ Choose amount type:
         }
         
         // Calculate UGX amount
-        const exchangeRate = await CkBTCService.getExchangeRate('UGX');
+        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
         const btcRate = exchangeRate.rate;
         ugxAmount = btcAmount * btcRate;
       }
@@ -2037,7 +1991,7 @@ Enter a smaller amount:`);
       }
       
       // Calculate fees and net amounts
-      const exchangeRate = await CkBTCService.getExchangeRate('UGX');
+      const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
       const btcRate = exchangeRate.rate;
       const ugxGross = btcAmount * btcRate;
       const fee = Math.round(ugxGross * 0.025); // 2.5% fee
@@ -2356,7 +2310,7 @@ Enter BTC amount to send:\n(Max: ₿${userBalance.balanceBTC})`);
       
       // Calculate fees and equivalent amounts
       try {
-        const exchangeRate = await CkBTCService.getExchangeRate('UGX');
+        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
         const btcRate = exchangeRate.rate;
         const ugxEquivalent = btcAmount * btcRate;
         const networkFee = 0.000001; // 1 satoshi network fee
