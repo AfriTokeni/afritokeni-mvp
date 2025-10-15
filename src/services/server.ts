@@ -438,13 +438,24 @@ function getSessionCurrency(session: USSDSession): string {
   return session.data.preferredCurrency || 'UGX';
 }
 
-// TODO: Systematically replace all remaining hardcoded UGX references (~200 occurrences)
+// TODO: Systematically replace remaining hardcoded UGX references (~150 occurrences)
 // with getSessionCurrency(session) throughout this file. Priority areas:
-// - Balance display messages
-// - Transaction history formatting  
-// - Deposit/withdraw confirmation messages
-// - Error messages with amounts
-// - SMS notifications
+// COMPLETED:
+// ✅ Main menu and local currency menu
+// ✅ Balance display messages (handleCheckBalance)
+// ✅ Transaction history formatting (handleTransactionHistory)
+// ✅ Deposit flow (handleDeposit) - all steps, SMS, confirmations
+// ✅ Withdraw prompts in local currency menu
+//
+// REMAINING (~150 occurrences):
+// - Bitcoin (ckBTC) flow: Buy/Sell/Send operations (~50 refs)
+// - USDC (ckUSDC) flow: Buy/Sell/Send operations (~50 refs)
+// - Withdraw flow: handleWithdraw function (~20 refs)
+// - Send money flow: handleSendMoney function (~15 refs)
+// - Error messages with hardcoded UGX amounts (~15 refs)
+//
+// NOTE: Bitcoin and USDC flows may need to be removed entirely per business logic
+// (AfriTokeni is Bitcoin ↔ African currencies ONLY, no stablecoins)
 
 // Get user balance from DataService
 async function getUserBalance(phoneNumber: string): Promise<number | null> {
