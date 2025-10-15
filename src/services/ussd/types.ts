@@ -1,0 +1,86 @@
+/**
+ * USSD Types and Interfaces
+ * Extracted from server.ts for better organization
+ */
+
+export interface USSDSession {
+  sessionId: string;
+  phoneNumber: string;
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'local_currency' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'find_agent' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell' | 'usdc_send';
+  data: {
+    amount?: number;
+    withdrawAmount?: number;
+    availableBalance?: number;
+    withdrawFee?: number;
+    availableAgents?: any[];
+    selectedAgent?: any;
+    withdrawalCode?: string;
+    transactionId?: string;
+    pinAttempts?: number;
+    pinVerified?: boolean;
+    recipientPhoneNumber?: string;
+    recipientPhone?: string;
+    recipientId?: string;
+    recipientName?: string;
+    recipientUser?: any;
+    firstName?: string;
+    lastName?: string;
+    verificationCode?: string;
+    verificationAttempts?: number;
+    preferredCurrency?: string;
+    depositAmount?: number;
+    depositCode?: string;
+    depositId?: string;
+    ugxAmount?: number;
+    btcAmount?: number;
+    fee?: number;
+    netAmount?: number;
+    ugxGross?: number;
+    ugxNet?: number;
+    amountType?: string;
+    purchaseCode?: string;
+    saleCode?: string;
+    userBalance?: any;
+    usdcSellAmount?: number;
+    pendingOperation?: string;
+    nextMenu?: string;
+    [key: string]: any;
+  };
+  step: number;
+  lastActivity: number;
+  
+  isExpired(): boolean;
+  updateActivity(): void;
+}
+
+export interface VerificationData {
+  code: string;
+  userId: string;
+  timestamp: number;
+}
+
+export class USSDSessionImpl implements USSDSession {
+  sessionId: string;
+  phoneNumber: string;
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_buy' | 'btc_sell' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell';
+  data: Record<string, any>;
+  step: number;
+  lastActivity: number;
+
+  constructor(sessionId: string, phoneNumber: string) {
+    this.sessionId = sessionId;
+    this.phoneNumber = phoneNumber.replace('+', '');
+    this.currentMenu = 'registration_check';
+    this.data = {};
+    this.step = 0;
+    this.lastActivity = Date.now();
+  }
+  
+  isExpired(): boolean {
+    return Date.now() - this.lastActivity > 180000; // 3 minutes
+  }
+  
+  updateActivity(): void {
+    this.lastActivity = Date.now();
+  }
+}
