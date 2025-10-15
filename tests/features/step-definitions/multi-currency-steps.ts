@@ -5,6 +5,7 @@ import { UserService } from '../../../src/services/userService';
 import { BalanceService } from '../../../src/services/balanceService';
 import { TransactionService } from '../../../src/services/transactionService';
 import { AgentService } from '../../../src/services/agentService';
+import { CkUSDCService } from '../../../src/services/ckUSDCService';
 
 Given('I am a user in {word}', async function (country: string) {
   world.country = country;
@@ -31,7 +32,14 @@ Given('I have {int} {word} in my wallet', async function (amount: number, curren
 });
 
 When('I check my balance', async function () {
-  world.balance = await BalanceService.getBalance(world.userId, world.currency);
+  // Check if we're in a ckUSDC context (if usdcBalance was set)
+  if (world.usdcBalance !== undefined) {
+    const balanceObj = await CkUSDCService.getBalance(world.userId, true, true);
+    world.usdcBalance = parseFloat(balanceObj.balanceUSDC);
+    world.queriedUsdcBalance = world.usdcBalance;
+  } else {
+    world.balance = await BalanceService.getBalance(world.userId, world.currency);
+  }
 });
 
 Then('I should see {int} {word}', async function (amount: number, currency: string) {

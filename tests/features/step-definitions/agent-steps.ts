@@ -265,16 +265,30 @@ When('another customer brings {int} {word} cash', function (amount: number, curr
   world.customerCashAmount = amount;
 });
 
-When('I give {int} {word} cash to a customer', function (amount: number, currency: string) {
+When('I give {int} {word} cash to a customer', async function (amount: number, currency: string) {
+  await AgentService.updateAgentBalance(world.agentId, {
+    cashBalance: world.agentCashBalance - amount,
+    digitalBalance: world.agentDigitalBalance + amount
+  });
   world.agentCashBalance -= amount;
+  world.agentDigitalBalance += amount;
 });
 
-When('I give {int} {word} cash to another customer', function (amount: number, currency: string) {
+When('I give {int} {word} cash to another customer', async function (amount: number, currency: string) {
+  await AgentService.updateAgentBalance(world.agentId, {
+    cashBalance: world.agentCashBalance - amount,
+    digitalBalance: world.agentDigitalBalance + amount
+  });
   world.agentCashBalance -= amount;
+  world.agentDigitalBalance += amount;
 });
 
-Then('my cash balance should be {int} {word}', function (expected: number, currency: string) {
-  assert.equal(world.agentCashBalance, expected, `Expected cash balance ${expected}`);
+Then('my cash balance should be {int} {word}', async function (expected: number, currency: string) {
+  // Verify with real service
+  const agent = await AgentService.getAgent(world.agentId);
+  const actualBalance = agent?.cashBalance || 0;
+  assert.equal(actualBalance, expected, `Expected cash balance ${expected}, got ${actualBalance}`);
+  world.agentCashBalance = actualBalance;
 });
 
 Given('I am an agent', async function () {

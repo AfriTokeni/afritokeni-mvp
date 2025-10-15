@@ -56,7 +56,7 @@ Before(function () {
   world.userId = 'test-user-' + Date.now();
   world.balance = 0;
   world.btcBalance = 0;
-  world.usdcBalance = 0;
+  // Don't initialize usdcBalance - let it be undefined so we can detect ckUSDC context
   
   mockJuno.clear();
 });

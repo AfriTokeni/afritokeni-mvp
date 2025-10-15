@@ -160,16 +160,40 @@ Then('I should see an error message about unauthorized agent', function () {
   assert.ok(world.error?.message?.includes('not belong') || world.error?.message?.includes('agent'));
 });
 
-When('I send {float} ckBTC to a user', function (amount: number) {
-  world.firstTransfer = { success: true, txId: 'tx-' + Date.now(), amount };
-  world.lastTransferAmount = amount;
-  world.btcBalance -= amount;
+When('I send {float} ckBTC to a user', async function (amount: number) {
+  try {
+    const result = await CkBTCService.transfer({
+      senderId: world.userId,
+      recipient: 'test-recipient-1',
+      amountSatoshis: Math.floor(amount * 100000000),
+    }, true, true);
+    world.firstTransfer = { success: true, txId: result.transactionId, amount };
+    world.lastTransferAmount = amount;
+    // Update balance after transfer
+    const balanceObj = await CkBTCService.getBalance(world.userId, true, true);
+    world.btcBalance = parseFloat(balanceObj.balanceBTC);
+  } catch (error: any) {
+    world.error = error;
+    world.transferFailed = true;
+  }
 });
 
-When('I immediately try to send the same amount again', function () {
-  const amount = world.lastTransferAmount;
-  world.secondTransfer = { success: true, txId: 'tx-' + Date.now(), amount };
-  world.btcBalance -= amount;
+When('I immediately try to send the same amount again', async function () {
+  try {
+    const amount = world.lastTransferAmount;
+    const result = await CkBTCService.transfer({
+      senderId: world.userId,
+      recipient: 'test-recipient-2',
+      amountSatoshis: Math.floor(amount * 100000000),
+    }, true, true);
+    world.secondTransfer = { success: true, txId: result.transactionId, amount };
+    // Update balance after transfer
+    const balanceObj = await CkBTCService.getBalance(world.userId, true, true);
+    world.btcBalance = parseFloat(balanceObj.balanceBTC);
+  } catch (error: any) {
+    world.error = error;
+    world.transferFailed = true;
+  }
 });
 
 Then('both transactions should process independently', function () {
