@@ -203,6 +203,7 @@ export class WebhookDataService {
     kycStatus?: 'pending' | 'approved' | 'rejected' | 'not_started';
     pin?: string; // USSD PIN for mobile users
     authMethod?: 'sms' | 'web'; // To determine key strategy
+    preferredCurrency?: string; // User's preferred currency (auto-detected from phone)
   }): Promise<User> {
     const now = new Date();
     const newUser: User = {
@@ -214,6 +215,7 @@ export class WebhookDataService {
       isVerified: false,
       kycStatus: userData.kycStatus || 'not_started',
       pin: userData.pin,
+      preferredCurrency: userData.preferredCurrency || 'UGX',
       createdAt: now
     };
 

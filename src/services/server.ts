@@ -212,6 +212,77 @@ setInterval(() => {
 
 // Helper functions for user registration and PIN management (integrated with DataService)
 
+// Currency detection from phone number prefix
+function detectCurrencyFromPhone(phoneNumber: string): string {
+  const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+  
+  // African country phone prefixes
+  const currencyMap: { [key: string]: string } = {
+    '256': 'UGX',  // Uganda
+    '254': 'KES',  // Kenya
+    '234': 'NGN',  // Nigeria
+    '233': 'GHS',  // Ghana
+    '255': 'TZS',  // Tanzania
+    '250': 'RWF',  // Rwanda
+    '251': 'ETB',  // Ethiopia
+    '27': 'ZAR',   // South Africa
+    '20': 'EGP',   // Egypt
+    '212': 'MAD',  // Morocco
+    '213': 'DZD',  // Algeria
+    '216': 'TND',  // Tunisia
+    '220': 'GMD',  // Gambia
+    '221': 'XOF',  // Senegal
+    '223': 'XOF',  // Mali
+    '224': 'GNF',  // Guinea
+    '225': 'XOF',  // Côte d'Ivoire
+    '226': 'XOF',  // Burkina Faso
+    '227': 'XOF',  // Niger
+    '228': 'XOF',  // Togo
+    '229': 'XOF',  // Benin
+    '230': 'MUR',  // Mauritius
+    '231': 'LRD',  // Liberia
+    '232': 'SLL',  // Sierra Leone
+    '235': 'XAF',  // Chad
+    '236': 'XAF',  // Central African Republic
+    '237': 'XAF',  // Cameroon
+    '238': 'CVE',  // Cape Verde
+    '239': 'STN',  // São Tomé and Príncipe
+    '240': 'XAF',  // Equatorial Guinea
+    '241': 'XAF',  // Gabon
+    '242': 'XAF',  // Republic of Congo
+    '243': 'CDF',  // DR Congo
+    '244': 'AOA',  // Angola
+    '245': 'XOF',  // Guinea-Bissau
+    '246': 'SCR',  // Seychelles
+    '248': 'SCR',  // Seychelles
+    '249': 'SDG',  // Sudan
+    '252': 'SOS',  // Somalia
+    '253': 'DJF',  // Djibouti
+    '257': 'BIF',  // Burundi
+    '258': 'MZN',  // Mozambique
+    '260': 'ZMW',  // Zambia
+    '261': 'MGA',  // Madagascar
+    '262': 'EUR',  // Réunion
+    '263': 'ZWL',  // Zimbabwe
+    '264': 'NAD',  // Namibia
+    '265': 'MWK',  // Malawi
+    '266': 'LSL',  // Lesotho
+    '267': 'BWP',  // Botswana
+    '268': 'SZL',  // Eswatini
+    '269': 'KMF',  // Comoros
+  };
+  
+  // Try to match country code (2-3 digits)
+  for (const [prefix, currency] of Object.entries(currencyMap)) {
+    if (cleanNumber.startsWith(prefix)) {
+      return currency;
+    }
+  }
+  
+  // Default to UGX if no match
+  return 'UGX';
+}
+
 // Check if user is registered in Juno datastore
 async function isUserRegistered(phoneNumber: string): Promise<boolean> {
   try {
@@ -229,15 +300,21 @@ async function isUserRegistered(phoneNumber: string): Promise<boolean> {
 async function registerNewUser(phoneNumber: string, firstName: string, lastName: string): Promise<boolean> {
   try {
     console.log(`Registering new user: ${firstName} ${lastName} with phone ${phoneNumber}`);
+    
+    // Detect currency from phone number
+    const preferredCurrency = detectCurrencyFromPhone(phoneNumber);
+    console.log(`Detected currency for ${phoneNumber}: ${preferredCurrency}`);
+    
     await DataService.createUser({
       firstName: firstName,
       lastName: lastName,
       email: `+${phoneNumber}`, // Store phone as email for SMS users
       userType: 'user',
       kycStatus: 'not_started',
-      authMethod: 'sms'
+      authMethod: 'sms',
+      preferredCurrency: preferredCurrency
     });
-    console.log(`Successfully registered user: ${phoneNumber}`);
+    console.log(`Successfully registered user: ${phoneNumber} with currency ${preferredCurrency}`);
     return true;
   } catch (error) {
     console.error(`Error registering user ${phoneNumber}:`, error);
@@ -341,6 +418,34 @@ function requestPinVerification(session: USSDSession, operation: string, nextMen
   return continueSession(`${operation}\nFor security, please enter your 4-digit PIN:`);
 }
 
+// Get user's preferred currency from their profile
+async function getUserCurrency(phoneNumber: string): Promise<string> {
+  try {
+    const user = await DataService.findUserByPhoneNumber(`+${phoneNumber}`);
+    if (user && user.preferredCurrency) {
+      return user.preferredCurrency;
+    }
+    // Fallback: detect from phone number
+    return detectCurrencyFromPhone(phoneNumber);
+  } catch (error) {
+    console.error(`Error getting user currency for ${phoneNumber}:`, error);
+    return detectCurrencyFromPhone(phoneNumber);
+  }
+}
+
+// Helper to get currency from session (with fallback)
+function getSessionCurrency(session: USSDSession): string {
+  return session.data.preferredCurrency || 'UGX';
+}
+
+// TODO: Systematically replace all remaining hardcoded UGX references (~200 occurrences)
+// with getSessionCurrency(session) throughout this file. Priority areas:
+// - Balance display messages
+// - Transaction history formatting  
+// - Deposit/withdraw confirmation messages
+// - Error messages with amounts
+// - SMS notifications
+
 // Get user balance from DataService
 async function getUserBalance(phoneNumber: string): Promise<number | null> {
   try {
@@ -348,7 +453,8 @@ async function getUserBalance(phoneNumber: string): Promise<number | null> {
     const balance = await DataService.getUserBalance(`+${phoneNumber}`);
     
     if (balance) {
-      console.log(`✅ Balance retrieved: UGX ${balance.balance}`);
+      const currency = await getUserCurrency(phoneNumber);
+      console.log(`✅ Balance retrieved: ${currency} ${balance.balance}`);
       return balance.balance;
     } else {
       console.log(`ℹ️ No balance found for ${phoneNumber}, defaulting to 0`);
@@ -406,14 +512,18 @@ async function handleRegistrationCheck(input: string, session: USSDSession): Pro
         console.log(`➡️ Redirecting ${session.phoneNumber} to PIN setup`);
         return continueSession('Welcome back to AfriTokeni!\nTo secure your account, please set up a 4-digit PIN:\nEnter your new PIN:');
       } else {
-        // User registered and has PIN - go directly to main menu (no PIN verification required for menu access)
+        // User registered and has PIN - load currency and go to main menu
+        const currency = await getUserCurrency(session.phoneNumber);
         session.currentMenu = 'main';
         session.step = 0;
-        session.data = { pinVerified: false }; // Track that PIN hasn't been verified yet for sensitive operations
-        console.log(`➡️ User ${session.phoneNumber} has PIN, going directly to main menu`);
+        session.data = { 
+          pinVerified: false, // Track that PIN hasn't been verified yet for sensitive operations
+          preferredCurrency: currency // Store user's currency in session
+        };
+        console.log(`➡️ User ${session.phoneNumber} has PIN, currency: ${currency}, going directly to main menu`);
         return continueSession(`Welcome back to AfriTokeni USSD Service!
 Please select an option:
-1. Local Currency (UGX)
+1. Local Currency (${currency})
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
 4. Help`);
@@ -694,10 +804,11 @@ Please select an option:
 }
 
 async function handleMainMenu(input: string, session: USSDSession): Promise<string> {
+  const currency = getSessionCurrency(session);
   if (!input) {
     return continueSession(`Welcome to AfriTokeni USSD Service
 Please select an option:
-1. Local Currency (UGX)
+1. Local Currency (${currency})
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
 4. Help`);
@@ -725,10 +836,11 @@ Please select an option:
       session.step = 0;
       return handleUSDC('', session);
     
-    case '4':
+    case '4': {
+      const currency = getSessionCurrency(session);
       return endSession(`AfriTokeni Help
 
-Local Currency: Send, deposit, withdraw UGX
+Local Currency: Send, deposit, withdraw ${currency}
 Bitcoin: Buy, sell, send ckBTC
 USDC: Buy, sell, send USDC stablecoin
 
@@ -736,22 +848,26 @@ For support: Call +256-XXX-XXXX
 Visit: afritokeni.com
 
 Thank you for using AfriTokeni!`);
+    }
     
-    default:
+    default: {
+      const currency = getSessionCurrency(session);
       return continueSession(`Invalid option. Please try again:
-1. Local Currency (UGX)
+1. Local Currency (${currency})
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
 4. Help`);
+    }
   }
 }
 
 async function handleLocalCurrency(input: string, session: USSDSession): Promise<string> {
+  const currency = getSessionCurrency(session);
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   
   if (!currentInput) {
-    return continueSession(`Local Currency (UGX)
+    return continueSession(`Local Currency (${currency})
 Please select an option:
 1.1 Send Money
 1.2 Check Balance
@@ -778,15 +894,19 @@ Please select an option:
         return await handleCheckBalance('', session);
       }
     
-    case '1.3':
+    case '1.3': {
+      const currency = getSessionCurrency(session);
       session.currentMenu = 'deposit';
       session.step = 1;
-      return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
+      return continueSession(`Deposit Money\nEnter amount to deposit (${currency}):`);
+    }
     
-    case '1.4':
+    case '1.4': {
+      const currency = getSessionCurrency(session);
       session.currentMenu = 'withdraw';
       session.step = 1;
-      return continueSession('Withdraw Money\nEnter amount to withdraw (UGX):');
+      return continueSession(`Withdraw Money\nEnter amount to withdraw (${currency}):`);
+    }
     
     case '1.5':
       // Transaction History - requires PIN verification if not already verified
