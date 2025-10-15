@@ -34,6 +34,15 @@ import type {
 } from '../types/notification.js';
 import { generateEmailContent, generateSMSContent } from './notificationTemplates.js';
 
+// Import route modules
+import {
+  createSMSRoutes,
+  createUSSDRoutes,
+  createNotificationRoutes,
+  createUtilityRoutes,
+  setSMSNotificationFunction
+} from './routes/index.js';
+
 // Import USSD handlers and utilities
 import {
   // Session management
@@ -158,6 +167,16 @@ async function sendSMSNotification(phoneNumber: string, message: string): Promis
 initBitcoinHandlers(sendSMSNotification, handleMainMenu);
 initUSDCHandlers(sendSMSNotification, handleMainMenu);
 
+// Initialize USSD routes with SMS notification function
+setSMSNotificationFunction(sendSMSNotification);
+
+// Mount route modules
+app.use('/api', createSMSRoutes(sendSMSNotification));
+app.use('/api', createUSSDRoutes());
+app.use('/api', createNotificationRoutes(sendSMSNotification));
+app.use('/', createUtilityRoutes());
+
+// Legacy routes below (to be removed after testing route modules)
 // Route to send SMS verification code
 app.post('/api/send-sms', async (req: Request, res: Response) => {
   try {
