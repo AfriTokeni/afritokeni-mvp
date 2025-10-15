@@ -1026,19 +1026,20 @@ async function handleCheckBalance(input: string, session: USSDSession): Promise<
   if (session.data.pinVerified) {
     console.log(`PIN already verified for ${session.phoneNumber}, showing balance directly`);
     try {
+      const currency = getSessionCurrency(session);
       const balance = await getUserBalance(session.phoneNumber);
       
       if (balance !== null) {
         return endSession(`Your Account Balance
-Amount: UGX ${balance.toLocaleString()}
-Available: UGX ${balance.toLocaleString()}
+Amount: ${currency} ${balance.toLocaleString()}
+Available: ${currency} ${balance.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
       } else {
         // No balance found, assume 0
         return endSession(`Your Account Balance
-Amount: UGX 0
-Available: UGX 0
+Amount: ${currency} 0
+Available: ${currency} 0
 
 Thank you for using AfriTokeni!`);
       }
@@ -1066,20 +1067,20 @@ Thank you for using AfriTokeni!`);
       
       // PIN is correct, get user balance
       try {
-        // const cleanPhone = session.phoneNumber.replace('+', '');
+        const currency = getSessionCurrency(session);
         const balance = await getUserBalance(session.phoneNumber);
         
         if (balance !== null) {
           return endSession(`Your Account Balance
-Amount: UGX ${balance.toLocaleString()}
-Available: UGX ${balance.toLocaleString()}
+Amount: ${currency} ${balance.toLocaleString()}
+Available: ${currency} ${balance.toLocaleString()}
 
 Thank you for using AfriTokeni!`);
         } else {
           // No balance found, assume 0
           return endSession(`Your Account Balance
-Amount: UGX 0
-Available: UGX 0
+Amount: ${currency} 0
+Available: ${currency} 0
 
 Thank you for using AfriTokeni!`);
         }
@@ -1108,6 +1109,7 @@ async function handleTransactionHistory(input: string, session: USSDSession): Pr
   if (session.data.pinVerified) {
     console.log(`PIN already verified for ${session.phoneNumber}, showing transaction history directly`);
     try {
+      const currency = getSessionCurrency(session);
       console.log(`Getting transaction history for ${session.phoneNumber}`);
       const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
       
@@ -1129,25 +1131,25 @@ Thank you for using AfriTokeni!`);
         
         switch (tx.type) {
           case 'send':
-            description = `Sent: UGX ${tx.amount.toLocaleString()}`;
+            description = `Sent: ${currency} ${tx.amount.toLocaleString()}`;
             if (tx.fee && tx.fee > 0) {
-              description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+              description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
             }
             break;
           case 'receive':
-            description = `Received: UGX ${tx.amount.toLocaleString()}`;
+            description = `Received: ${currency} ${tx.amount.toLocaleString()}`;
             break;
           case 'withdraw':
-            description = `Withdraw: UGX ${tx.amount.toLocaleString()}`;
+            description = `Withdraw: ${currency} ${tx.amount.toLocaleString()}`;
             if (tx.fee && tx.fee > 0) {
-              description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+              description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
             }
             break;
           case 'deposit':
-            description = `Deposit: UGX ${tx.amount.toLocaleString()}`;
+            description = `Deposit: ${currency} ${tx.amount.toLocaleString()}`;
             break;
           default:
-            description = `${tx.description || 'Transaction'}: UGX ${tx.amount.toLocaleString()}`;
+            description = `${tx.description || 'Transaction'}: ${currency} ${tx.amount.toLocaleString()}`;
         }
         
         transactionList += `${index + 1}. ${date}\n${description}\nStatus: ${tx.status}\n\n`;
@@ -1178,6 +1180,7 @@ Thank you for using AfriTokeni!`);
       
       // PIN is correct, get transaction history
       try {
+        const currency = getSessionCurrency(session);
         console.log(`Getting transaction history for ${session.phoneNumber}`);
         const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
         
@@ -1199,25 +1202,25 @@ Thank you for using AfriTokeni!`);
           
           switch (tx.type) {
             case 'send':
-              description = `Sent: UGX ${tx.amount.toLocaleString()}`;
+              description = `Sent: ${currency} ${tx.amount.toLocaleString()}`;
               if (tx.fee && tx.fee > 0) {
-                description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+                description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
               }
               break;
             case 'receive':
-              description = `Received: UGX ${tx.amount.toLocaleString()}`;
+              description = `Received: ${currency} ${tx.amount.toLocaleString()}`;
               break;
             case 'withdraw':
-              description = `Withdraw: UGX ${tx.amount.toLocaleString()}`;
+              description = `Withdraw: ${currency} ${tx.amount.toLocaleString()}`;
               if (tx.fee && tx.fee > 0) {
-                description += ` (Fee: UGX ${tx.fee.toLocaleString()})`;
+                description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
               }
               break;
             case 'deposit':
-              description = `Deposit: UGX ${tx.amount.toLocaleString()}`;
+              description = `Deposit: ${currency} ${tx.amount.toLocaleString()}`;
               break;
             default:
-              description = `${tx.type}: UGX ${tx.amount.toLocaleString()}`;
+              description = `${tx.type}: ${currency} ${tx.amount.toLocaleString()}`;
           }
           
           transactionList += `${index + 1}. ${description} - ${date}\n`;
@@ -1255,21 +1258,22 @@ async function handleDeposit(input: string, session: USSDSession): Promise<strin
   switch (session.step) {
     case 1: {
       // Step 1: Enter deposit amount
+      const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession('Deposit Money\nEnter amount to deposit (UGX):');
+        return continueSession(`Deposit Money\nEnter amount to deposit (${currency}):`);
       }
       
       const amount = parseInt(currentInput);
       if (isNaN(amount) || amount <= 0) {
-        return continueSession('Invalid amount.\nEnter amount to deposit (UGX):');
+        return continueSession(`Invalid amount.\nEnter amount to deposit (${currency}):`);
       }
       
       if (amount < 1000) {
-        return continueSession('Minimum deposit: UGX 1,000\nEnter amount to deposit (UGX):');
+        return continueSession(`Minimum deposit: ${currency} 1,000\nEnter amount to deposit (${currency}):`);
       }
       
       if (amount > 5000000) {
-        return continueSession('Maximum deposit: UGX 5,000,000\nEnter amount to deposit (UGX):');
+        return continueSession(`Maximum deposit: ${currency} 5,000,000\nEnter amount to deposit (${currency}):`);
       }
 
       session.data.depositAmount = amount;
@@ -1289,7 +1293,7 @@ async function handleDeposit(input: string, session: USSDSession): Promise<strin
         session.data.availableAgents = displayAgents;
         
         let agentList = `Select an agent for deposit:
-Amount: UGX ${amount.toLocaleString()}
+Amount: ${currency} ${amount.toLocaleString()}
 
 `;
         
@@ -1328,11 +1332,12 @@ Amount: UGX ${amount.toLocaleString()}
       
       const depositAmount = session.data.depositAmount || 0;
       
+      const currency = getSessionCurrency(session);
       return continueSession(`Selected Agent:
 ${selectedAgent.businessName}
 ${selectedAgent.location.city}, ${selectedAgent.location.address}
 
-Deposit Amount: UGX ${depositAmount.toLocaleString()}
+Deposit Amount: ${currency} ${depositAmount.toLocaleString()}
 
 Enter your 4-digit PIN to confirm:`);
     }
@@ -1385,13 +1390,14 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         }
         
         // Create pending deposit request in datastore
+        const currency = getSessionCurrency(session);
         let depositId: string;
         try {
           depositId = await DataService.createDepositRequest(
             user.id,
             selectedAgent.id,
             depositAmount,
-            'UGX',
+            currency,
             depositCode
           );
           session.data.depositId = depositId;
@@ -1404,7 +1410,7 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         // Send SMS with deposit details
         const smsMessage = `AfriTokeni Deposit
 Code: ${depositCode}
-Amount: UGX ${depositAmount.toLocaleString()}
+Amount: ${currency} ${depositAmount.toLocaleString()}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location.city}
 Valid: 24 hours
@@ -1424,7 +1430,7 @@ Give this code and cash to the agent to complete deposit.`;
         return endSession(`✅ Deposit Request Created!
 
 Code: ${depositCode}
-Amount: UGX ${depositAmount.toLocaleString()}
+Amount: ${currency} ${depositAmount.toLocaleString()}
 Agent: ${selectedAgent.businessName}
 Location: ${selectedAgent.location.city}
 
