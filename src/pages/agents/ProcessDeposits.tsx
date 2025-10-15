@@ -541,7 +541,6 @@ const ProcessDeposits: React.FC = () => {
                               value={verificationCodes[request.id] || ''}
                               onChange={(e) => setVerificationCodes(prev => ({ ...prev, [request.id]: e.target.value }))}
                               className="flex-1 sm:w-32 px-2 sm:px-3 py-1 border border-neutral-300 rounded text-xs sm:text-sm font-mono"
-                              maxLength={6}
                             />
                             <button
                               onClick={() => handleVerifyCode(request)}

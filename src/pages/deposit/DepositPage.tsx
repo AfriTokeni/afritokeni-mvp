@@ -91,7 +91,7 @@ const DepositPage: React.FC = () => {
         agents: []
       });
     }
-  }, [userLocation, isLoadingAgents, updateState]);
+  }, [userLocation]);
 
   // Get user location on mount
   useEffect(() => {
@@ -132,7 +132,7 @@ const DepositPage: React.FC = () => {
       console.log('Auto-loading agents from useEffect...');
       loadNearbyAgents();
     }
-  }, [userLocation, step, agents.length, isLoadingAgents, loadNearbyAgents]);
+  }, [userLocation, step,loadNearbyAgents]);
 
   // Create deposit request
   const createDepositRequest = useCallback(async (agent: Agent) => {
