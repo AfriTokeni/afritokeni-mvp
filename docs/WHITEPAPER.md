@@ -1,7 +1,9 @@
 # AfriTokeni Whitepaper
 ## SMS-Accessible Crypto Banking for Africa
 
-**Version 1.3 | October 2025**
+**Version 1.4 | October 2025**
+
+**Latest Update**: DAO Governance now fully implemented with USSD voting interface
 
 ---
 
@@ -623,36 +625,69 @@ AfriTokeni is governed by its users through a Decentralized Autonomous Organizat
 **1 AFRI = 1 Vote**
 
 **Vote via**:
-- Web dashboard (full interface)
-- USSD commands (SMS voting)
-- Mobile app
+- 📱 **USSD** (*229*4#) - Full voting interface on any phone
+- 🌐 **Web dashboard** - Rich UI with proposal details
+- 📲 **Mobile app** - Coming soon
 
-**Voting Process**:
+**Voting Process** (USSD):
 ```
-USSD: *123*8*2# → Vote on Proposal
+Step 1: Access DAO Menu
+*229#           → Main Menu
+*229*4#         → DAO Governance
 
-System: Proposal #42
-"Reduce urban agent fees from 3% to 2.5%"
+Step 2: View Proposals
+*229*4*1#       → View Active Proposals
 
-Proposed by: Agent Association
-Voting ends: 3 days
+System displays:
+"Active Proposals
 
-Current votes:
-✅ Yes: 45,234,123 AFRI (62%)
-❌ No: 27,891,456 AFRI (38%)
+1. Increase Agent Commission
+2. Add New Currency Support
 
-Your voting power: 1,250 AFRI
+Reply with number for details"
+
+Step 3: Select Proposal
+User: 1
+
+System displays:
+"Proposal: Increase Agent Commission
+
+Description: Increase agent commission from 2% to 3%
+
+Voting ends: Dec 31, 2025
 
 1. Vote YES
 2. Vote NO
-3. View details
+3. Vote ABSTAIN
+0. Back"
 
-User: 1
+Step 4: Cast Vote
+User: 1 (Vote YES)
 
-System: ✅ Vote recorded!
-You voted YES with 1,250 AFRI
-Thank you for participating!
+System: "Enter voting amount (AFRI tokens):"
+User: 1000
+
+System: "Enter your PIN:"
+User: ****
+
+System: "✅ Vote Successful!
+
+Voted YES with 1000 AFRI
+Your tokens are locked until proposal ends.
+
+Thank you for participating!"
 ```
+
+**Voting Features**:
+- ✅ **View Proposals**: See all active governance proposals
+- ✅ **Voting Power**: Check your AFRI token balance
+- ✅ **Weighted Voting**: Vote with any amount of tokens
+- ✅ **Three Options**: YES, NO, or ABSTAIN
+- ✅ **PIN Security**: Confirm votes with 6-digit PIN
+- ✅ **Token Locking**: Tokens locked during voting period
+- ✅ **Active Votes**: Track all your current votes
+- ✅ **Double-Vote Prevention**: Can't vote twice on same proposal
+- ✅ **Automatic Unlock**: Tokens released when proposal ends
 
 ### 8.3 Governance Scope
 
