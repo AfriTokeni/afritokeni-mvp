@@ -27,7 +27,7 @@
     "test": "npm run test:all",
     "test:all": "cucumber-js 'tests/features/**/*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:watch": "cucumber-js tests/features/icp-integration.feature --require 'tests/features/step-definitions/{shared-steps,icp-integration-steps}.ts' --require-module tsx",
-    "test:ussd": "cucumber-js 'tests/features/{ussd-handlers,ussd-integration,ussd-errors,ussd-state,ussd-service}.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
+    "test:ussd": "cucumber-js 'tests/features/{ussd-handlers,ussd-integration,ussd-errors,ussd-state,ussd-service,ussd-dao}.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:ussd:icp": "./scripts/test-ussd-icp.sh",
     "test:original": "cucumber-js 'tests/features/{ckbtc,ckusdc,fiat,ussd,error-handling,multi-currency,agent-flows,icp-integration}.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx --tags '@integration'",
     "test:original:icp": "dfx start --clean --background && dfx deploy ckbtc_ledger ckusdc_ledger && npm run test:original && dfx stop",
