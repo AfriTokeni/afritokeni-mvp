@@ -186,9 +186,14 @@ export class USSDService {
           break;
         
         case 'dao':
+          response = await handleDAO(input, session);
+          break;
+        
         case 'dao_proposals':
         case 'dao_voting_power':
         case 'dao_active_votes':
+          // These are handled by their respective functions via handleDAO
+          // but we need to pass the actual input, not route through DAO menu
           response = await handleDAO(input, session);
           break;
         

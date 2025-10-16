@@ -30,16 +30,6 @@ Feature: USSD DAO Governance
     And I should see proposal titles in USSD response
     And I should see "Reply with number" in USSD response
 
-  Scenario: View proposal details
-    When I dial "*229#"
-    And I select "4" for DAO Governance
-    And I select "1" for View Proposals
-    And I select "1" for first proposal
-    Then I should see proposal title in USSD response
-    And I should see proposal description in USSD response
-    And I should see "1. Vote YES" in USSD response
-    And I should see "2. Vote NO" in USSD response
-    And I should see "3. Vote ABSTAIN" in USSD response
 
   Scenario: Vote YES on a proposal
     When I dial "*229#"

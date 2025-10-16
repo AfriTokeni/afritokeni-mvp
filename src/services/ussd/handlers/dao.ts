@@ -27,6 +27,17 @@ export async function handleDAO(input: string, session: USSDSession): Promise<st
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
+  // If we're already in a sub-menu, route to the appropriate handler
+  if (session.currentMenu === 'dao_proposals') {
+    return handleViewProposals(input, session);
+  }
+  if (session.currentMenu === 'dao_voting_power') {
+    return handleVotingPower(input, session);
+  }
+  if (session.currentMenu === 'dao_active_votes') {
+    return handleActiveVotes(input, session);
+  }
+  
   if (!input || sanitized_input === '') {
     return continueSession(`DAO Governance
 
@@ -38,18 +49,24 @@ export async function handleDAO(input: string, session: USSDSession): Promise<st
   
   switch (sanitized_input) {
     case '1':
-      session.currentMenu = 'dao_proposals';
-      session.step = 0;
+      if (session.currentMenu !== 'dao_proposals') {
+        session.currentMenu = 'dao_proposals';
+        session.step = 0;
+      }
       return handleViewProposals('', session);
     
     case '2':
-      session.currentMenu = 'dao_voting_power';
-      session.step = 0;
+      if (session.currentMenu !== 'dao_voting_power') {
+        session.currentMenu = 'dao_voting_power';
+        session.step = 0;
+      }
       return handleVotingPower('', session);
     
     case '3':
-      session.currentMenu = 'dao_active_votes';
-      session.step = 0;
+      if (session.currentMenu !== 'dao_active_votes') {
+        session.currentMenu = 'dao_active_votes';
+        session.step = 0;
+      }
       return handleActiveVotes('', session);
     
     case '0':
