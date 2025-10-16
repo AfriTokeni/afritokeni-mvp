@@ -16,18 +16,11 @@ import {
   handlePinSetup,
   handleMainMenu,
   handleLocalCurrency,
-  handleCheckBalance,
-  handleTransactionHistory,
   handleFindAgent,
   handleDeposit,
   handleWithdraw,
   handleSendMoney,
   handleBitcoin,
-  handleBTCBalance,
-  handleBTCRate,
-  handleBTCBuy,
-  handleBTCSell,
-  handleBTCSend,
   handleUSDC,
   handleUSDCBalance,
   handleUSDCRate,
@@ -64,7 +57,8 @@ export function createUSSDRoutes() {
           response = await handleVerification(text, session);
           break;
         case 'pin_check':
-          response = await handlePinCheck(text, session, handleCheckBalance, handleTransactionHistory);
+          // Legacy - now handled by ussdService.ts
+          response = 'END Service temporarily unavailable';
           break;
         case 'pin_setup':
           response = await handlePinSetup(text, session);
@@ -82,10 +76,9 @@ export function createUSSDRoutes() {
           response = await handleSendMoney(text, session, sendSMSNotification);
           break;
         case 'check_balance':
-          response = await handleCheckBalance(text, session);
-          break;
         case 'transaction_history':
-          response = await handleTransactionHistory(text, session);
+          // Legacy - now handled by ussdService.ts
+          response = 'END Service temporarily unavailable';
           break;
         case 'deposit':
           response = await handleDeposit(text, session, sendSMSNotification);
@@ -94,19 +87,12 @@ export function createUSSDRoutes() {
           response = await handleBitcoin(text, session);
           break;
         case 'btc_balance':
-          response = await handleBTCBalance(text, session);
-          break;
         case 'btc_rate':
-          response = await handleBTCRate(text, session);
-          break;
         case 'btc_buy':
-          response = await handleBTCBuy(text, session);
-          break;
         case 'btc_sell':
-          response = await handleBTCSell(text, session);
-          break;
         case 'btc_send':
-          response = await handleBTCSend(text, session);
+          // Legacy - now handled by ussdService.ts via handleBitcoin
+          response = await handleBitcoin(text, session);
           break;
         case 'usdc':
           response = await handleUSDC(text, session);
