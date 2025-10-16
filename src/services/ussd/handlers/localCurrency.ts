@@ -61,7 +61,7 @@ Please select an option:
   switch (currentInput) {
     case '1.1':
       session.currentMenu = 'send_money';
-      session.step = 1;
+      session.step = 0;
       return continueSession('Send Money\nEnter recipient phone number:');
     
     case '1.2':

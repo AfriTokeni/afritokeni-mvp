@@ -39,11 +39,19 @@ Please select an option:
     case '2.1':
       session.currentMenu = 'btc_balance';
       session.step = 1;
+      // Skip PIN if already verified
+      if (session.data.pinVerified) {
+        return await handleBTCBalance('', session);
+      }
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
     case '2.2':
       session.currentMenu = 'btc_rate';
       session.step = 1;
+      // Skip PIN if already verified
+      if (session.data.pinVerified) {
+        return await handleBTCRate('', session);
+      }
       return continueSession('Bitcoin Rate\nEnter your 4-digit PIN:');
     
     case '2.3':
@@ -83,6 +91,11 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
+  // If PIN already verified, skip to showing balance
+  if (session.data.pinVerified || session.step === 0) {
+    session.step = 2; // Skip PIN verification
+  }
+  
   switch (session.step) {
     case 1: {
       // PIN verification
@@ -94,6 +107,13 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
       if (!pinCorrect) {
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
+      
+      // PIN verified, proceed to show balance
+      session.step = 2;
+    }
+    
+    case 2: {
+      // Show balance (PIN already verified or skipped)
       
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
@@ -137,6 +157,11 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
+  // If PIN already verified, skip to showing rate
+  if (session.data.pinVerified || session.step === 0) {
+    session.step = 2;
+  }
+  
   switch (session.step) {
     case 1: {
       // PIN verification step
@@ -150,6 +175,10 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
+      session.step = 2;
+    }
+    
+    case 2: {
       // Display current BTC rate using getExchangeRate
       try {
         const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));

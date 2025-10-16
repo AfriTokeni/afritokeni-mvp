@@ -45,18 +45,23 @@ export const ICRC1_IDL = ({ IDL }: any) => IDL.Service({
   icrc1_decimals: IDL.Func([], [IDL.Nat8], ['query']),
 });
 
-// Shared world object
-export const world: any = {};
+// Define world object type
+export interface World {
+  [key: string]: any;
+}
+
+// Create world object
+export const world: World = {};
 
 Before(function () {
   // Clear all world state
   Object.keys(world).forEach(key => delete world[key]);
-  
+
   // Initialize fresh state
   world.userId = 'test-user-' + Date.now();
   world.balance = 0;
   world.btcBalance = 0;
   // Don't initialize usdcBalance - let it be undefined so we can detect ckUSDC context
-  
+
   mockJuno.clear();
 });

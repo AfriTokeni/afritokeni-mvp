@@ -18,6 +18,25 @@ export async function handleSendMoney(input: string, session: USSDSession, sendS
   const currentInput = inputParts[inputParts.length - 1] || '';
   
   switch (session.step) {
+    case 0: {
+      // Step 0: Enter recipient phone number
+      if (!currentInput) {
+        return continueSession('Send Money\nEnter recipient phone number:');
+      }
+      
+      // Validate phone number format
+      const phoneRegex = /^(\+?256|0)?[37]\d{8}$/;
+      if (!phoneRegex.test(currentInput)) {
+        return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
+      }
+      
+      // Store recipient and move to amount entry
+      session.data.recipientPhone = currentInput;
+      session.step = 1;
+      const currency = getSessionCurrency(session);
+      return continueSession(`Enter amount to send (${currency}):`);
+    }
+    
     case 1: {
       // Step 1: Enter amount and validate user has enough balance
       const amount = parseFloat(currentInput);

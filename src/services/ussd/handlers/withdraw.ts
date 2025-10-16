@@ -46,7 +46,7 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       // Step 2: Check user balance
       console.log(`Checking balance for ${session.phoneNumber}`);
       try {
-        const userBalance = await DataService.getUserBalance(session.phoneNumber);
+        const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
         
         if (!userBalance) {
           return endSession('Unable to check balance. Please try again later.');
@@ -167,8 +167,9 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         
         session.step = 5;
         
-        // Step 6: Create pending withdrawal transaction
-        const withdrawalCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        // Step 6: Create pending withdrawal transaction with WD- prefix
+        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const withdrawalCode = `WD-${randomCode}`;
         session.data.withdrawalCode = withdrawalCode;
         
         console.log(`Creating withdrawal transaction for ${session.phoneNumber}`);

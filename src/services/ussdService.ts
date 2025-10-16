@@ -1,15 +1,18 @@
 import { nanoid } from 'nanoid';
 import { getDoc, setDoc } from '@junobuild/core';
 import { RateLimiter } from './rateLimiter';
+import { USSDSessionImpl } from './ussd/types';
+import type { USSDSession } from './ussd/types';
+import { handleMainMenu } from './ussd/handlers/mainMenu';
+import { handleLocalCurrency } from './ussd/handlers/localCurrency';
+import { handleBitcoin } from './ussd/handlers/bitcoin';
+import { handleSendMoney } from './ussd/handlers/sendMoney';
+import { handleWithdraw } from './ussd/handlers/withdraw';
+import { handleDeposit } from './ussd/handlers/deposit';
+import { handleFindAgent } from './ussd/handlers/agents';
 
-export interface USSDSession {
-  sessionId: string;
-  phoneNumber: string;
-  currentMenu: string;
-  data: Record<string, any>;
-  createdAt: Date;
-  lastActivity: Date;
-}
+// Re-export for backward compatibility
+export type { USSDSession };
 
 export class USSDService {
   static async createUSSDSession(sessionId: string, phoneNumber: string): Promise<USSDSession> {
@@ -18,20 +21,19 @@ export class USSDService {
       throw new Error(rateLimitCheck.message || 'USSD rate limit exceeded');
     }
 
-    const now = new Date();
-    const session: USSDSession = {
-      sessionId,
-      phoneNumber,
-      currentMenu: 'main',
-      data: {},
-      createdAt: now,
-      lastActivity: now
-    };
+    // Use the proper USSDSessionImpl class
+    const session = new USSDSessionImpl(sessionId, phoneNumber);
+    
+    // USSD sessions start at main menu (not registration_check)
+    session.currentMenu = 'main';
 
     const dataForJuno = {
-      ...session,
-      createdAt: now.toISOString(),
-      lastActivity: now.toISOString()
+      sessionId: session.sessionId,
+      phoneNumber: session.phoneNumber,
+      currentMenu: session.currentMenu,
+      data: session.data,
+      step: session.step,
+      lastActivity: session.lastActivity
     };
 
     await setDoc({
@@ -55,11 +57,15 @@ export class USSDService {
       if (!doc?.data) return null;
 
       const data = doc.data as any;
-      return {
-        ...data,
-        createdAt: new Date(data.createdAt),
-        lastActivity: new Date(data.lastActivity)
-      };
+      
+      // Reconstruct the session object with proper methods
+      const session = new USSDSessionImpl(data.sessionId, data.phoneNumber);
+      session.currentMenu = data.currentMenu;
+      session.data = data.data || {};
+      session.step = data.step || 0;
+      session.lastActivity = data.lastActivity || Date.now();
+      
+      return session;
     } catch (error) {
       console.error('Error getting USSD session:', error);
       return null;
@@ -71,17 +77,24 @@ export class USSDService {
       const existingSession = await this.getUSSDSession(sessionId);
       if (!existingSession) return false;
 
-      const now = new Date();
-      const updated = {
-        ...existingSession,
-        ...updates,
-        lastActivity: now
-      };
+      // Update the session
+      if (updates.currentMenu) existingSession.currentMenu = updates.currentMenu;
+      if (updates.data) existingSession.data = { ...existingSession.data, ...updates.data };
+      if (updates.step !== undefined) existingSession.step = updates.step;
+      if (updates.lastActivity !== undefined) existingSession.lastActivity = updates.lastActivity;
+      
+      // Update activity only if not explicitly set
+      if (updates.lastActivity === undefined) {
+        existingSession.updateActivity();
+      }
 
       const dataForJuno = {
-        ...updated,
-        createdAt: updated.createdAt.toISOString(),
-        lastActivity: now.toISOString()
+        sessionId: existingSession.sessionId,
+        phoneNumber: existingSession.phoneNumber,
+        currentMenu: existingSession.currentMenu,
+        data: existingSession.data,
+        step: existingSession.step,
+        lastActivity: existingSession.lastActivity
       };
 
       const existingDoc = await getDoc({
@@ -116,26 +129,83 @@ export class USSDService {
       if (!session) {
         session = await this.createUSSDSession(sessionId, phoneNumber);
       }
+      
+      // Check if session expired
+      if (session.isExpired()) {
+        return {
+          response: 'END Session expired. Please dial *229# again to start a new session.',
+          continueSession: false
+        };
+      }
+      
+      // Update activity
+      session.updateActivity();
 
       const input = text.trim();
 
-      if (input === '' || input === '*229#') {
-        return {
-          response: this.getMainMenu(),
-          continueSession: true
-        };
+      // Route to appropriate handler based on current menu
+      let response: string;
+      
+      console.log(`🔀 Routing: menu=${session.currentMenu}, input="${input}"`);
+      
+      switch (session.currentMenu) {
+        case 'main':
+          response = await handleMainMenu(input, session, handleLocalCurrency, handleBitcoin, async () => 'USDC Menu');
+          break;
+        
+        case 'local_currency':
+          response = await handleLocalCurrency(input, session, handleSendMoney, handleDeposit, handleWithdraw, handleFindAgent, async () => this.getMainMenu());
+          break;
+        
+        case 'check_balance':
+          // Balance check is handled by localCurrency handler
+          response = await handleLocalCurrency(input, session, handleSendMoney, handleDeposit, handleWithdraw, handleFindAgent, async () => this.getMainMenu());
+          break;
+        
+        case 'send_money':
+          response = await handleSendMoney(input, session, async () => {});
+          break;
+        
+        case 'withdraw':
+          response = await handleWithdraw(input, session, async () => {}, async () => this.getMainMenu());
+          break;
+        
+        case 'deposit':
+          response = await handleDeposit(input, session, async () => {});
+          break;
+        
+        case 'find_agent':
+          response = await handleFindAgent(input, session, handleLocalCurrency);
+          break;
+        
+        case 'bitcoin':
+        case 'btc_balance':
+        case 'btc_rate':
+          response = await handleBitcoin(input, session);
+          break;
+        
+        default:
+          if (input === '' || input === '*229#') {
+            response = this.getMainMenu();
+          } else {
+            response = 'Invalid selection. Please try again.';
+          }
       }
 
-      if (session.currentMenu === 'main') {
-        return this.handleMainMenuSelection(session, input);
-      }
+      // Save updated session - handlers modify session in place
+      console.log(`💾 Saving session: menu=${session.currentMenu}, step=${session.step}`);
+      await this.updateUSSDSession(sessionId, {
+        currentMenu: session.currentMenu,
+        data: session.data,
+        step: session.step
+      });
 
       return {
-        response: 'Invalid selection. Please try again.',
-        continueSession: true
+        response,
+        continueSession: !response.startsWith('END')
       };
     } catch (error: any) {
-      if (error.message.includes('rate limit')) {
+      if (error.message.includes('rate limit') || error.message.includes('Too many requests')) {
         return {
           response: 'Too many requests. Please wait a moment and try again.',
           continueSession: false

@@ -1,0 +1,116 @@
+/**
+ * Mock DataService for USSD tests
+ * Intercepts DataService calls and returns test data
+ */
+
+import { WebhookDataService } from '../../src/services/webHookServices';
+import { listDocs } from '@junobuild/core';
+import { CkBTCService } from '../../src/services/ckBTCService';
+
+// Store original methods
+const originalGetUserBalance = WebhookDataService.getUserBalance;
+const originalListDocs = listDocs;
+const originalGetBalance = CkBTCService.getBalance;
+
+// Mock data storage
+const mockBalances = new Map<string, number>();
+const mockAgents = [
+  {
+    id: 'test-agent-1',
+    businessName: 'Test Agent Kampala',
+    location: {
+      city: 'Kampala',
+      address: 'Central Road',
+      latitude: 0.3476,
+      longitude: 32.5825
+    },
+    phoneNumber: '+256700111111',
+    isOnline: true,
+    isActive: true,
+    cashAvailable: 500000,
+    commission: 2.5,
+    rating: 4.8
+  }
+];
+
+export function enableDataServiceMock() {
+  // Mock getUserBalance
+  WebhookDataService.getUserBalance = async (phoneNumber: string) => {
+    // Try with and without + prefix
+    const cleanPhone = phoneNumber.replace('+', '');
+    const withPlus = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+    const balance = mockBalances.get(phoneNumber) || mockBalances.get(cleanPhone) || mockBalances.get(withPlus) || 100000;
+    return {
+      userId: phoneNumber,
+      balance,
+      currency: 'UGX',
+      lastUpdated: new Date()
+    };
+  };
+  
+  // Mock getAvailableAgents
+  (WebhookDataService as any).getAvailableAgents = async () => {
+    return mockAgents;
+  };
+  
+  // Mock findUserByPhoneNumber
+  (WebhookDataService as any).findUserByPhoneNumber = async (phoneNumber: string) => {
+    return {
+      id: phoneNumber,
+      phoneNumber,
+      firstName: 'Test',
+      lastName: 'User',
+      email: `${phoneNumber}@test.com`
+    };
+  };
+  
+  // Mock verifyUserPin - always return true for tests
+  (WebhookDataService as any).verifyUserPin = async (phoneNumber: string, pin: string) => {
+    return true;
+  };
+  
+  // Mock CkBTCService.getBalance for Bitcoin balance checks
+  CkBTCService.getBalance = async (userId: string, useSatellite?: boolean, isDemoMode?: boolean) => {
+    return {
+      balance: 1000000, // 0.01 BTC in satoshis
+      balanceSatoshis: 1000000,
+      balanceBTC: '0.01',
+      balanceUSD: 600, // Assuming $60k BTC price
+      lastUpdated: new Date()
+    };
+  };
+  
+  // Mock listDocs to return agents when querying agents collection
+  (global as any).listDocs = async (params: any) => {
+    if (params.collection === 'agents') {
+      return {
+        items: mockAgents.map((agent, index) => ({
+          key: `agent-${index}`,
+          data: agent,
+          created_at: BigInt(Date.now()),
+          updated_at: BigInt(Date.now()),
+          version: BigInt(1)
+        })),
+        items_length: BigInt(mockAgents.length),
+        items_page: BigInt(0),
+        matches_length: BigInt(mockAgents.length),
+        matches_pages: BigInt(1)
+      };
+    }
+    return originalListDocs(params);
+  };
+}
+
+export function disableDataServiceMock() {
+  WebhookDataService.getUserBalance = originalGetUserBalance;
+  CkBTCService.getBalance = originalGetBalance;
+  (global as any).listDocs = originalListDocs;
+}
+
+export function setMockBalance(phoneNumber: string, balance: number) {
+  mockBalances.set(phoneNumber, balance);
+}
+
+export function clearMockData() {
+  mockBalances.clear();
+}

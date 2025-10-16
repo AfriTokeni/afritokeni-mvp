@@ -130,8 +130,9 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
 Attempts remaining: ${3 - session.data.pinAttempts}`);
         }
         
-        // Generate deposit code
-        const depositCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        // Generate deposit code with DEP- prefix
+        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const depositCode = `DEP-${randomCode}`;
         session.data.depositCode = depositCode;
         
         console.log(`Creating deposit request for ${session.phoneNumber}`);

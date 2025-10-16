@@ -62,7 +62,7 @@ export interface VerificationData {
 export class USSDSessionImpl implements USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_buy' | 'btc_sell' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'local_currency' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'find_agent' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell';
   data: Record<string, any>;
   step: number;
   lastActivity: number;
