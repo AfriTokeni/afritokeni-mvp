@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, TrendingDown, DollarSign } from 'lucide-react';
+import { Check, TrendingDown, DollarSign, X, Zap, Bitcoin } from 'lucide-react';
 import { getActiveCurrencies, AfricanCurrency, AFRICAN_CURRENCIES } from '../types/currency';
 
 const SavingsComparisonTable: React.FC = () => {
@@ -243,14 +243,17 @@ const SavingsComparisonTable: React.FC = () => {
             </thead>
             <tbody>
               {/* AfriTokeni Row */}
-              <tr className="border-b border-gray-100 bg-green-50">
+              <tr className="border-b-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 relative">
                 <td className="py-4 sm:py-5 lg:py-6 px-3 sm:px-4 lg:px-6">
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-900 rounded-lg flex items-center justify-center font-bold text-white text-sm">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-lg">
                       A
                     </div>
                     <div>
-                      <div className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">AfriTokeni</div>
+                      <div className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg flex items-center gap-2">
+                        AfriTokeni
+                        <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full font-semibold">BEST</span>
+                      </div>
                       <div className="text-xs text-gray-600 capitalize">{location} Rate</div>
                     </div>
                   </div>
@@ -264,34 +267,34 @@ const SavingsComparisonTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-6 text-center">
-                  <div className="inline-flex items-center justify-center gap-1 text-green-600 font-semibold text-xs sm:text-sm lg:text-base">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="inline-flex items-center justify-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold text-xs sm:text-sm">
+                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
                     <span className="hidden sm:inline">Instant</span>
                     <span className="sm:hidden">Fast</span>
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">&lt;1 sec</div>
-                  <div className="text-xs text-gray-500 mt-1">{useCkUSDC ? 'ckUSDC' : 'ckBTC'}</div>
+                  <div className="text-xs text-gray-600 mt-1 font-medium">&lt;1 sec</div>
+                  <div className="text-xs text-green-600 mt-1 font-semibold">{useCkUSDC ? 'ckUSDC' : 'ckBTC'}</div>
                 </td>
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
-                  <div className="inline-flex items-center justify-center gap-1 text-green-600 font-semibold text-xs sm:text-sm lg:text-base">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="inline-flex items-center justify-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold text-xs sm:text-sm">
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4" />
                     Yes
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">*229#</div>
+                  <div className="text-xs text-gray-600 mt-1 font-medium">*229#</div>
                 </td>
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
-                  <div className="inline-flex items-center justify-center gap-1 text-green-600 font-semibold text-xs sm:text-sm lg:text-base">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="inline-flex items-center justify-center gap-1 bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold text-xs sm:text-sm">
+                    <Bitcoin className="w-3 h-3 sm:w-4 sm:h-4" />
                     Yes
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">ckBTC</div>
+                  <div className="text-xs text-orange-600 mt-1 font-semibold">ckBTC</div>
                 </td>
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
-                  <div className="inline-flex items-center justify-center gap-1 text-green-600 font-semibold text-xs sm:text-sm lg:text-base">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="inline-flex items-center justify-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold text-xs sm:text-sm">
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4" />
                     39
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">All Africa</div>
+                  <div className="text-xs text-gray-600 mt-1 font-medium">All Africa</div>
                 </td>
               </tr>
 
@@ -308,13 +311,19 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-xs sm:text-sm lg:text-base text-gray-600">Min - Hours</div>
                 </td>
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
-                  <div className="text-xs sm:text-sm lg:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
-                  <div className="text-xs sm:text-sm lg:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
-                  <div className="text-xs sm:text-sm lg:text-base text-gray-600">200+</div>
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium">200+</div>
                 </td>
               </tr>
 
@@ -331,13 +340,19 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-sm sm:text-base text-gray-600">Minutes - Hours</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">200+</div>
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium">200+</div>
                 </td>
               </tr>
 
@@ -354,13 +369,19 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-sm sm:text-base text-gray-600">Minutes - Days</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">150+</div>
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium">150+</div>
                 </td>
               </tr>
 
@@ -378,15 +399,19 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-sm sm:text-base text-gray-600">Minutes - Hours</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="inline-flex items-center gap-1 text-green-600">
-                    <Check className="w-5 h-5" />
+                  <div className="inline-flex items-center justify-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                    Yes
                   </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">East Africa</div>
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium">East Africa</div>
                 </td>
               </tr>
 
@@ -404,15 +429,19 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-sm sm:text-base text-gray-600">Minutes - Hours</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="inline-flex items-center gap-1 text-green-600">
-                    <Check className="w-5 h-5" />
+                  <div className="inline-flex items-center justify-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                    Yes
                   </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">West/Central</div>
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium">West/Central</div>
                 </td>
               </tr>
 
@@ -430,15 +459,19 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-sm sm:text-base text-gray-600">Minutes - Hours</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="inline-flex items-center gap-1 text-green-600">
-                    <Check className="w-5 h-5" />
+                  <div className="inline-flex items-center justify-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                    Yes
                   </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                  <div className="inline-flex items-center justify-center gap-1 bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs sm:text-sm">
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    No
+                  </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">14</div>
+                  <div className="text-xs sm:text-sm text-gray-600 font-medium">14</div>
                 </td>
               </tr>
             </tbody>
