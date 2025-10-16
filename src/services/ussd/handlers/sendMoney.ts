@@ -165,6 +165,18 @@ Thank you for using AfriTokeni!`);
     }
     
     default:
+      // Handle '0' to go back to main menu
+      if (currentInput === '0') {
+        session.currentMenu = 'main';
+        session.step = 0;
+        session.data = {}; // Clear session data
+        return continueSession(`AfriTokeni Main Menu
+1. Local Currency (UGX)
+2. Bitcoin
+3. USDC
+0. Exit`);
+      }
+      
       const currency = getSessionCurrency(session);
       session.step = 1;
       return continueSession(`Enter amount to send (${currency}):`);

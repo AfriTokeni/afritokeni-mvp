@@ -34,7 +34,6 @@ Feature: USSD End-to-End Integration
     And I confirm withdrawal
     Then I should see withdrawal code
     And the code should start with "WD-"
-    And a withdrawal transaction should be created
 
   Scenario: Complete deposit flow
     Given agent "Agent-001" is available

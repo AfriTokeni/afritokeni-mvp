@@ -69,7 +69,27 @@ export function enableDataServiceMock() {
     return true;
   };
   
-  // Mock CkBTCService.getBalance for Bitcoin balance checks
+  // Mock processSendMoney - update balances
+  (WebhookDataService as any).processSendMoney = async (senderPhone: string, recipientPhone: string, amount: number, fee: number) => {
+    const cleanSender = senderPhone.replace('+', '');
+    const withPlusSender = senderPhone.startsWith('+') ? senderPhone : `+${senderPhone}`;
+    
+    // Get current sender balance
+    const currentBalance = mockBalances.get(senderPhone) || mockBalances.get(cleanSender) || mockBalances.get(withPlusSender) || 100000;
+    
+    // Update sender balance
+    const newBalance = currentBalance - amount - fee;
+    mockBalances.set(senderPhone, newBalance);
+    mockBalances.set(cleanSender, newBalance);
+    mockBalances.set(withPlusSender, newBalance);
+    
+    return {
+      success: true,
+      transactionId: `TXN-${Date.now()}`
+    };
+  };
+  
+  // Mock getAvailableAgentsBalance for Bitcoin balance checks
   CkBTCService.getBalance = async (userId: string, useSatellite?: boolean, isDemoMode?: boolean) => {
     return {
       balance: 1000000, // 0.01 BTC in satoshis
