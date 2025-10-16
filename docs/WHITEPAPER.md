@@ -101,7 +101,7 @@ AfriTokeni provides **instant, low-cost crypto banking accessible via USSD** on 
 │  Feature Phone          Smartphone     │
 │  ┌──────────┐          ┌──────────┐    │
 │  │ Dial     │          │  Web     │    │
-│  │ *123#    │          │  App     │    │
+│  │ *229#    │          │  App     │    │
 │  │          │          │          │    │
 │  │ USSD     │          │ Full UI  │    │
 │  │ Menu     │          │ Dashboard│    │
@@ -357,65 +357,59 @@ Many Africans want crypto benefits (speed, low fees, accessibility) WITHOUT Bitc
 ### 5.2 USSD Menu Structure
 
 ```
-*123# → AfriTokeni Main Menu
+*229# → AfriTokeni Main Menu
 
-1. Send Money
-   1.1 Send Local Currency
-   1.2 Send ckBTC
-   1.3 Send ckUSDC
+1. Local Currency (UGX)
+   1.1 Send Money
+   1.2 Deposit Cash (via agent)
+   1.3 Withdraw Cash (via agent)
+   1.4 Find Agents
 
-2. Check Balance
-   2.1 Local Currency Balance
-   2.2 ckBTC Balance
-   2.3 ckUSDC Balance
+2. Bitcoin (ckBTC)
+   2.1 Check Balance
+   2.2 Send Bitcoin
+   2.3 Exchange Rates
+   2.4 Buy/Sell
 
-3. Cash Services
-   3.1 Deposit Cash (via agent)
-   3.2 Withdraw Cash (via agent)
+3. USDC (ckUSDC)
+   3.1 Check Balance
+   3.2 Send USDC
+   3.3 Exchange Rates
+   3.4 Buy/Sell
 
-4. Exchange
-   4.1 Buy ckBTC
-   4.2 Buy ckUSDC
-   4.3 Sell ckBTC
-   4.4 Sell ckUSDC
+4. DAO Governance
+   4.1 View Active Proposals
+   4.2 My Voting Power
+   4.3 Active Votes
+   4.4 Vote on Proposal
 
-5. Find Agents
-   5.1 Nearest agents
-   5.2 By location
-
-6. Transaction History
-   6.1 Last 10 transactions
-   6.2 This month
-   6.3 Search by date
-
-7. Account
-   7.1 Profile
-   7.2 Change PIN
-   7.3 Help
-
-8. DAO Governance
-   8.1 View proposals
-   8.2 Vote on proposal
-   8.3 Create proposal
+5. Help & Support
+   5.1 How to Use
+   5.2 Contact Support
+   5.3 Transaction History
+   5.4 Account Settings
 ```
 
 ### 5.3 Example USSD Flows
 
 **Send ckBTC**:
 ```
-User: *123#
-System: Welcome to AfriTokeni
-1. Send Money
-2. Check Balance
-...
+User: *229#
+System: AfriTokeni Main Menu
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. DAO Governance
+5. Help
 
-User: 1
-System: Send Money
-1. Local Currency
-2. ckBTC
-3. ckUSDC
+User: 2 (Bitcoin)
+System: Bitcoin (ckBTC)
+1. Check Balance
+2. Send Bitcoin
+3. Exchange Rates
+4. Buy/Sell
 
-User: 2
+User: 2 (Send Bitcoin)
 System: Send ckBTC
 Enter amount (BTC):
 
@@ -439,18 +433,22 @@ Completed in <1 second
 
 **Check ckUSDC Balance**:
 ```
-User: *123#
-System: AfriTokeni Menu
-...
-2. Check Balance
+User: *229#
+System: AfriTokeni Main Menu
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. DAO Governance
+5. Help
 
-User: 2
-System: Check Balance
-1. Local Currency
-2. ckBTC
-3. ckUSDC
+User: 3 (USDC)
+System: USDC (ckUSDC)
+1. Check Balance
+2. Send USDC
+3. Exchange Rates
+4. Buy/Sell
 
-User: 3
+User: 1 (Check Balance)
 System: ckUSDC Balance:
 $125.50 USDC
 (≈ 471,375 UGX)

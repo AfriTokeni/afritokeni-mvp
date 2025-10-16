@@ -317,19 +317,19 @@ const LandingPage: React.FC = () => {
             
             <div className="bg-gray-900 rounded-xl p-4 sm:p-6 font-mono text-xs sm:text-sm lg:text-base">
               <div className="text-green-400 mb-2">$ Dial USSD menu:</div>
-              <div className="text-white mb-4">*AFRI#</div>
+              <div className="text-white mb-4">*229#</div>
               
               <div className="text-yellow-400 mb-2">⚡ Menu appears:</div>
               <div className="text-gray-300 mb-4 space-y-1">
-                <div>1. Send Money</div>
-                <div>2. Check Balance</div>
-                <div>5. Check ckBTC Balance</div>
-                <div>6. Send ckBTC</div>
-                <div>8. Check ckUSDC Balance</div>
+                <div>1. Local Currency (UGX)</div>
+                <div>2. Bitcoin (ckBTC)</div>
+                <div>3. USDC (ckUSDC)</div>
+                <div>4. DAO Governance</div>
+                <div>5. Help</div>
               </div>
               
               <div className="text-green-400 mb-2">$ Select option:</div>
-              <div className="text-white">6 (Send ckBTC)</div>
+              <div className="text-white">2 (Bitcoin)</div>
             </div>
 
             <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
