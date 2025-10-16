@@ -153,6 +153,18 @@ When('I enter PIN {string}', async function (pin: string) {
   world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);
 });
 
+When('I enter my PIN {string}', async function (pin: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    pin
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+  world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);
+});
+
 When('I select {string} for Send Money', async function (option: string) {
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,
