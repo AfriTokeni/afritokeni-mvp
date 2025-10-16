@@ -41,7 +41,12 @@ Please select an option:
       session.step = 1;
       // Skip PIN if already verified
       if (session.data.pinVerified) {
-        return await handleBTCBalance('', session);
+        return await handleBTCBalance(input, session);
+      }
+      // Check if PIN was provided in the same input (for testing/simulators)
+      if (inputParts.length > 2 && inputParts[inputParts.length - 2] === '2.1') {
+        // PIN is in the same request, process it
+        return await handleBTCBalance(input, session);
       }
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
