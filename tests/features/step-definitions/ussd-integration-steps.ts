@@ -12,7 +12,7 @@ import { BalanceService } from '../../../src/services/balanceService';
 import { TransactionService } from '../../../src/services/transactionService';
 import { CkBTCService } from '../../../src/services/ckBTCService';
 import { getUSSDPrincipalInfo, transferUSSDCkBTC, getUSSDCkBTCBalance } from '../../../src/services/ussdPrincipalService';
-import { enableDataServiceMock, setMockBalance } from '../../mocks/dataServiceMock';
+import { enableDataServiceMock, setMockBalance, setPhoneToUserId } from '../../mocks/dataServiceMock';
 
 // ========== Given Steps ==========
 
@@ -38,6 +38,9 @@ Given('I am a registered user with {int} UGX balance', async function (balance: 
   
   // Set mock balance for USSD handlers
   setMockBalance(world.ussdPhoneNumber, balance);
+  
+  // Map phone to userId for balance updates
+  setPhoneToUserId(world.ussdPhoneNumber, world.userId);
   
   // Create session with PIN verified for integration tests
   const session = await USSDService.createUSSDSession(world.ussdSessionId, world.ussdPhoneNumber);

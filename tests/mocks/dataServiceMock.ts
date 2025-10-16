@@ -14,6 +14,7 @@ const originalGetBalance = CkBTCService.getBalance;
 
 // Mock data storage
 const mockBalances = new Map<string, number>();
+const phoneToUserId = new Map<string, string>();
 const mockAgents = [
   {
     id: 'test-agent-1',
@@ -84,13 +85,14 @@ export function enableDataServiceMock() {
     mockBalances.set(withPlusSender, newBalance);
     
     // Also update in BalanceService for the test to see
-    // Find user by phone to get userId
-    const { BalanceService } = await import('../../src/services/balanceService');
-    try {
-      // Try to update balance in BalanceService (will fail if user doesn't exist, that's ok)
-      await BalanceService.updateUserBalance(cleanSender, newBalance);
-    } catch (e) {
-      // Ignore errors - user might not exist in test
+    const userId = phoneToUserId.get(senderPhone) || phoneToUserId.get(cleanSender) || phoneToUserId.get(withPlusSender);
+    if (userId) {
+      const { BalanceService } = await import('../../src/services/balanceService');
+      try {
+        await BalanceService.updateUserBalance(userId, newBalance);
+      } catch (e) {
+        // Ignore errors
+      }
     }
     
     return {
@@ -141,6 +143,13 @@ export function setMockBalance(phoneNumber: string, balance: number) {
   mockBalances.set(phoneNumber, balance);
 }
 
+export function setPhoneToUserId(phoneNumber: string, userId: string) {
+  phoneToUserId.set(phoneNumber, userId);
+  phoneToUserId.set(phoneNumber.replace('+', ''), userId);
+  phoneToUserId.set(phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`, userId);
+}
+
 export function clearMockData() {
   mockBalances.clear();
+  phoneToUserId.clear();
 }

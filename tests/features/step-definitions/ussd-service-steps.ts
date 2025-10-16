@@ -78,6 +78,7 @@ When('I select option {string}', async function (option: string) {
   
   world.ussdResponse = result.response;
   world.ussdContinueSession = result.continueSession;
+  world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);
   
   // Refresh session to get updated menu state
   world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);

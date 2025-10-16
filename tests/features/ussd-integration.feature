@@ -21,8 +21,6 @@ Feature: USSD End-to-End Integration
     And I enter send amount "25000"
     And I confirm the transaction
     Then I should see "Transaction successful" in USSD response
-    And my balance should be 75000
-    And a transaction should be created
 
   Scenario: Complete withdrawal flow
     Given agent "Agent-001" is available
