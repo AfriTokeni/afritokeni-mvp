@@ -290,6 +290,13 @@ Then('a transaction should be created', async function () {
 
 Then('I should see withdrawal code', function () {
   assert.ok(world.ussdResponse, 'Should have a response');
+  
+  // Extract withdrawal code from response
+  const codeMatch = world.ussdResponse.match(/WD-[A-Z0-9]+/);
+  if (codeMatch) {
+    world.withdrawalCode = codeMatch[0];
+  }
+  
   assert.ok(
     world.ussdResponse.includes('WD-') || world.ussdResponse.includes('code'),
     `Response should contain withdrawal code. Got: ${world.ussdResponse}`

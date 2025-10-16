@@ -292,6 +292,14 @@ Then('I should see agent options', function () {
 
 Then('I should see deposit code', function () {
   assert.ok(world.ussdResponse, 'Should have a response');
+  
+  // Extract deposit code from response
+  const codeMatch = world.ussdResponse.match(/DEP-[A-Z0-9]+/);
+  if (codeMatch) {
+    world.depositCode = codeMatch[0];
+    world.withdrawalCode = codeMatch[0]; // Also set withdrawalCode for generic code checks
+  }
+  
   assert.ok(
     world.ussdResponse.includes('DEP-') || world.ussdResponse.includes('code'),
     `Response should contain deposit code. Got: ${world.ussdResponse}`
