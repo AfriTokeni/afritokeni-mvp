@@ -399,10 +399,10 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
             {/* USSD Interface */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
-              <div className="space-y-4 sm:space-y-6">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8 flex flex-col">
+              <div className="space-y-4 sm:space-y-6 flex-1 flex flex-col">
                 <div className="text-center">
                   <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
                     <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
@@ -451,7 +451,7 @@ const LandingPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="text-center pt-4 border-t border-gray-200">
+                <div className="text-center pt-4 border-t border-gray-200 mt-auto">
                   <Link
                     to="/ussd"
                     className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
@@ -463,8 +463,8 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Web Interface */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
-              <div className="space-y-4 sm:space-y-6">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8 flex flex-col">
+              <div className="space-y-4 sm:space-y-6 flex-1 flex flex-col">
                 <div className="text-center pt-2">
                   <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-green-50 border border-green-100 text-green-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
                     <Globe className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
@@ -508,7 +508,7 @@ const LandingPage: React.FC = () => {
                   </button>
                 </div>
                 
-                <div className="text-center pt-4 border-t border-gray-200">
+                <div className="text-center pt-4 border-t border-gray-200 mt-auto">
                   <button
                     onClick={handleICPLogin}
                     className="inline-flex items-center text-green-600 hover:text-green-700 font-medium text-sm"
