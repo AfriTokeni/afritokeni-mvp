@@ -54,84 +54,92 @@ const SavingsComparisonTable: React.FC = () => {
           </p>
         </div>
 
-        {/* Calculator */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8 border border-gray-200">
+        {/* Calculator - Stripe Style */}
+        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 mb-10 border border-gray-200/60 backdrop-blur-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Amount */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Transfer Amount (USD)
+            <div className="group">
+              <label className="block text-sm font-medium text-gray-700 mb-2.5">
+                Transfer Amount
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-base font-medium">$</span>
                 <input
                   type="text"
                   value={amount}
                   onChange={(e) => {
                     const val = e.target.value;
-                    // Only allow numbers
                     if (val === '' || /^\d+$/.test(val)) {
                       setAmount(val);
                     }
                   }}
                   onBlur={() => {
-                    // Ensure minimum value on blur
                     const num = parseFloat(amount) || 10;
                     if (num < 10) setAmount('10');
                   }}
                   placeholder="100"
-                  className="w-full pl-7 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-sm font-medium text-gray-900 transition-all"
+                  className="w-full pl-9 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl text-base font-medium text-gray-900 placeholder:text-gray-400 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                  transition-all duration-200 shadow-sm hover:border-gray-300"
                 />
               </div>
             </div>
 
             {/* To */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Sending To
+            <div className="group">
+              <label className="block text-sm font-medium text-gray-700 mb-2.5">
+                Destination Country
               </label>
-              <select
-                value={toCountry}
-                onChange={(e) => setToCountry(e.target.value as AfricanCurrency)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-sm font-medium text-gray-900 bg-white transition-all appearance-none cursor-pointer"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
-                  backgroundPosition: 'right 0.5rem center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '1.5em 1.5em',
-                  paddingRight: '2.5rem'
-                }}
-              >
-                {activeCurrencies.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.country} ({currency.code})
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={toCountry}
+                  onChange={(e) => setToCountry(e.target.value as AfricanCurrency)}
+                  className="w-full px-4 py-3.5 bg-white border border-gray-200 rounded-xl text-base font-medium text-gray-900 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                  transition-all duration-200 shadow-sm hover:border-gray-300 appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                    backgroundPosition: 'right 1rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.25em 1.25em',
+                    paddingRight: '3rem'
+                  }}
+                >
+                  {activeCurrencies.map((currency) => (
+                    <option key={currency.code} value={currency.code}>
+                      {currency.country} ({currency.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Location Type */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            <div className="group">
+              <label className="block text-sm font-medium text-gray-700 mb-2.5">
                 Recipient Location
               </label>
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value as 'urban' | 'suburban' | 'rural' | 'remote')}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-sm font-medium text-gray-900 bg-white transition-all appearance-none cursor-pointer"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
-                  backgroundPosition: 'right 0.5rem center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '1.5em 1.5em',
-                  paddingRight: '2.5rem'
-                }}
-              >
-                <option value="urban">Urban (City) - 2.5-4%</option>
-                <option value="suburban">Suburban - 3-5%</option>
-                <option value="rural">Rural (Village) - 4-7%</option>
-                <option value="remote">Remote Area - 7-12%</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value as 'urban' | 'suburban' | 'rural' | 'remote')}
+                  className="w-full px-4 py-3.5 bg-white border border-gray-200 rounded-xl text-base font-medium text-gray-900 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                  transition-all duration-200 shadow-sm hover:border-gray-300 appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                    backgroundPosition: 'right 1rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.25em 1.25em',
+                    paddingRight: '3rem'
+                  }}
+                >
+                  <option value="urban">Urban (City) - 2.5-4%</option>
+                  <option value="suburban">Suburban - 3-5%</option>
+                  <option value="rural">Rural (Village) - 4-7%</option>
+                  <option value="remote">Remote Area - 7-12%</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
