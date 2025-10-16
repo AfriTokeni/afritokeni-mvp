@@ -48,6 +48,7 @@ Feature: USSD End-to-End Integration
     When I dial "*229#" for integration
     And I select "2" for Bitcoin
     And I select "2.1" for Check Balance
+    And I enter PIN "1234"
     Then I should see my Bitcoin balance
     And the session should end
 

@@ -66,6 +66,7 @@ Feature: USSD Handler Logic
   Scenario: Check Bitcoin balance
     Given I am in bitcoin menu
     When I select option "2.1"
+    And I enter PIN "1234"
     Then I should see "ckBTC Balance" in USSD response
 
   Scenario: Bitcoin routes to buy
