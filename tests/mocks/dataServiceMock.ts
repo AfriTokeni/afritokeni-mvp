@@ -77,11 +77,21 @@ export function enableDataServiceMock() {
     // Get current sender balance
     const currentBalance = mockBalances.get(senderPhone) || mockBalances.get(cleanSender) || mockBalances.get(withPlusSender) || 100000;
     
-    // Update sender balance
+    // Update sender balance in mock
     const newBalance = currentBalance - amount - fee;
     mockBalances.set(senderPhone, newBalance);
     mockBalances.set(cleanSender, newBalance);
     mockBalances.set(withPlusSender, newBalance);
+    
+    // Also update in BalanceService for the test to see
+    // Find user by phone to get userId
+    const { BalanceService } = await import('../../src/services/balanceService');
+    try {
+      // Try to update balance in BalanceService (will fail if user doesn't exist, that's ok)
+      await BalanceService.updateUserBalance(cleanSender, newBalance);
+    } catch (e) {
+      // Ignore errors - user might not exist in test
+    }
     
     return {
       success: true,
