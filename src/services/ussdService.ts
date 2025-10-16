@@ -5,7 +5,7 @@ import { USSDSessionImpl } from './ussd/types';
 import type { USSDSession } from './ussd/types';
 import { handleMainMenu } from './ussd/handlers/mainMenu';
 import { handleLocalCurrency } from './ussd/handlers/localCurrency';
-import { handleBitcoin } from './ussd/handlers/bitcoin';
+import { handleBitcoin, handleBTCBalance, handleBTCRate } from './ussd/handlers/bitcoin';
 import { handleSendMoney } from './ussd/handlers/sendMoney';
 import { handleWithdraw } from './ussd/handlers/withdraw';
 import { handleDeposit } from './ussd/handlers/deposit';
@@ -180,9 +180,15 @@ export class USSDService {
           break;
         
         case 'bitcoin':
-        case 'btc_balance':
-        case 'btc_rate':
           response = await handleBitcoin(input, session);
+          break;
+        
+        case 'btc_balance':
+          response = await handleBTCBalance(input, session);
+          break;
+        
+        case 'btc_rate':
+          response = await handleBTCRate(input, session);
           break;
         
         case 'dao':

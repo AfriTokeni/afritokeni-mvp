@@ -17,6 +17,7 @@ import { BalanceService } from '../../../src/services/balanceService';
 import { setDoc } from '@junobuild/core';
 import { enableDataServiceMock, setMockBalance, disableDataServiceMock } from '../../mocks/dataServiceMock';
 import { getUSSDPrincipalInfo } from '../../../src/services/ussdPrincipalService';
+import { setUserPin } from '../../../src/services/ussd/handlers/pinManagement';
 
 // ========== Background Steps ==========
 
@@ -40,6 +41,9 @@ Given('I am a registered USSD user with balance', async function () {
   // Set balance using both userId and phone number for compatibility
   await BalanceService.updateUserBalance(world.userId, 100000);
   world.balance = 100000;
+  
+  // Set PIN for the test user (strip + prefix as setUserPin adds it)
+  await setUserPin(world.ussdPhoneNumber.replace(/^\+/, ''), '1234');
   
   // CRITICAL: Get REAL Principal + Subaccount for this USSD user
   const principalInfo = getUSSDPrincipalInfo(world.ussdPhoneNumber);

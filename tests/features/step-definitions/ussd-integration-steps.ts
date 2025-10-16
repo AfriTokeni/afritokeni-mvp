@@ -13,6 +13,7 @@ import { TransactionService } from '../../../src/services/transactionService';
 import { CkBTCService } from '../../../src/services/ckBTCService';
 import { getUSSDPrincipalInfo, transferUSSDCkBTC, getUSSDCkBTCBalance } from '../../../src/services/ussdPrincipalService';
 import { enableDataServiceMock, setMockBalance, setPhoneToUserId } from '../../mocks/dataServiceMock';
+import { setUserPin } from '../../../src/services/ussd/handlers/pinManagement';
 
 // ========== Given Steps ==========
 
@@ -35,6 +36,9 @@ Given('I am a registered user with {int} UGX balance', async function (balance: 
   await BalanceService.updateUserBalance(world.userId, balance);
   world.balance = balance;
   world.initialBalance = balance;
+  
+  // Set PIN for the test user (strip + prefix as setUserPin adds it)
+  await setUserPin(world.ussdPhoneNumber.replace(/^\+/, ''), '1234');
   
   // Set mock balance for USSD handlers
   setMockBalance(world.ussdPhoneNumber, balance);
