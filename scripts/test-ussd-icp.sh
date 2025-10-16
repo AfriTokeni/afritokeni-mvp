@@ -20,24 +20,14 @@ dfx start --background --clean
 echo "⏳ Waiting for replica to be ready..."
 sleep 5
 
-# Deploy ckBTC ledger locally
-echo "💰 Deploying ckBTC ledger..."
-dfx deploy icrc1_ledger_canister --argument "(variant { Init = record {
-  token_name = \"ckBTC Test\";
-  token_symbol = \"ckBTC\";
-  minting_account = record { owner = principal \"$(dfx identity get-principal)\" };
-  initial_balances = vec {};
-  metadata = vec {};
-  transfer_fee = 10;
-  archive_options = record {
-    trigger_threshold = 2000;
-    num_blocks_to_archive = 1000;
-    controller_id = principal \"$(dfx identity get-principal)\";
-  };
-}})" || echo "⚠️  Ledger already deployed or failed"
+# Deploy ckBTC and ckUSDC ledgers
+echo "💰 Deploying ckBTC and ckUSDC ledgers..."
+dfx deploy ckbtc_ledger || echo "⚠️  ckBTC Ledger already deployed or failed"
+dfx deploy ckusdc_ledger || echo "⚠️  ckUSDC Ledger already deployed or failed"
 
-# Get ckBTC canister ID
-CKBTC_CANISTER=$(dfx canister id icrc1_ledger_canister 2>/dev/null || echo "")
+# Get canister IDs
+CKBTC_CANISTER=$(dfx canister id ckbtc_ledger 2>/dev/null || echo "")
+CKUSDC_CANISTER=$(dfx canister id ckusdc_ledger 2>/dev/null || echo "")
 
 if [ -z "$CKBTC_CANISTER" ]; then
     echo "❌ Failed to get ckBTC canister ID"
