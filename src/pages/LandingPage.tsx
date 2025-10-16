@@ -399,6 +399,19 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
           
+          {/* USSD Availability Banner */}
+          <div className="max-w-6xl mx-auto mb-4 sm:mb-6">
+            <div className="bg-red-50 border-2 border-red-300 rounded-xl p-3 sm:p-4">
+              <h3 className="font-bold text-red-900 mb-2 text-xs sm:text-sm md:text-base text-center">🇺🇬 REAL USSD: UGANDA ONLY</h3>
+              <p className="text-xs sm:text-sm text-red-800 mb-1 text-center">
+                <strong>Uganda:</strong> Dial <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*384*22948#</code> for real USSD!
+              </p>
+              <p className="text-xs text-red-700 text-center">
+                <strong>Other countries:</strong> Coming soon! Use USSD playground for demo.
+              </p>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
             {/* USSD Interface */}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 sm:p-6 lg:p-8 flex flex-col">
@@ -407,15 +420,6 @@ const LandingPage: React.FC = () => {
                   <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
                     <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                     USSD Interface
-                  </div>
-                  <div className="bg-red-50 border-2 border-red-300 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
-                    <h3 className="font-bold text-red-900 mb-2 text-xs sm:text-sm md:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
-                    <p className="text-xs sm:text-sm text-red-800 mb-2">
-                      <strong>Uganda:</strong> Dial <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*384*22948#</code> for real USSD!
-                    </p>
-                    <p className="text-xs text-red-700">
-                      <strong>Other countries:</strong> Coming soon! Use USSD playground for demo.
-                    </p>
                   </div>
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Any Phone Works</h3>
                   <p className="text-sm sm:text-base text-gray-600">USSD menu - no internet required</p>
