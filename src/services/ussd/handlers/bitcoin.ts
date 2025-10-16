@@ -120,10 +120,14 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
           return endSession('User not found. Please try again later.');
         }
         
-        // Use CkBTCService to get balance with local currency equivalent
+        // Use the user's Principal ID for ICP blockchain operations
         const currency = getSessionCurrency(session);
+        const principalId = user.principalId || user.id; // Fallback to user.id for legacy users
+        
+        console.log(`📊 Fetching ckBTC balance for Principal: ${principalId}`);
+        
         const balance = await CkBTCService.getBalanceWithLocalCurrency(
-          user.id, 
+          principalId, 
           currency, 
           true // Use satellite for SMS/USSD operations
         );

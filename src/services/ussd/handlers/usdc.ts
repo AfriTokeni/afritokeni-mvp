@@ -106,10 +106,15 @@ Please contact support.
 Thank you for using AfriTokeni!`);
         }
 
-        // Use CkUSDCService with satellite config for SMS users
+        // Use the user's Principal ID for ICP blockchain operations
+        const currency = getSessionCurrency(session);
+        const principalId = user.principalId || user.id; // Fallback to user.id for legacy users
+        
+        console.log(`📊 Fetching USDC balance for Principal: ${principalId}`);
+        
         const balance = await CkUSDCService.getBalanceWithLocalCurrency(
-          user.id, // Principal ID
-          'ugx',   // Local currency
+          principalId, // ICP Principal ID
+          currency.toLowerCase() as any,
           true     // useSatellite = true for SMS users
         );
         

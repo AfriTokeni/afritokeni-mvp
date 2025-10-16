@@ -57,6 +57,7 @@ export interface AgentKYCData {
 
 export interface User {
   id: string;
+  principalId?: string; // ICP Principal ID for blockchain operations (required for SMS users)
   firstName: string;
   lastName: string;
   email: string;
