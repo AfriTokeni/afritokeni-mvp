@@ -3,6 +3,8 @@ import assert from 'assert';
 import { world } from './shared-steps.js';
 import { USSDTestHelper } from '../../helpers/ussdTestHelpers';
 import { USSDService } from '../../../src/services/ussdService';
+import { WebhookDataService } from '../../../src/services/webHookServices';
+import { setUserPin } from '../../../src/services/ussd/handlers/pinManagement';
 
 // ========== Given Steps ==========
 
@@ -12,6 +14,19 @@ Given('I am a registered USSD user with {int} AFRI tokens', async function (afri
   world.afriTokens = afriTokens;
   world.lockedTokens = 0;
   world.userVotes = [];
+  
+  // Create real user with PIN
+  await WebhookDataService.createUser({
+    firstName: 'DAO',
+    lastName: 'TestUser',
+    email: world.ussdPhoneNumber,
+    userType: 'user',
+    authMethod: 'sms',
+    preferredCurrency: 'UGX'
+  });
+  
+  // Set PIN (strip + prefix as setUserPin adds it)
+  await setUserPin(world.ussdPhoneNumber.replace(/^\+/, ''), '1234');
   
   // Create USSD session with DAO data
   world.ussdSession = await USSDTestHelper.createMockSession(

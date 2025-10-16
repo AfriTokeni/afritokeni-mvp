@@ -271,8 +271,9 @@ Enter your 4-digit PIN to confirm:`);
       return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
     }
     
-    // Verify PIN
-    const pinCorrect = await DataService.verifyUserPin(`+${session.phoneNumber}`, sanitized_input);
+    // Verify PIN (verifyUserPin adds + prefix internally)
+    const phoneNumber = session.phoneNumber.replace(/^\+/, '');
+    const pinCorrect = await DataService.verifyUserPin(phoneNumber, sanitized_input);
     if (!pinCorrect) {
       return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
     }
