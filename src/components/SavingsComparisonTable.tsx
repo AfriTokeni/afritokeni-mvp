@@ -224,17 +224,20 @@ const SavingsComparisonTable: React.FC = () => {
                 <th className="text-left py-3 sm:py-4 px-3 sm:px-4 lg:px-6 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
                   Provider
                 </th>
-                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-6 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
-                  Transfer Fee
+                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-4 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
+                  Fee
                 </th>
-                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-6 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
+                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-4 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
                   Speed
                 </th>
-                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-6 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
-                  USSD Access
+                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-4 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
+                  USSD
                 </th>
-                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-6 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
-                  39 Countries
+                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-4 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
+                  Bitcoin
+                </th>
+                <th className="text-center py-3 sm:py-4 px-2 sm:px-3 lg:px-4 text-gray-700 font-bold text-xs sm:text-sm lg:text-base">
+                  Coverage
                 </th>
               </tr>
             </thead>
@@ -269,17 +272,24 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-xs text-gray-600 mt-1">&lt;1 sec</div>
                   <div className="text-xs text-gray-500 mt-1">{useCkUSDC ? 'ckUSDC' : 'ckBTC'}</div>
                 </td>
-                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-6 text-center">
+                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
                   <div className="inline-flex items-center justify-center gap-1 text-green-600 font-semibold text-xs sm:text-sm lg:text-base">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                     Yes
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">Any phone</div>
+                  <div className="text-xs text-gray-600 mt-1">*229#</div>
                 </td>
-                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-6 text-center">
+                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
                   <div className="inline-flex items-center justify-center gap-1 text-green-600 font-semibold text-xs sm:text-sm lg:text-base">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                     Yes
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">ckBTC</div>
+                </td>
+                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
+                  <div className="inline-flex items-center justify-center gap-1 text-green-600 font-semibold text-xs sm:text-sm lg:text-base">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                    39
                   </div>
                   <div className="text-xs text-gray-600 mt-1">All Africa</div>
                 </td>
@@ -297,11 +307,14 @@ const SavingsComparisonTable: React.FC = () => {
                 <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-6 text-center">
                   <div className="text-xs sm:text-sm lg:text-base text-gray-600">Min - Hours</div>
                 </td>
-                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-6 text-center">
+                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
                   <div className="text-xs sm:text-sm lg:text-base text-gray-600">No</div>
                 </td>
-                <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">200+ Countries</div>
+                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
+                  <div className="text-xs sm:text-sm lg:text-base text-gray-600">No</div>
+                </td>
+                <td className="py-4 sm:py-5 lg:py-6 px-2 sm:px-3 lg:px-4 text-center">
+                  <div className="text-xs sm:text-sm lg:text-base text-gray-600">200+</div>
                 </td>
               </tr>
 
@@ -321,7 +334,10 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-sm sm:text-base text-gray-600">No</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">200+ Countries</div>
+                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                </td>
+                <td className="py-6 px-4 sm:px-6 text-center">
+                  <div className="text-sm sm:text-base text-gray-600">200+</div>
                 </td>
               </tr>
 
@@ -341,7 +357,10 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="text-sm sm:text-base text-gray-600">No</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">150+ Countries</div>
+                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                </td>
+                <td className="py-6 px-4 sm:px-6 text-center">
+                  <div className="text-sm sm:text-base text-gray-600">150+</div>
                 </td>
               </tr>
 
@@ -362,6 +381,9 @@ const SavingsComparisonTable: React.FC = () => {
                   <div className="inline-flex items-center gap-1 text-green-600">
                     <Check className="w-5 h-5" />
                   </div>
+                </td>
+                <td className="py-6 px-4 sm:px-6 text-center">
+                  <div className="text-sm sm:text-base text-gray-600">No</div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
                   <div className="text-sm sm:text-base text-gray-600">East Africa</div>
@@ -387,6 +409,9 @@ const SavingsComparisonTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
+                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                </td>
+                <td className="py-6 px-4 sm:px-6 text-center">
                   <div className="text-sm sm:text-base text-gray-600">West/Central</div>
                 </td>
               </tr>
@@ -410,7 +435,10 @@ const SavingsComparisonTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="py-6 px-4 sm:px-6 text-center">
-                  <div className="text-sm sm:text-base text-gray-600">14 Countries</div>
+                  <div className="text-sm sm:text-base text-gray-600">No</div>
+                </td>
+                <td className="py-6 px-4 sm:px-6 text-center">
+                  <div className="text-sm sm:text-base text-gray-600">14</div>
                 </td>
               </tr>
             </tbody>
