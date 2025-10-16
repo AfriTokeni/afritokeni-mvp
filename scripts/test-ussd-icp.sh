@@ -36,15 +36,17 @@ if [ -z "$CKBTC_CANISTER" ]; then
 fi
 
 echo "✅ ckBTC Ledger deployed at: $CKBTC_CANISTER"
+echo "✅ ckUSDC Ledger deployed at: $CKUSDC_CANISTER"
 
 # Export for tests
 export CKBTC_LEDGER_CANISTER_ID=$CKBTC_CANISTER
+export CKUSDC_LEDGER_CANISTER_ID=$CKUSDC_CANISTER
 
-# Run integration tests
+# Run USSD tests
 echo ""
-echo "🧪 Running USSD ckBTC integration tests..."
+echo "🧪 Running USSD tests against real ICP..."
 echo "=========================================="
-npm run test:integration
+npm run test:ussd
 
 # Cleanup
 echo ""
