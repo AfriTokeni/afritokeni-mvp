@@ -5,36 +5,39 @@
   "type": "module",
   "scripts": {
     "dev": "vite --force",
-    "juno:dev-start": "juno dev start",
-    "juno:dev-stop": "juno dev stop",
-    "juno:dev-publish": "juno config apply -m development",
-    "juno:dev-login": "juno login --mode development --emulator",
     "build": "tsc -b && vite build",
-    "build:backend": "tsc --project tsconfig.backend.json",
-    "start:backend": "node dist/services/server.js",
-    "dev:sms": "tsx src/services/smsServer.ts",
-    "build:sms": "tsc --project tsconfig.backend.json",
-    "start:sms": "node dist/services/smsServer.js",
-    "prime-demo-data": "tsx scripts/primeDemoData.ts",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    
+    "backend:build": "tsc --project tsconfig.backend.json",
+    "backend:start": "node dist/services/server.js",
+    
+    "sms:dev": "tsx src/services/smsServer.ts",
+    "sms:build": "tsc --project tsconfig.backend.json",
+    "sms:start": "node dist/services/smsServer.js",
+    
+    "juno:dev:start": "juno dev start",
+    "juno:dev:stop": "juno dev stop",
+    "juno:dev:publish": "juno config apply -m development",
+    "juno:dev:login": "juno login --mode development --emulator",
+    
+    "data:seed": "tsx scripts/primeDemoData.ts",
     
     "test": "npm run test:all",
     "test:all": "cucumber-js 'tests/features/**/*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:watch": "cucumber-js tests/features/icp-integration.feature --require 'tests/features/step-definitions/{shared-steps,icp-integration-steps}.ts' --require-module tsx",
-    
     "test:ussd": "cucumber-js 'tests/features/{ussd-handlers,ussd-integration,ussd-errors,ussd-state,ussd-service}.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:ussd:icp": "./scripts/test-ussd-icp.sh",
-    
     "test:original": "cucumber-js 'tests/features/{ckbtc,ckusdc,fiat,ussd,error-handling,multi-currency,agent-flows,icp-integration}.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx --tags '@integration'",
     "test:original:icp": "dfx start --clean --background && dfx deploy ckbtc_ledger ckusdc_ledger && npm run test:original && dfx stop",
     
     "icp:start": "dfx start --clean --background",
     "icp:stop": "dfx stop",
     "icp:deploy": "dfx deploy ckbtc_ledger ckusdc_ledger",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "format": "prettier --write .",
-    "postinstall:copy-auth": "node -e \"require('fs').cpSync('node_modules/@junobuild/core/dist/workers/', './public/workers', {recursive: true});\"",
-    "postinstall": "npm run postinstall:copy-auth"
+    
+    "postinstall": "npm run postinstall:copy-auth",
+    "postinstall:copy-auth": "node -e \"require('fs').cpSync('node_modules/@junobuild/core/dist/workers/', './public/workers', {recursive: true});\""
   },
   "dependencies": {
     "@dfinity/agent": "^3.2.7",
