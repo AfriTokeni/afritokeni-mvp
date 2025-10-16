@@ -6,8 +6,6 @@ import { User } from '../types/auth';
 import { AnonymousIdentity } from "@dfinity/agent";
 import type { SatelliteOptions } from "@junobuild/core";
 import { AfricanCurrency } from '../types/currency';
-import { Principal } from '@dfinity/principal';
-import { createHash } from 'crypto';
 
 // Node.js process declaration for environment variables
 // declare const process: {
@@ -23,27 +21,9 @@ const satellite:SatelliteOptions = {
   container: false
 };
 
-/**
- * Generate a deterministic ICP Principal ID from phone number
- * This creates a self-authenticating Principal that can be used for ICP operations
- */
-function generatePrincipalFromPhone(phoneNumber: string): string {
-  // Create a deterministic hash from phone number
-  const hash = createHash('sha256').update(`afritokeni-sms-${phoneNumber}`).digest();
-  
-  // Take first 29 bytes for Principal (ICP Principals are typically 29 bytes)
-  const principalBytes = hash.slice(0, 29);
-  
-  // Create Principal from bytes
-  const principal = Principal.fromUint8Array(principalBytes);
-  
-  return principal.toText();
-}
-
 // Interface for user data as stored in Juno (with string dates)
 interface UserDataFromJuno {
   id: string;
-  principalId?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -226,15 +206,8 @@ export class WebhookDataService {
     preferredCurrency?: string; // User's preferred currency (auto-detected from phone)
   }): Promise<User> {
     const now = new Date();
-    
-    // Generate Principal ID for SMS users (deterministic from phone number)
-    const principalId = userData.authMethod === 'sms' 
-      ? generatePrincipalFromPhone(userData.email) 
-      : undefined;
-    
     const newUser: User = {
       id: userData.id || nanoid(), // Use provided ID or generate new one
-      principalId, // ICP Principal ID for blockchain operations
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
@@ -245,9 +218,6 @@ export class WebhookDataService {
       preferredCurrency: userData.preferredCurrency || 'UGX',
       createdAt: now
     };
-    
-    console.log(`📝 Creating user with Principal ID: ${principalId || 'none (web user)'}`);
-
 
     // Convert Date fields to ISO strings for Juno storage
     const dataForJuno = {
@@ -297,7 +267,6 @@ export class WebhookDataService {
       const rawData = doc.data as UserDataFromJuno;
       const user: User = {
         id: rawData.id,
-        principalId: rawData.principalId,
         firstName: rawData.firstName,
         lastName: rawData.lastName,
         email: rawData.email,
