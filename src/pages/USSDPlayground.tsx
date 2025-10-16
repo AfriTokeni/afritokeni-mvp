@@ -387,7 +387,7 @@ Type HELP for commands or *384*22948# for main menu.
 Thank you for using AfriTokeni!`;
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputCommand.trim()) return;
 
     const now = new Date();
@@ -402,16 +402,14 @@ Thank you for using AfriTokeni!`;
 
     setMessages(prev => [...prev, sentMessage]);
 
-    // Simulate response delay
-    setTimeout(async () => {
-      const response = await processCommand(inputCommand);
-      const receivedMessage: Message = {
-        type: 'received',
-        text: response,
-        timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, receivedMessage]);
-    }, 500);
+    // Process command immediately (no artificial delay)
+    const response = await processCommand(inputCommand);
+    const receivedMessage: Message = {
+      type: 'received',
+      text: response,
+      timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages(prev => [...prev, receivedMessage]);
 
     setInputCommand('');
   };
