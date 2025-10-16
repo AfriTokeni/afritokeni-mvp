@@ -76,7 +76,8 @@ Please select an option:
 1. Local Currency (UGX)
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
-4. Help
+4. DAO Governance
+5. Help
 
 Note: Registration is automatic
 when you dial for the first time`;
@@ -282,6 +283,20 @@ Visit: afritokeni.com
 Thank you for using AfriTokeni!`;
     }
 
+    // Option 4: DAO Governance
+    if (upperCmd === '4') {
+      return `🗳️ DAO Governance
+
+Vote on proposals via SMS!
+
+1. View Proposals
+2. My Voting Power
+3. Active Votes
+0. Back
+
+Coming soon: Vote on AfriTokeni governance proposals directly from your phone!`;
+    }
+
     // Back to Main Menu (0)
     if (upperCmd === '0') {
       return `📱 AfriTokeni Menu
@@ -290,7 +305,8 @@ Please select an option:
 1. Local Currency (UGX)
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
-4. Help`;
+4. DAO Governance
+5. Help`;
     }
 
     // Transaction history

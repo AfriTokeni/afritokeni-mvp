@@ -13,13 +13,17 @@ Given('I am a registered USSD user with {int} AFRI tokens', async function (afri
   world.lockedTokens = 0;
   world.userVotes = [];
   
-  // Create USSD session
+  // Create USSD session with DAO data
   world.ussdSession = await USSDTestHelper.createMockSession(
     world.ussdSessionId,
     world.ussdPhoneNumber,
     'main',
     0,
-    { afriTokens, lockedTokens: 0 }
+    { 
+      afriTokens, 
+      lockedTokens: 0,
+      userVotes: []
+    }
   );
 });
 
@@ -57,7 +61,7 @@ Given('I have voted on {int} proposals', function (count: number) {
   world.lockedTokens = world.userVotes.reduce((sum, vote) => sum + vote.amount, 0);
 });
 
-Given('I have already voted on proposal {int}', function (proposalNum: number) {
+Given('I have already voted on proposal {int}', async function (proposalNum: number) {
   world.userVotes = [{
     proposalId: `PROP-${proposalNum}`,
     choice: 'yes',
@@ -65,6 +69,12 @@ Given('I have already voted on proposal {int}', function (proposalNum: number) {
     timestamp: new Date()
   }];
   world.lockedTokens = 1000;
+  
+  // Update session data
+  if (world.ussdSession) {
+    world.ussdSession.data.userVotes = world.userVotes;
+    world.ussdSession.data.lockedTokens = 1000;
+  }
 });
 
 // ========== When Steps ==========

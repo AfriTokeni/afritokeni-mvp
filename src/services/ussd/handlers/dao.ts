@@ -300,11 +300,12 @@ async function handleVotingPower(input: string, session: USSDSession): Promise<s
   
   return endSession(`Your Voting Power
 
-Total AFRI: ${afriTokens}
-Available: ${available} AFRI
-Locked in votes: ${lockedTokens} AFRI
+${afriTokens} AFRI
+${lockedTokens} AFRI locked
 
-Locked tokens will be released when proposals end.
+Available: ${available} AFRI
+
+Locked tokens released when proposals end.
 
 Thank you for using AfriTokeni!`);
 }
