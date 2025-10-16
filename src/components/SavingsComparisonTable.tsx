@@ -238,109 +238,114 @@ const SavingsComparisonTable: React.FC = () => {
           </div>
         </div>
 
-        {/* Desktop Table - Stripe Style */}
-        <div className="hidden sm:block overflow-hidden rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-200/60">
+        {/* Desktop Table - Premium SaaS Style */}
+        <div className="hidden sm:block overflow-hidden rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-gray-200">
           <table className="w-full border-collapse bg-white min-w-[640px]">
             <thead>
-              <tr className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900">
-                <th className="text-left py-4 px-6 text-white font-medium text-sm">
+              <tr className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
+                <th className="text-left py-5 px-8 text-white/90 font-semibold text-sm tracking-wide">
                   Provider
                 </th>
-                <th className="text-center py-4 px-4 text-white font-medium text-sm">
-                  Fee
+                <th className="text-center py-5 px-6 text-white/90 font-semibold text-sm tracking-wide">
+                  Transfer Fee
                 </th>
-                <th className="text-center py-4 px-4 text-white font-medium text-sm">
+                <th className="text-center py-5 px-6 text-white/90 font-semibold text-sm tracking-wide">
                   Speed
                 </th>
-                <th className="text-center py-4 px-4 text-white font-medium text-sm">
-                  USSD Access
+                <th className="text-center py-5 px-6 text-white/90 font-semibold text-sm tracking-wide">
+                  USSD
                 </th>
-                <th className="text-center py-4 px-4 text-white font-medium text-sm">
+                <th className="text-center py-5 px-6 text-white/90 font-semibold text-sm tracking-wide">
                   Bitcoin
                 </th>
-                <th className="text-center py-4 px-4 text-white font-medium text-sm">
-                  Countries
+                <th className="text-center py-5 px-6 text-white/90 font-semibold text-sm tracking-wide">
+                  Coverage
                 </th>
               </tr>
             </thead>
             <tbody>
-              {/* AfriTokeni Row - Premium Highlight */}
-              <tr className="border-b border-blue-100 bg-gradient-to-r from-blue-50/50 via-white to-blue-50/50 hover:from-blue-50 hover:to-blue-50 transition-all duration-200 relative">
-                <td className="py-5 px-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center font-bold text-white text-base shadow-lg shadow-blue-500/20">
-                      A
+              {/* AfriTokeni Row - Premium Hero */}
+              <tr className="relative border-b-2 border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50/30 to-blue-50 hover:from-blue-100/80 hover:via-indigo-100/40 hover:to-blue-100/80 transition-all duration-300 group">
+                <td className="py-7 px-8">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-xl shadow-blue-500/30 ring-2 ring-blue-100">
+                        A
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900 text-base">AfriTokeni</span>
-                        <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-medium">Recommended</span>
+                      <div className="flex items-center gap-2.5 mb-1">
+                        <span className="font-bold text-gray-900 text-base">AfriTokeni</span>
+                        <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs px-2.5 py-1 rounded-full font-semibold shadow-sm">
+                          Recommended
+                        </span>
                       </div>
-                      <div className="text-xs text-gray-500 capitalize mt-0.5">{location} Rate</div>
+                      <div className="text-xs text-gray-600 font-medium capitalize">{location} Rate</div>
                     </div>
                   </div>
                 </td>
-                <td className="py-5 px-4 text-center">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                <td className="py-7 px-6 text-center">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent">
                     ${afriTokeniFee.toFixed(2)}
                   </div>
-                  <div className="text-xs text-green-600 font-semibold mt-1">
-                    {afriTokeniFeePercent}% fee
+                  <div className="text-xs text-emerald-600 font-bold mt-1.5 tracking-wide">
+                    {afriTokeniFeePercent}% FEE
                   </div>
                 </td>
-                <td className="py-5 px-4 text-center">
-                  <div className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-sm font-medium">
-                    <Zap className="w-3.5 h-3.5 fill-current" />
+                <td className="py-7 px-6 text-center">
+                  <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold border border-green-200/50">
+                    <Zap className="w-4 h-4 fill-current" />
                     Instant
                   </div>
-                  <div className="text-xs text-gray-500 mt-1.5">&lt;1 sec</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium">&lt;1 second</div>
                 </td>
-                <td className="py-5 px-4 text-center">
-                  <div className="inline-flex items-center justify-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-sm font-medium">
-                    <Check className="w-3.5 h-3.5" />
+                <td className="py-7 px-6 text-center">
+                  <div className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold border border-green-200/50">
+                    <Check className="w-4 h-4 stroke-[2.5]" />
                     Yes
                   </div>
-                  <div className="text-xs text-gray-500 mt-1.5">*229#</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium">*229#</div>
                 </td>
-                <td className="py-5 px-4 text-center">
-                  <div className="inline-flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full text-sm font-medium">
-                    <Bitcoin className="w-3.5 h-3.5" />
+                <td className="py-7 px-6 text-center">
+                  <div className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 px-4 py-2 rounded-lg text-sm font-semibold border border-orange-200/50">
+                    <Bitcoin className="w-4 h-4" />
                     Yes
                   </div>
-                  <div className="text-xs text-orange-600 mt-1.5 font-medium">ckBTC</div>
+                  <div className="text-xs text-orange-600 mt-2 font-bold">ckBTC</div>
                 </td>
-                <td className="py-5 px-4 text-center">
-                  <div className="text-base font-semibold text-gray-900">39</div>
-                  <div className="text-xs text-gray-500 mt-1">All Africa</div>
+                <td className="py-7 px-6 text-center">
+                  <div className="text-xl font-bold text-gray-900">39</div>
+                  <div className="text-xs text-gray-500 mt-1 font-medium">All Africa</div>
                 </td>
               </tr>
 
               {/* Western Union Row */}
-              <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors duration-150">
-                <td className="py-4 px-6">
+              <tr className="border-b border-gray-100 hover:bg-slate-50/50 transition-all duration-200">
+                <td className="py-5 px-8">
                   <div className="font-semibold text-gray-900 text-sm">Western Union</div>
-                  <div className="text-xs text-gray-500 mt-0.5">International</div>
+                  <div className="text-xs text-gray-500 mt-0.5">International Transfer</div>
                 </td>
-                <td className="py-4 px-4 text-center">
+                <td className="py-5 px-6 text-center">
                   <div className="text-xl font-bold text-gray-900">${westernUnionFee.toFixed(2)}</div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <div className="text-sm text-gray-600">Min - Hours</div>
+                <td className="py-5 px-6 text-center">
+                  <div className="text-sm text-gray-600 font-medium">Minutes - Hours</div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <div className="inline-flex items-center gap-1.5 text-gray-400 text-sm">
-                    <X className="w-3.5 h-3.5" />
+                <td className="py-5 px-6 text-center">
+                  <div className="inline-flex items-center gap-1.5 text-gray-400 text-sm font-medium">
+                    <X className="w-4 h-4 stroke-2" />
                     No
                   </div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <div className="inline-flex items-center gap-1.5 text-gray-400 text-sm">
-                    <X className="w-3.5 h-3.5" />
+                <td className="py-5 px-6 text-center">
+                  <div className="inline-flex items-center gap-1.5 text-gray-400 text-sm font-medium">
+                    <X className="w-4 h-4 stroke-2" />
                     No
                   </div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <div className="text-sm text-gray-600 font-medium">200+</div>
+                <td className="py-5 px-6 text-center">
+                  <div className="text-sm text-gray-700 font-semibold">200+</div>
                 </td>
               </tr>
 
