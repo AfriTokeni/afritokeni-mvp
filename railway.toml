@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "npm install --legacy-peer-deps --include=dev && npm run build:backend"
 
 [deploy]
-startCommand = "npm run start:backend"
+startCommand = "npm run backend:start"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"

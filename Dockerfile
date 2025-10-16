@@ -12,10 +12,10 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Build the backend
-RUN npm run build:backend
+RUN npm run backend:build
 
 # Expose port
 EXPOSE 3001
 
 # Start the server
-CMD ["npm", "run", "start:backend"]
+CMD ["npm", "run", "backend:start"]
