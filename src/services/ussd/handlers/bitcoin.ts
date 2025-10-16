@@ -95,44 +95,39 @@ Please select an option:
   }
 }
 
-// In your USSD server - modified Bitcoin balance handler
+// Bitcoin balance handler - matches USDC pattern exactly
 async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
-  // If PIN already verified, skip to showing balance
-  if (session.data.pinVerified || session.step === 0) {
-    session.step = 2; // Skip PIN verification
-  }
-  
-  if (session.step === 1) {
-    // PIN verification
-    if (!/^\d{4}$/.test(sanitized_input)) {
-      return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
-    }
-    
-    const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
-    if (!pinCorrect) {
-      return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
-    }
-    
-    // PIN verified, proceed to show balance
-    session.step = 2;
-  }
-  
-  if (session.step === 2) {
-    // Show balance (PIN already verified or skipped)
+  switch (session.step) {
+    case 1: {
+      // PIN verification step
+      if (!/^\d{4}$/.test(sanitized_input)) {
+        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      }
       
+      // Verify PIN
+      const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+      if (!pinCorrect) {
+        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      }
+      
+      // Get Bitcoin balance using real CkBTCService
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
           return endSession('User not found. Please try again later.');
         }
         
-        // Use CkBTCService to get balance with local currency equivalent
+        // Use the user's Principal ID for ICP blockchain operations
         const currency = getSessionCurrency(session);
+        const principalId = (user as any).principalId || user.id; // Fallback to user.id for legacy users
+        
+        console.log(`📊 Fetching ckBTC balance for Principal: ${principalId}`);
+        
         const balance = await CkBTCService.getBalanceWithLocalCurrency(
-          user.id, 
+          principalId, 
           currency, 
           true // Use satellite for SMS/USSD operations
         );
@@ -152,12 +147,11 @@ Thank you for using AfriTokeni!`);
         console.error('Error retrieving ckBTC balance:', error);
         return endSession('Error retrieving ckBTC balance.\nPlease try again later.');
       }
+    }
+    
+    default:
+      return endSession('Invalid session state. Please try again.');
   }
-  
-  // Default case
-  session.currentMenu = 'bitcoin';
-  session.step = 0;
-  return handleBitcoin('', session);
 }
 
 async function handleBTCRate(input: string, session: USSDSession): Promise<string> {
