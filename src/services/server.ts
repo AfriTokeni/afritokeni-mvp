@@ -290,6 +290,7 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
     console.log(`📱 USSD Request - Session: ${sessionId}, Phone: ${phoneNumber}, Text: "${text}"`);
     
     const session = getOrCreateSession(sessionId, phoneNumber);
+    console.log(`🔍 Current session state - Menu: ${session.currentMenu}, Step: ${session.step}`);
     let response: string;
 
     // Route to appropriate handler based on current menu
@@ -373,6 +374,9 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
         response = await handleRegistrationCheck('', session, sendSMSNotification, hasUserPin);
     }
 
+    // Log session state after handler
+    console.log(`✅ After handler - Menu: ${session.currentMenu}, Step: ${session.step}`);
+    
     // Clean up session if ended
     if (response.startsWith('END')) {
       ussdSessions.delete(sessionId);
