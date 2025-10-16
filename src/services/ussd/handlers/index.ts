@@ -5,13 +5,14 @@
 
 export * from './registration.js';
 export * from './pinManagement.js';
-export * from './mainMenu.js';
-export * from './localCurrency.js';
-export * from './agents.js';
-export * from './deposit.js';
-export * from './withdraw.js';
-export * from './sendMoney.js';
-export * from './bitcoin.js';
+export { handleMainMenu } from './mainMenu.js';
+export { handleLocalCurrency } from './localCurrency.js';
+export { handleSendMoney } from './sendMoney.js';
+export { handleWithdraw } from './withdraw.js';
+export { handleDeposit } from './deposit.js';
+export { handleFindAgent } from './agents.js';
+export { handleBitcoin } from './bitcoin.js';
+export { handleDAO } from './dao.js';
 export * from './usdc.js';
 
 // Export init functions

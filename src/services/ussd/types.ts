@@ -6,7 +6,7 @@
 export interface USSDSession {
   sessionId: string;
   phoneNumber: string;
-  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'local_currency' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'find_agent' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell' | 'usdc_send';
+  currentMenu: 'registration_check' | 'user_registration' | 'verification' | 'pin_check' | 'pin_setup' | 'main' | 'local_currency' | 'send_money' | 'withdraw' | 'check_balance' | 'transaction_history' | 'deposit' | 'find_agent' | 'bitcoin' | 'btc_balance' | 'btc_rate' | 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc' | 'usdc_balance' | 'usdc_rate' | 'usdc_buy' | 'usdc_sell' | 'usdc_send' | 'dao' | 'dao_proposals' | 'dao_voting_power' | 'dao_active_votes';
   data: {
     amount?: number;
     withdrawAmount?: number;

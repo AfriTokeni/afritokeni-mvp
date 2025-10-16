@@ -10,6 +10,7 @@ import { handleSendMoney } from './ussd/handlers/sendMoney';
 import { handleWithdraw } from './ussd/handlers/withdraw';
 import { handleDeposit } from './ussd/handlers/deposit';
 import { handleFindAgent } from './ussd/handlers/agents';
+import { handleDAO } from './ussd/handlers/dao';
 
 // Re-export for backward compatibility
 export type { USSDSession };
@@ -150,7 +151,7 @@ export class USSDService {
       
       switch (session.currentMenu) {
         case 'main':
-          response = await handleMainMenu(input, session, handleLocalCurrency, handleBitcoin, async () => 'USDC Menu');
+          response = await handleMainMenu(input, session, handleLocalCurrency, handleBitcoin, async () => 'USDC Menu', handleDAO);
           break;
         
         case 'local_currency':
@@ -182,6 +183,13 @@ export class USSDService {
         case 'btc_balance':
         case 'btc_rate':
           response = await handleBitcoin(input, session);
+          break;
+        
+        case 'dao':
+        case 'dao_proposals':
+        case 'dao_voting_power':
+        case 'dao_active_votes':
+          response = await handleDAO(input, session);
           break;
         
         default:

@@ -15,7 +15,8 @@ export async function handleMainMenu(
   session: USSDSession,
   handleLocalCurrency: any,
   handleBitcoin: any,
-  handleUSDC: any
+  handleUSDC: any,
+  handleDAO?: any
 ): Promise<string> {
   const currency = getSessionCurrency(session);
   if (!input) {
@@ -24,7 +25,8 @@ Please select an option:
 1. Local Currency (${currency})
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
-4. Help`);
+4. DAO Governance
+5. Help`);
   }
 
   console.log(`Main menu input: ${input}`);
@@ -49,13 +51,22 @@ Please select an option:
       session.step = 0;
       return handleUSDC('', session);
     
-    case '4': {
+    case '4':
+      if (handleDAO) {
+        session.currentMenu = 'dao';
+        session.step = 0;
+        return handleDAO('', session);
+      }
+      return continueSession(`DAO Governance coming soon!`);
+    
+    case '5': {
       const currency = getSessionCurrency(session);
       return endSession(`AfriTokeni Help
 
 Local Currency: Send, deposit, withdraw ${currency}
 Bitcoin: Buy, sell, send ckBTC
 USDC: Buy, sell, send USDC stablecoin
+DAO: Vote on governance proposals
 
 For support: Call +256-XXX-XXXX
 Visit: afritokeni.com
@@ -69,7 +80,8 @@ Thank you for using AfriTokeni!`);
 1. Local Currency (${currency})
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
-4. Help`);
+4. DAO Governance
+5. Help`);
     }
   }
 }
