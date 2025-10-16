@@ -234,7 +234,7 @@ When('I confirm the transaction', async function () {
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,
     world.ussdPhoneNumber,
-    '1' // Assuming 1 is confirm
+    '1234' // Enter PIN to confirm
   );
   
   world.ussdResponse = result.response;
@@ -258,7 +258,7 @@ When('I confirm withdrawal', async function () {
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,
     world.ussdPhoneNumber,
-    '1' // Assuming 1 is confirm
+    '1234' // Enter PIN to confirm
   );
   
   world.ussdResponse = result.response;

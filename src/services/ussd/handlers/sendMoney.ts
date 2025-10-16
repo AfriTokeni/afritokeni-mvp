@@ -64,62 +64,22 @@ Thank you for using AfriTokeni!`);
       session.data.amount = amount;
       session.data.fee = fee;
       session.step = 2;
-      return continueSession(`Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+      
+      // Get recipient info (already stored in step 0)
+      const recipientPhone = session.data.recipientPhone;
+      
+      return continueSession(`Send Money Confirmation:
+Recipient: ${recipientPhone}
+Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
 Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 
-Enter recipient phone number (256XXXXXXXXX):`);
+Enter your 4-digit PIN to confirm:`);
     }
     
     case 2: {
-      // Step 2: Enter recipient phone number and verify they exist
-      if (!currentInput.match(/^256\d{9}$/)) {
-        return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
-      }
-
-      console.log(`Searching for user by phone number: ${currentInput}`);
-
-      // Use the findUserByPhoneNumber method to find recipient
-      let recipient = await DataService.findUserByPhoneNumber(currentInput);
-      
-      if (!recipient) {
-        // Try with + prefix
-        recipient = await DataService.findUserByPhoneNumber(`+${currentInput}`);
-      }
-      
-      if (!recipient) {
-        return continueSession(`Phone number ${currentInput} is not registered with AfriTokeni.
-        
-Please enter a valid recipient phone number (256XXXXXXXXX):`);
-      }
-
-      // Don't allow sending money to yourself
-      if (currentInput === session.phoneNumber) {
-        return continueSession(`You cannot send money to yourself.
-
-Please enter a different recipient phone number (256XXXXXXXXX):`);
-      }
-
-      session.data.recipientPhone = currentInput;
-      session.data.recipientId = recipient.id;
-      session.data.recipientName = `${recipient.firstName} ${recipient.lastName}`;
-      session.step = 3;
-      
-      const amount = session.data.amount || 0;
-      const fee = session.data.fee || 0;
-      
-      return continueSession(`Recipient: ${recipient.firstName} ${recipient.lastName}
-Phone: ${currentInput}
-Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
-Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
-Total: ${getSessionCurrency(session)} ${(amount + fee).toLocaleString()}
-
-Enter your PIN to confirm:`);
-    }
-    
-    case 3: {
-      // Step 3: Verify PIN and process transaction
-      const isValidPin = await verifyUserPin(session.phoneNumber, currentInput);
+      // Step 2: Verify PIN and process transaction
+      const isValidPin = await DataService.verifyUserPin(`+${session.phoneNumber}`, currentInput);
       if (!isValidPin) {
         // Increment pin attempts
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
