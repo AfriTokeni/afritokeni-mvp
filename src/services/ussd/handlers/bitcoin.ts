@@ -24,6 +24,8 @@ async function handleBitcoin(input: string, session: USSDSession): Promise<strin
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   
+  console.log(`🔵 handleBitcoin called - input: "${input}", currentInput: "${currentInput}", session.currentMenu: ${session.currentMenu}, session.step: ${session.step}`);
+  
   if (!currentInput) {
     return continueSession(`Bitcoin (ckBTC)
 Please select an option:
@@ -37,8 +39,10 @@ Please select an option:
   
   switch (currentInput) {
     case '2.1':
+      console.log(`🟢 Changing menu from ${session.currentMenu} to btc_balance`);
       session.currentMenu = 'btc_balance';
       session.step = 1;
+      console.log(`🟢 Menu changed to: ${session.currentMenu}, step: ${session.step}`);
       // Skip PIN if already verified
       if (session.data.pinVerified) {
         return await handleBTCBalance(input, session);
