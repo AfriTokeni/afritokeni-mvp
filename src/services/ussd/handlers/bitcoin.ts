@@ -96,24 +96,23 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
     session.step = 2; // Skip PIN verification
   }
   
-  switch (session.step) {
-    case 1: {
-      // PIN verification
-      if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
-      }
-      
-      const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
-      if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
-      }
-      
-      // PIN verified, proceed to show balance
-      session.step = 2;
+  if (session.step === 1) {
+    // PIN verification
+    if (!/^\d{4}$/.test(sanitized_input)) {
+      return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
     }
     
-    case 2: {
-      // Show balance (PIN already verified or skipped)
+    const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+    if (!pinCorrect) {
+      return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+    }
+    
+    // PIN verified, proceed to show balance
+    session.step = 2;
+  }
+  
+  if (session.step === 2) {
+    // Show balance (PIN already verified or skipped)
       
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
@@ -144,13 +143,12 @@ Thank you for using AfriTokeni!`);
         console.error('Error retrieving ckBTC balance:', error);
         return endSession('Error retrieving ckBTC balance.\nPlease try again later.');
       }
-    }
-    
-    default:
-      session.currentMenu = 'bitcoin';
-      session.step = 0;
-      return handleBitcoin('', session);
   }
+  
+  // Default case
+  session.currentMenu = 'bitcoin';
+  session.step = 0;
+  return handleBitcoin('', session);
 }
 
 async function handleBTCRate(input: string, session: USSDSession): Promise<string> {
@@ -162,29 +160,28 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
     session.step = 2;
   }
   
-  switch (session.step) {
-    case 1: {
-      // PIN verification step
-      if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
-      }
-      
-      // Verify PIN
-      const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
-      if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
-      }
-      
-      session.step = 2;
+  if (session.step === 1) {
+    // PIN verification step
+    if (!/^\d{4}$/.test(sanitized_input)) {
+      return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
     }
     
-    case 2: {
-      // Display current BTC rate using getExchangeRate
-      try {
-        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
-        const lastUpdated = exchangeRate.lastUpdated.toLocaleString();
-        
-        return endSession(`Bitcoin Exchange Rate
+    // Verify PIN
+    const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+    if (!pinCorrect) {
+      return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+    }
+    
+    session.step = 2;
+  }
+  
+  if (session.step === 2) {
+    // Display current BTC rate using getExchangeRate
+    try {
+      const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
+      const lastUpdated = exchangeRate.lastUpdated.toLocaleString();
+      
+      return endSession(`Bitcoin Exchange Rate
 
 1 BTC = ${getSessionCurrency(session)} ${exchangeRate.rate.toLocaleString()}
 
@@ -197,21 +194,20 @@ Buy/Sell spreads may apply
 ckBTC provides instant Bitcoin transfers with minimal fees on ICP.
 
 Thank you for using AfriTokeni!`);
-        
-      } catch (error) {
-        console.error('Error retrieving BTC rate:', error);
-        return endSession(`Error retrieving BTC rate.
+      
+    } catch (error) {
+      console.error('Error retrieving BTC rate:', error);
+      return endSession(`Error retrieving BTC rate.
 Please try again later.
 
 Thank you for using AfriTokeni!`);
-      }
     }
-    
-    default:
-      session.currentMenu = 'bitcoin';
-      session.step = 0;
-      return handleBitcoin('', session);
   }
+  
+  // Default case
+  session.currentMenu = 'bitcoin';
+  session.step = 0;
+  return handleBitcoin('', session);
 }
 
 async function handleBTCBuy(input: string, session: USSDSession): Promise<string> {
