@@ -12,7 +12,6 @@ Feature: USSD End-to-End Integration
     Then I should see my balance "100000"
     And the session should end
 
-  @pending
   Scenario: Complete send money flow
     Given recipient "+256700999888" exists
     When I dial "*229#" for integration
@@ -25,7 +24,6 @@ Feature: USSD End-to-End Integration
     And my balance should be 75000
     And a transaction should be created
 
-  @pending
   Scenario: Complete withdrawal flow
     Given agent "Agent-001" is available
     When I dial "*229#" for integration
@@ -38,7 +36,6 @@ Feature: USSD End-to-End Integration
     And the code should start with "WD-"
     And a withdrawal transaction should be created
 
-  @pending
   Scenario: Complete deposit flow
     Given agent "Agent-001" is available
     When I dial "*229#" for integration

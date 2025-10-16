@@ -24,8 +24,8 @@ export async function handleSendMoney(input: string, session: USSDSession, sendS
         return continueSession('Send Money\nEnter recipient phone number:');
       }
       
-      // Validate phone number format
-      const phoneRegex = /^(\+?256|0)?[37]\d{8}$/;
+      // Validate phone number format (accepts +256XXXXXXXXX, 256XXXXXXXXX, 07XXXXXXXX, 03XXXXXXXX)
+      const phoneRegex = /^(\+?256[37]\d{8}|0[37]\d{8})$/;
       if (!phoneRegex.test(currentInput)) {
         return continueSession('Invalid phone number format.\nEnter recipient phone (256XXXXXXXXX):');
       }

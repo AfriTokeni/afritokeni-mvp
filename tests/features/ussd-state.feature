@@ -30,7 +30,6 @@ Feature: USSD State Management
     When I make a request
     Then the session last activity should be recent
 
-  @pending
   Scenario: Back to main menu clears session data
     Given I am in send money menu with data
     When I select option "0"
