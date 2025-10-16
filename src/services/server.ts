@@ -48,7 +48,17 @@ import {
   handleWithdraw,
   handleSendMoney,
   handleBitcoin,
+  handleBTCBalance,
+  handleBTCRate,
+  handleBTCBuy,
+  handleBTCSell,
+  handleBTCSend,
   handleUSDC,
+  handleUSDCBalance,
+  handleUSDCRate,
+  handleUSDCBuy,
+  handleUSDCSell,
+  handleUSDCSend,
   // Initialization
   initBitcoinHandlers,
   initUSDCHandlers
@@ -324,23 +334,37 @@ app.post('/api/ussd', async (req: Request, res: Response) => {
         response = await handleBitcoin(text, session);
         break;
       case 'btc_balance':
+        response = await handleBTCBalance(text, session);
+        break;
       case 'btc_rate':
+        response = await handleBTCRate(text, session);
+        break;
       case 'btc_buy':
+        response = await handleBTCBuy(text, session);
+        break;
       case 'btc_sell':
+        response = await handleBTCSell(text, session);
+        break;
       case 'btc_send':
-        // Legacy - now handled by ussdService.ts via handleBitcoin
-        response = await handleBitcoin(text, session);
+        response = await handleBTCSend(text, session);
         break;
       case 'usdc':
         response = await handleUSDC(text, session);
         break;
       case 'usdc_balance':
+        response = await handleUSDCBalance(text, session);
+        break;
       case 'usdc_rate':
+        response = await handleUSDCRate(text, session);
+        break;
       case 'usdc_buy':
+        response = await handleUSDCBuy(text, session);
+        break;
       case 'usdc_sell':
+        response = await handleUSDCSell(text, session);
+        break;
       case 'usdc_send':
-        // Legacy - now handled by ussdService.ts via handleUSDC
-        response = await handleUSDC(text, session);
+        response = await handleUSDCSend(text, session);
         break;
       case 'withdraw':
         response = await handleWithdraw(text, session, sendSMSNotification, handleMainMenu);

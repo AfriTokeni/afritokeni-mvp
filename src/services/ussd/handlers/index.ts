@@ -11,7 +11,7 @@ export { handleSendMoney } from './sendMoney.js';
 export { handleWithdraw } from './withdraw.js';
 export { handleDeposit } from './deposit.js';
 export { handleFindAgent } from './agents.js';
-export { handleBitcoin } from './bitcoin.js';
+export { handleBitcoin, handleBTCBalance, handleBTCRate, handleBTCBuy, handleBTCSell, handleBTCSend } from './bitcoin.js';
 export { handleDAO } from './dao.js';
 export * from './usdc.js';
 
