@@ -143,6 +143,9 @@ const LandingPage: React.FC = () => {
               <br />
               <span className="text-orange-600">in under 1 second</span>
             </h1>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-6xl mx-auto px-4 sm:px-0 leading-relaxed">
+              Banking without internet. Transfers without smartphones. Accessible anywhere, on any phone.
+            </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
               <button
                 onClick={handleICPLogin}
