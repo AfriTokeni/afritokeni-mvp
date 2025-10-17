@@ -43,15 +43,20 @@ Please select an option:
       session.currentMenu = 'btc_balance';
       session.step = 1;
       console.log(`🟢 Menu changed to: ${session.currentMenu}, step: ${session.step}`);
+      console.log(`🔍 Input analysis: inputParts=${JSON.stringify(inputParts)}, length=${inputParts.length}`);
+      console.log(`🔍 inputParts[length-2]="${inputParts[inputParts.length - 2]}", pinVerified=${session.data.pinVerified}`);
+      
       // Skip PIN if already verified
       if (session.data.pinVerified) {
+        console.log(`✅ PIN already verified, calling handleBTCBalance`);
         return await handleBTCBalance(input, session);
       }
       // Check if PIN was provided in the same input (for testing/simulators)
       if (inputParts.length > 2 && inputParts[inputParts.length - 2] === '2.1') {
-        // PIN is in the same request, process it
+        console.log(`✅ PIN in same request detected, calling handleBTCBalance`);
         return await handleBTCBalance(input, session);
       }
+      console.log(`⏸️ Requesting PIN from user`);
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
     case '2.2':
