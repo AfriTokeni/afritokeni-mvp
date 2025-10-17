@@ -165,6 +165,22 @@ When('I enter my PIN {string}', async function (pin: string) {
   world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);
 });
 
+When('I send chained input {string}', async function (chainedInput: string) {
+  // This simulates Africa's Talking sending full chained input in one request
+  // e.g., "2*2.1*1234" instead of separate requests
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    chainedInput
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+  world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);
+  
+  console.log(`📱 Chained input "${chainedInput}" → Response: ${result.response.substring(0, 100)}...`);
+});
+
 When('I select {string} for Send Money', async function (option: string) {
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,

@@ -22,7 +22,11 @@ export function initBitcoinHandlers(smsFunc: any, mainMenuFunc: any) {
 
 async function handleBitcoin(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
-  const currentInput = inputParts[inputParts.length - 1] || '';
+  // If coming from main menu with chained input (e.g., "2*2.1*1234"), extract the second part
+  // Otherwise extract the last part for direct navigation
+  const currentInput = (inputParts.length > 1 && inputParts[0] === '2') 
+    ? inputParts[1] 
+    : inputParts[inputParts.length - 1] || '';
   
   console.log(`🔵 handleBitcoin called - input: "${input}", currentInput: "${currentInput}", session.currentMenu: ${session.currentMenu}, session.step: ${session.step}`);
   

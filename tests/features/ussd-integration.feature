@@ -52,6 +52,13 @@ Feature: USSD End-to-End Integration
     Then I should see my Bitcoin balance
     And the session should end
 
+  Scenario: Bitcoin balance with chained input (Africa's Talking style)
+    Given I have 0.01 ckBTC for integration test
+    When I dial "*229#" for integration
+    And I send chained input "2*2.1*1234"
+    Then I should see my Bitcoin balance
+    And the session should end
+
   Scenario: Navigation back to main menu
     When I dial "*229#" for integration
     And I select "1" for Local Currency
