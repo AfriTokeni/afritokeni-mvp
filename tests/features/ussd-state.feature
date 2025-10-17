@@ -38,6 +38,6 @@ Feature: USSD State Management
 
   Scenario: Menu transition updates current menu
     Given I am in local currency menu
-    When I select option "1.1"
+    When I select option "1"
     Then the session menu should be "send_money"
     And the previous menu should be "local_currency"

@@ -167,7 +167,7 @@ When('I enter my PIN {string}', async function (pin: string) {
 
 When('I send chained input {string}', async function (chainedInput: string) {
   // This simulates Africa's Talking sending full chained input in one request
-  // e.g., "2*2.1*1234" instead of separate requests
+  // e.g., "2*1*1234" (Main menu 2 -> Bitcoin, submenu 1 -> Check Balance, PIN 1234)
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,
     world.ussdPhoneNumber,

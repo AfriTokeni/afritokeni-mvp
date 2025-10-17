@@ -35,24 +35,24 @@ Feature: USSD Handler Logic
 
   Scenario: Local currency routes to send money
     Given I am in local currency menu
-    When I select option "1.1"
+    When I select option "1"
     Then the session menu should be "send_money"
     And I should see "Enter recipient phone number" in USSD response
 
   Scenario: Local currency routes to check balance
     Given I am in local currency menu
-    When I select option "1.2"
+    When I select option "2"
     Then I should see my balance in response
 
   Scenario: Local currency routes to deposit
     Given I am in local currency menu
-    When I select option "1.3"
+    When I select option "3"
     Then the session menu should be "deposit"
     And I should see "Enter amount to deposit" in USSD response
 
   Scenario: Withdraw menu shows amount prompt
     Given I am in local currency menu
-    When I select option "1.4"
+    When I select option "4"
     Then the session menu should be "withdraw"
     And I should see "Enter amount" in USSD response
 
@@ -65,13 +65,13 @@ Feature: USSD Handler Logic
 
   Scenario: Check Bitcoin balance
     Given I am in bitcoin menu
-    When I select option "2.1"
+    When I select option "1"
     And I enter PIN "1234"
     Then I should see "ckBTC Balance" in USSD response
 
-  Scenario: Bitcoin routes to buy
+  Scenario: Bitcoin routes to rate check
     Given I am in bitcoin menu
-    When I select option "2.2"
+    When I select option "2"
     Then I should see "Bitcoin Exchange Rate" in USSD response
 
   # Agent Handler Tests

@@ -28,36 +28,36 @@ async function handleUSDC(input: string, session: USSDSession): Promise<string> 
   if (!currentInput) {
     return continueSession(`USDC (ckUSDC)
 Please select an option:
-3.1 Check Balance
-3.2 USDC Rate
-3.3 Buy USDC
-3.4 Sell USDC
-3.5 Send USDC
+1. Check Balance
+2. USDC Rate
+3. Buy USDC
+4. Sell USDC
+5. Send USDC
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '3.1':
+    case '1':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '3.2':
+    case '2':
       session.currentMenu = 'usdc_rate';
       session.step = 1;
       return continueSession('USDC Rate\nEnter your 4-digit PIN:');
     
-    case '3.3':
+    case '3':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
       return continueSession('Buy USDC\nEnter your 4-digit PIN:');
     
-    case '3.4':
+    case '4':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
       return continueSession('Sell USDC\nEnter your 4-digit PIN:');
     
-    case '3.5':
+    case '5':
       session.currentMenu = 'usdc_send';
       session.step = 1;
       return continueSession('Send USDC\nEnter your 4-digit PIN:');
@@ -69,11 +69,11 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-3.1 Check Balance
-3.2 USDC Rate
-3.3 Buy USDC
-3.4 Sell USDC
-3.5 Send USDC
+1. Check Balance
+2. USDC Rate
+3. Buy USDC
+4. Sell USDC
+5. Send USDC
 0. Back to Main Menu`);
   }
 }
@@ -107,8 +107,9 @@ Thank you for using AfriTokeni!`);
         }
 
         // Use CkUSDCService with satellite config for SMS users
+        const principalId = user.principalId || user.id;
         const balance = await CkUSDCService.getBalanceWithLocalCurrency(
-          user.id, // Principal ID
+          principalId, // ICP Principal ID for blockchain operations
           'ugx',   // Local currency
           true     // useSatellite = true for SMS users
         );
@@ -308,11 +309,12 @@ Select an agent:
         session.data.purchaseCode = purchaseCode;
         
         // Process USDC purchase through agent using CkUSDCService.exchange
+        const principalId = user.principalId || user.id;
         const exchangeResult = await CkUSDCService.exchange({
           amount: ugxAmount,
           currency: 'ugx',
           type: 'buy',
-          userId: user.id,
+          userId: principalId,
           agentId: selectedAgent.id
         }, true); // Use satellite for SMS/USSD operations
         
@@ -405,7 +407,8 @@ Thank you for using AfriTokeni!`);
         }
 
         // Get real USDC balance using CkUSDCService
-        const balance = await CkUSDCService.getBalance(user.id, true); // useSatellite = true for SMS
+        const principalId = user.principalId || user.id;
+        const balance = await CkUSDCService.getBalance(principalId, true); // useSatellite = true for SMS
         const usdcBalance = parseFloat(balance.balanceUSDC);
         
         // Store balance for later use
@@ -560,8 +563,9 @@ Enter your PIN to confirm:`);
         session.data.saleCode = saleCode;
         
         // Process USDC to local currency exchange through agent
+        const principalId = user.principalId || user.id;
         const exchangeResult = await CkUSDCService.exchange({
-          userId: user.id,
+          userId: principalId,
           agentId: selectedAgent.id,
           amount: usdcAmount,
           currency: 'ugx',
@@ -657,7 +661,8 @@ Thank you for using AfriTokeni!`);
         }
 
         // Get real USDC balance using CkUSDCService
-        const balance = await CkUSDCService.getBalance(user.id, true); // useSatellite = true for SMS
+        const principalId = user.principalId || user.id;
+        const balance = await CkUSDCService.getBalance(principalId, true); // useSatellite = true for SMS
         const usdcBalance = parseFloat(balance.balanceUSDC);
         
         // Store balance for later use
@@ -796,9 +801,11 @@ Enter your PIN to confirm:`);
         const transactionFee = session.data.transactionFee || 0;
         
         // Process USDC transfer
+        const senderPrincipalId = user.principalId || user.id;
+        const recipientPrincipalId = recipient.principalId || recipient.id;
         const transferResult = await CkUSDCService.transfer({
-          senderId: user.id,
-          recipient: recipient.id,
+          senderId: senderPrincipalId,
+          recipient: recipientPrincipalId,
           amount: usdcAmount,
           memo: `USSD transfer to ${session.data.recipientPhone}`
         }, true); // useSatellite = true for SMS

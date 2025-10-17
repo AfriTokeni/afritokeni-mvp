@@ -33,29 +33,34 @@ Please select an option:
   // Extract the FIRST part of the input for main menu selection
   const inputParts = input.split("*");
   const sanitized_input = inputParts[0] || '';
-  console.log(`Main menu sanitized input: "${sanitized_input}" (from ${inputParts.length} parts)`);
+  const isChainedInput = inputParts.length > 1;
+  console.log(`Main menu sanitized input: "${sanitized_input}" (from ${inputParts.length} parts, chained: ${isChainedInput})`);
 
   switch (sanitized_input) {
     case '1':
       session.currentMenu = 'local_currency';
       session.step = 0;
-      return handleLocalCurrency(input, session);
+      // For chained input, pass full input; otherwise pass empty to show menu
+      return handleLocalCurrency(isChainedInput ? input : '', session);
     
     case '2':
       session.currentMenu = 'bitcoin';
       session.step = 0;
-      return handleBitcoin(input, session);
+      // For chained input, pass full input; otherwise pass empty to show menu
+      return handleBitcoin(isChainedInput ? input : '', session);
     
     case '3':
       session.currentMenu = 'usdc';
       session.step = 0;
-      return handleUSDC(input, session);
+      // For chained input, pass full input; otherwise pass empty to show menu
+      return handleUSDC(isChainedInput ? input : '', session);
     
     case '4':
       if (handleDAO) {
         session.currentMenu = 'dao';
         session.step = 0;
-        return handleDAO(input, session);
+        // For chained input, pass full input; otherwise pass empty to show menu
+        return handleDAO(isChainedInput ? input : '', session);
       }
       return continueSession(`DAO Governance coming soon!`);
     

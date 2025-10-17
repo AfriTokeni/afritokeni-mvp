@@ -33,16 +33,16 @@ async function handleBitcoin(input: string, session: USSDSession): Promise<strin
   if (!currentInput) {
     return continueSession(`Bitcoin (ckBTC)
 Please select an option:
-2.1 Check Balance
-2.2 Bitcoin Rate
-2.3 Buy Bitcoin
-2.4 Sell Bitcoin
-2.5 Send Bitcoin
+1. Check Balance
+2. Bitcoin Rate
+3. Buy Bitcoin
+4. Sell Bitcoin
+5. Send Bitcoin
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '2.1':
+    case '1':
       console.log(`🟢 Changing menu from ${session.currentMenu} to btc_balance`);
       session.currentMenu = 'btc_balance';
       session.step = 1;
@@ -56,14 +56,14 @@ Please select an option:
         return await handleBTCBalance(input, session);
       }
       // Check if PIN was provided in the same input (for testing/simulators)
-      if (inputParts.length > 2 && inputParts[inputParts.length - 2] === '2.1') {
+      if (inputParts.length > 2 && inputParts[inputParts.length - 2] === '1') {
         console.log(`✅ PIN in same request detected, calling handleBTCBalance`);
         return await handleBTCBalance(input, session);
       }
       console.log(`⏸️ Requesting PIN from user`);
       return continueSession('Check Balance\nEnter your 4-digit PIN:');
     
-    case '2.2':
+    case '2':
       session.currentMenu = 'btc_rate';
       session.step = 1;
       // Skip PIN if already verified
@@ -72,18 +72,18 @@ Please select an option:
       }
       return continueSession('Bitcoin Rate\nEnter your 4-digit PIN:');
     
-    case '2.3':
+    case '3':
       session.currentMenu = 'btc_buy';
       session.step = 1;
       const currency = getSessionCurrency(session);
       return continueSession(`Buy Bitcoin\nEnter ${currency} amount to spend:`);
     
-    case '2.4':
+    case '4':
       session.currentMenu = 'btc_sell';
       session.step = 1;
       return await handleBTCSell('', session);
     
-    case '2.5':
+    case '5':
       session.currentMenu = 'btc_send';
       session.step = 1;
       return continueSession('Send Bitcoin\nEnter your 4-digit PIN:');
@@ -95,11 +95,11 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-2.1 Check Balance
-2.2 Bitcoin Rate
-2.3 Buy Bitcoin
-2.4 Sell Bitcoin
-2.5 Send Bitcoin
+1. Check Balance
+2. Bitcoin Rate
+3. Buy Bitcoin
+4. Sell Bitcoin
+5. Send Bitcoin
 0. Back to Main Menu`);
   }
 }
@@ -122,7 +122,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
         return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
       }
       
-      // Get Bitcoin balance using real CkBTCService
+      // Get Bitcoin balance using CkBTCService
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
@@ -131,7 +131,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
         
         // Use the user's Principal ID for ICP blockchain operations
         const currency = getSessionCurrency(session);
-        const principalId = (user as any).principalId || user.id; // Fallback to user.id for legacy users
+        const principalId = user.principalId || user.id;
         
         console.log(`📊 Fetching ckBTC balance for Principal: ${principalId}`);
         
@@ -455,8 +455,9 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
           
           // Get ckBTC balance with local currency equivalent
           const currency = getSessionCurrency(session);
+          const principalId = user.principalId || user.id;
           const balance = await CkBTCService.getBalanceWithLocalCurrency(
-            user.id, 
+            principalId, 
             currency, 
             true // Use satellite for SMS/USSD operations
           );
@@ -563,8 +564,9 @@ Choose amount type:
         }
         
         const currency = getSessionCurrency(session);
+        const principalId = user.principalId || user.id;
         const balance = await CkBTCService.getBalanceWithLocalCurrency(
-          user.id, 
+          principalId, 
           currency, 
           true // Use satellite for SMS/USSD operations
         );
@@ -796,8 +798,9 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         
         // Get ckBTC balance with local currency equivalent
         const currency = getSessionCurrency(session);
+        const principalId = user.principalId || user.id;
         const balance = await CkBTCService.getBalanceWithLocalCurrency(
-          user.id, 
+          principalId, 
           currency, 
           true // Use satellite for SMS/USSD operations
         );

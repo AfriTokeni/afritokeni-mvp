@@ -17,6 +17,7 @@ const USSDPlayground: React.FC = () => {
   const [inputCommand, setInputCommand] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
   const [ussdStarted, setUssdStarted] = useState(false);
+  const [currentMenu, setCurrentMenu] = useState<'main' | 'local_currency' | 'bitcoin' | 'usdc' | 'dao'>('main');
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'received',
@@ -70,6 +71,7 @@ const USSDPlayground: React.FC = () => {
     // Main menu - this starts the USSD session
     if (upperCmd === '*384*22948#') {
       setUssdStarted(true);
+      setCurrentMenu('main');
       return `📱 AfriTokeni Menu
 
 Please select an option:
@@ -90,22 +92,64 @@ when you dial for the first time`;
 Click the green button or type the code.`;
     }
 
-    // Option 1: Local Currency
-    if (upperCmd === '1') {
-      return `💵 Local Currency (UGX)
+    // Handle back to main menu
+    if (upperCmd === '0' && currentMenu !== 'main') {
+      setCurrentMenu('main');
+      return `📱 AfriTokeni Menu
 
 Please select an option:
-1.1 Send Money
-1.2 Check Balance
-1.3 Deposit
-1.4 Withdraw
-1.5 Transactions
-1.6 Find Agent
-0. Back to Main Menu`;
+1. Local Currency (UGX)
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+4. DAO Governance
+5. Help`;
     }
 
-    // Local Currency - Check Balance (1.2)
-    if (upperCmd === '1.2' || upperCmd === 'BAL') {
+    // MAIN MENU NAVIGATION
+    if (currentMenu === 'main') {
+      if (upperCmd === '1') {
+        setCurrentMenu('local_currency');
+        return `💵 Local Currency (UGX)
+
+Please select an option:
+1. Send Money
+2. Check Balance
+3. Deposit
+4. Withdraw
+5. Transactions
+6. Find Agent
+0. Back to Main Menu`;
+      }
+      if (upperCmd === '2') {
+        setCurrentMenu('bitcoin');
+        return `₿ Bitcoin (ckBTC)
+
+Please select an option:
+1. Check Balance
+2. Bitcoin Rate
+3. Buy Bitcoin
+4. Sell Bitcoin
+5. Send Bitcoin
+0. Back to Main Menu`;
+      }
+      if (upperCmd === '3') {
+        setCurrentMenu('usdc');
+        return `💵 USDC (ckUSDC)
+
+Please select an option:
+1. Check Balance
+2. USDC Rate
+3. Buy USDC
+4. Sell USDC
+5. Send USDC
+0. Back to Main Menu`;
+      }
+      return `Invalid option. Please select 1-5.`;
+    }
+
+    // LOCAL CURRENCY SUBMENU
+    if (currentMenu === 'local_currency') {
+      if (upperCmd === '2' || upperCmd === 'BAL') {
       return `💰 Your Balance
 
 UGX: ${balance.digitalBalance.toLocaleString()}
@@ -115,20 +159,12 @@ ckUSDC: $${(balance.ckUSDCBalance / 100).toFixed(2)}
 Thank you for using AfriTokeni!`;
     }
 
-    // Option 2: Bitcoin (ckBTC)
-    if (upperCmd === '2') {
-      return `₿ Bitcoin (ckBTC)
-
-Please select an option:
-2.1 Check Balance
-2.2 Bitcoin Rate
-2.3 Buy Bitcoin
-2.4 Sell Bitcoin
-2.5 Send Bitcoin
-0. Back to Main Menu`;
+      return `Invalid option in Local Currency menu.`;
     }
 
-    if (upperCmd === '2.1' || upperCmd === 'BTC BAL' || upperCmd === 'CKBTC BAL') {
+    // BITCOIN SUBMENU
+    if (currentMenu === 'bitcoin') {
+      if (upperCmd === '1' || upperCmd === 'BTC BAL' || upperCmd === 'CKBTC BAL') {
       const btc = (balance.ckBTCBalance / 100000000).toFixed(8);
       const ugxValue = balance.ckBTCBalance * 1385; // ~138.5M UGX per BTC
       return `₿ Your ckBTC Balance
@@ -143,7 +179,7 @@ Instant transfers <1 second!
 Thank you for using AfriTokeni!`;
     }
 
-    if (upperCmd === '2.2' || upperCmd === 'BTC RATE') {
+      if (upperCmd === '2' || upperCmd === 'BTC RATE') {
       return `₿ Bitcoin Exchange Rate
 
 1 BTC = 138,500,000 UGX
@@ -154,8 +190,8 @@ Last Updated: ${new Date().toLocaleTimeString()}
 Thank you for using AfriTokeni!`;
     }
 
-    // Buy Bitcoin (2.3)
-    if (upperCmd === '2.3') {
+      // Buy Bitcoin (3)
+      if (upperCmd === '3') {
       return `₿ Buy Bitcoin
 
 Enter UGX amount to spend:
@@ -166,8 +202,8 @@ Agent will provide Bitcoin at current rate.
 Thank you for using AfriTokeni!`;
     }
 
-    // Sell Bitcoin (2.4)
-    if (upperCmd === '2.4') {
+      // Sell Bitcoin (4)
+      if (upperCmd === '4') {
       return `₿ Sell Bitcoin
 
 Enter Bitcoin amount to sell (satoshis):
@@ -178,8 +214,8 @@ Agent will pay you UGX at current rate.
 Thank you for using AfriTokeni!`;
     }
 
-    // Send Bitcoin (2.5)
-    if (upperCmd === '2.5') {
+      // Send Bitcoin (5)
+      if (upperCmd === '5') {
       return `₿ Send Bitcoin
 
 To: Principal ID or Phone
@@ -192,20 +228,12 @@ Reply YES to confirm
 Thank you for using AfriTokeni!`;
     }
 
-    // Option 3: USDC (ckUSDC)
-    if (upperCmd === '3') {
-      return `💵 USDC (ckUSDC)
-
-Please select an option:
-3.1 Check Balance
-3.2 USDC Rate
-3.3 Buy USDC
-3.4 Sell USDC
-3.5 Send USDC
-0. Back to Main Menu`;
+      return `Invalid option in Bitcoin menu.`;
     }
 
-    if (upperCmd === '3.1' || upperCmd === 'USDC BAL') {
+    // USDC SUBMENU
+    if (currentMenu === 'usdc') {
+      if (upperCmd === '1' || upperCmd === 'USDC BAL') {
       const usdc = (balance.ckUSDCBalance / 100).toFixed(2);
       const ugxValue = balance.ckUSDCBalance * 37.5; // 1 USD = 3750 UGX
       return `💵 Your ckUSDC Balance
@@ -220,7 +248,7 @@ Stable value guaranteed!
 Thank you for using AfriTokeni!`;
     }
 
-    if (upperCmd === '3.2' || upperCmd === 'USDC RATE') {
+      if (upperCmd === '2' || upperCmd === 'USDC RATE') {
       return `💵 USDC Exchange Rate
 
 1 USDC = 3,750 UGX
@@ -231,8 +259,8 @@ Last Updated: ${new Date().toLocaleTimeString()}
 Thank you for using AfriTokeni!`;
     }
 
-    // Buy USDC (3.3)
-    if (upperCmd === '3.3') {
+      // Buy USDC (3)
+      if (upperCmd === '3') {
       return `💵 Buy USDC
 
 Enter UGX amount to spend:
@@ -243,8 +271,8 @@ Agent will provide USDC at current rate.
 Thank you for using AfriTokeni!`;
     }
 
-    // Sell USDC (3.4)
-    if (upperCmd === '3.4') {
+      // Sell USDC (4)
+      if (upperCmd === '4') {
       return `💵 Sell USDC
 
 Enter USDC amount to sell:
@@ -255,8 +283,8 @@ Agent will pay you UGX at current rate.
 Thank you for using AfriTokeni!`;
     }
 
-    // Send USDC (3.5)
-    if (upperCmd === '3.5') {
+      // Send USDC (5)
+      if (upperCmd === '5') {
       return `💵 Send USDC
 
 To: Principal ID or Phone
@@ -267,10 +295,12 @@ Time: <1 second
 Reply YES to confirm
 
 Thank you for using AfriTokeni!`;
+      }
+      return `Invalid option in USDC menu.`;
     }
 
-    // Option 4: Help
-    if (upperCmd === '4' || upperCmd === 'HELP') {
+    // Option 5: Help (from main menu)
+    if (currentMenu === 'main' && (upperCmd === '5' || upperCmd === 'HELP')) {
       return `📖 AfriTokeni Help
 
 Local Currency: Send, deposit, withdraw UGX
@@ -281,32 +311,6 @@ For support: Call +256-700-AFRI (2374)
 Visit: afritokeni.com
 
 Thank you for using AfriTokeni!`;
-    }
-
-    // Option 4: DAO Governance
-    if (upperCmd === '4') {
-      return `🗳️ DAO Governance
-
-Vote on proposals via SMS!
-
-1. View Proposals
-2. My Voting Power
-3. Active Votes
-0. Back
-
-Coming soon: Vote on AfriTokeni governance proposals directly from your phone!`;
-    }
-
-    // Back to Main Menu (0)
-    if (upperCmd === '0') {
-      return `📱 AfriTokeni Menu
-
-Please select an option:
-1. Local Currency (UGX)
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. DAO Governance
-5. Help`;
     }
 
     // Transaction history

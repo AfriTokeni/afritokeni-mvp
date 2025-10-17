@@ -206,8 +206,18 @@ export class WebhookDataService {
     preferredCurrency?: string; // User's preferred currency (auto-detected from phone)
   }): Promise<User> {
     const now = new Date();
+    
+    // Generate a valid ICP Principal ID for the user
+    // For production: derive from phone number deterministically
+    // This creates a valid self-authenticating Principal ID
+    const { Principal } = await import('@dfinity/principal');
+    const userIdentifier = userData.id || userData.email; // Use phone for SMS users
+    const hash = new TextEncoder().encode(userIdentifier);
+    const principalId = Principal.selfAuthenticating(hash).toText();
+    
     const newUser: User = {
-      id: userData.id || nanoid(), // Use provided ID or generate new one
+      id: userData.id || nanoid(), // Keep nanoid for internal reference
+      principalId, // Add ICP Principal ID for blockchain operations
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
@@ -217,7 +227,7 @@ export class WebhookDataService {
       pin: userData.pin,
       preferredCurrency: userData.preferredCurrency || 'UGX',
       createdAt: now
-    };
+    } as User;
 
     // Convert Date fields to ISO strings for Juno storage
     const dataForJuno = {

@@ -49,22 +49,22 @@ export async function handleLocalCurrency(
   if (!currentInput) {
     return continueSession(`Local Currency (${currency})
 Please select an option:
-1.1 Send Money
-1.2 Check Balance
-1.3 Deposit
-1.4 Withdraw
-1.5 Transactions
-1.6 Find Agent
+1. Send Money
+2. Check Balance
+3. Deposit
+4. Withdraw
+5. Transactions
+6. Find Agent
 0. Back to Main Menu`);
   }
   
   switch (currentInput) {
-    case '1.1':
+    case '1':
       session.currentMenu = 'send_money';
       session.step = 0;
       return continueSession('Send Money\nEnter recipient phone number:');
     
-    case '1.2':
+    case '2':
       // Check Balance - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Check Balance', 'check_balance');
@@ -74,21 +74,21 @@ Please select an option:
         return await handleCheckBalance('', session);
       }
     
-    case '1.3': {
+    case '3': {
       const currency = getSessionCurrency(session);
       session.currentMenu = 'deposit';
       session.step = 1;
       return continueSession(`Deposit Money\nEnter amount to deposit (${currency}):`);
     }
     
-    case '1.4': {
+    case '4': {
       const currency = getSessionCurrency(session);
       session.currentMenu = 'withdraw';
       session.step = 1;
       return continueSession(`Withdraw Money\nEnter amount to withdraw (${currency}):`);
     }
     
-    case '1.5':
+    case '5':
       // Transaction History - requires PIN verification if not already verified
       if (requiresPinVerification(session)) {
         return requestPinVerification(session, 'Transaction History', 'transaction_history');
@@ -98,7 +98,7 @@ Please select an option:
         return await handleTransactionHistory('', session);
       }
     
-    case '1.6':
+    case '6':
       session.currentMenu = 'find_agent';
       session.step = 1;
       return handleFindAgent('', session);
@@ -110,12 +110,12 @@ Please select an option:
     
     default:
       return continueSession(`Invalid option. Please try again:
-1.1 Send Money
-1.2 Check Balance
-1.3 Deposit
-1.4 Withdraw
-1.5 Transactions
-1.6 Find Agent
+1. Send Money
+2. Check Balance
+3. Deposit
+4. Withdraw
+5. Transactions
+6. Find Agent
 0. Back to Main Menu`);
   }
 }
