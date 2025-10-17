@@ -30,32 +30,32 @@ Please select an option:
   }
 
   console.log(`Main menu input: ${input}`);
-  // Extract the last part of the input after splitting by '*'
+  // Extract the FIRST part of the input for main menu selection
   const inputParts = input.split("*");
-  const sanitized_input = inputParts[inputParts.length - 1] || '';
-  console.log(`Main menu sanitized input: "${sanitized_input}"`);
+  const sanitized_input = inputParts[0] || '';
+  console.log(`Main menu sanitized input: "${sanitized_input}" (from ${inputParts.length} parts)`);
 
   switch (sanitized_input) {
     case '1':
       session.currentMenu = 'local_currency';
       session.step = 0;
-      return handleLocalCurrency('', session);
+      return handleLocalCurrency(input, session);
     
     case '2':
       session.currentMenu = 'bitcoin';
       session.step = 0;
-      return handleBitcoin('', session);
+      return handleBitcoin(input, session);
     
     case '3':
       session.currentMenu = 'usdc';
       session.step = 0;
-      return handleUSDC('', session);
+      return handleUSDC(input, session);
     
     case '4':
       if (handleDAO) {
         session.currentMenu = 'dao';
         session.step = 0;
-        return handleDAO('', session);
+        return handleDAO(input, session);
       }
       return continueSession(`DAO Governance coming soon!`);
     
