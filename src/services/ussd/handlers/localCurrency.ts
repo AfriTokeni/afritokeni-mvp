@@ -8,6 +8,7 @@ import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService } from '../../webHookServices.js';
 import { requiresPinVerification, requestPinVerification, verifyUserPin } from './pinManagement.js';
+import { TranslationService } from '../../translations.js';
 
 /**
  * Get user balance from DataService
@@ -47,15 +48,16 @@ export async function handleLocalCurrency(
   const currentInput = inputParts[inputParts.length - 1] || '';
   
   if (!currentInput) {
-    return continueSession(`Local Currency (${currency})
-Please select an option:
-1. Send Money
-2. Check Balance
-3. Deposit
-4. Withdraw
-5. Transactions
-6. Find Agent
-0. Back to Main Menu`);
+    const lang = session.language || 'en';
+    return continueSession(`${TranslationService.translate('local_currency_menu', lang)} (${currency})
+${TranslationService.translate('please_select_option', lang)}
+1. ${TranslationService.translate('send_money', lang)}
+2. ${TranslationService.translate('check_balance', lang)}
+3. ${TranslationService.translate('deposit', lang)}
+4. ${TranslationService.translate('withdraw', lang)}
+5. ${TranslationService.translate('transactions', lang)}
+6. ${TranslationService.translate('find_agent', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
   }
   
   switch (currentInput) {

@@ -594,6 +594,26 @@ export class TranslationService {
       lg: 'Kiremya mu kufuna omuwendo. Gezaako oluvannyuma.',
       sw: 'Kosa katika kupata bei. Tafadhali jaribu tena baadaye.'
     },
+    'local_currency_menu': {
+      en: 'Local Currency',
+      lg: 'Ssente z\'omu Uganda',
+      sw: 'Sarafu ya Ndani'
+    },
+    'deposit': {
+      en: 'Deposit',
+      lg: 'Teeka Ssente',
+      sw: 'Weka Pesa'
+    },
+    'transactions': {
+      en: 'Transactions',
+      lg: 'Ebyafaayo',
+      sw: 'Miamala'
+    },
+    'find_agent': {
+      en: 'Find Agent',
+      lg: 'Noonya Agent',
+      sw: 'Tafuta Wakala'
+    },
   };
 
   /**
