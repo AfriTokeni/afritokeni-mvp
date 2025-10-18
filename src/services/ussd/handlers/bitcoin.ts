@@ -116,7 +116,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN with demo fallback
@@ -202,7 +202,7 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
   if (session.step === 1) {
     // PIN verification step
     if (!/^\d{4}$/.test(sanitized_input)) {
-      return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     }
     
     // Verify PIN
@@ -219,7 +219,7 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
       pinCorrect = true;
     }
     if (!pinCorrect) {
-      return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     }
     
     session.step = 2;
@@ -388,7 +388,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         return endSession(`${TranslationService.translate('transaction_failed', lang)}\n${TranslationService.translate('transaction_cancelled', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       let pinCorrect = false;
@@ -404,7 +404,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       try {
@@ -687,7 +687,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
     case 4: {
       // PIN verification and process Bitcoin sale
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       let pinCorrect = false;
@@ -703,7 +703,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       try {
@@ -804,7 +804,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // PIN is correct, proceed to get balance and show send options
@@ -969,7 +969,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
     case 4: {
       // Final PIN verification and send transaction
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       let pinCorrect = false;
@@ -985,7 +985,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Process the BTC send transaction

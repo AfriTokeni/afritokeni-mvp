@@ -149,7 +149,7 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
       // PIN verification step
       const lang = session.language || 'en';
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN
@@ -166,7 +166,7 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // PIN is correct, get user balance
@@ -262,7 +262,7 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN
@@ -279,7 +279,7 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // PIN is correct, get transaction history

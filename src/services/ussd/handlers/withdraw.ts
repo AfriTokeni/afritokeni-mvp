@@ -135,8 +135,7 @@ ${selectedAgent.location.city}, ${selectedAgent.location.address}
 ${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
 ${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
 
-${TranslationService.translate('enter_pin_to_confirm', lang)}:
-${TranslationService.translate('back_or_menu', lang)}`);
+${TranslationService.translate('enter_pin_to_confirm', lang)}:`);
     }
       
     case 4: {

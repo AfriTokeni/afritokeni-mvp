@@ -737,7 +737,65 @@ export class WebhookDataService {
         return agents;
       } catch (error) {
         console.error('Error getting available agents:', error);
-        return [];
+        
+        // PLAYGROUND MODE: Return mock agents when backend is unavailable
+        console.log('✅ Playground mode: Returning mock agents');
+        return [
+          {
+            id: 'agent_001',
+            userId: 'user_agent_001',
+            businessName: 'Kampala Central Agent',
+            location: {
+              country: 'Uganda',
+              state: 'Central',
+              city: 'Kampala',
+              address: 'Plot 123, Kampala Road',
+              coordinates: { lat: 0.3476, lng: 32.5825 }
+            },
+            isActive: true,
+            status: 'available',
+            cashBalance: 5000000,
+            digitalBalance: 10000000,
+            commissionRate: 0.02,
+            createdAt: new Date()
+          },
+          {
+            id: 'agent_002',
+            userId: 'user_agent_002',
+            businessName: 'Entebbe Agent Services',
+            location: {
+              country: 'Uganda',
+              state: 'Central',
+              city: 'Entebbe',
+              address: 'Airport Road, Entebbe',
+              coordinates: { lat: 0.0640, lng: 32.4435 }
+            },
+            isActive: true,
+            status: 'available',
+            cashBalance: 3000000,
+            digitalBalance: 8000000,
+            commissionRate: 0.025,
+            createdAt: new Date()
+          },
+          {
+            id: 'agent_003',
+            userId: 'user_agent_003',
+            businessName: 'Jinja Money Exchange',
+            location: {
+              country: 'Uganda',
+              state: 'Eastern',
+              city: 'Jinja',
+              address: 'Main Street, Jinja',
+              coordinates: { lat: 0.4244, lng: 33.2040 }
+            },
+            isActive: true,
+            status: 'available',
+            cashBalance: 2000000,
+            digitalBalance: 6000000,
+            commissionRate: 0.03,
+            createdAt: new Date()
+          }
+        ];
       }
     }
 

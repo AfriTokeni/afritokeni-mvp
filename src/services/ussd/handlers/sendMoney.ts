@@ -99,8 +99,7 @@ ${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} 
 ${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 ${TranslationService.translate('total', lang)}: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 
-${TranslationService.translate('enter_pin_to_confirm', lang)}:
-${TranslationService.translate('back_or_menu', lang)}`);
+${TranslationService.translate('enter_pin_to_confirm', lang)}:`);
     }
     
     case 2: {

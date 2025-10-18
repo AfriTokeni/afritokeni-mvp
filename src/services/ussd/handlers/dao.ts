@@ -274,7 +274,7 @@ ${TranslationService.translate('enter_pin_to_confirm', lang)}:`);
   // Step 4: PIN verification and vote submission
   if (session.step === 4) {
     if (!/^\d{4}$/.test(sanitized_input)) {
-      return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     }
     
     // Verify PIN (verifyUserPin adds + prefix internally)

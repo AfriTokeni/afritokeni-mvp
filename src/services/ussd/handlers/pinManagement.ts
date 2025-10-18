@@ -103,7 +103,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
     case 1: {
       // User is entering their PIN
       if (!pinInput) {
-        return continueSession(`${TranslationService.translate('welcome_afritokeni', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('welcome_afritokeni', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       if (!/^\d{4}$/.test(pinInput)) {
@@ -172,7 +172,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
       console.log(`🔑 Initializing PIN check for ${session.phoneNumber}`);
       session.step = 1;
       session.data.pinAttempts = 0;
-      return continueSession(`${TranslationService.translate('welcome_afritokeni', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('welcome_afritokeni', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
   }
 }
 

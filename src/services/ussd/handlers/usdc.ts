@@ -202,7 +202,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN
@@ -219,7 +219,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       session.step = 2;
@@ -378,7 +378,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN
@@ -395,7 +395,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       session.step = 2;
@@ -520,7 +520,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
     case 4: {
       // PIN verification and process USDC sale
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       let pinCorrect = false;
@@ -536,7 +536,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       try {
@@ -605,7 +605,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN
@@ -622,7 +622,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       session.step = 2;
@@ -740,7 +740,7 @@ ${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationS
     case 4: {
       // Final PIN verification and process transfer
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       let pinCorrect = false;
@@ -756,7 +756,7 @@ ${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationS
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       try {
