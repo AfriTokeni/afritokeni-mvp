@@ -99,7 +99,7 @@ ${TranslationService.translate('press_zero_back', lang)}`);
     default: {
       const currency = getSessionCurrency(session);
       const lang = session.language || 'en';
-      return continueSession(`${TranslationService.translate('error', lang)}
+      return continueSession(`${TranslationService.translate('invalid_option', lang)}
 
 1. ${TranslationService.translate('local_currency', lang)} (${currency})
 2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)

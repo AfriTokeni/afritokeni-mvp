@@ -145,6 +145,11 @@ export class TranslationService {
       lg: 'Kiremya',
       sw: 'Kosa'
     },
+    'invalid_option': {
+      en: 'Invalid option. Please try again:',
+      lg: 'Ekiragiro si kituufu. Gezaako nate:',
+      sw: 'Chaguo si sahihi. Jaribu tena:'
+    },
     'insufficient_balance': {
       en: 'Insufficient balance',
       lg: 'Ssente tezimala',
