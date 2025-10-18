@@ -155,18 +155,17 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         session.currentMenu = 'local_currency';
         session.step = 0;
         session.data = {};
-        return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('transaction_failed', lang)}\n${TranslationService.translate('transaction_cancelled', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
       
       if (!sanitized_input || sanitized_input.length !== 4) {
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
         
         if (session.data.pinAttempts >= 3) {
-          return endSession('Too many incorrect PIN attempts. Transaction cancelled for security.');
+          return endSession(`${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('transaction_cancelled', lang)}.`);
         }
         
-        return continueSession(`Invalid PIN format. Enter 4-digit PIN:
-Attempts remaining: ${3 - session.data.pinAttempts}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}. ${TranslationService.translate('enter_pin_4digit', lang)}:\n${TranslationService.translate('attempts_remaining', lang)}: ${3 - session.data.pinAttempts}`);
       }
       
       console.log(`Verifying PIN for ${session.phoneNumber}`);
@@ -177,11 +176,10 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
           session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
           
           if (session.data.pinAttempts >= 3) {
-            return endSession('Incorrect PIN. Too many attempts. Transaction cancelled for security.');
+            return endSession(`${TranslationService.translate('incorrect_pin', lang)}. ${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('transaction_cancelled', lang)}.`);
           }
           
-          return continueSession(`Incorrect PIN. Try again:
-Attempts remaining: ${3 - session.data.pinAttempts}`);
+          return continueSession(`${TranslationService.translate('incorrect_pin', lang)}. ${TranslationService.translate('try_again', lang)}:\n${TranslationService.translate('attempts_remaining', lang)}: ${3 - session.data.pinAttempts}`);
         }
         
         session.step = 5;
@@ -222,16 +220,16 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         const withdrawFee = session.data.withdrawFee || 0;
         
         // Send SMS with withdrawal details
-        const smsMessage = `AfriTokeni Withdrawal
-Code: ${withdrawalCode}
-Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
-Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location.city}
-Valid: 24 hours
-Transaction ID: ${transactionId}
+        const smsMessage = `AfriTokeni ${TranslationService.translate('withdrawal', lang)}
+${TranslationService.translate('code', lang)}: ${withdrawalCode}
+${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
+${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
+${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}
+${TranslationService.translate('location', lang)}: ${selectedAgent.location.city}
+${TranslationService.translate('valid', lang)}: 24 ${TranslationService.translate('hours', lang)}
+${TranslationService.translate('transaction_id', lang)}: ${transactionId}
 
-Show this code to the agent with your ID to collect cash.`;
+${TranslationService.translate('show_code_to_agent', lang)}.`;
 
         console.log(`Sending withdrawal SMS to ${session.phoneNumber}`);
 
@@ -242,20 +240,20 @@ Show this code to the agent with your ID to collect cash.`;
           // Continue even if SMS fails
         }
         
-        return endSession(`✅ Withdrawal Created!
+        return endSession(`✅ ${TranslationService.translate('withdrawal_created', lang)}
 
-Code: ${withdrawalCode}
-Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
-Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location.city}
+${TranslationService.translate('code', lang)}: ${withdrawalCode}
+${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
+${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
+${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}
+${TranslationService.translate('location', lang)}: ${selectedAgent.location.city}
 
-Valid for 24 hours. Show this code and your ID to the agent to collect cash.
+${TranslationService.translate('valid', lang)} 24 ${TranslationService.translate('hours', lang)}. ${TranslationService.translate('show_code_to_agent', lang)}.
 
-SMS sent with details.
-Transaction ID: ${transactionId}
+${TranslationService.translate('sms_sent', lang)}.
+${TranslationService.translate('transaction_id', lang)}: ${transactionId}
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         
       } catch (error) {
         console.error('Error verifying PIN or creating transaction:', error);

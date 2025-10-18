@@ -1028,6 +1028,36 @@ export class TranslationService {
       lg: 'Refelensi',
       sw: 'Kumbukumbu'
     },
+    'withdrawal': {
+      en: 'Withdrawal',
+      lg: 'Okusasula',
+      sw: 'Uondoaji'
+    },
+    'valid': {
+      en: 'Valid',
+      lg: 'Kikola',
+      sw: 'Halali'
+    },
+    'hours': {
+      en: 'hours',
+      lg: 'essaawa',
+      sw: 'masaa'
+    },
+    'show_code_to_agent': {
+      en: 'Show this code to the agent with your ID to collect cash',
+      lg: 'Laga agent koodi eno n\'ekiraga naawe okufuna ssente',
+      sw: 'Onyeshe wakala nambari hii na kitambulisho chako kupokea pesa'
+    },
+    'withdrawal_created': {
+      en: 'Withdrawal Created!',
+      lg: 'Okusasula kutondeddwa!',
+      sw: 'Uondoaji Umeundwa!'
+    },
+    'try_again': {
+      en: 'Try again',
+      lg: 'Gezaako nate',
+      sw: 'Jaribu tena'
+    },
   };
 
   /**
