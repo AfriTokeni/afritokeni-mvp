@@ -126,11 +126,12 @@ async function handleViewProposals(input: string, session: USSDSession): Promise
     session.data.proposals = proposals;
     session.step = 1;
     
+    const lang = session.language || 'en';
     let response = `Active Proposals\n\n`;
     proposals.forEach((prop, index) => {
       response += `${index + 1}. ${prop.title}\n`;
     });
-    response += `\nReply with number for details\n0. Back`;
+    response += `\n${TranslationService.translate('press_zero_back', lang)}`;
     
     return continueSession(response);
   }
@@ -176,6 +177,7 @@ Thank you for participating in governance!`);
       : proposal.votingEndsAt;
     const daysLeft = Math.ceil((votingEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
     
+    const lang = session.language || 'en';
     return continueSession(`${proposal.title}
 
 ${proposal.description}
@@ -190,7 +192,8 @@ ABSTAIN: ${proposal.votes.abstain}
 1. Vote YES
 2. Vote NO
 3. Vote ABSTAIN
-0. Back`);
+
+${TranslationService.translate('press_zero_back', lang)}`);
   }
   
   // Step 2: Select vote choice
@@ -227,16 +230,27 @@ ABSTAIN: ${proposal.votes.abstain}
     const lockedTokens = session.data.lockedTokens || 0;
     const available = afriTokens - lockedTokens;
     
+    const lang = session.language || 'en';
     return continueSession(`Vote ${choice.toUpperCase()}
 
 Available: ${available} AFRI
 Locked: ${lockedTokens} AFRI
 
-Enter amount to vote (min 1 AFRI):`);
+Enter amount to vote (min 1 AFRI):
+
+${TranslationService.translate('press_zero_back', lang)}`);
   }
   
   // Step 3: Enter voting amount
   if (session.step === 3) {
+    // Handle cancel
+    if (sanitized_input === '0') {
+      session.step = 0;
+      session.currentMenu = 'dao';
+      session.data = {};
+      return continueSession('__SHOW_DAO_MENU__');
+    }
+    
     const amount = parseInt(sanitized_input);
     
     if (isNaN(amount) || amount < 1) {
