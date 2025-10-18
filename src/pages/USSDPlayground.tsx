@@ -4,6 +4,7 @@ import { Smartphone, Send, Globe } from 'lucide-react';
 import PublicHeader from '../components/PublicHeader';
 import PublicFooter from '../components/PublicFooter';
 import { CentralizedDemoService } from '../services/centralizedDemoService';
+import { USSDService } from '../services/ussdService';
 
 interface Message {
   type: 'sent' | 'received';
@@ -14,10 +15,10 @@ interface Message {
 const USSDPlayground: React.FC = () => {
   const [phoneNumber] = useState('+256 700 123 456');
   const [demoUserId] = useState('demo_ussd_user');
+  const [sessionId] = useState('playground_session_' + Date.now());
   const [inputCommand, setInputCommand] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
-  const [ussdStarted, setUssdStarted] = useState(false);
-  const [currentMenu, setCurrentMenu] = useState<'main' | 'local_currency' | 'bitcoin' | 'usdc' | 'dao'>('main');
+  const [ussdText, setUssdText] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'received',
@@ -46,453 +47,40 @@ const USSDPlayground: React.FC = () => {
 
 
   const processCommand = async (cmd: string): Promise<string> => {
-    const upperCmd = cmd.toUpperCase().trim();
+    const trimmedCmd = cmd.trim();
     
     // Ensure initialization is complete
     if (!isInitialized) {
       return '⏳ Initializing... Please wait.';
     }
+
+    // Handle USSD dial code
+    if (trimmedCmd.toUpperCase() === '*384*22948#' || trimmedCmd === '*229#') {
+      setUssdText(''); // Reset USSD chain
+      const result = await USSDService.processUSSDRequest(sessionId, phoneNumber, '');
+      return result.response.replace(/^(CON |END )/, '');
+    }
+
+    // Build USSD text chain
+    let newUssdText = ussdText;
+    if (ussdText === '') {
+      newUssdText = trimmedCmd;
+    } else {
+      newUssdText = ussdText + '*' + trimmedCmd;
+    }
+    setUssdText(newUssdText);
     
-    // Get demo balance
-    let balance = await CentralizedDemoService.getBalance(demoUserId);
+    // Call real USSD backend
+    console.log(`📱 USSD Playground: text="${newUssdText}"`);
+    const result = await USSDService.processUSSDRequest(sessionId, phoneNumber, newUssdText);
     
-    // If still null, try to initialize again
-    if (!balance) {
-      console.log('Balance not found, re-initializing...');
-      balance = await CentralizedDemoService.initializeUser(demoUserId, 'UGX');
-    }
-    
-    if (!balance) {
-      return '❌ Error loading balance. Please try again.';
+    // If session ended, reset
+    if (!result.continueSession) {
+      setUssdText('');
     }
     
-    const transactions = await CentralizedDemoService.getTransactions(demoUserId);
-
-    // Main menu - this starts the USSD session
-    if (upperCmd === '*384*22948#') {
-      setUssdStarted(true);
-      setCurrentMenu('main');
-      return `📱 AfriTokeni Menu
-
-Please select an option:
-1. Local Currency (UGX)
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. DAO Governance
-5. Help
-
-Note: Registration is automatic
-when you dial for the first time`;
-    }
-
-    // Force user to dial USSD code first
-    if (!ussdStarted) {
-      return `⚠️ Please dial *384*22948# first to start USSD service.
-
-Click the green button or type the code.`;
-    }
-
-    // Handle back to main menu
-    if (upperCmd === '0' && currentMenu !== 'main') {
-      setCurrentMenu('main');
-      return `📱 AfriTokeni Menu
-
-Please select an option:
-1. Local Currency (UGX)
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. DAO Governance
-5. Help`;
-    }
-
-    // MAIN MENU NAVIGATION
-    if (currentMenu === 'main') {
-      if (upperCmd === '1') {
-        setCurrentMenu('local_currency');
-        return `💵 Local Currency (UGX)
-
-Please select an option:
-1. Send Money
-2. Check Balance
-3. Deposit
-4. Withdraw
-5. Transactions
-6. Find Agent
-0. Back to Main Menu`;
-      }
-      if (upperCmd === '2') {
-        setCurrentMenu('bitcoin');
-        return `₿ Bitcoin (ckBTC)
-
-Please select an option:
-1. Check Balance
-2. Bitcoin Rate
-3. Buy Bitcoin
-4. Sell Bitcoin
-5. Send Bitcoin
-0. Back to Main Menu`;
-      }
-      if (upperCmd === '3') {
-        setCurrentMenu('usdc');
-        return `💵 USDC (ckUSDC)
-
-Please select an option:
-1. Check Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-5. Send USDC
-0. Back to Main Menu`;
-      }
-      if (upperCmd === '4') {
-        setCurrentMenu('dao');
-        return `🏛️ DAO Governance
-
-Please select an option:
-1. View Active Proposals
-2. My Voting Power
-3. Active Votes
-4. Vote on Proposal
-0. Back to Main Menu`;
-      }
-      if (upperCmd === '5') {
-        return `📚 AfriTokeni Help
-
-Local Currency: Send, deposit, withdraw UGX
-Bitcoin: Buy, sell, send ckBTC
-USDC: Buy, sell, send USDC stablecoin
-DAO: Vote on governance proposals
-
-For support: Call +256-XXX-XXXX
-Visit: afritokeni.com
-
-Thank you for using AfriTokeni!`;
-      }
-      return `Invalid option. Please select 1-5.`;
-    }
-
-    // LOCAL CURRENCY SUBMENU
-    if (currentMenu === 'local_currency') {
-      if (upperCmd === '2' || upperCmd === 'BAL') {
-      return `💰 Your Balance
-
-UGX: ${balance.digitalBalance.toLocaleString()}
-ckBTC: ${(balance.ckBTCBalance / 100000000).toFixed(8)} BTC
-ckUSDC: $${(balance.ckUSDCBalance / 100).toFixed(2)}
-
-Thank you for using AfriTokeni!`;
-    }
-
-      return `Invalid option in Local Currency menu.`;
-    }
-
-    // BITCOIN SUBMENU
-    if (currentMenu === 'bitcoin') {
-      if (upperCmd === '1' || upperCmd === 'BTC BAL' || upperCmd === 'CKBTC BAL') {
-      const btc = (balance.ckBTCBalance / 100000000).toFixed(8);
-      const ugxValue = balance.ckBTCBalance * 1385; // ~138.5M UGX per BTC
-      return `₿ Your ckBTC Balance
-
-${btc} BTC
-≈ UGX ${ugxValue.toLocaleString()}
-
-Current Rate: 1 BTC = 138,500,000 UGX
-
-Instant transfers <1 second!
-
-Thank you for using AfriTokeni!`;
-    }
-
-      if (upperCmd === '2' || upperCmd === 'BTC RATE') {
-      return `₿ Bitcoin Exchange Rate
-
-1 BTC = 138,500,000 UGX
-1 UGX = 0.00000000722 BTC
-
-Last Updated: ${new Date().toLocaleTimeString()}
-
-Thank you for using AfriTokeni!`;
-    }
-
-      // Buy Bitcoin (3)
-      if (upperCmd === '3') {
-      return `₿ Buy Bitcoin
-
-Enter UGX amount to spend:
-Example: 100000
-
-Agent will provide Bitcoin at current rate.
-
-Thank you for using AfriTokeni!`;
-    }
-
-      // Sell Bitcoin (4)
-      if (upperCmd === '4') {
-      return `₿ Sell Bitcoin
-
-Enter Bitcoin amount to sell (satoshis):
-Example: 50000
-
-Agent will pay you UGX at current rate.
-
-Thank you for using AfriTokeni!`;
-    }
-
-      // Send Bitcoin (5)
-      if (upperCmd === '5') {
-      return `₿ Send Bitcoin
-
-To: Principal ID or Phone
-Amount: 10000 satoshis
-Fee: <$0.01
-Time: <1 second
-
-Reply YES to confirm
-
-Thank you for using AfriTokeni!`;
-    }
-
-      return `Invalid option in Bitcoin menu.`;
-    }
-
-    // USDC SUBMENU
-    if (currentMenu === 'usdc') {
-      if (upperCmd === '1' || upperCmd === 'USDC BAL') {
-      const usdc = (balance.ckUSDCBalance / 100).toFixed(2);
-      const ugxValue = balance.ckUSDCBalance * 37.5; // 1 USD = 3750 UGX
-      return `💵 Your ckUSDC Balance
-
-$${usdc} USDC
-≈ UGX ${ugxValue.toLocaleString()}
-
-Current Rate: 1 USDC = 3,750 UGX
-
-Stable value guaranteed!
-
-Thank you for using AfriTokeni!`;
-    }
-
-      if (upperCmd === '2' || upperCmd === 'USDC RATE') {
-      return `💵 USDC Exchange Rate
-
-1 USDC = 3,750 UGX
-1 UGX = $0.000267 USDC
-
-Last Updated: ${new Date().toLocaleTimeString()}
-
-Thank you for using AfriTokeni!`;
-    }
-
-      // Buy USDC (3)
-      if (upperCmd === '3') {
-      return `💵 Buy USDC
-
-Enter UGX amount to spend:
-Example: 100000
-
-Agent will provide USDC at current rate.
-
-Thank you for using AfriTokeni!`;
-    }
-
-      // Sell USDC (4)
-      if (upperCmd === '4') {
-      return `💵 Sell USDC
-
-Enter USDC amount to sell:
-Example: 50
-
-Agent will pay you UGX at current rate.
-
-Thank you for using AfriTokeni!`;
-    }
-
-      // Send USDC (5)
-      if (upperCmd === '5') {
-      return `💵 Send USDC
-
-To: Principal ID or Phone
-Amount: $10.00 USDC
-Fee: <$0.01
-Time: <1 second
-
-Reply YES to confirm
-
-Thank you for using AfriTokeni!`;
-      }
-      return `Invalid option in USDC menu.`;
-    }
-
-    // DAO GOVERNANCE SUBMENU
-    if (currentMenu === 'dao') {
-      if (upperCmd === '1') {
-        return `🏛️ Active Proposals
-
-1. Increase Agent Commission
-   From 2% to 3%
-   Voting ends: Dec 31, 2025
-   Status: Active
-
-2. Add Nigerian Naira (NGN)
-   New currency support
-   Voting ends: Jan 15, 2026
-   Status: Active
-
-Reply with proposal number for details
-0. Back to Main Menu`;
-      }
-      
-      if (upperCmd === '2') {
-        return `🗳️ My Voting Power
-
-AFRI Tokens: 1,250
-Voting Power: 1,250 votes
-
-Earned from:
-- Transactions: 500 AFRI
-- Referrals: 250 AFRI
-- Agent Services: 500 AFRI
-
-0. Back to Main Menu`;
-      }
-      
-      if (upperCmd === '3') {
-        return `✅ Active Votes
-
-You have voted on:
-
-1. Increase Agent Commission
-   Your vote: YES (500 AFRI)
-   Current results: 65% YES
-
-No other active votes
-
-0. Back to Main Menu`;
-      }
-      
-      if (upperCmd === '4') {
-        return `🗳️ Vote on Proposal
-
-Enter proposal number (1-2):
-
-1. Increase Agent Commission
-2. Add Nigerian Naira
-
-Then choose:
-YES / NO / ABSTAIN
-
-0. Back to Main Menu`;
-      }
-      
-      return `Invalid option in DAO menu.`;
-    }
-
-    // Option 5: Help (from main menu)
-    if (currentMenu === 'main' && (upperCmd === '5' || upperCmd === 'HELP')) {
-      return `📖 AfriTokeni Help
-
-Local Currency: Send, deposit, withdraw UGX
-Bitcoin: Buy, sell, send ckBTC
-USDC: Buy, sell, send USDC stablecoin
-
-For support: Call +256-700-AFRI (2374)
-Visit: afritokeni.com
-
-Thank you for using AfriTokeni!`;
-    }
-
-    // Transaction history
-    if (upperCmd === 'HISTORY') {
-      const recent = transactions.slice(0, 3);
-      let history = '📊 Recent Transactions\n\n';
-      recent.forEach((tx, i) => {
-        history += `${i + 1}. ${tx.type} UGX ${tx.amount.toLocaleString()}\n   ${new Date(tx.createdAt).toLocaleDateString()}\n`;
-      });
-      return history + '\nThank you for using AfriTokeni!';
-    }
-
-    // Find Agent (Option 16)
-    if (upperCmd === '16' || upperCmd === 'AGENTS') {
-      return `📍 Find Agent
-
-Available agents near you:
-
-1. Kampala Central - 2.3km
-   ⭐ 4.8 (23 reviews)
-   Services: Deposit, Withdraw, Bitcoin
-
-2. Nakawa Market - 4.1km
-   ⭐ 4.5 (15 reviews)
-   Services: Deposit, Withdraw
-
-3. City Center - 5.8km
-   ⭐ 4.9 (45 reviews)
-   Services: All services
-
-Reply with number for details.
-
-Thank you for using AfriTokeni!`;
-    }
-
-    // Transaction History (Option 15)
-    if (upperCmd === '15' || upperCmd === 'HISTORY') {
-      const recent = transactions.slice(0, 3);
-      let history = '📊 Transaction History\n\n';
-      recent.forEach((tx, i) => {
-        history += `${i + 1}. ${tx.type} UGX ${tx.amount.toLocaleString()}\n   ${new Date(tx.createdAt).toLocaleDateString()}\n`;
-      });
-      return history + '\nReply with number for details.\n\nThank you for using AfriTokeni!';
-    }
-
-    // Withdraw (Option 14)
-    if (upperCmd === '14' || upperCmd.startsWith('WITHDRAW')) {
-      return `💵 Cash Withdrawal
-
-Amount: UGX 50,000
-Nearest agent: 2.3 km away
-Fee: 3% (UGX 1,500)
-
-Code: WD-${Math.random().toString(36).substr(2, 6).toUpperCase()}
-
-Show this code to the agent to collect cash.
-
-Thank you for using AfriTokeni!`;
-    }
-
-    // Send money (Option 11)
-    if (upperCmd === '11' || upperCmd.startsWith('SEND')) {
-      return `✅ Money Transfer
-
-To: +256 700 XXX XXX
-Amount: UGX 10,000
-Fee: UGX 0 (free!)
-
-Reply YES to confirm
-
-Thank you for using AfriTokeni!`;
-    }
-
-    // Deposit (Option 13)
-    if (upperCmd === '13' || upperCmd.startsWith('DEPOSIT')) {
-      return `💰 Deposit Money
-
-Find nearest agent to deposit cash.
-
-Agent: Kampala Central - 2.3km
-Fee: 0% (free!)
-
-Show this code to agent:
-DEP-${Math.random().toString(36).substr(2, 6).toUpperCase()}
-
-Thank you for using AfriTokeni!`;
-    }
-
-    // Default
-    return `❓ Unknown command.
-
-Type HELP for commands or *384*22948# for main menu.
-
-Thank you for using AfriTokeni!`;
+    // Clean up response
+    return result.response.replace(/^(CON |END )/, '');
   };
 
   const handleSendMessage = async () => {
