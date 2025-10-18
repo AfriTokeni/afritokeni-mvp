@@ -445,13 +445,15 @@ export class USSDService {
     }
   }
 
-  private static getMainMenu(): string {
-    return `*229# - AfriTokeni
-1. Send Money
-2. Check Balance
-3. Withdraw Cash
-4. Find Agents
-5. Bitcoin
-0. Help`;
+  private static async getMainMenu(lang: 'en' | 'lg' | 'sw' = 'en'): Promise<string> {
+    const { TranslationService } = await import('./translations.js');
+    return `${TranslationService.translate('welcome', lang)}
+
+1. ${TranslationService.translate('local_currency', lang)}
+2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)
+3. ${TranslationService.translate('usdc', lang)} (ckUSDC)
+4. ${TranslationService.translate('dao_governance', lang)}
+5. ${TranslationService.translate('help', lang)}
+6. Language Selection`;
   }
 }
