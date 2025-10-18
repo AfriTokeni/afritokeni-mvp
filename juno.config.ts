@@ -118,6 +118,12 @@ export default defineConfig({
           write: "public",
           memory: "stable",
         },
+        {
+          collection: "ussd_sessions",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
       ],
       storage: [
         {
