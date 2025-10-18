@@ -291,11 +291,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < ugxAmount) {
         const currentBalance = userBalance ? userBalance.balance : 0;
-        return endSession(`Insufficient balance!
-Your balance: ${currency} ${currentBalance.toLocaleString()}
-Required: ${currency} ${ugxAmount.toLocaleString()}
-
-Thank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('insufficient_balance', lang)}\n${TranslationService.translate('your_balance', lang)}: ${currency} ${currentBalance.toLocaleString()}\n${TranslationService.translate('required', lang)}: ${currency} ${ugxAmount.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
       }
       
       // Calculate BTC amount and fees with real rate
@@ -325,12 +321,7 @@ Thank you for using AfriTokeni!`);
         
         session.data.availableAgents = availableAgents;
         
-        let agentList = `BTC Purchase Quote
-
-Spend: ${currency} ${ugxAmount.toLocaleString()}
-Fee (2.5%): ${currency} ${fee.toLocaleString()}
-Net: ${currency} ${netAmount.toLocaleString()}
-Receive: ₿${btcAmount.toFixed(8)} BTC
+        let agentList = `BTC ${TranslationService.translate('purchase_quote', lang)}\n\n${TranslationService.translate('spend', lang)}: ${currency} ${ugxAmount.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${currency} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${currency} ${netAmount.toLocaleString()}\n${TranslationService.translate('receive', lang)}: ₿${btcAmount.toFixed(8)} BTC
 
 Select an agent:
 `;
@@ -696,12 +687,7 @@ Thank you for using AfriTokeni!`);
         
         session.data.availableAgents = availableAgents;
         
-        let agentList = `BTC Sale Quote
-
-Sell: ₿${btcAmount.toFixed(8)} BTC
-Gross: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}
-Fee (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}
-You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
+        let agentList = `BTC ${TranslationService.translate('sale_quote', lang)}\n\n${TranslationService.translate('sell', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('gross', lang)}: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
 Select an agent:
 `;
