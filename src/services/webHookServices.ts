@@ -5,13 +5,6 @@ import { AnonymousIdentity } from "@dfinity/agent";
 import type { SatelliteOptions } from "@junobuild/core";
 import { AfricanCurrency } from '../types/currency';
 
-// Node.js process declaration for environment variables
-// declare const process: {
-//   env: {
-//     [key: string]: string | undefined;
-//     NODE_ENV?: string;
-//   };
-// };
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
