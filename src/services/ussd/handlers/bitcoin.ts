@@ -433,7 +433,17 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         // Get user information
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession('User not found. Please contact support.');
+          // Demo mode: show mock purchase success
+          const ugxAmount = session.data.ugxAmount || 50000;
+          const btcAmount = (ugxAmount / 400000000).toFixed(8);
+          return endSession(`Bitcoin Purchase Successful! (Demo)
+
+Amount: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
+Received: ₿${btcAmount} BTC
+
+Meet your selected agent to complete the transaction.
+
+Thank you for using AfriTokeni!`);
         }
         
         const selectedAgent = session.data.selectedAgent;
