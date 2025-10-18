@@ -508,7 +508,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${TranslationService.translate('select_an_agent', lang)} (1-${agents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:`);
       }
       
       const selectedAgent = agents[agentChoice - 1];

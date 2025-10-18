@@ -184,10 +184,10 @@ export async function handleUserRegistration(input: string, session: USSDSession
         session.currentMenu = 'verification';
         session.step = 1;
         console.log(`📱 SMS sent successfully to ${session.phoneNumber}, moving to verification menu`);
-        return continueSession(`Thank you ${firstName} ${lastName}!\nWe've sent a verification code to your phone.\nPlease enter the 6-digit code:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('thank_you', lang)} ${firstName} ${lastName}!\n${TranslationService.translate('verification_code_sent', lang)}\n${TranslationService.translate('enter_verification_code', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       } catch (error) {
         console.error(`❌ Failed to send verification SMS to ${session.phoneNumber}:`, error);
-        return endSession('Failed to send verification code. Please try again later.');
+        return endSession(`${TranslationService.translate('verification_failed', lang)}`);
       }
     }
       
@@ -214,9 +214,9 @@ export async function handleVerification(input: string, session: USSDSession): P
         console.log(`❌ Invalid code format for ${session.phoneNumber}, attempts: ${session.data.verificationAttempts}`);
         if (session.data.verificationAttempts >= 3) {
           console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
-          return endSession('Too many failed attempts. Please dial again to restart registration.');
+          return endSession(`${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('please_try_again_later', lang)}`);
         }
-        return continueSession(`Invalid code format. Please enter the 6-digit verification code:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_code_format', lang)}. ${TranslationService.translate('enter_verification_code', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify the code
@@ -228,9 +228,9 @@ export async function handleVerification(input: string, session: USSDSession): P
         console.log(`❌ Invalid verification code for ${session.phoneNumber}, attempts: ${session.data.verificationAttempts}`);
         if (session.data.verificationAttempts >= 3) {
           console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
-          return endSession('Too many failed attempts. Please dial again to restart registration.');
+          return endSession(`${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('please_try_again_later', lang)}`);
         }
-        return continueSession(`Invalid verification code. Please try again:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_verification_code', lang)}. ${TranslationService.translate('try_again', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Code is valid - register the user

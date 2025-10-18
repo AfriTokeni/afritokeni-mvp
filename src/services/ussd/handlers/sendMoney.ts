@@ -120,14 +120,10 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
         
         if (session.data.pinAttempts >= 3) {
-          return endSession(`Too many incorrect PIN attempts.
-Transaction cancelled for security.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('too_many_attempts', lang)}.\n${TranslationService.translate('transaction_cancelled', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
-        return continueSession(`Incorrect PIN. ${3 - session.data.pinAttempts} attempts remaining.
-Enter your PIN:`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}. ${3 - session.data.pinAttempts} ${TranslationService.translate('attempts_remaining', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
 
       // PIN is correct, process the transaction

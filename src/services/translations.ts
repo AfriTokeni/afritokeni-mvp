@@ -1203,6 +1203,26 @@ export class TranslationService {
       lg: 'Ebikwata ku Kutunda',
       sw: 'Maelezo ya Mauzo'
     },
+    'verification_code_sent': {
+      en: 'We\'ve sent a verification code to your phone.',
+      lg: 'Tuweerezza koodi y\'okukakasa ku ssimu yo.',
+      sw: 'Tumetuma nambari ya uthibitisho kwa simu yako.'
+    },
+    'enter_verification_code': {
+      en: 'Please enter the 6-digit code',
+      lg: 'Yingiza koodi y\'ennamba 6',
+      sw: 'Weka nambari ya nambari 6'
+    },
+    'invalid_code_format': {
+      en: 'Invalid code format',
+      lg: 'Enkola ya koodi si ntuufu',
+      sw: 'Muundo wa nambari si sahihi'
+    },
+    'invalid_verification_code': {
+      en: 'Invalid verification code',
+      lg: 'Koodi y\'okukakasa si ntuufu',
+      sw: 'Nambari ya uthibitisho si sahihi'
+    },
     'setup_pin_message': {
       en: 'To secure your account, please set up a 4-digit PIN',
       lg: 'Okukuuma akawunti yo, tegeka PIN ya namba 4',

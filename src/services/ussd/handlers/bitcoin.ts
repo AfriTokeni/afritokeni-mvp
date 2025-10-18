@@ -844,7 +844,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error checking ckBTC balance:', error);
-        return endSession('Error checking balance. Please try again later.');
+        return endSession(`${TranslationService.translate('error_try_again', lang)}`);
       }
     }
     

@@ -112,7 +112,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
         
         if (session.data.pinAttempts >= 3) {
           console.log(`🚫 Max PIN attempts reached for ${session.phoneNumber}`);
-          return endSession('Too many failed attempts. Please try again later.');
+          return endSession(`${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('please_try_again_later', lang)}`);
         }
         
         return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}. ${TranslationService.translate('enter_pin_4digit', lang)}:`);
@@ -159,7 +159,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
         
         if (session.data.pinAttempts >= 3) {
           console.log(`🚫 Max PIN attempts reached for ${session.phoneNumber}`);
-          return endSession('Too many failed attempts. Please try again later.');
+          return endSession(`${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('please_try_again_later', lang)}`);
         }
         
         const remainingAttempts = 3 - session.data.pinAttempts;
@@ -172,7 +172,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
       console.log(`🔑 Initializing PIN check for ${session.phoneNumber}`);
       session.step = 1;
       session.data.pinAttempts = 0;
-      return continueSession(`Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('welcome_afritokeni', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
   }
 }
 
