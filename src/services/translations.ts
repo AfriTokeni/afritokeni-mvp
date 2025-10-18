@@ -674,6 +674,100 @@ export class TranslationService {
       lg: 'Yingiza ennamba 4 zokka',
       sw: 'Tafadhali weka nambari 4 tu'
     },
+    
+    // Transaction quotes
+    'purchase_quote': {
+      en: 'Purchase Quote',
+      lg: 'Eky\'okugula',
+      sw: 'Nukuu ya Ununuzi'
+    },
+    'sale_quote': {
+      en: 'Sale Quote',
+      lg: 'Eky\'okutunda',
+      sw: 'Nukuu ya Mauzo'
+    },
+    'spend': {
+      en: 'Spend',
+      lg: 'Saasaanya',
+      sw: 'Tumia'
+    },
+    'receive': {
+      en: 'Receive',
+      lg: 'Funa',
+      sw: 'Pokea'
+    },
+    'sell': {
+      en: 'Sell',
+      lg: 'Tunda',
+      sw: 'Uza'
+    },
+    'gross': {
+      en: 'Gross',
+      lg: 'Omugatte',
+      sw: 'Jumla'
+    },
+    'net': {
+      en: 'Net',
+      lg: 'Ekyasigadde',
+      sw: 'Safi'
+    },
+    
+    // Agent finder
+    'find_agent_title': {
+      en: 'Find Agent',
+      lg: 'Noonya Agent',
+      sw: 'Tafuta Wakala'
+    },
+    'available_agents': {
+      en: 'Available agents near you',
+      lg: 'Ba-agent abali kumpi nawe',
+      sw: 'Mawakala wanaopatikana karibu nawe'
+    },
+    'agent_details': {
+      en: 'Agent Details',
+      lg: 'Ebikwata ku Agent',
+      sw: 'Maelezo ya Wakala'
+    },
+    'location': {
+      en: 'Location',
+      lg: 'Ekifo',
+      sw: 'Mahali'
+    },
+    'address': {
+      en: 'Address',
+      lg: 'Endagiriro',
+      sw: 'Anwani'
+    },
+    'services': {
+      en: 'Services',
+      lg: 'Empeereza',
+      sw: 'Huduma'
+    },
+    'deposit_money': {
+      en: 'Deposit money',
+      lg: 'Teeka ssente',
+      sw: 'Weka pesa'
+    },
+    'withdraw_money': {
+      en: 'Withdraw money',
+      lg: 'Ggya ssente',
+      sw: 'Ondoa pesa'
+    },
+    'buy_sell_bitcoin': {
+      en: 'Buy/Sell Bitcoin',
+      lg: 'Gula/Tunda Bitcoin',
+      sw: 'Nunua/Uza Bitcoin'
+    },
+    'visit_agent': {
+      en: 'Visit the agent at their location for assistance',
+      lg: 'Kyalira agent ku kifo kye okufuna obuyambi',
+      sw: 'Tembelea wakala mahali pake kwa msaada'
+    },
+    'for_directions': {
+      en: 'For directions or to contact agents directly, visit them at their listed locations',
+      lg: 'Okufuna ekkubo oba okutumira ba-agent, bakyalire ku bifo byabwe',
+      sw: 'Kwa maelekezo au kuwasiliana na mawakala moja kwa moja, watembelee mahali walipoorodheshwa'
+    },
   };
 
   /**
