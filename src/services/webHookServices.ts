@@ -266,8 +266,8 @@ export class WebhookDataService {
 
   // Find user by phone number - handles both SMS users (phone as key) and web users (phone in email field)
   static async findUserByPhoneNumber(phoneNumber: string): Promise<User | null> {
-    try {
-      // PLAYGROUND MODE: Return mock user
+    // PLAYGROUND MODE: Return mock user immediately without hitting backend
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       console.log('✅ Playground mode: Returning mock user for', phoneNumber);
       return {
         id: 'playground_user',
@@ -281,7 +281,9 @@ export class WebhookDataService {
         preferredCurrency: 'UGX',
         createdAt: new Date()
       };
-      
+    }
+    
+    try {
       // First try to get user directly by phone number (SMS users)
       let user = await this.getUserByKey(phoneNumber);
       if (user) {
@@ -466,6 +468,17 @@ export class WebhookDataService {
 
     // Balance operations
     static async getUserBalance(userIdentifier: string): Promise<UserBalance | null> {
+      // PLAYGROUND MODE: Return mock balance immediately
+      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        console.log('✅ Playground mode: Returning mock balance 50,000 UGX');
+        return {
+          userId: 'playground_user',
+          balance: 50000,
+          currency: 'UGX',
+          lastUpdated: new Date()
+        };
+      }
+      
       try {
         // First try to get user by the identifier (could be user ID or phone number)
         let user = await this.getUserByKey(userIdentifier);
@@ -725,6 +738,68 @@ export class WebhookDataService {
 
     // Agent operations
     static async getAvailableAgents(): Promise<Agent[]> {
+      // PLAYGROUND MODE: Return mock agents immediately without hitting backend
+      // Check if we're in a non-production environment
+      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        console.log('✅ Playground mode detected: Returning mock agents without backend call');
+        return [
+          {
+            id: 'agent_001',
+            userId: 'user_agent_001',
+            businessName: 'Kampala Central Agent',
+            location: {
+              country: 'Uganda',
+              state: 'Central',
+              city: 'Kampala',
+              address: 'Plot 123, Kampala Road',
+              coordinates: { lat: 0.3476, lng: 32.5825 }
+            },
+            isActive: true,
+            status: 'available',
+            cashBalance: 5000000,
+            digitalBalance: 10000000,
+            commissionRate: 0.02,
+            createdAt: new Date()
+          },
+          {
+            id: 'agent_002',
+            userId: 'user_agent_002',
+            businessName: 'Entebbe Agent Services',
+            location: {
+              country: 'Uganda',
+              state: 'Central',
+              city: 'Entebbe',
+              address: 'Airport Road, Entebbe',
+              coordinates: { lat: 0.0640, lng: 32.4435 }
+            },
+            isActive: true,
+            status: 'available',
+            cashBalance: 3000000,
+            digitalBalance: 8000000,
+            commissionRate: 0.025,
+            createdAt: new Date()
+          },
+          {
+            id: 'agent_003',
+            userId: 'user_agent_003',
+            businessName: 'Jinja Money Exchange',
+            location: {
+              country: 'Uganda',
+              state: 'Eastern',
+              city: 'Jinja',
+              address: 'Main Street, Jinja',
+              coordinates: { lat: 0.4244, lng: 33.2040 }
+            },
+            isActive: true,
+            status: 'available',
+            cashBalance: 2000000,
+            digitalBalance: 6000000,
+            commissionRate: 0.03,
+            createdAt: new Date()
+          }
+        ];
+      }
+      
       try {
         const agentDocs = await listDocs({
           collection: 'agents',
@@ -887,6 +962,49 @@ export class WebhookDataService {
 
     // Get user transaction history
     static async getUserTransactions(phoneNumber: string, limit: number = 5): Promise<Transaction[]> {
+      // PLAYGROUND MODE: Return mock transactions immediately
+      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        console.log('✅ Playground mode: Returning mock transactions');
+        return [
+          {
+            id: 'tx_001',
+            userId: 'playground_user',
+            type: 'receive',
+            amount: 25000,
+            fee: 0,
+            currency: 'UGX',
+            status: 'completed',
+            description: 'Received from +256700999888',
+            createdAt: new Date(Date.now() - 86400000),
+            completedAt: new Date(Date.now() - 86400000)
+          },
+          {
+            id: 'tx_002',
+            userId: 'playground_user',
+            type: 'send',
+            amount: 10000,
+            fee: 100,
+            currency: 'UGX',
+            status: 'completed',
+            description: 'Sent to +256700111222',
+            createdAt: new Date(Date.now() - 172800000),
+            completedAt: new Date(Date.now() - 172800000)
+          },
+          {
+            id: 'tx_003',
+            userId: 'playground_user',
+            type: 'deposit',
+            amount: 50000,
+            fee: 0,
+            currency: 'UGX',
+            status: 'completed',
+            description: 'Cash deposit via agent',
+            createdAt: new Date(Date.now() - 259200000),
+            completedAt: new Date(Date.now() - 259200000)
+          }
+        ];
+      }
+      
       console.log(`Getting transaction history for ${phoneNumber}, limit: ${limit}`);
       try {
         // Find the user first to get their ID
