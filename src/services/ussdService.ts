@@ -236,6 +236,11 @@ export class USSDService {
           // These are handled by their respective functions via handleDAO
           // but we need to pass the actual input, not route through DAO menu
           response = await handleDAO(input, session);
+          
+          // Check if handler wants to show dao menu
+          if (response.includes('__SHOW_DAO_MENU__')) {
+            response = await handleDAO('', session);
+          }
           break;
         
         case 'language_selection':
