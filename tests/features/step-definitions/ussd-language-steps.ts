@@ -5,7 +5,20 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { world } from './shared-steps.js';
+import { USSDTestHelper } from '../../helpers/ussdTestHelpers.js';
 import type { Language } from '../../../src/services/translations.js';
+
+Given('I am a registered USSD user', async function () {
+  world.ussdPhoneNumber = USSDTestHelper.generatePhoneNumber();
+  world.ussdSessionId = USSDTestHelper.generateSessionId();
+  
+  // Create a mock session
+  const session = await USSDTestHelper.createMockSession(
+    world.ussdSessionId,
+    world.ussdPhoneNumber
+  );
+  world.session = session;
+});
 
 Given('my language preference is {string}', function (language: Language) {
   // Set language preference in session
@@ -53,6 +66,24 @@ When('I select {string} for Swahili', async function (option: string) {
 });
 
 // Removed duplicate - already exists in ussd-integration-steps.ts
+
+When('I select {string} to go back', async function (option: string) {
+  const input = option;
+  world.lastResponse = await world.ussdService.processUSSDRequest(
+    world.sessionId,
+    world.phoneNumber,
+    input
+  );
+});
+
+When('I select {string} for Help', async function (option: string) {
+  const input = option;
+  world.lastResponse = await world.ussdService.processUSSDRequest(
+    world.sessionId,
+    world.phoneNumber,
+    input
+  );
+});
 
 When('I enter chained input {string}', async function (input: string) {
   world.lastResponse = await world.ussdService.processUSSDRequest(
