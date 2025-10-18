@@ -262,11 +262,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < amountUGX) {
         const currentBalance = userBalance ? userBalance.balance : 0;
-        return endSession(`Insufficient balance!
-Your balance: ${getSessionCurrency(session)} ${currentBalance.toLocaleString()}
-Required: ${getSessionCurrency(session)} ${amountUGX.toLocaleString()}
-
-Thank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('insufficient_balance', lang)}\n${TranslationService.translate('your_balance', lang)}: ${getSessionCurrency(session)} ${currentBalance.toLocaleString()}\n${TranslationService.translate('required', lang)}: ${getSessionCurrency(session)} ${amountUGX.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
       }
 
       try {
@@ -297,12 +293,7 @@ Thank you for using AfriTokeni!`);
         const netAmount = amountUGX - fee;
         const finalUSDCAmount = netAmount / usdcRate.rate;
         
-        let agentList = `USDC Purchase Quote
-
-Spend: ${getSessionCurrency(session)} ${amountUGX.toLocaleString()}
-Fee (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}
-Net: ${getSessionCurrency(session)} ${netAmount.toLocaleString()}
-Receive: $${finalUSDCAmount.toFixed(6)} USDC
+        let agentList = `USDC ${TranslationService.translate('purchase_quote', lang)}\n\n${TranslationService.translate('spend', lang)}: ${getSessionCurrency(session)} ${amountUGX.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${netAmount.toLocaleString()}\n${TranslationService.translate('receive', lang)}: $${finalUSDCAmount.toFixed(6)} USDC
 
 Select an agent:
 `;
@@ -432,7 +423,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -449,7 +440,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -536,12 +527,7 @@ Thank you for using AfriTokeni!`);
         
         session.data.availableAgents = availableAgents;
         
-        let agentList = `USDC Sale Quote
-
-Sell: $${usdcAmount.toFixed(6)} USDC
-Gross: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}
-Fee (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}
-You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
+        let agentList = `USDC ${TranslationService.translate('sale_quote', lang)}\n\n${TranslationService.translate('sell', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('gross', lang)}: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
 Select an agent:
 `;
