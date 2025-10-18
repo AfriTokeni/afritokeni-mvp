@@ -38,7 +38,7 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       const amount = parseInt(sanitized_input);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount (${currency}):`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
       
       if (amount < 1000) {
@@ -60,7 +60,7 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
         const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
         
         if (!userBalance) {
-          return endSession('Unable to check balance. Please try again later.');
+          return endSession(TranslationService.translate('error_try_again', lang));
         }
         
         const totalRequired = amount + Math.round(amount * 0.01); // Include 1% fee
@@ -78,19 +78,14 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
         const agents = await DataService.getAvailableAgents();
         
         if (agents.length === 0) {
-          return endSession('No agents available at the moment. Please try again later.');
+          return endSession(`${TranslationService.translate('no_agents_available', lang)}. ${TranslationService.translate('please_try_again_later', lang)}.`);
         }
         
         // Display only the first 2 agents
         const displayAgents = agents.slice(0, 2);
         session.data.availableAgents = displayAgents;
         
-        let agentList = `Select an agent:
-Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
-Fee: ${getSessionCurrency(session)} ${session.data.withdrawFee.toLocaleString()}
-Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
-
-`;
+        let agentList = `${TranslationService.translate('select_an_agent', lang)}:\n${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${amount.toLocaleString()}\n${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${session.data.withdrawFee.toLocaleString()}\n${TranslationService.translate('total', lang)}: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}\n\n`;
         
         displayAgents.forEach((agent, index) => {
           agentList += `${index + 1}. ${agent.businessName}
@@ -194,14 +189,14 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         // Get user to get their ID
         const user = await DataService.findUserByPhoneNumber(session.phoneNumber);
         if (!user) {
-          return endSession('User not found. Please try again later.');
+          return endSession(TranslationService.translate('error_try_again', lang));
         }
         
         const withdrawAmount = session.data.withdrawAmount || 0;
         const selectedAgent = session.data.selectedAgent;
         
         if (!selectedAgent) {
-          return endSession('Agent not selected. Please try again.');
+          return endSession(TranslationService.translate('error_try_again', lang));
         }
         
         const transactionId = await DataService.createWithdrawTransaction(
@@ -212,7 +207,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         );
         
         if (!transactionId) {
-          return endSession('Failed to create withdrawal transaction. Please try again later.');
+          return endSession(TranslationService.translate('error_try_again', lang));
         }
         
         session.data.transactionId = transactionId;
