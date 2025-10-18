@@ -143,14 +143,11 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
         if (!user) {
           // Demo mode: show mock balance
           console.log('User not found, showing demo BTC balance');
-          return endSession(`Your ckBTC Balance (Demo)
-
-₿0.00123456 BTC
-≈ ${getSessionCurrency(session)} 500,000
-
-ckBTC provides instant Bitcoin transfers with minimal fees on the Internet Computer blockchain.
-
-Thank you for using AfriTokeni!`);
+          return endSession(TranslationService.getDemoMessage('btc_balance', lang, {
+            currency: getSessionCurrency(session),
+            amount: '500,000',
+            btc: '0.00123456'
+          }));
         }
         
         // Use the user's Principal ID for ICP blockchain operations
@@ -179,14 +176,11 @@ Thank you for using AfriTokeni!`);
       } catch (error) {
         console.error('Error retrieving ckBTC balance:', error);
         // Demo mode fallback
-        return endSession(`Your ckBTC Balance (Demo)
-
-₿0.00123456 BTC
-≈ ${getSessionCurrency(session)} 500,000
-
-ckBTC provides instant Bitcoin transfers with minimal fees on the Internet Computer blockchain.
-
-Thank you for using AfriTokeni!`);
+        return endSession(TranslationService.getDemoMessage('btc_balance', lang, {
+          currency: getSessionCurrency(session),
+          amount: '500,000',
+          btc: '0.00123456'
+        }));
       }
     }
     
@@ -797,14 +791,11 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
           // Demo mode: show mock sell success
           const btcAmount = session.data.btcAmount || 0.001;
           const ugxAmount = (btcAmount * 400000000).toFixed(0);
-          return endSession(`Bitcoin Sale Successful! (Demo)
-
-Sold: ₿${btcAmount} BTC
-Received: ${getSessionCurrency(session)} ${parseInt(ugxAmount).toLocaleString()}
-
-Meet your selected agent to receive cash.
-
-Thank you for using AfriTokeni!`);
+          return endSession(TranslationService.getDemoMessage('btc_sell', lang, {
+            currency: getSessionCurrency(session),
+            amount: parseInt(ugxAmount).toLocaleString(),
+            btc: btcAmount.toString()
+          }));
         }
         
         const selectedAgent = session.data.selectedAgent;
@@ -1113,14 +1104,10 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
           // Demo mode: show mock send success
           const btcAmount = session.data.sendAmount || 0.0001;
           const recipientPhone = session.data.recipientPhone || '+256700000000';
-          return endSession(`Bitcoin Sent Successfully! (Demo)
-
-Amount: ₿${btcAmount} BTC
-To: ${recipientPhone}
-
-Transaction complete!
-
-Thank you for using AfriTokeni!`);
+          return endSession(TranslationService.getDemoMessage('btc_send', lang, {
+            btc: btcAmount.toString(),
+            phone: recipientPhone
+          }));
         }
         
         const recipientUser = session.data.recipientUser;

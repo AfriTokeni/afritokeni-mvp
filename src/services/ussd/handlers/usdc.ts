@@ -132,14 +132,11 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
         if (!user) {
           // Demo mode: show mock balance
           console.log('User not found, showing demo USDC balance');
-          return endSession(`Your USDC Balance (Demo)
-
-$100.00 USDC
-≈ ${getSessionCurrency(session)} 380,000
-
-Current Rate: 1 USDC = ${getSessionCurrency(session)} 3,800
-
-Thank you for using AfriTokeni!`);
+          return endSession(TranslationService.getDemoMessage('usdc_balance', lang, {
+            currency: getSessionCurrency(session),
+            amount: '380,000',
+            usdc: '$100.00'
+          }));
         }
 
         // Use CkUSDCService with satellite config for SMS users
@@ -162,14 +159,11 @@ Thank you for using AfriTokeni!`);
       } catch (error) {
         console.error('Error retrieving USDC balance:', error);
         // Demo mode fallback
-        return endSession(`Your USDC Balance (Demo)
-
-$100.00 USDC
-≈ ${getSessionCurrency(session)} 380,000
-
-Current Rate: 1 USDC = ${getSessionCurrency(session)} 3,800
-
-Thank you for using AfriTokeni!`);
+        return endSession(TranslationService.getDemoMessage('usdc_balance', lang, {
+          currency: getSessionCurrency(session),
+          amount: '380,000',
+          usdc: '$100.00'
+        }));
       }
     }
     
@@ -348,14 +342,11 @@ Select an agent:
           // Demo mode: show mock USDC buy success
           const usdcAmount = session.data.usdcAmount || 50;
           const ugxAmount = (usdcAmount * 3800).toFixed(0);
-          return endSession(`USDC Purchase Successful! (Demo)
-
-Amount: ${getSessionCurrency(session)} ${parseInt(ugxAmount).toLocaleString()}
-Received: $${usdcAmount} USDC
-
-Meet your selected agent to complete the transaction.
-
-Thank you for using AfriTokeni!`);
+          return endSession(TranslationService.getDemoMessage('usdc_buy', lang, {
+            currency: getSessionCurrency(session),
+            amount: parseInt(ugxAmount).toLocaleString(),
+            usdc: `$${usdcAmount}`
+          }));
         }
         
         const selectedAgent = session.data.availableAgents![selection - 1];
@@ -635,14 +626,11 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
           // Demo mode: show mock USDC sell success
           const usdcAmount = session.data.usdcAmount || 50;
           const ugxAmount = (usdcAmount * 3800).toFixed(0);
-          return endSession(`USDC Sale Successful! (Demo)
-
-Sold: $${usdcAmount} USDC
-Received: ${getSessionCurrency(session)} ${parseInt(ugxAmount).toLocaleString()}
-
-Meet your selected agent to receive cash.
-
-Thank you for using AfriTokeni!`);
+          return endSession(TranslationService.getDemoMessage('usdc_sell', lang, {
+            currency: getSessionCurrency(session),
+            amount: parseInt(ugxAmount).toLocaleString(),
+            usdc: `$${usdcAmount}`
+          }));
         }
         
         const selectedAgent = session.data.selectedAgent;
@@ -910,14 +898,10 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
           // Demo mode: show mock USDC send success
           const usdcAmount = session.data.sendAmount || 10;
           const recipientPhone = session.data.recipientPhone || '+256700000000';
-          return endSession(`USDC Sent Successfully! (Demo)
-
-Amount: $${usdcAmount} USDC
-To: ${recipientPhone}
-
-Transaction complete!
-
-Thank you for using AfriTokeni!`);
+          return endSession(TranslationService.getDemoMessage('usdc_send', lang, {
+            usdc: `$${usdcAmount}`,
+            phone: recipientPhone
+          }));
         }
         
         const usdcAmount = session.data.usdcAmount || 0;
