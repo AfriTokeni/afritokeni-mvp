@@ -116,21 +116,21 @@ Feature: Cancel Functionality Across All USSD Flows
     Then I should see "Bitcoin" in USSD response
 
   # ==================== BITCOIN SEND ====================
-  Scenario: Cancel Bitcoin Send at phone entry (English)
+  Scenario: Cancel Bitcoin Send at PIN entry (English)
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "5" for Send Bitcoin
-    Then I should see "phone" in USSD response
+    Then I should see "PIN" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 
-  Scenario: Cancel Bitcoin Send at amount entry (Swahili)
+  Scenario: Cancel Bitcoin Send at phone entry (Swahili)
     Given my language preference is "sw"
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "5" for Send Bitcoin
-    And I enter phone number "256700123456"
-    Then I should see "kiasi" in USSD response
+    And I enter PIN "1234"
+    Then I should see "simu" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 

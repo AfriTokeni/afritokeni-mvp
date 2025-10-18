@@ -46,7 +46,7 @@ Feature: USSD Cancel/Go Back Functionality
     When I dial "*229#"
     And I select "1" for Local Currency
     And I select "1" for Send Money
-    Then I should see "Nyiga 0" in USSD response
+    Then I should see "Ddayo" in USSD response
     When I select "0" to cancel
     Then I should see "Ssente z'omu Uganda" in USSD response
 
@@ -55,7 +55,7 @@ Feature: USSD Cancel/Go Back Functionality
     When I dial "*229#"
     And I select "1" for Local Currency
     And I select "1" for Send Money
-    Then I should see "Bonyeza 0" in USSD response
+    Then I should see "Rudi" in USSD response
     When I select "0" to cancel
     Then I should see "Sarafu ya Ndani" in USSD response
 
