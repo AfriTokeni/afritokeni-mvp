@@ -207,13 +207,7 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
       const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
       
       if (transactions.length === 0) {
-        return endSession(`Transaction History:
-
-No transactions found.
-
-To start using AfriTokeni, send money or make a deposit through an agent.
-
-${TranslationService.translate('thank_you', lang)}`);
+        return endSession(`${TranslationService.translate('transactions', lang)}:\n\n${TranslationService.translate('no_transactions', lang)}.\n\n${TranslationService.translate('to_start_using', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
 
       let transactionList = `${TranslationService.translate('last', lang)} ${transactions.length} ${TranslationService.translate('transactions', lang)}:\n\n`;
@@ -224,22 +218,22 @@ ${TranslationService.translate('thank_you', lang)}`);
         
         switch (tx.type) {
           case 'send':
-            description = `Sent: ${currency} ${tx.amount.toLocaleString()}`;
+            description = `${TranslationService.translate('sent', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
             if (tx.fee && tx.fee > 0) {
               description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
             }
             break;
           case 'receive':
-            description = `Received: ${currency} ${tx.amount.toLocaleString()}`;
+            description = `${TranslationService.translate('received', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
             break;
           case 'withdraw':
-            description = `Withdraw: ${currency} ${tx.amount.toLocaleString()}`;
+            description = `${TranslationService.translate('withdraw', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
             if (tx.fee && tx.fee > 0) {
               description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
             }
             break;
           case 'deposit':
-            description = `Deposit: ${currency} ${tx.amount.toLocaleString()}`;
+            description = `${TranslationService.translate('deposit', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
             break;
           default:
             description = `${tx.type}: ${currency} ${tx.amount.toLocaleString()}`;
@@ -269,7 +263,7 @@ ${TranslationService.translate('thank_you', lang)}`);
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -286,7 +280,7 @@ ${TranslationService.translate('thank_you', lang)}`);
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // PIN is correct, get transaction history
@@ -296,13 +290,7 @@ ${TranslationService.translate('thank_you', lang)}`);
         const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
         
         if (transactions.length === 0) {
-          return endSession(`Transaction History:
-
-No transactions found.
-
-To start using AfriTokeni, send money or make a deposit through an agent.
-
-${TranslationService.translate('thank_you', lang)}`);
+          return endSession(`${TranslationService.translate('transactions', lang)}:\n\n${TranslationService.translate('no_transactions', lang)}.\n\n${TranslationService.translate('to_start_using', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
 
         let transactionList = `${TranslationService.translate('last', lang)} ${transactions.length} ${TranslationService.translate('transactions', lang)}:\n\n`;
@@ -313,22 +301,22 @@ ${TranslationService.translate('thank_you', lang)}`);
           
           switch (tx.type) {
             case 'send':
-              description = `Sent: ${currency} ${tx.amount.toLocaleString()}`;
+              description = `${TranslationService.translate('sent', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
               if (tx.fee && tx.fee > 0) {
                 description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
               }
               break;
             case 'receive':
-              description = `Received: ${currency} ${tx.amount.toLocaleString()}`;
+              description = `${TranslationService.translate('received', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
               break;
             case 'withdraw':
-              description = `Withdraw: ${currency} ${tx.amount.toLocaleString()}`;
+              description = `${TranslationService.translate('withdraw', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
               if (tx.fee && tx.fee > 0) {
                 description += ` (Fee: ${currency} ${tx.fee.toLocaleString()})`;
               }
               break;
             case 'deposit':
-              description = `Deposit: ${currency} ${tx.amount.toLocaleString()}`;
+              description = `${TranslationService.translate('deposit', lang)}: ${currency} ${tx.amount.toLocaleString()}`;
               break;
             default:
               description = `${tx.type}: ${currency} ${tx.amount.toLocaleString()}`;
@@ -347,11 +335,7 @@ ${TranslationService.translate('thank_you', lang)}`);
         return endSession(transactionList);
       } catch (error) {
         console.error('Error getting transaction history:', error);
-        return endSession(`Transaction History:
-
-Unable to retrieve transaction history at the moment. Please try again later.
-
-${TranslationService.translate('thank_you', lang)}`);
+        return endSession(`${TranslationService.translate('transactions', lang)}:\n\n${TranslationService.translate('error_try_again', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
     }
     

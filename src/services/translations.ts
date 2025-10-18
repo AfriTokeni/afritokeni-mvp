@@ -1128,6 +1128,21 @@ export class TranslationService {
       lg: 'Kyalira',
       sw: 'Tembelea'
     },
+    'no_transactions': {
+      en: 'No transactions found',
+      lg: 'Tewali nsimbi ezisindikiddwa',
+      sw: 'Hakuna miamala iliyopatikana'
+    },
+    'to_start_using': {
+      en: 'To start using AfriTokeni, send money or make a deposit through an agent',
+      lg: 'Okutandika okukozesa AfriTokeni, wereza ssente oba teeka ssente ng\'oyita mu agent',
+      sw: 'Ili kuanza kutumia AfriTokeni, tuma pesa au fanya amana kupitia wakala'
+    },
+    'last': {
+      en: 'Last',
+      lg: 'Ezisembayo',
+      sw: 'Za mwisho'
+    },
   };
 
   /**
