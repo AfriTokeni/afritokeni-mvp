@@ -461,6 +461,7 @@ Thank you for using AfriTokeni!`);
 async function handleBTCSell(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
+  const lang = session.language || 'en';
   
   switch (session.step) {
     case 1: {
@@ -475,6 +476,14 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
           // Get ckBTC balance with local currency equivalent
           const currency = getSessionCurrency(session);
           const principalId = user.principalId || user.id;
+          // Handle cancel
+          if (currentInput === '0') {
+            session.currentMenu = 'bitcoin';
+            session.step = 0;
+            session.data = {};
+            return continueSession('__SHOW_BITCOIN_MENU__');
+          }
+          
           const balance = await CkBTCService.getBalanceWithLocalCurrency(
             principalId, 
             currency, 
@@ -794,12 +803,22 @@ Thank you for using AfriTokeni!`);
 async function handleBTCSend(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
+  const lang = session.language || 'en';
   
   switch (session.step) {
     case 1: {
       // PIN verification step
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        session.data = {};
+        return continueSession('__SHOW_BITCOIN_MENU__');
+      }
+      
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
       
       // Verify PIN
