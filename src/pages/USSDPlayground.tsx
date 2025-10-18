@@ -244,9 +244,6 @@ const USSDPlayground: React.FC = () => {
             <p className="text-base sm:text-lg lg:text-xl mb-4 sm:mb-6 opacity-90">
               Experience the future of mobile banking with instant, fee-free transfers
             </p>
-            <p className="text-sm sm:text-base mb-4 opacity-75">
-              💡 Demo PIN: <strong>1234</strong> (for testing transactions)
-            </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link
                 to="/bitcoin-exchange"
