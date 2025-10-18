@@ -242,6 +242,13 @@ export class TranslationService {
       sw: 'Akaunti imefungwa. Majaribio mengi sana.'
     },
     
+    // Session management
+    'session_expired': {
+      en: 'Session expired. Please dial *384*22948# again to start a new session.',
+      lg: 'Obudde buweddeyo. Kuba *384*22948# okutandika omulimu omupya.',
+      sw: 'Kipindi kimemalizika. Tafadhali piga *384*22948# tena kuanza kipindi kipya.'
+    },
+    
     // Menu items
     'check_balance': {
       en: 'Check Balance',

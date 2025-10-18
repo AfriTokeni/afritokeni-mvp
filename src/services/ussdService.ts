@@ -142,8 +142,10 @@ export class USSDService {
           console.log('🔄 Session expired but user dialing fresh - creating new session');
           session = await this.createUSSDSession(sessionId, phoneNumber);
         } else {
+          const { TranslationService } = await import('./translations.js');
+          const lang = session.language || 'en';
           return {
-            response: 'END Session expired. Please dial *229# again to start a new session.',
+            response: 'END ' + TranslationService.translate('session_expired', lang),
             continueSession: false
           };
         }
