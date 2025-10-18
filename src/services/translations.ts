@@ -364,4 +364,61 @@ export class TranslationService {
       { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili' }
     ];
   }
+
+  /**
+   * Format demo transaction messages
+   */
+  static getDemoMessage(type: 'btc_buy' | 'btc_sell' | 'btc_send' | 'usdc_buy' | 'usdc_sell' | 'usdc_send' | 'btc_balance' | 'usdc_balance', lang: Language, data: any): string {
+    const messages = {
+      btc_buy: {
+        en: `Bitcoin Purchase Successful! (Demo)\n\nAmount: {currency} {amount}\nReceived: ₿{btc} BTC\n\nMeet your selected agent to complete the transaction.\n\nThank you for using AfriTokeni!`,
+        lg: `Okugula Bitcoin Kuwangudde! (Demo)\n\nOmuwendo: {currency} {amount}\nOfunye: ₿{btc} BTC\n\nSisinkana ne agent wo okumaliriza.\n\nWebale okukozesa AfriTokeni!`,
+        sw: `Ununuzi wa Bitcoin Umefanikiwa! (Demo)\n\nKiasi: {currency} {amount}\nUmepokea: ₿{btc} BTC\n\nKutana na wakala wako kukamilisha.\n\nAsante kwa kutumia AfriTokeni!`
+      },
+      btc_sell: {
+        en: `Bitcoin Sale Successful! (Demo)\n\nSold: ₿{btc} BTC\nReceived: {currency} {amount}\n\nMeet your selected agent to receive cash.\n\nThank you for using AfriTokeni!`,
+        lg: `Okutunda Bitcoin Kuwangudde! (Demo)\n\nOtunze: ₿{btc} BTC\nOfunye: {currency} {amount}\n\nSisinkana ne agent wo okufuna ssente.\n\nWebale okukozesa AfriTokeni!`,
+        sw: `Mauzo ya Bitcoin Yamefanikiwa! (Demo)\n\nUmeuz: ₿{btc} BTC\nUmepokea: {currency} {amount}\n\nKutana na wakala wako kupokea pesa.\n\nAsante kwa kutumia AfriTokeni!`
+      },
+      btc_send: {
+        en: `Bitcoin Sent Successfully! (Demo)\n\nAmount: ₿{btc} BTC\nTo: {phone}\n\nTransaction complete!\n\nThank you for using AfriTokeni!`,
+        lg: `Okuweereza Bitcoin Kuwangudde! (Demo)\n\nOmuwendo: ₿{btc} BTC\nEri: {phone}\n\nOmulimu guwedde!\n\nWebale okukozesa AfriTokeni!`,
+        sw: `Bitcoin Imetumwa! (Demo)\n\nKiasi: ₿{btc} BTC\n\nKwa: {phone}\n\nMuamala umekamilika!\n\nAsante kwa kutumia AfriTokeni!`
+      },
+      usdc_buy: {
+        en: `USDC Purchase Successful! (Demo)\n\nAmount: {currency} {amount}\nReceived: ${data.usdc} USDC\n\nMeet your selected agent to complete the transaction.\n\nThank you for using AfriTokeni!`,
+        lg: `Okugula USDC Kuwangudde! (Demo)\n\nOmuwendo: {currency} {amount}\nOfunye: ${data.usdc} USDC\n\nSisinkana ne agent wo okumaliriza.\n\nWebale okukozesa AfriTokeni!`,
+        sw: `Ununuzi wa USDC Umefanikiwa! (Demo)\n\nKiasi: {currency} {amount}\nUmepokea: ${data.usdc} USDC\n\nKutana na wakala wako kukamilisha.\n\nAsante kwa kutumia AfriTokeni!`
+      },
+      usdc_sell: {
+        en: `USDC Sale Successful! (Demo)\n\nSold: ${data.usdc} USDC\nReceived: {currency} {amount}\n\nMeet your selected agent to receive cash.\n\nThank you for using AfriTokeni!`,
+        lg: `Okutunda USDC Kuwangudde! (Demo)\n\nOtunze: ${data.usdc} USDC\nOfunye: {currency} {amount}\n\nSisinkana ne agent wo okufuna ssente.\n\nWebale okukozesa AfriTokeni!`,
+        sw: `Mauzo ya USDC Yamefanikiwa! (Demo)\n\nUmeuz: ${data.usdc} USDC\nUmepokea: {currency} {amount}\n\nKutana na wakala wako kupokea pesa.\n\nAsante kwa kutumia AfriTokeni!`
+      },
+      usdc_send: {
+        en: `USDC Sent Successfully! (Demo)\n\nAmount: ${data.usdc} USDC\nTo: {phone}\n\nTransaction complete!\n\nThank you for using AfriTokeni!`,
+        lg: `Okuweereza USDC Kuwangudde! (Demo)\n\nOmuwendo: ${data.usdc} USDC\nEri: {phone}\n\nOmulimu guwedde!\n\nWebale okukozesa AfriTokeni!`,
+        sw: `USDC Imetumwa! (Demo)\n\nKiasi: ${data.usdc} USDC\nKwa: {phone}\n\nMuamala umekamilika!\n\nAsante kwa kutumia AfriTokeni!`
+      },
+      btc_balance: {
+        en: `Your ckBTC Balance (Demo)\n\n₿{btc} BTC\n≈ {currency} {amount}\n\nckBTC provides instant Bitcoin transfers with minimal fees on the Internet Computer blockchain.\n\nThank you for using AfriTokeni!`,
+        lg: `Obugagga bwo bwa ckBTC (Demo)\n\n₿{btc} BTC\n≈ {currency} {amount}\n\nckBTC ekuwa okuweereza Bitcoin amangu n'emisolo mitono.\n\nWebale okukozesa AfriTokeni!`,
+        sw: `Salio lako la ckBTC (Demo)\n\n₿{btc} BTC\n≈ {currency} {amount}\n\nckBTC inatoa uhamisho wa haraka wa Bitcoin na ada ndogo.\n\nAsante kwa kutumia AfriTokeni!`
+      },
+      usdc_balance: {
+        en: `Your USDC Balance (Demo)\n\n${data.usdc} USDC\n≈ {currency} {amount}\n\nCurrent Rate: 1 USDC = {currency} 3,800\n\nThank you for using AfriTokeni!`,
+        lg: `Obugagga bwo bwa USDC (Demo)\n\n${data.usdc} USDC\n≈ {currency} {amount}\n\nOmuwendo gwa kati: 1 USDC = {currency} 3,800\n\nWebale okukozesa AfriTokeni!`,
+        sw: `Salio lako la USDC (Demo)\n\n${data.usdc} USDC\n≈ {currency} {amount}\n\nBei ya sasa: 1 USDC = {currency} 3,800\n\nAsante kwa kutumia AfriTokeni!`
+      }
+    };
+
+    let message = messages[type][lang];
+    // Replace placeholders
+    if (data.currency) message = message.replace(/{currency}/g, data.currency);
+    if (data.amount) message = message.replace(/{amount}/g, data.amount);
+    if (data.btc) message = message.replace(/{btc}/g, data.btc);
+    if (data.phone) message = message.replace(/{phone}/g, data.phone);
+    
+    return message;
+  }
 }
