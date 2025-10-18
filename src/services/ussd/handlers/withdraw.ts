@@ -43,12 +43,12 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       
       if (amount < 1000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Minimum withdrawal: ${currency} 1,000\nEnter amount (${currency}):`);
+        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: ${currency} 1,000\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
       
       if (amount > 2000000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Maximum withdrawal: ${currency} 2,000,000\nEnter amount (${currency}):`);
+        return continueSession(`${TranslationService.translate('maximum_amount', lang)}: ${currency} 2,000,000\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
 
       session.data.withdrawAmount = amount;
@@ -66,11 +66,7 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
         const totalRequired = amount + Math.round(amount * 0.01); // Include 1% fee
         
         if (userBalance.balance < totalRequired) {
-          return endSession(`Insufficient balance.
-Available: ${getSessionCurrency(session)} ${userBalance.balance.toLocaleString()}
-Required: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()} (including fee)
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('insufficient_balance', lang)}.\n${TranslationService.translate('available', lang)}: ${getSessionCurrency(session)} ${userBalance.balance.toLocaleString()}\n${TranslationService.translate('required', lang)}: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()} (${TranslationService.translate('including_fee', lang)})\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
         session.data.availableBalance = userBalance.balance;
@@ -108,7 +104,7 @@ Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
         
       } catch (error) {
         console.error('Error checking balance:', error);
-        return endSession('Unable to process withdrawal. Please try again later.');
+        return endSession(TranslationService.translate('error_try_again', lang));
       }
     }
       
@@ -263,7 +259,7 @@ Thank you for using AfriTokeni!`);
         
       } catch (error) {
         console.error('Error verifying PIN or creating transaction:', error);
-        return endSession('Unable to process withdrawal. Please try again later.');
+        return endSession(TranslationService.translate('error_try_again', lang));
       }
     }
     
