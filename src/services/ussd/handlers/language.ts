@@ -15,7 +15,11 @@ export async function handleLanguageSelection(
   session: USSDSession
 ): Promise<string> {
   const inputParts = input.split('*');
-  const currentInput = inputParts[inputParts.length - 1] || '';
+  // For chained input from main menu (e.g., "6*2"), extract the second part
+  // Otherwise extract the last part for direct navigation
+  const currentInput = (inputParts.length > 1 && inputParts[0] === '6') 
+    ? inputParts[1] 
+    : (inputParts[inputParts.length - 1] || '');
   
   // Show language menu
   if (!currentInput) {

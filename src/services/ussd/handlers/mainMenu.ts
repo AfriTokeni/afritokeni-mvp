@@ -87,7 +87,8 @@ ${TranslationService.translate('press_zero_back', lang)}`);
     case '6': {
       session.currentMenu = 'language_selection';
       session.step = 0;
-      return handleLanguageSelection('', session);
+      // For chained input, pass full input; otherwise pass empty to show menu
+      return handleLanguageSelection(isChainedInput ? input : '', session);
     }
     
     case '0': {
