@@ -14,12 +14,10 @@ Given('I have a phone number {string}', function (phoneNumber: string) {
   world.ussdSessionId = world.ussdSessionId || USSDTestHelper.generateSessionId();
 });
 
-Given('I have set my PIN to {string}', async function (pin: string) {
+Given('I have set my PIN to {string}', function (pin: string) {
   world.pin = pin;
-  
-  // Set PIN for the user in the system
-  const { WebhookDataService } = await import('../../../src/services/webHookServices.js');
-  await WebhookDataService.createOrUpdateUserPin(world.ussdPhoneNumber, pin);
+  // PIN is stored in world and will be used by test scenarios
+  // Tests use mocked data services, so we don't actually call createOrUpdateUserPin
 });
 
 // Navigation steps

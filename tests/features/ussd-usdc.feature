@@ -20,7 +20,7 @@ Feature: USSD USDC Menu Navigation and Operations
 
   Scenario: Check USDC balance with PIN
     When I dial "*229#"
-    And I select "3" for USSD
+    And I select "3" for USDC
     And I select "1" for Check Balance
     Then I should see "Enter your 4-digit PIN" in USSD response
     When I enter PIN "1234"
