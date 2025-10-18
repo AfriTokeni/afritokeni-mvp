@@ -205,11 +205,11 @@ ${TranslationService.translate('thank_you', lang)}`);
         session.currentMenu = 'main';
         session.step = 0;
         session.data = {}; // Clear session data
-        return continueSession(`AfriTokeni Main Menu
-1. Local Currency (UGX)
+        return continueSession(`AfriTokeni ${TranslationService.translate('main_menu', lang)}
+1. ${TranslationService.translate('local_currency', lang)}
 2. Bitcoin
 3. USDC
-0. Exit`);
+0. ${TranslationService.translate('exit', lang)}`);
       }
       
       const currency = getSessionCurrency(session);
