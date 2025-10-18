@@ -103,7 +103,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
     case 1: {
       // User is entering their PIN
       if (!pinInput) {
-        return continueSession(`Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('welcome_afritokeni', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (!/^\d{4}$/.test(pinInput)) {
@@ -151,12 +151,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
         const currency = getSessionCurrency(session);
         session.currentMenu = 'main';
         session.step = 0;
-        return continueSession(`Welcome back to AfriTokeni USSD Service
-Please select an option:
-1. Local Currency (${currency})
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. Help`);
+        return continueSession(`${TranslationService.translate('welcome_back', lang)}\n${TranslationService.translate('please_select_option', lang)}:\n1. ${TranslationService.translate('local_currency_menu', lang)} (${currency})\n2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)\n3. ${TranslationService.translate('usdc', lang)} (ckUSDC)\n4. ${TranslationService.translate('dao_governance', lang)}\n0. Exit`);
       } else {
         // PIN is incorrect
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
@@ -184,7 +179,7 @@ Please select an option:
 /**
  * Handle PIN setup - for new users or PIN reset
  */
-export async function handlePinSetup(input: string, session: USSDSession, lang: string = 'en'): Promise<string> {
+export async function handlePinSetup(input: string, session: USSDSession, lang: Language = 'en'): Promise<string> {
   const inputParts = input.split('*');
   const pinInput = inputParts[inputParts.length - 1] || '';
   console.log(`🔧 PIN setup for ${session.phoneNumber}, step: ${session.step}, input: "${pinInput}"`);
@@ -194,12 +189,12 @@ export async function handlePinSetup(input: string, session: USSDSession, lang: 
       // First PIN entry
       if (!/^\d{4}$/.test(pinInput)) {
         console.log(`❌ Invalid PIN format during setup for ${session.phoneNumber}: "${pinInput}"`);
-        return continueSession(`Invalid PIN format.\nPlease enter exactly 4 digits:`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_exactly_4_digits', lang)}:`);
       }
       session.data.newPin = pinInput;
       session.step = 2;
       console.log(`✅ First PIN entry accepted for ${session.phoneNumber}`);
-      return continueSession(`Please confirm your PIN by entering it again:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
+      return continueSession(`${TranslationService.translate('confirm_pin', lang)}:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
     
     case 2:
       // PIN confirmation
@@ -211,7 +206,7 @@ export async function handlePinSetup(input: string, session: USSDSession, lang: 
           session.step = 1;
           session.data = {};
           console.log(`❌ PIN mismatch for ${session.phoneNumber}`);
-          return continueSession(`PINs do not match.\nPlease enter your new 4-digit PIN again:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
+          return continueSession(`${TranslationService.translate('pins_no_match', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
         }
 
         console.log(`🔑 New PIN confirmed for ${session.phoneNumber}`);
@@ -225,20 +220,13 @@ export async function handlePinSetup(input: string, session: USSDSession, lang: 
           session.data = { preferredCurrency: currency };
           console.log(`✅ PIN setup completed successfully for ${session.phoneNumber}`);
           
-          return continueSession(`PIN set successfully!
-
-Welcome to AfriTokeni USSD Service
-Please select an option:
-1. Local Currency (${currency})
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. Help`);
+          return continueSession(`${TranslationService.translate('pin_set_success', lang)}\n\n${TranslationService.translate('welcome_back', lang)}\n${TranslationService.translate('please_select_option', lang)}:\n1. ${TranslationService.translate('local_currency_menu', lang)} (${currency})\n2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)\n3. ${TranslationService.translate('usdc', lang)} (ckUSDC)\n4. ${TranslationService.translate('dao_governance', lang)}\n0. Exit`);
         } else {
           // PIN save failed, retry
           session.step = 1;
           session.data = {};
           console.log(`❌ Failed to save PIN for ${session.phoneNumber}`);
-          return continueSession(`Error saving PIN. Please try again.\nEnter your new 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
+          return continueSession(`${TranslationService.translate('error_saving_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
         }
       }  
     

@@ -637,7 +637,42 @@ export class TranslationService {
     'verification_failed': {
       en: 'Verification process error. Please try again.',
       lg: 'Kiremya mu kukakasa. Gezaako nate.',
-      sw: 'Kosa katika uthibitisho. Tafadhali jaribu tena.'
+      sw: 'Kosa katika uthibitisho. Tafadhali jaribu tena baadaye.'
+    },
+    'welcome_afritokeni': {
+      en: 'Welcome to AfriTokeni!',
+      lg: 'Tukusanyukidde ku AfriTokeni!',
+      sw: 'Karibu AfriTokeni!'
+    },
+    'welcome_back': {
+      en: 'Welcome back to AfriTokeni USSD Service',
+      lg: 'Tukusanyukidde nate ku mpeereza ya AfriTokeni USSD',
+      sw: 'Karibu tena kwa huduma ya AfriTokeni USSD'
+    },
+    'pin_set_success': {
+      en: 'PIN set successfully!',
+      lg: 'PIN etegekeddwa bulungi!',
+      sw: 'PIN imewekwa kwa mafanikio!'
+    },
+    'pins_no_match': {
+      en: 'PINs do not match',
+      lg: 'PIN tezikwatagana',
+      sw: 'PIN hazifanani'
+    },
+    'confirm_pin': {
+      en: 'Please confirm your PIN by entering it again',
+      lg: 'Kakasa PIN yo ng\'oyingiza nate',
+      sw: 'Tafadhali thibitisha PIN yako kwa kuiweka tena'
+    },
+    'error_saving_pin': {
+      en: 'Error saving PIN. Please try again.',
+      lg: 'Kiremya mu kutereka PIN. Gezaako nate.',
+      sw: 'Kosa katika kuhifadhi PIN. Tafadhali jaribu tena.'
+    },
+    'enter_exactly_4_digits': {
+      en: 'Please enter exactly 4 digits',
+      lg: 'Yingiza ennamba 4 zokka',
+      sw: 'Tafadhali weka nambari 4 tu'
     },
   };
 
