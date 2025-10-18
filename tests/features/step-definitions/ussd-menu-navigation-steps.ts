@@ -6,13 +6,20 @@ Given('I have a valid phone number {string}', function (phoneNumber: string) {
   this.phoneNumber = phoneNumber;
 });
 
-Given('I have set my PIN to {string}', async function (pin: string) {
-  // PIN is set during test execution when needed
+Given('I have a phone number {string}', function (phoneNumber: string) {
+  this.phoneNumber = phoneNumber;
+});
+
+Given('I have set my PIN to {string}', function (pin: string) {
   this.pin = pin;
 });
 
 // Navigation steps
 When('I select {string} for USDC', async function (option: string) {
+  this.lastResponse = await this.ussdService.processUSSDRequest(this.phoneNumber, option);
+});
+
+When('I select {string} for USDC Rate', async function (option: string) {
   this.lastResponse = await this.ussdService.processUSSDRequest(this.phoneNumber, option);
 });
 

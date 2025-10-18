@@ -6,7 +6,7 @@ import type { USSDSession } from './ussd/types';
 import { handleMainMenu } from './ussd/handlers/mainMenu';
 import { handleLocalCurrency } from './ussd/handlers/localCurrency';
 import { handleBitcoin, handleBTCBalance, handleBTCRate } from './ussd/handlers/bitcoin';
-import { handleUSDC } from './ussd/handlers/usdc';
+import { handleUSDC, handleUSDCBalance, handleUSDCRate } from './ussd/handlers/usdc';
 import { handleSendMoney } from './ussd/handlers/sendMoney';
 import { handleWithdraw } from './ussd/handlers/withdraw';
 import { handleDeposit } from './ussd/handlers/deposit';
@@ -232,6 +232,24 @@ export class USSDService {
           // Check if handler wants to show main menu
           if (response.includes('__SHOW_MAIN_MENU__')) {
             response = await handleMainMenu('', session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
+          }
+          break;
+        
+        case 'usdc_balance':
+          response = await handleUSDCBalance(input, session);
+          
+          // Check if handler wants to show usdc menu
+          if (response.includes('__SHOW_USDC_MENU__')) {
+            response = await handleUSDC('', session);
+          }
+          break;
+        
+        case 'usdc_rate':
+          response = await handleUSDCRate(input, session);
+          
+          // Check if handler wants to show usdc menu
+          if (response.includes('__SHOW_USDC_MENU__')) {
+            response = await handleUSDC('', session);
           }
           break;
         
