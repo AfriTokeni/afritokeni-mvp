@@ -319,11 +319,19 @@ Thank you for participating in AfriTokeni governance!`);
  * Handle viewing voting power
  */
 async function handleVotingPower(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const afriTokens = session.data.afriTokens || 5000;
   const lockedTokens = session.data.lockedTokens || 0;
   const available = afriTokens - lockedTokens;
   
-  return endSession(`Your Voting Power
+  // Handle cancel
+  if (input === '0') {
+    session.currentMenu = 'dao';
+    session.step = 0;
+    return continueSession('__SHOW_DAO_MENU__');
+  }
+  
+  return continueSession(`Your Voting Power
 
 ${afriTokens} AFRI
 ${lockedTokens} AFRI locked
@@ -332,24 +340,32 @@ Available: ${available} AFRI
 
 Locked tokens released when proposals end.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('press_zero_back', lang)}`);
 }
 
 /**
  * Handle viewing active votes
  */
 async function handleActiveVotes(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const userVotes = session.data.userVotes || [];
   const lockedTokens = session.data.lockedTokens || 0;
   
+  // Handle cancel
+  if (input === '0') {
+    session.currentMenu = 'dao';
+    session.step = 0;
+    return continueSession('__SHOW_DAO_MENU__');
+  }
+  
   if (userVotes.length === 0) {
-    return endSession(`Your Active Votes
+    return continueSession(`Your Active Votes
 
 You have no active votes.
 
 Vote on proposals to participate in governance!
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('press_zero_back', lang)}`);
   }
   
   let response = `Your Active Votes\n\n`;
