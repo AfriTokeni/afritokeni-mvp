@@ -124,6 +124,12 @@ export default defineConfig({
           write: "public",
           memory: "stable",
         },
+        {
+          collection: "demo_balances",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
       ],
       storage: [
         {
