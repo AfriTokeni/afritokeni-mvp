@@ -24,7 +24,7 @@ const USSDPlayground: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'received',
-      text: '🌍 USSD Demo Mode\n\nWelcome to AfriTokeni!\n\nDial *384*22948# to start',
+      text: '🌍 USSD Demo Mode\n\nWelcome to AfriTokeni!\n\nDial *384*22948# to start\n\n🔐 Demo PIN: 1234',
       timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
