@@ -26,7 +26,7 @@
     
     "test": "npm run icp:start && npm run icp:deploy && npm run test:all; npm run icp:stop",
     "test:all": "cucumber-js 'tests/features/**/*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
-    "test:no-icp": "cucumber-js 'tests/features/**/*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
+    "test:no-icp": "SKIP_ICP_TESTS=true cucumber-js 'tests/features/**/*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:watch": "cucumber-js tests/features/icp-integration.feature --require 'tests/features/step-definitions/{shared-steps,icp-integration-steps}.ts' --require-module tsx",
     "test:ussd": "cucumber-js 'tests/features/{ussd-handlers,ussd-integration,ussd-errors,ussd-state,ussd-service,ussd-dao}.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:ussd:icp": "./scripts/test-ussd-icp.sh",

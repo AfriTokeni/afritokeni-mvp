@@ -12,6 +12,12 @@ import { EscrowService } from '../../../src/services/escrowService';
 
 // @icp tag
 Given('the local ICP replica is running', async function () {
+  // Skip ICP check entirely if not running ICP tests
+  if (process.env.SKIP_ICP_TESTS === 'true') {
+    world.icpReplicaRunning = false;
+    return 'skipped';
+  }
+  
   try {
     world.agent = new HttpAgent({ host: LOCAL_REPLICA_URL });
     await world.agent.fetchRootKey(); // Required for local development
