@@ -78,7 +78,7 @@ ${TranslationService.translate('please_select_option', lang)}
       session.currentMenu = 'btc_buy';
       session.step = 1;
       const currency = getSessionCurrency(session);
-      return continueSession(`Buy Bitcoin\nEnter ${currency} amount to spend:`);
+      return continueSession(`${TranslationService.translate('buy_bitcoin', lang)}\n${TranslationService.translate('enter_amount_to_spend', lang)} (${currency}):`);
     
     case '4':
       session.currentMenu = 'btc_sell';
@@ -247,10 +247,7 @@ Thank you for using AfriTokeni!`);
       
     } catch (error) {
       console.error('Error retrieving BTC rate:', error);
-      return endSession(`Error retrieving BTC rate.
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+      return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
     }
   }
   
@@ -270,7 +267,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       // Enter amount to spend
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:`);
+        return continueSession(`${TranslationService.translate('buy_bitcoin', lang)}\n${TranslationService.translate('enter_amount_to_spend', lang)} (${currency}):`);
       }
       
       // Handle cancel
@@ -283,11 +280,11 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       
       const ugxAmount = parseInt(currentInput);
       if (isNaN(ugxAmount) || ugxAmount <= 0) {
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter ${currency} amount to spend:`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\n${TranslationService.translate('enter_amount_to_spend', lang)} (${currency}):`);
       }
       
       if (ugxAmount < 10000) {
-        return continueSession(`Minimum purchase: ${currency} 10,000\nEnter ${currency} amount to spend:`);
+        return continueSession(`${TranslationService.translate('minimum_purchase', lang)}: ${currency} 10,000\n${TranslationService.translate('enter_amount_to_spend', lang)} (${currency}):`);
       }
       
       // Check user balance first
@@ -323,11 +320,7 @@ Thank you for using AfriTokeni!`);
         );
         
         if (availableAgents.length === 0) {
-          return endSession(`No agents available for Bitcoin purchase at this time.
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('no_agents_available', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
         session.data.availableAgents = availableAgents;
@@ -502,7 +495,7 @@ Thank you for using AfriTokeni!`);
         
       } catch (error) {
         console.error('Error processing ckBTC purchase:', error);
-        return endSession('Error processing purchase. Please try again later.');
+        return endSession(TranslationService.translate('error_processing_purchase', lang));
       }
     }
     
@@ -525,7 +518,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         try {
           const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
           if (!user) {
-            return endSession('User not found. Please contact support.');
+            return endSession(TranslationService.translate('user_not_found', lang));
           }
           
           // Get ckBTC balance with local currency equivalent
@@ -567,7 +560,7 @@ Choose amount type:
           
         } catch (error) {
           console.error('Error checking ckBTC balance:', error);
-          return endSession('Error checking balance. Please try again later.');
+          return endSession(TranslationService.translate('error_try_again', lang));
         }
       }
       
@@ -576,11 +569,11 @@ Choose amount type:
         session.data.amountType = 'ugx';
         session.step = 2;
         const currency = getSessionCurrency(session);
-        return continueSession(`Enter ${currency} amount to receive (min: ${currency} 1,000):`);
+        return continueSession(`${TranslationService.translate('enter_amount', lang)} (${currency}, ${TranslationService.translate('minimum_amount', lang)}: ${currency} 1,000):`);
       } else if (currentInput === '2') {
         session.data.amountType = 'btc';
         session.step = 2;
-        return continueSession(`Enter BTC amount to sell (min: ₿0.00001):`);
+        return continueSession(`${TranslationService.translate('enter_btc_amount', lang)} (${TranslationService.translate('minimum_amount', lang)}: ₿0.00001):`);
       } else if (currentInput === '0') {
         session.currentMenu = 'bitcoin';
         session.step = 0;
@@ -606,11 +599,11 @@ Choose amount type:
         const currency = getSessionCurrency(session);
         ugxAmount = parseFloat(currentInput);
         if (isNaN(ugxAmount) || ugxAmount <= 0) {
-          return continueSession(`Invalid amount.\nEnter ${currency} amount to receive (min: ${currency} 1,000):`);
+          return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_amount', lang)} (${currency}, min: ${currency} 1,000):`);
         }
         
         if (ugxAmount < 1000) {
-          return continueSession(`Minimum sale: ${currency} 1,000\nEnter ${currency} amount to receive:`);
+          return continueSession(`${TranslationService.translate('minimum_sale', lang)}: ${currency} 1,000\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
         }
         
         // Get exchange rate and calculate BTC amount (before fees)
