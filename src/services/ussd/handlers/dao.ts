@@ -168,7 +168,11 @@ Amount: ${existingVote.amount} AFRI
 Thank you for participating in governance!`);
     }
     
-    const daysLeft = Math.ceil((proposal.votingEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+    // Handle date conversion (Juno stores dates as ISO strings)
+    const votingEndsAt = typeof proposal.votingEndsAt === 'string' 
+      ? new Date(proposal.votingEndsAt) 
+      : proposal.votingEndsAt;
+    const daysLeft = Math.ceil((votingEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
     
     return continueSession(`${proposal.title}
 
