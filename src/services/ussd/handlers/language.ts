@@ -26,15 +26,15 @@ export async function handleLanguageSelection(
   switch (currentInput) {
     case '1':
       session.language = 'en';
-      return endSession(TranslationService.translate('language_set', 'en'));
+      return continueSession(`${TranslationService.translate('language_set', 'en')}\n\nPress 0 to return to main menu`);
     
     case '2':
       session.language = 'lg';
-      return endSession(TranslationService.translate('language_set', 'lg'));
+      return continueSession(`${TranslationService.translate('language_set', 'lg')}\n\nPress 0 to return to main menu`);
     
     case '3':
       session.language = 'sw';
-      return endSession(TranslationService.translate('language_set', 'sw'));
+      return continueSession(`${TranslationService.translate('language_set', 'sw')}\n\nPress 0 to return to main menu`);
     
     case '0':
       // Go back to main menu
