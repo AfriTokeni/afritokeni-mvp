@@ -37,9 +37,9 @@ Feature: USSD Cancel/Go Back Functionality
     When I dial "*229#"
     And I select "1" for Local Currency
     And I select "1" for Send Money
-    Then I should see "Press 0" in USSD response
+    Then I should see "0. Back" in USSD response
     When I enter phone number "256700123456"
-    Then I should see "Press 0" in USSD response
+    Then I should see "0. Back" in USSD response
 
   Scenario: Cancel works in Luganda
     Given my language preference is "lg"
@@ -73,7 +73,7 @@ Feature: USSD Cancel/Go Back Functionality
     And I select "1" for Send Money
     And I enter phone number "123"
     Then I should see "Invalid phone" in USSD response
-    And I should see "Press 0" in USSD response
+    And I should see "0. Back" in USSD response
 
   Scenario: Invalid amount shows cancel option
     When I dial "*229#"
@@ -82,7 +82,7 @@ Feature: USSD Cancel/Go Back Functionality
     And I enter phone number "256700123456"
     And I enter amount "abc"
     Then I should see "Invalid" in USSD response
-    And I should see "Press 0" in USSD response
+    And I should see "0. Back" in USSD response
 
   Scenario: Multiple cancel attempts work
     When I dial "*229#"
