@@ -1058,6 +1058,51 @@ export class TranslationService {
       lg: 'Gezaako nate',
       sw: 'Jaribu tena'
     },
+    'setup_pin_message': {
+      en: 'To secure your account, please set up a 4-digit PIN',
+      lg: 'Okukuuma akawunti yo, tegeka PIN ya namba 4',
+      sw: 'Kulinda akaunti yako, weka PIN ya nambari 4'
+    },
+    'enter_new_pin': {
+      en: 'Enter your new PIN',
+      lg: 'Yingiza PIN yo empya',
+      sw: 'Weka PIN yako mpya'
+    },
+    'invalid_name': {
+      en: 'Invalid name',
+      lg: 'Erinnya si lituufu',
+      sw: 'Jina si sahihi'
+    },
+    'enter_full_name': {
+      en: 'Please enter your full name (first and last name)',
+      lg: 'Yingiza erinnya lyo lyonna (erinnya ly\'omu maaso n\'ery\'oluvannyuma)',
+      sw: 'Weka jina lako kamili (jina la kwanza na la mwisho)'
+    },
+    'verification_successful': {
+      en: 'Verification successful',
+      lg: 'Okukakasa kugenze bulungi',
+      sw: 'Uthibitisho umefanikiwa'
+    },
+    'account_created': {
+      en: 'Account created successfully',
+      lg: 'Akawunti etondeddwa bulungi',
+      sw: 'Akaunti imeundwa kwa mafanikio'
+    },
+    'not_registered_yet': {
+      en: 'You are not registered yet',
+      lg: 'Tonnawandiisibwa',
+      sw: 'Bado hujajiandikisha'
+    },
+    'please_wait': {
+      en: 'Please wait',
+      lg: 'Lindawo',
+      sw: 'Tafadhali subiri'
+    },
+    'enter_both_names': {
+      en: 'Please enter both first and last name separated by space',
+      lg: 'Yingiza erinnya ly\'omu maaso n\'ery\'oluvannyuma nga biriko ekifo wakati',
+      sw: 'Weka jina la kwanza na la mwisho likitengwa na nafasi'
+    },
   };
 
   /**

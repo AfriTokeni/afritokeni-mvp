@@ -108,7 +108,7 @@ export async function handleRegistrationCheck(input: string, session: USSDSessio
       session.currentMenu = 'user_registration';
       session.step = 1;
       console.log(`➡️ Redirecting ${session.phoneNumber} to registration`);
-      return continueSession(`Welcome to AfriTokeni!\nYou are not registered yet.\nPlease enter your full name (first and last name):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('welcome', lang)}!\n${TranslationService.translate('not_registered_yet', lang)}.\n${TranslationService.translate('enter_full_name', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     } else {
       // User is registered - check if they have a PIN
       const hasPIN = await hasUserPin(session.phoneNumber);
@@ -119,7 +119,7 @@ export async function handleRegistrationCheck(input: string, session: USSDSessio
         session.currentMenu = 'pin_setup';
         session.step = 1;
         console.log(`➡️ Redirecting ${session.phoneNumber} to PIN setup`);
-        return continueSession(`Welcome back to AfriTokeni!\nTo secure your account, please set up a 4-digit PIN:\nEnter your new PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('welcome_back', lang)}!\n${TranslationService.translate('setup_pin_message', lang)}:\n${TranslationService.translate('enter_new_pin', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       } else {
         // User registered and has PIN - load currency and go to main menu
         const currency = await getUserCurrency(session.phoneNumber);
@@ -130,18 +130,13 @@ export async function handleRegistrationCheck(input: string, session: USSDSessio
           preferredCurrency: currency // Store user's currency in session
         };
         console.log(`➡️ User ${session.phoneNumber} has PIN, currency: ${currency}, going directly to main menu`);
-        return continueSession(`Welcome back to AfriTokeni USSD Service!
-Please select an option:
-1. Local Currency (${currency})
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. Help`);
+        return continueSession(`${TranslationService.translate('welcome_back', lang)}!\n${TranslationService.translate('please_select_option', lang)}:\n1. ${TranslationService.translate('local_currency', lang)} (${currency})\n2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)\n3. ${TranslationService.translate('usdc', lang)} (ckUSDC)\n4. ${TranslationService.translate('help', lang)}`);
       }
     }
   }
   
   // This shouldn't be reached, but just in case
-  return continueSession(`Welcome to AfriTokeni!\nPlease wait...\n\n${TranslationService.translate('back_or_menu', lang)}`);
+  return continueSession(`${TranslationService.translate('welcome', lang)}!\n${TranslationService.translate('please_wait', lang)}...\n\n${TranslationService.translate('back_or_menu', lang)}`);
 }
 
 /**
@@ -157,13 +152,13 @@ export async function handleUserRegistration(input: string, session: USSDSession
       // Getting full name
       if (!sanitized_input || sanitized_input.trim().length < 3) {
         console.log(`❌ Invalid name "${sanitized_input}" provided by ${session.phoneNumber}`);
-        return continueSession(`Invalid name. Please enter your full name (first and last name):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_name', lang)}. ${TranslationService.translate('enter_full_name', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const fullNameParts = sanitized_input.trim().split(/\s+/);
       if (fullNameParts.length < 2) {
         console.log(`❌ Incomplete name "${sanitized_input}" provided by ${session.phoneNumber}`);
-        return continueSession(`Please enter both first and last name separated by space:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('enter_both_names', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // First word is first name, last word is last name
@@ -255,7 +250,7 @@ export async function handleVerification(input: string, session: USSDSession): P
       console.log(`👤 User ${session.phoneNumber} registered successfully, moving to PIN setup`);
       session.currentMenu = 'pin_setup';
       session.step = 1;
-      return continueSession(`Verification successful!\nAccount created successfully.\nNow please set up a 4-digit PIN to secure your account:\nEnter your new PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('verification_successful', lang)}!\n${TranslationService.translate('account_created', lang)}.\n${TranslationService.translate('setup_pin_message', lang)}:\n${TranslationService.translate('enter_new_pin', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
       
     default:
