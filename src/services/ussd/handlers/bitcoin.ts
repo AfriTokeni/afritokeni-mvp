@@ -323,14 +323,14 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
         
         let agentList = `BTC ${TranslationService.translate('purchase_quote', lang)}\n\n${TranslationService.translate('spend', lang)}: ${currency} ${ugxAmount.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${currency} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${currency} ${netAmount.toLocaleString()}\n${TranslationService.translate('receive', lang)}: ₿${btcAmount.toFixed(8)} BTC
 
-Select an agent:
+${TranslationService.translate('select_an_agent', lang)}:
 `;
         
         availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
           agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
         });
         
-        agentList += '0. Cancel';
+        agentList += `0. ${TranslationService.translate('cancel', lang)}`;
         
         return continueSession(agentList);
         
@@ -352,7 +352,7 @@ Select an agent:
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${TranslationService.translate('select_an_agent', lang)} (1-${agents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:`);
       }
       
       const selectedAgent = agents[agentChoice - 1];
@@ -547,7 +547,7 @@ Your ckBTC Balance:
 Choose amount type:
 1. Enter ${getSessionCurrency(session)} amount
 2. Enter BTC amount
-0. Cancel`);
+0. ${TranslationService.translate('cancel', lang)}`);
           
         } catch (error) {
           console.error('Error checking ckBTC balance:', error);
@@ -575,7 +575,7 @@ Choose amount type:
 Choose amount type:
 1. Enter ${getSessionCurrency(session)} amount
 2. Enter BTC amount
-0. Cancel`);
+0. ${TranslationService.translate('cancel', lang)}`);
       }
     }
     
@@ -686,14 +686,14 @@ Enter a smaller amount:`);
         let agentList = `BTC ${TranslationService.translate('sale_quote', lang)}\n\n${TranslationService.translate('sell', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('gross', lang)}: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
         
 
-Select an agent:
+${TranslationService.translate('select_an_agent', lang)}:
 `;
         
         availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
           agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
         });
         
-        agentList += '0. Cancel';
+        agentList += `0. ${TranslationService.translate('cancel', lang)}`;
         
         return continueSession(agentList);
         
@@ -715,7 +715,7 @@ Select an agent:
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession('Invalid selection.\nSelect an agent (1-' + (agents?.length || 0) + ') or 0 to cancel:');
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${TranslationService.translate('select_an_agent', lang)} (1-${agents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:`);
       }
       
       const selectedAgent = agents[agentChoice - 1];
