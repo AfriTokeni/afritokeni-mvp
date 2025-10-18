@@ -71,13 +71,13 @@ ${TranslationService.translate('please_select_option', lang)}
       return continueSession('__SHOW_MAIN_MENU__');
     
     default:
-      return continueSession(`Invalid option. Please try again:
-1. Check Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-5. Send USDC
-0. Back to Main Menu`);
+      return continueSession(`${TranslationService.translate('invalid_option', lang)}
+1. ${TranslationService.translate('check_balance', lang)}
+2. ${TranslationService.translate('usdc_rate', lang)}
+3. ${TranslationService.translate('buy_usdc', lang)}
+4. ${TranslationService.translate('sell_usdc', lang)}
+5. ${TranslationService.translate('send_usdc', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
   }
 }
 
@@ -208,10 +208,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
     
   } catch (error) {
     console.error('Error retrieving USDC rate:', error);
-    return continueSession(`Error retrieving USDC rate.
-Please try again later.
-
-${TranslationService.translate('back_or_menu', lang)}`);
+    return continueSession(`${TranslationService.translate('error_retrieving_rate', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
   }
 }
 
@@ -245,7 +242,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       }
       
       session.step = 2;
-      return continueSession(`Buy USDC\nEnter amount in UGX:`);
+      return continueSession(`${TranslationService.translate('buy_usdc', lang)}\n${TranslationService.translate('enter_amount', lang)} (${getSessionCurrency(session)}):`);
     }
     
     case 2: {
