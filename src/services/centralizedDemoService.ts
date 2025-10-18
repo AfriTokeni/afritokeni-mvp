@@ -88,10 +88,18 @@ class CentralizedDemoServiceClass {
    */
   async initializeUser(userId: string, currency: string = 'UGX'): Promise<DemoBalance> {
     try {
-      // Check if already exists
-      const existing = await this.getBalance(userId);
-      if (existing) return existing;
+      // Try to get existing document with its version
+      const existingDoc = await getDoc({
+        collection: this.COLLECTION,
+        key: userId,
+      });
       
+      // If exists, return it
+      if (existingDoc?.data) {
+        return existingDoc.data as DemoBalance;
+      }
+      
+      // Create new balance
       const balance: DemoBalance = {
         userId,
         userType: 'user',
@@ -105,6 +113,7 @@ class CentralizedDemoServiceClass {
         updatedAt: Date.now(),
       };
       
+      // For new documents, don't provide version - Juno handles it
       await setDoc({
         collection: this.COLLECTION,
         doc: {
