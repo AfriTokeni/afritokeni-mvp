@@ -13,9 +13,16 @@ import { TranslationService } from '../../translations.js';
 /**
  * Get user balance from DataService
  */
-export async function getUserBalance(phoneNumber: string): Promise<number | null> {
+export async function getUserBalance(phoneNumber: string, sessionId?: string): Promise<number | null> {
   try {
     console.log(`Getting balance for user: ${phoneNumber}`);
+    
+    // PLAYGROUND MODE: Return mock balance
+    if (sessionId?.startsWith('playground_')) {
+      console.log('✅ Playground mode: Returning mock balance 50,000 UGX');
+      return 50000;
+    }
+    
     const balance = await DataService.getUserBalance(`+${phoneNumber}`);
     
     if (balance) {
@@ -27,6 +34,11 @@ export async function getUserBalance(phoneNumber: string): Promise<number | null
     }
   } catch (error) {
     console.error('Error getting user balance:', error);
+    // Fallback for playground
+    if (sessionId?.startsWith('playground_')) {
+      console.log('✅ Playground fallback: Returning mock balance 50,000 UGX');
+      return 50000;
+    }
     return null;
   }
 }
@@ -129,7 +141,7 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
     console.log(`PIN already verified for ${session.phoneNumber}, showing balance directly`);
     try {
       const currency = getSessionCurrency(session);
-      const balance = await getUserBalance(session.phoneNumber);
+      const balance = await getUserBalance(session.phoneNumber, session.sessionId);
       
       const lang = session.language || 'en';
       if (balance !== null) {
@@ -172,7 +184,7 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
       // PIN is correct, get user balance
       try {
         const currency = getSessionCurrency(session);
-        const balance = await getUserBalance(session.phoneNumber);
+        const balance = await getUserBalance(session.phoneNumber, session.sessionId);
         
         if (balance !== null) {
           return endSession(`${TranslationService.translate('your_account_balance', lang)}\n${TranslationService.translate('amount', lang)}: ${currency} ${balance.toLocaleString()}\n${TranslationService.translate('available', lang)}: ${currency} ${balance.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
@@ -206,7 +218,52 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
     try {
       const currency = getSessionCurrency(session);
       console.log(`Getting transaction history for ${session.phoneNumber}`);
-      const transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
+      
+      // PLAYGROUND MODE: Return mock transactions
+      let transactions;
+      if (session.sessionId.startsWith('playground_')) {
+        console.log('✅ Playground mode: Returning mock transactions');
+        transactions = [
+          {
+            id: 'tx_001',
+            userId: 'demo_user',
+            type: 'receive' as const,
+            amount: 25000,
+            fee: 0,
+            currency: 'UGX' as const,
+            status: 'completed' as const,
+            description: 'Received from +256700999888',
+            createdAt: new Date(Date.now() - 86400000),
+            completedAt: new Date(Date.now() - 86400000)
+          },
+          {
+            id: 'tx_002',
+            userId: 'demo_user',
+            type: 'send' as const,
+            amount: 10000,
+            fee: 100,
+            currency: 'UGX' as const,
+            status: 'completed' as const,
+            description: 'Sent to +256700111222',
+            createdAt: new Date(Date.now() - 172800000),
+            completedAt: new Date(Date.now() - 172800000)
+          },
+          {
+            id: 'tx_003',
+            userId: 'demo_user',
+            type: 'deposit' as const,
+            amount: 50000,
+            fee: 0,
+            currency: 'UGX' as const,
+            status: 'completed' as const,
+            description: 'Cash deposit via agent',
+            createdAt: new Date(Date.now() - 259200000),
+            completedAt: new Date(Date.now() - 259200000)
+          }
+        ];
+      } else {
+        transactions = await DataService.getUserTransactions(session.phoneNumber, 5);
+      }
       
       if (transactions.length === 0) {
         return endSession(`${TranslationService.translate('transactions', lang)}:\n\n${TranslationService.translate('no_transactions', lang)}.\n\n${TranslationService.translate('to_start_using', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);

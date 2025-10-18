@@ -151,21 +151,24 @@ export class USSDService {
         }
       }
       
-      // Update activity
-      session.updateActivity();
-
       const input = text.trim();
       
       // RESET SESSION: If user explicitly dials the USSD code, reset to main menu regardless of current state
-      // This allows starting fresh from anywhere in the flow
-      // Note: Empty input is NOT a reset - it's used to show submenus
-      if (input === '*229#' || input === '*384*22948#') {
+      // This allows starting fresh from anywhere in the flow, even after errors
+      // Check this BEFORE updating activity or routing to handlers
+      if (input === '*229#' || input === '*384*22948#' || input.includes('384') || input.includes('22948')) {
         console.log('🔄 User dialed USSD code - resetting session to main menu');
+        session.currentMenu = 'main';
+        session.step = 0;
+        session.data = {};
+        session.updateActivity();
+        
         await this.updateUSSDSession(sessionId, {
           currentMenu: 'main',
           step: 0,
           data: {}
         });
+        
         // Return main menu
         const lang = session.language || 'en';
         return {
@@ -173,6 +176,9 @@ export class USSDService {
           continueSession: true
         };
       }
+      
+      // Update activity for normal requests
+      session.updateActivity();
       
       // Handle chained input (e.g., "3*1*1234" from main menu)
       // Process each part sequentially if we're at main menu and have multiple parts

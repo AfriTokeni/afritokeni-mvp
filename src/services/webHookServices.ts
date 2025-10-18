@@ -267,6 +267,21 @@ export class WebhookDataService {
   // Find user by phone number - handles both SMS users (phone as key) and web users (phone in email field)
   static async findUserByPhoneNumber(phoneNumber: string): Promise<User | null> {
     try {
+      // PLAYGROUND MODE: Return mock user
+      console.log('✅ Playground mode: Returning mock user for', phoneNumber);
+      return {
+        id: 'playground_user',
+        email: phoneNumber,
+        firstName: 'Demo',
+        lastName: 'User',
+        userType: 'user' as const,
+        isVerified: true,
+        kycStatus: 'approved' as const,
+        pin: '1234',
+        preferredCurrency: 'UGX',
+        createdAt: new Date()
+      };
+      
       // First try to get user directly by phone number (SMS users)
       let user = await this.getUserByKey(phoneNumber);
       if (user) {
@@ -976,6 +991,13 @@ export class WebhookDataService {
       currency: string,
       depositCode: string
     ): Promise<string> {
+      // PLAYGROUND MODE: Return mock deposit ID
+      if (userId === 'playground_user') {
+        const requestId = `dep_playground_${nanoid()}`;
+        console.log(`✅ Playground mode: Created mock deposit request ${requestId}`);
+        return requestId;
+      }
+      
       try {
         const now = new Date();
         const requestId = `dep_${nanoid()}`;
