@@ -89,6 +89,11 @@ export class TranslationService {
       lg: 'Kakasa',
       sw: 'Thibitisha'
     },
+    'confirmation': {
+      en: 'Confirmation',
+      lg: 'Okukakasa',
+      sw: 'Uthibitisho'
+    },
     'cancel': {
       en: 'Cancel',
       lg: 'Sazaamu',

@@ -73,7 +73,7 @@ export class USSDSessionImpl implements USSDSession {
 
   constructor(sessionId: string, phoneNumber: string) {
     this.sessionId = sessionId;
-    this.phoneNumber = phoneNumber.replace('+', '');
+    this.phoneNumber = phoneNumber ? phoneNumber.replace('+', '') : '';
     this.currentMenu = 'registration_check';
     this.data = {};
     this.step = 0;

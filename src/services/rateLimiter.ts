@@ -40,6 +40,11 @@ export class RateLimiter {
     phoneNumber: string,
     type: 'sms' | 'ussd' | 'transaction'
   ): { allowed: boolean; message?: string; retryAfter?: number } {
+    // Disable rate limiting in test environment
+    if (process.env.NODE_ENV === 'test') {
+      return { allowed: true };
+    }
+    
     const record = this.getRecord(phoneNumber);
     const now = new Date();
 

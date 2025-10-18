@@ -1,10 +1,3 @@
-/**
- * USDC Handlers
- * NOTE: Per business logic, USDC should be REMOVED from AfriTokeni
- * AfriTokeni is Bitcoin ↔ African currencies ONLY, no stablecoins
- * This file exists temporarily for backward compatibility
- */
-
 import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
@@ -44,10 +37,12 @@ ${TranslationService.translate('please_select_option', lang)}
     case '1':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
-      return continueSession(`${TranslationService.translate('check_balance', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
+      return continueSession(`${TranslationService.translate('check_balance', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '2':
       // Rate check doesn't need PIN - just show the rate
+      session.currentMenu = 'usdc_rate';
+      session.step = 0;
       return await handleUSDCRate('', session);
     
     case '3':
@@ -104,7 +99,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN with demo fallback
@@ -122,7 +117,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       }
       
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Get USDC balance using real CkUSDCService
@@ -148,7 +143,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
           true     // useSatellite = true for SMS users
         );
         
-        return endSession(`${TranslationService.translate('your_balance', lang)} (USDC)\n\n$${balance.balanceUSDC} USDC\n≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}\n\n${TranslationService.translate('current_rate', lang)}: 1 USDC = ${getSessionCurrency(session)} ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
+        return endSession(`Your USDC Balance\n\n$${balance.balanceUSDC} USDC\n≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}\n\n${TranslationService.translate('current_rate', lang)}: 1 USDC = ${getSessionCurrency(session)} ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
         
       } catch (error) {
         console.error('Error retrieving USDC balance:', error);
@@ -190,7 +185,7 @@ async function handleUSDCRate(input: string, session: USSDSession): Promise<stri
   try {
     const usdcRateUGX = await CkUSDCService.getExchangeRate('ugx');
     
-    return continueSession(`${TranslationService.translate('current_rate', lang)} (USDC)\n\n1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}\n1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC\n\n${TranslationService.translate('last_updated', lang)}: ${new Date().toLocaleTimeString()}\n\n${TranslationService.translate('back_or_menu', lang)}`);
+    return continueSession(`Current USDC Exchange Rate\n\n1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}\n1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC\n\n${TranslationService.translate('last_updated', lang)}: ${new Date().toLocaleTimeString()}\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
   } catch (error) {
     console.error('Error retrieving USDC rate:', error);

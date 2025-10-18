@@ -314,7 +314,11 @@ export class USSDService {
           continueSession: false
         };
       }
-      console.error('Error processing USSD request:', error);
+      console.error('❌ Error processing USSD request:', error);
+      console.error('   Phone:', phoneNumber);
+      console.error('   Input:', text);
+      console.error('   Error message:', error.message);
+      console.error('   Stack:', error.stack);
       return {
         response: 'An error occurred. Please try again.',
         continueSession: false
