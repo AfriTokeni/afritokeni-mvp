@@ -287,6 +287,103 @@ export class TranslationService {
       lg: '0. Ddayo | 9. Menu',
       sw: '0. Rudi | 9. Menyu'
     },
+    
+    // Common prompts
+    'enter_amount': {
+      en: 'Enter amount',
+      lg: 'Yingiza omuwendo',
+      sw: 'Weka kiasi'
+    },
+    'enter_pin_4digit': {
+      en: 'Enter your 4-digit PIN',
+      lg: 'Yingiza PIN yo ey\'ennamba 4',
+      sw: 'Weka PIN yako ya nambari 4'
+    },
+    'invalid_pin_format': {
+      en: 'Invalid PIN format',
+      lg: 'Enkola ya PIN si ntuufu',
+      sw: 'Muundo wa PIN si sahihi'
+    },
+    'incorrect_pin': {
+      en: 'Incorrect PIN',
+      lg: 'PIN si ntuufu',
+      sw: 'PIN si sahihi'
+    },
+    'please_select_option': {
+      en: 'Please select an option:',
+      lg: 'Londa ekiragiro:',
+      sw: 'Tafadhali chagua chaguo:'
+    },
+    'back_to_main_menu': {
+      en: 'Back to Main Menu',
+      lg: 'Ddayo ku Menu Enkulu',
+      sw: 'Rudi kwa Menyu Kuu'
+    },
+    'invalid_selection': {
+      en: 'Invalid selection',
+      lg: 'Ekiragiro si kituufu',
+      sw: 'Chaguo si sahihi'
+    },
+    'user_not_found': {
+      en: 'User not found. Please contact support.',
+      lg: 'Omukozesa tazuuliddwa. Tuukirire obuyambi.',
+      sw: 'Mtumiaji hajapatikana. Tafadhali wasiliana na msaada.'
+    },
+    'error_try_again': {
+      en: 'Error. Please try again later.',
+      lg: 'Kiremya. Gezaako oluvannyuma.',
+      sw: 'Kosa. Tafadhali jaribu tena baadaye.'
+    },
+    'thank_you': {
+      en: 'Thank you for using AfriTokeni!',
+      lg: 'Webale okukozesa AfriTokeni!',
+      sw: 'Asante kwa kutumia AfriTokeni!'
+    },
+    'transaction_cancelled': {
+      en: 'Transaction cancelled',
+      lg: 'Okuweereza kusaziddwamu',
+      sw: 'Muamala umeghairiwa'
+    },
+    'minimum_amount': {
+      en: 'Minimum',
+      lg: 'Omuwendo omutono',
+      sw: 'Kiwango cha chini'
+    },
+    'enter_pin_confirm': {
+      en: 'Enter your PIN to confirm',
+      lg: 'Yingiza PIN yo okukakasa',
+      sw: 'Weka PIN yako kuthibitisha'
+    },
+    'no_agents_available': {
+      en: 'No agents available at this time. Please try again later.',
+      lg: 'Tewali ba-agent kati. Gezaako oluvannyuma.',
+      sw: 'Hakuna mawakala kwa sasa. Tafadhali jaribu tena baadaye.'
+    },
+    'select_agent': {
+      en: 'Select an agent',
+      lg: 'Londa agent',
+      sw: 'Chagua wakala'
+    },
+    'choose_amount_type': {
+      en: 'Choose amount type',
+      lg: 'Londa ekika ky\'omuwendo',
+      sw: 'Chagua aina ya kiasi'
+    },
+    'transaction_complete': {
+      en: 'Transaction complete!',
+      lg: 'Okuweereza kuwedde!',
+      sw: 'Muamala umekamilika!'
+    },
+    'meet_agent': {
+      en: 'Meet your selected agent to complete the transaction.',
+      lg: 'Sisinkana ne agent wo okumaliriza.',
+      sw: 'Kutana na wakala wako kukamilisha muamala.'
+    },
+    'receive_cash': {
+      en: 'Meet your selected agent to receive cash.',
+      lg: 'Sisinkana ne agent wo okufuna ssente.',
+      sw: 'Kutana na wakala wako kupokea pesa.'
+    },
   };
 
   /**
