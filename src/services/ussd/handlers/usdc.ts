@@ -261,11 +261,11 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
         );
         
         if (availableAgents.length === 0) {
-          return endSession(`No agents available for USDC purchase at this time.
+          return endSession(`${TranslationService.translate('no_agents_available', lang)}.
 
-Please try again later.
+${TranslationService.translate('please_try_again_later', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         }
         
         session.data.usdcPurchaseAmount = amountUGX;
@@ -420,17 +420,16 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
         // Store balance for later use
         session.data.usdcBalance = usdcBalance;
         
-        return continueSession(`Sell USDC
-Your Balance: $${usdcBalance.toFixed(2)} USDC
+        return continueSession(`${TranslationService.translate('sell', lang)} USDC
+${TranslationService.translate('your_balance', lang)}: $${usdcBalance.toFixed(2)} USDC
 
-Enter amount to sell (USDC):
-(Min: $1.00, Max: $${usdcBalance.toFixed(2)})`);
+${TranslationService.translate('enter_amount', lang)} (USDC):
+(${TranslationService.translate('minimum_amount', lang)}: $1.00, Max: $${usdcBalance.toFixed(2)})`);
       } catch (error) {
         console.error('Error getting USDC balance:', error);
-        return continueSession(`Error getting balance.
-Please try again later.
+        return continueSession(`${TranslationService.translate('error_try_again', lang)}.
 
-Enter your 4-digit PIN:`);
+${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
     }
     
@@ -648,17 +647,16 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
         // Store balance for later use
         session.data.usdcBalance = usdcBalance;
         
-        return continueSession(`Send USDC
-Your Balance: $${usdcBalance.toFixed(6)} USDC
+        return continueSession(`${TranslationService.translate('send', lang)} USDC
+${TranslationService.translate('your_balance', lang)}: $${usdcBalance.toFixed(6)} USDC
 
-Enter amount to send (USDC):
-(Min: $0.01)`);
+${TranslationService.translate('enter_amount', lang)} (USDC):
+(${TranslationService.translate('minimum_amount', lang)}: $0.01)`);
       } catch (error) {
         console.error('Error getting USDC balance:', error);
-        return continueSession(`Error getting balance.
-Please try again later.
+        return continueSession(`${TranslationService.translate('error_try_again', lang)}.
 
-Enter your 4-digit PIN:`);
+${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
     }
     
@@ -747,7 +745,7 @@ ${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationS
     case 4: {
       // Final PIN verification and process transfer
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       let pinCorrect = false;
@@ -763,7 +761,7 @@ ${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationS
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -833,16 +831,16 @@ ${TranslationService.translate('sms_confirmations_sent', lang)}.
 
 ${TranslationService.translate('thank_you', lang)}`);
         } else {
-          return endSession(`❌ Transfer failed: ${transferResult.error || 'Unknown error'}
+          return endSession(`❌ ${TranslationService.translate('transfer', lang)} ${TranslationService.translate('failed', lang)}: ${transferResult.error || TranslationService.translate('error_try_again', lang)}
 
-Please try again later.
+${TranslationService.translate('please_try_again_later', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         }
         
       } catch (error) {
         console.error('Error processing USDC transfer:', error);
-        return endSession('Error processing transfer. Please try again later.');
+        return endSession(TranslationService.translate('error_try_again', lang));
       }
     }
     
