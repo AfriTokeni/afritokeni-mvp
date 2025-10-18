@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Smartphone, Send, Globe } from 'lucide-react';
 import PublicHeader from '../components/PublicHeader';
 import PublicFooter from '../components/PublicFooter';
 import { CentralizedDemoService } from '../services/centralizedDemoService';
-import { USSDService } from '../services/ussdService';
+import { handleMainMenu, handleLocalCurrency, handleBitcoin, handleDAO } from '../services/ussd/handlers';
+import { USSDSession } from '../services/ussd/types';
 
 interface Message {
   type: 'sent' | 'received';
@@ -19,6 +20,7 @@ const USSDPlayground: React.FC = () => {
   const [inputCommand, setInputCommand] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
   const [ussdText, setUssdText] = useState('');
+  const sessionRef = useRef<USSDSession | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'received',
@@ -29,11 +31,20 @@ const USSDPlayground: React.FC = () => {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const messagesContainerRef = React.useRef<HTMLDivElement>(null);
 
-  // Initialize demo user
+  // Initialize demo user (wait for Juno to be ready)
   useEffect(() => {
     const init = async () => {
-      await CentralizedDemoService.initializeUser(demoUserId, 'UGX');
-      setIsInitialized(true);
+      // Wait a bit for Juno to initialize (from App.tsx)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      try {
+        await CentralizedDemoService.initializeUser(demoUserId, 'UGX');
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize:', error);
+        // Set initialized anyway so UI doesn't hang
+        setIsInitialized(true);
+      }
     };
     init();
   }, [demoUserId]);
