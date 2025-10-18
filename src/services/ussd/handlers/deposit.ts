@@ -22,7 +22,7 @@ export async function handleDeposit(input: string, session: USSDSession, sendSMS
       // Step 1: Enter deposit amount
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Deposit Money\nEnter amount (${currency}):`);
+        return continueSession(`${TranslationService.translate('deposit', lang)}\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
       
       // Handle cancel
@@ -35,15 +35,15 @@ export async function handleDeposit(input: string, session: USSDSession, sendSMS
       
       const amount = parseInt(currentInput);
       if (isNaN(amount) || amount <= 0) {
-        return continueSession(`Invalid amount.\nEnter amount to deposit (${currency}):`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
       
       if (amount < 1000) {
-        return continueSession(`Minimum deposit: ${currency} 1,000\nEnter amount to deposit (${currency}):`);
+        return continueSession(`${TranslationService.translate('minimum', lang)} ${TranslationService.translate('deposit', lang)}: ${currency} 1,000\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
       
       if (amount > 5000000) {
-        return continueSession(`Maximum deposit: ${currency} 5,000,000\nEnter amount to deposit (${currency}):`);
+        return continueSession(`Maximum ${TranslationService.translate('deposit', lang)}: ${currency} 5,000,000\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
 
       session.data.depositAmount = amount;
@@ -55,17 +55,14 @@ export async function handleDeposit(input: string, session: USSDSession, sendSMS
         const agents = await DataService.getAvailableAgents();
         
         if (agents.length === 0) {
-          return endSession('No agents available at the moment. Please try again later.');
+          return endSession(`${TranslationService.translate('no_agents_available', lang)}`);
         }
         
         // Display only the first 2 agents
         const displayAgents = agents.slice(0, 2);
         session.data.availableAgents = displayAgents;
         
-        let agentList = `Select an agent for deposit:
-Amount: ${currency} ${amount.toLocaleString()}
-
-`;
+        let agentList = `${TranslationService.translate('select_agent', lang)} (${TranslationService.translate('deposit', lang)}):\n${TranslationService.translate('amount', lang)}: ${currency} ${amount.toLocaleString()}\n\n`;
         
         displayAgents.forEach((agent, index) => {
           agentList += `${index + 1}. ${agent.businessName}
@@ -73,13 +70,13 @@ Amount: ${currency} ${amount.toLocaleString()}
 `;
         });
         
-        agentList += '\n0. Cancel deposit';
+        agentList += `\n0. ${TranslationService.translate('cancel', lang)} ${TranslationService.translate('deposit', lang)}`;
         
         return continueSession(agentList);
         
       } catch (error) {
         console.error('Error getting agents:', error);
-        return endSession('Unable to get agents. Please try again later.');
+        return endSession(`${TranslationService.translate('no_agents_available', lang)}`);
       }
     }
     
@@ -97,12 +94,12 @@ Amount: ${currency} ${amount.toLocaleString()}
       const agentChoice = parseInt(currentInput);
       
       if (agentChoice === 0) {
-        return endSession('Deposit cancelled.\n\nThank you for using AfriTokeni!');
+        return endSession(`${TranslationService.translate('deposit', lang)} ${TranslationService.translate('transaction_cancelled', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession(`Invalid selection. Choose agent number or 0 to cancel:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}. ${TranslationService.translate('select_agent', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const selectedAgent = agents[agentChoice - 1];
@@ -112,13 +109,7 @@ Amount: ${currency} ${amount.toLocaleString()}
       const depositAmount = session.data.depositAmount || 0;
       
       const currency = getSessionCurrency(session);
-      return continueSession(`Selected Agent:
-${selectedAgent.businessName}
-${selectedAgent.location.city}, ${selectedAgent.location.address}
-
-Deposit Amount: ${currency} ${depositAmount.toLocaleString()}
-
-Enter your 4-digit PIN to confirm:`);
+      return continueSession(`${TranslationService.translate('selected_agent', lang)}:\n${selectedAgent.businessName}\n${selectedAgent.location.city}, ${selectedAgent.location.address}\n\n${TranslationService.translate('deposit', lang)} ${TranslationService.translate('amount', lang)}: ${currency} ${depositAmount.toLocaleString()}\n\n${TranslationService.translate('enter_pin_to_confirm', lang)}:`);
     }
     
     case 3: {
@@ -129,18 +120,17 @@ Enter your 4-digit PIN to confirm:`);
         session.currentMenu = 'local_currency';
         session.step = 0;
         session.data = {};
-        return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('transaction_failed', lang)}\n${TranslationService.translate('transaction_cancelled', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
       
       if (!currentInput || currentInput.length !== 4) {
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
         
         if (session.data.pinAttempts >= 3) {
-          return endSession('Too many incorrect PIN attempts. Deposit cancelled for security.');
+          return endSession(`${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('deposit', lang)} ${TranslationService.translate('transaction_cancelled', lang)}.`);
         }
         
-        return continueSession(`Invalid PIN format. Enter 4-digit PIN:
-Attempts remaining: ${3 - session.data.pinAttempts}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}. ${TranslationService.translate('enter_pin_4digit', lang)}:\n${TranslationService.translate('attempts_remaining', lang)}: ${3 - session.data.pinAttempts}`);
       }
       
       console.log(`Verifying PIN for deposit: ${session.phoneNumber}`);
@@ -151,11 +141,10 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
           session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
           
           if (session.data.pinAttempts >= 3) {
-            return endSession('Incorrect PIN. Too many attempts. Deposit cancelled for security.');
+            return endSession(`${TranslationService.translate('incorrect_pin', lang)}. ${TranslationService.translate('too_many_attempts', lang)}. ${TranslationService.translate('deposit', lang)} ${TranslationService.translate('transaction_cancelled', lang)}.`);
           }
           
-          return continueSession(`Incorrect PIN. Try again:
-Attempts remaining: ${3 - session.data.pinAttempts}`);
+          return continueSession(`${TranslationService.translate('incorrect_pin', lang)}. ${TranslationService.translate('try_again', lang)}:\n${TranslationService.translate('attempts_remaining', lang)}: ${3 - session.data.pinAttempts}`);
         }
         
         // Generate deposit code with DEP- prefix
@@ -168,14 +157,14 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
         // Get user to get their ID
         const user = await DataService.findUserByPhoneNumber(session.phoneNumber);
         if (!user) {
-          return endSession('User not found. Please try again later.');
+          return endSession(`${TranslationService.translate('user_not_found', lang)}`);
         }
         
         const depositAmount = session.data.depositAmount || 0;
         const selectedAgent = session.data.selectedAgent;
         
         if (!selectedAgent) {
-          return endSession('Agent not selected. Please try again.');
+          return endSession(`${TranslationService.translate('select_agent', lang)}. ${TranslationService.translate('please_try_again', lang)}`);
         }
         
         // Create pending deposit request in datastore
@@ -193,19 +182,11 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
           console.log(`✅ Deposit request ${depositId} created successfully`);
         } catch (createError) {
           console.error('❌ Failed to create deposit request:', createError);
-          return endSession('Failed to create deposit request. Please try again later.');
+          return endSession(`${TranslationService.translate('error_try_again', lang)}`);
         }
         
         // Send SMS with deposit details
-        const smsMessage = `AfriTokeni Deposit
-Code: ${depositCode}
-Amount: ${currency} ${depositAmount.toLocaleString()}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location.city}
-Valid: 24 hours
-Deposit ID: ${depositId}
-
-Give this code and cash to the agent to complete deposit.`;
+        const smsMessage = `AfriTokeni ${TranslationService.translate('deposit', lang)}\n${TranslationService.translate('code', lang)}: ${depositCode}\n${TranslationService.translate('amount', lang)}: ${currency} ${depositAmount.toLocaleString()}\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location.city}\n${TranslationService.translate('valid', lang)}: 24 ${TranslationService.translate('hours', lang)}\n${TranslationService.translate('deposit', lang)} ID: ${depositId}\n\n${TranslationService.translate('meet_agent', lang)}`;
 
         console.log(`Sending deposit SMS to ${session.phoneNumber}`);
 
@@ -216,27 +197,15 @@ Give this code and cash to the agent to complete deposit.`;
           // Continue even if SMS fails
         }
         
-        return endSession(`✅ Deposit Request Created!
-
-Code: ${depositCode}
-Amount: ${currency} ${depositAmount.toLocaleString()}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location.city}
-
-Valid for 24 hours. Give this code and cash to the agent to complete your deposit.
-
-SMS sent with details.
-Deposit ID: ${depositId}
-
-Thank you for using AfriTokeni!`);
+        return endSession(`✅ ${TranslationService.translate('deposit', lang)} ${TranslationService.translate('transaction_complete', lang)}\n\n${TranslationService.translate('code', lang)}: ${depositCode}\n${TranslationService.translate('amount', lang)}: ${currency} ${depositAmount.toLocaleString()}\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location.city}\n\n${TranslationService.translate('valid', lang)}: 24 ${TranslationService.translate('hours', lang)}. ${TranslationService.translate('meet_agent', lang)}\n\n${TranslationService.translate('sms_sent', lang)}.\n${TranslationService.translate('deposit', lang)} ID: ${depositId}\n\n${TranslationService.translate('thank_you', lang)}`);
         
       } catch (error) {
         console.error('Error verifying PIN or creating deposit:', error);
-        return endSession('Unable to process deposit. Please try again later.');
+        return endSession(`${TranslationService.translate('error_try_again', lang)}`);
       }
     }
     
     default:
-      return endSession('Deposit process error. Please try again.');
+      return endSession(`${TranslationService.translate('error_try_again', lang)}`);
   }
 }

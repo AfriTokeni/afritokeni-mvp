@@ -116,7 +116,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN with demo fallback
@@ -134,7 +134,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
       }
       
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Get Bitcoin balance using CkBTCService
@@ -202,24 +202,24 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
   if (session.step === 1) {
     // PIN verification step
     if (!/^\d{4}$/.test(sanitized_input)) {
-      return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     // Verify PIN
     let pinCorrect = false;
-      try {
-        pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
-      } catch (error) {
-        console.log('PIN verification error (demo mode):', error);
-      }
-      
-      // If PIN verification failed, check for demo PIN
-      if (!pinCorrect && sanitized_input === '1234') {
-        console.log('Using demo PIN 1234 for playground');
-        pinCorrect = true;
-      }
+    try {
+      pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
+    } catch (error) {
+      console.log('PIN verification error (demo mode):', error);
+    }
+    
+    // If PIN verification failed, check for demo PIN
+    if (!pinCorrect && sanitized_input === '1234') {
+      console.log('Using demo PIN 1234 for playground');
+      pinCorrect = true;
+    }
     if (!pinCorrect) {
-      return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     session.step = 2;
@@ -321,7 +321,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
         
         session.data.availableAgents = availableAgents;
         
-        let agentList = `BTC ${TranslationService.translate('purchase_quote', lang)}\n\n${TranslationService.translate('spend', lang)}: ${currency} ${ugxAmount.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${currency} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${currency} ${netAmount.toLocaleString()}\n${TranslationService.translate('receive', lang)}: ₿${btcAmount.toFixed(8)} BTC
+        let agentList = `${TranslationService.translate('btc_purchase_quote', lang)}\n\n${TranslationService.translate('spend', lang)}: ${currency} ${ugxAmount.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${currency} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${currency} ${netAmount.toLocaleString()}\n${TranslationService.translate('receive', lang)}: ₿${btcAmount.toFixed(8)} BTC
 
 ${TranslationService.translate('select_an_agent', lang)}:
 `;
@@ -336,7 +336,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         
       } catch (error) {
         console.error('Error getting agents for Bitcoin purchase:', error);
-        return endSession('Error loading agents. Please try again later.');
+        return endSession(`${TranslationService.translate('no_agents_available', lang)}`);
       }
     }
     
@@ -352,7 +352,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${TranslationService.translate('select_an_agent', lang)} (1-${agents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:`);
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n\n${TranslationService.translate('select_an_agent', lang)} (1-${agents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:`);
       }
       
       const selectedAgent = agents[agentChoice - 1];
@@ -385,10 +385,10 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         session.currentMenu = 'bitcoin';
         session.step = 0;
         session.data = {};
-        return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('transaction_failed', lang)}\n${TranslationService.translate('transaction_cancelled', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       let pinCorrect = false;
@@ -404,7 +404,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -504,7 +504,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
           );
           
           if (balance.balanceSatoshis <= 0) {
-            return endSession(`${TranslationService.translate('no_ckbtc_available', lang)}.\n\n${TranslationService.translate('ckbtc_balance', lang)}: ₿0.00000000\n≈ ${getSessionCurrency(session)} 0\n\n${TranslationService.translate('thank_you', lang)}`);
+            return endSession(`${TranslationService.translate('no_ckbtc_available', lang)}.\n\n${TranslationService.translate('ckbtc_balance', lang)}: ₿0.00000000\n≈ ${getSessionCurrency(session)} 0\n\n${TranslationService.translate('you_need_ckbtc', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
           }
           
           return continueSession(`${TranslationService.translate('sell_ckbtc', lang)}\n\n${TranslationService.translate('your_ckbtc_balance', lang)}:\n₿${balance.balanceBTC} BTC\n≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}\n\n${TranslationService.translate('choose_amount_type', lang)}:\n1. ${TranslationService.translate('enter_amount', lang)} (${getSessionCurrency(session)})\n2. ${TranslationService.translate('enter_btc_amount', lang)}\n0. ${TranslationService.translate('cancel', lang)}`);
@@ -582,7 +582,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession('User not found. Please contact support.');
+          return endSession(`${TranslationService.translate('user_not_found', lang)}`);
         }
         
         const currency = getSessionCurrency(session);
@@ -594,19 +594,19 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         );
         
         if (balance.balanceSatoshis < (btcAmount * 100000000)) { // Convert BTC to satoshis for comparison
-          return continueSession(`Insufficient ckBTC balance!
+          return continueSession(`${TranslationService.translate('insufficient_btc', lang)}
 
-Your balance: ₿${balance.balanceBTC} BTC
+${TranslationService.translate('your_balance', lang)}: ₿${balance.balanceBTC} BTC
 ≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
-Required: ₿${btcAmount.toFixed(8)} BTC
+${TranslationService.translate('required', lang)}: ₿${btcAmount.toFixed(8)} BTC
 
-Enter a smaller amount:`);
+${TranslationService.translate('enter_smaller_amount', lang)}`);
         }
         
       } catch (error) {
         console.error('Error checking Bitcoin balance:', error);
-        return endSession('Error checking balance. Please try again later.');
+        return endSession(`${TranslationService.translate('error_try_again', lang)}`);
       }
       
       // Calculate fees and net amounts
@@ -638,7 +638,7 @@ Enter a smaller amount:`);
         
         session.data.availableAgents = availableAgents;
         
-        let agentList = `BTC ${TranslationService.translate('sale_quote', lang)}\n\n${TranslationService.translate('sell', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('gross', lang)}: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
+        let agentList = `${TranslationService.translate('btc_sale_quote', lang)}\n\n${TranslationService.translate('sell', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('gross', lang)}: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
         
 
 ${TranslationService.translate('select_an_agent', lang)}:
@@ -654,7 +654,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         
       } catch (error) {
         console.error('Error getting agents for Bitcoin sale:', error);
-        return endSession('Error loading agents. Please try again later.');
+        return endSession(`${TranslationService.translate('no_agents_available', lang)}`);
       }
     }
     
@@ -681,20 +681,13 @@ ${TranslationService.translate('select_an_agent', lang)}:
       const ugxNet = session.data.ugxNet || 0;
       const fee = session.data.fee || 0;
       
-      return continueSession(`${TranslationService.translate('selected_agent', lang)}:\n${selectedAgent.businessName}\n${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}\n\n
-
-Sale Details:
-Sell: ₿${btcAmount.toFixed(8)} BTC
-Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
-You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
-
-Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('selected_agent', lang)}:\n${selectedAgent.businessName}\n${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}\n\n${TranslationService.translate('sale_details', lang)}:\n${TranslationService.translate('sell', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('you_receive', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}\n\n${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 4: {
       // PIN verification and process Bitcoin sale
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       let pinCorrect = false;
@@ -710,7 +703,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -794,7 +787,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
       }
       
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN
@@ -811,14 +804,14 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // PIN is correct, proceed to get balance and show send options
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession('User not found. Please contact support.');
+          return endSession(`${TranslationService.translate('user_not_found', lang)}`);
         }
         
         // Get ckBTC balance with local currency equivalent
@@ -837,15 +830,17 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         session.data.userBalance = balance;
         session.step = 2;
         
-        return continueSession(`Send ckBTC
+        return continueSession(`${TranslationService.translate('send_bitcoin', lang)}
 
-Your Balance: ₿${balance.balanceBTC} BTC
+${TranslationService.translate('your_balance', lang)}: ₿${balance.balanceBTC} BTC
 ≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
-Enter recipient phone number:
-(e.g. 256700123456)
+${TranslationService.translate('enter_recipient_phone', lang)}:
+${TranslationService.translate('phone_format_example', lang)}
 
-Press 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
+${TranslationService.translate('press_zero_back', lang)}
+
+${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error checking ckBTC balance:', error);
@@ -856,7 +851,7 @@ Press 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
     case 2: {
       // Recipient phone number entry
       if (!currentInput) {
-        return continueSession(`Enter recipient phone number:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('enter_recipient_phone', lang)}:\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Validate and format phone number
@@ -871,13 +866,13 @@ Press 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
         } else if (recipientPhone.length === 9) {
           recipientPhone = '+256' + recipientPhone;
         } else {
-          return continueSession(`Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`${TranslationService.translate('invalid_phone_format', lang)}.\n${TranslationService.translate('enter_recipient_phone', lang)}:\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
       }
       
       // Basic validation
       if (!/^\+256[0-9]{9}$/.test(recipientPhone)) {
-        return continueSession(`Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_phone_format', lang)}.\n${TranslationService.translate('enter_recipient_phone', lang)}:\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check if recipient is same as sender
@@ -896,11 +891,15 @@ Press 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
         session.data.recipientUser = recipientUser;
         session.step = 3;
         
-        return continueSession(`Recipient: ${recipientPhone}
-Name: ${recipientUser.firstName} ${recipientUser.lastName}
+        return continueSession(`${TranslationService.translate('recipient', lang)}: ${recipientPhone}
+${TranslationService.translate('name', lang)}: ${recipientUser.firstName} ${recipientUser.lastName}
 
-Enter BTC amount to send:
-(Min: ₿0.00001, Max: ₿${session.data.userBalance.balanceBTC})`);
+${TranslationService.translate('enter_btc_amount', lang)}:
+(${TranslationService.translate('minimum', lang)}: 0.00001 BTC)
+
+${TranslationService.translate('press_zero_back', lang)}
+
+${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error checking recipient:', error);
@@ -913,11 +912,11 @@ Enter BTC amount to send:
       const btcAmount = parseFloat(currentInput);
       
       if (isNaN(btcAmount) || btcAmount <= 0) {
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_btc_amount', lang)}:\n(${TranslationService.translate('minimum_amount', lang)}: ₿0.00001)`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_btc_amount', lang)}:\n(${TranslationService.translate('minimum', lang)}: 0.00001 BTC)`);
       }
       
       if (btcAmount < 0.00001) {
-        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: ₿0.00001 BTC\n${TranslationService.translate('enter_btc_amount', lang)}:`);
+        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: 0.00001 BTC\n${TranslationService.translate('enter_btc_amount', lang)}:`);
       }
       
       const userBalance = session.data.userBalance;
@@ -949,27 +948,28 @@ Enter smaller amount:`);
         const recipientPhone = session.data.recipientPhone;
         const recipientUser = session.data.recipientUser;
         
-        return continueSession(`Send ckBTC Confirmation
+        return continueSession(`${TranslationService.translate('send_summary', lang)}
 
-To: ${recipientPhone}
-Name: ${recipientUser.firstName} ${recipientUser.lastName}
-Amount: ₿${btcAmount.toFixed(8)} BTC
-≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
-Network fee: ₿${networkFee.toFixed(8)} BTC
-Total: ₿${totalBTC.toFixed(8)} BTC
+${TranslationService.translate('to', lang)}: ${recipientPhone}
+${TranslationService.translate('name', lang)}: ${recipientUser.firstName} ${recipientUser.lastName}
+${TranslationService.translate('amount', lang)}: ₿${btcAmount.toFixed(8)} BTC
+${TranslationService.translate('network_fee', lang)}: ₿${networkFee.toFixed(8)} BTC
+${TranslationService.translate('total', lang)}: ₿${totalBTC.toFixed(8)} BTC
 
-Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+${TranslationService.translate('enter_pin_to_confirm', lang)}:
+
+${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error calculating send details:', error);
-        return continueSession(`Error calculating fees. Please try again.\nEnter BTC amount to send:`);
+        return continueSession(`${TranslationService.translate('error_try_again', lang)}\n${TranslationService.translate('enter_btc_amount', lang)}:`);
       }
     }
     
     case 4: {
       // Final PIN verification and send transaction
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       let pinCorrect = false;
@@ -985,7 +985,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Process the BTC send transaction

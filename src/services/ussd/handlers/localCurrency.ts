@@ -131,11 +131,12 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
       const currency = getSessionCurrency(session);
       const balance = await getUserBalance(session.phoneNumber);
       
+      const lang = session.language || 'en';
       if (balance !== null) {
-        return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} ${balance.toLocaleString()}\nAvailable: ${currency} ${balance.toLocaleString()}\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
+        return endSession(`${TranslationService.translate('your_account_balance', lang)}\n${TranslationService.translate('amount', lang)}: ${currency} ${balance.toLocaleString()}\n${TranslationService.translate('available', lang)}: ${currency} ${balance.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
       } else {
         // No balance found, assume 0
-        return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} 0\nAvailable: ${currency} 0\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
+        return endSession(`${TranslationService.translate('your_account_balance', lang)}\n${TranslationService.translate('amount', lang)}: ${currency} 0\n${TranslationService.translate('available', lang)}: ${currency} 0\n\n${TranslationService.translate('thank_you', lang)}`);
       }
     } catch (error) {
       console.error('Error retrieving balance:', error);
@@ -146,8 +147,9 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
   switch (session.step) {
     case 1: {
       // PIN verification step
+      const lang = session.language || 'en';
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', session.language || 'en')}\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', session.language || 'en')}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -164,7 +166,7 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', session.language || 'en')}\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', session.language || 'en')}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // PIN is correct, get user balance
@@ -173,10 +175,10 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
         const balance = await getUserBalance(session.phoneNumber);
         
         if (balance !== null) {
-          return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} ${balance.toLocaleString()}\nAvailable: ${currency} ${balance.toLocaleString()}\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
+          return endSession(`${TranslationService.translate('your_account_balance', lang)}\n${TranslationService.translate('amount', lang)}: ${currency} ${balance.toLocaleString()}\n${TranslationService.translate('available', lang)}: ${currency} ${balance.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
         } else {
           // No balance found, assume 0
-          return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} 0\nAvailable: ${currency} 0\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
+          return endSession(`${TranslationService.translate('your_account_balance', lang)}\n${TranslationService.translate('amount', lang)}: ${currency} 0\n${TranslationService.translate('available', lang)}: ${currency} 0\n\n${TranslationService.translate('thank_you', lang)}`);
         }
       } catch (error) {
         console.error('Error retrieving balance:', error);
@@ -193,10 +195,10 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
  * Handle transaction history
  */
 export async function handleTransactionHistory(input: string, session: USSDSession): Promise<string> {
-  const lang = session.language || 'en';
   console.log(`Transaction history input: ${input}`);
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
+  const lang = session.language || 'en';
   
   // If PIN is already verified in session, skip PIN verification
   if (session.data.pinVerified) {
@@ -247,15 +249,12 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
         }
       });
 
-      transactionList += `\nThank you for using AfriTokeni!`;
+      transactionList += `\n${TranslationService.translate('thank_you_using_afritokeni', lang)}`;
       
       return endSession(transactionList);
     } catch (error) {
       console.error('Error retrieving transaction history:', error);
-      return endSession(`Error retrieving transaction history.
-Please try again later.
-
-${TranslationService.translate('thank_you', lang)}`);
+      return endSession(`${TranslationService.translate('error_retrieving_history', lang)}\n${TranslationService.translate('please_try_again_later', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
     }
   }
   
@@ -263,7 +262,7 @@ ${TranslationService.translate('thank_you', lang)}`);
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -280,7 +279,7 @@ ${TranslationService.translate('thank_you', lang)}`);
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // PIN is correct, get transaction history
@@ -330,7 +329,7 @@ ${TranslationService.translate('thank_you', lang)}`);
           }
         });
 
-        transactionList += `\nThank you for using AfriTokeni!`;
+        transactionList += `\n${TranslationService.translate('thank_you_using_afritokeni', lang)}`;
         
         return endSession(transactionList);
       } catch (error) {
@@ -340,6 +339,6 @@ ${TranslationService.translate('thank_you', lang)}`);
     }
     
     default:
-      return endSession('Error retrieving transactions. Please try again.');
+      return endSession(`${TranslationService.translate('error_retrieving_history', lang)} ${TranslationService.translate('please_try_again', lang)}`);
   }
 }

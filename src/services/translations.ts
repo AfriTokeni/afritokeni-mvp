@@ -1058,6 +1058,151 @@ export class TranslationService {
       lg: 'Gezaako nate',
       sw: 'Jaribu tena'
     },
+    'please_try_again': {
+      en: 'Please try again',
+      lg: 'Gezaako nate',
+      sw: 'Tafadhali jaribu tena'
+    },
+    'already_voted': {
+      en: 'Already voted on this proposal!',
+      lg: 'Omaze okulonda ku kirowoozo kino!',
+      sw: 'Umeshapiga kura kwenye pendekezo hili!'
+    },
+    'your_vote': {
+      en: 'Your vote',
+      lg: 'Okulonda kwo',
+      sw: 'Kura yako'
+    },
+    'thank_you_governance': {
+      en: 'Thank you for participating in AfriTokeni governance!',
+      lg: 'Webale okwetaba mu kufuga AfriTokeni!',
+      sw: 'Asante kwa kushiriki katika utawala wa AfriTokeni!'
+    },
+    'voting_ends_in': {
+      en: 'Voting ends in',
+      lg: 'Okulonda kuggwawo mu',
+      sw: 'Kupiga kura kunaisha ndani ya'
+    },
+    'days': {
+      en: 'days',
+      lg: 'ennaku',
+      sw: 'siku'
+    },
+    'current_votes': {
+      en: 'Current votes',
+      lg: 'Okulonda kwa kati',
+      sw: 'Kura za sasa'
+    },
+    'vote_yes': {
+      en: 'Vote YES',
+      lg: 'Londa YE',
+      sw: 'Piga kura NDIO'
+    },
+    'vote_no': {
+      en: 'Vote NO',
+      lg: 'Londa NEDDA',
+      sw: 'Piga kura HAPANA'
+    },
+    'vote_abstain': {
+      en: 'Vote ABSTAIN',
+      lg: 'Londa NZIYIZA',
+      sw: 'Piga kura ZUIA'
+    },
+    'vote': {
+      en: 'Vote',
+      lg: 'Londa',
+      sw: 'Piga kura'
+    },
+    'enter_vote_amount': {
+      en: 'Enter amount to vote (min 1 AFRI)',
+      lg: 'Yingiza omuwendo ogw\'okulonda (omutono 1 AFRI)',
+      sw: 'Weka kiasi cha kupiga kura (chini 1 AFRI)'
+    },
+    'insufficient_tokens': {
+      en: 'Insufficient tokens!',
+      lg: 'Tokens tezimala!',
+      sw: 'Tokens hazitoshi!'
+    },
+    'requested': {
+      en: 'Requested',
+      lg: 'Esabiddwa',
+      sw: 'Imeombwa'
+    },
+    'confirm_vote': {
+      en: 'Confirm Vote',
+      lg: 'Kakasa Okulonda',
+      sw: 'Thibitisha Kura'
+    },
+    'proposal': {
+      en: 'Proposal',
+      lg: 'Ekirowoozo',
+      sw: 'Pendekezo'
+    },
+    'vote_successful': {
+      en: 'Vote Successful!',
+      lg: 'Okulonda kuwangudde!',
+      sw: 'Kura Imefanikiwa!'
+    },
+    'voted': {
+      en: 'Voted',
+      lg: 'Olonze',
+      sw: 'Umepiga kura'
+    },
+    'vote_locked_message': {
+      en: 'Your vote is locked until proposal ends.',
+      lg: 'Okulonda kwo kuziyiddwa okutuusa ekirowoozo lwe kiggwawo.',
+      sw: 'Kura yako imefungwa hadi pendekezo liishe.'
+    },
+    'your_voting_power': {
+      en: 'Your Voting Power',
+      lg: 'Amaanyi Go ag\'Okulonda',
+      sw: 'Nguvu Yako ya Kupiga Kura'
+    },
+    'locked_tokens_message': {
+      en: 'Locked tokens released when proposals end.',
+      lg: 'Tokens eziziyiddwa zisumulukibwa ekirowoozo lwe kiggwawo.',
+      sw: 'Tokens zilizofungwa zitatolewa mapendekezo yatakapoisha.'
+    },
+    'your_active_votes': {
+      en: 'Your Active Votes',
+      lg: 'Okulonda Kwo Okukola',
+      sw: 'Kura Zako Zinazofanya Kazi'
+    },
+    'no_active_votes': {
+      en: 'You have no active votes.',
+      lg: 'Tolina kulonda kukola.',
+      sw: 'Huna kura zinazofanya kazi.'
+    },
+    'vote_to_participate': {
+      en: 'Vote on proposals to participate in governance!',
+      lg: 'Londa ku birowoozo okwetaba mu kufuga!',
+      sw: 'Piga kura kwenye mapendekezo kushiriki katika utawala!'
+    },
+    'total_locked': {
+      en: 'Total locked',
+      lg: 'Omugatte oguziyiddwa',
+      sw: 'Jumla iliyofungwa'
+    },
+    'btc_purchase_quote': {
+      en: 'Bitcoin Purchase Quote',
+      lg: 'Eky\'okugula Bitcoin',
+      sw: 'Nukuu ya Ununuzi wa Bitcoin'
+    },
+    'btc_sale_quote': {
+      en: 'Bitcoin Sale Quote',
+      lg: 'Eky\'okutunda Bitcoin',
+      sw: 'Nukuu ya Mauzo ya Bitcoin'
+    },
+    'recipient': {
+      en: 'Recipient',
+      lg: 'Omufuna',
+      sw: 'Mpokeaji'
+    },
+    'sale_details': {
+      en: 'Sale Details',
+      lg: 'Ebikwata ku Kutunda',
+      sw: 'Maelezo ya Mauzo'
+    },
     'setup_pin_message': {
       en: 'To secure your account, please set up a 4-digit PIN',
       lg: 'Okukuuma akawunti yo, tegeka PIN ya namba 4',
@@ -1142,6 +1287,21 @@ export class TranslationService {
       en: 'Last',
       lg: 'Ezisembayo',
       sw: 'Za mwisho'
+    },
+    'your_account_balance': {
+      en: 'Your Account Balance',
+      lg: 'Ssente zo ku Akawunti',
+      sw: 'Salio yako ya Akaunti'
+    },
+    'error_retrieving_history': {
+      en: 'Error retrieving transaction history.',
+      lg: 'Kiremya mu kufuna ebyafaayo by\'ensimbi.',
+      sw: 'Kosa katika kupata historia ya muamala.'
+    },
+    'thank_you_using_afritokeni': {
+      en: 'Thank you for using AfriTokeni!',
+      lg: 'Webale okukozesa AfriTokeni!',
+      sw: 'Asante kwa kutumia AfriTokeni!'
     },
   };
 

@@ -76,12 +76,7 @@ export async function handleDAO(input: string, session: USSDSession): Promise<st
       session.currentMenu = 'main';
       session.step = 0;
       session.data = {};
-      return continueSession(`AfriTokeni Main Menu
-1. Local Currency (UGX)
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. DAO Governance
-0. Exit`);
+      return continueSession('__SHOW_MAIN_MENU__');
     
     default:
       return continueSession(`${TranslationService.translate('invalid_option', lang)}
@@ -127,8 +122,7 @@ async function handleViewProposals(input: string, session: USSDSession): Promise
     session.data.proposals = proposals;
     session.step = 1;
     
-    const lang = session.language || 'en';
-    let response = `Active Proposals\n\n`;
+    let response = `${TranslationService.translate('view_proposals', lang)}\n\n`;
     proposals.forEach((prop, index) => {
       response += `${index + 1}. ${prop.title}\n`;
     });
@@ -149,10 +143,10 @@ async function handleViewProposals(input: string, session: USSDSession): Promise
     const proposals = session.data.proposals || [];
     
     if (proposalIndex < 0 || proposalIndex >= proposals.length) {
-      return continueSession(`Invalid proposal number.
+      return continueSession(`${TranslationService.translate('invalid_selection', lang)}.
 
-Reply with number (1-${proposals.length})
-0. Back`);
+${TranslationService.translate('select_an_agent', lang)} (1-${proposals.length})
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
     }
     
     const proposal = proposals[proposalIndex];
@@ -164,12 +158,12 @@ Reply with number (1-${proposals.length})
     const existingVote = userVotes.find((v: any) => v.proposalId === proposal.id);
     
     if (existingVote) {
-      return endSession(`Already voted on this proposal!
+      return endSession(`${TranslationService.translate('already_voted', lang)}
 
-Your vote: ${existingVote.choice.toUpperCase()}
-Amount: ${existingVote.amount} AFRI
+${TranslationService.translate('your_vote', lang)}: ${existingVote.choice.toUpperCase()}
+${TranslationService.translate('amount', lang)}: ${existingVote.amount} AFRI
 
-Thank you for participating in governance!`);
+${TranslationService.translate('thank_you_governance', lang)}`);
     }
     
     // Handle date conversion (Juno stores dates as ISO strings)
@@ -178,21 +172,20 @@ Thank you for participating in governance!`);
       : proposal.votingEndsAt;
     const daysLeft = Math.ceil((votingEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
     
-    const lang = session.language || 'en';
     return continueSession(`${proposal.title}
 
 ${proposal.description}
 
-Voting ends in ${daysLeft} days
+${TranslationService.translate('voting_ends_in', lang)} ${daysLeft} ${TranslationService.translate('days', lang)}
 
-Current votes:
+${TranslationService.translate('current_votes', lang)}:
 YES: ${proposal.votes.yes}
 NO: ${proposal.votes.no}
 ABSTAIN: ${proposal.votes.abstain}
 
-1. Vote YES
-2. Vote NO
-3. Vote ABSTAIN
+1. ${TranslationService.translate('vote_yes', lang)}
+2. ${TranslationService.translate('vote_no', lang)}
+3. ${TranslationService.translate('vote_abstain', lang)}
 
 ${TranslationService.translate('back_or_menu', lang)}`);
   }
@@ -216,12 +209,12 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         choice = 'abstain';
         break;
       default:
-        return continueSession(`Invalid option.
+        return continueSession(`${TranslationService.translate('invalid_option', lang)}.
 
-1. Vote YES
-2. Vote NO
-3. Vote ABSTAIN
-0. Back`);
+1. ${TranslationService.translate('vote_yes', lang)}
+2. ${TranslationService.translate('vote_no', lang)}
+3. ${TranslationService.translate('vote_abstain', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
     }
     
     session.data.voteChoice = choice;
@@ -231,13 +224,12 @@ ${TranslationService.translate('back_or_menu', lang)}`);
     const lockedTokens = session.data.lockedTokens || 0;
     const available = afriTokens - lockedTokens;
     
-    const lang = session.language || 'en';
-    return continueSession(`Vote ${choice.toUpperCase()}
+    return continueSession(`${TranslationService.translate('vote', lang)} ${choice.toUpperCase()}
 
-Available: ${available} AFRI
-Locked: ${lockedTokens} AFRI
+${TranslationService.translate('available', lang)}: ${available} AFRI
+${TranslationService.translate('locked', lang)}: ${lockedTokens} AFRI
 
-Enter amount to vote (min 1 AFRI):
+${TranslationService.translate('enter_vote_amount', lang)}:
 
 ${TranslationService.translate('back_or_menu', lang)}`);
   }
@@ -248,10 +240,10 @@ ${TranslationService.translate('back_or_menu', lang)}`);
     
     // Validate amount first (0 is invalid, not cancel)
     if (isNaN(amount) || amount < 1) {
-      return continueSession(`Invalid amount.
-Minimum: 1 AFRI
+      return continueSession(`${TranslationService.translate('invalid_amount', lang)}.
+${TranslationService.translate('minimum', lang)}: 1 AFRI
 
-Enter amount to vote:`);
+${TranslationService.translate('enter_vote_amount', lang)}:`);
     }
     
     const afriTokens = session.data.afriTokens || 5000;
@@ -259,24 +251,24 @@ Enter amount to vote:`);
     const available = afriTokens - lockedTokens;
     
     if (amount > available) {
-      return continueSession(`Insufficient tokens!
+      return continueSession(`${TranslationService.translate('insufficient_tokens', lang)}
 
-Available: ${available} AFRI
-Requested: ${amount} AFRI
+${TranslationService.translate('available', lang)}: ${available} AFRI
+${TranslationService.translate('requested', lang)}: ${amount} AFRI
 
-Enter amount to vote:`);
+${TranslationService.translate('enter_vote_amount', lang)}:`);
     }
     
     session.data.voteAmount = amount;
     session.step = 4;
     
-    return continueSession(`Confirm Vote
+    return continueSession(`${TranslationService.translate('confirm_vote', lang)}
 
-Proposal: ${session.data.selectedProposal.title}
-Vote: ${session.data.voteChoice.toUpperCase()}
-Amount: ${amount} AFRI
+${TranslationService.translate('proposal', lang)}: ${session.data.selectedProposal.title}
+${TranslationService.translate('vote', lang)}: ${session.data.voteChoice.toUpperCase()}
+${TranslationService.translate('amount', lang)}: ${amount} AFRI
 
-Enter your 4-digit PIN to confirm:`);
+${TranslationService.translate('enter_pin_to_confirm', lang)}:`);
   }
   
   // Step 4: PIN verification and vote submission
@@ -298,7 +290,7 @@ Enter your 4-digit PIN to confirm:`);
     }
     
     if (!pinCorrect) {
-      return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('incorrect_pin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     // Record vote
@@ -317,19 +309,19 @@ Enter your 4-digit PIN to confirm:`);
     // Update locked tokens
     session.data.lockedTokens = (session.data.lockedTokens || 0) + session.data.voteAmount;
     
-    return endSession(`✅ Vote Successful!
+    return endSession(`✅ ${TranslationService.translate('vote_successful', lang)}
 
-Voted ${vote.choice.toUpperCase()} on:
+${TranslationService.translate('voted', lang)} ${vote.choice.toUpperCase()}:
 ${session.data.selectedProposal.title}
 
-Amount: ${vote.amount} AFRI
+${TranslationService.translate('amount', lang)}: ${vote.amount} AFRI
 
-Your vote is locked until proposal ends.
+${TranslationService.translate('vote_locked_message', lang)}
 
-Thank you for participating in AfriTokeni governance!`);
+${TranslationService.translate('thank_you_governance', lang)}`);
   }
   
-  return endSession('Error processing request. Please try again.');
+  return endSession(`${TranslationService.translate('error_try_again', lang)}`);
 }
 
 /**
@@ -355,14 +347,14 @@ async function handleVotingPower(input: string, session: USSDSession): Promise<s
     return continueSession('__SHOW_DAO_MENU__');
   }
   
-  return continueSession(`Your Voting Power
+  return continueSession(`${TranslationService.translate('your_voting_power', lang)}
 
 ${afriTokens} AFRI
-${lockedTokens} AFRI locked
+${lockedTokens} AFRI ${TranslationService.translate('locked', lang)}
 
-Available: ${available} AFRI
+${TranslationService.translate('available', lang)}: ${available} AFRI
 
-Locked tokens released when proposals end.
+${TranslationService.translate('locked_tokens_message', lang)}
 
 ${TranslationService.translate('back_or_menu', lang)}`);
 }
@@ -390,24 +382,24 @@ async function handleActiveVotes(input: string, session: USSDSession): Promise<s
   }
   
   if (userVotes.length === 0) {
-    return continueSession(`Your Active Votes
+    return continueSession(`${TranslationService.translate('your_active_votes', lang)}
 
-You have no active votes.
+${TranslationService.translate('no_active_votes', lang)}
 
-Vote on proposals to participate in governance!
+${TranslationService.translate('vote_to_participate', lang)}
 
 ${TranslationService.translate('back_or_menu', lang)}`);
   }
   
-  let response = `Your Active Votes\n\n`;
-  response += `${userVotes.length} active votes\n`;
-  response += `Total locked: ${lockedTokens} AFRI\n\n`;
+  let response = `${TranslationService.translate('your_active_votes', lang)}\n\n`;
+  response += `${userVotes.length} ${TranslationService.translate('active_votes', lang)}\n`;
+  response += `${TranslationService.translate('total_locked', lang)}: ${lockedTokens} AFRI\n\n`;
   
   userVotes.forEach((vote: any, index: number) => {
     response += `${index + 1}. ${vote.choice.toUpperCase()} - ${vote.amount} AFRI\n`;
   });
   
-  response += `\nThank you for participating in governance!`;
+  response += `\n${TranslationService.translate('thank_you_governance', lang)}`;
   
   return endSession(response);
 }
