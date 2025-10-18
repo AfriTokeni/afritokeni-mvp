@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Smartphone, Send, Globe } from 'lucide-react';
 import PublicHeader from '../components/PublicHeader';
 import PublicFooter from '../components/PublicFooter';
 import { CentralizedDemoService } from '../services/centralizedDemoService';
 import { USSDService } from '../services/ussdService';
+import { USSDSession } from '../services/ussd/types';
 
 interface Message {
   type: 'sent' | 'received';
