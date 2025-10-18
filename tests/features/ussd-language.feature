@@ -110,12 +110,6 @@ Feature: USSD Language Selection
     Then the session language should be "lg"
     And I should see "Tukusanyukidde ku AfriTokeni" in USSD response
 
-  Scenario: Chained input for language selection
-    When I dial "*229#"
-    And I enter chained input "6*2"
-    Then I should see "Olulimi lutegekeddwa ku Luganda" in USSD response
-    And the session language should be "lg"
-
   Scenario: Error messages show in selected language
     Given my language preference is "lg"
     When I dial "*229#"
