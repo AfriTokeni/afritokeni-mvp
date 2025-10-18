@@ -112,7 +112,12 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
         pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
       } catch (error) {
         console.log('PIN verification error (demo mode):', error);
-        pinCorrect = sanitized_input === '1234';
+      }
+      
+      // If PIN verification failed, check for demo PIN
+      if (!pinCorrect && sanitized_input === '1234') {
+        console.log('Using demo PIN 1234 for playground');
+        pinCorrect = true;
       }
       
       if (!pinCorrect) {
