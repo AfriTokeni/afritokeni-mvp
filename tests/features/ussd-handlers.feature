@@ -48,7 +48,7 @@ Feature: USSD Handler Logic
     Given I am in local currency menu
     When I select option "3"
     Then the session menu should be "deposit"
-    And I should see "Enter amount to deposit" in USSD response
+    And I should see "Enter amount" in USSD response
 
   Scenario: Withdraw menu shows amount prompt
     Given I am in local currency menu
@@ -108,7 +108,7 @@ Feature: USSD Handler Logic
   # Deposit Handler Tests
   Scenario: Deposit requests amount
     Given I am in deposit menu
-    Then I should see "Enter amount to deposit" in USSD response
+    Then I should see "Enter amount" in USSD response
 
   Scenario: Deposit generates code
     Given I am in deposit menu

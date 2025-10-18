@@ -29,14 +29,6 @@ export async function handleDAO(input: string, session: USSDSession): Promise<st
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   const lang = session.language || 'en';
   
-  // Handle cancel at any point
-  if (sanitized_input === '0' && session.currentMenu !== 'dao') {
-    session.currentMenu = 'dao';
-    session.step = 0;
-    session.data = {};
-    return continueSession('__SHOW_DAO_MENU__');
-  }
-  
   // If we're already in a sub-menu, route to the appropriate handler
   const menu = session.currentMenu as string;
   if (menu === 'dao_proposals') {

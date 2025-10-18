@@ -8,17 +8,7 @@ import { world } from './shared-steps.js';
 import { USSDTestHelper } from '../../helpers/ussdTestHelpers.js';
 import { USSDService } from '../../../src/services/ussdService.js';
 
-When('I enter phone number {string}', async function (phoneNumber: string) {
-  const result = await USSDTestHelper.simulateUSSDRequest(
-    world.ussdSessionId,
-    world.ussdPhoneNumber,
-    phoneNumber
-  );
-  
-  world.ussdResponse = result.response;
-  world.ussdContinueSession = result.continueSession;
-  world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);
-});
+// Note: 'I enter phone number' is defined in ussd-handler-steps.ts
 
 When('I enter amount {string}', async function (amount: string) {
   const result = await USSDTestHelper.simulateUSSDRequest(
