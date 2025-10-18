@@ -6,6 +6,7 @@ import type { USSDSession } from './ussd/types';
 import { handleMainMenu } from './ussd/handlers/mainMenu';
 import { handleLocalCurrency } from './ussd/handlers/localCurrency';
 import { handleBitcoin, handleBTCBalance, handleBTCRate } from './ussd/handlers/bitcoin';
+import { handleUSDC } from './ussd/handlers/usdc';
 import { handleSendMoney } from './ussd/handlers/sendMoney';
 import { handleWithdraw } from './ussd/handlers/withdraw';
 import { handleDeposit } from './ussd/handlers/deposit';
@@ -206,11 +207,16 @@ export class USSDService {
         case 'language_selection':
           const { handleLanguageSelection } = await import('./ussd/handlers/language.js');
           response = await handleLanguageSelection(input, session);
+          
+          // Check if handler wants to show main menu
+          if (response.includes('__SHOW_MAIN_MENU__')) {
+            response = await handleMainMenu('', session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
+          }
           break;
         
         default:
           if (input === '' || input === '*229#') {
-            response = this.getMainMenu();
+            response = await handleMainMenu('', session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
           } else {
             response = 'Invalid selection. Please try again.';
           }
@@ -221,7 +227,8 @@ export class USSDService {
       await this.updateUSSDSession(sessionId, {
         currentMenu: session.currentMenu,
         data: session.data,
-        step: session.step
+        step: session.step,
+        language: session.language // Save language preference!
       });
 
       return {

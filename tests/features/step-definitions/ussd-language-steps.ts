@@ -52,14 +52,7 @@ When('I select {string} for Swahili', async function (option: string) {
   );
 });
 
-When('I select {string} for invalid option', async function (option: string) {
-  const input = option;
-  world.lastResponse = await world.ussdService.processUSSDRequest(
-    world.sessionId,
-    world.phoneNumber,
-    input
-  );
-});
+// Removed duplicate - already exists in ussd-integration-steps.ts
 
 When('I enter chained input {string}', async function (input: string) {
   world.lastResponse = await world.ussdService.processUSSDRequest(

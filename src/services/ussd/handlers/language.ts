@@ -37,9 +37,11 @@ export async function handleLanguageSelection(
       return continueSession(`${TranslationService.translate('language_set', 'sw')}\n\nPress 0 to return to main menu`);
     
     case '0':
-      // Go back to main menu
+      // Go back to main menu - need to import and call it
       session.currentMenu = 'main';
-      return continueSession(''); // Will trigger main menu display
+      session.step = 0;
+      // Return a marker that tells the service to show main menu
+      return continueSession('__SHOW_MAIN_MENU__');
     
     default:
       return continueSession(TranslationService.translate('select_language', session.language || 'en'));
