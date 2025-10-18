@@ -85,6 +85,7 @@ export class USSDService {
       if (updates.data) existingSession.data = { ...existingSession.data, ...updates.data };
       if (updates.step !== undefined) existingSession.step = updates.step;
       if (updates.lastActivity !== undefined) existingSession.lastActivity = updates.lastActivity;
+      if (updates.language !== undefined) existingSession.language = updates.language;
       
       // Update activity only if not explicitly set
       if (updates.lastActivity === undefined) {
@@ -97,7 +98,8 @@ export class USSDService {
         currentMenu: existingSession.currentMenu,
         data: existingSession.data,
         step: existingSession.step,
-        lastActivity: existingSession.lastActivity
+        lastActivity: existingSession.lastActivity,
+        language: existingSession.language
       };
 
       const existingDoc = await getDoc({
@@ -224,7 +226,7 @@ export class USSDService {
       }
 
       // Save updated session - handlers modify session in place
-      console.log(`💾 Saving session: menu=${session.currentMenu}, step=${session.step}`);
+      console.log(`💾 Saving session: menu=${session.currentMenu}, step=${session.step}, language=${session.language}`);
       await this.updateUSSDSession(sessionId, {
         currentMenu: session.currentMenu,
         data: session.data,
