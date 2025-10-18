@@ -444,7 +444,7 @@ Enter your 4-digit PIN:`);
       }
       
       if (usdcAmount < 1) {
-        return continueSession(`Minimum sale: $1.00 USDC\nEnter USDC amount to sell:`);
+        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: $1.00 USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
       }
       
       if (usdcAmount > userBalance) {
@@ -668,11 +668,11 @@ Enter your 4-digit PIN:`);
       const userBalance = session.data.usdcBalance || 0;
       
       if (isNaN(usdcAmount) || usdcAmount <= 0) {
-        return continueSession(`Invalid amount.\nEnter USDC amount to send:`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
       }
       
       if (usdcAmount < 0.01) {
-        return continueSession(`Minimum send: $0.01 USDC\nEnter USDC amount to send:`);
+        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: $0.01 USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
       }
       
       // Calculate transaction fee (0.0001 USDC)
@@ -680,12 +680,7 @@ Enter your 4-digit PIN:`);
       const totalRequired = usdcAmount + transactionFee;
       
       if (totalRequired > userBalance) {
-        return continueSession(`Insufficient balance.
-Amount: $${usdcAmount.toFixed(6)} USDC
-Fee: $${transactionFee.toFixed(6)} USDC
-Total needed: $${totalRequired.toFixed(6)} USDC
-Your balance: $${userBalance.toFixed(6)} USDC
-Enter USDC amount to send:`);
+        return continueSession(`${TranslationService.translate('insufficient_for_fee', lang)}\n${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC\n${TranslationService.translate('total_needed', lang)}: $${totalRequired.toFixed(6)} USDC\n${TranslationService.translate('your_balance', lang)}: $${userBalance.toFixed(6)} USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
       }
       
       session.data.usdcAmount = usdcAmount;
