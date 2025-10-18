@@ -236,7 +236,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       const amountUGX = parseFloat(currentInput);
       
       if (isNaN(amountUGX) || amountUGX <= 0) {
-        return continueSession(`Invalid amount.\nEnter amount in UGX:`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_amount', lang)} (${getSessionCurrency(session)}):`);
       }
       
       if (amountUGX < 1000) {
@@ -307,7 +307,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
       }
       
       if (selection < 1 || selection > (session.data.availableAgents?.length || 0)) {
-        return continueSession(`Invalid selection.\nChoose an agent number or 0 to cancel:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${TranslationService.translate('select_an_agent', lang)} (1-${session.data.availableAgents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -435,10 +435,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
         // Get user from DataService to get Principal ID
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession(`User not found.
-Please contact support.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
 
         // Get real USDC balance using CkUSDCService
@@ -477,9 +474,7 @@ Enter your 4-digit PIN:`);
       }
       
       if (usdcAmount > userBalance) {
-        return continueSession(`Insufficient balance.
-Your balance: $${userBalance.toFixed(2)} USDC
-Enter USDC amount to sell:`);
+        return continueSession(`${TranslationService.translate('insufficient_balance', lang)}.\n${TranslationService.translate('your_balance', lang)}: $${userBalance.toFixed(2)} USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
       }
       
       try {
@@ -524,7 +519,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         
       } catch (error) {
         console.error('Error getting agents for USDC sale:', error);
-        return endSession(TranslationService.translate('error_try_again', lang));
+        return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
       }
     }
     
@@ -566,7 +561,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
     case 4: {
       // PIN verification and process USDC sale
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       let pinCorrect = false;
@@ -582,21 +577,14 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
         // Get user information
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          // Demo mode: show mock USDC sell success
-          const usdcAmount = session.data.usdcAmount || 50;
-          const ugxAmount = (usdcAmount * 3800).toFixed(0);
-          return endSession(TranslationService.getDemoMessage('usdc_sell', lang, {
-            currency: getSessionCurrency(session),
-            amount: parseInt(ugxAmount).toLocaleString(),
-            usdc: `$${usdcAmount}`
-          }));
+          return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
         const selectedAgent = session.data.selectedAgent;
@@ -655,16 +643,12 @@ SMS sent with details.
 
 Thank you for using AfriTokeni!`);
         } else {
-          return endSession(`❌ Sale failed: ${exchangeResult.error || 'Unknown error'}
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
       } catch (error) {
         console.error('Error processing USDC sale:', error);
-        return endSession('Error processing sale. Please try again later.');
+        return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
       }
     }
     
@@ -684,7 +668,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -701,7 +685,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -710,10 +694,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
         // Get user from DataService to get Principal ID
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession(`User not found.
-Please contact support.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
 
         // Get real USDC balance using CkUSDCService
