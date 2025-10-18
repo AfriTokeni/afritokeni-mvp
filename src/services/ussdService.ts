@@ -213,6 +213,7 @@ export class USSDService {
           
           // Check if handler wants to show main menu
           if (response.includes('__SHOW_MAIN_MENU__')) {
+            console.log('🔄 Detected __SHOW_MAIN_MENU__ marker, showing main menu in language:', session.language);
             response = await handleMainMenu('', session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
           }
           break;

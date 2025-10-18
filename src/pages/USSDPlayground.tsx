@@ -72,14 +72,17 @@ const USSDPlayground: React.FC = () => {
       return result.response.replace(/^(CON |END )/, '');
     }
 
-    // Build USSD text chain
-    let newUssdText = ussdText;
-    if (ussdText === '') {
+    // For menu navigation, send just the current input, not chained
+    // Only chain if this is the initial dial (starts with *)
+    let newUssdText = trimmedCmd;
+    if (trimmedCmd.startsWith('*')) {
+      // Initial USSD dial - use as is
       newUssdText = trimmedCmd;
+      setUssdText(''); // Reset chain for menu navigation
     } else {
-      newUssdText = ussdText + '*' + trimmedCmd;
+      // Menu navigation - just send the digit
+      newUssdText = trimmedCmd;
     }
-    setUssdText(newUssdText);
     
     // Call real USSD backend
     console.log(`📱 USSD Playground: text="${newUssdText}"`);
