@@ -68,7 +68,7 @@ const USSDPlayground: React.FC = () => {
     // Handle USSD dial code
     if (trimmedCmd.toUpperCase() === '*384*22948#' || trimmedCmd === '*229#') {
       setUssdText(''); // Reset USSD chain
-      const result = await USSDService.processUSSDRequest(sessionId, phoneNumber, '');
+      const result = await USSDService.processUSSDRequest(sessionId, phoneNumber, trimmedCmd);
       return result.response.replace(/^(CON |END )/, '');
     }
 
