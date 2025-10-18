@@ -112,14 +112,7 @@ ${TranslationService.translate('please_select_option', lang)}
       return handleMainMenu('', session);
     
     default:
-      return continueSession(`Invalid option. Please try again:
-1. Send Money
-2. Check Balance
-3. Deposit
-4. Withdraw
-5. Transactions
-6. Find Agent
-0. Back to Main Menu`);
+      return continueSession(`${TranslationService.translate('invalid_option', session.language || 'en')}. ${TranslationService.translate('please_try_again', session.language || 'en')}:\n1. ${TranslationService.translate('send_money', session.language || 'en')}\n2. ${TranslationService.translate('check_balance', session.language || 'en')}\n3. ${TranslationService.translate('deposit', session.language || 'en')}\n4. ${TranslationService.translate('withdraw', session.language || 'en')}\n5. ${TranslationService.translate('transactions', session.language || 'en')}\n6. ${TranslationService.translate('find_agent', session.language || 'en')}\n0. ${TranslationService.translate('back_to_main_menu', session.language || 'en')}`);
   }
 }
 
@@ -139,25 +132,14 @@ export async function handleCheckBalance(input: string, session: USSDSession): P
       const balance = await getUserBalance(session.phoneNumber);
       
       if (balance !== null) {
-        return endSession(`Your Account Balance
-Amount: ${currency} ${balance.toLocaleString()}
-Available: ${currency} ${balance.toLocaleString()}
-
-Thank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} ${balance.toLocaleString()}\nAvailable: ${currency} ${balance.toLocaleString()}\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
       } else {
         // No balance found, assume 0
-        return endSession(`Your Account Balance
-Amount: ${currency} 0
-Available: ${currency} 0
-
-Thank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} 0\nAvailable: ${currency} 0\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
       }
     } catch (error) {
       console.error('Error retrieving balance:', error);
-      return endSession(`Error retrieving balance.
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+      return endSession(`${TranslationService.translate('error_try_again', session.language || 'en')}\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
     }
   }
   
@@ -165,7 +147,7 @@ Thank you for using AfriTokeni!`);
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', session.language || 'en')}\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', session.language || 'en')}`);
       }
       
       // Verify PIN
@@ -182,7 +164,7 @@ Thank you for using AfriTokeni!`);
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', session.language || 'en')}\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', session.language || 'en')}`);
       }
       
       // PIN is correct, get user balance
@@ -191,30 +173,19 @@ Thank you for using AfriTokeni!`);
         const balance = await getUserBalance(session.phoneNumber);
         
         if (balance !== null) {
-          return endSession(`Your Account Balance
-Amount: ${currency} ${balance.toLocaleString()}
-Available: ${currency} ${balance.toLocaleString()}
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} ${balance.toLocaleString()}\nAvailable: ${currency} ${balance.toLocaleString()}\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
         } else {
           // No balance found, assume 0
-          return endSession(`Your Account Balance
-Amount: ${currency} 0
-Available: ${currency} 0
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('your_account_balance', session.language || 'en')}\nAmount: ${currency} 0\nAvailable: ${currency} 0\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
         }
       } catch (error) {
         console.error('Error retrieving balance:', error);
-        return endSession(`Error retrieving balance.
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('error_try_again', session.language || 'en')}\n\n${TranslationService.translate('thank_you', session.language || 'en')}`);
       }
     }
     
     default:
-      return endSession('Error checking balance. Please try again.');
+      return endSession(TranslationService.translate('error_try_again', session.language || 'en'));
   }
 }
 
@@ -222,6 +193,7 @@ Thank you for using AfriTokeni!`);
  * Handle transaction history
  */
 export async function handleTransactionHistory(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   console.log(`Transaction history input: ${input}`);
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
@@ -241,10 +213,10 @@ No transactions found.
 
 To start using AfriTokeni, send money or make a deposit through an agent.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
       }
 
-      let transactionList = `Last ${transactions.length} Transactions:\n\n`;
+      let transactionList = `${TranslationService.translate('last', lang)} ${transactions.length} ${TranslationService.translate('transactions', lang)}:\n\n`;
       
       transactions.forEach((tx, index) => {
         const date = tx.createdAt.toLocaleDateString('en-GB');
@@ -289,7 +261,7 @@ Thank you for using AfriTokeni!`);
       return endSession(`Error retrieving transaction history.
 Please try again later.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
     }
   }
   
@@ -330,10 +302,10 @@ No transactions found.
 
 To start using AfriTokeni, send money or make a deposit through an agent.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         }
 
-        let transactionList = `Last ${transactions.length} Transactions:\n\n`;
+        let transactionList = `${TranslationService.translate('last', lang)} ${transactions.length} ${TranslationService.translate('transactions', lang)}:\n\n`;
         
         transactions.forEach((tx, index) => {
           const date = tx.createdAt.toLocaleDateString('en-GB');
@@ -379,7 +351,7 @@ Thank you for using AfriTokeni!`);
 
 Unable to retrieve transaction history at the moment. Please try again later.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
       }
     }
     
