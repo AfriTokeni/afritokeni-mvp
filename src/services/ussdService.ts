@@ -66,6 +66,7 @@ export class USSDService {
       session.data = data.data || {};
       session.step = data.step || 0;
       session.lastActivity = data.lastActivity || Date.now();
+      session.language = data.language; // Restore language preference!
       
       return session;
     } catch (error) {
