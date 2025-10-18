@@ -26,15 +26,15 @@ export async function handleLanguageSelection(
   switch (currentInput) {
     case '1':
       session.language = 'en';
-      return continueSession(`${TranslationService.translate('language_set', 'en')}\n\nPress 0 to return to main menu`);
+      return continueSession(`${TranslationService.translate('language_set', 'en')}\n\n${TranslationService.translate('press_zero_back', 'en')}`);
     
     case '2':
       session.language = 'lg';
-      return continueSession(`${TranslationService.translate('language_set', 'lg')}\n\nPress 0 to return to main menu`);
+      return continueSession(`${TranslationService.translate('language_set', 'lg')}\n\n${TranslationService.translate('press_zero_back', 'lg')}`);
     
     case '3':
       session.language = 'sw';
-      return continueSession(`${TranslationService.translate('language_set', 'sw')}\n\nPress 0 to return to main menu`);
+      return continueSession(`${TranslationService.translate('language_set', 'sw')}\n\n${TranslationService.translate('press_zero_back', 'sw')}`);
     
     case '0':
       // Go back to main menu - need to import and call it

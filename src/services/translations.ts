@@ -239,6 +239,11 @@ export class TranslationService {
       en: 'Language set to English',
       lg: 'Olulimi lutegekeddwa ku Luganda',
       sw: 'Lugha imewekwa kwa Kiswahili'
+    },
+    'press_zero_back': {
+      en: 'Press 0 to return to main menu',
+      lg: 'Nyiga 0 okudda ku menu enkulu',
+      sw: 'Bonyeza 0 kurudi kwa menyu kuu'
     }
   };
 
