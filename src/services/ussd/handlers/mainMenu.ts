@@ -31,7 +31,7 @@ export async function handleMainMenu(
 3. USDC (ckUSDC)
 4. DAO Governance
 5. ${TranslationService.translate('help', lang)}
-6. Language / Olulimi / Lugha`);
+6. Language Selection`);
   }
 
   console.log(`Main menu input: ${input}`);
@@ -105,7 +105,7 @@ Press 0 to return to main menu`);
 3. USDC (ckUSDC)
 4. DAO Governance
 5. ${TranslationService.translate('help', lang)}
-6. Language / Olulimi / Lugha`);
+6. Language Selection`);
     }
   }
 }

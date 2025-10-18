@@ -231,9 +231,9 @@ export class TranslationService {
     
     // Language selection
     'select_language': {
-      en: 'Select language: 1.English 2.Luganda 3.Swahili',
-      lg: 'Londa olulimi: 1.English 2.Luganda 3.Swahili',
-      sw: 'Chagua lugha: 1.English 2.Luganda 3.Swahili'
+      en: 'Select language:\n1. English\n2. Luganda\n3. Swahili',
+      lg: 'Londa olulimi:\n1. English\n2. Luganda\n3. Swahili',
+      sw: 'Chagua lugha:\n1. English\n2. Luganda\n3. Swahili'
     },
     'language_set': {
       en: 'Language set to English',
