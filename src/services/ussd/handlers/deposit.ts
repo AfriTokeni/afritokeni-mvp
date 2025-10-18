@@ -7,6 +7,7 @@ import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService } from '../../webHookServices.js';
+import { TranslationService } from '../../translations.js';
 
 /**
  * Handle deposit flow
@@ -14,13 +15,22 @@ import { WebhookDataService as DataService } from '../../webHookServices.js';
 export async function handleDeposit(input: string, session: USSDSession, sendSMS: (phone: string, msg: string) => Promise<any>): Promise<string> {
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
+  const lang = session.language || 'en';
   
   switch (session.step) {
     case 1: {
       // Step 1: Enter deposit amount
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Deposit Money\nEnter amount to deposit (${currency}):`);
+        return continueSession(`Deposit Money\nEnter amount (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
+      }
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
       }
       
       const amount = parseInt(currentInput);
@@ -75,6 +85,15 @@ Amount: ${currency} ${amount.toLocaleString()}
     
     case 2: {
       // Step 2: Agent selection
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
+      }
+      
       const agentChoice = parseInt(currentInput);
       
       if (agentChoice === 0) {
@@ -104,6 +123,15 @@ Enter your 4-digit PIN to confirm:`);
     
     case 3: {
       // Step 3: PIN verification and deposit code generation
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
+      }
+      
       if (!currentInput || currentInput.length !== 4) {
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
         
