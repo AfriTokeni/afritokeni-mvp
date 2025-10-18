@@ -10,6 +10,7 @@ import { WebhookDataService as DataService, Agent } from '../../webHookServices.
 import { CkBTCService } from '../../ckBTCService.js';
 import { CkBTCUtils } from '../../../types/ckbtc.js';
 import { verifyUserPin } from './pinManagement.js';
+import { TranslationService } from '../../translations.js';
 
 // These will be injected by the caller
 let sendSMSNotification: (phone: string, msg: string) => Promise<any>;
