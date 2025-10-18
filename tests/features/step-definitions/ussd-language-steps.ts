@@ -121,8 +121,6 @@ When('I enter chained input {string}', async function (input: string) {
 });
 
 Then('the session language should be {string}', function (expectedLanguage: Language) {
-  console.log(`🔍 Checking session language. Expected: ${expectedLanguage}, Got: ${world.ussdSession?.language}`);
-  console.log(`🔍 Full session:`, JSON.stringify(world.ussdSession, null, 2));
   expect(world.ussdSession).to.exist;
   expect(world.ussdSession?.language).to.equal(expectedLanguage);
 });
