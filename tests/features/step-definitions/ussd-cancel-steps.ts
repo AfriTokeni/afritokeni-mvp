@@ -87,6 +87,4 @@ Then('the session data should be empty', function () {
   expect(world.ussdSession?.data).to.deep.equal({});
 });
 
-Then('the session should end', function () {
-  expect(world.ussdContinueSession).to.be.false;
-});
+// Note: 'the session should end' is defined in ussd-service-steps.ts
