@@ -217,6 +217,11 @@ export class USSDService {
         
         case 'dao':
           response = await handleDAO(input, session);
+          
+          // Check if handler wants to show dao menu
+          if (response.includes('__SHOW_DAO_MENU__')) {
+            response = await handleDAO('', session);
+          }
           break;
         
         case 'dao_proposals':
