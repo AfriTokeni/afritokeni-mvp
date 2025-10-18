@@ -162,40 +162,40 @@ Thank you for using AfriTokeni!`);
         // Send SMS to sender
         await sendSMS(
           session.phoneNumber,
-          `Money sent successfully!
-Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
-To: ${recipientName} (${recipientPhone})
-Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
-Reference: ${transactionId}
-Thank you for using AfriTokeni!`
+          `${TranslationService.translate('money_sent_successfully', lang)}
+${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+${TranslationService.translate('to', lang)}: ${recipientName} (${recipientPhone})
+${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${fee.toLocaleString()}
+${TranslationService.translate('reference', lang)}: ${transactionId}
+${TranslationService.translate('thank_you', lang)}`
         );
         
         // Send SMS to recipient  
         await sendSMS(
           recipientPhone,
-          `You received money!
-Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
-From: ${senderPhone}
-Reference: ${transactionId}
-Thank you for using AfriTokeni!`
+          `${TranslationService.translate('you_received_money', lang)}
+${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+${TranslationService.translate('from', lang)}: ${senderPhone}
+${TranslationService.translate('reference', lang)}: ${transactionId}
+${TranslationService.translate('thank_you', lang)}`
         );
 
-        return endSession(`✅ Transaction Successful!
+        return endSession(`✅ ${TranslationService.translate('transaction_successful', lang)}!
 
-Sent: ${getSessionCurrency(session)} ${amount.toLocaleString()}
-To: ${recipientName}
-Phone: ${recipientPhone}
-Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
-Reference: ${transactionId}
+${TranslationService.translate('sent', lang)}: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+${TranslationService.translate('to', lang)}: ${recipientName}
+${TranslationService.translate('phone', lang)}: ${recipientPhone}
+${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${fee.toLocaleString()}
+${TranslationService.translate('reference', lang)}: ${transactionId}
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
 
       } catch (error) {
         console.error('Error processing send money transaction:', error);
-        return endSession(`❌ Transaction Failed!
-An error occurred while processing your transaction.
+        return endSession(`❌ ${TranslationService.translate('transaction_failed', lang)}!
+${TranslationService.translate('error_processing', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
       }
     }
     

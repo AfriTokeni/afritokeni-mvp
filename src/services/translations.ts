@@ -1003,6 +1003,31 @@ export class TranslationService {
       lg: 'SMS z\'okukakasa ziweereddwa',
       sw: 'Uthibitisho wa SMS umetumwa'
     },
+    'too_many_attempts': {
+      en: 'Too many incorrect PIN attempts',
+      lg: 'Okugezaako PIN embi emirundi mingi',
+      sw: 'Majaribio mengi ya PIN isiyo sahihi'
+    },
+    'attempts_remaining': {
+      en: 'attempts remaining',
+      lg: 'okugezaako okusigadde',
+      sw: 'majaribio yaliyobaki'
+    },
+    'money_sent_successfully': {
+      en: 'Money sent successfully!',
+      lg: 'Ssente ziweereddwa bulungi!',
+      sw: 'Pesa zimetumwa kwa mafanikio!'
+    },
+    'you_received_money': {
+      en: 'You received money!',
+      lg: 'Ofunye ssente!',
+      sw: 'Umepokea pesa!'
+    },
+    'reference': {
+      en: 'Reference',
+      lg: 'Refelensi',
+      sw: 'Kumbukumbu'
+    },
   };
 
   /**
