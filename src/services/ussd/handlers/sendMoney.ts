@@ -8,6 +8,7 @@ import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService } from '../../webHookServices.js';
 import { verifyUserPin } from './pinManagement.js';
+import { TranslationService } from '../../translations.js';
 
 /**
  * Handle send money flow
@@ -17,17 +18,19 @@ export async function handleSendMoney(input: string, session: USSDSession, sendS
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   
+  const lang = session.language || 'en';
+  
   switch (session.step) {
     case 0: {
       // Step 0: Enter recipient phone number
       if (!currentInput) {
-        return continueSession('Send Money\nEnter recipient phone number:\n(e.g. 256700123456)\n\nPress 0 to go back');
+        return continueSession(`${TranslationService.translate('send_money', lang)}\n${TranslationService.translate('enter_recipient_phone', lang)}\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
       
       // Validate phone number format (accepts +256XXXXXXXXX, 256XXXXXXXXX, 07XXXXXXXX, 03XXXXXXXX)
       const phoneRegex = /^(\+?256[37]\d{8}|0[37]\d{8})$/;
       if (!phoneRegex.test(currentInput)) {
-        return continueSession('Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back');
+        return continueSession(`${TranslationService.translate('invalid_phone', lang)}\n${TranslationService.translate('enter_recipient_phone', lang)}\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
       
       // Store recipient and move to amount entry

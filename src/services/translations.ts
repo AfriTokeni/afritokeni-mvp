@@ -165,6 +165,16 @@ export class TranslationService {
       lg: 'Namba ya simu si ntuufu',
       sw: 'Nambari ya simu si sahihi'
     },
+    'enter_recipient_phone': {
+      en: 'Enter recipient phone number:',
+      lg: 'Yingiza namba ya simu y\'omuntu:',
+      sw: 'Weka nambari ya simu ya mpokeaji:'
+    },
+    'phone_format_example': {
+      en: '(e.g. 256700123456)',
+      lg: '(okugeza: 256700123456)',
+      sw: '(mfano: 256700123456)'
+    },
     
     // Rate limiting
     'too_many_requests': {
