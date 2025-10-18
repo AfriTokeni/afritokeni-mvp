@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { User } from '../types/auth';
