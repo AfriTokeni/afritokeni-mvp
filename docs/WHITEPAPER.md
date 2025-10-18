@@ -19,10 +19,13 @@ AfriTokeni is a revolutionary financial inclusion platform that brings instant, 
 - **DAO Governance**: Community-owned platform with SMS voting
 
 ### Market Opportunity
-- **Target Market**: 54% unbanked adults in Uganda (14.6M people)
-- **Total Addressable Market**: $133B mobile money market growing at 25.73% annually
-- **Infrastructure**: 98% 2G coverage, 84% feature phone dominance
+- **Global Unbanked**: 1.3 billion people worldwide without bank accounts
+- **Target Demographics**: 84% feature phone users across Africa, South Asia, Latin America
+- **Market Size**: $685B global remittances (2024), $133B mobile money in Africa
+- **Infrastructure**: 3B+ feature phone users globally, 98% 2G coverage in target markets
 - **Cost Advantage**: 83% cheaper than current mobile money solutions
+
+*Source: World Bank Global Findex 2025, World Bank Migration Brief 2024*
 
 ---
 
@@ -43,14 +46,35 @@ AfriTokeni is a revolutionary financial inclusion platform that brings instant, 
 
 ## 1. Problem Statement
 
-### 1.1 Financial Exclusion in Africa
+### 1.1 Global Financial Exclusion
 
-**14.6 million Ugandans** (54% of adults) remain unbanked despite widespread mobile phone adoption. Traditional financial services fail to serve:
+**1.3 billion people worldwide** remain unbanked despite widespread mobile phone adoption. This crisis spans every emerging market:
 
+**Regional Breakdown**:
+- **Africa**: 350M unbanked (our beachhead market)
+  - Uganda: 14.6M unbanked (54% of adults)
+  - Nigeria: 38M unbanked
+  - Kenya: 8M unbanked
+- **South Asia**: 1.4B unbanked
+  - India: 190M unbanked
+  - Pakistan: 100M unbanked
+  - Bangladesh: 50M unbanked
+- **Southeast Asia**: 290M unbanked
+  - Indonesia: 95M unbanked
+  - Philippines: 34M unbanked
+  - Vietnam: 31M unbanked
+- **Latin America**: 210M unbanked
+  - Brazil: 45M unbanked
+  - Mexico: 37M unbanked
+  - Colombia: 14M unbanked
+
+**Common Barriers**:
 - **Rural populations**: Banks won't operate in remote villages
-- **Feature phone users**: 84% of Ugandans use basic phones without internet
+- **Feature phone users**: 84% use basic phones without internet (3B+ globally)
 - **Low-income individuals**: High fees (up to 13%) make small transactions unviable
-- **Cross-border workers**: Remittances cost 5-10% in fees
+- **Cross-border workers**: $685B in remittances face 5-10% fees
+
+*Source: World Bank Global Findex 2025, World Bank Migration Brief 2024*
 
 ### 1.2 Current Solutions Fall Short
 
