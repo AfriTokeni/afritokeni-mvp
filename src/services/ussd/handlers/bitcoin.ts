@@ -226,18 +226,27 @@ Thank you for using AfriTokeni!`);
 async function handleBTCBuy(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
+  const lang = session.language || 'en';
   
   switch (session.step) {
     case 1: {
       // Enter amount to spend
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:`);
+        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('press_zero_back', lang)}`);
+      }
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        session.data = {};
+        return continueSession('__SHOW_BITCOIN_MENU__');
       }
       
       const ugxAmount = parseInt(currentInput);
       if (isNaN(ugxAmount) || ugxAmount <= 0) {
-        return continueSession(`Invalid amount.\nEnter ${currency} amount to spend:`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
       
       if (ugxAmount < 10000) {
@@ -343,11 +352,20 @@ Amount: ${currency} ${ugxAmount.toLocaleString()}
 Fee: ${currency} ${fee.toLocaleString()}
 Receive: ₿${btcAmount.toFixed(8)} BTC
 
-Enter your PIN to confirm:`);
+Enter your PIN to confirm:
+${TranslationService.translate('press_zero_back', lang)}`);
     }
     
     case 3: {
       // PIN verification and process Bitcoin purchase
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        session.data = {};
+        return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
+      }
       if (!/^\d{4}$/.test(currentInput)) {
         return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
       }

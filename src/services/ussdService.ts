@@ -200,6 +200,11 @@ export class USSDService {
         
         case 'bitcoin':
           response = await handleBitcoin(input, session);
+          
+          // Check if handler wants to show bitcoin menu
+          if (response.includes('__SHOW_BITCOIN_MENU__')) {
+            response = await handleBitcoin('', session);
+          }
           break;
         
         case 'btc_balance':
