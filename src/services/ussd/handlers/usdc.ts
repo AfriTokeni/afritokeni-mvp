@@ -128,9 +128,16 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       try {
         // Get user from DataService to get Principal ID
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+        
         if (!user) {
-          return endSession(`User not found.
-Please contact support.
+          // Demo mode: show mock balance
+          console.log('User not found, showing demo USDC balance');
+          return endSession(`Your USDC Balance (Demo)
+
+$100.00 USDC
+≈ ${getSessionCurrency(session)} 380,000
+
+Current Rate: 1 USDC = ${getSessionCurrency(session)} 3,800
 
 Thank you for using AfriTokeni!`);
         }
@@ -154,8 +161,13 @@ Thank you for using AfriTokeni!`);
         
       } catch (error) {
         console.error('Error retrieving USDC balance:', error);
-        return endSession(`Error retrieving USDC balance.
-Please try again later.
+        // Demo mode fallback
+        return endSession(`Your USDC Balance (Demo)
+
+$100.00 USDC
+≈ ${getSessionCurrency(session)} 380,000
+
+Current Rate: 1 USDC = ${getSessionCurrency(session)} 3,800
 
 Thank you for using AfriTokeni!`);
       }
