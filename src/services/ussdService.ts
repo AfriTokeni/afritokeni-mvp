@@ -239,6 +239,11 @@ export class USSDService {
           if (response.includes('__SHOW_BITCOIN_MENU__')) {
             response = await handleBitcoin('', session);
           }
+          
+          // Check if handler wants to show main menu
+          if (response.includes('__SHOW_MAIN_MENU__')) {
+            response = await handleMainMenu('', session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
+          }
           break;
         
         case 'btc_balance':
