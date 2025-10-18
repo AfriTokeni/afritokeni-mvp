@@ -1103,6 +1103,31 @@ export class TranslationService {
       lg: 'Yingiza erinnya ly\'omu maaso n\'ery\'oluvannyuma nga biriko ekifo wakati',
       sw: 'Weka jina la kwanza na la mwisho likitengwa na nafasi'
     },
+    'coming_soon': {
+      en: 'coming soon',
+      lg: 'ejja mu biseera ebitali bya wala',
+      sw: 'inakuja hivi karibuni'
+    },
+    'vote_on_proposals': {
+      en: 'Vote on proposals',
+      lg: 'Londa ku byogerwa',
+      sw: 'Piga kura kwenye mapendekezo'
+    },
+    'for_support': {
+      en: 'For support',
+      lg: 'Okufuna obuyambi',
+      sw: 'Kwa msaada'
+    },
+    'call': {
+      en: 'Call',
+      lg: 'Kuba',
+      sw: 'Piga simu'
+    },
+    'visit': {
+      en: 'Visit',
+      lg: 'Kyalira',
+      sw: 'Tembelea'
+    },
   };
 
   /**

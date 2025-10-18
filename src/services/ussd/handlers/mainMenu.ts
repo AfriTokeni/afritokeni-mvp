@@ -67,21 +67,12 @@ export async function handleMainMenu(
         // For chained input, pass full input; otherwise pass empty to show menu
         return handleDAO(isChainedInput ? input : '', session);
       }
-      return continueSession(`DAO Governance coming soon!\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('dao_governance', lang)} ${TranslationService.translate('coming_soon', lang)}!\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '5': {
       const currency = getSessionCurrency(session);
       const lang = session.language || 'en';
-      return continueSession(`${TranslationService.translate('help', lang)}
-
-Local Currency: ${TranslationService.translate('send_money', lang)}, ${TranslationService.translate('withdraw', lang)}
-Bitcoin: ${TranslationService.translate('buy_bitcoin', lang)}, ${TranslationService.translate('sell_bitcoin', lang)}
-DAO: Vote on proposals
-
-For support: Call +256-XXX-XXXX
-Visit: afritokeni.com
-
-${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('help', lang)}\n\n${TranslationService.translate('local_currency', lang)}: ${TranslationService.translate('send_money', lang)}, ${TranslationService.translate('withdraw', lang)}\n${TranslationService.translate('bitcoin', lang)}: ${TranslationService.translate('buy_bitcoin', lang)}, ${TranslationService.translate('sell_bitcoin', lang)}\n${TranslationService.translate('dao', lang)}: ${TranslationService.translate('vote_on_proposals', lang)}\n\n${TranslationService.translate('for_support', lang)}: ${TranslationService.translate('call', lang)} +256-XXX-XXXX\n${TranslationService.translate('visit', lang)}: ${TranslationService.translate('website', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case '6': {
