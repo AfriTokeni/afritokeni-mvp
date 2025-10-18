@@ -26,6 +26,8 @@ export async function handleMainMenu(
   if (!input) {
     return continueSession(`${TranslationService.translate('welcome', lang)}
 
+🔐 DEMO MODE - PIN: 1234
+
 1. ${TranslationService.translate('local_currency', lang)} (${currency})
 2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)
 3. ${TranslationService.translate('usdc', lang)} (ckUSDC)
