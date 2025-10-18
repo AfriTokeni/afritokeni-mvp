@@ -281,7 +281,7 @@ Enter your 4-digit PIN to confirm:`);
   // Step 4: PIN verification and vote submission
   if (session.step === 4) {
     if (!/^\d{4}$/.test(sanitized_input)) {
-      return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     // Verify PIN (verifyUserPin adds + prefix internally)
@@ -297,7 +297,7 @@ Enter your 4-digit PIN to confirm:`);
     }
     
     if (!pinCorrect) {
-      return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     // Record vote

@@ -216,13 +216,13 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -408,13 +408,13 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -563,12 +563,12 @@ Enter your PIN to confirm:`);
     case 4: {
       // PIN verification and process USDC sale
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -662,13 +662,13 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -802,12 +802,12 @@ Enter your PIN to confirm:`);
     case 4: {
       // Final PIN verification and process transfer
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {

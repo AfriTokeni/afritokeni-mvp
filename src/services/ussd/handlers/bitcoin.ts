@@ -114,13 +114,13 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Get Bitcoin balance using CkBTCService
@@ -176,13 +176,13 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
   if (session.step === 1) {
     // PIN verification step
     if (!/^\d{4}$/.test(sanitized_input)) {
-      return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+      return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     // Verify PIN
     const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
     if (!pinCorrect) {
-      return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+      return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     session.step = 2;
@@ -367,12 +367,12 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
       }
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -710,12 +710,12 @@ Enter your PIN to confirm:`);
     case 4: {
       // PIN verification and process Bitcoin sale
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -824,7 +824,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
       // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // PIN is correct, proceed to get balance and show send options
@@ -994,12 +994,12 @@ Enter your PIN to confirm:`);
     case 4: {
       // Final PIN verification and send transaction
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Process the BTC send transaction

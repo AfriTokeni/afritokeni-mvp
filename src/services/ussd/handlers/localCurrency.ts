@@ -163,13 +163,13 @@ Thank you for using AfriTokeni!`);
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // PIN is correct, get user balance
@@ -284,13 +284,13 @@ Thank you for using AfriTokeni!`);
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession('Invalid PIN format.\nEnter your 4-digit PIN:');
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
       const pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
       if (!pinCorrect) {
-        return continueSession('Incorrect PIN.\nEnter your 4-digit PIN:');
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // PIN is correct, get transaction history
