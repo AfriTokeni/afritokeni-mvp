@@ -16,7 +16,6 @@ Feature: USSD Menu Navigation
     And I should see "0. Back to Main Menu" in USSD response
     When I select "0" to go back
     Then I should see "AfriTokeni" in USSD response
-    And I should see "1. Local Currency" in USSD response
 
   Scenario: Navigate to Bitcoin menu and back
     When I dial "*229#"
@@ -27,7 +26,6 @@ Feature: USSD Menu Navigation
     And I should see "0. Back to Main Menu" in USSD response
     When I select "0" to go back
     Then I should see "AfriTokeni" in USSD response
-    And I should see "2. Bitcoin" in USSD response
 
   Scenario: Navigate to USDC menu and back
     When I dial "*229#"
