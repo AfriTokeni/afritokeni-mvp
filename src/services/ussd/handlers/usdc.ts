@@ -303,7 +303,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
       const selection = parseInt(currentInput);
       
       if (selection === 0) {
-        return endSession('USDC purchase cancelled.\nThank you for using AfriTokeni!');
+        return endSession(`${TranslationService.translate('transaction_cancelled', lang)}.\n${TranslationService.translate('thank_you', lang)}`);
       }
       
       if (selection < 1 || selection > (session.data.availableAgents?.length || 0)) {
@@ -356,18 +356,14 @@ ${TranslationService.translate('select_an_agent', lang)}:
             // Continue even if SMS fails
           }
           
-          return endSession(`✅ ${TranslationService.translate('purchase_initiated', lang)}\n\n${TranslationService.translate('purchase_code', lang)}: ${purchaseCode}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n${TranslationService.translate('you_will_receive', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('amount_to_pay', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n\n${TranslationService.translate('give_code_and_payment', lang)}.\n\n${TranslationService.translate('sms_sent', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
+          return endSession(`${TranslationService.translate('purchase_initiated', lang)}\n\n${TranslationService.translate('purchase_code', lang)}: ${purchaseCode}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n${TranslationService.translate('you_will_receive', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('amount_to_pay', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n\n${TranslationService.translate('give_code_and_payment', lang)}.\n\n${TranslationService.translate('sms_sent', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         } else {
-          return endSession(`❌ Purchase failed: ${exchangeResult.error || 'Unknown error'}
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('purchase', lang)} ${TranslationService.translate('failed', lang)}: ${exchangeResult.error || TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('please_try_again_later', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
       } catch (error) {
         console.error('Error processing USDC purchase:', error);
-        return endSession('Error processing purchase. Please try again later.');
+        return endSession(`${TranslationService.translate('error_processing_purchase', lang)}.\n\n${TranslationService.translate('please_try_again_later', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
     }
     
@@ -444,7 +440,7 @@ Enter your 4-digit PIN:`);
       const userBalance = session.data.usdcBalance || 0;
       
       if (isNaN(usdcAmount) || usdcAmount <= 0) {
-        return continueSession(`Invalid amount.\nEnter USDC amount to sell:`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
       }
       
       if (usdcAmount < 1) {
