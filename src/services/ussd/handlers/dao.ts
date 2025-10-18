@@ -243,16 +243,9 @@ ${TranslationService.translate('press_zero_back', lang)}`);
   
   // Step 3: Enter voting amount
   if (session.step === 3) {
-    // Handle cancel
-    if (sanitized_input === '0') {
-      session.step = 0;
-      session.currentMenu = 'dao';
-      session.data = {};
-      return continueSession('__SHOW_DAO_MENU__');
-    }
-    
     const amount = parseInt(sanitized_input);
     
+    // Validate amount first (0 is invalid, not cancel)
     if (isNaN(amount) || amount < 1) {
       return continueSession(`Invalid amount.
 Minimum: 1 AFRI
