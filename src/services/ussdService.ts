@@ -221,6 +221,15 @@ export class USSDService {
           response = await handleBTCRate(input, session);
           break;
         
+        case 'usdc':
+          response = await handleUSDC(input, session);
+          
+          // Check if handler wants to show usdc menu
+          if (response.includes('__SHOW_USDC_MENU__')) {
+            response = await handleUSDC('', session);
+          }
+          break;
+        
         case 'dao':
           response = await handleDAO(input, session);
           
