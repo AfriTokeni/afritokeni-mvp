@@ -6,6 +6,8 @@
 import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
+import { TranslationService } from '../../translations.js';
+import { handleLanguageSelection } from './language.js';
 
 /**
  * Handle main menu - top-level USSD menu
@@ -19,14 +21,17 @@ export async function handleMainMenu(
   handleDAO?: any
 ): Promise<string> {
   const currency = getSessionCurrency(session);
+  const lang = session.language || 'en';
+  
   if (!input) {
-    return continueSession(`Welcome to AfriTokeni USSD Service
-Please select an option:
+    return continueSession(`${TranslationService.translate('welcome', lang)}
+
 1. Local Currency (${currency})
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
 4. DAO Governance
-5. Help`);
+5. ${TranslationService.translate('help', lang)}
+6. Language / Olulimi / Lugha`);
   }
 
   console.log(`Main menu input: ${input}`);
@@ -66,17 +71,23 @@ Please select an option:
     
     case '5': {
       const currency = getSessionCurrency(session);
-      return continueSession(`AfriTokeni Help
+      const lang = session.language || 'en';
+      return continueSession(`${TranslationService.translate('help', lang)}
 
-Local Currency: Send, deposit, withdraw ${currency}
-Bitcoin: Buy, sell, send ckBTC
-USDC: Buy, sell, send USDC stablecoin
-DAO: Vote on governance proposals
+Local Currency: ${TranslationService.translate('send_money', lang)}, ${TranslationService.translate('withdraw', lang)}
+Bitcoin: ${TranslationService.translate('buy_bitcoin', lang)}, ${TranslationService.translate('sell_bitcoin', lang)}
+DAO: Vote on proposals
 
 For support: Call +256-XXX-XXXX
 Visit: afritokeni.com
 
 Press 0 to return to main menu`);
+    }
+    
+    case '6': {
+      session.currentMenu = 'language_selection';
+      session.step = 0;
+      return handleLanguageSelection('', session);
     }
     
     case '0': {
@@ -86,12 +97,15 @@ Press 0 to return to main menu`);
     
     default: {
       const currency = getSessionCurrency(session);
-      return continueSession(`Invalid option. Please try again:
+      const lang = session.language || 'en';
+      return continueSession(`${TranslationService.translate('error', lang)}
+
 1. Local Currency (${currency})
 2. Bitcoin (ckBTC)
 3. USDC (ckUSDC)
 4. DAO Governance
-5. Help`);
+5. ${TranslationService.translate('help', lang)}
+6. Language / Olulimi / Lugha`);
     }
   }
 }

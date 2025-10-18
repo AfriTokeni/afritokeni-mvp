@@ -203,6 +203,11 @@ export class USSDService {
           response = await handleDAO(input, session);
           break;
         
+        case 'language_selection':
+          const { handleLanguageSelection } = await import('./ussd/handlers/language.js');
+          response = await handleLanguageSelection(input, session);
+          break;
+        
         default:
           if (input === '' || input === '*229#') {
             response = this.getMainMenu();

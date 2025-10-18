@@ -13,6 +13,7 @@ export { handleDeposit } from './deposit.js';
 export { handleFindAgent } from './agents.js';
 export { handleBitcoin, handleBTCBalance, handleBTCRate, handleBTCBuy, handleBTCSell, handleBTCSend } from './bitcoin.js';
 export { handleDAO } from './dao.js';
+export { handleLanguageSelection } from './language.js';
 export * from './usdc.js';
 
 // Export init functions
