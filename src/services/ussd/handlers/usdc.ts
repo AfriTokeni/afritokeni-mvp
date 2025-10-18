@@ -207,7 +207,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -224,7 +224,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -241,7 +241,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       
       if (amountUGX < 1000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Minimum purchase: ${currency} 1,000\nEnter amount in ${currency}:`);
+        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: ${currency} 1,000\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
       
       // Check user balance first
@@ -345,15 +345,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
           const usdcAmount = exchangeResult.ckusdcAmount;
           
           // Send SMS with purchase details and code
-          const smsMessage = `AfriTokeni USDC Purchase
-Code: ${purchaseCode}
-Amount: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
-USDC to receive: $${usdcAmount.toFixed(6)}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-Transaction ID: ${exchangeResult.transactionId}
-
-Give this code and payment to the agent to complete your USDC purchase.`;
+          const smsMessage = `AfriTokeni USDC ${TranslationService.translate('purchase', lang)}\n${TranslationService.translate('code', lang)}: ${purchaseCode}\n${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\nUSDC ${TranslationService.translate('to_receive', lang)}: $${usdcAmount.toFixed(6)}\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n\n${TranslationService.translate('give_code_and_payment', lang)}.`;
 
           console.log(`Sending USDC purchase SMS to ${session.phoneNumber}`);
 
@@ -364,21 +356,7 @@ Give this code and payment to the agent to complete your USDC purchase.`;
             // Continue even if SMS fails
           }
           
-          return endSession(`✅ USDC Purchase Initiated!
-
-Purchase Code: ${purchaseCode}
-Transaction ID: ${exchangeResult.transactionId}
-You will receive: $${usdcAmount.toFixed(6)} USDC
-Amount to pay: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
-
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-
-Give the code ${purchaseCode} and payment to the agent to complete your purchase.
-
-SMS sent with details.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`✅ ${TranslationService.translate('purchase_initiated', lang)}\n\n${TranslationService.translate('purchase_code', lang)}: ${purchaseCode}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n${TranslationService.translate('you_will_receive', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('amount_to_pay', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n\n${TranslationService.translate('give_code_and_payment', lang)}.\n\n${TranslationService.translate('sms_sent', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         } else {
           return endSession(`❌ Purchase failed: ${exchangeResult.error || 'Unknown error'}
 
@@ -409,7 +387,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -426,7 +404,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -546,22 +524,13 @@ ${TranslationService.translate('select_an_agent', lang)}:
       const ugxNet = session.data.ugxNet || 0;
       const fee = session.data.fee || 0;
       
-      return continueSession(`Selected Agent:
-${selectedAgent.businessName}
-${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
-
-Sale Details:
-Sell: $${usdcAmount.toFixed(6)} USDC
-Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
-You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
-
-Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('selected_agent', lang)}:\n${selectedAgent.businessName}\n${selectedAgent.location?.city || TranslationService.translate('location', lang)}, ${selectedAgent.location?.address || ''}\n\n${TranslationService.translate('sale_quote', lang)}:\n${TranslationService.translate('sell', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('you_will_receive', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}\n\n${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 4: {
       // PIN verification and process USDC sale
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       let pinCorrect = false;
@@ -577,7 +546,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -586,7 +555,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         if (!user) {
           return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
-        
+
         const selectedAgent = session.data.selectedAgent;
         const usdcAmount = session.data.usdcSellAmount || 0;
         
@@ -608,15 +577,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
           const ugxAmount = exchangeResult.localCurrencyAmount || 0;
           
           // Send SMS with sale details and code
-          const smsMessage = `AfriTokeni USDC Sale
-Code: ${saleCode}
-USDC to sell: $${usdcAmount.toFixed(6)}
-You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-Transaction ID: ${exchangeResult.transactionId}
-
-Give this code to the agent to complete your USDC sale and collect cash.`;
+          const smsMessage = `AfriTokeni USDC ${TranslationService.translate('sell', lang)}\n${TranslationService.translate('code', lang)}: ${saleCode}\nUSDC ${TranslationService.translate('to_sell', lang)}: $${usdcAmount.toFixed(6)}\n${TranslationService.translate('you_will_receive', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n\n${TranslationService.translate('give_code_to_agent', lang)}.`;
 
           console.log(`Sending USDC sale SMS to ${session.phoneNumber}`);
 
@@ -627,21 +588,7 @@ Give this code to the agent to complete your USDC sale and collect cash.`;
             // Continue even if SMS fails
           }
           
-          return endSession(`✅ USDC Sale Initiated!
-
-Sale Code: ${saleCode}
-Transaction ID: ${exchangeResult.transactionId}
-Selling: $${usdcAmount.toFixed(6)} USDC
-You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
-
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-
-Give the code ${saleCode} to the agent to complete your sale and collect cash.
-
-SMS sent with details.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`✅ ${TranslationService.translate('sale_initiated', lang)}\n\n${TranslationService.translate('sale_code', lang)}: ${saleCode}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n${TranslationService.translate('selling', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('you_will_receive', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n\n${TranslationService.translate('give_code_to_agent', lang)}.\n\n${TranslationService.translate('sms_sent', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         } else {
           return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
@@ -668,7 +615,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -685,7 +632,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
