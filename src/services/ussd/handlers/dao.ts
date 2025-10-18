@@ -122,7 +122,7 @@ async function handleViewProposals(input: string, session: USSDSession): Promise
     session.data.proposals = proposals;
     session.step = 1;
     
-    let response = `${TranslationService.translate('view_proposals', lang)}\n\n`;
+    let response = `${TranslationService.translate('active_proposals', lang)}\n\n`;
     proposals.forEach((prop, index) => {
       response += `${index + 1}. ${prop.title}\n`;
     });

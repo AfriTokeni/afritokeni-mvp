@@ -629,6 +629,11 @@ export class TranslationService {
       lg: 'Laba Ebirowoozo',
       sw: 'Angalia Mapendekezo'
     },
+    'active_proposals': {
+      en: 'Active Proposals',
+      lg: 'Ebirowoozo Ebikola',
+      sw: 'Mapendekezo Yanayofanya Kazi'
+    },
     'my_voting_power': {
       en: 'My Voting Power',
       lg: 'Amaanyi Gange ag\'Okulonda',
