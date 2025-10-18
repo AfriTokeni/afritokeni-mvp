@@ -47,7 +47,7 @@ Feature: USSD Error Handling
     Given I have an expired USSD session
     When I try to continue the session
     Then I should see "Session expired" in USSD response
-    And I should see "Please dial *229# again" in USSD response
+    And I should see "Please dial *384*22948# again" in USSD response
 
   Scenario: Maximum amount exceeded
     Given I am in send money menu

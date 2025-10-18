@@ -156,9 +156,10 @@ export class USSDService {
 
       const input = text.trim();
       
-      // RESET SESSION: If user dials the USSD code, reset to main menu regardless of current state
+      // RESET SESSION: If user explicitly dials the USSD code, reset to main menu regardless of current state
       // This allows starting fresh from anywhere in the flow
-      if (input === '*229#' || input === '*384*22948#' || input === '') {
+      // Note: Empty input is NOT a reset - it's used to show submenus
+      if (input === '*229#' || input === '*384*22948#') {
         console.log('🔄 User dialed USSD code - resetting session to main menu');
         await this.updateUSSDSession(sessionId, {
           currentMenu: 'main',
@@ -166,8 +167,9 @@ export class USSDService {
           data: {}
         });
         // Return main menu
+        const lang = session.language || 'en';
         return {
-          response: 'CON ' + await this.getMainMenu(),
+          response: 'CON ' + await this.getMainMenu(lang),
           continueSession: true
         };
       }
@@ -445,15 +447,16 @@ export class USSDService {
     }
   }
 
-  private static async getMainMenu(lang: 'en' | 'lg' | 'sw' = 'en'): Promise<string> {
+  private static async getMainMenu(lang?: 'en' | 'lg' | 'sw'): Promise<string> {
     const { TranslationService } = await import('./translations.js');
-    return `${TranslationService.translate('welcome', lang)}
+    const language = lang || 'en';
+    return `${TranslationService.translate('welcome', language)}
 
-1. ${TranslationService.translate('local_currency', lang)}
-2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)
-3. ${TranslationService.translate('usdc', lang)} (ckUSDC)
-4. ${TranslationService.translate('dao_governance', lang)}
-5. ${TranslationService.translate('help', lang)}
+1. ${TranslationService.translate('local_currency', language)}
+2. ${TranslationService.translate('bitcoin', language)} (ckBTC)
+3. ${TranslationService.translate('usdc', language)} (ckUSDC)
+4. ${TranslationService.translate('dao_governance', language)}
+5. ${TranslationService.translate('help', language)}
 6. Language Selection`;
   }
 }
