@@ -63,7 +63,7 @@ Please select an option:
         return await handleBTCBalance(input, session);
       }
       console.log(`⏸️ Requesting PIN from user`);
-      return continueSession(`Check Balance\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Check Balance\nEnter your 4-digit PIN:`);
     
     case '2':
       session.currentMenu = 'btc_rate';
@@ -72,13 +72,13 @@ Please select an option:
       if (session.data.pinVerified) {
         return await handleBTCRate('', session);
       }
-      return continueSession(`Bitcoin Rate\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Bitcoin Rate\nEnter your 4-digit PIN:`);
     
     case '3':
       session.currentMenu = 'btc_buy';
       session.step = 1;
       const currency = getSessionCurrency(session);
-      return continueSession(`Buy Bitcoin\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Buy Bitcoin\nEnter ${currency} amount to spend:`);
     
     case '4':
       session.currentMenu = 'btc_sell';
@@ -88,7 +88,7 @@ Please select an option:
     case '5':
       session.currentMenu = 'btc_send';
       session.step = 1;
-      return continueSession(`Send Bitcoin\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Send Bitcoin\nEnter your 4-digit PIN:`);
     
     case '0':
       session.currentMenu = 'main';
@@ -236,7 +236,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       // Enter amount to spend
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:`);
       }
       
       // Handle cancel
@@ -249,11 +249,11 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       
       const ugxAmount = parseInt(currentInput);
       if (isNaN(ugxAmount) || ugxAmount <= 0) {
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter ${currency} amount to spend:`);
       }
       
       if (ugxAmount < 10000) {
-        return continueSession(`Minimum purchase: ${currency} 10,000\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Minimum purchase: ${currency} 10,000\nEnter ${currency} amount to spend:`);
       }
       
       // Check user balance first
@@ -524,11 +524,11 @@ Choose amount type:
         session.data.amountType = 'ugx';
         session.step = 2;
         const currency = getSessionCurrency(session);
-        return continueSession(`Enter ${currency} amount to receive (min: ${currency} 1,000):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Enter ${currency} amount to receive (min: ${currency} 1,000):`);
       } else if (currentInput === '2') {
         session.data.amountType = 'btc';
         session.step = 2;
-        return continueSession(`Enter BTC amount to sell (min: ₿0.00001):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Enter BTC amount to sell (min: ₿0.00001):`);
       } else if (currentInput === '0') {
         session.currentMenu = 'bitcoin';
         session.step = 0;
@@ -554,11 +554,11 @@ Choose amount type:
         const currency = getSessionCurrency(session);
         ugxAmount = parseFloat(currentInput);
         if (isNaN(ugxAmount) || ugxAmount <= 0) {
-          return continueSession(`Invalid amount.\nEnter ${currency} amount to receive (min: ${currency} 1,000):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`Invalid amount.\nEnter ${currency} amount to receive (min: ${currency} 1,000):`);
         }
         
         if (ugxAmount < 1000) {
-          return continueSession(`Minimum sale: ${currency} 1,000\nEnter ${currency} amount to receive:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`Minimum sale: ${currency} 1,000\nEnter ${currency} amount to receive:`);
         }
         
         // Get exchange rate and calculate BTC amount (before fees)
@@ -574,11 +574,11 @@ Choose amount type:
         // User entered BTC amount directly
         btcAmount = parseFloat(currentInput);
         if (isNaN(btcAmount) || btcAmount <= 0) {
-          return continueSession(`Invalid amount.\nEnter BTC amount to sell (min: ₿0.00001):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`Invalid amount.\nEnter BTC amount to sell (min: ₿0.00001):`);
         }
         
         if (btcAmount < 0.00001) {
-          return continueSession(`Minimum sale: ₿0.00001 BTC\nEnter BTC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`Minimum sale: ₿0.00001 BTC\nEnter BTC amount to sell:`);
         }
         
         // Calculate UGX amount
@@ -610,7 +610,7 @@ Your balance: ₿${balance.balanceBTC} BTC
 
 Required: ₿${btcAmount.toFixed(8)} BTC
 
-Enter a smaller amount:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter a smaller amount:`);
         }
         
       } catch (error) {
@@ -821,7 +821,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
       }
       
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:`);
       }
       
       // Verify PIN
@@ -936,11 +936,11 @@ Enter BTC amount to send:
       const btcAmount = parseFloat(currentInput);
       
       if (isNaN(btcAmount) || btcAmount <= 0) {
-        return continueSession(`Invalid amount.\nEnter BTC amount to send:\n(Min: ₿0.00001)\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid amount.\nEnter BTC amount to send:\n(Min: ₿0.00001)`);
       }
       
       if (btcAmount < 0.00001) {
-        return continueSession(`Minimum send: ₿0.00001 BTC\nEnter BTC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Minimum send: ₿0.00001 BTC\nEnter BTC amount to send:`);
       }
       
       const userBalance = session.data.userBalance;
@@ -965,7 +965,7 @@ Network fee: ₿${networkFee.toFixed(8)} BTC
 Total needed: ₿${totalBTC.toFixed(8)} BTC
 Your balance: ₿${userBalance.balanceBTC} BTC
 
-Enter smaller amount:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter smaller amount:`);
         }
         
         session.data.sendAmount = btcAmount;
@@ -990,7 +990,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         
       } catch (error) {
         console.error('Error calculating send details:', error);
-        return continueSession(`Error calculating fees. Please try again.\nEnter BTC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Error calculating fees. Please try again.\nEnter BTC amount to send:`);
       }
     }
     

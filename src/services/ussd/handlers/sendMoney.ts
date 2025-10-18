@@ -50,7 +50,7 @@ export async function handleSendMoney(
       session.data.recipientPhone = currentInput;
       session.step = 1;
       const currency = getSessionCurrency(session);
-      return continueSession(`Enter amount to send (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Enter amount to send (${currency}):`);
     }
     
     case 1: {
@@ -67,7 +67,7 @@ export async function handleSendMoney(
       const amount = parseFloat(currentInput);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount to send (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount to send (${currency}):`);
       }
 
       // Calculate fee (1% of amount)
@@ -127,7 +127,7 @@ Thank you for using AfriTokeni!`);
         }
         
         return continueSession(`Incorrect PIN. ${3 - session.data.pinAttempts} attempts remaining.
-Enter your PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter your PIN:`);
       }
 
       // PIN is correct, process the transaction
@@ -214,6 +214,6 @@ Thank you for using AfriTokeni!`);
       
       const currency = getSessionCurrency(session);
       session.step = 1;
-      return continueSession(`Enter amount to send (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Enter amount to send (${currency}):`);
   }
 }

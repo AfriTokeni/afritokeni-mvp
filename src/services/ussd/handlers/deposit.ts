@@ -22,7 +22,7 @@ export async function handleDeposit(input: string, session: USSDSession, sendSMS
       // Step 1: Enter deposit amount
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Deposit Money\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Deposit Money\nEnter amount (${currency}):`);
       }
       
       // Handle cancel
@@ -35,15 +35,15 @@ export async function handleDeposit(input: string, session: USSDSession, sendSMS
       
       const amount = parseInt(currentInput);
       if (isNaN(amount) || amount <= 0) {
-        return continueSession(`Invalid amount.\nEnter amount to deposit (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid amount.\nEnter amount to deposit (${currency}):`);
       }
       
       if (amount < 1000) {
-        return continueSession(`Minimum deposit: ${currency} 1,000\nEnter amount to deposit (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Minimum deposit: ${currency} 1,000\nEnter amount to deposit (${currency}):`);
       }
       
       if (amount > 5000000) {
-        return continueSession(`Maximum deposit: ${currency} 5,000,000\nEnter amount to deposit (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Maximum deposit: ${currency} 5,000,000\nEnter amount to deposit (${currency}):`);
       }
 
       session.data.depositAmount = amount;
@@ -118,7 +118,7 @@ ${selectedAgent.location.city}, ${selectedAgent.location.address}
 
 Deposit Amount: ${currency} ${depositAmount.toLocaleString()}
 
-Enter your 4-digit PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter your 4-digit PIN to confirm:`);
     }
     
     case 3: {
@@ -140,7 +140,7 @@ Enter your 4-digit PIN to confirm:\n\n${TranslationService.translate('back_or_me
         }
         
         return continueSession(`Invalid PIN format. Enter 4-digit PIN:
-Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Attempts remaining: ${3 - session.data.pinAttempts}`);
       }
       
       console.log(`Verifying PIN for deposit: ${session.phoneNumber}`);
@@ -155,7 +155,7 @@ Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.tran
           }
           
           return continueSession(`Incorrect PIN. Try again:
-Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Attempts remaining: ${3 - session.data.pinAttempts}`);
         }
         
         // Generate deposit code with DEP- prefix

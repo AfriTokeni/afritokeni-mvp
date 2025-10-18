@@ -43,7 +43,7 @@ Please select an option:
     case '1':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
-      return continueSession(`Check Balance\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Check Balance\nEnter your 4-digit PIN:`);
     
     case '2':
       // Rate check doesn't need PIN - just show the rate
@@ -52,17 +52,17 @@ Please select an option:
     case '3':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
-      return continueSession(`Buy USDC\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Buy USDC\nEnter your 4-digit PIN:`);
     
     case '4':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
-      return continueSession(`Sell USDC\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Sell USDC\nEnter your 4-digit PIN:`);
     
     case '5':
       session.currentMenu = 'usdc_send';
       session.step = 1;
-      return continueSession(`Send USDC\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Send USDC\nEnter your 4-digit PIN:`);
     
     case '0':
       session.currentMenu = 'main';
@@ -103,7 +103,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:`);
       }
       
       // Verify PIN with demo fallback
@@ -121,7 +121,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       }
       
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:`);
       }
       
       // Get USDC balance using real CkUSDCService
@@ -227,7 +227,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       }
       
       session.step = 2;
-      return continueSession(`Buy USDC\nEnter amount in UGX:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Buy USDC\nEnter amount in UGX:`);
     }
     
     case 2: {
@@ -235,12 +235,12 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       const amountUGX = parseFloat(currentInput);
       
       if (isNaN(amountUGX) || amountUGX <= 0) {
-        return continueSession(`Invalid amount.\nEnter amount in UGX:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid amount.\nEnter amount in UGX:`);
       }
       
       if (amountUGX < 1000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Minimum purchase: ${currency} 1,000\nEnter amount in ${currency}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Minimum purchase: ${currency} 1,000\nEnter amount in ${currency}:`);
       }
       
       // Check user balance first
@@ -449,7 +449,7 @@ Enter amount to sell (USDC):
         return continueSession(`Error getting balance.
 Please try again later.
 
-Enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter your 4-digit PIN:`);
       }
     }
     
@@ -459,17 +459,17 @@ Enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}
       const userBalance = session.data.usdcBalance || 0;
       
       if (isNaN(usdcAmount) || usdcAmount <= 0) {
-        return continueSession(`Invalid amount.\nEnter USDC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid amount.\nEnter USDC amount to sell:`);
       }
       
       if (usdcAmount < 1) {
-        return continueSession(`Minimum sale: $1.00 USDC\nEnter USDC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Minimum sale: $1.00 USDC\nEnter USDC amount to sell:`);
       }
       
       if (usdcAmount > userBalance) {
         return continueSession(`Insufficient balance.
 Your balance: $${userBalance.toFixed(2)} USDC
-Enter USDC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter USDC amount to sell:`);
       }
       
       try {
@@ -704,7 +704,7 @@ Enter amount to send (USDC):
         return continueSession(`Error getting balance.
 Please try again later.
 
-Enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter your 4-digit PIN:`);
       }
     }
     
@@ -714,11 +714,11 @@ Enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}
       const userBalance = session.data.usdcBalance || 0;
       
       if (isNaN(usdcAmount) || usdcAmount <= 0) {
-        return continueSession(`Invalid amount.\nEnter USDC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid amount.\nEnter USDC amount to send:`);
       }
       
       if (usdcAmount < 0.01) {
-        return continueSession(`Minimum send: $0.01 USDC\nEnter USDC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Minimum send: $0.01 USDC\nEnter USDC amount to send:`);
       }
       
       // Calculate transaction fee (0.0001 USDC)
@@ -731,7 +731,7 @@ Amount: $${usdcAmount.toFixed(6)} USDC
 Fee: $${transactionFee.toFixed(6)} USDC
 Total needed: $${totalRequired.toFixed(6)} USDC
 Your balance: $${userBalance.toFixed(6)} USDC
-Enter USDC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter USDC amount to send:`);
       }
       
       session.data.usdcAmount = usdcAmount;

@@ -20,7 +20,7 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       // Step 1: Get amount to withdraw
       if (!input) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('withdraw', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('withdraw', lang)}\nEnter amount (${currency}):`);
       }
       const inputParts = input.split('*');
       const sanitized_input = inputParts[inputParts.length - 1] || '';
@@ -38,17 +38,17 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       const amount = parseInt(sanitized_input);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount (${currency}):`);
       }
       
       if (amount < 1000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Minimum withdrawal: ${currency} 1,000\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Minimum withdrawal: ${currency} 1,000\nEnter amount (${currency}):`);
       }
       
       if (amount > 2000000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Maximum withdrawal: ${currency} 2,000,000\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Maximum withdrawal: ${currency} 2,000,000\nEnter amount (${currency}):`);
       }
 
       session.data.withdrawAmount = amount;
@@ -170,7 +170,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         return continueSession(`Invalid PIN format. Enter 4-digit PIN:
-Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Attempts remaining: ${3 - session.data.pinAttempts}`);
       }
       
       console.log(`Verifying PIN for ${session.phoneNumber}`);
@@ -185,7 +185,7 @@ Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.tran
           }
           
           return continueSession(`Incorrect PIN. Try again:
-Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Attempts remaining: ${3 - session.data.pinAttempts}`);
         }
         
         session.step = 5;

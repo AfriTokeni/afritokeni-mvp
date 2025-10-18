@@ -115,7 +115,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
           return endSession('Too many failed attempts. Please try again later.');
         }
         
-        return continueSession(`Invalid PIN format. Please enter exactly 4 digits:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format. Please enter exactly 4 digits:`);
       }
       
       // Verify the PIN
@@ -168,7 +168,7 @@ Please select an option:
         }
         
         const remainingAttempts = 3 - session.data.pinAttempts;
-        return continueSession(`Incorrect PIN. You have ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.\nPlease enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Incorrect PIN. You have ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.\nPlease enter your 4-digit PIN:`);
       }
     }
     
@@ -194,7 +194,7 @@ export async function handlePinSetup(input: string, session: USSDSession, lang: 
       // First PIN entry
       if (!/^\d{4}$/.test(pinInput)) {
         console.log(`❌ Invalid PIN format during setup for ${session.phoneNumber}: "${pinInput}"`);
-        return continueSession(`Invalid PIN format.\nPlease enter exactly 4 digits:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format.\nPlease enter exactly 4 digits:`);
       }
       session.data.newPin = pinInput;
       session.step = 2;

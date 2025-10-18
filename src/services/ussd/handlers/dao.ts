@@ -251,7 +251,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
       return continueSession(`Invalid amount.
 Minimum: 1 AFRI
 
-Enter amount to vote:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter amount to vote:`);
     }
     
     const afriTokens = session.data.afriTokens || 5000;
@@ -264,7 +264,7 @@ Enter amount to vote:\n\n${TranslationService.translate('back_or_menu', lang)}`)
 Available: ${available} AFRI
 Requested: ${amount} AFRI
 
-Enter amount to vote:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter amount to vote:`);
     }
     
     session.data.voteAmount = amount;
@@ -276,7 +276,7 @@ Proposal: ${session.data.selectedProposal.title}
 Vote: ${session.data.voteChoice.toUpperCase()}
 Amount: ${amount} AFRI
 
-Enter your 4-digit PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+Enter your 4-digit PIN to confirm:`);
   }
   
   // Step 4: PIN verification and vote submission
