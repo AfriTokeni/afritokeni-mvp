@@ -115,7 +115,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
           return endSession('Too many failed attempts. Please try again later.');
         }
         
-        return continueSession(`Invalid PIN format. Please enter exactly 4 digits:`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}. ${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify the PIN
@@ -168,7 +168,7 @@ Please select an option:
         }
         
         const remainingAttempts = 3 - session.data.pinAttempts;
-        return continueSession(`Incorrect PIN. You have ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.\nPlease enter your 4-digit PIN:`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}. ${remainingAttempts} ${remainingAttempts > 1 ? 'attempts' : 'attempt'} remaining.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
     }
     
