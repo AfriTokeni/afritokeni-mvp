@@ -4,6 +4,8 @@ import { world } from './shared-steps.js';
 import { UserService } from '../../../src/services/userService';
 import { BalanceService } from '../../../src/services/balanceService';
 import { TransactionService } from '../../../src/services/transactionService';
+import { USSDTestHelper } from '../../helpers/ussdTestHelpers';
+import { USSDService } from '../../../src/services/ussdService';
 
 Given('I have {int} {word} in my account', async function (amount: number, currency: string) {
   world.currency = currency;
@@ -117,9 +119,27 @@ Given('I am a user', async function () {
   world.userId = user.id;
 });
 
-When('I dial {string}', function (ussdCode: string) {
+When('I dial {string}', async function (ussdCode: string) {
   world.ussdCode = ussdCode;
-  world.ussdSession = true;
+  
+  // Initialize session if not already set
+  if (!world.ussdSessionId) {
+    world.ussdSessionId = USSDTestHelper.generateSessionId();
+  }
+  if (!world.ussdPhoneNumber) {
+    world.ussdPhoneNumber = USSDTestHelper.generatePhoneNumber();
+  }
+  
+  // Actually call the USSD service
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    ''  // Empty input for initial dial
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+  world.ussdSession = await USSDService.getUSSDSession(world.ussdSessionId);
 });
 
 Then('I see the main menu', function () {

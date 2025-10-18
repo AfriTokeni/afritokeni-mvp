@@ -153,6 +153,34 @@ export class USSDService {
       session.updateActivity();
 
       const input = text.trim();
+      
+      // Handle chained input (e.g., "3*1*1234" from main menu)
+      // Process each part sequentially if we're at main menu and have multiple parts
+      const inputParts = input.split('*').filter(p => p.length > 0);
+      if (session.currentMenu === 'main' && inputParts.length > 1) {
+        console.log(`🔗 Processing chained input: ${inputParts.length} parts`);
+        
+        // Process each part sequentially
+        for (let i = 0; i < inputParts.length; i++) {
+          const part = inputParts[i];
+          console.log(`  Part ${i + 1}/${inputParts.length}: "${part}" (menu: ${session.currentMenu})`);
+          
+          const result = await this.processUSSDRequest(sessionId, phoneNumber, part);
+          
+          // If this is the last part, return its response
+          if (i === inputParts.length - 1) {
+            return result;
+          }
+          
+          // If session ended early, return
+          if (!result.continueSession) {
+            return result;
+          }
+          
+          // Reload session for next iteration
+          session = await this.getUSSDSession(sessionId) as USSDSession;
+        }
+      }
 
       // Route to appropriate handler based on current menu
       let response: string;
@@ -219,6 +247,36 @@ export class USSDService {
         
         case 'btc_rate':
           response = await handleBTCRate(input, session);
+          break;
+        
+        case 'btc_buy':
+          const { handleBTCBuy } = await import('./ussd/handlers/bitcoin.js');
+          response = await handleBTCBuy(input, session);
+          
+          // Check if handler wants to show bitcoin menu
+          if (response.includes('__SHOW_BITCOIN_MENU__')) {
+            response = await handleBitcoin('', session);
+          }
+          break;
+        
+        case 'btc_sell':
+          const { handleBTCSell } = await import('./ussd/handlers/bitcoin.js');
+          response = await handleBTCSell(input, session);
+          
+          // Check if handler wants to show bitcoin menu
+          if (response.includes('__SHOW_BITCOIN_MENU__')) {
+            response = await handleBitcoin('', session);
+          }
+          break;
+        
+        case 'btc_send':
+          const { handleBTCSend } = await import('./ussd/handlers/bitcoin.js');
+          response = await handleBTCSend(input, session);
+          
+          // Check if handler wants to show bitcoin menu
+          if (response.includes('__SHOW_BITCOIN_MENU__')) {
+            response = await handleBitcoin('', session);
+          }
           break;
         
         case 'usdc':

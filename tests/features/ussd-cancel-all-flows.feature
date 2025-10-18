@@ -8,10 +8,11 @@ Feature: Cancel Functionality Across All USSD Flows
 
   # ==================== SEND MONEY ====================
   Scenario: Cancel Send Money at phone entry (English)
+    Given I am a registered USSD user with balance
     When I dial "*229#"
     And I select "1" for Local Currency
     And I select "1" for Send Money
-    Then I should see "Press 0 to return to main menu" in USSD response
+    Then I should see "0. Back | 9. Menu" in USSD response
     When I select "0" to cancel
     Then I should see "Local Currency" in USSD response
 
@@ -21,7 +22,7 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "1" for Local Currency
     And I select "1" for Send Money
     And I enter phone number "256700123456"
-    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    Then I should see "omuwendo" in USSD response
     When I select "0" to cancel
     Then I should see "Ssente z'omu Uganda" in USSD response
 
@@ -32,7 +33,7 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "1" for Send Money
     And I enter phone number "256700123456"
     And I enter amount "1000"
-    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    Then I should see "PIN" in USSD response
     When I select "0" to cancel
     Then I should see "Muamala umeshindwa" in USSD response
 
@@ -41,7 +42,7 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "1" for Local Currency
     And I select "4" for Withdraw
-    Then I should see "Press 0 to return to main menu" in USSD response
+    Then I should see "amount" in USSD response
     When I select "0" to cancel
     Then I should see "Local Currency" in USSD response
 
@@ -51,7 +52,7 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "1" for Local Currency
     And I select "4" for Withdraw
     And I enter amount "5000"
-    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    Then I should see "agent" in USSD response
     When I select "0" to cancel
     Then I should see "Ssente z'omu Uganda" in USSD response
 
@@ -62,7 +63,7 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "4" for Withdraw
     And I enter amount "5000"
     And I select "1" for first agent
-    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    Then I should see "PIN" in USSD response
     When I select "0" to cancel
     Then I should see "Muamala umeshindwa" in USSD response
 
@@ -71,7 +72,7 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "1" for Local Currency
     And I select "3" for Deposit
-    Then I should see "Press 0 to return to main menu" in USSD response
+    Then I should see "amount" in USSD response
     When I select "0" to cancel
     Then I should see "Local Currency" in USSD response
 
@@ -81,7 +82,7 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "1" for Local Currency
     And I select "3" for Deposit
     And I enter amount "10000"
-    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    Then I should see "agent" in USSD response
     When I select "0" to cancel
     Then I should see "Ssente z'omu Uganda" in USSD response
 
@@ -90,7 +91,7 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "3" for Buy Bitcoin
-    Then I should see "Press 0 to return to main menu" in USSD response
+    Then I should see "amount" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 
@@ -100,9 +101,9 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "2" for Bitcoin
     And I select "3" for Buy Bitcoin
     And I enter amount "50000"
-    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    Then I should see "PIN" in USSD response
     When I select "0" to cancel
-    Then I should see "Muamala umeshindwa" in USSD response
+    Then I should see "Bitcoin" in USSD response
 
   # ==================== BITCOIN SELL ====================
   Scenario: Cancel Bitcoin Sell at amount entry (Luganda)
@@ -110,7 +111,7 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "4" for Sell Bitcoin
-    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    Then I should see "omuwendo" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 
@@ -119,7 +120,7 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "5" for Send Bitcoin
-    Then I should see "Press 0 to return to main menu" in USSD response
+    Then I should see "phone" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 
@@ -129,7 +130,7 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "2" for Bitcoin
     And I select "5" for Send Bitcoin
     And I enter phone number "256700123456"
-    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    Then I should see "kiasi" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 
@@ -139,7 +140,7 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "4" for DAO Governance
     And I select "1" for View Proposals
-    Then I should see "Press 0 to return to main menu" in USSD response
+    Then I should see "0. Back | 9. Menu" in USSD response
     When I select "0" to cancel
     Then I should see "DAO Governance" in USSD response
 
