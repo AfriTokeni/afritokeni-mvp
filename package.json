@@ -24,7 +24,7 @@
     
     "data:seed": "tsx scripts/primeDemoData.ts",
     
-    "test": "npm run icp:start && npm run test:all; npm run icp:stop",
+    "test": "npm run icp:start && npm run icp:deploy && npm run test:all; npm run icp:stop",
     "test:all": "cucumber-js 'tests/features/**/*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:no-icp": "cucumber-js 'tests/features/**/*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:watch": "cucumber-js tests/features/icp-integration.feature --require 'tests/features/step-definitions/{shared-steps,icp-integration-steps}.ts' --require-module tsx",
@@ -35,7 +35,7 @@
     
     "icp:start": "dfx start --clean --background",
     "icp:stop": "dfx stop",
-    "icp:deploy": "dfx deploy ckbtc_ledger ckusdc_ledger",
+    "icp:deploy": "dfx deploy ckbtc_ledger && dfx deploy ckusdc_ledger",
     
     "postinstall": "npm run postinstall:copy-auth",
     "postinstall:copy-auth": "node -e \"require('fs').cpSync('node_modules/@junobuild/core/dist/workers/', './public/workers', {recursive: true});\""
