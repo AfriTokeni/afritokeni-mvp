@@ -22,6 +22,7 @@ export async function handleMainMenu(
 ): Promise<string> {
   const currency = getSessionCurrency(session);
   const lang = session.language || 'en';
+  console.log(`🌍 Main menu language: ${lang} (from session.language: ${session.language})`);
   
   if (!input) {
     return continueSession(`${TranslationService.translate('welcome', lang)}

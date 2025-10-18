@@ -53,28 +53,36 @@ Feature: USSD Language Selection
     And the session language should be "lg"
 
   Scenario: Main menu shows translated text in Luganda
-    Given my language preference is "lg"
-    When I dial "*229#"
+    Given I am a registered USSD user
+    And I select "6" for Language Selection
+    And I select "2" for Luganda
+    And I select "0" to go back
     Then I should see "Tukusanyukidde ku AfriTokeni" in USSD response
     And I should see "Obuyambi" in USSD response
 
   Scenario: Main menu shows translated text in Swahili
-    Given my language preference is "sw"
-    When I dial "*229#"
+    Given I am a registered USSD user
+    And I select "6" for Language Selection
+    And I select "3" for Swahili
+    And I select "0" to go back
     Then I should see "Karibu AfriTokeni" in USSD response
     And I should see "Msaada" in USSD response
 
   Scenario: Help menu shows translated text in Luganda
-    Given my language preference is "lg"
-    When I dial "*229#"
+    Given I am a registered USSD user
+    And I select "6" for Language Selection
+    And I select "2" for Luganda
+    And I select "0" to go back
     And I select "5" for Help
     Then I should see "Obuyambi" in USSD response
     And I should see "Wereza Ssente" in USSD response
     And I should see "Ggya Ssente" in USSD response
 
   Scenario: Help menu shows translated text in Swahili
-    Given my language preference is "sw"
-    When I dial "*229#"
+    Given I am a registered USSD user
+    And I select "6" for Language Selection
+    And I select "3" for Swahili
+    And I select "0" to go back
     And I select "5" for Help
     Then I should see "Msaada" in USSD response
     And I should see "Tuma Pesa" in USSD response
