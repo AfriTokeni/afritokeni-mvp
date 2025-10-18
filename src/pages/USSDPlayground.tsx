@@ -144,6 +144,30 @@ Please select an option:
 5. Send USDC
 0. Back to Main Menu`;
       }
+      if (upperCmd === '4') {
+        setCurrentMenu('dao');
+        return `🏛️ DAO Governance
+
+Please select an option:
+1. View Active Proposals
+2. My Voting Power
+3. Active Votes
+4. Vote on Proposal
+0. Back to Main Menu`;
+      }
+      if (upperCmd === '5') {
+        return `📚 AfriTokeni Help
+
+Local Currency: Send, deposit, withdraw UGX
+Bitcoin: Buy, sell, send ckBTC
+USDC: Buy, sell, send USDC stablecoin
+DAO: Vote on governance proposals
+
+For support: Call +256-XXX-XXXX
+Visit: afritokeni.com
+
+Thank you for using AfriTokeni!`;
+      }
       return `Invalid option. Please select 1-5.`;
     }
 
@@ -297,6 +321,70 @@ Reply YES to confirm
 Thank you for using AfriTokeni!`;
       }
       return `Invalid option in USDC menu.`;
+    }
+
+    // DAO GOVERNANCE SUBMENU
+    if (currentMenu === 'dao') {
+      if (upperCmd === '1') {
+        return `🏛️ Active Proposals
+
+1. Increase Agent Commission
+   From 2% to 3%
+   Voting ends: Dec 31, 2025
+   Status: Active
+
+2. Add Nigerian Naira (NGN)
+   New currency support
+   Voting ends: Jan 15, 2026
+   Status: Active
+
+Reply with proposal number for details
+0. Back to Main Menu`;
+      }
+      
+      if (upperCmd === '2') {
+        return `🗳️ My Voting Power
+
+AFRI Tokens: 1,250
+Voting Power: 1,250 votes
+
+Earned from:
+- Transactions: 500 AFRI
+- Referrals: 250 AFRI
+- Agent Services: 500 AFRI
+
+0. Back to Main Menu`;
+      }
+      
+      if (upperCmd === '3') {
+        return `✅ Active Votes
+
+You have voted on:
+
+1. Increase Agent Commission
+   Your vote: YES (500 AFRI)
+   Current results: 65% YES
+
+No other active votes
+
+0. Back to Main Menu`;
+      }
+      
+      if (upperCmd === '4') {
+        return `🗳️ Vote on Proposal
+
+Enter proposal number (1-2):
+
+1. Increase Agent Commission
+2. Add Nigerian Naira
+
+Then choose:
+YES / NO / ABSTAIN
+
+0. Back to Main Menu`;
+      }
+      
+      return `Invalid option in DAO menu.`;
     }
 
     // Option 5: Help (from main menu)
