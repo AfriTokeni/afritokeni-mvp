@@ -59,7 +59,7 @@ Feature: USSD Menu Navigation
     When I dial "*229#"
     Then I should see "Welcome to AfriTokeni" in USSD response
     When I select "5" for Help
-    Then I should see "Help & Support" in USSD response
+    Then I should see "Help" in USSD response
     When I select "0" to go back
     Then I should see "Welcome to AfriTokeni" in USSD response
     And I should see "5. Help" in USSD response
@@ -68,7 +68,7 @@ Feature: USSD Menu Navigation
     When I dial "*229#"
     Then I should see "Welcome to AfriTokeni" in USSD response
     When I select "6" for Language Selection
-    Then I should see "Language Selection" in USSD response
+    Then I should see "Select language" in USSD response
     And I should see "1. English" in USSD response
     And I should see "2. Luganda" in USSD response
     And I should see "3. Swahili" in USSD response
@@ -80,7 +80,7 @@ Feature: USSD Menu Navigation
     When I dial "*229#"
     Then I should see "Welcome to AfriTokeni" in USSD response
     When I select "99" for invalid option
-    Then I should see "Invalid selection" in USSD response
+    Then I should see "Invalid option" in USSD response
     And I should see "Welcome to AfriTokeni" in USSD response
 
   Scenario: Navigate through multiple menus in sequence

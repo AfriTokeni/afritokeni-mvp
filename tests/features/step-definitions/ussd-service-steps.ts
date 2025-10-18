@@ -26,6 +26,10 @@ Given('I have an active USSD session', async function () {
 Given('I have made {int} USSD requests in {int} minute', async function (count: number, minutes: number) {
   world.ussdPhoneNumber = USSDTestHelper.generatePhoneNumber();
   
+  // Temporarily enable rate limiting for this test
+  const originalEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  
   // Simulate multiple requests to trigger rate limiting
   for (let i = 0; i < count; i++) {
     const sessionId = USSDTestHelper.generateSessionId();
@@ -36,6 +40,10 @@ Given('I have made {int} USSD requests in {int} minute', async function (count: 
       break;
     }
   }
+  
+  // Keep rate limiting enabled for the next request in this scenario
+  // It will be restored after the scenario completes
+  world.rateLimitingEnabled = true;
 });
 
 // ========== When Steps ==========

@@ -3,7 +3,7 @@
  * Used across all feature tests
  */
 
-import { Before, setDefaultTimeout } from '@cucumber/cucumber';
+import { Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { mockJuno } from '../../mocks/juno.js';
 import * as junoCore from '@junobuild/core';
 
@@ -64,4 +64,12 @@ Before(function () {
   // Don't initialize usdcBalance - let it be undefined so we can detect ckUSDC context
 
   mockJuno.clear();
+  
+  // Ensure NODE_ENV is set to test by default
+  process.env.NODE_ENV = 'test';
+});
+
+After(function () {
+  // Restore NODE_ENV to test after each scenario
+  process.env.NODE_ENV = 'test';
 });

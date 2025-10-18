@@ -37,9 +37,6 @@ Feature: USSD Service Core Logic
     When I send empty input
     Then I should see the main menu with options
 
-  # Rate limiting is disabled in test environment (NODE_ENV=test)
-  # This test is skipped - rate limiting only applies in production
-  @skip
   Scenario: Rate limiting prevents spam
     Given I have made 15 USSD requests in 1 minute
     When I dial "*229#" again
