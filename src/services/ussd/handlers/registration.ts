@@ -198,7 +198,7 @@ export async function handleUserRegistration(input: string, session: USSDSession
       
     default:
       console.log(`❌ Invalid registration step ${session.step} for ${session.phoneNumber}`);
-      return endSession('Registration process error. Please try again.');
+      return endSession(TranslationService.translate('error_try_again', lang));
   }
 }
 
@@ -248,7 +248,7 @@ export async function handleVerification(input: string, session: USSDSession): P
       
       if (!registrationSuccess) {
         console.log(`❌ User registration failed for ${session.phoneNumber}`);
-        return endSession('Registration failed. Please try again later.');
+        return endSession(TranslationService.translate('registration_failed', lang));
       }
       
       // Registration successful - now set up PIN
@@ -260,6 +260,6 @@ export async function handleVerification(input: string, session: USSDSession): P
       
     default:
       console.log(`❌ Invalid verification step ${session.step} for ${session.phoneNumber}`);
-      return endSession('Verification process error. Please try again.');
+      return endSession(TranslationService.translate('verification_failed', lang));
   }
 }

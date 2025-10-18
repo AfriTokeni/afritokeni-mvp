@@ -614,11 +614,6 @@ export class TranslationService {
       lg: 'Noonya Agent',
       sw: 'Tafuta Wakala'
     },
-    'dao_governance': {
-      en: 'DAO Governance',
-      lg: 'Okufuga kwa DAO',
-      sw: 'Utawala wa DAO'
-    },
     'view_proposals': {
       en: 'View Proposals',
       lg: 'Laba Ebirowoozo',
@@ -633,6 +628,16 @@ export class TranslationService {
       en: 'Active Votes',
       lg: 'Okulonda Okukola',
       sw: 'Kura Zinazofanya Kazi'
+    },
+    'registration_failed': {
+      en: 'Registration failed. Please try again later.',
+      lg: 'Okwewandiisa kulemeddwa. Gezaako oluvannyuma.',
+      sw: 'Usajili umeshindwa. Tafadhali jaribu tena baadaye.'
+    },
+    'verification_failed': {
+      en: 'Verification process error. Please try again.',
+      lg: 'Kiremya mu kukakasa. Gezaako nate.',
+      sw: 'Kosa katika uthibitisho. Tafadhali jaribu tena.'
     },
   };
 
