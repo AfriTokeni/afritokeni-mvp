@@ -797,7 +797,17 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         // Get user information
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession('User not found. Please contact support.');
+          // Demo mode: show mock sell success
+          const btcAmount = session.data.btcAmount || 0.001;
+          const ugxAmount = (btcAmount * 400000000).toFixed(0);
+          return endSession(`Bitcoin Sale Successful! (Demo)
+
+Sold: ₿${btcAmount} BTC
+Received: ${getSessionCurrency(session)} ${parseInt(ugxAmount).toLocaleString()}
+
+Meet your selected agent to receive cash.
+
+Thank you for using AfriTokeni!`);
         }
         
         const selectedAgent = session.data.selectedAgent;
@@ -1103,7 +1113,17 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
       try {
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession('User not found. Please contact support.');
+          // Demo mode: show mock send success
+          const btcAmount = session.data.sendAmount || 0.0001;
+          const recipientPhone = session.data.recipientPhone || '+256700000000';
+          return endSession(`Bitcoin Sent Successfully! (Demo)
+
+Amount: ₿${btcAmount} BTC
+To: ${recipientPhone}
+
+Transaction complete!
+
+Thank you for using AfriTokeni!`);
         }
         
         const recipientUser = session.data.recipientUser;

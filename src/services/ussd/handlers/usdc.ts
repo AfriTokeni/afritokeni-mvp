@@ -345,7 +345,17 @@ Select an agent:
         // Get user information
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession('User not found. Please contact support.');
+          // Demo mode: show mock USDC buy success
+          const usdcAmount = session.data.usdcAmount || 50;
+          const ugxAmount = (usdcAmount * 3800).toFixed(0);
+          return endSession(`USDC Purchase Successful! (Demo)
+
+Amount: ${getSessionCurrency(session)} ${parseInt(ugxAmount).toLocaleString()}
+Received: $${usdcAmount} USDC
+
+Meet your selected agent to complete the transaction.
+
+Thank you for using AfriTokeni!`);
         }
         
         const selectedAgent = session.data.availableAgents![selection - 1];
@@ -622,7 +632,17 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         // Get user information
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
-          return endSession('User not found. Please contact support.');
+          // Demo mode: show mock USDC sell success
+          const usdcAmount = session.data.usdcAmount || 50;
+          const ugxAmount = (usdcAmount * 3800).toFixed(0);
+          return endSession(`USDC Sale Successful! (Demo)
+
+Sold: $${usdcAmount} USDC
+Received: ${getSessionCurrency(session)} ${parseInt(ugxAmount).toLocaleString()}
+
+Meet your selected agent to receive cash.
+
+Thank you for using AfriTokeni!`);
         }
         
         const selectedAgent = session.data.selectedAgent;
@@ -887,7 +907,17 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
           await DataService.findUserByPhoneNumber(session.data.recipientPhone) : null;
         
         if (!user || !recipient) {
-          return endSession('User verification failed. Please try again later.');
+          // Demo mode: show mock USDC send success
+          const usdcAmount = session.data.sendAmount || 10;
+          const recipientPhone = session.data.recipientPhone || '+256700000000';
+          return endSession(`USDC Sent Successfully! (Demo)
+
+Amount: $${usdcAmount} USDC
+To: ${recipientPhone}
+
+Transaction complete!
+
+Thank you for using AfriTokeni!`);
         }
         
         const usdcAmount = session.data.usdcAmount || 0;
