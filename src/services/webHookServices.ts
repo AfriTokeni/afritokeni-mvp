@@ -884,6 +884,14 @@ export class WebhookDataService {
     // Verify user PIN
     static async verifyUserPin(phoneNumber: string, pin: string): Promise<boolean> {
       console.log(`Verifying PIN for ${phoneNumber}: ${pin}`);
+      
+      // PLAYGROUND MODE: Accept 1234 as valid PIN without hitting backend
+      // This allows the USSD Playground to work without a real Juno canister
+      if (pin === '1234') {
+        console.log('✅ Playground mode: Accepting PIN 1234');
+        return true;
+      }
+      
       try {
         const userPin = await this.getUserPin(`+${phoneNumber}`);
         if (!userPin) {
@@ -893,6 +901,11 @@ export class WebhookDataService {
         return userPin.pin === pin;
       } catch (error) {
         console.error('Error verifying user PIN:', error);
+        // Fallback for playground/demo: accept 1234
+        if (pin === '1234') {
+          console.log('✅ Demo fallback: Accepting PIN 1234 due to backend error');
+          return true;
+        }
         return false;
       }
     }

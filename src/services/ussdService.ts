@@ -154,6 +154,22 @@ export class USSDService {
 
       const input = text.trim();
       
+      // RESET SESSION: If user dials the USSD code, reset to main menu regardless of current state
+      // This allows starting fresh from anywhere in the flow
+      if (input === '*229#' || input === '*384*22948#' || input === '') {
+        console.log('🔄 User dialed USSD code - resetting session to main menu');
+        await this.updateUSSDSession(sessionId, {
+          currentMenu: 'main',
+          step: 0,
+          data: {}
+        });
+        // Return main menu
+        return {
+          response: 'CON ' + await this.getMainMenu(),
+          continueSession: true
+        };
+      }
+      
       // Handle chained input (e.g., "3*1*1234" from main menu)
       // Process each part sequentially if we're at main menu and have multiple parts
       const inputParts = input.split('*').filter(p => p.length > 0);
