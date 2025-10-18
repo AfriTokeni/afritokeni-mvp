@@ -442,15 +442,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
           const btcAmount = exchangeResult.amountBTC;
           
           // Send SMS with purchase details and code
-          const smsMessage = `AfriTokeni ckBTC Purchase
-Code: ${purchaseCode}
-Amount: ${currency} ${ugxAmount.toLocaleString()}
-ckBTC to receive: ₿${btcAmount.toFixed(8)}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-Transaction ID: ${exchangeResult.transactionId}
-
-Give this code and payment to the agent to complete your ckBTC purchase.`;
+          const smsMessage = `AfriTokeni ckBTC ${TranslationService.translate('purchase', lang)}\n${TranslationService.translate('code', lang)}: ${purchaseCode}\n${TranslationService.translate('amount', lang)}: ${currency} ${ugxAmount.toLocaleString()}\n${TranslationService.translate('ckbtc_to_receive', lang)}: ₿${btcAmount.toFixed(8)}\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n\n${TranslationService.translate('give_code_and_payment', lang)}.`;
 
           console.log(`Sending ckBTC purchase SMS to ${session.phoneNumber}`);
 
@@ -461,27 +453,9 @@ Give this code and payment to the agent to complete your ckBTC purchase.`;
             // Continue even if SMS fails
           }
           
-          return endSession(`✅ ckBTC Purchase Initiated!
-
-Purchase Code: ${purchaseCode}
-Transaction ID: ${exchangeResult.transactionId}
-You will receive: ₿${btcAmount.toFixed(8)} ckBTC
-Amount to pay: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
-
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-
-Give the code ${purchaseCode} and payment to the agent to complete your purchase.
-
-SMS sent with details.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`✅ ${TranslationService.translate('purchase_initiated', lang)}\n\n${TranslationService.translate('purchase_code', lang)}: ${purchaseCode}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n${TranslationService.translate('you_will_receive', lang)}: ₿${btcAmount.toFixed(8)} ckBTC\n${TranslationService.translate('amount_to_pay', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n\n${TranslationService.translate('give_code_and_payment', lang)}.\n\n${TranslationService.translate('sms_sent', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         } else {
-          return endSession(`❌ Purchase failed: ${exchangeResult.error || 'Unknown error'}
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`❌ ${TranslationService.translate('purchase', lang)} ${TranslationService.translate('failed', lang)}: ${exchangeResult.error || TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('please_try_again_later', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
       } catch (error) {

@@ -898,6 +898,66 @@ export class TranslationService {
       lg: 'Koodi',
       sw: 'Nambari'
     },
+    'ckbtc_to_receive': {
+      en: 'ckBTC to receive',
+      lg: 'ckBTC gy\'ojja kufuna',
+      sw: 'ckBTC utakayopokea'
+    },
+    'give_code_and_payment': {
+      en: 'Give this code and payment to the agent to complete your ckBTC purchase',
+      lg: 'Wa agent koodi eno n\'essente okumaliriza okugula kwo ckBTC',
+      sw: 'Mpe wakala nambari hii na malipo kukamilisha ununuzi wako wa ckBTC'
+    },
+    'ckbtc_balance': {
+      en: 'ckBTC Balance',
+      lg: 'Ssente za ckBTC',
+      sw: 'Salio ya ckBTC'
+    },
+    'you_need_ckbtc': {
+      en: 'You need ckBTC to send. Please buy some first',
+      lg: 'Weetaaga ckBTC okuweereza. Gula ezisooka',
+      sw: 'Unahitaji ckBTC kutuma. Tafadhali nunua kwanza'
+    },
+    'total_needed': {
+      en: 'Total needed',
+      lg: 'Omugatte ogwetaagisa',
+      sw: 'Jumla inayohitajika'
+    },
+    'insufficient_for_fee': {
+      en: 'Insufficient balance for amount + network fee!',
+      lg: 'Ssente tezimala omuwendo n\'essente z\'omutimbagano!',
+      sw: 'Salio haitoshi kwa kiasi + ada ya mtandao!'
+    },
+    'name': {
+      en: 'Name',
+      lg: 'Erinnya',
+      sw: 'Jina'
+    },
+    'sent': {
+      en: 'Sent',
+      lg: 'Eweereddwa',
+      sw: 'Imetumwa'
+    },
+    'received': {
+      en: 'Received',
+      lg: 'Efuniddwa',
+      sw: 'Imepokelewa'
+    },
+    'from': {
+      en: 'From',
+      lg: 'Okuva',
+      sw: 'Kutoka'
+    },
+    'new_balance_updated': {
+      en: 'Your new balance will be updated shortly',
+      lg: 'Ssente zo empya zijja kukyusibwa mu bbanga ttono',
+      sw: 'Salio yako mpya itasasishwa hivi karibuni'
+    },
+    'sms_notifications_sent': {
+      en: 'SMS notifications sent to both parties',
+      lg: 'SMS ziweereddwa eri bombi',
+      sw: 'Arifa za SMS zimetumwa kwa pande zote mbili'
+    },
   };
 
   /**
