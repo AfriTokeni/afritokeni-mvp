@@ -28,7 +28,7 @@ Feature: USSD DAO Governance
     And I select "1" for View Proposals
     Then I should see "Active Proposals" in USSD response
     And I should see proposal titles in USSD response
-    And I should see "Press 0" in USSD response
+    And I should see "0. Back" in USSD response
 
 
   Scenario: Vote YES on a proposal
