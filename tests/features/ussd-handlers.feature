@@ -77,7 +77,7 @@ Feature: USSD Handler Logic
   # Agent Handler Tests
   Scenario: Find agent shows available agents
     Given I am in find agent menu
-    Then I should see "Available Agents" in USSD response
+    Then I should see "Available agents" in USSD response
     And I should see agent options
 
   # Send Money Handler Tests

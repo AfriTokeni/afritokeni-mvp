@@ -7,6 +7,25 @@ import { TransactionService } from '../../../src/services/transactionService';
 import { USSDTestHelper } from '../../helpers/ussdTestHelpers';
 import { USSDService } from '../../../src/services/ussdService';
 
+// Step definitions for session reset tests
+Given('I am a registered user with phone number {string}', async function (phoneNumber: string) {
+  world.phoneNumber = phoneNumber;
+  world.sessionId = `test_session_${Date.now()}`;
+});
+
+Given('my PIN is {string}', function (pin: string) {
+  world.pin = pin;
+});
+
+When('I enter {string}', async function (input: string) {
+  const sessionId = world.sessionId || `test_session_${Date.now()}`;
+  const phoneNumber = world.phoneNumber || '256788123456';
+  
+  const result = await USSDService.processUSSDRequest(sessionId, phoneNumber, input);
+  world.ussdResponse = result.response;
+  world.sessionContinues = result.continueSession;
+});
+
 Given('I have {int} {word} in my account', async function (amount: number, currency: string) {
   world.currency = currency;
   const phoneNumber = `+256700${Date.now().toString().slice(-6)}`;

@@ -144,11 +144,15 @@ Then('I should see the main menu with options', function () {
 });
 
 Then('I should see {string} in USSD response', function (expectedText: string) {
-  assert.ok(world.ussdResponse, 'Should have a response');
-  assert.ok(
-    USSDTestHelper.responseContains(world.ussdResponse, expectedText),
-    `Response should contain "${expectedText}". Got: ${world.ussdResponse}`
-  );
+  assert(world.ussdResponse, 'No USSD response found');
+  assert(world.ussdResponse.includes(expectedText), 
+    `Expected to see "${expectedText}" in response but got: ${world.ussdResponse}`);
+});
+
+Then('I should not see {string} in USSD response', function (unexpectedText: string) {
+  assert(world.ussdResponse, 'No USSD response found');
+  assert(!world.ussdResponse.includes(unexpectedText), 
+    `Expected NOT to see "${unexpectedText}" in response but got: ${world.ussdResponse}`);
 });
 
 Then('I should see option {string} for local currency', function (optionNumber: string) {

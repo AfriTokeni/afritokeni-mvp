@@ -129,38 +129,14 @@ export class USSDService {
     text: string
   ): Promise<{ response: string; continueSession: boolean }> {
     try {
-      let session = await this.getUSSDSession(sessionId);
-
-      if (!session) {
-        session = await this.createUSSDSession(sessionId, phoneNumber);
-      }
-      
-      // Check if session expired
-      if (session.isExpired()) {
-        // If user is dialing fresh (empty input), create new session
-        if (!text || text.trim() === '' || text.trim() === '*229#' || text.trim() === '*384*22948#') {
-          console.log('🔄 Session expired but user dialing fresh - creating new session');
-          session = await this.createUSSDSession(sessionId, phoneNumber);
-        } else {
-          const { TranslationService } = await import('./translations.js');
-          const lang = session.language || 'en';
-          return {
-            response: 'END ' + TranslationService.translate('session_expired', lang),
-            continueSession: false
-          };
-        }
-      }
-      
       const input = text.trim();
       
-      // RESET SESSION: If user explicitly dials the USSD code, reset to main menu regardless of current state
-      // This allows starting fresh from anywhere in the flow, even after errors
-      // Check this BEFORE updating activity or routing to handlers
-      if (input === '*229#' || input === '*384*22948#' || input.includes('384') || input.includes('22948')) {
-        console.log('🔄 User dialed USSD code - resetting session to main menu');
-        session.currentMenu = 'main';
-        session.step = 0;
-        session.data = {};
+      // CRITICAL: Check for USSD dial code FIRST, before any session logic
+      // This allows starting fresh even if session is expired, ended, or in error state
+      // Note: Empty input is NOT a reset - it's used for showing submenus
+      if (input === '*229#' || input === '*384*22948#') {
+        console.log('🔄 User dialed USSD code - creating fresh session');
+        const session = await this.createUSSDSession(sessionId, phoneNumber);
         session.updateActivity();
         
         await this.updateUSSDSession(sessionId, {
@@ -169,11 +145,28 @@ export class USSDService {
           data: {}
         });
         
-        // Return main menu
         const lang = session.language || 'en';
         return {
           response: 'CON ' + await this.getMainMenu(lang),
           continueSession: true
+        };
+      }
+      
+      // Now get or create session for other inputs
+      let session = await this.getUSSDSession(sessionId);
+
+      if (!session) {
+        console.log('No session found, creating new one');
+        session = await this.createUSSDSession(sessionId, phoneNumber);
+      }
+      
+      // Check if session expired
+      if (session.isExpired()) {
+        const { TranslationService } = await import('./translations.js');
+        const lang = session.language || 'en';
+        return {
+          response: 'END ' + TranslationService.translate('session_expired', lang),
+          continueSession: false
         };
       }
       
