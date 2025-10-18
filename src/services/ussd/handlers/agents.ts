@@ -22,11 +22,7 @@ export async function handleFindAgent(input: string, session: USSDSession, handl
     const availableAgents = agents.filter((agent: Agent) => agent.isActive);
     
     if (availableAgents.length === 0) {
-      return endSession(`No agents available at this time.
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+      return endSession(`${TranslationService.translate('no_agents_available', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
     }
     
     let agentList = `Find Agent
@@ -76,14 +72,10 @@ Visit the agent at their location for assistance.
 Thank you for using AfriTokeni!`);
     }
     
-    return continueSession(`Invalid selection.
-${agentList}\n\n${TranslationService.translate('back_or_menu', lang)}`);
+    return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${agentList}\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
   } catch (error) {
     console.error('Error getting agents:', error);
-    return endSession(`Error loading agents.
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+    return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
   }
 }
