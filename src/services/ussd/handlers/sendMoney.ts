@@ -13,7 +13,12 @@ import { TranslationService } from '../../translations.js';
 /**
  * Handle send money flow
  */
-export async function handleSendMoney(input: string, session: USSDSession, sendSMS: (phone: string, msg: string) => Promise<any>): Promise<string> {
+export async function handleSendMoney(
+  input: string, 
+  session: USSDSession, 
+  sendSMS: (phone: string, msg: string) => Promise<any>,
+  goBackToMenu?: () => Promise<string>
+): Promise<string> {
   // Parse input for multi-step USSD
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
@@ -27,6 +32,13 @@ export async function handleSendMoney(input: string, session: USSDSession, sendS
         return continueSession(`${TranslationService.translate('send_money', lang)}\n${TranslationService.translate('enter_recipient_phone', lang)}\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
       
+      // Handle cancel - go back to local currency menu
+      if (currentInput === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        return continueSession(''); // Will show local currency menu
+      }
+      
       // Validate phone number format (accepts +256XXXXXXXXX, 256XXXXXXXXX, 07XXXXXXXX, 03XXXXXXXX)
       const phoneRegex = /^(\+?256[37]\d{8}|0[37]\d{8})$/;
       if (!phoneRegex.test(currentInput)) {
@@ -37,15 +49,24 @@ export async function handleSendMoney(input: string, session: USSDSession, sendS
       session.data.recipientPhone = currentInput;
       session.step = 1;
       const currency = getSessionCurrency(session);
-      return continueSession(`Enter amount to send (${currency}):`);
+      return continueSession(`Enter amount to send (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
     }
     
     case 1: {
       // Step 1: Enter amount and validate user has enough balance
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return continueSession('');
+      }
+      
       const amount = parseFloat(currentInput);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Invalid amount.\nEnter amount to send (${currency}):`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount to send (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
 
       // Calculate fee (1% of amount)
@@ -77,11 +98,21 @@ Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
 Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 
-Enter your 4-digit PIN to confirm:`);
+Enter your 4-digit PIN to confirm:
+${TranslationService.translate('press_zero_back', lang)}`);
     }
     
     case 2: {
       // Step 2: Verify PIN and process transaction
+      
+      // Handle cancel
+      if (currentInput === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
+      }
+      
       const isValidPin = await DataService.verifyUserPin(`+${session.phoneNumber}`, currentInput);
       if (!isValidPin) {
         // Increment pin attempts
