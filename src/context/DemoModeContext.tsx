@@ -22,8 +22,9 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    // Save preference to localStorage
-    localStorage.setItem('afritokeni_demo_mode', JSON.stringify(isDemoMode));
+    // Save preference to localStorage (as string 'true' or 'false')
+    localStorage.setItem('afritokeni_demo_mode', isDemoMode ? 'true' : 'false');
+    console.log('🎭 Demo mode changed:', isDemoMode);
     // Demo data is now loaded on-demand from /data folder
   }, [isDemoMode]);
 
@@ -36,7 +37,14 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleDemoMode = () => {
-    setIsDemoMode(prev => !prev);
+    setIsDemoMode(prev => {
+      const newValue = !prev;
+      // Reload page after a short delay to ensure localStorage is updated
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+      return newValue;
+    });
   };
 
   return (
