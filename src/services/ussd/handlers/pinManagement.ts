@@ -7,6 +7,7 @@ import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService } from '../../webHookServices.js';
+import { TranslationService } from '../../translations.js';
 
 /**
  * Check if user has a PIN set
@@ -77,6 +78,7 @@ export function requiresPinVerification(session: USSDSession): boolean {
  * Initiate PIN verification for sensitive operations
  */
 export function requestPinVerification(session: USSDSession, operation: string, nextMenu: string): string {
+  const lang = session.language || 'en';
   session.currentMenu = 'pin_check';
   session.step = 1;
   session.data.pendingOperation = operation;
@@ -89,6 +91,7 @@ export function requestPinVerification(session: USSDSession, operation: string, 
  * Handle PIN check - verify existing PIN
  */
 export async function handlePinCheck(input: string, session: USSDSession, handleCheckBalance: any, handleTransactionHistory: any): Promise<string> {
+  const lang = session.language || 'en';
   console.log(`🔑 PIN check for ${session.phoneNumber}, step: ${session.step}, raw input: "${input}"`);
   
   // Extract the last part of USSD input (the actual PIN entered)
@@ -181,8 +184,7 @@ Please select an option:
 /**
  * Handle PIN setup - for new users or PIN reset
  */
-export async function handlePinSetup(input: string, session: USSDSession, lang: string): Promise<string> {
-  const lang = session.language || 'en';
+export async function handlePinSetup(input: string, session: USSDSession, lang: string = 'en'): Promise<string> {
   const inputParts = input.split('*');
   const pinInput = inputParts[inputParts.length - 1] || '';
   console.log(`🔧 PIN setup for ${session.phoneNumber}, step: ${session.step}, input: "${pinInput}"`);

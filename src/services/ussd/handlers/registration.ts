@@ -7,6 +7,7 @@ import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { detectCurrencyFromPhone, getUserCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService } from '../../webHookServices.js';
+import { TranslationService } from '../../translations.js';
 
 // In-memory storage for verification codes
 const verificationCodes = new Map<string, { code: string; userId: string; timestamp: number }>();
@@ -94,6 +95,7 @@ export function verifyVerificationCode(phoneNumber: string, inputCode: string): 
  * Handle registration check - first step when user dials USSD
  */
 export async function handleRegistrationCheck(input: string, session: USSDSession, sendSMS: (phone: string, msg: string) => Promise<any>, hasUserPin: (phone: string) => Promise<boolean>): Promise<string> {
+  const lang = session.language || 'en';
   console.log(`🔍 Registration check for ${session.phoneNumber}, input: "${input}"`);
   
   if (!input) {
@@ -203,6 +205,8 @@ export async function handleUserRegistration(input: string, session: USSDSession
  * Handle verification - for verifying SMS code
  */
 export async function handleVerification(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
+  const translationService = new TranslationService();
   const sanitized_input = input.split("*")[input.split("*").length - 1];
   console.log(`🔍 Verification for ${session.phoneNumber}, attempt ${(session.data.verificationAttempts || 0) + 1}, input: "${sanitized_input}"`);
   
