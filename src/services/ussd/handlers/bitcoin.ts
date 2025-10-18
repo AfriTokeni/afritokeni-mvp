@@ -22,6 +22,7 @@ export function initBitcoinHandlers(smsFunc: any, mainMenuFunc: any) {
 }
 
 async function handleBitcoin(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   // If coming from main menu with chained input (e.g., "2*2.1*1234"), extract the second part
   // Otherwise extract the last part for direct navigation
@@ -62,7 +63,7 @@ Please select an option:
         return await handleBTCBalance(input, session);
       }
       console.log(`⏸️ Requesting PIN from user`);
-      return continueSession('Check Balance\nEnter your 4-digit PIN:');
+      return continueSession(`Check Balance\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '2':
       session.currentMenu = 'btc_rate';
@@ -71,13 +72,13 @@ Please select an option:
       if (session.data.pinVerified) {
         return await handleBTCRate('', session);
       }
-      return continueSession('Bitcoin Rate\nEnter your 4-digit PIN:');
+      return continueSession(`Bitcoin Rate\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '3':
       session.currentMenu = 'btc_buy';
       session.step = 1;
       const currency = getSessionCurrency(session);
-      return continueSession(`Buy Bitcoin\nEnter ${currency} amount to spend:`);
+      return continueSession(`Buy Bitcoin\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '4':
       session.currentMenu = 'btc_sell';
@@ -87,7 +88,7 @@ Please select an option:
     case '5':
       session.currentMenu = 'btc_send';
       session.step = 1;
-      return continueSession('Send Bitcoin\nEnter your 4-digit PIN:');
+      return continueSession(`Send Bitcoin\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '0':
       session.currentMenu = 'main';
@@ -107,6 +108,7 @@ Please select an option:
 
 // Bitcoin balance handler - matches USDC pattern exactly
 async function handleBTCBalance(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
@@ -165,6 +167,7 @@ Thank you for using AfriTokeni!`);
 }
 
 async function handleBTCRate(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   
@@ -250,7 +253,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       }
       
       if (ugxAmount < 10000) {
-        return continueSession(`Minimum purchase: ${currency} 10,000\nEnter ${currency} amount to spend:`);
+        return continueSession(`Minimum purchase: ${currency} 10,000\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check user balance first
@@ -521,11 +524,11 @@ Choose amount type:
         session.data.amountType = 'ugx';
         session.step = 2;
         const currency = getSessionCurrency(session);
-        return continueSession(`Enter ${currency} amount to receive (min: ${currency} 1,000):`);
+        return continueSession(`Enter ${currency} amount to receive (min: ${currency} 1,000):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       } else if (currentInput === '2') {
         session.data.amountType = 'btc';
         session.step = 2;
-        return continueSession('Enter BTC amount to sell (min: ₿0.00001):');
+        return continueSession(`Enter BTC amount to sell (min: ₿0.00001):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       } else if (currentInput === '0') {
         session.currentMenu = 'bitcoin';
         session.step = 0;
@@ -551,11 +554,11 @@ Choose amount type:
         const currency = getSessionCurrency(session);
         ugxAmount = parseFloat(currentInput);
         if (isNaN(ugxAmount) || ugxAmount <= 0) {
-          return continueSession(`Invalid amount.\nEnter ${currency} amount to receive (min: ${currency} 1,000):`);
+          return continueSession(`Invalid amount.\nEnter ${currency} amount to receive (min: ${currency} 1,000):\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         if (ugxAmount < 1000) {
-          return continueSession(`Minimum sale: ${currency} 1,000\nEnter ${currency} amount to receive:`);
+          return continueSession(`Minimum sale: ${currency} 1,000\nEnter ${currency} amount to receive:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         // Get exchange rate and calculate BTC amount (before fees)
@@ -571,11 +574,11 @@ Choose amount type:
         // User entered BTC amount directly
         btcAmount = parseFloat(currentInput);
         if (isNaN(btcAmount) || btcAmount <= 0) {
-          return continueSession('Invalid amount.\nEnter BTC amount to sell (min: ₿0.00001):');
+          return continueSession(`Invalid amount.\nEnter BTC amount to sell (min: ₿0.00001):\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         if (btcAmount < 0.00001) {
-          return continueSession('Minimum sale: ₿0.00001 BTC\nEnter BTC amount to sell:');
+          return continueSession(`Minimum sale: ₿0.00001 BTC\nEnter BTC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         // Calculate UGX amount
@@ -607,7 +610,7 @@ Your balance: ₿${balance.balanceBTC} BTC
 
 Required: ₿${btcAmount.toFixed(8)} BTC
 
-Enter a smaller amount:`);
+Enter a smaller amount:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
       } catch (error) {
@@ -704,7 +707,7 @@ Sell: ₿${btcAmount.toFixed(8)} BTC
 Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
-Enter your PIN to confirm:`);
+Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 4: {
@@ -865,7 +868,7 @@ Your Balance: ₿${balance.balanceBTC} BTC
 Enter recipient phone number:
 (e.g. 256700123456)
 
-Press 0 to go back`);
+Press 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error checking ckBTC balance:', error);
@@ -876,7 +879,7 @@ Press 0 to go back`);
     case 2: {
       // Recipient phone number entry
       if (!currentInput) {
-        return continueSession('Enter recipient phone number:\n(e.g. 256700123456)\n\nPress 0 to go back');
+        return continueSession(`Enter recipient phone number:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Validate and format phone number
@@ -891,25 +894,25 @@ Press 0 to go back`);
         } else if (recipientPhone.length === 9) {
           recipientPhone = '+256' + recipientPhone;
         } else {
-          return continueSession('Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back');
+          return continueSession(`Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
       }
       
       // Basic validation
       if (!/^\+256[0-9]{9}$/.test(recipientPhone)) {
-        return continueSession('Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back');
+        return continueSession(`Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check if recipient is same as sender
       if (recipientPhone === `+${session.phoneNumber}`) {
-        return continueSession('Cannot send to yourself.\nEnter different phone:\n(e.g. 256700123456)\n\nPress 0 to go back');
+        return continueSession(`Cannot send to yourself.\nEnter different phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check if recipient is registered
       try {
         const recipientUser = await DataService.findUserByPhoneNumber(recipientPhone);
         if (!recipientUser) {
-          return continueSession(`Recipient ${recipientPhone} is not registered with AfriTokeni.\nThey need to register first.\n\nEnter different phone:\n(e.g. 256700123456)\n\nPress 0 to go back`);
+          return continueSession(`Recipient ${recipientPhone} is not registered with AfriTokeni.\nThey need to register first.\n\nEnter different phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         session.data.recipientPhone = recipientPhone;
@@ -924,7 +927,7 @@ Enter BTC amount to send:
         
       } catch (error) {
         console.error('Error checking recipient:', error);
-        return continueSession('Error checking recipient.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back');
+        return continueSession(`Error checking recipient.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     
@@ -933,11 +936,11 @@ Enter BTC amount to send:
       const btcAmount = parseFloat(currentInput);
       
       if (isNaN(btcAmount) || btcAmount <= 0) {
-        return continueSession('Invalid amount.\nEnter BTC amount to send:\n(Min: ₿0.00001)');
+        return continueSession(`Invalid amount.\nEnter BTC amount to send:\n(Min: ₿0.00001)\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (btcAmount < 0.00001) {
-        return continueSession('Minimum send: ₿0.00001 BTC\nEnter BTC amount to send:');
+        return continueSession(`Minimum send: ₿0.00001 BTC\nEnter BTC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const userBalance = session.data.userBalance;
@@ -962,7 +965,7 @@ Network fee: ₿${networkFee.toFixed(8)} BTC
 Total needed: ₿${totalBTC.toFixed(8)} BTC
 Your balance: ₿${userBalance.balanceBTC} BTC
 
-Enter smaller amount:`);
+Enter smaller amount:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         session.data.sendAmount = btcAmount;
@@ -983,11 +986,11 @@ Amount: ₿${btcAmount.toFixed(8)} BTC
 Network fee: ₿${networkFee.toFixed(8)} BTC
 Total: ₿${totalBTC.toFixed(8)} BTC
 
-Enter your PIN to confirm:`);
+Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error calculating send details:', error);
-        return continueSession('Error calculating fees. Please try again.\nEnter BTC amount to send:');
+        return continueSession(`Error calculating fees. Please try again.\nEnter BTC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     

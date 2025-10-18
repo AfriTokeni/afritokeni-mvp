@@ -106,7 +106,7 @@ export async function handleRegistrationCheck(input: string, session: USSDSessio
       session.currentMenu = 'user_registration';
       session.step = 1;
       console.log(`➡️ Redirecting ${session.phoneNumber} to registration`);
-      return continueSession('Welcome to AfriTokeni!\nYou are not registered yet.\nPlease enter your full name (first and last name):');
+      return continueSession(`Welcome to AfriTokeni!\nYou are not registered yet.\nPlease enter your full name (first and last name):\n\n${TranslationService.translate('back_or_menu', lang)}`);
     } else {
       // User is registered - check if they have a PIN
       const hasPIN = await hasUserPin(session.phoneNumber);
@@ -117,7 +117,7 @@ export async function handleRegistrationCheck(input: string, session: USSDSessio
         session.currentMenu = 'pin_setup';
         session.step = 1;
         console.log(`➡️ Redirecting ${session.phoneNumber} to PIN setup`);
-        return continueSession('Welcome back to AfriTokeni!\nTo secure your account, please set up a 4-digit PIN:\nEnter your new PIN:');
+        return continueSession(`Welcome back to AfriTokeni!\nTo secure your account, please set up a 4-digit PIN:\nEnter your new PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       } else {
         // User registered and has PIN - load currency and go to main menu
         const currency = await getUserCurrency(session.phoneNumber);
@@ -139,7 +139,7 @@ Please select an option:
   }
   
   // This shouldn't be reached, but just in case
-  return continueSession('Welcome to AfriTokeni!\nPlease wait...');
+  return continueSession(`Welcome to AfriTokeni!\nPlease wait...\n\n${TranslationService.translate('back_or_menu', lang)}`);
 }
 
 /**
@@ -154,13 +154,13 @@ export async function handleUserRegistration(input: string, session: USSDSession
       // Getting full name
       if (!sanitized_input || sanitized_input.trim().length < 3) {
         console.log(`❌ Invalid name "${sanitized_input}" provided by ${session.phoneNumber}`);
-        return continueSession('Invalid name. Please enter your full name (first and last name):');
+        return continueSession(`Invalid name. Please enter your full name (first and last name):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const fullNameParts = sanitized_input.trim().split(/\s+/);
       if (fullNameParts.length < 2) {
         console.log(`❌ Incomplete name "${sanitized_input}" provided by ${session.phoneNumber}`);
-        return continueSession('Please enter both first and last name separated by space:');
+        return continueSession(`Please enter both first and last name separated by space:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // First word is first name, last word is last name
@@ -186,7 +186,7 @@ export async function handleUserRegistration(input: string, session: USSDSession
         session.currentMenu = 'verification';
         session.step = 1;
         console.log(`📱 SMS sent successfully to ${session.phoneNumber}, moving to verification menu`);
-        return continueSession(`Thank you ${firstName} ${lastName}!\nWe've sent a verification code to your phone.\nPlease enter the 6-digit code:`);
+        return continueSession(`Thank you ${firstName} ${lastName}!\nWe've sent a verification code to your phone.\nPlease enter the 6-digit code:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       } catch (error) {
         console.error(`❌ Failed to send verification SMS to ${session.phoneNumber}:`, error);
         return endSession('Failed to send verification code. Please try again later.');
@@ -216,7 +216,7 @@ export async function handleVerification(input: string, session: USSDSession): P
           console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
           return endSession('Too many failed attempts. Please dial again to restart registration.');
         }
-        return continueSession('Invalid code format. Please enter the 6-digit verification code:');
+        return continueSession(`Invalid code format. Please enter the 6-digit verification code:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify the code
@@ -230,7 +230,7 @@ export async function handleVerification(input: string, session: USSDSession): P
           console.log(`🚫 Max verification attempts reached for ${session.phoneNumber}`);
           return endSession('Too many failed attempts. Please dial again to restart registration.');
         }
-        return continueSession('Invalid verification code. Please try again:');
+        return continueSession(`Invalid verification code. Please try again:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Code is valid - register the user
@@ -250,7 +250,7 @@ export async function handleVerification(input: string, session: USSDSession): P
       console.log(`👤 User ${session.phoneNumber} registered successfully, moving to PIN setup`);
       session.currentMenu = 'pin_setup';
       session.step = 1;
-      return continueSession('Verification successful!\nAccount created successfully.\nNow please set up a 4-digit PIN to secure your account:\nEnter your new PIN:');
+      return continueSession(`Verification successful!\nAccount created successfully.\nNow please set up a 4-digit PIN to secure your account:\nEnter your new PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
       
     default:

@@ -127,7 +127,7 @@ Thank you for using AfriTokeni!`);
         }
         
         return continueSession(`Incorrect PIN. ${3 - session.data.pinAttempts} attempts remaining.
-Enter your PIN:`);
+Enter your PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
 
       // PIN is correct, process the transaction
@@ -214,6 +214,6 @@ Thank you for using AfriTokeni!`);
       
       const currency = getSessionCurrency(session);
       session.step = 1;
-      return continueSession(`Enter amount to send (${currency}):`);
+      return continueSession(`Enter amount to send (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
   }
 }

@@ -52,17 +52,17 @@ Please select an option:
     case '3':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
-      return continueSession('Buy USDC\nEnter your 4-digit PIN:');
+      return continueSession(`Buy USDC\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '4':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
-      return continueSession('Sell USDC\nEnter your 4-digit PIN:');
+      return continueSession(`Sell USDC\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '5':
       session.currentMenu = 'usdc_send';
       session.step = 1;
-      return continueSession('Send USDC\nEnter your 4-digit PIN:');
+      return continueSession(`Send USDC\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '0':
       session.currentMenu = 'main';
@@ -209,6 +209,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
 }
 
 async function handleUSDCBuy(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   
@@ -226,7 +227,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       }
       
       session.step = 2;
-      return continueSession('Buy USDC\nEnter amount in UGX:');
+      return continueSession(`Buy USDC\nEnter amount in UGX:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 2: {
@@ -234,12 +235,12 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       const amountUGX = parseFloat(currentInput);
       
       if (isNaN(amountUGX) || amountUGX <= 0) {
-        return continueSession('Invalid amount.\nEnter amount in UGX:');
+        return continueSession(`Invalid amount.\nEnter amount in UGX:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (amountUGX < 1000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Minimum purchase: ${currency} 1,000\nEnter amount in ${currency}:`);
+        return continueSession(`Minimum purchase: ${currency} 1,000\nEnter amount in ${currency}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check user balance first
@@ -314,7 +315,7 @@ Select an agent:
       }
       
       if (selection < 1 || selection > (session.data.availableAgents?.length || 0)) {
-        return continueSession('Invalid selection.\nChoose an agent number or 0 to cancel:');
+        return continueSession(`Invalid selection.\nChoose an agent number or 0 to cancel:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -401,6 +402,7 @@ Thank you for using AfriTokeni!`);
 }
 
 async function handleUSDCSell(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   
@@ -447,7 +449,7 @@ Enter amount to sell (USDC):
         return continueSession(`Error getting balance.
 Please try again later.
 
-Enter your 4-digit PIN:`);
+Enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     
@@ -457,17 +459,17 @@ Enter your 4-digit PIN:`);
       const userBalance = session.data.usdcBalance || 0;
       
       if (isNaN(usdcAmount) || usdcAmount <= 0) {
-        return continueSession('Invalid amount.\nEnter USDC amount to sell:');
+        return continueSession(`Invalid amount.\nEnter USDC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (usdcAmount < 1) {
-        return continueSession('Minimum sale: $1.00 USDC\nEnter USDC amount to sell:');
+        return continueSession(`Minimum sale: $1.00 USDC\nEnter USDC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (usdcAmount > userBalance) {
         return continueSession(`Insufficient balance.
 Your balance: $${userBalance.toFixed(2)} USDC
-Enter USDC amount to sell:`);
+Enter USDC amount to sell:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       try {
@@ -557,7 +559,7 @@ Sell: $${usdcAmount.toFixed(6)} USDC
 Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 You receive: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
-Enter your PIN to confirm:`);
+Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 4: {
@@ -655,6 +657,7 @@ Thank you for using AfriTokeni!`);
 }
 
 async function handleUSDCSend(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   
@@ -701,7 +704,7 @@ Enter amount to send (USDC):
         return continueSession(`Error getting balance.
 Please try again later.
 
-Enter your 4-digit PIN:`);
+Enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     
@@ -711,11 +714,11 @@ Enter your 4-digit PIN:`);
       const userBalance = session.data.usdcBalance || 0;
       
       if (isNaN(usdcAmount) || usdcAmount <= 0) {
-        return continueSession('Invalid amount.\nEnter USDC amount to send:');
+        return continueSession(`Invalid amount.\nEnter USDC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (usdcAmount < 0.01) {
-        return continueSession('Minimum send: $0.01 USDC\nEnter USDC amount to send:');
+        return continueSession(`Minimum send: $0.01 USDC\nEnter USDC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Calculate transaction fee (0.0001 USDC)
@@ -728,7 +731,7 @@ Amount: $${usdcAmount.toFixed(6)} USDC
 Fee: $${transactionFee.toFixed(6)} USDC
 Total needed: $${totalRequired.toFixed(6)} USDC
 Your balance: $${userBalance.toFixed(6)} USDC
-Enter USDC amount to send:`);
+Enter USDC amount to send:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.data.usdcAmount = usdcAmount;
@@ -759,7 +762,7 @@ Enter recipient phone number:
       // Basic phone number validation
       const phoneRegex = /^\+256[0-9]{9}$/;
       if (!phoneRegex.test(recipientPhone)) {
-        return continueSession('Invalid phone number format.\nEnter recipient phone:\n(Format: +256701234567)');
+        return continueSession(`Invalid phone number format.\nEnter recipient phone:\n(Format: +256701234567)\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check if recipient exists
@@ -768,12 +771,12 @@ Enter recipient phone number:
         if (!recipient) {
           return continueSession(`Recipient ${recipientPhone} not found.
 Please ensure they have an AfriTokeni account.
-Enter recipient phone number:`);
+Enter recipient phone number:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         // Don't allow sending to yourself
         if (recipientPhone === `+${session.phoneNumber}`) {
-          return continueSession('Cannot send to your own number.\nEnter recipient phone number:');
+          return continueSession(`Cannot send to your own number.\nEnter recipient phone number:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         session.data.recipientPhone = recipientPhone;
@@ -791,11 +794,11 @@ Amount: $${usdcAmount.toFixed(6)} USDC
 Fee: $${transactionFee.toFixed(6)} USDC
 Total: $${totalAmount.toFixed(6)} USDC
 
-Enter your PIN to confirm:`);
+Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error finding recipient:', error);
-        return continueSession('Error verifying recipient.\nPlease try again.\nEnter recipient phone number:');
+        return continueSession(`Error verifying recipient.\nPlease try again.\nEnter recipient phone number:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     

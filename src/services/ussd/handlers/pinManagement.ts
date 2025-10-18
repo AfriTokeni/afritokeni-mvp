@@ -82,7 +82,7 @@ export function requestPinVerification(session: USSDSession, operation: string, 
   session.data.pendingOperation = operation;
   session.data.nextMenu = nextMenu;
   session.data.pinAttempts = 0;
-  return continueSession(`${operation}\nFor security, please enter your 4-digit PIN:`);
+  return continueSession(`${operation}\nFor security, please enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
 }
 
 /**
@@ -100,7 +100,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
     case 1: {
       // User is entering their PIN
       if (!pinInput) {
-        return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
+        return continueSession(`Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (!/^\d{4}$/.test(pinInput)) {
@@ -112,7 +112,7 @@ export async function handlePinCheck(input: string, session: USSDSession, handle
           return endSession('Too many failed attempts. Please try again later.');
         }
         
-        return continueSession('Invalid PIN format. Please enter exactly 4 digits:');
+        return continueSession(`Invalid PIN format. Please enter exactly 4 digits:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify the PIN
@@ -165,7 +165,7 @@ Please select an option:
         }
         
         const remainingAttempts = 3 - session.data.pinAttempts;
-        return continueSession(`Incorrect PIN. You have ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.\nPlease enter your 4-digit PIN:`);
+        return continueSession(`Incorrect PIN. You have ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.\nPlease enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     
@@ -174,7 +174,7 @@ Please select an option:
       console.log(`🔑 Initializing PIN check for ${session.phoneNumber}`);
       session.step = 1;
       session.data.pinAttempts = 0;
-      return continueSession('Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:');
+      return continueSession(`Welcome to AfriTokeni!\nPlease enter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
   }
 }
 
@@ -192,12 +192,12 @@ export async function handlePinSetup(input: string, session: USSDSession): Promi
       // First PIN entry
       if (!/^\d{4}$/.test(pinInput)) {
         console.log(`❌ Invalid PIN format during setup for ${session.phoneNumber}: "${pinInput}"`);
-        return continueSession('Invalid PIN format.\nPlease enter exactly 4 digits:');
+        return continueSession(`Invalid PIN format.\nPlease enter exactly 4 digits:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       session.data.newPin = pinInput;
       session.step = 2;
       console.log(`✅ First PIN entry accepted for ${session.phoneNumber}`);
-      return continueSession('Please confirm your PIN by entering it again:');
+      return continueSession(`Please confirm your PIN by entering it again:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case 2:
       // PIN confirmation
@@ -209,7 +209,7 @@ export async function handlePinSetup(input: string, session: USSDSession): Promi
           session.step = 1;
           session.data = {};
           console.log(`❌ PIN mismatch for ${session.phoneNumber}`);
-          return continueSession('PINs do not match.\nPlease enter your new 4-digit PIN again:');
+          return continueSession(`PINs do not match.\nPlease enter your new 4-digit PIN again:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
 
         console.log(`🔑 New PIN confirmed for ${session.phoneNumber}`);
@@ -236,7 +236,7 @@ Please select an option:
           session.step = 1;
           session.data = {};
           console.log(`❌ Failed to save PIN for ${session.phoneNumber}`);
-          return continueSession('Error saving PIN. Please try again.\nEnter your new 4-digit PIN:');
+          return continueSession(`Error saving PIN. Please try again.\nEnter your new 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
       }  
     

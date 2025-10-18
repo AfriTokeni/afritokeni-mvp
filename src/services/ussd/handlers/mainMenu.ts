@@ -67,7 +67,7 @@ export async function handleMainMenu(
         // For chained input, pass full input; otherwise pass empty to show menu
         return handleDAO(isChainedInput ? input : '', session);
       }
-      return continueSession(`DAO Governance coming soon!`);
+      return continueSession(`DAO Governance coming soon!\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '5': {
       const currency = getSessionCurrency(session);

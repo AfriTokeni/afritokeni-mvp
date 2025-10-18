@@ -6,11 +6,13 @@
 import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { WebhookDataService as DataService, Agent } from '../../webHookServices.js';
+import { TranslationService } from '../../translations.js';
 
 /**
  * Handle find agent - show available agents
  */
 export async function handleFindAgent(input: string, session: USSDSession, handleLocalCurrency: any): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   
@@ -75,7 +77,7 @@ Thank you for using AfriTokeni!`);
     }
     
     return continueSession(`Invalid selection.
-${agentList}`);
+${agentList}\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
   } catch (error) {
     console.error('Error getting agents:', error);

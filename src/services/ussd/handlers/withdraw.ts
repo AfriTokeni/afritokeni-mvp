@@ -43,12 +43,12 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       
       if (amount < 1000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Minimum withdrawal: ${currency} 1,000\nEnter amount (${currency}):`);
+        return continueSession(`Minimum withdrawal: ${currency} 1,000\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (amount > 2000000) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Maximum withdrawal: ${currency} 2,000,000\nEnter amount (${currency}):`);
+        return continueSession(`Maximum withdrawal: ${currency} 2,000,000\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
 
       session.data.withdrawAmount = amount;
@@ -127,7 +127,7 @@ Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession('Invalid selection. Choose agent number or 0 to cancel:');
+        return continueSession(`Invalid selection. Choose agent number or 0 to cancel:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const selectedAgent = agents[agentChoice - 1];
@@ -170,7 +170,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         return continueSession(`Invalid PIN format. Enter 4-digit PIN:
-Attempts remaining: ${3 - session.data.pinAttempts}`);
+Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       console.log(`Verifying PIN for ${session.phoneNumber}`);
@@ -185,7 +185,7 @@ Attempts remaining: ${3 - session.data.pinAttempts}`);
           }
           
           return continueSession(`Incorrect PIN. Try again:
-Attempts remaining: ${3 - session.data.pinAttempts}`);
+Attempts remaining: ${3 - session.data.pinAttempts}\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         session.step = 5;
