@@ -281,7 +281,12 @@ export class TranslationService {
       en: 'Press 0 to return to main menu',
       lg: 'Nyiga 0 okudda ku menu enkulu',
       sw: 'Bonyeza 0 kurudi kwa menyu kuu'
-    }
+    },
+    'back_or_menu': {
+      en: '0. Back | 9. Menu',
+      lg: '0. Ddayo | 9. Menu',
+      sw: '0. Rudi | 9. Menyu'
+    },
   };
 
   /**

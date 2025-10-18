@@ -331,8 +331,15 @@ async function handleVotingPower(input: string, session: USSDSession): Promise<s
   const lockedTokens = session.data.lockedTokens || 0;
   const available = afriTokens - lockedTokens;
   
-  // If user provided input (pressed any key), go back to DAO menu
+  // Handle menu navigation
   if (input && input.trim() !== '') {
+    if (input.trim() === '9') {
+      // Show DAO menu
+      session.currentMenu = 'dao';
+      session.step = 0;
+      return continueSession('__SHOW_DAO_MENU__');
+    }
+    // Any other input goes back to DAO menu
     session.currentMenu = 'dao';
     session.step = 0;
     return continueSession('__SHOW_DAO_MENU__');
@@ -347,7 +354,7 @@ Available: ${available} AFRI
 
 Locked tokens released when proposals end.
 
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
 }
 
 /**
@@ -358,8 +365,15 @@ async function handleActiveVotes(input: string, session: USSDSession): Promise<s
   const userVotes = session.data.userVotes || [];
   const lockedTokens = session.data.lockedTokens || 0;
   
-  // If user provided input (pressed any key), go back to DAO menu
+  // Handle navigation
   if (input && input.trim() !== '') {
+    if (input.trim() === '9') {
+      // Show DAO menu
+      session.currentMenu = 'dao';
+      session.step = 0;
+      return continueSession('__SHOW_DAO_MENU__');
+    }
+    // Any other input (including 0) goes back to DAO menu
     session.currentMenu = 'dao';
     session.step = 0;
     return continueSession('__SHOW_DAO_MENU__');
@@ -372,7 +386,7 @@ You have no active votes.
 
 Vote on proposals to participate in governance!
 
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
   }
   
   let response = `Your Active Votes\n\n`;
