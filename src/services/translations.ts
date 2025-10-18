@@ -554,6 +554,46 @@ export class TranslationService {
       lg: 'Kiremya mu kuweereza. Gezaako oluvannyuma.',
       sw: 'Kosa katika kuchakata. Tafadhali jaribu tena baadaye.'
     },
+    'usdc_menu_title': {
+      en: 'USDC (ckUSDC)',
+      lg: 'USDC (ckUSDC)',
+      sw: 'USDC (ckUSDC)'
+    },
+    'usdc_rate': {
+      en: 'USDC Rate',
+      lg: 'Omuwendo gwa USDC',
+      sw: 'Bei ya USDC'
+    },
+    'buy_usdc': {
+      en: 'Buy USDC',
+      lg: 'Gula USDC',
+      sw: 'Nunua USDC'
+    },
+    'sell_usdc': {
+      en: 'Sell USDC',
+      lg: 'Tunda USDC',
+      sw: 'Uza USDC'
+    },
+    'send_usdc': {
+      en: 'Send USDC',
+      lg: 'Wereza USDC',
+      sw: 'Tuma USDC'
+    },
+    'current_rate': {
+      en: 'Current Rate',
+      lg: 'Omuwendo gwa kati',
+      sw: 'Bei ya sasa'
+    },
+    'last_updated': {
+      en: 'Last Updated',
+      lg: 'Oluvannyuma olw\'okusemba',
+      sw: 'Imesasishwa mwisho'
+    },
+    'error_retrieving_rate': {
+      en: 'Error retrieving rate. Please try again later.',
+      lg: 'Kiremya mu kufuna omuwendo. Gezaako oluvannyuma.',
+      sw: 'Kosa katika kupata bei. Tafadhali jaribu tena baadaye.'
+    },
   };
 
   /**

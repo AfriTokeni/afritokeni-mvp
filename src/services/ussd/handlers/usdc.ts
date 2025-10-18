@@ -27,14 +27,15 @@ async function handleUSDC(input: string, session: USSDSession): Promise<string> 
   const currentInput = inputParts[inputParts.length - 1] || '';
   
   if (!currentInput) {
-    return continueSession(`USDC (ckUSDC)
-Please select an option:
-1. Check Balance
-2. USDC Rate
-3. Buy USDC
-4. Sell USDC
-5. Send USDC
-0. Back to Main Menu`);
+    const lang = session.language || 'en';
+    return continueSession(`${TranslationService.translate('usdc_menu_title', lang)}
+${TranslationService.translate('please_select_option', lang)}
+1. ${TranslationService.translate('check_balance', lang)}
+2. ${TranslationService.translate('usdc_rate', lang)}
+3. ${TranslationService.translate('buy_usdc', lang)}
+4. ${TranslationService.translate('sell_usdc', lang)}
+5. ${TranslationService.translate('send_usdc', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
   }
   
   const lang = session.language || 'en';
@@ -43,7 +44,7 @@ Please select an option:
     case '1':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
-      return continueSession(`Check Balance\nEnter your 4-digit PIN:`);
+      return continueSession(`${TranslationService.translate('check_balance', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '2':
       // Rate check doesn't need PIN - just show the rate
@@ -52,17 +53,17 @@ Please select an option:
     case '3':
       session.currentMenu = 'usdc_buy';
       session.step = 1;
-      return continueSession(`Buy USDC\nEnter your 4-digit PIN:`);
+      return continueSession(`${TranslationService.translate('buy_usdc', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '4':
       session.currentMenu = 'usdc_sell';
       session.step = 1;
-      return continueSession(`Sell USDC\nEnter your 4-digit PIN:`);
+      return continueSession(`${TranslationService.translate('sell_usdc', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '5':
       session.currentMenu = 'usdc_send';
       session.step = 1;
-      return continueSession(`Send USDC\nEnter your 4-digit PIN:`);
+      return continueSession(`${TranslationService.translate('send_usdc', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '0':
       session.currentMenu = 'main';
@@ -103,7 +104,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN with demo fallback
@@ -121,7 +122,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       }
       
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Get USDC balance using real CkUSDCService
