@@ -137,10 +137,16 @@ export class USSDService {
       
       // Check if session expired
       if (session.isExpired()) {
-        return {
-          response: 'END Session expired. Please dial *229# again to start a new session.',
-          continueSession: false
-        };
+        // If user is dialing fresh (empty input), create new session
+        if (!text || text.trim() === '' || text.trim() === '*229#' || text.trim() === '*384*22948#') {
+          console.log('🔄 Session expired but user dialing fresh - creating new session');
+          session = await this.createUSSDSession(sessionId, phoneNumber);
+        } else {
+          return {
+            response: 'END Session expired. Please dial *229# again to start a new session.',
+            continueSession: false
+          };
+        }
       }
       
       // Update activity
