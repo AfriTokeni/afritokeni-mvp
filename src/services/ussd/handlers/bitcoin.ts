@@ -63,7 +63,7 @@ Please select an option:
         return await handleBTCBalance(input, session);
       }
       console.log(`⏸️ Requesting PIN from user`);
-      return continueSession(`Check Balance\nEnter your 4-digit PIN:`);
+      return continueSession(`${TranslationService.translate('check_balance', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '2':
       session.currentMenu = 'btc_rate';
@@ -72,7 +72,7 @@ Please select an option:
       if (session.data.pinVerified) {
         return await handleBTCRate('', session);
       }
-      return continueSession(`Bitcoin Rate\nEnter your 4-digit PIN:`);
+      return continueSession(`${TranslationService.translate('bitcoin_rate', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '3':
       session.currentMenu = 'btc_buy';
@@ -88,7 +88,7 @@ Please select an option:
     case '5':
       session.currentMenu = 'btc_send';
       session.step = 1;
-      return continueSession(`Send Bitcoin\nEnter your 4-digit PIN:`);
+      return continueSession(`${TranslationService.translate('send_bitcoin', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '0':
       session.currentMenu = 'main';
@@ -134,7 +134,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
       }
       
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Get Bitcoin balance using CkBTCService
@@ -185,7 +185,7 @@ Thank you for using AfriTokeni!`);
     }
     
     default:
-      return endSession('Invalid session state. Please try again.');
+      return endSession(TranslationService.translate('error_try_again', lang));
   }
 }
 
