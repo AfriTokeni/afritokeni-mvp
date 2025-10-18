@@ -77,6 +77,11 @@ export class TranslationService {
       lg: 'Ensimbi ziweereddwa!',
       sw: 'Muamala umefanikiwa!'
     },
+    'transaction_successful': {
+      en: 'Transaction successful',
+      lg: 'Ensimbi ziweereddwa',
+      sw: 'Muamala umefanikiwa'
+    },
     'transaction_failed': {
       en: 'Transaction failed',
       lg: 'Ensimbi teziweereddwa',
