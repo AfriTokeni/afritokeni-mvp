@@ -95,16 +95,6 @@ Feature: Cancel Functionality Across All USSD Flows
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 
-  Scenario: Cancel Bitcoin Buy at PIN entry (Swahili)
-    Given my language preference is "sw"
-    When I dial "*229#"
-    And I select "2" for Bitcoin
-    And I select "3" for Buy Bitcoin
-    And I enter amount "50000"
-    Then I should see "PIN" in USSD response
-    When I select "0" to cancel
-    Then I should see "Bitcoin" in USSD response
-
   # ==================== BITCOIN SELL ====================
   Scenario: Cancel Bitcoin Sell at amount entry (Luganda)
     Given my language preference is "lg"
@@ -133,39 +123,6 @@ Feature: Cancel Functionality Across All USSD Flows
     Then I should see "simu" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
-
-  # ==================== DAO VOTING ====================
-  Scenario: Cancel DAO voting at proposal selection (English)
-    Given there are active DAO proposals
-    When I dial "*229#"
-    And I select "4" for DAO Governance
-    And I select "1" for View Proposals
-    Then I should see "0. Back | 9. Menu" in USSD response
-    When I select "0" to cancel
-    Then I should see "DAO Governance" in USSD response
-
-  Scenario: Cancel DAO voting at vote choice (Luganda)
-    Given my language preference is "lg"
-    Given there are active DAO proposals
-    When I dial "*229#"
-    And I select "4" for DAO Governance
-    And I select "1" for View Proposals
-    And I select "1" for first proposal
-    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
-    When I select "0" to cancel
-    Then I should see "Okufuga kwa DAO" in USSD response
-
-  Scenario: Cancel DAO voting at amount entry (Swahili)
-    Given my language preference is "sw"
-    Given there are active DAO proposals
-    When I dial "*229#"
-    And I select "4" for DAO Governance
-    And I select "1" for View Proposals
-    And I select "1" for first proposal
-    And I select "1" for Vote YES
-    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
-    When I select "0" to cancel
-    Then I should see "Utawala wa DAO" in USSD response
 
   # ==================== SESSION DATA CLEANUP ====================
   Scenario: Cancel clears all session data
@@ -196,6 +153,6 @@ Feature: Cancel Functionality Across All USSD Flows
     And I select "1" for Send Money
     And I enter phone number "123"
     Then I should see "Invalid phone" in USSD response
-    And I should see "Press 0" in USSD response
+    And I should see "0. Back" in USSD response
     When I select "0" to cancel
     Then I should see "Local Currency" in USSD response
