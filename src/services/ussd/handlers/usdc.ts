@@ -37,7 +37,7 @@ ${TranslationService.translate('please_select_option', lang)}
     case '1':
       session.currentMenu = 'usdc_balance';
       session.step = 1;
-      return continueSession(`${TranslationService.translate('check_balance', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('check_balance', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
     
     case '2':
       // Rate check doesn't need PIN - just show the rate
@@ -99,7 +99,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Verify PIN with demo fallback
@@ -117,7 +117,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
       }
       
       if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
       
       // Get USDC balance using real CkUSDCService

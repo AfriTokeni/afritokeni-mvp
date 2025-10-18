@@ -20,10 +20,9 @@ Feature: USSD USDC Menu Navigation and Operations
 
   Scenario: Check USDC balance with PIN
     When I dial "*229#"
-    And I select "3" for USDC
+    And I select "3" for USSD
     And I select "1" for Check Balance
     Then I should see "Enter your 4-digit PIN" in USSD response
-    And I should see "0. Back | 9. Menu" in USSD response
     When I enter PIN "1234"
     Then I should see "Your USDC Balance" in USSD response
 
@@ -60,21 +59,21 @@ Feature: USSD USDC Menu Navigation and Operations
     Then I should see "Welcome to AfriTokeni" in USSD response
     And I should see "3. USDC" in USSD response
 
-  Scenario: Invalid PIN shows error with navigation options
+  Scenario: Invalid PIN shows error without navigation
     When I dial "*229#"
     And I select "3" for USDC
     And I select "1" for Check Balance
     When I enter PIN "9999"
     Then I should see "Incorrect PIN" in USSD response
-    And I should see "0. Back | 9. Menu" in USSD response
+    And I should see "Enter your 4-digit PIN" in USSD response
 
-  Scenario: Invalid PIN format shows error with navigation options
+  Scenario: Invalid PIN format shows error without navigation
     When I dial "*229#"
     And I select "3" for USDC
     And I select "1" for Check Balance
     When I enter PIN "123"
     Then I should see "Invalid PIN format" in USSD response
-    And I should see "0. Back | 9. Menu" in USSD response
+    And I should see "Enter your 4-digit PIN" in USSD response
 
   Scenario: Chained input for USDC balance check
     When I dial "*229#"
