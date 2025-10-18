@@ -130,6 +130,12 @@ export default defineConfig({
           write: "public",
           memory: "stable",
         },
+        {
+          collection: "withdrawal_requests",
+          read: "public",
+          write: "public",
+          memory: "stable",
+        },
       ],
       storage: [
         {
