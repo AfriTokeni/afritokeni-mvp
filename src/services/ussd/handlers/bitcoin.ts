@@ -92,7 +92,7 @@ Please select an option:
     case '0':
       session.currentMenu = 'main';
       session.step = 0;
-      return handleMainMenu('', session);
+      return continueSession('__SHOW_MAIN_MENU__');
     
     default:
       return continueSession(`Invalid option. Please try again:
