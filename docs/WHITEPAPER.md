@@ -1,9 +1,9 @@
 # AfriTokeni Whitepaper
 ## SMS-Accessible Crypto Banking for Africa
 
-**Version 1.4 | October 2025**
+**Version 1.5 | October 2025**
 
-**Latest Update**: DAO Governance now fully implemented with USSD voting interface
+**Latest Update**: Full trilingual USSD interface (English, Luganda, Swahili) with session reset and enhanced UX
 
 ---
 
@@ -15,6 +15,7 @@ AfriTokeni is a revolutionary financial inclusion platform that brings instant, 
 - **ckBTC (ICP Bitcoin)**: Instant Bitcoin transfers in <1 second with ~$0.01 fees
 - **ckUSDC (Stablecoin)**: Volatility protection with 1:1 USD peg
 - **USSD Access**: Works on 100% of phones, including feature phones
+- **Trilingual Interface**: Full support for English, Luganda, and Swahili
 - **Agent Network**: Physical cash-to-crypto exchange through verified local agents
 - **DAO Governance**: Community-owned platform with SMS voting
 
@@ -380,39 +381,55 @@ Many Africans want crypto benefits (speed, low fees, accessibility) WITHOUT Bitc
 
 ### 5.2 USSD Menu Structure
 
-```
-*229# → AfriTokeni Main Menu
+**Standard USSD Navigation**: AfriTokeni follows industry-standard single-digit navigation (like M-Pesa, Airtel Money) for maximum usability on feature phones.
 
-1. Local Currency (UGX)
-   1.1 Send Money
-   1.2 Deposit Cash (via agent)
-   1.3 Withdraw Cash (via agent)
-   1.4 Find Agents
+```
+*384*22948# → AfriTokeni Main Menu
+
+1. Local Currency
+   1. Send Money
+   2. Check Balance
+   3. Deposit Cash (via agent)
+   4. Withdraw Cash (via agent)
+   5. Transaction History
+   6. Find Agents
+   0. Back to Main Menu
 
 2. Bitcoin (ckBTC)
-   2.1 Check Balance
-   2.2 Send Bitcoin
-   2.3 Exchange Rates
-   2.4 Buy/Sell
+   1. Check Balance
+   2. Bitcoin Rate
+   3. Buy Bitcoin
+   4. Sell Bitcoin
+   5. Send Bitcoin
+   0. Back to Main Menu
 
 3. USDC (ckUSDC)
-   3.1 Check Balance
-   3.2 Send USDC
-   3.3 Exchange Rates
-   3.4 Buy/Sell
+   1. Check Balance
+   2. USDC Rate
+   3. Buy USDC
+   4. Sell USDC
+   5. Send USDC
+   0. Back to Main Menu
 
 4. DAO Governance
-   4.1 View Active Proposals
-   4.2 My Voting Power
-   4.3 Active Votes
-   4.4 Vote on Proposal
+   1. View Active Proposals
+   2. My Voting Power
+   3. My Active Votes
+   4. Vote on Proposal
+   0. Back to Main Menu
 
 5. Help & Support
-   5.1 How to Use
-   5.2 Contact Support
-   5.3 Transaction History
-   5.4 Account Settings
+6. Language Selection
+   1. English
+   2. Luganda
+   3. Swahili
 ```
+
+**Key UX Features**:
+- **Session Reset**: Dial `*384*22948#` anytime to start fresh from any state
+- **Cancel Anytime**: Press `0` to go back or cancel during any flow
+- **Auto-Prompt**: Every session end shows "Dial *384*22948# to start a new session"
+- **State Machine**: Proper context tracking prevents navigation errors
 
 ### 5.3 Example USSD Flows
 
@@ -484,12 +501,138 @@ Received $50 from John
 
 ### 5.4 Multi-Language Support
 
-All USSD menus available in:
-- **English**: Primary language
-- **Luganda**: Uganda's main local language
-- **Swahili**: East Africa lingua franca
+**Full trilingual support** ensures accessibility across East Africa:
 
-Language auto-detected or user-selectable.
+#### Supported Languages
+- **English**: Primary language for international users
+- **Luganda**: Uganda's main local language (16M+ speakers)
+- **Swahili**: East Africa lingua franca (200M+ speakers across Kenya, Tanzania, Uganda, Rwanda, Burundi, DRC)
+
+#### Language Selection
+Users can change language anytime via:
+```
+Main Menu → 6. Language Selection
+1. English
+2. Luganda  
+3. Swahili
+```
+
+#### Example: Deposit Flow in 3 Languages
+
+**English**:
+```
+Welcome to AfriTokeni!
+1. Local Currency
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+
+→ User enters: 1
+Local Currency
+1. Send Money
+2. Check Balance
+3. Deposit
+
+→ User enters: 3
+Deposit
+Enter amount (UGX):
+
+→ User enters: 50000
+Select Agent:
+1. Kampala Central Agent
+   Plot 123, Kampala Road
+2. Entebbe Agent Services
+   Airport Road, Entebbe
+
+→ User enters: 1
+Enter your 4-digit PIN:
+
+→ User enters: 1234
+✅ Deposit request created!
+Code: DEP-ABC123
+Show this code to agent
+Amount: UGX 50,000
+
+Dial *384*22948# to start a new session
+```
+
+**Luganda**:
+```
+Tukusanyukidde ku AfriTokeni!
+1. Ssente z'omu Uganda
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+
+→ Omukozesa ayingiza: 1
+Ssente z'omu Uganda
+1. Wereza Ssente
+2. Kebera Ssente
+3. Teeka Ssente
+
+→ Omukozesa ayingiza: 3
+Teeka Ssente
+Yingiza omuwendo (UGX):
+
+→ Omukozesa ayingiza: 50000
+Londa Omukozi:
+1. Omukozi wa Kampala Central
+   Plot 123, Kampala Road
+2. Omukozi wa Entebbe
+   Airport Road, Entebbe
+
+→ Omukozesa ayingiza: 1
+Yingiza PIN yo eya namba 4:
+
+→ Omukozesa ayingiza: 1234
+✅ Okusaba okw'okuteeka ssente kutondeddwa!
+Koodi: DEP-ABC123
+Laga koodi eno omukozi
+Omuwendo: UGX 50,000
+
+Kuba *384*22948# okutandika omulundi omupya
+```
+
+**Swahili**:
+```
+Karibu AfriTokeni!
+1. Sarafu ya Ndani
+2. Bitcoin (ckBTC)
+3. USDC (ckUSDC)
+
+→ Mtumiaji anaingiza: 1
+Sarafu ya Ndani
+1. Tuma Pesa
+2. Angalia Salio
+3. Weka Pesa
+
+→ Mtumiaji anaingiza: 3
+Weka Pesa
+Ingiza kiasi (UGX):
+
+→ Mtumiaji anaingiza: 50000
+Chagua Wakala:
+1. Wakala wa Kampala Central
+   Plot 123, Kampala Road
+2. Huduma za Wakala wa Entebbe
+   Airport Road, Entebbe
+
+→ Mtumiaji anaingiza: 1
+Ingiza PIN yako ya tarakimu 4:
+
+→ Mtumiaji anaingiza: 1234
+✅ Ombi la kuweka pesa limeundwa!
+Nambari: DEP-ABC123
+Onyesha nambari hii kwa wakala
+Kiasi: UGX 50,000
+
+Piga *384*22948# kuanza kipindi kipya
+```
+
+#### Translation Coverage
+- **100% menu coverage**: All menus, prompts, and responses translated
+- **Dynamic currency support**: Works with all 39 African currencies
+- **Error messages**: Localized error handling and validation
+- **Session management**: "Dial to start new session" prompt in all languages
+- **Transaction confirmations**: Complete transaction details in user's language
 
 ---
 
