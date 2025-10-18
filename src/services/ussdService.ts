@@ -161,7 +161,7 @@ export class USSDService {
       
       switch (session.currentMenu) {
         case 'main':
-          response = await handleMainMenu(input, session, handleLocalCurrency, handleBitcoin, async () => 'USDC Menu', handleDAO);
+          response = await handleMainMenu(input, session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
           break;
         
         case 'local_currency':
