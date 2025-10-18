@@ -19,7 +19,3 @@ When('I select {string} for USDC', async function (option: string) {
 When('I select {string} to show current menu', async function (option: string) {
   this.lastResponse = await this.ussdService.processUSSDRequest(this.phoneNumber, option);
 });
-
-When('I select {string} for invalid option', async function (option: string) {
-  this.lastResponse = await this.ussdService.processUSSDRequest(this.phoneNumber, option);
-});
