@@ -17,6 +17,9 @@ import { handleDAO } from './ussd/handlers/dao';
 export type { USSDSession };
 
 export class USSDService {
+  // In-memory session storage for playground mode
+  private static playgroundSessions = new Map<string, USSDSession>();
+
   static async createUSSDSession(sessionId: string, phoneNumber: string): Promise<USSDSession> {
     const rateLimitCheck = RateLimiter.isAllowed(phoneNumber, 'ussd');
     if (!rateLimitCheck.allowed) {
@@ -28,6 +31,13 @@ export class USSDService {
     
     // USSD sessions start at main menu (not registration_check)
     session.currentMenu = 'main';
+
+    // PLAYGROUND MODE: Store in memory instead of Juno
+    if (sessionId.startsWith('playground_')) {
+      console.log('✅ Playground mode: Storing session in memory');
+      this.playgroundSessions.set(sessionId, session);
+      return session;
+    }
 
     const dataForJuno = {
       sessionId: session.sessionId,
@@ -50,6 +60,11 @@ export class USSDService {
   }
 
   static async getUSSDSession(sessionId: string): Promise<USSDSession | null> {
+    // PLAYGROUND MODE: Get from memory
+    if (sessionId.startsWith('playground_')) {
+      return this.playgroundSessions.get(sessionId) || null;
+    }
+
     try {
       const doc = await getDoc({
         collection: 'ussd_sessions',
@@ -90,6 +105,12 @@ export class USSDService {
       // Update activity only if not explicitly set
       if (updates.lastActivity === undefined) {
         existingSession.updateActivity();
+      }
+
+      // PLAYGROUND MODE: Just update in memory
+      if (sessionId.startsWith('playground_')) {
+        this.playgroundSessions.set(sessionId, existingSession);
+        return true;
       }
 
       const dataForJuno = {

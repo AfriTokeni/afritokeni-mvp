@@ -574,34 +574,6 @@ const AgentDashboard: React.FC = () => {
             </div>
           </div> */}
 
-          {/* Bitcoin Services */}
-          {/* <div>
-            <h3 className="text-sm font-semibold text-neutral-700 mb-3">Bitcoin Services</h3>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <button 
-                onClick={() => navigate('/agents/bitcoin')}
-                className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-orange-300 transition-all duration-200"
-              >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                  <Bitcoin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Bitcoin Wallet</span>
-                <p className="text-xs text-neutral-600 mt-1">Manage Bitcoin funds</p>
-              </button>
-
-              <button 
-                onClick={() => navigate('/agents/process-withdrawals')}
-                className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-md hover:border-red-300 transition-all duration-200"
-              >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                  <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-neutral-900 block text-center">Process Withdrawals</span>
-                <p className="text-xs text-neutral-600 mt-1">Cash to customers</p>
-              </button>
-            </div>
-          </div> */}
-
         {/* Recent Transactions */}
         <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
           <div className="border-b border-neutral-200 p-3 sm:p-4 md:p-5 lg:p-6">
