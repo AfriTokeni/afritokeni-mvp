@@ -855,7 +855,7 @@ Thank you for using AfriTokeni!`);
         
       } catch (error) {
         console.error('Error processing Bitcoin sale:', error);
-        return endSession('Error processing sale. Please try again later.');
+        return endSession(TranslationService.translate('error_processing_sale', lang));
       }
     }
     
@@ -979,7 +979,7 @@ Press 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
       
       // Check if recipient is same as sender
       if (recipientPhone === `+${session.phoneNumber}`) {
-        return continueSession(`Cannot send to yourself.\nEnter different phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${TranslationService.translate('enter_different_phone', lang)}:\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check if recipient is registered
@@ -1001,7 +1001,7 @@ Enter BTC amount to send:
         
       } catch (error) {
         console.error('Error checking recipient:', error);
-        return continueSession(`Error checking recipient.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('error_try_again', lang)}\n${TranslationService.translate('enter_recipient_btc', lang)}:\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     
@@ -1168,7 +1168,7 @@ Thank you for using AfriTokeni!`);
         
       } catch (error) {
         console.error('Error processing BTC send:', error);
-        return endSession('Error processing send. Please try again later.');
+        return endSession(TranslationService.translate('error_processing_send', lang));
       }
     }
     
