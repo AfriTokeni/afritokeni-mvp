@@ -33,14 +33,14 @@ async function handleBitcoin(input: string, session: USSDSession): Promise<strin
   console.log(`🔵 handleBitcoin called - input: "${input}", currentInput: "${currentInput}", session.currentMenu: ${session.currentMenu}, session.step: ${session.step}`);
   
   if (!currentInput) {
-    return continueSession(`Bitcoin (ckBTC)
-Please select an option:
-1. Check Balance
-2. Bitcoin Rate
-3. Buy Bitcoin
-4. Sell Bitcoin
-5. Send Bitcoin
-0. Back to Main Menu`);
+    return continueSession(`${TranslationService.translate('bitcoin_menu_title', lang)}
+${TranslationService.translate('please_select_option', lang)}
+1. ${TranslationService.translate('check_balance', lang)}
+2. ${TranslationService.translate('bitcoin_rate', lang)}
+3. ${TranslationService.translate('buy_bitcoin', lang)}
+4. ${TranslationService.translate('sell_bitcoin', lang)}
+5. ${TranslationService.translate('send_bitcoin', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
   }
   
   switch (currentInput) {
@@ -96,13 +96,13 @@ Please select an option:
       return continueSession('__SHOW_MAIN_MENU__');
     
     default:
-      return continueSession(`Invalid option. Please try again:
-1. Check Balance
-2. Bitcoin Rate
-3. Buy Bitcoin
-4. Sell Bitcoin
-5. Send Bitcoin
-0. Back to Main Menu`);
+      return continueSession(`${TranslationService.translate('invalid_option', lang)}
+1. ${TranslationService.translate('check_balance', lang)}
+2. ${TranslationService.translate('bitcoin_rate', lang)}
+3. ${TranslationService.translate('buy_bitcoin', lang)}
+4. ${TranslationService.translate('sell_bitcoin', lang)}
+5. ${TranslationService.translate('send_bitcoin', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
   }
 }
 

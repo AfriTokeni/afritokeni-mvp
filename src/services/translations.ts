@@ -384,6 +384,16 @@ export class TranslationService {
       lg: 'Sisinkana ne agent wo okufuna ssente.',
       sw: 'Kutana na wakala wako kupokea pesa.'
     },
+    'send_bitcoin': {
+      en: 'Send Bitcoin',
+      lg: 'Wereza Bitcoin',
+      sw: 'Tuma Bitcoin'
+    },
+    'bitcoin_menu_title': {
+      en: 'Bitcoin (ckBTC)',
+      lg: 'Bitcoin (ckBTC)',
+      sw: 'Bitcoin (ckBTC)'
+    },
   };
 
   /**
