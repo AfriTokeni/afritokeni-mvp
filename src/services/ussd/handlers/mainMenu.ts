@@ -66,7 +66,7 @@ Please select an option:
     
     case '5': {
       const currency = getSessionCurrency(session);
-      return endSession(`AfriTokeni Help
+      return continueSession(`AfriTokeni Help
 
 Local Currency: Send, deposit, withdraw ${currency}
 Bitcoin: Buy, sell, send ckBTC
@@ -76,7 +76,12 @@ DAO: Vote on governance proposals
 For support: Call +256-XXX-XXXX
 Visit: afritokeni.com
 
-Thank you for using AfriTokeni!`);
+0 to go back to main menu`);
+    }
+    
+    case '0': {
+      // Go back to main menu (re-show it)
+      return handleMainMenu('', session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
     }
     
     default: {
