@@ -36,7 +36,8 @@ export async function handleSendMoney(
       if (currentInput === '0') {
         session.currentMenu = 'local_currency';
         session.step = 0;
-        return continueSession(''); // Will show local currency menu
+        session.data = {};
+        return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
       }
       
       // Validate phone number format (accepts +256XXXXXXXXX, 256XXXXXXXXX, 07XXXXXXXX, 03XXXXXXXX)
@@ -60,7 +61,7 @@ export async function handleSendMoney(
         session.currentMenu = 'local_currency';
         session.step = 0;
         session.data = {};
-        return continueSession('');
+        return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
       }
       
       const amount = parseFloat(currentInput);
