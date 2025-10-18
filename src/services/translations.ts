@@ -394,6 +394,166 @@ export class TranslationService {
       lg: 'Bitcoin (ckBTC)',
       sw: 'Bitcoin (ckBTC)'
     },
+    'buy_btc_enter_amount': {
+      en: 'Buy Bitcoin',
+      lg: 'Gula Bitcoin',
+      sw: 'Nunua Bitcoin'
+    },
+    'enter_amount_to_spend': {
+      en: 'Enter amount to spend',
+      lg: 'Yingiza omuwendo ogw\'okusaasaanya',
+      sw: 'Weka kiasi cha kutumia'
+    },
+    'minimum_purchase': {
+      en: 'Minimum purchase',
+      lg: 'Omuwendo omutono ogw\'okugula',
+      sw: 'Ununuzi wa chini'
+    },
+    'choose_agent': {
+      en: 'Choose an agent',
+      lg: 'Londa agent',
+      sw: 'Chagua wakala'
+    },
+    'or_cancel': {
+      en: 'or 0 to cancel',
+      lg: 'oba 0 okusazaamu',
+      sw: 'au 0 kughairi'
+    },
+    'purchase_summary': {
+      en: 'Purchase Summary',
+      lg: 'Ebikwata ku Kugula',
+      sw: 'Muhtasari wa Ununuzi'
+    },
+    'you_pay': {
+      en: 'You pay',
+      lg: 'Osasula',
+      sw: 'Utalipa'
+    },
+    'you_receive': {
+      en: 'You receive',
+      lg: 'Ofuna',
+      sw: 'Utapokea'
+    },
+    'agent': {
+      en: 'Agent',
+      lg: 'Agent',
+      sw: 'Wakala'
+    },
+    'rate': {
+      en: 'Rate',
+      lg: 'Omuwendo',
+      sw: 'Bei'
+    },
+    'purchase_failed': {
+      en: 'Purchase failed',
+      lg: 'Okugula kulemeddwa',
+      sw: 'Ununuzi umeshindwa'
+    },
+    'error_processing_purchase': {
+      en: 'Error processing purchase. Please try again later.',
+      lg: 'Kiremya mu kugula. Gezaako oluvannyuma.',
+      sw: 'Kosa katika kuchakata ununuzi. Tafadhali jaribu tena baadaye.'
+    },
+    'available': {
+      en: 'Available',
+      lg: 'Ebiriwo',
+      sw: 'Inapatikana'
+    },
+    'locked': {
+      en: 'Locked',
+      lg: 'Eziyiddwa',
+      sw: 'Imefungwa'
+    },
+    'enter_btc_amount': {
+      en: 'Enter BTC amount',
+      lg: 'Yingiza omuwendo gwa BTC',
+      sw: 'Weka kiasi cha BTC'
+    },
+    'minimum_sale': {
+      en: 'Minimum sale',
+      lg: 'Omuwendo omutono ogw\'okutunda',
+      sw: 'Mauzo ya chini'
+    },
+    'insufficient_btc': {
+      en: 'Insufficient Bitcoin balance',
+      lg: 'Bitcoin tezimala',
+      sw: 'Salio la Bitcoin haitoshi'
+    },
+    'required': {
+      en: 'Required',
+      lg: 'Ekyetaagisa',
+      sw: 'Inahitajika'
+    },
+    'enter_smaller_amount': {
+      en: 'Enter a smaller amount',
+      lg: 'Yingiza omuwendo omutono',
+      sw: 'Weka kiasi kidogo'
+    },
+    'sale_summary': {
+      en: 'Sale Summary',
+      lg: 'Ebikwata ku Kutunda',
+      sw: 'Muhtasari wa Mauzo'
+    },
+    'you_sell': {
+      en: 'You sell',
+      lg: 'Otunda',
+      sw: 'Unauza'
+    },
+    'sale_failed': {
+      en: 'Sale failed',
+      lg: 'Okutunda kulemeddwa',
+      sw: 'Mauzo yameshindwa'
+    },
+    'error_processing_sale': {
+      en: 'Error processing sale. Please try again later.',
+      lg: 'Kiremya mu kutunda. Gezaako oluvannyuma.',
+      sw: 'Kosa katika kuchakata mauzo. Tafadhali jaribu tena baadaye.'
+    },
+    'enter_recipient_btc': {
+      en: 'Enter recipient phone number',
+      lg: 'Yingiza namba ya simu y\'omuntu',
+      sw: 'Weka nambari ya simu ya mpokeaji'
+    },
+    'recipient_not_found': {
+      en: 'Recipient not found',
+      lg: 'Omuntu tazuuliddwa',
+      sw: 'Mpokeaji hajapatikana'
+    },
+    'they_need_register': {
+      en: 'They need to register first',
+      lg: 'Balina okwewandiisa',
+      sw: 'Wanahitaji kusajili kwanza'
+    },
+    'enter_different_phone': {
+      en: 'Enter different phone',
+      lg: 'Yingiza namba endala',
+      sw: 'Weka nambari nyingine'
+    },
+    'send_summary': {
+      en: 'Send Summary',
+      lg: 'Ebikwata ku Kuweereza',
+      sw: 'Muhtasari wa Kutuma'
+    },
+    'to': {
+      en: 'To',
+      lg: 'Eri',
+      sw: 'Kwa'
+    },
+    'network_fee': {
+      en: 'Network Fee',
+      lg: 'Ssente z\'omutimbagano',
+      sw: 'Ada ya Mtandao'
+    },
+    'send_failed': {
+      en: 'Send failed',
+      lg: 'Okuweereza kulemeddwa',
+      sw: 'Kutuma kumeshindwa'
+    },
+    'error_processing_send': {
+      en: 'Error processing send. Please try again later.',
+      lg: 'Kiremya mu kuweereza. Gezaako oluvannyuma.',
+      sw: 'Kosa katika kuchakata. Tafadhali jaribu tena baadaye.'
+    },
   };
 
   /**
