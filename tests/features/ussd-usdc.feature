@@ -45,31 +45,12 @@ Feature: USSD USDC Menu Navigation and Operations
     Then I should see "USDC (ckUSDC)" in USSD response
     And I should see "1. Check Balance" in USSD response
 
-  Scenario: Check USDC rate with PIN
+  Scenario: Check USDC rate without PIN
     When I dial "*229#"
     And I select "3" for USDC
     And I select "2" for USDC Rate
-    Then I should see "Enter your 4-digit PIN" in USSD response
-    And I should see "0. Back | 9. Menu" in USSD response
-    When I enter PIN "1234"
     Then I should see "Current USDC Exchange Rate" in USSD response
-
-  Scenario: Cancel USDC rate check with 0
-    When I dial "*229#"
-    And I select "3" for USDC
-    And I select "2" for USDC Rate
-    Then I should see "Enter your 4-digit PIN" in USSD response
-    When I select "0" to go back
-    Then I should see "USDC (ckUSDC)" in USSD response
-    And I should see "2. USDC Rate" in USSD response
-
-  Scenario: Show USDC menu with 9 during rate check
-    When I dial "*229#"
-    And I select "3" for USDC
-    And I select "2" for USDC Rate
-    Then I should see "Enter your 4-digit PIN" in USSD response
-    When I select "9" to show current menu
-    Then I should see "USDC (ckUSDC)" in USSD response
+    And I should see "1 USDC" in USSD response
 
   Scenario: Navigate back to main menu from USDC menu
     When I dial "*229#"
@@ -102,5 +83,5 @@ Feature: USSD USDC Menu Navigation and Operations
 
   Scenario: Chained input for USDC rate check
     When I dial "*229#"
-    And I enter chained input "3*2*1234"
+    And I enter chained input "3*2"
     Then I should see "Current USDC Exchange Rate" in USSD response

@@ -46,9 +46,8 @@ Please select an option:
       return continueSession(`Check Balance\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
     case '2':
-      session.currentMenu = 'usdc_rate';
-      session.step = 1;
-      return continueSession(`USDC Rate\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      // Rate check doesn't need PIN - just show the rate
+      return await handleUSDCRate('', session);
     
     case '3':
       session.currentMenu = 'usdc_buy';
@@ -165,49 +164,11 @@ Thank you for using AfriTokeni!`);
 }
 
 async function handleUSDCRate(input: string, session: USSDSession): Promise<string> {
-  const inputParts = input.split('*');
-  const sanitized_input = inputParts[inputParts.length - 1] || '';
-  const lang = session.language || 'en';
-  
-  switch (session.step) {
-    case 1: {
-      // Handle 0 to go back
-      if (sanitized_input === '0') {
-        session.currentMenu = 'usdc';
-        session.step = 0;
-        return continueSession('__SHOW_USDC_MENU__');
-      }
-      
-      // Handle 9 to show current menu
-      if (sanitized_input === '9') {
-        session.currentMenu = 'usdc';
-        session.step = 0;
-        return continueSession('__SHOW_USDC_MENU__');
-      }
-      
-      // PIN verification step
-      if (!/^\d{4}$/.test(sanitized_input)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
-      }
-      
-      // Verify PIN with demo fallback
-      let pinCorrect = false;
-      try {
-        pinCorrect = await verifyUserPin(session.phoneNumber, sanitized_input);
-      } catch (error) {
-        console.log('PIN verification error (demo mode):', error);
-        pinCorrect = sanitized_input === '1234';
-      }
-      
-      if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
-      }
-      
-      // Get real-time USDC to UGX rate
-      try {
-        const usdcRateUGX = await CkUSDCService.getExchangeRate('ugx');
-        
-        return endSession(`Current USDC Exchange Rate
+  // Rate check doesn't need PIN - just show the rate directly
+  try {
+    const usdcRateUGX = await CkUSDCService.getExchangeRate('ugx');
+    
+    return endSession(`Current USDC Exchange Rate
 
 1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}
 1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC
@@ -215,20 +176,13 @@ async function handleUSDCRate(input: string, session: USSDSession): Promise<stri
 Last Updated: ${new Date().toLocaleTimeString()}
 
 Thank you for using AfriTokeni!`);
-        
-      } catch (error) {
-        console.error('Error retrieving USDC rate:', error);
-        return endSession(`Error retrieving USDC rate.
+    
+  } catch (error) {
+    console.error('Error retrieving USDC rate:', error);
+    return endSession(`Error retrieving USDC rate.
 Please try again later.
 
 Thank you for using AfriTokeni!`);
-      }
-    }
-    
-    default:
-      session.currentMenu = 'usdc';
-      session.step = 0;
-      return handleUSDC('', session);
   }
 }
 
