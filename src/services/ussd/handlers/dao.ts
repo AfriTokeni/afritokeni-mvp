@@ -98,6 +98,7 @@ DAO Governance
  * Handle viewing proposals
  */
 async function handleViewProposals(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   

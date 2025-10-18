@@ -181,8 +181,8 @@ Please select an option:
 /**
  * Handle PIN setup - for new users or PIN reset
  */
-export async function handlePinSetup(input: string, session: USSDSession): Promise<string> {
-  // Extract the last part of USSD input (the actual PIN entered)
+export async function handlePinSetup(input: string, session: USSDSession, lang: string): Promise<string> {
+  const lang = session.language || 'en';
   const inputParts = input.split('*');
   const pinInput = inputParts[inputParts.length - 1] || '';
   console.log(`🔧 PIN setup for ${session.phoneNumber}, step: ${session.step}, input: "${pinInput}"`);
