@@ -62,7 +62,8 @@ Please select an option:
     case '1':
       session.currentMenu = 'send_money';
       session.step = 0;
-      return continueSession('Send Money\nEnter recipient phone number:');
+      // Call sendMoney handler to show proper prompt with translations
+      return handleSendMoney('', session, async () => {});
     
     case '2':
       // Check Balance - requires PIN verification if not already verified
@@ -75,17 +76,17 @@ Please select an option:
       }
     
     case '3': {
-      const currency = getSessionCurrency(session);
       session.currentMenu = 'deposit';
       session.step = 1;
-      return continueSession(`Deposit Money\nEnter amount to deposit (${currency}):`);
+      // Call deposit handler to show proper prompt with translations
+      return handleDeposit('', session, async () => {});
     }
     
     case '4': {
-      const currency = getSessionCurrency(session);
       session.currentMenu = 'withdraw';
       session.step = 1;
-      return continueSession(`Withdraw Money\nEnter amount to withdraw (${currency}):`);
+      // Call withdraw handler to show proper prompt with translations
+      return handleWithdraw('', session, async () => {}, async () => {});
     }
     
     case '5':
