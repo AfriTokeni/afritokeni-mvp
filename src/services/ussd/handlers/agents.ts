@@ -25,9 +25,9 @@ export async function handleFindAgent(input: string, session: USSDSession, handl
       return endSession(`${TranslationService.translate('no_agents_available', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
     }
     
-    let agentList = `Find Agent
+    let agentList = `${TranslationService.translate('find_agent_title', lang)}
 
-Available agents near you:
+${TranslationService.translate('available_agents', lang)}:
 
 `;
     
@@ -38,9 +38,9 @@ Available agents near you:
 `;
     });
     
-    agentList += `For directions or to contact agents directly, visit them at their listed locations.
+    agentList += `${TranslationService.translate('for_directions', lang)}.
 
-0. Back to Local Currency Menu`;
+0. ${TranslationService.translate('back_to_main_menu', lang)}`;
     
     if (!currentInput) {
       return continueSession(agentList);
@@ -56,20 +56,20 @@ Available agents near you:
     const agentChoice = parseInt(currentInput);
     if (!isNaN(agentChoice) && agentChoice >= 1 && agentChoice <= availableAgents.length) {
       const selectedAgent = availableAgents[agentChoice - 1];
-      return endSession(`Agent Details
+      return endSession(`${TranslationService.translate('agent_details', lang)}
 
 ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-Address: ${selectedAgent.location?.address || 'N/A'}
+${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}
+${TranslationService.translate('address', lang)}: ${selectedAgent.location?.address || 'N/A'}
 
-Services:
-- Deposit money
-- Withdraw money
-- Buy/Sell Bitcoin
+${TranslationService.translate('services', lang)}:
+- ${TranslationService.translate('deposit_money', lang)}
+- ${TranslationService.translate('withdraw_money', lang)}
+- ${TranslationService.translate('buy_sell_bitcoin', lang)}
 
-Visit the agent at their location for assistance.
+${TranslationService.translate('visit_agent', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
     }
     
     return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${agentList}\n\n${TranslationService.translate('back_or_menu', lang)}`);
