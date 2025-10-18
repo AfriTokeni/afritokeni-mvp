@@ -228,6 +228,11 @@ export class USSDService {
           if (response.includes('__SHOW_USDC_MENU__')) {
             response = await handleUSDC('', session);
           }
+          
+          // Check if handler wants to show main menu
+          if (response.includes('__SHOW_MAIN_MENU__')) {
+            response = await handleMainMenu('', session, handleLocalCurrency, handleBitcoin, handleUSDC, handleDAO);
+          }
           break;
         
         case 'dao':
