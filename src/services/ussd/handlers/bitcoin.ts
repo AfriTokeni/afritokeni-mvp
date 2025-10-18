@@ -825,7 +825,9 @@ Your Balance: ₿${balance.balanceBTC} BTC
 ≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
 Enter recipient phone number:
-(Format: +256XXXXXXXXX)`);
+(e.g. 256700123456)
+
+0 to go back`);
         
       } catch (error) {
         console.error('Error checking ckBTC balance:', error);
@@ -836,7 +838,7 @@ Enter recipient phone number:
     case 2: {
       // Recipient phone number entry
       if (!currentInput) {
-        return continueSession('Enter recipient phone number:\n(Format: +256XXXXXXXXX)');
+        return continueSession('Enter recipient phone number:\n(e.g. 256700123456)\n\n0 to go back');
       }
       
       // Validate and format phone number
@@ -851,25 +853,25 @@ Enter recipient phone number:
         } else if (recipientPhone.length === 9) {
           recipientPhone = '+256' + recipientPhone;
         } else {
-          return continueSession('Invalid phone number format.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+          return continueSession('Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\n0 to go back');
         }
       }
       
       // Basic validation
       if (!/^\+256[0-9]{9}$/.test(recipientPhone)) {
-        return continueSession('Invalid phone number format.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+        return continueSession('Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\n0 to go back');
       }
       
       // Check if recipient is same as sender
       if (recipientPhone === `+${session.phoneNumber}`) {
-        return continueSession('Cannot send to yourself.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+        return continueSession('Cannot send to yourself.\nEnter different phone:\n(e.g. 256700123456)\n\n0 to go back');
       }
       
       // Check if recipient is registered
       try {
         const recipientUser = await DataService.findUserByPhoneNumber(recipientPhone);
         if (!recipientUser) {
-          return continueSession(`Recipient ${recipientPhone} is not registered with AfriTokeni.\nThey need to register first.\n\nEnter different phone number:\n(Format: +256XXXXXXXXX)`);
+          return continueSession(`Recipient ${recipientPhone} is not registered with AfriTokeni.\nThey need to register first.\n\nEnter different phone:\n(e.g. 256700123456)\n\n0 to go back`);
         }
         
         session.data.recipientPhone = recipientPhone;
@@ -884,7 +886,7 @@ Enter BTC amount to send:
         
       } catch (error) {
         console.error('Error checking recipient:', error);
-        return continueSession('Error checking recipient. Please try again.\nEnter recipient phone number:\n(Format: +256XXXXXXXXX)');
+        return continueSession('Error checking recipient.\nEnter recipient phone:\n(e.g. 256700123456)\n\n0 to go back');
       }
     }
     
