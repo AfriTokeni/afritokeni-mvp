@@ -123,7 +123,7 @@ Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession(`Invalid selection. Choose agent number or 0 to cancel:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}. ${TranslationService.translate('select_an_agent', lang)} ${TranslationService.translate('or_cancel', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       const selectedAgent = agents[agentChoice - 1];
@@ -133,14 +133,14 @@ Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
       const withdrawAmount = session.data.withdrawAmount || 0;
       const withdrawFee = session.data.withdrawFee || 0;
       
-      return continueSession(`Selected Agent:
+      return continueSession(`${TranslationService.translate('selected_agent', lang)}:
 ${selectedAgent.businessName}
 ${selectedAgent.location.city}, ${selectedAgent.location.address}
 
-Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
-Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
+${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
+${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
 
-Enter your 4-digit PIN to confirm:
+${TranslationService.translate('enter_pin_to_confirm', lang)}:
 ${TranslationService.translate('back_or_menu', lang)}`);
     }
       
