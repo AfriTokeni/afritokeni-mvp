@@ -233,7 +233,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       // Enter amount to spend
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`Buy BTC\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Handle cancel
@@ -246,7 +246,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       
       const ugxAmount = parseInt(currentInput);
       if (isNaN(ugxAmount) || ugxAmount <= 0) {
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter ${currency} amount to spend:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (ugxAmount < 10000) {
@@ -353,7 +353,7 @@ Fee: ${currency} ${fee.toLocaleString()}
 Receive: ₿${btcAmount.toFixed(8)} BTC
 
 Enter your PIN to confirm:
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 3: {
@@ -818,7 +818,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
       }
       
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN

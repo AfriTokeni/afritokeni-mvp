@@ -20,7 +20,7 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       // Step 1: Get amount to withdraw
       if (!input) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('withdraw', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`${TranslationService.translate('withdraw', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       const inputParts = input.split('*');
       const sanitized_input = inputParts[inputParts.length - 1] || '';
@@ -38,7 +38,7 @@ export async function handleWithdraw(input: string, session: USSDSession, sendSM
       const amount = parseInt(sanitized_input);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       if (amount < 1000) {
@@ -102,7 +102,7 @@ Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 `;
         });
         
-        agentList += `\n\n${TranslationService.translate('press_zero_back', lang)}`;
+        agentList += `\n\n${TranslationService.translate('back_or_menu', lang)}`;
         
         return continueSession(agentList);
         
@@ -145,7 +145,7 @@ Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
 Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
 
 Enter your 4-digit PIN to confirm:
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
     }
       
     case 4: {

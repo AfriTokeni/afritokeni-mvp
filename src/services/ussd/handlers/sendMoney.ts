@@ -29,7 +29,7 @@ export async function handleSendMoney(
     case 0: {
       // Step 0: Enter recipient phone number
       if (!currentInput) {
-        return continueSession(`${TranslationService.translate('send_money', lang)}\n${TranslationService.translate('enter_recipient_phone', lang)}\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`${TranslationService.translate('send_money', lang)}\n${TranslationService.translate('enter_recipient_phone', lang)}\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Handle cancel - go back to local currency menu
@@ -43,14 +43,14 @@ export async function handleSendMoney(
       // Validate phone number format (accepts +256XXXXXXXXX, 256XXXXXXXXX, 07XXXXXXXX, 03XXXXXXXX)
       const phoneRegex = /^(\+?256[37]\d{8}|0[37]\d{8})$/;
       if (!phoneRegex.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_phone', lang)}\n${TranslationService.translate('enter_recipient_phone', lang)}\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_phone', lang)}\n${TranslationService.translate('enter_recipient_phone', lang)}\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Store recipient and move to amount entry
       session.data.recipientPhone = currentInput;
       session.step = 1;
       const currency = getSessionCurrency(session);
-      return continueSession(`Enter amount to send (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
+      return continueSession(`Enter amount to send (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 1: {
@@ -67,7 +67,7 @@ export async function handleSendMoney(
       const amount = parseFloat(currentInput);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount to send (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount to send (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
 
       // Calculate fee (1% of amount)
@@ -100,7 +100,7 @@ Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
 Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 
 Enter your 4-digit PIN to confirm:
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 2: {

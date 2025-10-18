@@ -131,7 +131,7 @@ async function handleViewProposals(input: string, session: USSDSession): Promise
     proposals.forEach((prop, index) => {
       response += `${index + 1}. ${prop.title}\n`;
     });
-    response += `\n${TranslationService.translate('press_zero_back', lang)}`;
+    response += `\n${TranslationService.translate('back_or_menu', lang)}`;
     
     return continueSession(response);
   }
@@ -193,7 +193,7 @@ ABSTAIN: ${proposal.votes.abstain}
 2. Vote NO
 3. Vote ABSTAIN
 
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
   }
   
   // Step 2: Select vote choice
@@ -238,7 +238,7 @@ Locked: ${lockedTokens} AFRI
 
 Enter amount to vote (min 1 AFRI):
 
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
   }
   
   // Step 3: Enter voting amount

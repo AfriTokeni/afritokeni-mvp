@@ -22,7 +22,7 @@ export async function handleDeposit(input: string, session: USSDSession, sendSMS
       // Step 1: Enter deposit amount
       const currency = getSessionCurrency(session);
       if (!currentInput) {
-        return continueSession(`Deposit Money\nEnter amount (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
+        return continueSession(`Deposit Money\nEnter amount (${currency}):\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Handle cancel

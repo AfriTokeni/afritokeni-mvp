@@ -81,7 +81,7 @@ DAO: Vote on proposals
 For support: Call +256-XXX-XXXX
 Visit: afritokeni.com
 
-${TranslationService.translate('press_zero_back', lang)}`);
+${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case '6': {
