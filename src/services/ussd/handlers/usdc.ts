@@ -169,25 +169,42 @@ Thank you for using AfriTokeni!`);
 }
 
 async function handleUSDCRate(input: string, session: USSDSession): Promise<string> {
+  const lang = session.language || 'en';
+  const sanitized_input = input.split('*').pop() || '';
+  
+  // Handle 0 to go back
+  if (sanitized_input === '0') {
+    session.currentMenu = 'usdc';
+    session.step = 0;
+    return continueSession('__SHOW_USDC_MENU__');
+  }
+  
+  // Handle 9 to show current menu
+  if (sanitized_input === '9') {
+    session.currentMenu = 'usdc';
+    session.step = 0;
+    return continueSession('__SHOW_USDC_MENU__');
+  }
+  
   // Rate check doesn't need PIN - just show the rate directly
   try {
     const usdcRateUGX = await CkUSDCService.getExchangeRate('ugx');
     
-    return endSession(`Current USDC Exchange Rate
+    return continueSession(`Current USDC Exchange Rate
 
 1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}
 1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC
 
 Last Updated: ${new Date().toLocaleTimeString()}
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('back_or_menu', lang)}`);
     
   } catch (error) {
     console.error('Error retrieving USDC rate:', error);
-    return endSession(`Error retrieving USDC rate.
+    return continueSession(`Error retrieving USDC rate.
 Please try again later.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('back_or_menu', lang)}`);
   }
 }
 
