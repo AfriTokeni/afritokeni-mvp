@@ -1,6 +1,7 @@
 import { setDoc, getDoc, listDocs } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { User } from '../types/auth';
+import { Transaction } from '../types/transaction';
 import { AnonymousIdentity } from "@dfinity/agent";
 import type { SatelliteOptions } from "@junobuild/core";
 import { AfricanCurrency } from '../types/currency';
@@ -38,29 +39,7 @@ export interface DepositRequest {
   updatedAt: string;
 }
 
-// Transaction types for AfriTokeni
-export interface Transaction {
-  id: string;
-  userId: string;
-  type: 'send' | 'receive' | 'withdraw' | 'deposit';
-  amount: number;
-  fee?: number;
-  currency: 'UGX';
-  recipientId?: string;
-  recipientPhone?: string;
-  recipientName?: string;
-  agentId?: string;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  smsCommand?: string;
-  description?: string;
-  createdAt: Date;
-  completedAt?: Date;
-  metadata?: {
-    withdrawalCode?: string;
-    agentLocation?: string;
-    smsReference?: string;
-  };
-}
+
 
 export interface UserBalance {
   userId: string;
@@ -1144,11 +1123,31 @@ export class WebhookDataService {
           return { success: false, error: 'Agent not authorized for this deposit request' };
         }
 
-        // Create a simple transaction record for the deposit
+        // Create transaction record for the deposit
         const userTransactionId = `dep_tx_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
         
-        // For now, we'll just create a simple transaction ID
-        // In production, you'd store the actual transaction in the datastore
+        // Store the transaction in the database
+        const now = new Date();
+        const depositTransaction = {
+          id: userTransactionId,
+          userId: request.userId,
+          type: 'deposit' as const,
+          amount: request.amount,
+          currency: request.currency || 'UGX',
+          status: 'completed' as const,
+          agentId: agentId,
+          depositCode: request.depositCode,
+          createdAt: now.toISOString()
+        };
+        
+        await setDoc({
+          collection: 'transactions',
+          doc: {
+            key: userTransactionId,
+            data: depositTransaction
+          },
+          satellite
+        });
 
         // Update user balance (increase)
         const userBalance = await this.getUserBalance(request.userId);
