@@ -614,6 +614,26 @@ export class TranslationService {
       lg: 'Noonya Agent',
       sw: 'Tafuta Wakala'
     },
+    'dao_governance': {
+      en: 'DAO Governance',
+      lg: 'Okufuga kwa DAO',
+      sw: 'Utawala wa DAO'
+    },
+    'view_proposals': {
+      en: 'View Proposals',
+      lg: 'Laba Ebirowoozo',
+      sw: 'Angalia Mapendekezo'
+    },
+    'my_voting_power': {
+      en: 'My Voting Power',
+      lg: 'Amaanyi Gange ag\'Okulonda',
+      sw: 'Nguvu Yangu ya Kupiga Kura'
+    },
+    'active_votes': {
+      en: 'Active Votes',
+      lg: 'Okulonda Okukola',
+      sw: 'Kura Zinazofanya Kazi'
+    },
   };
 
   /**

@@ -42,12 +42,12 @@ export async function handleDAO(input: string, session: USSDSession): Promise<st
   }
   
   if (!input || sanitized_input === '') {
-    return continueSession(`DAO Governance
+    return continueSession(`${TranslationService.translate('dao_governance', lang)}
 
-1. View Proposals
-2. My Voting Power
-3. Active Votes
-0. Back to Main Menu`);
+1. ${TranslationService.translate('view_proposals', lang)}
+2. ${TranslationService.translate('my_voting_power', lang)}
+3. ${TranslationService.translate('active_votes', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
   }
   
   switch (sanitized_input) {
@@ -84,13 +84,13 @@ export async function handleDAO(input: string, session: USSDSession): Promise<st
 0. Exit`);
     
     default:
-      return continueSession(`Invalid option.
+      return continueSession(`${TranslationService.translate('invalid_option', lang)}
 
-DAO Governance
-1. View Proposals
-2. My Voting Power
-3. Active Votes
-0. Back to Main Menu`);
+${TranslationService.translate('dao_governance', lang)}
+1. ${TranslationService.translate('view_proposals', lang)}
+2. ${TranslationService.translate('my_voting_power', lang)}
+3. ${TranslationService.translate('active_votes', lang)}
+0. ${TranslationService.translate('back_to_main_menu', lang)}`);
   }
 }
 
@@ -282,7 +282,7 @@ Enter your 4-digit PIN to confirm:`);
   // Step 4: PIN verification and vote submission
   if (session.step === 4) {
     if (!/^\d{4}$/.test(sanitized_input)) {
-      return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     // Verify PIN (verifyUserPin adds + prefix internally)
@@ -298,7 +298,7 @@ Enter your 4-digit PIN to confirm:`);
     }
     
     if (!pinCorrect) {
-      return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     // Record vote
