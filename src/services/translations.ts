@@ -793,6 +793,111 @@ export class TranslationService {
       lg: 'ewa okuweereza okw\'amangu n\'essente ntono',
       sw: 'inatoa uhamisho wa haraka na ada ndogo'
     },
+    'your_ckbtc_balance': {
+      en: 'Your ckBTC Balance',
+      lg: 'Ssente zo za ckBTC',
+      sw: 'Salio yako ya ckBTC'
+    },
+    'bitcoin_exchange_rate': {
+      en: 'Bitcoin Exchange Rate',
+      lg: 'Omuwendo gwa Bitcoin',
+      sw: 'Bei ya Kubadilishana Bitcoin'
+    },
+    'buy_sell_spreads': {
+      en: 'Buy/Sell spreads may apply',
+      lg: 'Enjawulo y\'okugula/okutunda esobola okubaawo',
+      sw: 'Tofauti za ununuzi/mauzo zinaweza kutumika'
+    },
+    'selected_agent': {
+      en: 'Selected Agent',
+      lg: 'Agent alondeddwa',
+      sw: 'Wakala Aliyechaguliwa'
+    },
+    'purchase_details': {
+      en: 'Purchase Details',
+      lg: 'Ebikwata ku Kugula',
+      sw: 'Maelezo ya Ununuzi'
+    },
+    'enter_pin_to_confirm': {
+      en: 'Enter your PIN to confirm',
+      lg: 'Yingiza PIN yo okukakasa',
+      sw: 'Weka PIN yako kuthibitisha'
+    },
+    'purchase_initiated': {
+      en: 'Purchase Initiated!',
+      lg: 'Okugula kutandise!',
+      sw: 'Ununuzi Umeanzishwa!'
+    },
+    'purchase_code': {
+      en: 'Purchase Code',
+      lg: 'Koodi y\'okugula',
+      sw: 'Nambari ya Ununuzi'
+    },
+    'transaction_id': {
+      en: 'Transaction ID',
+      lg: 'ID y\'ensaasaanya',
+      sw: 'Kitambulisho cha Muamala'
+    },
+    'you_will_receive': {
+      en: 'You will receive',
+      lg: 'Ojja kufuna',
+      sw: 'Utapokea'
+    },
+    'amount_to_pay': {
+      en: 'Amount to pay',
+      lg: 'Omuwendo ogw\'okusasula',
+      sw: 'Kiasi cha kulipa'
+    },
+    'meet_agent_with_code': {
+      en: 'Meet your selected agent with this code',
+      lg: 'Sisinkana ne agent wo n\'okoodi eno',
+      sw: 'Kutana na wakala wako na nambari hii'
+    },
+    'no_ckbtc_available': {
+      en: 'No ckBTC available to sell',
+      lg: 'Tewali ckBTC ezitundibwa',
+      sw: 'Hakuna ckBTC inayopatikana kuuza'
+    },
+    'sell_ckbtc': {
+      en: 'Sell ckBTC',
+      lg: 'Tunda ckBTC',
+      sw: 'Uza ckBTC'
+    },
+    'btc_to_sell': {
+      en: 'BTC to sell',
+      lg: 'BTC ezitundibwa',
+      sw: 'BTC ya kuuza'
+    },
+    'selling': {
+      en: 'Selling',
+      lg: 'Otunda',
+      sw: 'Unauza'
+    },
+    'sale_code': {
+      en: 'Sale Code',
+      lg: 'Koodi y\'okutunda',
+      sw: 'Nambari ya Mauzo'
+    },
+    'sale_initiated': {
+      en: 'Sale Initiated!',
+      lg: 'Okutunda kutandise!',
+      sw: 'Mauzo Yameanzishwa!'
+    },
+    'give_code_to_agent': {
+      en: 'Give this code to the agent to complete your sale and collect cash',
+      lg: 'Wa agent koodi eno okumaliriza okutunda kwo n\'okufuna ssente',
+      sw: 'Mpe wakala nambari hii kukamilisha mauzo yako na kupokea pesa'
+    },
+    'sms_sent': {
+      en: 'SMS sent with details',
+      lg: 'SMS eweereddwa n\'ebikwata ku nsaasaanya',
+      sw: 'SMS imetumwa na maelezo'
+    },
+    'code': {
+      en: 'Code',
+      lg: 'Koodi',
+      sw: 'Nambari'
+    },
   };
 
   /**

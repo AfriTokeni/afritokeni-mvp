@@ -162,16 +162,16 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
           true // Use satellite for SMS/USSD operations
         );
         
-        return endSession(`Your ckBTC Balance
+        return endSession(`${TranslationService.translate('your_ckbtc_balance', lang)}
 
 ₿${balance.balanceBTC} BTC
 ≈ ${currency} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
 
-Last Updated: ${balance.lastUpdated.toLocaleString()}
+${TranslationService.translate('last_updated', lang)}: ${balance.lastUpdated.toLocaleString()}
 
-ckBTC provides instant Bitcoin transfers with minimal fees on the Internet Computer blockchain.
+ckBTC ${TranslationService.translate('instant_transfers', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         
       } catch (error) {
         console.error('Error retrieving ckBTC balance:', error);
@@ -231,19 +231,19 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
       const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
       const lastUpdated = exchangeRate.lastUpdated.toLocaleString();
       
-      return endSession(`Bitcoin Exchange Rate
+      return endSession(`${TranslationService.translate('bitcoin_exchange_rate', lang)}
 
 1 BTC = ${getSessionCurrency(session)} ${exchangeRate.rate.toLocaleString()}
 
-Last Updated: ${lastUpdated}
-Source: ${exchangeRate.source}
+${TranslationService.translate('last_updated', lang)}: ${lastUpdated}
+${TranslationService.translate('source', lang)}: ${exchangeRate.source}
 
 ${TranslationService.translate('rates_include_fees', lang)}
-Buy/Sell spreads may apply
+${TranslationService.translate('buy_sell_spreads', lang)}
 
-ckBTC provides instant Bitcoin transfers with minimal fees on ICP.
+ckBTC ${TranslationService.translate('instant_transfers', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
       
     } catch (error) {
       console.error('Error retrieving BTC rate:', error);
@@ -364,16 +364,16 @@ ${TranslationService.translate('select_an_agent', lang)}:
       const btcAmount = session.data.btcAmount || 0;
       const fee = session.data.fee || 0;
       
-      return continueSession(`Selected Agent:
+      return continueSession(`${TranslationService.translate('selected_agent', lang)}:
 ${selectedAgent.businessName}
-${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
+${selectedAgent.location?.city || TranslationService.translate('location', lang)}, ${selectedAgent.location?.address || ''}
 
-Purchase Details:
-Amount: ${currency} ${ugxAmount.toLocaleString()}
-Fee: ${currency} ${fee.toLocaleString()}
-Receive: ₿${btcAmount.toFixed(8)} BTC
+${TranslationService.translate('purchase_details', lang)}:
+${TranslationService.translate('amount', lang)}: ${currency} ${ugxAmount.toLocaleString()}
+${TranslationService.translate('fee', lang)}: ${currency} ${fee.toLocaleString()}
+${TranslationService.translate('receive', lang)}: ₿${btcAmount.toFixed(8)} BTC
 
-Enter your PIN to confirm:
+${TranslationService.translate('enter_pin_to_confirm', lang)}:
 ${TranslationService.translate('back_or_menu', lang)}`);
     }
     
@@ -794,15 +794,7 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
           const ugxAmount = exchangeResult.localCurrencyAmount || 0;
           
           // Send SMS with sale details and code
-          const smsMessage = `AfriTokeni BTC Sale
-Code: ${saleCode}
-BTC to sell: ₿${btcAmount.toFixed(8)}
-You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-Transaction ID: ${exchangeResult.transactionId}
-
-Give this code to the agent to complete your Bitcoin sale and collect cash.`;
+          const smsMessage = `AfriTokeni BTC ${TranslationService.translate('sell', lang)}\n${TranslationService.translate('code', lang)}: ${saleCode}\n${TranslationService.translate('btc_to_sell', lang)}: ₿${btcAmount.toFixed(8)}\n${TranslationService.translate('you_will_receive', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n\n${TranslationService.translate('give_code_to_agent', lang)}.`;
 
           console.log(`Sending Bitcoin sale SMS to ${session.phoneNumber}`);
 
@@ -813,27 +805,9 @@ Give this code to the agent to complete your Bitcoin sale and collect cash.`;
             // Continue even if SMS fails
           }
           
-          return endSession(`✅ BTC Sale Initiated!
-
-Sale Code: ${saleCode}
-Transaction ID: ${exchangeResult.transactionId}
-Selling: ₿${btcAmount.toFixed(8)} BTC
-You will receive: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}
-
-Agent: ${selectedAgent.businessName}
-Location: ${selectedAgent.location?.city || 'Location'}
-
-Give the code ${saleCode} to the agent to complete your sale and collect cash.
-
-SMS sent with details.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`✅ ${TranslationService.translate('sale_initiated', lang)}\n\n${TranslationService.translate('sale_code', lang)}: ${saleCode}\n${TranslationService.translate('transaction_id', lang)}: ${exchangeResult.transactionId}\n${TranslationService.translate('selling', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('you_will_receive', lang)}: ${getSessionCurrency(session)} ${ugxAmount.toLocaleString()}\n\n${TranslationService.translate('agent', lang)}: ${selectedAgent.businessName}\n${TranslationService.translate('location', lang)}: ${selectedAgent.location?.city || TranslationService.translate('location', lang)}\n\n${TranslationService.translate('give_code_to_agent', lang)}.\n\n${TranslationService.translate('sms_sent', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         } else {
-          return endSession(`❌ Sale failed: ${exchangeResult.error || 'Unknown error'}
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`❌ ${TranslationService.translate('sale_failed', lang)}: ${exchangeResult.error || TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('please_try_again_later', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
       } catch (error) {

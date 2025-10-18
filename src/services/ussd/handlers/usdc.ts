@@ -295,14 +295,14 @@ Thank you for using AfriTokeni!`);
         
         let agentList = `USDC ${TranslationService.translate('purchase_quote', lang)}\n\n${TranslationService.translate('spend', lang)}: ${getSessionCurrency(session)} ${amountUGX.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${netAmount.toLocaleString()}\n${TranslationService.translate('receive', lang)}: $${finalUSDCAmount.toFixed(6)} USDC
 
-Select an agent:
+${TranslationService.translate('select_an_agent', lang)}:
 `;
         
         availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
           agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
         });
         
-        agentList += '0. Cancel';
+        agentList += `0. ${TranslationService.translate('cancel', lang)}`;
         
         return continueSession(agentList);
         
@@ -529,14 +529,14 @@ Thank you for using AfriTokeni!`);
         
         let agentList = `USDC ${TranslationService.translate('sale_quote', lang)}\n\n${TranslationService.translate('sell', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('gross', lang)}: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
 
-Select an agent:
+${TranslationService.translate('select_an_agent', lang)}:
 `;
         
         availableAgents.slice(0, 5).forEach((agent: Agent, index: number) => {
           agentList += `${index + 1}. ${agent.businessName}\n   ${agent.location?.city || 'Location'}\n`;
         });
         
-        agentList += '0. Cancel';
+        agentList += `0. ${TranslationService.translate('cancel', lang)}`;
         
         return continueSession(agentList);
         
