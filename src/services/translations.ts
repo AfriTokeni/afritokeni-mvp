@@ -973,6 +973,26 @@ export class TranslationService {
       lg: 'Kebera ssente zo ng\'okuba',
       sw: 'Angalia salio yako kwa kupiga'
     },
+    'format': {
+      en: 'Format',
+      lg: 'Enkola',
+      sw: 'Muundo'
+    },
+    'invalid_phone_format': {
+      en: 'Invalid phone number format',
+      lg: 'Enkola y\'enamba ya ssimu si ntuufu',
+      sw: 'Muundo wa nambari ya simu si sahihi'
+    },
+    'ensure_account': {
+      en: 'Please ensure they have an AfriTokeni account',
+      lg: 'Kakasa nti alina akawunti ya AfriTokeni',
+      sw: 'Tafadhali hakikisha ana akaunti ya AfriTokeni'
+    },
+    'cannot_send_to_self': {
+      en: 'Cannot send to your own number',
+      lg: 'Tosobola kuweereza ku namba yo',
+      sw: 'Huwezi kutuma kwa nambari yako mwenyewe'
+    },
   };
 
   /**

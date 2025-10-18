@@ -687,12 +687,7 @@ Enter your 4-digit PIN:`);
       session.data.transactionFee = transactionFee;
       session.step = 3;
       
-      return continueSession(`Amount: $${usdcAmount.toFixed(6)} USDC
-Fee: $${transactionFee.toFixed(6)} USDC
-Total: $${totalRequired.toFixed(6)} USDC
-
-Enter recipient phone number:
-(Format: +256701234567)`);
+      return continueSession(`${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC\n${TranslationService.translate('total', lang)}: $${totalRequired.toFixed(6)} USDC\n\n${TranslationService.translate('enter_recipient_phone', lang)}:\n(${TranslationService.translate('format', lang)}: +256701234567)`);
     }
     
     case 3: {
@@ -711,21 +706,19 @@ Enter recipient phone number:
       // Basic phone number validation
       const phoneRegex = /^\+256[0-9]{9}$/;
       if (!phoneRegex.test(recipientPhone)) {
-        return continueSession(`Invalid phone number format.\nEnter recipient phone:\n(Format: +256701234567)\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_phone_format', lang)}.\n${TranslationService.translate('enter_recipient_phone', lang)}:\n(${TranslationService.translate('format', lang)}: +256701234567)\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Check if recipient exists
       try {
         const recipient = await DataService.findUserByPhoneNumber(recipientPhone);
         if (!recipient) {
-          return continueSession(`Recipient ${recipientPhone} not found.
-Please ensure they have an AfriTokeni account.
-Enter recipient phone number:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`${TranslationService.translate('recipient_not_found', lang)}.\n${TranslationService.translate('ensure_account', lang)}.\n${TranslationService.translate('enter_recipient_phone', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         // Don't allow sending to yourself
         if (recipientPhone === `+${session.phoneNumber}`) {
-          return continueSession(`Cannot send to your own number.\nEnter recipient phone number:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`${TranslationService.translate('cannot_send_to_self', lang)}.\n${TranslationService.translate('enter_recipient_phone', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         session.data.recipientPhone = recipientPhone;
