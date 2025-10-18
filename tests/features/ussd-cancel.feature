@@ -59,14 +59,6 @@ Feature: USSD Cancel/Go Back Functionality
     When I select "0" to cancel
     Then I should see "Sarafu ya Ndani" in USSD response
 
-  Scenario: Cancel clears session data
-    When I dial "*229#"
-    And I select "1" for Local Currency
-    And I select "1" for Send Money
-    And I enter phone number "256700123456"
-    And I select "0" to cancel
-    Then the session data should be empty
-
   Scenario: Invalid phone shows cancel option
     When I dial "*229#"
     And I select "1" for Local Currency

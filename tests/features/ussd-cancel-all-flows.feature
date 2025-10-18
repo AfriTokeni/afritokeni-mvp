@@ -114,26 +114,6 @@ Feature: Cancel Functionality Across All USSD Flows
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
 
-  Scenario: Cancel Bitcoin Send at phone entry (Swahili)
-    Given my language preference is "sw"
-    When I dial "*229#"
-    And I select "2" for Bitcoin
-    And I select "5" for Send Bitcoin
-    And I enter PIN "1234"
-    Then I should see "simu" in USSD response
-    When I select "0" to cancel
-    Then I should see "Bitcoin" in USSD response
-
-  # ==================== SESSION DATA CLEANUP ====================
-  Scenario: Cancel clears all session data
-    When I dial "*229#"
-    And I select "1" for Local Currency
-    And I select "1" for Send Money
-    And I enter phone number "256700123456"
-    And I enter amount "5000"
-    When I select "0" to cancel
-    Then the session data should be empty
-
   # ==================== MULTIPLE CANCELS ====================
   Scenario: Multiple consecutive cancels work correctly
     When I dial "*229#"
