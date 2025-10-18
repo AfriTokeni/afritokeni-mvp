@@ -178,6 +178,11 @@ export class USSDService {
         
         case 'withdraw':
           response = await handleWithdraw(input, session, async () => {}, async () => this.getMainMenu());
+          
+          // Check if handler wants to show local currency menu
+          if (response.includes('__SHOW_LOCAL_CURRENCY_MENU__')) {
+            response = await handleLocalCurrency('', session, handleSendMoney, handleDeposit, handleWithdraw, handleFindAgent, async () => this.getMainMenu());
+          }
           break;
         
         case 'deposit':

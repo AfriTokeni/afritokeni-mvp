@@ -7,27 +7,38 @@ import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService } from '../../webHookServices.js';
+import { TranslationService } from '../../translations.js';
 
 /**
  * Handle withdraw flow
  */
 export async function handleWithdraw(input: string, session: USSDSession, sendSMS: (phone: string, msg: string) => Promise<any>, handleMainMenu: any): Promise<string> {
+  const lang = session.language || 'en';
+  
   switch (session.step) {
     case 1: {
       // Step 1: Get amount to withdraw
       if (!input) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Withdraw Money\nEnter amount (${currency}):`);
+        return continueSession(`${TranslationService.translate('withdraw', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
       const inputParts = input.split('*');
       const sanitized_input = inputParts[inputParts.length - 1] || '';
 
       console.log(`Withdraw amount: ${sanitized_input}`);
 
+      // Handle cancel
+      if (sanitized_input === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
+      }
+      
       const amount = parseInt(sanitized_input);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`Invalid amount.\nEnter amount (${currency}):`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount (${currency}):\n\n${TranslationService.translate('press_zero_back', lang)}`);
       }
       
       if (amount < 1000) {
@@ -91,7 +102,7 @@ Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 `;
         });
         
-        agentList += '\n0. Cancel withdrawal';
+        agentList += `\n\n${TranslationService.translate('press_zero_back', lang)}`;
         
         return continueSession(agentList);
         
@@ -107,8 +118,11 @@ Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
       const sanitized_choice = inputParts[inputParts.length - 1] || '';
       const agentChoice = parseInt(sanitized_choice);
       
-      if (agentChoice === 0) {
-        return endSession('Withdrawal cancelled.\n\nThank you for using AfriTokeni!');
+      if (agentChoice === 0 || sanitized_choice === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
       }
       
       const agents = session.data.availableAgents;
@@ -130,7 +144,8 @@ ${selectedAgent.location.city}, ${selectedAgent.location.address}
 Amount: ${getSessionCurrency(session)} ${withdrawAmount.toLocaleString()}
 Fee: ${getSessionCurrency(session)} ${withdrawFee.toLocaleString()}
 
-Enter your 4-digit PIN to confirm:`);
+Enter your 4-digit PIN to confirm:
+${TranslationService.translate('press_zero_back', lang)}`);
     }
       
     case 4: {
@@ -138,6 +153,14 @@ Enter your 4-digit PIN to confirm:`);
       const inputParts = input.split('*');
       const sanitized_input = inputParts[inputParts.length - 1] || '';
       console.log(`Verifying PIN input: ${sanitized_input.length}`);
+      
+      // Handle cancel
+      if (sanitized_input === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        session.data = {};
+        return endSession(`${TranslationService.translate('transaction_failed', lang)}\nTransaction cancelled.\n\nThank you for using AfriTokeni!`);
+      }
       
       if (!sanitized_input || sanitized_input.length !== 4) {
         session.data.pinAttempts = (session.data.pinAttempts || 0) + 1;
