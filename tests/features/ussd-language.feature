@@ -32,7 +32,7 @@ Feature: USSD Language Selection
     And I select "6" for Language Selection
     And I select "2" for Luganda
     Then I should see "Olulimi lutegekeddwa ku Luganda" in USSD response
-    And I should see "Press 0 to return to main menu" in USSD response
+    And I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
     And the session language should be "lg"
 
   Scenario: Select Swahili language
@@ -40,7 +40,7 @@ Feature: USSD Language Selection
     And I select "6" for Language Selection
     And I select "3" for Swahili
     Then I should see "Lugha imewekwa kwa Kiswahili" in USSD response
-    And I should see "Press 0 to return to main menu" in USSD response
+    And I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
     And the session language should be "sw"
 
   Scenario: Return to main menu after language selection shows translated menu
