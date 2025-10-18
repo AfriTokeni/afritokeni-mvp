@@ -331,8 +331,8 @@ async function handleVotingPower(input: string, session: USSDSession): Promise<s
   const lockedTokens = session.data.lockedTokens || 0;
   const available = afriTokens - lockedTokens;
   
-  // Handle cancel
-  if (input === '0') {
+  // If user provided input (pressed any key), go back to DAO menu
+  if (input && input.trim() !== '') {
     session.currentMenu = 'dao';
     session.step = 0;
     return continueSession('__SHOW_DAO_MENU__');
@@ -358,8 +358,8 @@ async function handleActiveVotes(input: string, session: USSDSession): Promise<s
   const userVotes = session.data.userVotes || [];
   const lockedTokens = session.data.lockedTokens || 0;
   
-  // Handle cancel
-  if (input === '0') {
+  // If user provided input (pressed any key), go back to DAO menu
+  if (input && input.trim() !== '') {
     session.currentMenu = 'dao';
     session.step = 0;
     return continueSession('__SHOW_DAO_MENU__');
