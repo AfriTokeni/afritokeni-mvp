@@ -504,24 +504,10 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
           );
           
           if (balance.balanceSatoshis <= 0) {
-            return endSession(`No ckBTC available to sell.
-
-ckBTC Balance: ₿0.00000000
-≈ ${getSessionCurrency(session)} 0
-
-Thank you for using AfriTokeni!`);
+            return endSession(`${TranslationService.translate('no_ckbtc_available', lang)}.\n\n${TranslationService.translate('ckbtc_balance', lang)}: ₿0.00000000\n≈ ${getSessionCurrency(session)} 0\n\n${TranslationService.translate('thank_you', lang)}`);
           }
           
-          return continueSession(`Sell ckBTC
-
-Your ckBTC Balance:
-₿${balance.balanceBTC} BTC
-≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
-
-Choose amount type:
-1. Enter ${getSessionCurrency(session)} amount
-2. Enter BTC amount
-0. ${TranslationService.translate('cancel', lang)}`);
+          return continueSession(`${TranslationService.translate('sell_ckbtc', lang)}\n\n${TranslationService.translate('your_ckbtc_balance', lang)}:\n₿${balance.balanceBTC} BTC\n≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}\n\n${TranslationService.translate('choose_amount_type', lang)}:\n1. ${TranslationService.translate('enter_amount', lang)} (${getSessionCurrency(session)})\n2. ${TranslationService.translate('enter_btc_amount', lang)}\n0. ${TranslationService.translate('cancel', lang)}`);
           
         } catch (error) {
           console.error('Error checking ckBTC balance:', error);
@@ -544,12 +530,7 @@ Choose amount type:
         session.step = 0;
         return handleBitcoin('', session);
       } else {
-        return continueSession(`Invalid selection.
-
-Choose amount type:
-1. Enter ${getSessionCurrency(session)} amount
-2. Enter BTC amount
-0. ${TranslationService.translate('cancel', lang)}`);
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n\n${TranslationService.translate('choose_amount_type', lang)}:\n1. ${TranslationService.translate('enter_amount', lang)} (${getSessionCurrency(session)})\n2. ${TranslationService.translate('enter_btc_amount', lang)}\n0. ${TranslationService.translate('cancel', lang)}`);
       }
     }
     
@@ -689,7 +670,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
       
       const agents = session.data.availableAgents;
       if (!agents || isNaN(agentChoice) || agentChoice < 1 || agentChoice > agents.length) {
-        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n${TranslationService.translate('select_an_agent', lang)} (1-${agents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:`);
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n\n${TranslationService.translate('select_an_agent', lang)} (1-${agents?.length || 0}) ${TranslationService.translate('or_cancel', lang)}:`);
       }
       
       const selectedAgent = agents[agentChoice - 1];
@@ -700,9 +681,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
       const ugxNet = session.data.ugxNet || 0;
       const fee = session.data.fee || 0;
       
-      return continueSession(`Selected Agent:
-${selectedAgent.businessName}
-${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}
+      return continueSession(`${TranslationService.translate('selected_agent', lang)}:\n${selectedAgent.businessName}\n${selectedAgent.location?.city || 'Location'}, ${selectedAgent.location?.address || ''}\n\n
 
 Sale Details:
 Sell: ₿${btcAmount.toFixed(8)} BTC
@@ -852,14 +831,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         );
         
         if (balance.balanceSatoshis <= 0) {
-          return endSession(`Insufficient ckBTC balance!
-
-Your balance: ₿${balance.balanceBTC} BTC
-≈ ${getSessionCurrency(session)} ${(balance.localCurrencyEquivalent || 0).toLocaleString()}
-
-You need ckBTC to send. Please buy some first.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('no_ckbtc_available', lang)}.\n\n${TranslationService.translate('ckbtc_balance', lang)}: ₿0.00000000\n≈ ${getSessionCurrency(session)} 0\n\n${TranslationService.translate('you_need_ckbtc', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
         session.data.userBalance = balance;
@@ -962,10 +934,7 @@ Enter BTC amount to send:
         const totalBTC = btcAmount + networkFee;
         
         if (totalBTC > parseFloat(userBalance.balanceBTC)) {
-          return continueSession(`Insufficient balance for amount + network fee!
-Amount: ₿${btcAmount.toFixed(8)} BTC
-Network fee: ₿${networkFee.toFixed(8)} BTC
-Total needed: ₿${totalBTC.toFixed(8)} BTC
+          return continueSession(`${TranslationService.translate('insufficient_for_fee', lang)}\n${TranslationService.translate('amount', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('network_fee', lang)}: ₿${networkFee.toFixed(8)} BTC\n${TranslationService.translate('total_needed', lang)}: ₿${totalBTC.toFixed(8)} BTC
 Your balance: ₿${userBalance.balanceBTC} BTC
 
 Enter smaller amount:`);
@@ -1050,24 +1019,24 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         
         if (sendResult.success && sendResult.transactionId) {
           // Send SMS notifications to both sender and recipient
-          const senderSMS = `AfriTokeni BTC Sent ✅
+          const senderSMS = `AfriTokeni BTC ${TranslationService.translate('sent', lang)} ✅
 
-Sent: ₿${sendAmount.toFixed(8)} BTC
+${TranslationService.translate('sent', lang)}: ₿${sendAmount.toFixed(8)} BTC
 ≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
-To: ${session.data.recipientPhone}
-Transaction ID: ${sendResult.transactionId}
-Network fee: ₿${networkFee.toFixed(8)} BTC
+${TranslationService.translate('to', lang)}: ${session.data.recipientPhone}
+${TranslationService.translate('transaction_id', lang)}: ${sendResult.transactionId}
+${TranslationService.translate('network_fee', lang)}: ₿${networkFee.toFixed(8)} BTC
 
-Your new balance will be updated shortly.`;
+${TranslationService.translate('new_balance_updated', lang)}.`;
 
-          const recipientSMS = `AfriTokeni BTC Received 🎉
+          const recipientSMS = `AfriTokeni BTC ${TranslationService.translate('btc_received', lang)} 🎉
 
-Received: ₿${sendAmount.toFixed(8)} BTC
+${TranslationService.translate('received', lang)}: ₿${sendAmount.toFixed(8)} BTC
 ≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
-From: +${session.phoneNumber}
-Transaction ID: ${sendResult.transactionId}
+${TranslationService.translate('from', lang)}: +${session.phoneNumber}
+${TranslationService.translate('transaction_id', lang)}: ${sendResult.transactionId}
 
-Check your balance by dialing *255#`;
+${TranslationService.translate('check_balance_dial', lang)} *255#`;
 
           try {
             await sendSMSNotification(session.phoneNumber, senderSMS);
@@ -1079,22 +1048,22 @@ Check your balance by dialing *255#`;
             // Continue even if SMS fails
           }
           
-          return endSession(`✅ BTC Sent Successfully!
+          return endSession(`✅ ${TranslationService.translate('btc_sent_successfully', lang)}
 
-Sent: ₿${sendAmount.toFixed(8)} BTC
+${TranslationService.translate('sent', lang)}: ₿${sendAmount.toFixed(8)} BTC
 ≈ ${getSessionCurrency(session)} ${ugxEquivalent.toLocaleString()}
-To: ${session.data.recipientPhone}
-Transaction ID: ${sendResult.transactionId}
+${TranslationService.translate('to', lang)}: ${session.data.recipientPhone}
+${TranslationService.translate('transaction_id', lang)}: ${sendResult.transactionId}
 
-SMS notifications sent to both parties.
+${TranslationService.translate('sms_notifications_sent', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         } else {
-          return endSession(`❌ Send failed: ${sendResult.error || 'Unknown error'}
+          return endSession(`❌ ${TranslationService.translate('send_failed', lang)}: ${sendResult.error || TranslationService.translate('error_try_again', lang)}
 
-Please try again later.
+${TranslationService.translate('please_try_again_later', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         }
         
       } catch (error) {

@@ -148,14 +148,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
           true     // useSatellite = true for SMS users
         );
         
-        return endSession(`Your USDC Balance
-
-$${balance.balanceUSDC} USDC
-≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}
-
-Current Rate: 1 USDC = ${getSessionCurrency(session)} ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}
-
-Thank you for using AfriTokeni!`);
+        return endSession(`${TranslationService.translate('your_balance', lang)} (USDC)\n\n$${balance.balanceUSDC} USDC\n≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}\n\n${TranslationService.translate('current_rate', lang)}: 1 USDC = ${getSessionCurrency(session)} ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
         
       } catch (error) {
         console.error('Error retrieving USDC balance:', error);
@@ -197,14 +190,7 @@ async function handleUSDCRate(input: string, session: USSDSession): Promise<stri
   try {
     const usdcRateUGX = await CkUSDCService.getExchangeRate('ugx');
     
-    return continueSession(`Current USDC Exchange Rate
-
-1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}
-1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC
-
-Last Updated: ${new Date().toLocaleTimeString()}
-
-${TranslationService.translate('back_or_menu', lang)}`);
+    return continueSession(`${TranslationService.translate('current_rate', lang)} (USDC)\n\n1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}\n1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC\n\n${TranslationService.translate('last_updated', lang)}: ${new Date().toLocaleTimeString()}\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
   } catch (error) {
     console.error('Error retrieving USDC rate:', error);
@@ -221,7 +207,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
     case 1: {
       // PIN verification step
       if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Invalid PIN format.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       // Verify PIN
@@ -238,7 +224,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
         pinCorrect = true;
       }
       if (!pinCorrect) {
-        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n\${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`Incorrect PIN.\nEnter your 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
       
       session.step = 2;
@@ -308,7 +294,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         
       } catch (error) {
         console.error('Error getting agents for USDC purchase:', error);
-        return endSession('Error loading agents. Please try again later.');
+        return endSession(TranslationService.translate('error_try_again', lang));
       }
     }
     
@@ -518,11 +504,7 @@ Enter USDC amount to sell:`);
         );
         
         if (availableAgents.length === 0) {
-          return endSession(`No agents available for USDC sale at this time.
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('no_agents_available', lang)}.\n\n${TranslationService.translate('please_try_again_later', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
         session.data.availableAgents = availableAgents;
@@ -542,7 +524,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         
       } catch (error) {
         console.error('Error getting agents for USDC sale:', error);
-        return endSession('Error loading agents. Please try again later.');
+        return endSession(TranslationService.translate('error_try_again', lang));
       }
     }
     

@@ -958,6 +958,21 @@ export class TranslationService {
       lg: 'SMS ziweereddwa eri bombi',
       sw: 'Arifa za SMS zimetumwa kwa pande zote mbili'
     },
+    'btc_sent_successfully': {
+      en: 'BTC Sent Successfully!',
+      lg: 'BTC eweereddwa bulungi!',
+      sw: 'BTC Imetumwa kwa Mafanikio!'
+    },
+    'btc_received': {
+      en: 'BTC Received',
+      lg: 'BTC Efuniddwa',
+      sw: 'BTC Imepokelewa'
+    },
+    'check_balance_dial': {
+      en: 'Check your balance by dialing',
+      lg: 'Kebera ssente zo ng\'okuba',
+      sw: 'Angalia salio yako kwa kupiga'
+    },
   };
 
   /**
