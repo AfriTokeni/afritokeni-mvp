@@ -21,13 +21,13 @@ export async function handleSendMoney(input: string, session: USSDSession, sendS
     case 0: {
       // Step 0: Enter recipient phone number
       if (!currentInput) {
-        return continueSession('Send Money\nEnter recipient phone number:\n(e.g. 256700123456)\n\n0 to go back');
+        return continueSession('Send Money\nEnter recipient phone number:\n(e.g. 256700123456)\n\nPress 0 to go back');
       }
       
       // Validate phone number format (accepts +256XXXXXXXXX, 256XXXXXXXXX, 07XXXXXXXX, 03XXXXXXXX)
       const phoneRegex = /^(\+?256[37]\d{8}|0[37]\d{8})$/;
       if (!phoneRegex.test(currentInput)) {
-        return continueSession('Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\n0 to go back');
+        return continueSession('Invalid phone number format.\nEnter recipient phone:\n(e.g. 256700123456)\n\nPress 0 to go back');
       }
       
       // Store recipient and move to amount entry

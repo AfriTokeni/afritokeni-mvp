@@ -76,7 +76,7 @@ DAO: Vote on governance proposals
 For support: Call +256-XXX-XXXX
 Visit: afritokeni.com
 
-0 to go back to main menu`);
+Press 0 to return to main menu`);
     }
     
     case '0': {
