@@ -48,11 +48,17 @@ export class USSDService {
       lastActivity: session.lastActivity
     };
 
+    const existingDoc = await getDoc({
+      collection: 'ussd_sessions',
+      key: sessionId
+    });
+
     await setDoc({
       collection: 'ussd_sessions',
       doc: {
         key: sessionId,
-        data: dataForJuno
+        data: dataForJuno,
+        version: existingDoc?.version || 1n
       }
     });
 
