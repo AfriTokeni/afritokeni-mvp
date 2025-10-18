@@ -619,11 +619,11 @@ Choose amount type:
         // User entered BTC amount directly
         btcAmount = parseFloat(currentInput);
         if (isNaN(btcAmount) || btcAmount <= 0) {
-          return continueSession(`Invalid amount.\nEnter BTC amount to sell (min: ₿0.00001):`);
+          return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_btc_amount', lang)} (min: ₿0.00001)`);
         }
         
         if (btcAmount < 0.00001) {
-          return continueSession(`Minimum sale: ₿0.00001 BTC\nEnter BTC amount to sell:`);
+          return continueSession(`${TranslationService.translate('minimum_sale', lang)}: ₿0.00001 BTC\n${TranslationService.translate('enter_btc_amount', lang)}:`);
         }
         
         // Calculate UGX amount
@@ -986,7 +986,7 @@ Press 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
       try {
         const recipientUser = await DataService.findUserByPhoneNumber(recipientPhone);
         if (!recipientUser) {
-          return continueSession(`Recipient ${recipientPhone} is not registered with AfriTokeni.\nThey need to register first.\n\nEnter different phone:\n(e.g. 256700123456)\n\nPress 0 to go back\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`${TranslationService.translate('recipient_not_found', lang)}: ${recipientPhone}.\n${TranslationService.translate('they_need_register', lang)}.\n\n${TranslationService.translate('enter_different_phone', lang)}:\n${TranslationService.translate('phone_format_example', lang)}\n\n${TranslationService.translate('back_or_menu', lang)}`);
         }
         
         session.data.recipientPhone = recipientPhone;
@@ -1010,18 +1010,16 @@ Enter BTC amount to send:
       const btcAmount = parseFloat(currentInput);
       
       if (isNaN(btcAmount) || btcAmount <= 0) {
-        return continueSession(`Invalid amount.\nEnter BTC amount to send:\n(Min: ₿0.00001)`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_btc_amount', lang)}:\n(${TranslationService.translate('minimum_amount', lang)}: ₿0.00001)`);
       }
       
       if (btcAmount < 0.00001) {
-        return continueSession(`Minimum send: ₿0.00001 BTC\nEnter BTC amount to send:`);
+        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: ₿0.00001 BTC\n${TranslationService.translate('enter_btc_amount', lang)}:`);
       }
       
       const userBalance = session.data.userBalance;
       if (btcAmount > parseFloat(userBalance.balanceBTC)) {
-        return continueSession(`Insufficient balance!
-Your balance: ₿${userBalance.balanceBTC} BTC
-Enter BTC amount to send:\n(Max: ₿${userBalance.balanceBTC})`);
+        return continueSession(`${TranslationService.translate('insufficient_btc', lang)}!\n\n${TranslationService.translate('available', lang)}: ₿${userBalance.balanceBTC} BTC\n\n${TranslationService.translate('required', lang)}: ₿${btcAmount.toFixed(8)} BTC\n\n${TranslationService.translate('enter_smaller_amount', lang)}:`);
       }
       
       // Calculate fees and equivalent amounts
