@@ -238,7 +238,7 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
 Last Updated: ${lastUpdated}
 Source: ${exchangeRate.source}
 
-Rates include platform fees
+${TranslationService.translate('rates_include_fees', lang)}
 Buy/Sell spreads may apply
 
 ckBTC provides instant Bitcoin transfers with minimal fees on ICP.
@@ -678,16 +678,13 @@ Enter a smaller amount:`);
         );
         
         if (availableAgents.length === 0) {
-          return endSession(`No agents available for Bitcoin sale at this time.
-
-Please try again later.
-
-Thank you for using AfriTokeni!`);
+          return endSession(`${TranslationService.translate('no_agents_available', lang)}.\n\n${TranslationService.translate('please_try_again_later', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
         
         session.data.availableAgents = availableAgents;
         
         let agentList = `BTC ${TranslationService.translate('sale_quote', lang)}\n\n${TranslationService.translate('sell', lang)}: ₿${btcAmount.toFixed(8)} BTC\n${TranslationService.translate('gross', lang)}: ${getSessionCurrency(session)} ${ugxGross.toLocaleString()}\n${TranslationService.translate('fee', lang)} (2.5%): ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('net', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}
+        
 
 Select an agent:
 `;

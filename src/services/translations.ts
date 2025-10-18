@@ -768,6 +768,31 @@ export class TranslationService {
       lg: 'Okufuna ekkubo oba okutumira ba-agent, bakyalire ku bifo byabwe',
       sw: 'Kwa maelekezo au kuwasiliana na mawakala moja kwa moja, watembelee mahali walipoorodheshwa'
     },
+    'select_an_agent': {
+      en: 'Select an agent',
+      lg: 'Londa agent',
+      sw: 'Chagua wakala'
+    },
+    'please_try_again_later': {
+      en: 'Please try again later',
+      lg: 'Gezaako oluvannyuma',
+      sw: 'Tafadhali jaribu tena baadaye'
+    },
+    'source': {
+      en: 'Source',
+      lg: 'Ensibuko',
+      sw: 'Chanzo'
+    },
+    'rates_include_fees': {
+      en: 'Rates include platform fees',
+      lg: 'Emiwendo girimu ssente z\'omutimbagano',
+      sw: 'Bei zinajumuisha ada za jukwaa'
+    },
+    'instant_transfers': {
+      en: 'provides instant transfers with minimal fees',
+      lg: 'ewa okuweereza okw\'amangu n\'essente ntono',
+      sw: 'inatoa uhamisho wa haraka na ada ndogo'
+    },
   };
 
   /**
