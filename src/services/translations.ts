@@ -356,6 +356,11 @@ export class TranslationService {
       lg: 'Webale okukozesa AfriTokeni!',
       sw: 'Asante kwa kutumia AfriTokeni!'
     },
+    'dial_to_start_new_session': {
+      en: '\n\nDial *384*22948# to start a new session',
+      lg: '\n\nKuba *384*22948# okutandika omulundi omupya',
+      sw: '\n\nPiga *384*22948# kuanza kipindi kipya'
+    },
     'transaction_cancelled': {
       en: 'Transaction cancelled',
       lg: 'Okuweereza kusaziddwamu',

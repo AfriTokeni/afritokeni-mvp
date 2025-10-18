@@ -55,7 +55,7 @@ export async function handleDeposit(input: string, session: USSDSession, sendSMS
         const agents = await DataService.getAvailableAgents();
         
         if (agents.length === 0) {
-          return endSession(`${TranslationService.translate('no_agents_available', lang)}`);
+          return endSession(`${TranslationService.translate('no_agents_available', lang)}`, lang);
         }
         
         // Display only the first 2 agents

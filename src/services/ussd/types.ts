@@ -4,6 +4,15 @@
  */
 
 import type { Language } from '../translations.js';
+import { TranslationService } from '../translations.js';
+
+/**
+ * Helper function to add "dial to start new session" message to END responses
+ */
+export function endSession(message: string, language: Language = 'en'): string {
+  const dialPrompt = TranslationService.translate('dial_to_start_new_session', language);
+  return `END ${message}${dialPrompt}`;
+}
 
 export interface USSDSession {
   sessionId: string;
