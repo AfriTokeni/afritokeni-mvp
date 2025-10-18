@@ -27,6 +27,28 @@ export class TranslationService {
       sw: 'Akaunti yako iko tayari.'
     },
     
+    // Menu items
+    'local_currency': {
+      en: 'Local Currency',
+      lg: 'Ssente z\'omu Uganda',
+      sw: 'Sarafu ya Ndani'
+    },
+    'bitcoin': {
+      en: 'Bitcoin',
+      lg: 'Bitcoin',
+      sw: 'Bitcoin'
+    },
+    'usdc': {
+      en: 'USDC',
+      lg: 'USDC',
+      sw: 'USDC'
+    },
+    'dao_governance': {
+      en: 'DAO Governance',
+      lg: 'Okufuga kwa DAO',
+      sw: 'Utawala wa DAO'
+    },
+    
     // Balance
     'balance': {
       en: 'Balance',

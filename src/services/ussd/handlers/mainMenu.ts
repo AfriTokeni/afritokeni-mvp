@@ -26,10 +26,10 @@ export async function handleMainMenu(
   if (!input) {
     return continueSession(`${TranslationService.translate('welcome', lang)}
 
-1. Local Currency (${currency})
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. DAO Governance
+1. ${TranslationService.translate('local_currency', lang)} (${currency})
+2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)
+3. ${TranslationService.translate('usdc', lang)} (ckUSDC)
+4. ${TranslationService.translate('dao_governance', lang)}
 5. ${TranslationService.translate('help', lang)}
 6. Language Selection`);
   }
@@ -101,10 +101,10 @@ ${TranslationService.translate('press_zero_back', lang)}`);
       const lang = session.language || 'en';
       return continueSession(`${TranslationService.translate('error', lang)}
 
-1. Local Currency (${currency})
-2. Bitcoin (ckBTC)
-3. USDC (ckUSDC)
-4. DAO Governance
+1. ${TranslationService.translate('local_currency', lang)} (${currency})
+2. ${TranslationService.translate('bitcoin', lang)} (ckBTC)
+3. ${TranslationService.translate('usdc', lang)} (ckUSDC)
+4. ${TranslationService.translate('dao_governance', lang)}
 5. ${TranslationService.translate('help', lang)}
 6. Language Selection`);
     }
