@@ -729,18 +729,18 @@ Enter your 4-digit PIN:`);
         const transactionFee = session.data.transactionFee || 0;
         const totalAmount = usdcAmount + transactionFee;
         
-        return continueSession(`Confirm USDC Transfer:
+        return continueSession(`${TranslationService.translate('confirm', lang)} USDC ${TranslationService.translate('transfer', lang)}:
 
-To: ${recipient.firstName || 'User'} (${recipientPhone})
-Amount: $${usdcAmount.toFixed(6)} USDC
-Fee: $${transactionFee.toFixed(6)} USDC
-Total: $${totalAmount.toFixed(6)} USDC
+${TranslationService.translate('to', lang)}: ${recipient.firstName || 'User'} (${recipientPhone})
+${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC
+${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC
+${TranslationService.translate('total', lang)}: $${totalAmount.toFixed(6)} USDC
 
-Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
         
       } catch (error) {
         console.error('Error finding recipient:', error);
-        return continueSession(`Error verifying recipient.\nPlease try again.\nEnter recipient phone number:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+        return continueSession(`${TranslationService.translate('error_try_again', lang)}.\n${TranslationService.translate('enter_recipient_phone', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
       }
     }
     
@@ -797,19 +797,19 @@ Enter your PIN to confirm:\n\n${TranslationService.translate('back_or_menu', lan
         
         if (transferResult.success && transferResult.transactionId) {
           // Send confirmation SMS to sender
-          const senderSMS = `AfriTokeni USDC Transfer Sent ✅
-To: ${session.data.recipientName} (${session.data.recipientPhone})
-Amount: $${usdcAmount.toFixed(6)} USDC
-Fee: $${transactionFee.toFixed(6)} USDC
-Transaction ID: ${transferResult.transactionId}
-Time: ${new Date().toLocaleString()}`;
+          const senderSMS = `AfriTokeni USDC ${TranslationService.translate('transfer', lang)} ${TranslationService.translate('sent', lang)} ✅
+${TranslationService.translate('to', lang)}: ${session.data.recipientName} (${session.data.recipientPhone})
+${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC
+${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC
+${TranslationService.translate('transaction_id', lang)}: ${transferResult.transactionId}
+${TranslationService.translate('time', lang)}: ${new Date().toLocaleString()}`;
           
           // Send notification SMS to recipient
-          const recipientSMS = `AfriTokeni USDC Received ✅
-From: ${user.firstName || 'User'} (+${session.phoneNumber})
-Amount: $${usdcAmount.toFixed(6)} USDC
-Transaction ID: ${transferResult.transactionId}
-Time: ${new Date().toLocaleString()}`;
+          const recipientSMS = `AfriTokeni USDC ${TranslationService.translate('received', lang)} ✅
+${TranslationService.translate('from', lang)}: ${user.firstName || 'User'} (+${session.phoneNumber})
+${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC
+${TranslationService.translate('transaction_id', lang)}: ${transferResult.transactionId}
+${TranslationService.translate('time', lang)}: ${new Date().toLocaleString()}`;
           
           try {
             await sendSMSNotification(session.phoneNumber, senderSMS);
@@ -821,17 +821,17 @@ Time: ${new Date().toLocaleString()}`;
             // Continue even if SMS fails
           }
           
-          return endSession(`✅ USDC Transfer Successful!
+          return endSession(`✅ USDC ${TranslationService.translate('transfer', lang)} ${TranslationService.translate('successful', lang)}!
 
-To: ${session.data.recipientName}
-Phone: ${session.data.recipientPhone}
-Amount: $${usdcAmount.toFixed(6)} USDC
-Fee: $${transactionFee.toFixed(6)} USDC
-Transaction ID: ${transferResult.transactionId}
+${TranslationService.translate('to', lang)}: ${session.data.recipientName}
+${TranslationService.translate('phone', lang)}: ${session.data.recipientPhone}
+${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC
+${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC
+${TranslationService.translate('transaction_id', lang)}: ${transferResult.transactionId}
 
-SMS confirmations sent.
+${TranslationService.translate('sms_confirmations_sent', lang)}.
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
         } else {
           return endSession(`❌ Transfer failed: ${transferResult.error || 'Unknown error'}
 

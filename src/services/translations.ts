@@ -993,6 +993,16 @@ export class TranslationService {
       lg: 'Tosobola kuweereza ku namba yo',
       sw: 'Huwezi kutuma kwa nambari yako mwenyewe'
     },
+    'time': {
+      en: 'Time',
+      lg: 'Obudde',
+      sw: 'Wakati'
+    },
+    'sms_confirmations_sent': {
+      en: 'SMS confirmations sent',
+      lg: 'SMS z\'okukakasa ziweereddwa',
+      sw: 'Uthibitisho wa SMS umetumwa'
+    },
   };
 
   /**
