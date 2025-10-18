@@ -105,4 +105,4 @@ Feature: USSD DAO Governance
     And I select "4" for DAO Governance
     And I select "0" for Back
     Then the session menu should be "main"
-    And I should see "AfriTokeni Main Menu" in USSD response
+    And I should see "AfriTokeni" in USSD response

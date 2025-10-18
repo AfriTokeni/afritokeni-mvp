@@ -120,4 +120,4 @@ Feature: USSD Language Selection
     Given my language preference is "lg"
     When I dial "*229#"
     And I select "99" for invalid option
-    Then I should see "Kiremya" in USSD response
+    Then I should see "Ekiragiro si kituufu" in USSD response
