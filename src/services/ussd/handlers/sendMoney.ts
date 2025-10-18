@@ -50,7 +50,7 @@ export async function handleSendMoney(
       session.data.recipientPhone = currentInput;
       session.step = 1;
       const currency = getSessionCurrency(session);
-      return continueSession(`Enter amount to send (${currency}):`);
+      return continueSession(`${TranslationService.translate('enter_amount', lang)} (${currency}):`);
     }
     
     case 1: {
@@ -67,7 +67,7 @@ export async function handleSendMoney(
       const amount = parseFloat(currentInput);
       if (isNaN(amount) || amount <= 0) {
         const currency = getSessionCurrency(session);
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\nEnter amount to send (${currency}):`);
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}\n${TranslationService.translate('enter_amount', lang)} (${currency}):`);
       }
 
       // Calculate fee (1% of amount)
@@ -78,11 +78,11 @@ export async function handleSendMoney(
       const userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       if (!userBalance || userBalance.balance < totalRequired) {
         const currentBalance = userBalance ? userBalance.balance : 0;
-        return endSession(`Insufficient balance!
-Your balance: ${getSessionCurrency(session)} ${currentBalance.toLocaleString()}
-Required: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()} (Amount: ${amount.toLocaleString()} + Fee: ${fee.toLocaleString()})
+        return endSession(`${TranslationService.translate('insufficient_balance', lang)}!
+${TranslationService.translate('your_balance', lang)}: ${getSessionCurrency(session)} ${currentBalance.toLocaleString()}
+${TranslationService.translate('required', lang)}: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()} (${TranslationService.translate('amount', lang)}: ${amount.toLocaleString()} + ${TranslationService.translate('fee', lang)}: ${fee.toLocaleString()})
 
-Thank you for using AfriTokeni!`);
+${TranslationService.translate('thank_you', lang)}`);
       }
 
       // Store amount and fee for next step
@@ -93,13 +93,13 @@ Thank you for using AfriTokeni!`);
       // Get recipient info (already stored in step 0)
       const recipientPhone = session.data.recipientPhone;
       
-      return continueSession(`Send Money Confirmation:
-Recipient: ${recipientPhone}
-Amount: ${getSessionCurrency(session)} ${amount.toLocaleString()}
-Fee: ${getSessionCurrency(session)} ${fee.toLocaleString()}
-Total: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
+      return continueSession(`${TranslationService.translate('send_money', lang)} ${TranslationService.translate('confirmation', lang)}:
+${TranslationService.translate('recipient', lang)}: ${recipientPhone}
+${TranslationService.translate('amount', lang)}: ${getSessionCurrency(session)} ${amount.toLocaleString()}
+${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${fee.toLocaleString()}
+${TranslationService.translate('total', lang)}: ${getSessionCurrency(session)} ${totalRequired.toLocaleString()}
 
-Enter your 4-digit PIN to confirm:
+${TranslationService.translate('enter_pin_to_confirm', lang)}:
 ${TranslationService.translate('back_or_menu', lang)}`);
     }
     
@@ -214,6 +214,6 @@ Thank you for using AfriTokeni!`);
       
       const currency = getSessionCurrency(session);
       session.step = 1;
-      return continueSession(`Enter amount to send (${currency}):`);
+      return continueSession(`${TranslationService.translate('enter_amount', lang)} (${currency}):`);
   }
 }
