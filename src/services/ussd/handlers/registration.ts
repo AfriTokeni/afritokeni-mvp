@@ -148,6 +148,7 @@ Please select an option:
  * Handle user registration - for new users
  */
 export async function handleUserRegistration(input: string, session: USSDSession, sendSMS: (phone: string, msg: string) => Promise<any>): Promise<string> {
+  const lang = session.language || 'en';
   const sanitized_input = input.split("*")[input.split("*").length - 1];
   console.log(`📝 User registration for ${session.phoneNumber}, step: ${session.step}, input: "${sanitized_input}"`);
   
