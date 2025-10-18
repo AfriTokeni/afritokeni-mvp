@@ -1,0 +1,200 @@
+Feature: Cancel Functionality Across All USSD Flows
+  As a feature phone user
+  I want to cancel any multi-step operation by pressing 0
+  So that I can go back if I make a mistake or change my mind
+
+  Background:
+    Given I am a registered USSD user with balance
+
+  # ==================== SEND MONEY ====================
+  Scenario: Cancel Send Money at phone entry (English)
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "1" for Send Money
+    Then I should see "Press 0 to return to main menu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Local Currency" in USSD response
+
+  Scenario: Cancel Send Money at amount entry (Luganda)
+    Given my language preference is "lg"
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "1" for Send Money
+    And I enter phone number "256700123456"
+    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Ssente z'omu Uganda" in USSD response
+
+  Scenario: Cancel Send Money at PIN entry (Swahili)
+    Given my language preference is "sw"
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "1" for Send Money
+    And I enter phone number "256700123456"
+    And I enter amount "1000"
+    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Muamala umeshindwa" in USSD response
+
+  # ==================== WITHDRAW ====================
+  Scenario: Cancel Withdraw at amount entry (English)
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "4" for Withdraw
+    Then I should see "Press 0 to return to main menu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Local Currency" in USSD response
+
+  Scenario: Cancel Withdraw at agent selection (Luganda)
+    Given my language preference is "lg"
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "4" for Withdraw
+    And I enter amount "5000"
+    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Ssente z'omu Uganda" in USSD response
+
+  Scenario: Cancel Withdraw at PIN entry (Swahili)
+    Given my language preference is "sw"
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "4" for Withdraw
+    And I enter amount "5000"
+    And I select "1" for first agent
+    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Muamala umeshindwa" in USSD response
+
+  # ==================== DEPOSIT ====================
+  Scenario: Cancel Deposit at amount entry (English)
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "3" for Deposit
+    Then I should see "Press 0 to return to main menu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Local Currency" in USSD response
+
+  Scenario: Cancel Deposit at agent selection (Luganda)
+    Given my language preference is "lg"
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "3" for Deposit
+    And I enter amount "10000"
+    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Ssente z'omu Uganda" in USSD response
+
+  # ==================== BITCOIN BUY ====================
+  Scenario: Cancel Bitcoin Buy at amount entry (English)
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "3" for Buy Bitcoin
+    Then I should see "Press 0 to return to main menu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Bitcoin" in USSD response
+
+  Scenario: Cancel Bitcoin Buy at PIN entry (Swahili)
+    Given my language preference is "sw"
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "3" for Buy Bitcoin
+    And I enter amount "50000"
+    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Muamala umeshindwa" in USSD response
+
+  # ==================== BITCOIN SELL ====================
+  Scenario: Cancel Bitcoin Sell at amount entry (Luganda)
+    Given my language preference is "lg"
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "4" for Sell Bitcoin
+    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Bitcoin" in USSD response
+
+  # ==================== BITCOIN SEND ====================
+  Scenario: Cancel Bitcoin Send at phone entry (English)
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "5" for Send Bitcoin
+    Then I should see "Press 0 to return to main menu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Bitcoin" in USSD response
+
+  Scenario: Cancel Bitcoin Send at amount entry (Swahili)
+    Given my language preference is "sw"
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "5" for Send Bitcoin
+    And I enter phone number "256700123456"
+    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Bitcoin" in USSD response
+
+  # ==================== DAO VOTING ====================
+  Scenario: Cancel DAO voting at proposal selection (English)
+    Given there are active DAO proposals
+    When I dial "*229#"
+    And I select "4" for DAO Governance
+    And I select "1" for View Proposals
+    Then I should see "Press 0 to return to main menu" in USSD response
+    When I select "0" to cancel
+    Then I should see "DAO Governance" in USSD response
+
+  Scenario: Cancel DAO voting at vote choice (Luganda)
+    Given my language preference is "lg"
+    Given there are active DAO proposals
+    When I dial "*229#"
+    And I select "4" for DAO Governance
+    And I select "1" for View Proposals
+    And I select "1" for first proposal
+    Then I should see "Nyiga 0 okudda ku menu enkulu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Okufuga kwa DAO" in USSD response
+
+  Scenario: Cancel DAO voting at amount entry (Swahili)
+    Given my language preference is "sw"
+    Given there are active DAO proposals
+    When I dial "*229#"
+    And I select "4" for DAO Governance
+    And I select "1" for View Proposals
+    And I select "1" for first proposal
+    And I select "1" for Vote YES
+    Then I should see "Bonyeza 0 kurudi kwa menyu kuu" in USSD response
+    When I select "0" to cancel
+    Then I should see "Utawala wa DAO" in USSD response
+
+  # ==================== SESSION DATA CLEANUP ====================
+  Scenario: Cancel clears all session data
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "1" for Send Money
+    And I enter phone number "256700123456"
+    And I enter amount "5000"
+    When I select "0" to cancel
+    Then the session data should be empty
+
+  # ==================== MULTIPLE CANCELS ====================
+  Scenario: Multiple consecutive cancels work correctly
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "1" for Send Money
+    And I select "0" to cancel
+    And I select "4" for Withdraw
+    And I select "0" to cancel
+    And I select "3" for Deposit
+    And I select "0" to cancel
+    Then I should see "Local Currency" in USSD response
+
+  # ==================== CANCEL FROM ERRORS ====================
+  Scenario: Cancel works after validation error
+    When I dial "*229#"
+    And I select "1" for Local Currency
+    And I select "1" for Send Money
+    And I enter phone number "123"
+    Then I should see "Invalid phone" in USSD response
+    And I should see "Press 0" in USSD response
+    When I select "0" to cancel
+    Then I should see "Local Currency" in USSD response
