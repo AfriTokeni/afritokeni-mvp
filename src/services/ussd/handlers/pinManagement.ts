@@ -7,7 +7,7 @@ import type { USSDSession } from '../types.js';
 import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService } from '../../webHookServices.js';
-import { TranslationService } from '../../translations.js';
+import { TranslationService, type Language } from '../../translations.js';
 
 /**
  * Check if user has a PIN set
@@ -199,7 +199,7 @@ export async function handlePinSetup(input: string, session: USSDSession, lang: 
       session.data.newPin = pinInput;
       session.step = 2;
       console.log(`✅ First PIN entry accepted for ${session.phoneNumber}`);
-      return continueSession(`Please confirm your PIN by entering it again:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+      return continueSession(`Please confirm your PIN by entering it again:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
     
     case 2:
       // PIN confirmation
@@ -211,7 +211,7 @@ export async function handlePinSetup(input: string, session: USSDSession, lang: 
           session.step = 1;
           session.data = {};
           console.log(`❌ PIN mismatch for ${session.phoneNumber}`);
-          return continueSession(`PINs do not match.\nPlease enter your new 4-digit PIN again:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`PINs do not match.\nPlease enter your new 4-digit PIN again:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
         }
 
         console.log(`🔑 New PIN confirmed for ${session.phoneNumber}`);
@@ -238,7 +238,7 @@ Please select an option:
           session.step = 1;
           session.data = {};
           console.log(`❌ Failed to save PIN for ${session.phoneNumber}`);
-          return continueSession(`Error saving PIN. Please try again.\nEnter your new 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+          return continueSession(`Error saving PIN. Please try again.\nEnter your new 4-digit PIN:\n\n${TranslationService.translate('back_or_menu', lang as Language)}`);
         }
       }  
     
