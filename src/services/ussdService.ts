@@ -372,6 +372,36 @@ export class USSDService {
           }
           break;
         
+        case 'usdc_buy':
+          const { handleUSDCBuy } = await import('./ussd/handlers/usdc.js');
+          response = await handleUSDCBuy(input, session);
+          
+          // Check if handler wants to show usdc menu
+          if (response.includes('__SHOW_USDC_MENU__')) {
+            response = await handleUSDC('', session);
+          }
+          break;
+        
+        case 'usdc_sell':
+          const { handleUSDCSell } = await import('./ussd/handlers/usdc.js');
+          response = await handleUSDCSell(input, session);
+          
+          // Check if handler wants to show usdc menu
+          if (response.includes('__SHOW_USDC_MENU__')) {
+            response = await handleUSDC('', session);
+          }
+          break;
+        
+        case 'usdc_send':
+          const { handleUSDCSend } = await import('./ussd/handlers/usdc.js');
+          response = await handleUSDCSend(input, session);
+          
+          // Check if handler wants to show usdc menu
+          if (response.includes('__SHOW_USDC_MENU__')) {
+            response = await handleUSDC('', session);
+          }
+          break;
+        
         case 'dao':
           response = await handleDAO(input, session);
           
