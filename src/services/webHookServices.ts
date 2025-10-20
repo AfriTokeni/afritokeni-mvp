@@ -212,22 +212,27 @@ export class WebhookDataService {
     // For SMS users: use phone number (email field) as key
     const documentKey = userData.authMethod === 'web' ? newUser.id : userData.email;
 
-     const existingDoc = await getDoc({
+    // MOCK MODE: Skip Juno writes in unit tests
+    if (!shouldUseMocks()) {
+      const existingDoc = await getDoc({
         collection: 'users',
         key: documentKey,
         satellite
       });
 
-    // Save user to Juno datastore
-    await setDoc({
-      collection: 'users',
-      doc: {
-        key: documentKey,
-        data: dataForJuno,
-        version: existingDoc?.version ? existingDoc.version : 1n
-      },
-      satellite
-    });
+      // Save user to Juno datastore
+      await setDoc({
+        collection: 'users',
+        doc: {
+          key: documentKey,
+          data: dataForJuno,
+          version: existingDoc?.version ? existingDoc.version : 1n
+        },
+        satellite
+      });
+    } else {
+      console.log('✅ Mock mode: Skipping Juno write for user creation');
+    }
 
     return newUser;
   }
