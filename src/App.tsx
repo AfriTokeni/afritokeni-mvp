@@ -67,6 +67,14 @@ import WhitepaperPage from "./pages/WhitepaperPage";
 const App: FC = () => {
   useEffect(() => {
     const initJuno = async () => {
+      // Skip Juno initialization for playground/demo routes
+      const isPlaygroundRoute = window.location.pathname.includes('/playground');
+      
+      if (isPlaygroundRoute) {
+        console.log('🎭 Playground mode: Skipping Juno initialization (using mocked data)');
+        return;
+      }
+      
       try {
         // Use development satellite for localhost, production for deployed
         const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
@@ -82,9 +90,9 @@ const App: FC = () => {
             auth: true,
           },
         });
-        console.log("Juno satellite initialized successfully");
+        console.log("✅ Juno satellite initialized successfully");
       } catch (error) {
-        console.error("Failed to initialize Juno satellite:", error);
+        console.error("❌ Failed to initialize Juno satellite:", error);
       }
     };
     
