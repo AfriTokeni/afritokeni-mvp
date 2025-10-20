@@ -6,38 +6,41 @@ import { CkUSDCService } from '../../ckUSDCService.js';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 
+// Check if we're in playground mode
+const isPlayground = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.pathname.includes('/playground');
+  }
+  return false;
+};
+
 // Playground-safe wrappers for ckUSDC service calls
 async function safeGetBalance(principalId: string, currency: string) {
-  try {
-    return await CkUSDCService.getBalanceWithLocalCurrency(principalId, currency, true);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock USDC balance');
     return { balanceUSDC: '100.00', balanceCents: 10000, localCurrencyEquivalent: 380000, lastUpdated: new Date() };
   }
+  return await CkUSDCService.getBalanceWithLocalCurrency(principalId, currency, true);
 }
 
 async function safeGetExchangeRate(currency: string) {
-  try {
-    return await CkUSDCService.getExchangeRate(currency);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock USDC exchange rate');
     return { rate: 3800, lastUpdated: new Date(), source: 'Mock' };
   }
+  return await CkUSDCService.getExchangeRate(currency);
 }
 
 async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) {
-  try {
-    return await CkUSDCService.getBalance(principalId, useSatellite, true);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock USDC balance (simple)');
     return { balanceUSDC: '100.00', balanceCents: 10000, lastUpdated: new Date() };
   }
+  return await CkUSDCService.getBalance(principalId, useSatellite, true);
 }
 
 async function safeExchange(params: any) {
-  try {
-    return await CkUSDCService.exchange(params, true);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock USDC exchange');
     return { 
       success: true, 
@@ -46,18 +49,19 @@ async function safeExchange(params: any) {
       amountUSDC: 26.32,
       ckusdcAmount: 26.32,
       localCurrencyAmount: 100000,
+      exchangeRate: 3800,
       error: undefined
     };
   }
+  return await CkUSDCService.exchange(params, true);
 }
 
 async function safeTransfer(params: any) {
-  try {
-    return await CkUSDCService.transfer(params, true);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock USDC transfer');
     return { success: true, transactionId: `mock_${Date.now()}`, blockHeight: 12345n, error: undefined };
   }
+  return await CkUSDCService.transfer(params, true);
 }
 
 // These will be injected by the caller

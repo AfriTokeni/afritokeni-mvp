@@ -12,29 +12,33 @@ import { CkBTCUtils } from '../../../types/ckbtc';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 
-// Playground-safe wrapper for ckBTC service calls
+// Check if we're in playground mode
+const isPlayground = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.pathname.includes('/playground');
+  }
+  return false;
+};
+
+// Playground-safe wrappers for ckBTC service calls
 async function safeGetBalance(principalId: string, currency: string) {
-  try {
-    return await CkBTCService.getBalanceWithLocalCurrency(principalId, currency, true);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock ckBTC balance');
     return { balanceSatoshis: 50000, balanceBTC: '0.0005', localCurrencyEquivalent: 193208, lastUpdated: new Date() };
   }
+  return await CkBTCService.getBalanceWithLocalCurrency(principalId, currency, true);
 }
 
 async function safeGetExchangeRate(currency: string) {
-  try {
-    return await CkBTCService.getExchangeRate(currency);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock BTC exchange rate');
     return { rate: 386416858, lastUpdated: new Date(), source: 'Mock' };
   }
+  return await CkBTCService.getExchangeRate(currency);
 }
 
 async function safeExchange(params: any) {
-  try {
-    return await CkBTCService.exchange(params);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock ckBTC exchange');
     return { 
       success: true, 
@@ -42,18 +46,19 @@ async function safeExchange(params: any) {
       message: 'Mock exchange successful',
       amountBTC: 0.001,
       localCurrencyAmount: 386416,
+      exchangeRate: 386416858,
       error: undefined
     };
   }
+  return await CkBTCService.exchange(params);
 }
 
 async function safeTransfer(params: any) {
-  try {
-    return await CkBTCService.transfer(params, true, false);
-  } catch (error) {
+  if (isPlayground()) {
     console.log('🎭 Playground: Using mock ckBTC transfer');
     return { success: true, transactionId: `mock_${Date.now()}`, blockHeight: 12345n, error: undefined };
   }
+  return await CkBTCService.transfer(params, true, false);
 }
 
 // These will be injected by the caller
