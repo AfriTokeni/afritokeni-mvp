@@ -380,37 +380,48 @@ export class CkUSDCService {
    * Transfer ckUSDC between ICP users
    * @param request - Transfer request with amount, sender, and recipient principal IDs
    * @param useSatellite - Whether to use satellite configuration (true for SMS/USSD, false for web)
+   * @param isDemoMode - Whether in demo mode
    */
-  static async transfer(request: CkUSDCTransferRequest, useSatellite?: boolean): Promise<CkUSDCTransferResponse> {
+  static async transfer(request: CkUSDCTransferRequest, useSatellite?: boolean, isDemoMode = false): Promise<CkUSDCTransferResponse> {
     try {
       // Validate amount
       if (request.amount < CKUSDC_CONSTANTS.MIN_TRANSFER) {
         throw new Error(`Minimum transfer is ${CKUSDC_CONSTANTS.MIN_TRANSFER} ckUSDC`);
       }
 
-      // Call ICP ledger canister to execute transfer
-      const recipientPrincipal = Principal.fromText(request.recipient);
-      const ledgerActor = await this.getLedgerActor();
-      
-      const result: any = await ledgerActor.icrc1_transfer({
-        from_subaccount: [],
-        to: { owner: recipientPrincipal, subaccount: [] },
-        amount: BigInt(request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS)),
-        fee: [],
-        memo: request.memo ? Array.from(new TextEncoder().encode(request.memo)) : [],
-        created_at_time: []
-      });
+      let transactionId: string;
 
-      // Check if transfer was successful
-      if ('Err' in result) {
-        // Convert BigInt to string before error message
-        const errorStr = typeof result.Err === 'object' 
-          ? JSON.stringify(result.Err, (_, v) => typeof v === 'bigint' ? v.toString() : v)
-          : String(result.Err);
-        throw new Error(`Transfer failed: ${errorStr}`);
+      if (!isDemoMode) {
+        // PRODUCTION: Execute real ICRC-1 transfer on ICP mainnet
+        console.log('🚀 Production: Executing ICRC-1 USDC transfer on ICP...');
+        const recipientPrincipal = Principal.fromText(request.recipient);
+        const ledgerActor = await this.getLedgerActor();
+        
+        const result: any = await ledgerActor.icrc1_transfer({
+          from_subaccount: [],
+          to: { owner: recipientPrincipal, subaccount: [] },
+          amount: BigInt(request.amount * Math.pow(10, CKUSDC_CONSTANTS.DECIMALS)),
+          fee: [],
+          memo: request.memo ? Array.from(new TextEncoder().encode(request.memo)) : [],
+          created_at_time: []
+        });
+
+        // Check if transfer was successful
+        if ('Err' in result) {
+          // Convert BigInt to string before error message
+          const errorStr = typeof result.Err === 'object' 
+            ? JSON.stringify(result.Err, (_, v) => typeof v === 'bigint' ? v.toString() : v)
+            : String(result.Err);
+          throw new Error(`Transfer failed: ${errorStr}`);
+        }
+
+        transactionId = result.Ok.toString();
+        console.log(`✅ USDC transfer executed on ICP: ${transactionId}`);
+      } else {
+        // DEMO: Mock transaction
+        console.log('🎭 Demo Mode: Creating mock USDC transfer...');
+        transactionId = nanoid();
       }
-
-      const transactionId = nanoid();
       const fee = 0.001;
 
       const transaction: CkUSDCTransaction = {
