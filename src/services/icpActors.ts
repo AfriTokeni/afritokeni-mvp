@@ -7,14 +7,25 @@ import { Actor, HttpAgent, ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
 // ckBTC Canister IDs - use local dfx if available, otherwise mainnet
-export const CKBTC_LEDGER_CANISTER_ID = import.meta.env.CANISTER_ID_CKBTC_LEDGER || 'mxzaz-hqaaa-aaaar-qaada-cai';
+// Support both Vite (import.meta.env) and Node.js (process.env) for tests
+const getEnv = (key: string) => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key];
+  }
+  return undefined;
+};
+
+export const CKBTC_LEDGER_CANISTER_ID = getEnv('CANISTER_ID_CKBTC_LEDGER') || 'mxzaz-hqaaa-aaaar-qaada-cai';
 export const CKBTC_MINTER_CANISTER_ID = 'mqygn-kiaaa-aaaar-qaadq-cai'; // No local minter yet
 
 // ckUSDC Canister ID - use local dfx if available, otherwise mainnet
-export const CKUSDC_LEDGER_CANISTER_ID = import.meta.env.CANISTER_ID_CKUSDC_LEDGER || 'xevnm-gaaaa-aaaar-qafnq-cai';
+export const CKUSDC_LEDGER_CANISTER_ID = getEnv('CANISTER_ID_CKUSDC_LEDGER') || 'xevnm-gaaaa-aaaar-qafnq-cai';
 
 // ICP Host - use local dfx if DFX_NETWORK=local, otherwise mainnet
-const IC_HOST = import.meta.env.DFX_NETWORK === 'local' 
+const IC_HOST = getEnv('DFX_NETWORK') === 'local' 
   ? 'http://localhost:4943' 
   : 'https://ic0.app';
 
