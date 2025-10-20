@@ -5,6 +5,7 @@ import { WebhookDataService as DataService, Agent } from '../../webHookServices.
 import { CkUSDCService } from '../../ckUSDCService.js';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
+import { generatePrincipalFromIdentifier } from '../../../utils/principalUtils.js';
 
 // Check if we're in playground mode (ONLY for UI playground, NOT for tests!)
 const isPlayground = () => {
@@ -17,6 +18,37 @@ const isPlayground = () => {
   console.log('🔍 Playground check: window undefined (tests) → false');
   return false;
 };
+
+// Ensure user has a valid Principal ID - generate if missing
+async function ensurePrincipalId(user: any): Promise<string> {
+  if (user.principalId) {
+    return user.principalId;
+  }
+  // Generate Principal ID from user identifier (phone number or email)
+  const identifier = user.email || user.id;
+  const principalId = generatePrincipalFromIdentifier(identifier);
+  console.log(`⚠️ CRITICAL: User ${user.id} missing Principal ID - generated: ${principalId}`);
+  
+  // Update user record in database with new Principal ID
+  try {
+    user.principalId = principalId;
+    await DataService.createUser({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      userType: user.userType,
+      kycStatus: user.kycStatus,
+      authMethod: 'sms',
+      preferredCurrency: user.preferredCurrency
+    });
+    console.log(`✅ Updated user ${user.id} with Principal ID: ${principalId}`);
+  } catch (error) {
+    console.error(`❌ Failed to update user ${user.id} with Principal ID:`, error);
+  }
+  
+  return principalId;
+}
 
 // Playground-safe wrappers for ckUSDC service calls
 async function safeGetBalance(principalId: string, currency: string) {
@@ -203,7 +235,7 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
         }
 
         // Use CkUSDCService with satellite config for SMS users
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         const balance = await safeGetBalance(principalId, 'ugx');
         
         return endSession(`Your USDC Balance\n\n$${balance.balanceUSDC} USDC\n≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}\n\n${TranslationService.translate('current_rate', lang)}: 1 USDC = ${getSessionCurrency(session)} ${(await safeGetExchangeRate('ugx')).rate.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
@@ -390,7 +422,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         session.data.purchaseCode = purchaseCode;
         
         // Process USDC purchase through agent using CkUSDCService.exchange
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         const exchangeResult = await safeExchange({
           amount: ugxAmount,
           currency: 'ugx',
@@ -471,7 +503,7 @@ async function handleUSDCSell(input: string, session: USSDSession): Promise<stri
         }
 
         // Get real USDC balance using CkUSDCService
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         const balance = await safeGetBalanceSimple(principalId, true); // useSatellite = true for SMS
         const usdcBalance = parseFloat(balance.balanceUSDC);
         
@@ -617,7 +649,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
         session.data.saleCode = saleCode;
         
         // Process USDC to local currency exchange through agent
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         const exchangeResult = await safeExchange({
           userId: principalId,
           agentId: selectedAgent.id,
@@ -698,7 +730,7 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
         }
 
         // Get real USDC balance using CkUSDCService
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         const balance = await safeGetBalanceSimple(principalId, true); // useSatellite = true for SMS
         const usdcBalance = parseFloat(balance.balanceUSDC);
         
