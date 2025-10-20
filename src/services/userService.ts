@@ -45,7 +45,7 @@ export class UserService {
     
     // Generate Principal ID for ICP blockchain operations
     const userIdentifier = userData.phoneNumber || userData.email || userId;
-    const principalId = generatePrincipalFromIdentifier(userIdentifier);
+    const principalId = await generatePrincipalFromIdentifier(userIdentifier);
 
     const user: User = {
       id: userId,

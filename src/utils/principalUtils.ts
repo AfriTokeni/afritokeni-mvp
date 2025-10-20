@@ -6,18 +6,28 @@
 import { Principal } from '@dfinity/principal';
 
 /**
+ * Generate a SHA-256 hash from a string
+ * Principal.selfAuthenticating() requires exactly 32 bytes
+ */
+async function sha256(message: string): Promise<Uint8Array> {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  return new Uint8Array(hashBuffer);
+}
+
+/**
  * Generate a deterministic Principal ID from a phone number
  * Used for USSD users and phone-based ckBTC transfers
  * 
  * @param phoneNumber - Phone number (with or without +, spaces, etc.)
  * @returns Principal ID as string
  */
-export function generatePrincipalFromPhone(phoneNumber: string): string {
+export async function generatePrincipalFromPhone(phoneNumber: string): Promise<string> {
   // Remove all non-digit characters
   const phoneDigits = phoneNumber.replace(/\D/g, '');
   
-  // Generate Principal ID using self-authenticating method
-  const hash = new TextEncoder().encode(phoneDigits);
+  // Generate 32-byte SHA-256 hash (required for Principal.selfAuthenticating)
+  const hash = await sha256(phoneDigits);
   const principalId = Principal.selfAuthenticating(hash).toText();
   
   return principalId;
@@ -30,8 +40,9 @@ export function generatePrincipalFromPhone(phoneNumber: string): string {
  * @param identifier - Email, username, or any string identifier
  * @returns Principal ID as string
  */
-export function generatePrincipalFromIdentifier(identifier: string): string {
-  const hash = new TextEncoder().encode(identifier);
+export async function generatePrincipalFromIdentifier(identifier: string): Promise<string> {
+  // Generate 32-byte SHA-256 hash (required for Principal.selfAuthenticating)
+  const hash = await sha256(identifier);
   const principalId = Principal.selfAuthenticating(hash).toText();
   
   return principalId;

@@ -30,7 +30,7 @@ async function ensurePrincipalId(user: any): Promise<string> {
   }
   // Generate Principal ID from user identifier (phone number or email)
   const identifier = user.email || user.id;
-  const principalId = generatePrincipalFromIdentifier(identifier);
+  const principalId = await generatePrincipalFromIdentifier(identifier);
   console.log(`⚠️ CRITICAL: User ${user.id} missing Principal ID - generated: ${principalId}`);
   
   // Update user record in database with new Principal ID

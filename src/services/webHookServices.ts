@@ -185,7 +185,7 @@ export class WebhookDataService {
     // For production: derive from phone number deterministically
     // This creates a valid self-authenticating Principal ID
     const userIdentifier = userData.id || userData.email; // Use phone for SMS users
-    const principalId = generatePrincipalFromIdentifier(userIdentifier);
+    const principalId = await generatePrincipalFromIdentifier(userIdentifier);
     
     const newUser: User = {
       id: userData.id || nanoid(), // Keep nanoid for internal reference
