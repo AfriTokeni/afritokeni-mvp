@@ -539,15 +539,27 @@ const SendMoney: React.FC = () => {
               <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Amount:</span>
-                  <span className="font-medium">{formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}</span>
+                  <span className="font-medium">
+                     {sendType === 'ckbtc' ? `₿${parseFloat(localAmount).toFixed(8)} BTC` :
+                     sendType === 'ckusdc' ? `$${parseFloat(localAmount).toFixed(2)} USDC` :
+                     formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fee (0.5%):</span>
-                  <span className="font-medium text-orange-600">{formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
+                  <span className="font-medium text-orange-600">
+                     {sendType === 'ckbtc' ? `₿${(parseFloat(localAmount) * 0.005).toFixed(8)} BTC` :
+                     sendType === 'ckusdc' ? `$${(parseFloat(localAmount) * 0.005).toFixed(2)} USDC` :
+                     formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}
+                  </span>
                 </div>
                 <div className="border-t border-gray-200 pt-2 flex justify-between text-sm sm:text-base font-semibold">
                   <span>Total:</span>
-                  <span>{formatCurrencyAmount(parseFloat(localAmount) + calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}</span>
+                  <span>
+                    {sendType === 'ckbtc' ? `₿${(parseFloat(localAmount) * 1.005).toFixed(8)} BTC` :
+                     sendType === 'ckusdc' ? `$${(parseFloat(localAmount) * 1.005).toFixed(2)} USDC` :
+                     formatCurrencyAmount(parseFloat(localAmount) + calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}
+                  </span>
                 </div>
               </div>
             </div>
