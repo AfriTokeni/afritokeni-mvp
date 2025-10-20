@@ -15,7 +15,7 @@ import { TranslationService } from '../../translations.js';
 // Check if we're in playground mode
 const isPlayground = () => {
   if (typeof window !== 'undefined') {
-    return window.location.pathname.includes('/playground');
+    return window.location.pathname.includes('/playground') || window.location.pathname.includes('/ussd');
   }
   return false;
 };
