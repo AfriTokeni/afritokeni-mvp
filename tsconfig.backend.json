@@ -15,14 +15,9 @@
     "noImplicitAny": false
   },
   "include": [
-    "src/services/server.ts",
-    "src/services/webHookServices.ts",
-    "src/services/ckBTCService.ts",
-    "src/types/ckbtc.ts",
-    "src/types/ckusdc.ts",
-    "src/types/auth.ts",
-    "src/types/currency.ts",
-    "src/types/notification.ts",
+    "src/services/**/*.ts",
+    "src/types/**/*.ts",
+    "src/utils/**/*.ts"
   ],
   "exclude": [
     "node_modules",

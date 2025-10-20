@@ -8,7 +8,7 @@ import { Principal } from '@dfinity/principal';
 import { SnsGovernanceCanister } from '@dfinity/sns';
 
 // SNS Canister IDs from environment
-const SNS_LEDGER_CANISTER = import.meta.env.VITE_SNS_LEDGER_CANISTER;
+const SNS_LEDGER_CANISTER = (import.meta as any).env?.VITE_SNS_LEDGER_CANISTER || process.env.VITE_SNS_LEDGER_CANISTER;
 
 // ICRC-1 Ledger Interface
 const icrc1Idl = ({ IDL }: any) => {
@@ -289,7 +289,7 @@ export class AfriTokenService {
    */
   static async getLeaderboard(limit: number = 10): Promise<TokenBalance[]> {
     try {
-      const SNS_GOVERNANCE_CANISTER_ID = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const SNS_GOVERNANCE_CANISTER_ID = (import.meta as any).env?.VITE_SNS_GOVERNANCE_CANISTER || process.env.VITE_SNS_GOVERNANCE_CANISTER;
       
       // Create agent for IC mainnet
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });

@@ -65,7 +65,7 @@ export class GovernanceService {
 
     try {
       // SNS Governance Canister from environment
-      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const SNS_GOVERNANCE_CANISTER = (import.meta as any).env?.VITE_SNS_GOVERNANCE_CANISTER || process.env.VITE_SNS_GOVERNANCE_CANISTER;
       
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
       
@@ -166,7 +166,7 @@ export class GovernanceService {
     }
 
     try {
-      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const SNS_GOVERNANCE_CANISTER = (import.meta as any).env?.VITE_SNS_GOVERNANCE_CANISTER || process.env.VITE_SNS_GOVERNANCE_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
       // SNS Governance IDL for voting
@@ -245,7 +245,7 @@ export class GovernanceService {
    */
   static async getProposal(proposalId: string): Promise<Proposal | null> {
     try {
-      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const SNS_GOVERNANCE_CANISTER = (import.meta as any).env?.VITE_SNS_GOVERNANCE_CANISTER || process.env.VITE_SNS_GOVERNANCE_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
       // Extract proposal number from ID
@@ -311,7 +311,7 @@ export class GovernanceService {
    */
   static async getActiveProposals(): Promise<Proposal[]> {
     try {
-      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const SNS_GOVERNANCE_CANISTER = (import.meta as any).env?.VITE_SNS_GOVERNANCE_CANISTER || process.env.VITE_SNS_GOVERNANCE_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
       // SNS Governance IDL for listing proposals
@@ -479,7 +479,7 @@ export class GovernanceService {
    */
   private static async executeFeeAdjustment(data: any): Promise<void> {
     try {
-      const SNS_ROOT_CANISTER = import.meta.env.VITE_SNS_ROOT_CANISTER;
+      const SNS_ROOT_CANISTER = (import.meta as any).env?.VITE_SNS_ROOT_CANISTER || process.env.VITE_SNS_ROOT_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
       // Update fee configuration in the root canister
@@ -520,7 +520,7 @@ export class GovernanceService {
    */
   private static async executeCurrencyAddition(data: any): Promise<void> {
     try {
-      const SNS_ROOT_CANISTER = import.meta.env.VITE_SNS_ROOT_CANISTER;
+      const SNS_ROOT_CANISTER = (import.meta as any).env?.VITE_SNS_ROOT_CANISTER || process.env.VITE_SNS_ROOT_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
       const rootIdl = ({ IDL }: any) => {
@@ -562,7 +562,7 @@ export class GovernanceService {
    */
   private static async executeAgentStandards(data: any): Promise<void> {
     try {
-      const SNS_ROOT_CANISTER = import.meta.env.VITE_SNS_ROOT_CANISTER;
+      const SNS_ROOT_CANISTER = (import.meta as any).env?.VITE_SNS_ROOT_CANISTER || process.env.VITE_SNS_ROOT_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
       const rootIdl = ({ IDL }: any) => {
@@ -606,7 +606,7 @@ export class GovernanceService {
    */
   static async getUserVotes(userId: string): Promise<Vote[]> {
     try {
-      const SNS_GOVERNANCE_CANISTER = import.meta.env.VITE_SNS_GOVERNANCE_CANISTER;
+      const SNS_GOVERNANCE_CANISTER = (import.meta as any).env?.VITE_SNS_GOVERNANCE_CANISTER || process.env.VITE_SNS_GOVERNANCE_CANISTER;
       const agent = await HttpAgent.create({ host: 'https://ic0.app' });
 
       // SNS Governance IDL for listing neuron ballots (votes)
