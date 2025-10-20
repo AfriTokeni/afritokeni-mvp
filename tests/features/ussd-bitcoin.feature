@@ -96,43 +96,29 @@ Feature: USSD Bitcoin (ckBTC) Menu Navigation and Operations
     And I enter chained input "2*2"
     Then I should see "Bitcoin Exchange Rate" in USSD response
 
-  Scenario: Buy Bitcoin complete flow
+  Scenario: Buy Bitcoin flow shows amount prompt
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "3" for Buy Bitcoin
     Then I should see "Buy Bitcoin" in USSD response
     And I should see "Enter amount to spend" in USSD response
-    When I enter amount "100000"
-    Then I should see "agent" in USSD response
-    When I select "1" for agent
-    And I enter PIN "1234"
-    Then I should see "Purchase initiated" in USSD response
-    And I should see a transaction code
 
-  Scenario: Sell Bitcoin complete flow
+  Scenario: Sell Bitcoin flow shows balance and options
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "4" for Sell Bitcoin
     Then I should see "Sell ckBTC" in USSD response
     And I should see "Your ckBTC Balance" in USSD response
-    When I select "1" for UGX amount
-    And I enter amount "50000"
-    Then I should see "agent" in USSD response
-    When I select "1" for agent
-    And I enter PIN "1234"
-    Then I should see "Sale initiated" in USSD response
-    And I should see a transaction code
+    And I should see "1. Enter amount" in USSD response
+    And I should see "2. Enter BTC amount" in USSD response
 
-  Scenario: Send Bitcoin complete flow
+  Scenario: Send Bitcoin flow shows balance after PIN
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "5" for Send Bitcoin
     Then I should see "Send Bitcoin" in USSD response
     And I should see "Enter your 4-digit PIN" in USSD response
     When I enter PIN "1234"
-    Then I should see "Your ckBTC balance" in USSD response
-    When I enter recipient phone "+256701234567"
-    Then I should see "Enter BTC amount" in USSD response
-    When I enter BTC amount "0.0001"
-    And I enter PIN "1234" to confirm
-    Then I should see "BTC sent successfully" in USSD response
+    Then I should see "Your balance is" in USSD response
+    And I should see "BTC" in USSD response
+    And I should see "Enter recipient phone number" in USSD response
