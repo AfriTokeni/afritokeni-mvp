@@ -6,7 +6,7 @@ import { AgentService } from './agentService';
 import { TransactionService } from './transactionService';
 import { BalanceService } from './balanceService';
 import { SMSService } from './smsService';
-import { AfriTokenService } from './afritokenService';
+import { AfriTokenService } from './afriTokenService';
 import type { AfricanCurrency } from '../types/currency';
 
 export interface DepositRequest {
