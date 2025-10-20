@@ -85,29 +85,79 @@ Feature: USSD USDC Menu Navigation and Operations
     And I enter chained input "3*2"
     Then I should see "Current USDC Exchange Rate" in USSD response
 
-  Scenario: Buy USDC flow shows amount prompt
+  Scenario: Complete USDC buy flow end-to-end
     When I dial "*229#"
     And I select "3" for USDC
     And I select "3" for Buy USDC
+    Then I should see "Enter your 4-digit PIN" in USSD response
+    When I enter PIN "1234"
     Then I should see "Buy USDC" in USSD response
-    And I should see "Enter amount to spend" in USSD response
+    And I should see "Enter amount" in USSD response
+    When I enter "10000"
+    Then I should see "USDC Purchase Quote" in USSD response
+    And I should see "Select an agent" in USSD response
+    When I select "1" for first agent
+    Then I should see "Purchase initiated" in USSD response
+    And I should see "Transaction ID" in USSD response
+    And I should see "Code:" in USSD response
 
-  Scenario: Sell USDC flow shows balance and options
+  Scenario: Complete USDC sell flow end-to-end
     When I dial "*229#"
     And I select "3" for USDC
     And I select "4" for Sell USDC
+    Then I should see "Enter your 4-digit PIN" in USSD response
+    When I enter PIN "1234"
     Then I should see "Sell USDC" in USSD response
-    And I should see "Your USDC Balance" in USSD response
-    And I should see "1. Enter amount" in USSD response
-    And I should see "2. Enter USDC amount" in USSD response
+    And I should see "Your balance" in USSD response
+    And I should see "Enter amount" in USSD response
+    When I enter "10"
+    Then I should see "USDC Sale Quote" in USSD response
+    And I should see "Select an agent" in USSD response
+    When I select "1" for first agent
+    Then I should see "Sale initiated" in USSD response
+    And I should see "Transaction ID" in USSD response
+    And I should see "Code:" in USSD response
 
-  Scenario: Send USDC flow shows balance after PIN
+  Scenario: Complete USDC send flow end-to-end
     When I dial "*229#"
     And I select "3" for USDC
     And I select "5" for Send USDC
     Then I should see "Send USDC" in USSD response
     And I should see "Enter your 4-digit PIN" in USSD response
     When I enter PIN "1234"
-    Then I should see "Your balance is" in USSD response
-    And I should see "USDC" in USSD response
+    Then I should see "Send USDC" in USSD response
+    And I should see "Your balance" in USSD response
     And I should see "Enter recipient phone number" in USSD response
+    When I enter "+256700123457"
+    Then I should see "Enter amount" in USSD response
+    When I enter "5"
+    Then I should see "Confirm" in USSD response
+    And I should see "5" in USSD response
+    And I should see "+256700123457" in USSD response
+    When I enter PIN "1234"
+    Then I should see "sent successfully" in USSD response
+    And I should see "Transaction ID" in USSD response
+
+  Scenario: USDC buy with insufficient balance fails gracefully
+    When I dial "*229#"
+    And I select "3" for USDC
+    And I select "3" for Buy USDC
+    When I enter PIN "1234"
+    And I enter "999999999"
+    Then I should see "Insufficient balance" in USSD response
+
+  Scenario: USDC sell with insufficient USDC fails gracefully
+    When I dial "*229#"
+    And I select "3" for USDC
+    And I select "4" for Sell USDC
+    When I enter PIN "1234"
+    And I enter "999999"
+    Then I should see "Insufficient balance" in USSD response
+
+  Scenario: USDC send with invalid phone number fails
+    When I dial "*229#"
+    And I select "3" for USDC
+    And I select "5" for Send USDC
+    When I enter PIN "1234"
+    And I enter "invalid"
+    Then I should see "Invalid phone" in USSD response
