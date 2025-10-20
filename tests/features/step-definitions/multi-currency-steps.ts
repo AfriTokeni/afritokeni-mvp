@@ -232,6 +232,9 @@ Given(/^I have (\d+) (UGX|NGN|KES|GHS|ZAR|TZS|RWF|UGX|XAF|XOF|MAD|EGP|ZMW|BWP|MU
   world.currency = currency;
   await BalanceService.updateUserBalance(world.userId, amount);
   world.balance = amount;
+  // Also set currency-specific balance for integration tests
+  const balanceKey = currency.toLowerCase() + 'Balance';
+  (world as any)[balanceKey] = amount;
 });
 
 When('I immediately check my balance', async function () {

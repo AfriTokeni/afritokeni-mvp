@@ -22,7 +22,7 @@ Feature: ckUSDC Integration
 
   Scenario: Check ckUSDC balance
     Given I have 100 ckUSDC
-    When I check my balance
+    When I check my ckUSDC balance
     Then I see 100 ckUSDC
 
   Scenario: Send ckUSDC to another user
