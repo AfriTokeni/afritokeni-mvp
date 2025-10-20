@@ -335,7 +335,7 @@ async function handleUSDCBuy(input: string, session: USSDSession): Promise<strin
       }
       
       // Check user balance first
-      let userBalance = null;
+      let userBalance: any = null;
       try {
         userBalance = await DataService.getUserBalance(`+${session.phoneNumber}`);
       } catch (error) {

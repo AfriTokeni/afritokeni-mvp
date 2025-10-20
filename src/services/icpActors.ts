@@ -9,8 +9,8 @@ import { Principal } from '@dfinity/principal';
 // ckBTC Canister IDs - use local dfx if available, otherwise mainnet
 // Support both Vite (import.meta.env) and Node.js (process.env) for tests
 const getEnv = (key: string) => {
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env[key];
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
+    return (import.meta as any).env[key];
   }
   if (typeof process !== 'undefined' && process.env) {
     return process.env[key];
