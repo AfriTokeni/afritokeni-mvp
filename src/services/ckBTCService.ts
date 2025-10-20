@@ -12,7 +12,7 @@
 import { Principal } from '@dfinity/principal';
 import { AnonymousIdentity } from '@dfinity/agent';
 import { nanoid } from 'nanoid';
-import { getCkBTCLedgerActor, toPrincipal, toSubaccount } from './icpActors';
+import { getCkBTCLedgerActor, toPrincipal, toSubaccount } from './icpActors.js';
 import { getDoc, setDoc, listDocs } from '@junobuild/core';
 import type { SatelliteOptions } from '@junobuild/core';
 import {
@@ -33,8 +33,8 @@ import {
   CKBTC_CONSTANTS,
   CKBTC_TESTNET_CONFIG,
   CkBTCUtils,
-} from '../types/ckbtc';
-import { shouldUseMocks, MOCK_CKBTC_BALANCE, MOCK_BTC_RATE } from './mockService';
+} from '../types/ckbtc.js';
+import { shouldUseMocks, MOCK_CKBTC_BALANCE, MOCK_BTC_RATE } from './mockService.js';
 
 export class CkBTCService {
   private static config: CkBTCConfig = CKBTC_TESTNET_CONFIG;

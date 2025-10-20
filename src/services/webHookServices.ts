@@ -9,7 +9,7 @@ import { getDoc, setDoc, listDocs, deleteDoc } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { AfricanCurrency } from '../types/currency';
 import { Principal } from '@dfinity/principal';
-import { shouldUseMocks, MOCK_USER_BALANCE } from './mockService';
+import { shouldUseMocks, MOCK_USER_BALANCE } from './mockService.js';
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,

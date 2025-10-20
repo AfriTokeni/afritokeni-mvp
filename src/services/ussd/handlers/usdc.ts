@@ -6,7 +6,7 @@ import { CkUSDCService } from '../../ckUSDCService.js';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 import { generatePrincipalFromIdentifier } from '../../../utils/principalUtils.js';
-import { shouldUseMocks } from '../../mockService';
+import { shouldUseMocks } from '../../mockService.js';
 
 const isPlayground = () => {
   if (typeof window !== 'undefined') {

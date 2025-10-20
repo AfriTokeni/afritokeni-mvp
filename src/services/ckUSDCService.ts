@@ -16,7 +16,7 @@ import { Principal } from '@dfinity/principal';
 import { AnonymousIdentity } from '@dfinity/agent';
 import { HttpAgent, Actor } from '@dfinity/agent';
 import { nanoid } from 'nanoid';
-import { getCkUSDCLedgerActor, toPrincipal, toSubaccount } from './icpActors';
+import { getCkUSDCLedgerActor, toPrincipal, toSubaccount } from './icpActors.js';
 import { getDoc, setDoc, listDocs } from '@junobuild/core';
 import type { SatelliteOptions } from '@junobuild/core';
 import {
@@ -37,8 +37,8 @@ import {
   HELPER_CONTRACT_ABI,
   CKUSDC_CONSTANTS,
   SEPOLIA_CONFIG,
-} from '../types/ckusdc';
-import { shouldUseMocks, MOCK_CKUSDC_BALANCE, MOCK_USDC_RATE } from './mockService';
+} from '../types/ckusdc.js';
+import { shouldUseMocks, MOCK_CKUSDC_BALANCE, MOCK_USDC_RATE } from './mockService.js';
 
 declare global {
   interface Window {

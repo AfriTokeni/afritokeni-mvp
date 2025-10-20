@@ -12,7 +12,7 @@ import { CkBTCUtils } from '../../../types/ckbtc.js';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 import { generatePrincipalFromIdentifier } from '../../../utils/principalUtils.js';
-import { shouldUseMocks } from '../../mockService';
+import { shouldUseMocks } from '../../mockService.js';
 
 // Check if we're in playground mode (ONLY for UI playground, NOT for tests!)
 const isPlayground = () => {
