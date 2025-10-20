@@ -9,8 +9,11 @@ import { TranslationService } from '../../translations.js';
 // Check if we're in playground mode
 const isPlayground = () => {
   if (typeof window !== 'undefined') {
-    return window.location.pathname.includes('/playground');
+    const result = window.location.pathname.includes('/playground');
+    console.log('🔍 Playground check:', window.location.pathname, '→', result);
+    return result;
   }
+  console.log('🔍 Playground check: window undefined → false');
   return false;
 };
 
@@ -40,6 +43,7 @@ async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) 
 }
 
 async function safeExchange(params: any) {
+  console.log('🔍 safeExchange called, checking playground...');
   if (isPlayground()) {
     console.log('🎭 Playground: Using mock USDC exchange');
     return { 
@@ -53,6 +57,7 @@ async function safeExchange(params: any) {
       error: undefined
     };
   }
+  console.log('🚀 NOT playground - calling real CkUSDCService.exchange');
   return await CkUSDCService.exchange(params, true);
 }
 
