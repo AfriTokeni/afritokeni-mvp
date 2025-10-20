@@ -11,7 +11,7 @@ import { TranslationService } from '../../translations.js';
 /**
  * Handle find agent - show available agents
  */
-export async function handleFindAgent(input: string, session: USSDSession, handleLocalCurrency: any): Promise<string> {
+export async function handleFindAgent(input: string, session: USSDSession, handleLocalCurrency?: any): Promise<string> {
   const lang = session.language || 'en';
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
@@ -49,7 +49,10 @@ ${TranslationService.translate('available_agents', lang)}:
     if (currentInput === '0') {
       session.currentMenu = 'local_currency';
       session.step = 0;
-      return handleLocalCurrency('', session);
+      if (handleLocalCurrency) {
+        return handleLocalCurrency('', session);
+      }
+      return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
     }
     
     // If user selects an agent number, show detailed info

@@ -12,13 +12,25 @@ import { handleWithdraw } from './ussd/handlers/withdraw';
 import { handleDeposit } from './ussd/handlers/deposit';
 import { handleFindAgent } from './ussd/handlers/agents';
 import { handleDAO } from './ussd/handlers/dao';
+import { shouldUseMocks } from './mockService';
 
 // Re-export for backward compatibility
 export type { USSDSession };
 
+// Global session storage for test/playground mode (truly global to persist across everything)
+declare global {
+  var __USSD_SESSION_STORAGE__: Map<string, USSDSession> | undefined;
+}
+
+if (typeof globalThis !== 'undefined' && !globalThis.__USSD_SESSION_STORAGE__) {
+  globalThis.__USSD_SESSION_STORAGE__ = new Map<string, USSDSession>();
+}
+
+const globalSessionStorage = globalThis.__USSD_SESSION_STORAGE__ || new Map<string, USSDSession>();
+
 export class USSDService {
   // In-memory session storage for playground mode
-  private static playgroundSessions = new Map<string, USSDSession>();
+  private static playgroundSessions = globalSessionStorage;
 
   static async createUSSDSession(sessionId: string, phoneNumber: string): Promise<USSDSession> {
     const rateLimitCheck = RateLimiter.isAllowed(phoneNumber, 'ussd');
@@ -32,9 +44,8 @@ export class USSDService {
     // USSD sessions start at main menu (not registration_check)
     session.currentMenu = 'main';
 
-    // PLAYGROUND MODE: Store in memory instead of Juno
-    if (sessionId.startsWith('playground_')) {
-      console.log('✅ Playground mode: Storing session in memory');
+    // TEST/PLAYGROUND MODE: Store in memory instead of Juno
+    if (sessionId.startsWith('playground_') || shouldUseMocks()) {
       this.playgroundSessions.set(sessionId, session);
       return session;
     }
@@ -66,8 +77,8 @@ export class USSDService {
   }
 
   static async getUSSDSession(sessionId: string): Promise<USSDSession | null> {
-    // PLAYGROUND MODE: Get from memory
-    if (sessionId.startsWith('playground_')) {
+    // TEST/PLAYGROUND MODE: Get from memory
+    if (sessionId.startsWith('playground_') || shouldUseMocks()) {
       return this.playgroundSessions.get(sessionId) || null;
     }
 
@@ -113,8 +124,8 @@ export class USSDService {
         existingSession.updateActivity();
       }
 
-      // PLAYGROUND MODE: Just update in memory
-      if (sessionId.startsWith('playground_')) {
+      // TEST/PLAYGROUND MODE: Just update in memory
+      if (sessionId.startsWith('playground_') || shouldUseMocks()) {
         this.playgroundSessions.set(sessionId, existingSession);
         return true;
       }
