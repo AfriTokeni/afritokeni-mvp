@@ -53,7 +53,7 @@ async function safeExchange(params: any) {
 
 async function safeTransfer(params: any) {
   try {
-    return await CkUSDCService.transfer(params);
+    return await CkUSDCService.transfer(params, true);
   } catch (error) {
     console.log('🎭 Playground: Using mock USDC transfer');
     return { success: true, transactionId: `mock_${Date.now()}`, blockHeight: 12345n, error: undefined };

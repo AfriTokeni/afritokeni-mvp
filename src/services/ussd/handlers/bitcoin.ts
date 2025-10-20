@@ -49,7 +49,7 @@ async function safeExchange(params: any) {
 
 async function safeTransfer(params: any) {
   try {
-    return await CkBTCService.transfer(params);
+    return await CkBTCService.transfer(params, true, false);
   } catch (error) {
     console.log('🎭 Playground: Using mock ckBTC transfer');
     return { success: true, transactionId: `mock_${Date.now()}`, blockHeight: 12345n, error: undefined };
