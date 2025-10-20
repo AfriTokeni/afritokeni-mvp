@@ -18,6 +18,7 @@ export interface UserDataFromJuno {
 
 export interface User {
   id: string;
+  principalId?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -53,9 +54,16 @@ export class UserService {
   }): Promise<User> {
     const userId = userData.id || nanoid();
     const now = new Date();
+    
+    // Generate Principal ID for ICP blockchain operations
+    const { Principal } = await import('@dfinity/principal');
+    const userIdentifier = userData.phoneNumber || userData.email || userId;
+    const hash = new TextEncoder().encode(userIdentifier);
+    const principalId = Principal.selfAuthenticating(hash).toText();
 
     const user: User = {
       id: userId,
+      principalId,
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,

@@ -67,12 +67,8 @@ ${TranslationService.translate('please_select_option', lang)}
     
     case '2':
       session.currentMenu = 'btc_rate';
-      session.step = 1;
-      // Skip PIN if already verified
-      if (session.data.pinVerified) {
-        return await handleBTCRate('', session);
-      }
-      return continueSession(`${TranslationService.translate('bitcoin_rate', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
+      session.step = 2; // Skip PIN step, go directly to showing rate
+      return await handleBTCRate('', session);
     
     case '3':
       session.currentMenu = 'btc_buy';
@@ -114,6 +110,18 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
   
   switch (session.step) {
     case 1: {
+      // Handle navigation before PIN validation
+      if (sanitized_input === '0') {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return continueSession('__SHOW_BITCOIN_MENU__');
+      }
+      if (sanitized_input === '9') {
+        session.currentMenu = 'bitcoin';
+        session.step = 0;
+        return continueSession('__SHOW_BITCOIN_MENU__');
+      }
+      
       // PIN verification step
       if (!/^\d{4}$/.test(sanitized_input)) {
         return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
@@ -200,6 +208,18 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
   }
   
   if (session.step === 1) {
+    // Handle navigation before PIN validation
+    if (sanitized_input === '0') {
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return continueSession('__SHOW_BITCOIN_MENU__');
+    }
+    if (sanitized_input === '9') {
+      session.currentMenu = 'bitcoin';
+      session.step = 0;
+      return continueSession('__SHOW_BITCOIN_MENU__');
+    }
+    
     // PIN verification step
     if (!/^\d{4}$/.test(sanitized_input)) {
       return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}\n${TranslationService.translate('enter_pin_4digit', lang)}:`);

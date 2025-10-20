@@ -2,16 +2,49 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { world } from './shared-steps.js';
 import { USSDTestHelper } from '../../helpers/ussdTestHelpers';
+import { UserService } from '../../../src/services/userService';
 
 // Background steps
-Given('I have a valid phone number {string}', function (phoneNumber: string) {
+Given('I have a valid phone number {string}', async function (phoneNumber: string) {
   world.ussdPhoneNumber = phoneNumber;
   world.ussdSessionId = world.ussdSessionId || USSDTestHelper.generateSessionId();
+  
+  // Create user in database so they exist for USSD operations
+  try {
+    const user = await UserService.createUser({
+      phoneNumber,
+      firstName: 'Test',
+      lastName: 'User',
+      email: phoneNumber,
+      userType: 'user' as const,
+      pin: world.pin || '1234'
+    });
+    world.userId = user.id;
+  } catch (error) {
+    // User might already exist, that's ok
+    console.log('User creation skipped:', error);
+  }
 });
 
-Given('I have a phone number {string}', function (phoneNumber: string) {
+Given('I have a phone number {string}', async function (phoneNumber: string) {
   world.ussdPhoneNumber = phoneNumber;
   world.ussdSessionId = world.ussdSessionId || USSDTestHelper.generateSessionId();
+  
+  // Create user in database so they exist for USSD operations
+  try {
+    const user = await UserService.createUser({
+      phoneNumber,
+      firstName: 'Test',
+      lastName: 'User',
+      email: phoneNumber,
+      userType: 'user' as const,
+      pin: world.pin || '1234'
+    });
+    world.userId = user.id;
+  } catch (error) {
+    // User might already exist, that's ok
+    console.log('User creation skipped:', error);
+  }
 });
 
 Given('I have set my PIN to {string}', function (pin: string) {

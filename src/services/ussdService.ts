@@ -294,10 +294,20 @@ export class USSDService {
         
         case 'btc_balance':
           response = await handleBTCBalance(input, session);
+          
+          // Check if handler wants to show bitcoin menu
+          if (response.includes('__SHOW_BITCOIN_MENU__')) {
+            response = await handleBitcoin('', session);
+          }
           break;
         
         case 'btc_rate':
           response = await handleBTCRate(input, session);
+          
+          // Check if handler wants to show bitcoin menu
+          if (response.includes('__SHOW_BITCOIN_MENU__')) {
+            response = await handleBitcoin('', session);
+          }
           break;
         
         case 'btc_buy':

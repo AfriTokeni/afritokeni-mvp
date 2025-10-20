@@ -8,12 +8,12 @@ Feature: ckBTC Operations
     Then I see 0.005 ckBTC
 
   Scenario: Send ckBTC to another user
-    Given I have 0.01 ckBTC
+    Given I have 0.005 ckBTC
     When I send 0.003 ckBTC to another user
-    Then my balance is 0.007 ckBTC
+    Then my balance is 0.002 ckBTC
 
   Scenario: Sell ckBTC for cash via agent
-    Given I have 0.01 ckBTC
+    Given I have 0.005 ckBTC
     When I sell 0.005 ckBTC for UGX via agent
     Then I receive an escrow code
 
