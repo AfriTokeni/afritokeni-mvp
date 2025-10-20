@@ -76,6 +76,50 @@ When('I select {string} for USDC Rate', async function (option: string) {
   world.ussdContinueSession = result.continueSession;
 });
 
+When('I select {string} for Buy USDC', async function (option: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    option
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+});
+
+When('I select {string} for Sell USDC', async function (option: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    option
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+});
+
+When('I select {string} for Send USDC', async function (option: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    option
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+});
+
+When('I select {string} for first agent', async function (option: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    option
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+});
+
 When('I select {string} to show current menu', async function (option: string) {
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,
