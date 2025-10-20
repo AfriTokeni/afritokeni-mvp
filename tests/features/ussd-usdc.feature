@@ -84,3 +84,44 @@ Feature: USSD USDC Menu Navigation and Operations
     When I dial "*229#"
     And I enter chained input "3*2"
     Then I should see "Current USDC Exchange Rate" in USSD response
+
+  Scenario: Buy USDC complete flow
+    When I dial "*229#"
+    And I select "3" for USDC
+    And I select "3" for Buy USDC
+    Then I should see "Buy USDC" in USSD response
+    And I should see "Enter amount to spend" in USSD response
+    When I enter amount "100000"
+    Then I should see "agent" in USSD response
+    When I select "1" for agent
+    And I enter PIN "1234"
+    Then I should see "Purchase initiated" in USSD response
+    And I should see a transaction code
+
+  Scenario: Sell USDC complete flow
+    When I dial "*229#"
+    And I select "3" for USDC
+    And I select "4" for Sell USDC
+    Then I should see "Sell USDC" in USSD response
+    And I should see "Your USDC balance" in USSD response
+    When I select "1" for UGX amount
+    And I enter amount "50000"
+    Then I should see "agent" in USSD response
+    When I select "1" for agent
+    And I enter PIN "1234"
+    Then I should see "Sale initiated" in USSD response
+    And I should see a transaction code
+
+  Scenario: Send USDC complete flow
+    When I dial "*229#"
+    And I select "3" for USDC
+    And I select "5" for Send USDC
+    Then I should see "Send USDC" in USSD response
+    And I should see "Enter your 4-digit PIN" in USSD response
+    When I enter PIN "1234"
+    Then I should see "Your USDC balance" in USSD response
+    When I enter recipient phone "+256701234567"
+    Then I should see "Enter USDC amount" in USSD response
+    When I enter USDC amount "10"
+    And I enter PIN "1234" to confirm
+    Then I should see "USDC sent successfully" in USSD response
