@@ -11,6 +11,7 @@ import { CkBTCService } from '../../ckBTCService';
 import { CkBTCUtils } from '../../../types/ckbtc';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
+import { generatePrincipalFromIdentifier } from '../../../utils/principalUtils.js';
 
 // Check if we're in playground mode (ONLY for UI playground, NOT for tests!)
 const isPlayground = () => {
@@ -20,6 +21,37 @@ const isPlayground = () => {
   }
   return false;
 };
+
+// Ensure user has a valid Principal ID - generate if missing
+async function ensurePrincipalId(user: any): Promise<string> {
+  if (user.principalId) {
+    return user.principalId;
+  }
+  // Generate Principal ID from user identifier (phone number or email)
+  const identifier = user.email || user.id;
+  const principalId = generatePrincipalFromIdentifier(identifier);
+  console.log(`⚠️ CRITICAL: User ${user.id} missing Principal ID - generated: ${principalId}`);
+  
+  // Update user record in database with new Principal ID
+  try {
+    user.principalId = principalId;
+    await DataService.createUser({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      userType: user.userType,
+      kycStatus: user.kycStatus,
+      authMethod: 'sms',
+      preferredCurrency: user.preferredCurrency
+    });
+    console.log(`✅ Updated user ${user.id} with Principal ID: ${principalId}`);
+  } catch (error) {
+    console.error(`❌ Failed to update user ${user.id} with Principal ID:`, error);
+  }
+  
+  return principalId;
+}
 
 // Playground-safe wrappers for ckBTC service calls
 async function safeGetBalance(principalId: string, currency: string) {
@@ -213,7 +245,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
         
         // Use the user's Principal ID for ICP blockchain operations
         const currency = getSessionCurrency(session);
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         
         console.log(`📊 Fetching ckBTC balance for Principal: ${principalId}`);
         
@@ -557,7 +589,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
           
           // Get ckBTC balance with local currency equivalent
           const currency = getSessionCurrency(session);
-          const principalId = user.principalId || user.id;
+          const principalId = await ensurePrincipalId(user);
           // Handle cancel
           if (currentInput === '0') {
             session.currentMenu = 'bitcoin';
@@ -652,7 +684,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         }
         
         const currency = getSessionCurrency(session);
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         const balance = await safeGetBalance(principalId, currency);
         
         if (balance.balanceSatoshis < (btcAmount * 100000000)) { // Convert BTC to satoshis for comparison
@@ -878,7 +910,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         
         // Get ckBTC balance with local currency equivalent
         const currency = getSessionCurrency(session);
-        const principalId = user.principalId || user.id;
+        const principalId = await ensurePrincipalId(user);
         const balance = await safeGetBalance(principalId, currency);
         
         if (balance.balanceSatoshis <= 0) {
