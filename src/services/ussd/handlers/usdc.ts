@@ -6,11 +6,7 @@ import { CkUSDCService } from '../../ckUSDCService.js';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 import { generatePrincipalFromIdentifier } from '../../../utils/principalUtils.js';
-
-// Check if we're in playground mode (ONLY for UI playground, NOT for tests!)
-const isPlayground = () => {
-  // Only check browser playground - tests should use REAL services
-  if (typeof window !== 'undefined') {
+import { shouldUseMocks } from '../../mockService';
     const result = window.location.pathname.includes('/playground') || window.location.pathname.includes('/ussd');
     console.log('🔍 Playground check:', window.location.pathname, '→', result);
     return result;
@@ -52,8 +48,7 @@ async function ensurePrincipalId(user: any): Promise<string> {
 
 // Playground-safe wrappers for ckUSDC service calls
 async function safeGetBalance(principalId: string, currency: string) {
-  const isUnitTest = process.env.NODE_ENV === 'unit-test';
-  if (isPlayground() || isUnitTest) {
+  if (shouldUseMocks()) {
     console.log('🎭 Using mock USDC balance (playground/unit test)');
     return { balanceUSDC: '100.00', balanceCents: 10000, localCurrencyEquivalent: 380000, lastUpdated: new Date() };
   }
@@ -62,8 +57,7 @@ async function safeGetBalance(principalId: string, currency: string) {
 }
 
 async function safeGetExchangeRate(currency: string) {
-  const isUnitTest = process.env.NODE_ENV === 'unit-test';
-  if (isPlayground() || isUnitTest) {
+  if (shouldUseMocks()) {
     console.log('🎭 Using mock USDC exchange rate (playground/unit test)');
     return { rate: 3800, lastUpdated: new Date(), source: 'Mock' };
   }
@@ -71,8 +65,7 @@ async function safeGetExchangeRate(currency: string) {
 }
 
 async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) {
-  const isUnitTest = process.env.NODE_ENV === 'unit-test';
-  if (isPlayground() || isUnitTest) {
+  if (shouldUseMocks()) {
     console.log('🎭 Using mock USDC balance simple (playground/unit test)');
     return { balanceUSDC: '100.00', balanceCents: 10000, lastUpdated: new Date() };
   }

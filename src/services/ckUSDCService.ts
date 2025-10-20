@@ -13,10 +13,12 @@
 
 import { ethers } from 'ethers';
 import { Principal } from '@dfinity/principal';
-import { Actor, HttpAgent, AnonymousIdentity } from '@dfinity/agent';
+import { AnonymousIdentity } from '@dfinity/agent';
+import { HttpAgent, Actor } from '@dfinity/agent';
 import { nanoid } from 'nanoid';
-import { getDoc, listDocs, setDoc, SatelliteOptions } from '@junobuild/core';
-import { getCkUSDCLedgerActor, toPrincipal, toSubaccount } from './icpActors.js';
+import { getCkUSDCLedgerActor, toPrincipal, toSubaccount } from './icpActors';
+import { getDoc, setDoc, listDocs } from '@junobuild/core';
+import type { SatelliteOptions } from '@junobuild/core';
 import {
   CkUSDCConfig,
   CkUSDCBalance,
@@ -35,7 +37,8 @@ import {
   HELPER_CONTRACT_ABI,
   CKUSDC_CONSTANTS,
   SEPOLIA_CONFIG,
-} from '../types/ckusdc.js';
+} from '../types/ckusdc';
+import { shouldUseMocks, MOCK_CKUSDC_BALANCE, MOCK_USDC_RATE } from './mockService';
 
 declare global {
   interface Window {
@@ -92,14 +95,10 @@ export class CkUSDCService {
    */
   static async getBalance(principalId: string, useSatellite?: boolean, isDemoMode = false): Promise<CkUSDCBalance> {
     try {
-      // UNIT TEST MODE: Return mock immediately
-      const isUnitTest = process.env.NODE_ENV === 'unit-test';
-      if (isUnitTest && !isDemoMode) {
-        console.log('✅ Unit test mode: Returning mock ckUSDC balance (100 USDC)');
-        return {
-          balanceUSDC: '100.00',
-          lastUpdated: new Date(),
-        };
+      // MOCK MODE: Return mock for unit tests or playground
+      if (shouldUseMocks() && !isDemoMode) {
+        console.log('✅ Mock mode: Returning mock ckUSDC balance');
+        return MOCK_CKUSDC_BALANCE;
       }
       
       if (!isDemoMode) {
@@ -589,16 +588,10 @@ export class CkUSDCService {
    */
   static async getExchangeRate(currency: string): Promise<CkUSDCExchangeRate> {
     try {
-      // UNIT TEST MODE: Return mock rate
-      const isUnitTest = process.env.NODE_ENV === 'unit-test';
-      if (isUnitTest) {
-        console.log('✅ Unit test mode: Returning mock exchange rate');
-        return {
-          currency,
-          rate: 3800, // 1 USDC = 3800 UGX
-          lastUpdated: new Date(),
-          source: 'mock',
-        };
+      // MOCK MODE: Return mock for unit tests or playground
+      if (shouldUseMocks()) {
+        console.log('✅ Mock mode: Returning mock USDC exchange rate');
+        return { ...MOCK_USDC_RATE, currency };
       }
       
       const currencyUpper = currency.toUpperCase();

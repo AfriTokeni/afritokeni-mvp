@@ -1,14 +1,15 @@
 import { TransactionService } from './transactionService';
 import { BalanceService } from './balanceService';
-import type { User } from '../types/auth';
+import type { User, UserBalance, Agent } from '../types/auth';
 import { generatePrincipalFromIdentifier } from '../utils/principalUtils';
 import { Transaction } from '../types/transaction';
 import { AnonymousIdentity } from "@dfinity/agent";
 import type { SatelliteOptions } from "@junobuild/core";
-import { setDoc, getDoc, listDocs } from '@junobuild/core';
+import { getDoc, setDoc, listDocs, deleteDoc } from '@junobuild/core';
 import { nanoid } from 'nanoid';
 import { AfricanCurrency } from '../types/currency';
-
+import { Principal } from '@dfinity/principal';
+import { shouldUseMocks, MOCK_USER_BALANCE } from './mockService';
 
 const satellite:SatelliteOptions = {
   identity: new AnonymousIdentity,
@@ -470,18 +471,10 @@ export class WebhookDataService {
 
     // Balance operations
     static async getUserBalance(userIdentifier: string): Promise<UserBalance | null> {
-      // PLAYGROUND/UNIT TEST MODE: Return mock balance immediately
-      const isPlayground = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const isUnitTest = process.env.NODE_ENV === 'unit-test';
-      
-      if (isPlayground || isUnitTest) {
-        console.log('✅ Mock mode: Returning mock balance 1,000,000 UGX');
-        return {
-          userId: userIdentifier,
-          balance: 1000000, // 1 million UGX for tests
-          currency: 'UGX',
-          lastUpdated: new Date()
-        };
+      // MOCK MODE: Return mock for unit tests or playground
+      if (shouldUseMocks()) {
+        console.log('✅ Mock mode: Returning mock user balance');
+        return { ...MOCK_USER_BALANCE, userId: userIdentifier };
       }
       
       try {
