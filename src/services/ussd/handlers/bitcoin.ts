@@ -55,7 +55,7 @@ async function ensurePrincipalId(user: any): Promise<string> {
 
 // Playground-safe wrappers for ckBTC service calls
 async function safeGetBalance(principalId: string, currency: string) {
-  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  const isUnitTest = process.env.NODE_ENV === 'unit-test';
   if (isPlayground() || isUnitTest) {
     console.log('🎭 Using mock ckBTC balance (playground/unit test)');
     return { balanceSatoshis: 50000, balanceBTC: '0.0005', localCurrencyEquivalent: 193208, lastUpdated: new Date() };
@@ -64,7 +64,7 @@ async function safeGetBalance(principalId: string, currency: string) {
 }
 
 async function safeGetExchangeRate(currency: string) {
-  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  const isUnitTest = process.env.NODE_ENV === 'unit-test';
   if (isPlayground() || isUnitTest) {
     console.log('🎭 Using mock BTC exchange rate (playground/unit test)');
     return { rate: 386416858, lastUpdated: new Date(), source: 'Mock' };

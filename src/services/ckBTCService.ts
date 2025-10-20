@@ -9,11 +9,12 @@
  * - Supports both Web and SMS/USSD operations
  */
 
-import { nanoid } from 'nanoid';
-import { getDoc, listDocs, setDoc } from '@junobuild/core';
-import { SatelliteOptions } from '@junobuild/core';
+import { Principal } from '@dfinity/principal';
 import { AnonymousIdentity } from '@dfinity/agent';
-import { getCkBTCLedgerActor, toPrincipal, toSubaccount } from './icpActors.js';
+import { nanoid } from 'nanoid';
+import { getCkBTCLedgerActor, toPrincipal, toSubaccount } from './icpActors';
+import { getDoc, setDoc, listDocs } from '@junobuild/core';
+import type { SatelliteOptions } from '@junobuild/core';
 import {
   CkBTCConfig,
   CkBTCBalance,
@@ -32,7 +33,8 @@ import {
   CKBTC_CONSTANTS,
   CKBTC_TESTNET_CONFIG,
   CkBTCUtils,
-} from '../types/ckbtc.js';
+} from '../types/ckbtc';
+import { shouldUseMocks, MOCK_CKBTC_BALANCE, MOCK_BTC_RATE } from './mockService';
 
 export class CkBTCService {
   private static config: CkBTCConfig = CKBTC_TESTNET_CONFIG;
@@ -78,18 +80,10 @@ export class CkBTCService {
    */
   static async getBalance(principalId: string, useSatellite?: boolean, isDemoMode = false): Promise<CkBTCBalance> {
     try {
-      // PLAYGROUND MODE: Check if this is a playground/demo user (but NOT if isDemoMode is explicitly true for transaction-based tests)
-      const isPlaygroundUser = principalId === 'playground-user-demo-123' || principalId === 'aaaaa-aa';
-      const isTestEnvWithoutDemoMode = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && !isDemoMode;
-      
-      if ((isPlaygroundUser || isTestEnvWithoutDemoMode) && !isDemoMode) {
-        console.log('✅ Playground/USSD Test mode: Returning mock ckBTC balance (0.005 BTC)');
-        const mockBalanceSatoshis = 500000; // 0.005 BTC = 500,000 satoshis
-        return {
-          balanceSatoshis: mockBalanceSatoshis,
-          balanceBTC: CkBTCUtils.formatBTC(mockBalanceSatoshis),
-          lastUpdated: new Date(),
-        };
+      // MOCK MODE: Return mock for unit tests or playground
+      if (shouldUseMocks() && !isDemoMode) {
+        console.log('✅ Mock mode: Returning mock ckBTC balance');
+        return MOCK_CKBTC_BALANCE;
       }
       
       if (!isDemoMode) {
@@ -638,6 +632,12 @@ export class CkBTCService {
    */
   static async getExchangeRate(currency: string): Promise<BitcoinExchangeRate> {
     try {
+      // MOCK MODE: Return mock for unit tests or playground
+      if (shouldUseMocks()) {
+        console.log('✅ Mock mode: Returning mock BTC exchange rate');
+        return { ...MOCK_BTC_RATE, currency };
+      }
+      
       const currencyUpper = currency.toUpperCase();
       
       // Use Coinbase API (no CORS, no rate limits for public data)

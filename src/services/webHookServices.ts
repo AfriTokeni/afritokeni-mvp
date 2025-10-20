@@ -471,9 +471,8 @@ export class WebhookDataService {
     // Balance operations
     static async getUserBalance(userIdentifier: string): Promise<UserBalance | null> {
       // PLAYGROUND/UNIT TEST MODE: Return mock balance immediately
-      // Unit tests = NOT integration (DFX_NETWORK !== 'local')
       const isPlayground = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const isUnitTest = typeof process !== 'undefined' && process.env.DFX_NETWORK !== 'local';
+      const isUnitTest = process.env.NODE_ENV === 'unit-test';
       
       if (isPlayground || isUnitTest) {
         console.log('✅ Mock mode: Returning mock balance 1,000,000 UGX');

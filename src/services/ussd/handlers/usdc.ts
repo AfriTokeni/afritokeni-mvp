@@ -52,8 +52,7 @@ async function ensurePrincipalId(user: any): Promise<string> {
 
 // Playground-safe wrappers for ckUSDC service calls
 async function safeGetBalance(principalId: string, currency: string) {
-  // Use mocks for playground OR unit tests (but NOT integration tests)
-  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  const isUnitTest = process.env.NODE_ENV === 'unit-test';
   if (isPlayground() || isUnitTest) {
     console.log('🎭 Using mock USDC balance (playground/unit test)');
     return { balanceUSDC: '100.00', balanceCents: 10000, localCurrencyEquivalent: 380000, lastUpdated: new Date() };
@@ -63,7 +62,7 @@ async function safeGetBalance(principalId: string, currency: string) {
 }
 
 async function safeGetExchangeRate(currency: string) {
-  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  const isUnitTest = process.env.NODE_ENV === 'unit-test';
   if (isPlayground() || isUnitTest) {
     console.log('🎭 Using mock USDC exchange rate (playground/unit test)');
     return { rate: 3800, lastUpdated: new Date(), source: 'Mock' };
@@ -72,7 +71,7 @@ async function safeGetExchangeRate(currency: string) {
 }
 
 async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) {
-  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  const isUnitTest = process.env.NODE_ENV === 'unit-test';
   if (isPlayground() || isUnitTest) {
     console.log('🎭 Using mock USDC balance simple (playground/unit test)');
     return { balanceUSDC: '100.00', balanceCents: 10000, lastUpdated: new Date() };

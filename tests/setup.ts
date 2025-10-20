@@ -3,8 +3,12 @@
  * Mocks Juno to prevent IndexedDB errors in Node.js
  */
 
-// Set test environment to disable rate limiting
-process.env.NODE_ENV = 'test';
+// Set test environment - will be overridden by npm scripts
+// unit tests: NODE_ENV=unit-test
+// integration tests: NODE_ENV=integration
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'unit-test';
+}
 
 // Mock Juno satellite ID globally
 process.env.VITE_JUNO_SATELLITE_ID = 'uxrrr-q7777-77774-qaaaq-cai';

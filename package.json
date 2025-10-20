@@ -24,8 +24,8 @@
     
     "data:seed": "tsx scripts/primeDemoData.ts",
     
-    "test:unit": "cucumber-js 'tests/features/ussd-*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
-    "test:integration": "DFX_NETWORK=local cucumber-js 'tests/features/integration-*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
+    "test:unit": "NODE_ENV=unit-test cucumber-js 'tests/features/ussd-*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
+    "test:integration": "NODE_ENV=integration DFX_NETWORK=local cucumber-js 'tests/features/integration-*.feature' --require 'tests/setup.ts' --require 'tests/features/step-definitions/*.ts' --require-module tsx",
     "test:all": "npm run test:unit && npm run test:integration",
     
     "icp:start": "dfx start --clean --background",
