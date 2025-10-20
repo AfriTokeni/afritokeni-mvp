@@ -198,3 +198,17 @@ Then('I see my recent transaction', async function () {
   const transactions = await TransactionService.getUserTransactions(world.userId);
   assert.ok(transactions.length > 0, 'Should have at least one transaction');
 });
+
+// CRITICAL: AfricasTalking concatenated input format
+// AfricasTalking sends "241234" not "2*4*1234" for navigation + PIN
+When('I enter concatenated input {string}', async function (concatenatedInput: string) {
+  // Use the existing session ID from world (set by "When I dial")
+  const sessionId = world.ussdSessionId || world.sessionId || `test_session_${Date.now()}`;
+  const phoneNumber = world.ussdPhoneNumber || world.phoneNumber || '256788123456';
+  
+  // Send the concatenated input WITHOUT asterisks (simulates AfricasTalking behavior)
+  const result = await USSDService.processUSSDRequest(sessionId, phoneNumber, concatenatedInput);
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+  world.sessionContinues = result.continueSession;
+});

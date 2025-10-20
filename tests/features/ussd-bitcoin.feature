@@ -170,3 +170,30 @@ Feature: USSD Bitcoin (ckBTC) Menu Navigation and Operations
     When I enter PIN "1234"
     And I enter "invalid"
     Then I should see "Invalid phone" in USSD response
+
+  # CRITICAL: AfricasTalking cumulative input format tests
+  # AfricasTalking sends cumulative text: "2" → "2*4" → "2*4*1234"
+  # But handlers receive full string, so "2*4*1234" has 6 digits at end, not 4
+  
+  Scenario: Bitcoin sell with AfricasTalking cumulative input format
+    When I dial "*229#"
+    And I enter chained input "2*4*1234"
+    Then I should see "Sell Bitcoin" in USSD response
+    And I should see "Your balance" in USSD response
+    And I should see "Enter BTC amount" in USSD response
+    And I should not see "Invalid PIN format" in USSD response
+    And I should not see "Enter your 4-digit PIN" in USSD response
+
+  Scenario: Bitcoin buy with AfricasTalking cumulative input format
+    When I dial "*229#"
+    And I enter chained input "2*3*1234"
+    Then I should see "Buy Bitcoin" in USSD response
+    And I should see "Enter amount" in USSD response
+    And I should not see "Invalid PIN format" in USSD response
+
+  Scenario: Bitcoin send with AfricasTalking cumulative input format
+    When I dial "*229#"
+    And I enter chained input "2*5*1234"
+    Then I should see "Send Bitcoin" in USSD response
+    And I should see "Enter recipient phone number" in USSD response
+    And I should not see "Invalid PIN format" in USSD response

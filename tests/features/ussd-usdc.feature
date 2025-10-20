@@ -162,3 +162,30 @@ Feature: USSD USDC Menu Navigation and Operations
     When I enter PIN "1234"
     And I enter "invalid"
     Then I should see "Invalid phone" in USSD response
+
+  # CRITICAL: AfricasTalking cumulative input format tests
+  # AfricasTalking sends cumulative text: "3" → "3*4" → "3*4*1234"
+  # But handlers receive full string, so "3*4*1234" has 6 digits at end, not 4
+  
+  Scenario: USDC sell with AfricasTalking cumulative input format
+    When I dial "*229#"
+    And I enter chained input "3*4*1234"
+    Then I should see "Sell USDC" in USSD response
+    And I should see "Your balance" in USSD response
+    And I should see "Enter amount" in USSD response
+    And I should not see "Invalid PIN format" in USSD response
+    And I should not see "Enter your 4-digit PIN" in USSD response
+
+  Scenario: USDC buy with AfricasTalking cumulative input format
+    When I dial "*229#"
+    And I enter chained input "3*3*1234"
+    Then I should see "Buy USDC" in USSD response
+    And I should see "Enter amount" in USSD response
+    And I should not see "Invalid PIN format" in USSD response
+
+  Scenario: USDC send with AfricasTalking cumulative input format
+    When I dial "*229#"
+    And I enter chained input "3*5*1234"
+    Then I should see "Send USDC" in USSD response
+    And I should see "Enter recipient phone number" in USSD response
+    And I should not see "Invalid PIN format" in USSD response

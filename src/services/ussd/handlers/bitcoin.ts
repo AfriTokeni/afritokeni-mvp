@@ -110,11 +110,9 @@ export function initBitcoinHandlers(smsFunc: any, mainMenuFunc: any) {
 async function handleBitcoin(input: string, session: USSDSession): Promise<string> {
   const lang = session.language || 'en';
   const inputParts = input.split('*');
-  // If coming from main menu with chained input (e.g., "2*2.1*1234"), extract the second part
-  // Otherwise extract the last part for direct navigation
-  const currentInput = (inputParts.length > 1 && inputParts[0] === '2') 
-    ? inputParts[1] 
-    : inputParts[inputParts.length - 1] || '';
+  // ALWAYS extract the last part - this is what the user just entered
+  // AfricasTalking sends cumulative: "2" → "2*4" → "2*4*1234"
+  const currentInput = inputParts[inputParts.length - 1] || '';
   
   console.log(`🔵 handleBitcoin called - input: "${input}", currentInput: "${currentInput}", session.currentMenu: ${session.currentMenu}, session.step: ${session.step}`);
   
