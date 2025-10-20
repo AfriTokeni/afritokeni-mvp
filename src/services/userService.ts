@@ -1,5 +1,7 @@
 import { nanoid } from 'nanoid';
-import { getDoc, setDoc, listDocs } from '@junobuild/core';
+import { setDoc, getDoc, listDocs } from '@junobuild/core';
+import type { User } from '../types/auth';
+import { generatePrincipalFromIdentifier } from '../utils/principalUtils';
 import { PINVerificationService } from './pinVerification';
 import { RateLimiter } from './rateLimiter';
 
@@ -9,25 +11,11 @@ export interface UserDataFromJuno {
   lastName: string;
   email: string;
   phoneNumber?: string;
-  userType: 'user' | 'agent';
+  userType: 'user' | 'agent' | 'admin';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
   pin?: string;
   createdAt: string;
-}
-
-export interface User {
-  id: string;
-  principalId?: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber?: string;
-  userType: 'user' | 'agent';
-  isVerified: boolean;
-  kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
-  pin?: string;
-  createdAt: Date;
 }
 
 export interface UserPin {
@@ -56,10 +44,8 @@ export class UserService {
     const now = new Date();
     
     // Generate Principal ID for ICP blockchain operations
-    const { Principal } = await import('@dfinity/principal');
     const userIdentifier = userData.phoneNumber || userData.email || userId;
-    const hash = new TextEncoder().encode(userIdentifier);
-    const principalId = Principal.selfAuthenticating(hash).toText();
+    const principalId = generatePrincipalFromIdentifier(userIdentifier);
 
     const user: User = {
       id: userId,
@@ -135,7 +121,7 @@ export class UserService {
       const updated = { ...existing, ...updates };
       const dataForJuno: UserDataFromJuno = {
         ...updated,
-        createdAt: updated.createdAt.toISOString()
+        createdAt: updated.createdAt?.toISOString() || new Date().toISOString()
       };
 
       const existingDoc = await getDoc({

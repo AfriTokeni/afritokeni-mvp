@@ -1,9 +1,12 @@
-import { setDoc, getDoc, listDocs } from '@junobuild/core';
-import { nanoid } from 'nanoid';
-import { User } from '../types/auth';
+import { TransactionService } from './transactionService';
+import { BalanceService } from './balanceService';
+import type { User } from '../types/auth';
+import { generatePrincipalFromIdentifier } from '../utils/principalUtils';
 import { Transaction } from '../types/transaction';
 import { AnonymousIdentity } from "@dfinity/agent";
 import type { SatelliteOptions } from "@junobuild/core";
+import { setDoc, getDoc, listDocs } from '@junobuild/core';
+import { nanoid } from 'nanoid';
 import { AfricanCurrency } from '../types/currency';
 
 
@@ -180,10 +183,8 @@ export class WebhookDataService {
     // Generate a valid ICP Principal ID for the user
     // For production: derive from phone number deterministically
     // This creates a valid self-authenticating Principal ID
-    const { Principal } = await import('@dfinity/principal');
     const userIdentifier = userData.id || userData.email; // Use phone for SMS users
-    const hash = new TextEncoder().encode(userIdentifier);
-    const principalId = Principal.selfAuthenticating(hash).toText();
+    const principalId = generatePrincipalFromIdentifier(userIdentifier);
     
     const newUser: User = {
       id: userData.id || nanoid(), // Keep nanoid for internal reference

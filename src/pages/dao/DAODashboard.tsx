@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Vote as VoteIcon, TrendingUp, Users, Coins, Plus, CheckCircle, XCircle, Clock, HelpCircle, ChevronDown, ChevronUp, DollarSign, Globe, Shield, FileText, Lightbulb } from 'lucide-react';
 import { useAuthentication } from '../../context/AuthenticationContext';
 import { useDemoMode } from '../../context/DemoModeContext';
-import { AfriTokenService, TokenBalance } from '../../services/afriTokenService';
+import { AfriTokenService, TokenBalance } from '../../services/afritokenService';
 import { GovernanceService, Proposal } from '../../services/governanceService';
 import { CentralizedDemoService } from '../../services/centralizedDemoService';
 import CreateProposalModal from '../../components/CreateProposalModal';

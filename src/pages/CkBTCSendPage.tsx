@@ -12,6 +12,7 @@ import { useAuthentication } from '../context/AuthenticationContext';
 import { CkBTCService } from '../services/ckBTCService';
 import { CkBTCUtils, CKBTC_CONSTANTS } from '../types/ckbtc';
 import PageLayout from '../components/PageLayout';
+import { generatePrincipalFromPhone, isPhoneNumber } from '../utils/principalUtils';
 
 type Step = 'amount' | 'recipient' | 'confirm' | 'success';
 
@@ -77,16 +78,8 @@ export const CkBTCSendPage: React.FC = () => {
       // Convert phone number to Principal ID if needed
       let recipientPrincipal = recipient;
       
-      // Check if recipient looks like a phone number (starts with + or all digits)
-      if (/^[\+\d\s\-\(\)]+$/.test(recipient)) {
-        // Remove all non-digit characters
-        const phoneDigits = recipient.replace(/\D/g, '');
-        
-        // Generate Principal ID from phone number (same method as USSD users)
-        const { Principal } = await import('@dfinity/principal');
-        const hash = new TextEncoder().encode(phoneDigits);
-        recipientPrincipal = Principal.selfAuthenticating(hash).toText();
-        
+      if (isPhoneNumber(recipient)) {
+        recipientPrincipal = generatePrincipalFromPhone(recipient);
         console.log(`📞 Converted phone ${recipient} → Principal ${recipientPrincipal}`);
       }
       

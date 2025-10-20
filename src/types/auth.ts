@@ -61,13 +61,14 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string; // Phone number for SMS/USSD users
   userType: 'user' | 'agent' | 'admin';
   isVerified: boolean;
   kycStatus: 'pending' | 'approved' | 'rejected' | 'not_started';
   pin?: string; // USSD PIN for mobile users
   createdAt?: Date; // Optional since Juno handles timestamps automatically
   junoUser?: any; // Juno User object
-  preferredCurrency?: string; // African currency code (NGN, GHS, KES, etc.)
+  preferredCurrency?: string; // African currency code (NGN, KES, GHS, etc.)
   location?: {
     country: string;
     city: string;
