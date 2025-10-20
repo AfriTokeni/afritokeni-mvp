@@ -325,7 +325,11 @@ export class CkUSDCService {
 
       // Check if withdrawal was successful
       if ('Err' in result) {
-        throw new Error(`Withdrawal failed: ${result.Err}`);
+        // Convert BigInt to string before error message
+        const errorStr = typeof result.Err === 'object' 
+          ? JSON.stringify(result.Err, (_, v) => typeof v === 'bigint' ? v.toString() : v)
+          : String(result.Err);
+        throw new Error(`Withdrawal failed: ${errorStr}`);
       }
 
       // Store withdrawal transaction
@@ -399,7 +403,11 @@ export class CkUSDCService {
 
       // Check if transfer was successful
       if ('Err' in result) {
-        throw new Error(`Transfer failed: ${result.Err}`);
+        // Convert BigInt to string before error message
+        const errorStr = typeof result.Err === 'object' 
+          ? JSON.stringify(result.Err, (_, v) => typeof v === 'bigint' ? v.toString() : v)
+          : String(result.Err);
+        throw new Error(`Transfer failed: ${errorStr}`);
       }
 
       const transactionId = nanoid();
