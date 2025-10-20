@@ -31,20 +31,12 @@ const USSDPlayground: React.FC = () => {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const messagesContainerRef = React.useRef<HTMLDivElement>(null);
 
-  // Initialize demo user (wait for Juno to be ready)
+  // Initialize demo user (playground uses in-memory mock data, no Juno)
   useEffect(() => {
     const init = async () => {
-      // Wait a bit for Juno to initialize (from App.tsx)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      try {
-        await CentralizedDemoService.initializeUser(demoUserId, 'UGX');
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize:', error);
-        // Set initialized anyway so UI doesn't hang
-        setIsInitialized(true);
-      }
+      console.log('🎭 Playground: Using in-memory mock data (no backend calls)');
+      // Playground doesn't need to initialize anything - all data is mocked
+      setIsInitialized(true);
     };
     init();
   }, [demoUserId]);
