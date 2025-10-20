@@ -360,8 +360,15 @@ ${TranslationService.translate('thank_you', lang)}`);
 
 async function handleBTCBuy(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
-  const currentInput = inputParts[inputParts.length - 1] || '';
+  let currentInput = inputParts[inputParts.length - 1] || '';
   const lang = session.language || 'en';
+  
+  // CRITICAL FIX: AfricasTalking sends full concatenated input (e.g., "341234" not "34*1234")
+  // For PIN entry (step 1), extract last 4 characters if input is longer than 4 digits
+  if (session.step === 1 && currentInput.length > 4 && /^\d+$/.test(currentInput)) {
+    currentInput = currentInput.slice(-4);
+    console.log(`🔧 Extracted PIN from concatenated input: ${currentInput}`);
+  }
   
   switch (session.step) {
     case 1: {
@@ -547,8 +554,16 @@ ${TranslationService.translate('select_an_agent', lang)}:
 
 async function handleBTCSell(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
-  const currentInput = inputParts[inputParts.length - 1] || '';
+  let currentInput = inputParts[inputParts.length - 1] || '';
   const lang = session.language || 'en';
+  
+  // CRITICAL FIX: AfricasTalking sends full concatenated input (e.g., "241234" not "24*1234")
+  // For PIN entry (step 1), extract last 4 characters if input is longer than 4 digits
+  if (session.step === 1 && currentInput.length > 4 && /^\d+$/.test(currentInput)) {
+    currentInput = currentInput.slice(-4);
+    console.log(`🔧 Extracted PIN from concatenated input: ${currentInput}`);
+  }
+  
   console.log('current input', currentInput);
   
   switch (session.step) {
@@ -761,8 +776,15 @@ ${TranslationService.translate('select_an_agent', lang)}:
 
 async function handleBTCSend(input: string, session: USSDSession): Promise<string> {
   const inputParts = input.split('*');
-  const currentInput = inputParts[inputParts.length - 1] || '';
+  let currentInput = inputParts[inputParts.length - 1] || '';
   const lang = session.language || 'en';
+  
+  // CRITICAL FIX: AfricasTalking sends full concatenated input (e.g., "541234" not "54*1234")
+  // For PIN entry (step 1), extract last 4 characters if input is longer than 4 digits
+  if (session.step === 1 && currentInput.length > 4 && /^\d+$/.test(currentInput)) {
+    currentInput = currentInput.slice(-4);
+    console.log(`🔧 Extracted PIN from concatenated input: ${currentInput}`);
+  }
   
   switch (session.step) {
     case 1: {
