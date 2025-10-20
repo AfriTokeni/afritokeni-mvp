@@ -12,6 +12,8 @@ import { handleWithdraw } from './ussd/handlers/withdraw';
 import { handleDeposit } from './ussd/handlers/deposit';
 import { handleFindAgent } from './ussd/handlers/agents';
 import { handleDAO } from './ussd/handlers/dao';
+import { handleTransactionHistory } from './ussd/handlers/localCurrency';
+import { handlePinCheck } from './ussd/handlers/pinManagement';
 import { shouldUseMocks } from './mockService';
 
 // Re-export for backward compatibility
@@ -256,6 +258,23 @@ export class USSDService {
         case 'check_balance':
           // Balance check is handled by localCurrency handler
           response = await handleLocalCurrency(input, session, handleSendMoney, handleDeposit, handleWithdraw, handleFindAgent, async () => this.getMainMenu());
+          break;
+        
+        case 'pin_check':
+          // PIN verification for sensitive operations
+          const handleCheckBalance = async (input: string, session: USSDSession) => {
+            return await handleLocalCurrency(input, session, handleSendMoney, handleDeposit, handleWithdraw, handleFindAgent, async () => this.getMainMenu());
+          };
+          response = await handlePinCheck(input, session, handleCheckBalance, handleTransactionHistory);
+          break;
+        
+        case 'transaction_history':
+          response = await handleTransactionHistory(input, session);
+          
+          // Check if handler wants to show local currency menu
+          if (response.includes('__SHOW_LOCAL_CURRENCY_MENU__')) {
+            response = await handleLocalCurrency('', session, handleSendMoney, handleDeposit, handleWithdraw, handleFindAgent, async () => this.getMainMenu());
+          }
           break;
         
         case 'send_money':

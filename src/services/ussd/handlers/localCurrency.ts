@@ -212,17 +212,18 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
   const sanitized_input = inputParts[inputParts.length - 1] || '';
   const lang = session.language || 'en';
   
-  // If PIN is already verified in session, skip PIN verification
-  if (session.data.pinVerified) {
+  // If PIN is already verified in session AND we're at step 1, skip PIN verification
+  if (session.data.pinVerified && session.step === 1) {
     console.log(`PIN already verified for ${session.phoneNumber}, showing transaction history directly`);
     try {
       const currency = getSessionCurrency(session);
       console.log(`Getting transaction history for ${session.phoneNumber}`);
       
-      // PLAYGROUND MODE: Return mock transactions
+      // TEST/PLAYGROUND MODE: Return mock transactions
       let transactions;
-      if (session.sessionId.startsWith('playground_')) {
-        console.log('✅ Playground mode: Returning mock transactions');
+      const { shouldUseMocks } = await import('../../mockService.js');
+      if (shouldUseMocks()) {
+        console.log('✅ Test/Playground mode: Returning mock transactions');
         transactions = [
           {
             id: 'tx_001',
@@ -269,7 +270,7 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
         return endSession(`${TranslationService.translate('transactions', lang)}:\n\n${TranslationService.translate('no_transactions', lang)}.\n\n${TranslationService.translate('to_start_using', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
 
-      let transactionList = `${TranslationService.translate('last', lang)} ${transactions.length} ${TranslationService.translate('transactions', lang)}:\n\n`;
+      let transactionList = `${TranslationService.translate('recent_transactions', lang)}\n\n`;
       
       transactions.forEach((tx, index) => {
         const date = tx.createdAt.toLocaleDateString('en-GB');
@@ -306,9 +307,10 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
         }
       });
 
-      transactionList += `\n${TranslationService.translate('thank_you_using_afritokeni', lang)}`;
+      transactionList += `\n0. ${TranslationService.translate('back_to_main_menu', lang)}`;
       
-      return endSession(transactionList);
+      session.step = 2;
+      return continueSession(transactionList);
     } catch (error) {
       console.error('Error retrieving transaction history:', error);
       return endSession(`${TranslationService.translate('error_retrieving_history', lang)}\n${TranslationService.translate('please_try_again_later', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
@@ -349,7 +351,7 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
           return endSession(`${TranslationService.translate('transactions', lang)}:\n\n${TranslationService.translate('no_transactions', lang)}.\n\n${TranslationService.translate('to_start_using', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
         }
 
-        let transactionList = `${TranslationService.translate('last', lang)} ${transactions.length} ${TranslationService.translate('transactions', lang)}:\n\n`;
+        let transactionList = `${TranslationService.translate('recent_transactions', lang)}\n\n`;
         
         transactions.forEach((tx, index) => {
           const date = tx.createdAt.toLocaleDateString('en-GB');
@@ -386,13 +388,27 @@ export async function handleTransactionHistory(input: string, session: USSDSessi
           }
         });
 
-        transactionList += `\n${TranslationService.translate('thank_you_using_afritokeni', lang)}`;
+        transactionList += `\n0. ${TranslationService.translate('back_to_main_menu', lang)}`;
         
-        return endSession(transactionList);
+        session.step = 2;
+        return continueSession(transactionList);
       } catch (error) {
         console.error('Error getting transaction history:', error);
         return endSession(`${TranslationService.translate('transactions', lang)}:\n\n${TranslationService.translate('error_try_again', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
       }
+    }
+    
+    case 2: {
+      // Handle navigation from transaction list
+      if (sanitized_input === '0') {
+        session.currentMenu = 'local_currency';
+        session.step = 0;
+        delete session.data.pinVerified; // Clear PIN verification
+        return continueSession('__SHOW_LOCAL_CURRENCY_MENU__');
+      }
+      
+      // Invalid option
+      return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n\n0. ${TranslationService.translate('back_to_main_menu', lang)}`);
     }
     
     default:

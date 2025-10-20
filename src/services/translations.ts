@@ -631,6 +631,11 @@ export class TranslationService {
       lg: 'Ebyafaayo',
       sw: 'Miamala'
     },
+    'recent_transactions': {
+      en: 'Recent Transactions',
+      lg: 'Ebyafaayo Ebisembayo',
+      sw: 'Miamala ya Hivi Karibuni'
+    },
     'find_agent': {
       en: 'Find Agent',
       lg: 'Noonya Agent',

@@ -413,7 +413,20 @@ export class WebhookDataService {
 
   // USSD Operations
   static async getUserPin(phoneNumber: string): Promise<UserPin | null> {
-     console.log('Getting user by key:', satellite);
+    // MOCK MODE: Return mock PIN for testing
+    if (shouldUseMocks()) {
+      console.log('✅ Mock mode: Returning mock PIN 1234');
+      return {
+        userId: 'mock_user',
+        phoneNumber: phoneNumber,
+        pin: '1234',
+        isSet: true,
+        createdAt: new Date(),
+        lastUpdated: new Date()
+      };
+    }
+    
+    console.log('Getting user by key:', satellite);
     try {
       // Get user by phone number (which is stored as email for SMS users)
       const user = await this.getUserByKey(phoneNumber);
