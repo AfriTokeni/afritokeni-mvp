@@ -96,67 +96,25 @@ export class CkUSDCService {
   static async getBalance(principalId: string, useSatellite?: boolean, isDemoMode = false): Promise<CkUSDCBalance> {
     try {
       // MOCK MODE: Return mock for unit tests or playground
-      if (shouldUseMocks() && !isDemoMode) {
+      if (shouldUseMocks()) {
         console.log('✅ Mock mode: Returning mock ckUSDC balance');
         return MOCK_CKUSDC_BALANCE;
       }
       
-      if (!isDemoMode) {
-        // PRODUCTION MODE: Query ICP mainnet ledger canister
-        console.log('🚀 Production: Querying ICP mainnet for ckUSDC balance...');
-        const principal = toPrincipal(principalId);
-        const ledgerActor = await getCkUSDCLedgerActor();
-        const balance = await ledgerActor.icrc1_balance_of({
-          owner: principal,
-          subaccount: toSubaccount()
-        });
-
-        const balanceAmount = Number(balance) / Math.pow(10, CKUSDC_CONSTANTS.DECIMALS);
-        console.log(`✅ ckUSDC balance from ICP: ${balanceAmount} USDC`);
-
-        return {
-          balanceUSDC: this.formatAmount(balanceAmount),
-          lastUpdated: new Date(),
-        };
-      }
-
-      // DEMO MODE: Calculate balance from transaction history in Juno
-      console.log('🎭 Demo Mode: Calculating ckUSDC balance from mock transactions...');
-      const satellite = this.getSatelliteConfig(useSatellite);
-      const results = await listDocs({
-        collection: 'ckusdc_transactions',
-        satellite,
-        filter: {
-          order: {
-            desc: true,
-            field: 'created_at'
-          }
-        }
+      // PRODUCTION/INTEGRATION MODE: Query ICP canister
+      console.log('🚀 Production: Querying ICP for ckUSDC balance...');
+      const principal = toPrincipal(principalId);
+      const ledgerActor = await getCkUSDCLedgerActor();
+      const balance = await ledgerActor.icrc1_balance_of({
+        owner: principal,
+        subaccount: toSubaccount()
       });
 
-      // Calculate balance from transaction history
-      let balance = 0;
-      results.items
-        .filter((item: any) => item.data.userId === principalId)
-        .forEach((item: any) => {
-          const tx = item.data;
-          if (tx.type === 'exchange_buy' && tx.status === 'completed') {
-            balance += tx.amount;
-          } else if (tx.type === 'exchange_sell' && tx.status === 'completed') {
-            balance -= tx.amount;
-          } else if (tx.type === 'transfer') {
-            if (tx.userId === principalId) {
-              balance -= (tx.amount + (tx.fee || 0));
-            }
-            if (tx.recipient === principalId) {
-              balance += tx.amount;
-            }
-          }
-        });
-      
-      console.log(`✅ Demo ckUSDC balance calculated: ${balance} USDC`);
+      const balanceAmount = Number(balance) / Math.pow(10, CKUSDC_CONSTANTS.DECIMALS);
+      console.log(`✅ ckUSDC balance from ICP: ${balanceAmount} USDC`);
+
       return {
-        balanceUSDC: this.formatAmount(balance),
+        balanceUSDC: this.formatAmount(balanceAmount),
         lastUpdated: new Date(),
       };
     } catch (error) {

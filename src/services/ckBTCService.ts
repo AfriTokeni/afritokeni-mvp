@@ -80,8 +80,8 @@ export class CkBTCService {
    */
   static async getBalance(principalId: string, useSatellite?: boolean, isDemoMode = false): Promise<CkBTCBalance> {
     try {
-      // MOCK MODE: Return mock for unit tests or playground
-      if (shouldUseMocks() && !isDemoMode) {
+      // MOCK MODE: Return mock for unit tests or playground (ALWAYS in unit tests, regardless of isDemoMode)
+      if (shouldUseMocks()) {
         console.log('✅ Mock mode: Returning mock ckBTC balance');
         return MOCK_CKBTC_BALANCE;
       }
