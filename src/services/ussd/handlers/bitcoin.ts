@@ -12,8 +12,9 @@ import { CkBTCUtils } from '../../../types/ckbtc';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 
-// Check if we're in playground mode
+// Check if we're in playground mode (ONLY for UI playground, NOT for tests!)
 const isPlayground = () => {
+  // Only check browser playground - tests should use REAL services
   if (typeof window !== 'undefined') {
     return window.location.pathname.includes('/playground') || window.location.pathname.includes('/ussd');
   }

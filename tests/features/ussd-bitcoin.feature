@@ -96,29 +96,79 @@ Feature: USSD Bitcoin (ckBTC) Menu Navigation and Operations
     And I enter chained input "2*2"
     Then I should see "Bitcoin Exchange Rate" in USSD response
 
-  Scenario: Buy Bitcoin flow shows amount prompt
+  Scenario: Complete Bitcoin buy flow end-to-end
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "3" for Buy Bitcoin
+    Then I should see "Enter your 4-digit PIN" in USSD response
+    When I enter PIN "1234"
     Then I should see "Buy Bitcoin" in USSD response
-    And I should see "Enter amount to spend" in USSD response
+    And I should see "Enter amount" in USSD response
+    When I enter "50000"
+    Then I should see "Bitcoin Purchase Quote" in USSD response
+    And I should see "Select an agent" in USSD response
+    When I select "1" for first agent
+    Then I should see "Purchase initiated" in USSD response
+    And I should see "Transaction ID" in USSD response
+    And I should see "Code:" in USSD response
 
-  Scenario: Sell Bitcoin flow shows balance and options
+  Scenario: Complete Bitcoin sell flow end-to-end
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "4" for Sell Bitcoin
+    Then I should see "Enter your 4-digit PIN" in USSD response
+    When I enter PIN "1234"
     Then I should see "Sell ckBTC" in USSD response
     And I should see "Your ckBTC Balance" in USSD response
-    And I should see "1. Enter amount" in USSD response
-    And I should see "2. Enter BTC amount" in USSD response
+    And I should see "Enter amount" in USSD response
+    When I enter "10000"
+    Then I should see "Bitcoin Sale Quote" in USSD response
+    And I should see "Select an agent" in USSD response
+    When I select "1" for first agent
+    Then I should see "Sale initiated" in USSD response
+    And I should see "Transaction ID" in USSD response
+    And I should see "Code:" in USSD response
 
-  Scenario: Send Bitcoin flow shows balance after PIN
+  Scenario: Complete Bitcoin send flow end-to-end
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "5" for Send Bitcoin
     Then I should see "Send Bitcoin" in USSD response
     And I should see "Enter your 4-digit PIN" in USSD response
     When I enter PIN "1234"
-    Then I should see "Your balance is" in USSD response
-    And I should see "BTC" in USSD response
+    Then I should see "Send Bitcoin" in USSD response
+    And I should see "Your balance" in USSD response
     And I should see "Enter recipient phone number" in USSD response
+    When I enter "+256700123457"
+    Then I should see "Enter amount" in USSD response
+    When I enter "0.0001"
+    Then I should see "Confirm" in USSD response
+    And I should see "0.0001" in USSD response
+    And I should see "+256700123457" in USSD response
+    When I enter PIN "1234"
+    Then I should see "sent successfully" in USSD response
+    And I should see "Transaction ID" in USSD response
+
+  Scenario: Bitcoin buy with insufficient balance fails gracefully
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "3" for Buy Bitcoin
+    When I enter PIN "1234"
+    And I enter "999999999"
+    Then I should see "Insufficient balance" in USSD response
+
+  Scenario: Bitcoin sell with insufficient BTC fails gracefully
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "4" for Sell Bitcoin
+    When I enter PIN "1234"
+    And I enter "999999999"
+    Then I should see "Insufficient balance" in USSD response
+
+  Scenario: Bitcoin send with invalid phone number fails
+    When I dial "*229#"
+    And I select "2" for Bitcoin
+    And I select "5" for Send Bitcoin
+    When I enter PIN "1234"
+    And I enter "invalid"
+    Then I should see "Invalid phone" in USSD response

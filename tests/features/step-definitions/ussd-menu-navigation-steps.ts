@@ -109,6 +109,39 @@ When('I select {string} for Send USDC', async function (option: string) {
   world.ussdContinueSession = result.continueSession;
 });
 
+When('I select {string} for Buy Bitcoin', async function (option: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    option
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+});
+
+When('I select {string} for Sell Bitcoin', async function (option: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    option
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+});
+
+When('I select {string} for Send Bitcoin', async function (option: string) {
+  const result = await USSDTestHelper.simulateUSSDRequest(
+    world.ussdSessionId,
+    world.ussdPhoneNumber,
+    option
+  );
+  
+  world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
+});
+
 When('I select {string} for first agent', async function (option: string) {
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,
