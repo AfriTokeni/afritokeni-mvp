@@ -7,6 +7,9 @@ import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 import { generatePrincipalFromIdentifier } from '../../../utils/principalUtils.js';
 import { shouldUseMocks } from '../../mockService';
+
+const isPlayground = () => {
+  if (typeof window !== 'undefined') {
     const result = window.location.pathname.includes('/playground') || window.location.pathname.includes('/ussd');
     console.log('🔍 Playground check:', window.location.pathname, '→', result);
     return result;
