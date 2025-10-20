@@ -55,29 +55,21 @@ async function ensurePrincipalId(user: any): Promise<string> {
 
 // Playground-safe wrappers for ckBTC service calls
 async function safeGetBalance(principalId: string, currency: string) {
-  if (isPlayground()) {
-    console.log('🎭 Playground: Using mock ckBTC balance');
+  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  if (isPlayground() || isUnitTest) {
+    console.log('🎭 Using mock ckBTC balance (playground/unit test)');
     return { balanceSatoshis: 50000, balanceBTC: '0.0005', localCurrencyEquivalent: 193208, lastUpdated: new Date() };
   }
-  try {
-    return await CkBTCService.getBalanceWithLocalCurrency(principalId, currency, true);
-  } catch (error) {
-    console.log('⚠️ CkBTCService.getBalanceWithLocalCurrency failed, using mock for tests:', error);
-    return { balanceSatoshis: 50000, balanceBTC: '0.0005', localCurrencyEquivalent: 193208, lastUpdated: new Date() };
-  }
+  return await CkBTCService.getBalanceWithLocalCurrency(principalId, currency, true);
 }
 
 async function safeGetExchangeRate(currency: string) {
-  if (isPlayground()) {
-    console.log('🎭 Playground: Using mock BTC exchange rate');
+  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  if (isPlayground() || isUnitTest) {
+    console.log('🎭 Using mock BTC exchange rate (playground/unit test)');
     return { rate: 386416858, lastUpdated: new Date(), source: 'Mock' };
   }
-  try {
-    return await CkBTCService.getExchangeRate(currency);
-  } catch (error) {
-    console.log('⚠️ CkBTCService.getExchangeRate failed, using mock for tests:', error);
-    return { rate: 386416858, lastUpdated: new Date(), source: 'Mock' };
-  }
+  return await CkBTCService.getExchangeRate(currency);
 }
 
 async function safeExchange(params: any) {

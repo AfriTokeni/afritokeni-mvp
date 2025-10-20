@@ -52,42 +52,32 @@ async function ensurePrincipalId(user: any): Promise<string> {
 
 // Playground-safe wrappers for ckUSDC service calls
 async function safeGetBalance(principalId: string, currency: string) {
-  if (isPlayground()) {
-    console.log('🎭 Playground: Using mock USDC balance');
+  // Use mocks for playground OR unit tests (but NOT integration tests)
+  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  if (isPlayground() || isUnitTest) {
+    console.log('🎭 Using mock USDC balance (playground/unit test)');
     return { balanceUSDC: '100.00', balanceCents: 10000, localCurrencyEquivalent: 380000, lastUpdated: new Date() };
   }
-  try {
-    return await CkUSDCService.getBalanceWithLocalCurrency(principalId, currency, true);
-  } catch (error) {
-    console.log('⚠️ CkUSDCService.getBalanceWithLocalCurrency failed, using mock for tests:', error);
-    return { balanceUSDC: '100.00', balanceCents: 10000, localCurrencyEquivalent: 380000, lastUpdated: new Date() };
-  }
+  // Call real service in production OR integration tests
+  return await CkUSDCService.getBalanceWithLocalCurrency(principalId, currency, true);
 }
 
 async function safeGetExchangeRate(currency: string) {
-  if (isPlayground()) {
-    console.log('🎭 Playground: Using mock USDC exchange rate');
+  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  if (isPlayground() || isUnitTest) {
+    console.log('🎭 Using mock USDC exchange rate (playground/unit test)');
     return { rate: 3800, lastUpdated: new Date(), source: 'Mock' };
   }
-  try {
-    return await CkUSDCService.getExchangeRate(currency);
-  } catch (error) {
-    console.log('⚠️ CkUSDCService.getExchangeRate failed, using mock for tests:', error);
-    return { rate: 3800, lastUpdated: new Date(), source: 'Mock' };
-  }
+  return await CkUSDCService.getExchangeRate(currency);
 }
 
 async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) {
-  if (isPlayground()) {
-    console.log('🎭 Playground: Using mock USDC balance (simple)');
+  const isUnitTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' && process.env.DFX_NETWORK !== 'local';
+  if (isPlayground() || isUnitTest) {
+    console.log('🎭 Using mock USDC balance simple (playground/unit test)');
     return { balanceUSDC: '100.00', balanceCents: 10000, lastUpdated: new Date() };
   }
-  try {
-    return await CkUSDCService.getBalance(principalId, useSatellite, true);
-  } catch (error) {
-    console.log('⚠️ CkUSDCService.getBalance failed, using mock for tests:', error);
-    return { balanceUSDC: '100.00', balanceCents: 10000, lastUpdated: new Date() };
-  }
+  return await CkUSDCService.getBalance(principalId, useSatellite, true);
 }
 
 async function safeExchange(params: any) {
