@@ -78,7 +78,20 @@ export class CkBTCService {
    */
   static async getBalance(principalId: string, useSatellite?: boolean, isDemoMode = false): Promise<CkBTCBalance> {
     try {
-      if (!isDemoMode) {
+      // PLAYGROUND MODE: Check if this is a playground/demo user
+      const isPlaygroundUser = principalId === 'playground-user-demo-123' || principalId === 'aaaaa-aa';
+      
+      if (isPlaygroundUser || isDemoMode) {
+        console.log('✅ Playground mode: Returning mock ckBTC balance (0.005 BTC)');
+        const mockBalanceSatoshis = 500000; // 0.005 BTC = 500,000 satoshis
+        return {
+          balanceSatoshis: mockBalanceSatoshis,
+          balanceBTC: CkBTCUtils.formatBTC(mockBalanceSatoshis),
+          lastUpdated: new Date(),
+        };
+      }
+      
+      if (true) {
         // PRODUCTION MODE: Query ICP mainnet ledger canister
         console.log('🚀 Production: Querying ICP mainnet for ckBTC balance...');
         const principal = toPrincipal(principalId);

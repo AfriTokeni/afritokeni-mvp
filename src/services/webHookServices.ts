@@ -270,7 +270,8 @@ export class WebhookDataService {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       console.log('✅ Playground mode: Returning mock user for', phoneNumber);
       return {
-        id: 'playground_user',
+        id: 'playground-user-demo-123',
+        principalId: 'aaaaa-aa', // Valid ICP Principal ID for demo mode
         email: phoneNumber,
         firstName: 'Demo',
         lastName: 'User',
