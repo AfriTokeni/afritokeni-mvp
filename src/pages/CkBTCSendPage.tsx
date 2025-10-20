@@ -79,7 +79,7 @@ export const CkBTCSendPage: React.FC = () => {
       let recipientPrincipal = recipient;
       
       if (isPhoneNumber(recipient)) {
-        recipientPrincipal = generatePrincipalFromPhone(recipient);
+        recipientPrincipal = await generatePrincipalFromPhone(recipient);
         console.log(`📞 Converted phone ${recipient} → Principal ${recipientPrincipal}`);
       }
       
