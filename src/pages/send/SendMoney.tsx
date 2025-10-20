@@ -459,7 +459,7 @@ const SendMoney: React.FC = () => {
                               setRecipientName(contact.name);
                               setSearchQuery(contact.name);
                               setShowContactDropdown(false);
-                              // Auto-fill wallet if available
+                              // Set wallet address based on send type
                               if (sendType === 'ckbtc' && contact.btcWallet) {
                                 setWalletAddress(contact.btcWallet);
                               } else if (sendType === 'ckusdc' && contact.usdcWallet) {
