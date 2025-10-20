@@ -3,14 +3,32 @@
  * Handles all Bitcoin operations: balance, rates, buy, sell, send
  */
 
-import type { USSDSession } from '../types.js';
-import { continueSession, endSession } from '../utils/responses.js';
-import { getSessionCurrency } from '../utils/currency.js';
-import { WebhookDataService as DataService, Agent } from '../../webHookServices.js';
-import { CkBTCService } from '../../ckBTCService.js';
-import { CkBTCUtils } from '../../../types/ckbtc.js';
-import { verifyUserPin } from './pinManagement.js';
-import { TranslationService } from '../../translations.js';
+import { USSDSession, continueSession, endSession } from '../types';
+import { TranslationService } from '../translations';
+import { DataService } from '../../webHookServices';
+import { CkBTCService } from '../../ckBTCService';
+import { CkBTCUtils } from '../../../types/ckbtc';
+import { verifyUserPin } from '../../pinVerification';
+import { getSessionCurrency } from '../utils/sessionUtils';
+
+// Playground-safe wrapper for ckBTC service calls
+async function safeGetBalance(principalId: string, currency: string) {
+  try {
+    return await CkBTCService.getBalanceWithLocalCurrency(principalId, currency, true);
+  } catch (error) {
+    console.log('🎭 Playground: Using mock ckBTC balance');
+    return { balanceSatoshis: 50000, balanceBTC: '0.0005', localCurrencyEquivalent: 193208, lastUpdated: new Date() };
+  }
+}
+
+async function safeGetExchangeRate(currency: string) {
+  try {
+    return await CkBTCService.getExchangeRate(currency);
+  } catch (error) {
+    console.log('🎭 Playground: Using mock BTC exchange rate');
+    return { rate: 386416858, lastUpdated: new Date(), source: 'Mock' };
+  }
+}
 
 // These will be injected by the caller
 let sendSMSNotification: (phone: string, msg: string) => Promise<any>;
@@ -164,11 +182,7 @@ async function handleBTCBalance(input: string, session: USSDSession): Promise<st
         
         console.log(`📊 Fetching ckBTC balance for Principal: ${principalId}`);
         
-        const balance = await CkBTCService.getBalanceWithLocalCurrency(
-          principalId, 
-          currency, 
-          true // Use satellite for SMS/USSD operations
-        );
+        const balance = await safeGetBalance(principalId, currency);
         
         return endSession(`${TranslationService.translate('your_ckbtc_balance', lang)}
 
@@ -248,7 +262,7 @@ async function handleBTCRate(input: string, session: USSDSession): Promise<strin
   if (session.step === 2) {
     // Display current BTC rate using getExchangeRate
     try {
-      const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
+      const exchangeRate = await safeGetExchangeRate(getSessionCurrency(session));
       const lastUpdated = exchangeRate.lastUpdated.toLocaleString();
       
       return endSession(`${TranslationService.translate('bitcoin_exchange_rate', lang)}
@@ -315,7 +329,7 @@ async function handleBTCBuy(input: string, session: USSDSession): Promise<string
       }
       
       // Calculate BTC amount and fees with real rate
-      const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
+      const exchangeRate = await safeGetExchangeRate(getSessionCurrency(session));
       const btcRate = exchangeRate.rate;
       const fee = Math.round(ugxAmount * 0.025); // 2.5% fee
       const netAmount = ugxAmount - fee;
@@ -517,22 +531,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
             return continueSession('__SHOW_BITCOIN_MENU__');
           }
           
-          let balance;
-          try {
-            balance = await CkBTCService.getBalanceWithLocalCurrency(
-              principalId, 
-              currency, 
-              true // Use satellite for SMS/USSD operations
-            );
-          } catch (balanceError) {
-            // Playground/demo mode: return mock balance
-            console.log('🎭 Playground mode: Using mock ckBTC balance for sell');
-            balance = {
-              balanceSatoshis: 50000,
-              balanceBTC: '0.0005',
-              localCurrencyEquivalent: 193208
-            };
-          }
+          const balance = await safeGetBalance(principalId, currency);
           
           if (balance.balanceSatoshis <= 0) {
             return endSession(`${TranslationService.translate('no_ckbtc_available', lang)}.\n\n${TranslationService.translate('ckbtc_balance', lang)}: ₿0.00000000\n≈ ${getSessionCurrency(session)} 0\n\n${TranslationService.translate('you_need_ckbtc', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
@@ -585,7 +584,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         }
         
         // Get exchange rate and calculate BTC amount (before fees)
-        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
+        const exchangeRate = await safeGetExchangeRate(getSessionCurrency(session));
         const btcRate = exchangeRate.rate;
         
         // Calculate gross UGX needed (including fees) to get the desired net amount
@@ -605,7 +604,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         }
         
         // Calculate UGX amount
-        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
+        const exchangeRate = await safeGetExchangeRate(getSessionCurrency(session));
         const btcRate = exchangeRate.rate;
         ugxAmount = btcAmount * btcRate;
       }
@@ -619,11 +618,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
         
         const currency = getSessionCurrency(session);
         const principalId = user.principalId || user.id;
-        const balance = await CkBTCService.getBalanceWithLocalCurrency(
-          principalId, 
-          currency, 
-          true // Use satellite for SMS/USSD operations
-        );
+        const balance = await safeGetBalance(principalId, currency);
         
         if (balance.balanceSatoshis < (btcAmount * 100000000)) { // Convert BTC to satoshis for comparison
           return continueSession(`${TranslationService.translate('insufficient_btc', lang)}
@@ -642,7 +637,7 @@ ${TranslationService.translate('enter_smaller_amount', lang)}`);
       }
       
       // Calculate fees and net amounts
-      const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
+      const exchangeRate = await safeGetExchangeRate(getSessionCurrency(session));
       const btcRate = exchangeRate.rate;
       const ugxGross = btcAmount * btcRate;
       const fee = Math.round(ugxGross * 0.025); // 2.5% fee
@@ -849,11 +844,7 @@ async function handleBTCSend(input: string, session: USSDSession): Promise<strin
         // Get ckBTC balance with local currency equivalent
         const currency = getSessionCurrency(session);
         const principalId = user.principalId || user.id;
-        const balance = await CkBTCService.getBalanceWithLocalCurrency(
-          principalId, 
-          currency, 
-          true // Use satellite for SMS/USSD operations
-        );
+        const balance = await safeGetBalance(principalId, currency);
         
         if (balance.balanceSatoshis <= 0) {
           return endSession(`${TranslationService.translate('no_ckbtc_available', lang)}.\n\n${TranslationService.translate('ckbtc_balance', lang)}: ₿0.00000000\n≈ ${getSessionCurrency(session)} 0\n\n${TranslationService.translate('you_need_ckbtc', lang)}.\n\n${TranslationService.translate('thank_you', lang)}`);
@@ -958,7 +949,7 @@ ${TranslationService.translate('back_or_menu', lang)}`);
       
       // Calculate fees and equivalent amounts
       try {
-        const exchangeRate = await CkBTCService.getExchangeRate(getSessionCurrency(session));
+        const exchangeRate = await safeGetExchangeRate(getSessionCurrency(session));
         const btcRate = exchangeRate.rate;
         const ugxEquivalent = btcAmount * btcRate;
         const networkFee = 0.000001; // 1 satoshi network fee

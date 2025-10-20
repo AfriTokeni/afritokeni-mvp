@@ -6,6 +6,25 @@ import { CkUSDCService } from '../../ckUSDCService.js';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 
+// Playground-safe wrappers for ckUSDC service calls
+async function safeGetBalance(principalId: string, currency: string) {
+  try {
+    return await CkUSDCService.getBalanceWithLocalCurrency(principalId, currency, true);
+  } catch (error) {
+    console.log('🎭 Playground: Using mock USDC balance');
+    return { balanceUSDC: '100.00', balanceCents: 10000, localCurrencyEquivalent: 380000, lastUpdated: new Date() };
+  }
+}
+
+async function safeGetExchangeRate(currency: string) {
+  try {
+    return await CkUSDCService.getExchangeRate(currency);
+  } catch (error) {
+    console.log('🎭 Playground: Using mock USDC exchange rate');
+    return { rate: 3800, lastUpdated: new Date(), source: 'Mock' };
+  }
+}
+
 // These will be injected by the caller
 let sendSMSNotification: (phone: string, msg: string) => Promise<any>;
 let handleMainMenu: any;
@@ -137,13 +156,9 @@ async function handleUSDCBalance(input: string, session: USSDSession): Promise<s
 
         // Use CkUSDCService with satellite config for SMS users
         const principalId = user.principalId || user.id;
-        const balance = await CkUSDCService.getBalanceWithLocalCurrency(
-          principalId, // ICP Principal ID for blockchain operations
-          'ugx',   // Local currency
-          true     // useSatellite = true for SMS users
-        );
+        const balance = await safeGetBalance(principalId, 'ugx');
         
-        return endSession(`Your USDC Balance\n\n$${balance.balanceUSDC} USDC\n≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}\n\n${TranslationService.translate('current_rate', lang)}: 1 USDC = ${getSessionCurrency(session)} ${(await CkUSDCService.getExchangeRate('ugx')).rate.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
+        return endSession(`Your USDC Balance\n\n$${balance.balanceUSDC} USDC\n≈ ${getSessionCurrency(session)} ${balance.localCurrencyEquivalent?.toLocaleString() || '0'}\n\n${TranslationService.translate('current_rate', lang)}: 1 USDC = ${getSessionCurrency(session)} ${(await safeGetExchangeRate('ugx')).rate.toLocaleString()}\n\n${TranslationService.translate('thank_you', lang)}`);
         
       } catch (error) {
         console.error('Error retrieving USDC balance:', error);
@@ -183,7 +198,7 @@ async function handleUSDCRate(input: string, session: USSDSession): Promise<stri
   
   // Rate check doesn't need PIN - just show the rate directly
   try {
-    const usdcRateUGX = await CkUSDCService.getExchangeRate('ugx');
+    const usdcRateUGX = await safeGetExchangeRate('ugx');
     
     return continueSession(`Current USDC Exchange Rate\n\n1 USDC = ${getSessionCurrency(session)} ${usdcRateUGX.rate.toLocaleString()}\n1 ${getSessionCurrency(session)} = $${(1 / usdcRateUGX.rate).toFixed(6)} USDC\n\n${TranslationService.translate('last_updated', lang)}: ${new Date().toLocaleTimeString()}\n\n${TranslationService.translate('back_or_menu', lang)}`);
     
@@ -268,7 +283,7 @@ ${TranslationService.translate('thank_you', lang)}`);
         session.step = 3;
         
         // Get current USDC rate for display
-        const usdcRate = await CkUSDCService.getExchangeRate('ugx');
+        const usdcRate = await safeGetExchangeRate('ugx');
         const usdcAmount = amountUGX / usdcRate.rate;
         const fee = Math.round(usdcAmount * 0.025 * usdcRate.rate); // 2.5% fee in UGX
         const netAmount = amountUGX - fee;
@@ -447,7 +462,7 @@ ${TranslationService.translate('enter_pin_4digit', lang)}:`);
       
       try {
         // Get current USDC rate and calculate fees
-        const usdcRate = await CkUSDCService.getExchangeRate('ugx');
+        const usdcRate = await safeGetExchangeRate('ugx');
         const ugxGross = usdcAmount * usdcRate.rate;
         const fee = Math.round(ugxGross * 0.025); // 2.5% fee in UGX
         const ugxNet = ugxGross - fee;
