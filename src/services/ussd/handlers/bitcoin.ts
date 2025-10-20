@@ -3,13 +3,14 @@
  * Handles all Bitcoin operations: balance, rates, buy, sell, send
  */
 
-import { USSDSession, continueSession, endSession } from '../types';
-import { TranslationService } from '../translations';
-import { DataService } from '../../webHookServices';
+import type { USSDSession } from '../types.js';
+import { continueSession, endSession } from '../utils/responses.js';
+import { getSessionCurrency } from '../utils/currency.js';
+import { WebhookDataService as DataService, Agent } from '../../webHookServices.js';
 import { CkBTCService } from '../../ckBTCService';
 import { CkBTCUtils } from '../../../types/ckbtc';
-import { verifyUserPin } from '../../pinVerification';
-import { getSessionCurrency } from '../utils/sessionUtils';
+import { verifyUserPin } from './pinManagement.js';
+import { TranslationService } from '../../translations.js';
 
 // Playground-safe wrapper for ckBTC service calls
 async function safeGetBalance(principalId: string, currency: string) {
