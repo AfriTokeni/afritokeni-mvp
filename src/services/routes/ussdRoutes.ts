@@ -21,6 +21,11 @@ import {
   handleWithdraw,
   handleSendMoney,
   handleBitcoin,
+  handleBTCBalance,
+  handleBTCRate,
+  handleBTCBuy,
+  handleBTCSell,
+  handleBTCSend,
   handleUSDC,
   handleUSDCBalance,
   handleUSDCRate,
@@ -87,12 +92,19 @@ export function createUSSDRoutes() {
           response = await handleBitcoin(text, session);
           break;
         case 'btc_balance':
+          response = await handleBTCBalance(text, session);
+          break;
         case 'btc_rate':
+          response = await handleBTCRate(text, session);
+          break;
         case 'btc_buy':
+          response = await handleBTCBuy(text, session);
+          break;
         case 'btc_sell':
+          response = await handleBTCSell(text, session);
+          break;
         case 'btc_send':
-          // Legacy - now handled by ussdService.ts via handleBitcoin
-          response = await handleBitcoin(text, session);
+          response = await handleBTCSend(text, session);
           break;
         case 'usdc':
           response = await handleUSDC(text, session);
