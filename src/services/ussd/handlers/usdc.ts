@@ -61,7 +61,10 @@ async function safeTransfer(params: any) {
 }
 
 // These will be injected by the caller
-let sendSMSNotification: (phone: string, msg: string) => Promise<any>;
+let sendSMSNotification: (phone: string, msg: string) => Promise<any> = async (phone: string, msg: string) => {
+  console.log('🎭 Playground: Mock SMS to', phone, ':', msg.substring(0, 50) + '...');
+  return Promise.resolve();
+};
 let handleMainMenu: any;
 
 export function initUSDCHandlers(smsFunc: any, mainMenuFunc: any) {
