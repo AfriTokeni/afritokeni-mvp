@@ -66,6 +66,6 @@ export const MOCK_USDC_RATE = {
 export const MOCK_USER_BALANCE = {
   userId: 'mock-user',
   balance: 1000000,
-  currency: 'UGX',
+  currency: 'UGX' as const,
   lastUpdated: new Date()
 };

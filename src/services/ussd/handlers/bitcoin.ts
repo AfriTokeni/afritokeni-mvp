@@ -8,6 +8,7 @@ import { continueSession, endSession } from '../utils/responses.js';
 import { getSessionCurrency } from '../utils/currency.js';
 import { WebhookDataService as DataService, Agent } from '../../webHookServices.js';
 import { CkBTCService } from '../../ckBTCService.js';
+import { CkBTCUtils } from '../../../types/ckbtc.js';
 import { verifyUserPin } from './pinManagement.js';
 import { TranslationService } from '../../translations.js';
 import { generatePrincipalFromIdentifier } from '../../../utils/principalUtils.js';

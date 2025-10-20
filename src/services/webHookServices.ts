@@ -1,6 +1,6 @@
 import { TransactionService } from './transactionService';
 import { BalanceService } from './balanceService';
-import type { User, UserBalance, Agent } from '../types/auth';
+import type { User } from '../types/auth';
 import { generatePrincipalFromIdentifier } from '../utils/principalUtils';
 import { Transaction } from '../types/transaction';
 import { AnonymousIdentity } from "@dfinity/agent";
