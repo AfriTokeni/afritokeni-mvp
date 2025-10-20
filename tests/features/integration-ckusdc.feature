@@ -1,6 +1,24 @@
 @integration
-Feature: ckUSDC Operations
-  Users can use ckUSDC as a stable store of value in ckUSDC
+Feature: ckUSDC Integration
+  As a user of AfriTokeni
+  I want to interact with real ckUSDC ledger on ICP
+  So that I can verify the blockchain integration works correctly
+
+  Background:
+    Given the local ICP replica is running
+    And ckUSDC ledger is deployed
+
+  Scenario: Query ckUSDC ledger metadata
+    When I query the ckUSDC ledger for token metadata
+    Then the token symbol should be "ckUSDC"
+    And the token name should be "ckUSDC"
+    And the decimals should be 6
+
+  Scenario: Query ckUSDC balance
+    Given I have a test principal
+    When I query my ckUSDC balance on the ledger
+    Then I should receive a valid balance response
+    And the balance should be a non-negative number
 
   Scenario: Check ckUSDC balance
     Given I have 100 ckUSDC
