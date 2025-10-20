@@ -6,15 +6,17 @@
 import { Actor, HttpAgent, ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
-// ckBTC Mainnet Canister IDs
-export const CKBTC_LEDGER_CANISTER_ID = 'mxzaz-hqaaa-aaaar-qaada-cai';
-export const CKBTC_MINTER_CANISTER_ID = 'mqygn-kiaaa-aaaar-qaadq-cai';
+// ckBTC Canister IDs - use local dfx if available, otherwise mainnet
+export const CKBTC_LEDGER_CANISTER_ID = import.meta.env.CANISTER_ID_CKBTC_LEDGER || 'mxzaz-hqaaa-aaaar-qaada-cai';
+export const CKBTC_MINTER_CANISTER_ID = 'mqygn-kiaaa-aaaar-qaadq-cai'; // No local minter yet
 
-// ckUSDC Mainnet Canister ID (ICRC-1 ledger)
-export const CKUSDC_LEDGER_CANISTER_ID = 'xevnm-gaaaa-aaaar-qafnq-cai';
+// ckUSDC Canister ID - use local dfx if available, otherwise mainnet
+export const CKUSDC_LEDGER_CANISTER_ID = import.meta.env.CANISTER_ID_CKUSDC_LEDGER || 'xevnm-gaaaa-aaaar-qafnq-cai';
 
-// ICP Mainnet Host
-const IC_HOST = 'https://ic0.app';
+// ICP Host - use local dfx if DFX_NETWORK=local, otherwise mainnet
+const IC_HOST = import.meta.env.DFX_NETWORK === 'local' 
+  ? 'http://localhost:4943' 
+  : 'https://ic0.app';
 
 /**
  * ICRC-1 Ledger Interface (Simplified for ckBTC)
