@@ -97,7 +97,7 @@ Feature: USSD USDC Menu Navigation and Operations
     Then I should see "USDC Purchase Quote" in USSD response
     And I should see "Select an agent" in USSD response
     When I select "1" for first agent
-    Then I should see "Purchase initiated" in USSD response
+    Then I should see "Purchase Initiated" in USSD response
     And I should see "Transaction ID" in USSD response
     And I should see "Code:" in USSD response
 
@@ -114,7 +114,7 @@ Feature: USSD USDC Menu Navigation and Operations
     Then I should see "USDC Sale Quote" in USSD response
     And I should see "Select an agent" in USSD response
     When I select "1" for first agent
-    Then I should see "Sale initiated" in USSD response
+    Then I should see "Sale Initiated" in USSD response
     And I should see "Transaction ID" in USSD response
     And I should see "Code:" in USSD response
 
@@ -126,17 +126,18 @@ Feature: USSD USDC Menu Navigation and Operations
     And I should see "Enter your 4-digit PIN" in USSD response
     When I enter PIN "1234"
     Then I should see "Send USDC" in USSD response
-    And I should see "Your balance" in USSD response
     And I should see "Enter recipient phone number" in USSD response
     When I enter "+256700123457"
-    Then I should see "Enter amount" in USSD response
+    Then I should see "Recipient" in USSD response
+    And I should see "Your balance" in USSD response
+    And I should see "Enter amount" in USSD response
     When I enter "5"
     Then I should see "Confirm" in USSD response
     And I should see "5" in USSD response
     And I should see "+256700123457" in USSD response
-    When I enter PIN "1234"
-    Then I should see "sent successfully" in USSD response
-    And I should see "Transaction ID" in USSD response
+    When I enter "1"
+    Then I should see "Transaction ID" in USSD response
+    And I should see "Thank you" in USSD response
 
   Scenario: USDC buy with insufficient balance fails gracefully
     When I dial "*229#"

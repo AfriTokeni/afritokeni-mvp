@@ -91,6 +91,8 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "3" for Buy Bitcoin
+    Then I should see "PIN" in USSD response
+    When I enter PIN "1234"
     Then I should see "amount" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response
@@ -101,6 +103,8 @@ Feature: Cancel Functionality Across All USSD Flows
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "4" for Sell Bitcoin
+    Then I should see "PIN" in USSD response
+    When I enter PIN "1234"
     Then I should see "omuwendo" in USSD response
     When I select "0" to cancel
     Then I should see "Bitcoin" in USSD response

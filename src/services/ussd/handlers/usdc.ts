@@ -76,9 +76,9 @@ async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) 
 }
 
 async function safeExchange(params: any) {
-  console.log('🔍 safeExchange called, checking playground...');
-  if (isPlayground()) {
-    console.log('🎭 Playground: Using mock USDC exchange');
+  console.log('🔍 safeExchange called, checking mocks...');
+  if (shouldUseMocks()) {
+    console.log('🎭 Using mock USDC exchange (playground/unit test)');
     return { 
       success: true, 
       transactionId: `mock_${Date.now()}`, 
@@ -90,13 +90,13 @@ async function safeExchange(params: any) {
       error: undefined
     };
   }
-  console.log('🚀 NOT playground - calling real CkUSDCService.exchange');
+  console.log('🚀 Production mode - calling real CkUSDCService.exchange');
   return await CkUSDCService.exchange(params, true);
 }
 
 async function safeTransfer(params: any) {
-  if (isPlayground()) {
-    console.log('🎭 Playground: Using mock USDC transfer');
+  if (shouldUseMocks()) {
+    console.log('🎭 Using mock USDC transfer (playground/unit test)');
     return { success: true, transactionId: `mock_${Date.now()}`, blockHeight: 12345n, error: undefined };
   }
   return await CkUSDCService.transfer(params, true);
@@ -593,7 +593,7 @@ ${TranslationService.translate('select_an_agent', lang)}:
     }
     
     case 3: {
-      // Agent selection
+      // Agent selection and process USDC sale (PIN already verified in step 1)
       const agentChoice = parseInt(currentInput);
       
       if (agentChoice === 0) {
@@ -608,47 +608,15 @@ ${TranslationService.translate('select_an_agent', lang)}:
       }
       
       const selectedAgent = agents[agentChoice - 1];
-      session.data.selectedAgent = selectedAgent;
-      session.step = 4;
-      
       const usdcAmount = session.data.usdcSellAmount || 0;
-      const ugxNet = session.data.ugxNet || 0;
-      const fee = session.data.fee || 0;
       
-      return continueSession(`${TranslationService.translate('selected_agent', lang)}:\n${selectedAgent.businessName}\n${selectedAgent.location?.city || TranslationService.translate('location', lang)}, ${selectedAgent.location?.address || ''}\n\n${TranslationService.translate('sale_quote', lang)}:\n${TranslationService.translate('sell', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('fee', lang)}: ${getSessionCurrency(session)} ${fee.toLocaleString()}\n${TranslationService.translate('you_will_receive', lang)}: ${getSessionCurrency(session)} ${ugxNet.toLocaleString()}\n\n${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
-    }
-    
-    case 4: {
-      // PIN verification and process USDC sale
-      if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
-      }
-      
-      let pinCorrect = false;
-      try {
-        pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
-      } catch (error) {
-        console.log('PIN verification error (demo mode):', error);
-      }
-      
-      // If PIN verification failed, check for demo PIN
-      if (!pinCorrect && currentInput === '1234') {
-        console.log('Using demo PIN 1234 for playground');
-        pinCorrect = true;
-      }
-      if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
-      }
-      
+      // PIN already verified in step 1, proceed with transaction
       try {
         // Get user information
         const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
         if (!user) {
           return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
         }
-
-        const selectedAgent = session.data.selectedAgent;
-        const usdcAmount = session.data.usdcSellAmount || 0;
         
         // Generate a unique sale code for the user to give to agent
         const saleCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -728,64 +696,15 @@ async function handleUSDCSend(input: string, session: USSDSession): Promise<stri
       
       session.step = 2;
       
-      try {
-        // Get user from DataService to get Principal ID
-        const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
-        if (!user) {
-          return endSession(`${TranslationService.translate('error_try_again', lang)}\n\n${TranslationService.translate('thank_you', lang)}`);
-        }
+      // Ask for recipient phone number
+      return continueSession(`${TranslationService.translate('send_usdc', lang)}
+${TranslationService.translate('enter_recipient_phone', lang)}:
 
-        // Get real USDC balance using CkUSDCService
-        const principalId = await ensurePrincipalId(user);
-        const balance = await safeGetBalanceSimple(principalId, true); // useSatellite = true for SMS
-        const usdcBalance = parseFloat(balance.balanceUSDC);
-        
-        // Store balance for later use
-        session.data.usdcBalance = usdcBalance;
-        
-        return continueSession(`${TranslationService.translate('send', lang)} USDC
-${TranslationService.translate('your_balance', lang)}: $${usdcBalance.toFixed(6)} USDC
-
-${TranslationService.translate('enter_amount', lang)} (USDC):
-(${TranslationService.translate('minimum_amount', lang)}: $0.01)`);
-      } catch (error) {
-        console.error('Error getting USDC balance:', error);
-        return continueSession(`${TranslationService.translate('error_try_again', lang)}.
-
-${TranslationService.translate('enter_pin_4digit', lang)}:`);
-      }
+${TranslationService.translate('back_or_menu', lang)}`);
     }
     
     case 2: {
-      // Amount entry step
-      const usdcAmount = parseFloat(currentInput);
-      const userBalance = session.data.usdcBalance || 0;
-      
-      if (isNaN(usdcAmount) || usdcAmount <= 0) {
-        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
-      }
-      
-      if (usdcAmount < 0.01) {
-        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: $0.01 USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
-      }
-      
-      // Calculate transaction fee (0.0001 USDC)
-      const transactionFee = 0.0001;
-      const totalRequired = usdcAmount + transactionFee;
-      
-      if (totalRequired > userBalance) {
-        return continueSession(`${TranslationService.translate('insufficient_for_fee', lang)}\n${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC\n${TranslationService.translate('total_needed', lang)}: $${totalRequired.toFixed(6)} USDC\n${TranslationService.translate('your_balance', lang)}: $${userBalance.toFixed(6)} USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
-      }
-      
-      session.data.usdcAmount = usdcAmount;
-      session.data.transactionFee = transactionFee;
-      session.step = 3;
-      
-      return continueSession(`${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC\n${TranslationService.translate('total', lang)}: $${totalRequired.toFixed(6)} USDC\n\n${TranslationService.translate('enter_recipient_phone', lang)}:\n(${TranslationService.translate('format', lang)}: +256701234567)`);
-    }
-    
-    case 3: {
-      // Recipient phone number entry
+      // Recipient phone number entry (after PIN)
       let recipientPhone = currentInput.trim();
       
       // Handle different phone number formats
@@ -817,20 +736,31 @@ ${TranslationService.translate('enter_pin_4digit', lang)}:`);
         
         session.data.recipientPhone = recipientPhone;
         session.data.recipientName = recipient.firstName || 'User';
-        session.step = 4;
+        session.step = 3;
         
-        const usdcAmount = session.data.usdcAmount || 0;
-        const transactionFee = session.data.transactionFee || 0;
-        const totalAmount = usdcAmount + transactionFee;
+        // Get user balance
+        try {
+          const user = await DataService.findUserByPhoneNumber(`+${session.phoneNumber}`);
+          if (user) {
+            const principalId = await ensurePrincipalId(user);
+            const balance = await safeGetBalanceSimple(principalId, true);
+            const usdcBalance = parseFloat(balance.balanceUSDC);
+            session.data.usdcBalance = usdcBalance;
+            
+            return continueSession(`${TranslationService.translate('recipient', lang)}: ${recipient.firstName || 'User'} (${recipientPhone})
+${TranslationService.translate('your_balance', lang)}: $${usdcBalance.toFixed(6)} USDC
+
+${TranslationService.translate('enter_amount', lang)} (USDC):
+(${TranslationService.translate('minimum_amount', lang)}: $0.01)`);
+          }
+        } catch (balanceError) {
+          console.error('Error getting balance:', balanceError);
+        }
         
-        return continueSession(`${TranslationService.translate('confirm', lang)} USDC ${TranslationService.translate('transfer', lang)}:
+        return continueSession(`${TranslationService.translate('recipient', lang)}: ${recipient.firstName || 'User'} (${recipientPhone})
 
-${TranslationService.translate('to', lang)}: ${recipient.firstName || 'User'} (${recipientPhone})
-${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC
-${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC
-${TranslationService.translate('total', lang)}: $${totalAmount.toFixed(6)} USDC
-
-${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationService.translate('back_or_menu', lang)}`);
+${TranslationService.translate('enter_amount', lang)} (USDC):
+(${TranslationService.translate('minimum_amount', lang)}: $0.01)`);
         
       } catch (error) {
         console.error('Error finding recipient:', error);
@@ -838,26 +768,55 @@ ${TranslationService.translate('enter_pin_to_confirm', lang)}:\n\n${TranslationS
       }
     }
     
+    case 3: {
+      // Amount entry step (after phone)
+      const usdcAmount = parseFloat(currentInput);
+      const userBalance = session.data.usdcBalance || 0;
+      
+      if (isNaN(usdcAmount) || usdcAmount <= 0) {
+        return continueSession(`${TranslationService.translate('invalid_amount', lang)}.\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
+      }
+      
+      if (usdcAmount < 0.01) {
+        return continueSession(`${TranslationService.translate('minimum_amount', lang)}: $0.01 USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
+      }
+      
+      // Calculate transaction fee
+      const transactionFee = 0.0001;
+      const totalRequired = usdcAmount + transactionFee;
+      
+      if (totalRequired > userBalance) {
+        return continueSession(`${TranslationService.translate('insufficient_for_fee', lang)}\n${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC\n${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC\n${TranslationService.translate('total_needed', lang)}: $${totalRequired.toFixed(6)} USDC\n${TranslationService.translate('your_balance', lang)}: $${userBalance.toFixed(6)} USDC\n${TranslationService.translate('enter_amount', lang)} (USDC):`);
+      }
+      
+      session.data.usdcAmount = usdcAmount;
+      session.data.transactionFee = transactionFee;
+      session.step = 4;
+      
+      const recipientPhone = session.data.recipientPhone;
+      const recipientName = session.data.recipientName;
+      
+      return continueSession(`${TranslationService.translate('confirm', lang)} USDC ${TranslationService.translate('transfer', lang)}:
+
+${TranslationService.translate('to', lang)}: ${recipientName} (${recipientPhone})
+${TranslationService.translate('amount', lang)}: $${usdcAmount.toFixed(6)} USDC
+${TranslationService.translate('fee', lang)}: $${transactionFee.toFixed(6)} USDC
+${TranslationService.translate('total', lang)}: $${totalRequired.toFixed(6)} USDC
+
+1. ${TranslationService.translate('confirm', lang)}
+0. ${TranslationService.translate('cancel', lang)}`);
+    }
+    
     case 4: {
-      // Final PIN verification and process transfer
-      if (!/^\d{4}$/.test(currentInput)) {
-        return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
+      // Confirmation step (no PIN needed - already done in step 1)
+      if (currentInput === '0') {
+        session.currentMenu = 'usdc';
+        session.step = 0;
+        return handleUSDC('', session);
       }
       
-      let pinCorrect = false;
-      try {
-        pinCorrect = await verifyUserPin(session.phoneNumber, currentInput);
-      } catch (error) {
-        console.log('PIN verification error (demo mode):', error);
-      }
-      
-      // If PIN verification failed, check for demo PIN
-      if (!pinCorrect && currentInput === '1234') {
-        console.log('Using demo PIN 1234 for playground');
-        pinCorrect = true;
-      }
-      if (!pinCorrect) {
-        return continueSession(`${TranslationService.translate('incorrect_pin', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
+      if (currentInput !== '1') {
+        return continueSession(`${TranslationService.translate('invalid_selection', lang)}.\n1. ${TranslationService.translate('confirm', lang)}\n0. ${TranslationService.translate('cancel', lang)}`);
       }
       
       try {

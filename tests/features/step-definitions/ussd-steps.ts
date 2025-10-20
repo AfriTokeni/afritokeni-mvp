@@ -18,11 +18,13 @@ Given('my PIN is {string}', function (pin: string) {
 });
 
 When('I enter {string}', async function (input: string) {
-  const sessionId = world.sessionId || `test_session_${Date.now()}`;
-  const phoneNumber = world.phoneNumber || '256788123456';
+  // Use the existing session ID from world (set by "When I dial")
+  const sessionId = world.ussdSessionId || world.sessionId || `test_session_${Date.now()}`;
+  const phoneNumber = world.ussdPhoneNumber || world.phoneNumber || '256788123456';
   
   const result = await USSDService.processUSSDRequest(sessionId, phoneNumber, input);
   world.ussdResponse = result.response;
+  world.ussdContinueSession = result.continueSession;
   world.sessionContinues = result.continueSession;
 });
 
@@ -150,10 +152,12 @@ When('I dial {string}', async function (ussdCode: string) {
   }
   
   // Actually call the USSD service
+  // For session reset codes, send them as input. Otherwise send empty string.
+  const inputToSend = (ussdCode === '*384*22948#') ? ussdCode : '';
   const result = await USSDTestHelper.simulateUSSDRequest(
     world.ussdSessionId,
     world.ussdPhoneNumber,
-    ''  // Empty input for initial dial
+    inputToSend
   );
   
   world.ussdResponse = result.response;

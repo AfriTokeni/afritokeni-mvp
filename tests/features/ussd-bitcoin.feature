@@ -31,10 +31,8 @@ Feature: USSD Bitcoin (ckBTC) Menu Navigation and Operations
     When I dial "*229#"
     And I select "2" for Bitcoin
     And I select "4" for Sell Bitcoin
-    Then I should see "Sell ckBTC" in USSD response
-    And I should see "Your ckBTC Balance" in USSD response
-    And I should see "1. Enter amount" in USSD response
-    And I should see "2. Enter BTC amount" in USSD response
+    Then I should see "Sell Bitcoin" in USSD response
+    And I should see "Enter your 4-digit PIN" in USSD response
 
   Scenario: Cancel Bitcoin balance check with 0
     When I dial "*229#"
@@ -108,7 +106,7 @@ Feature: USSD Bitcoin (ckBTC) Menu Navigation and Operations
     Then I should see "Bitcoin Purchase Quote" in USSD response
     And I should see "Select an agent" in USSD response
     When I select "1" for first agent
-    Then I should see "Purchase initiated" in USSD response
+    Then I should see "Purchase Initiated" in USSD response
     And I should see "Transaction ID" in USSD response
     And I should see "Code:" in USSD response
 
@@ -118,14 +116,14 @@ Feature: USSD Bitcoin (ckBTC) Menu Navigation and Operations
     And I select "4" for Sell Bitcoin
     Then I should see "Enter your 4-digit PIN" in USSD response
     When I enter PIN "1234"
-    Then I should see "Sell ckBTC" in USSD response
-    And I should see "Your ckBTC Balance" in USSD response
-    And I should see "Enter amount" in USSD response
-    When I enter "10000"
+    Then I should see "Sell Bitcoin" in USSD response
+    And I should see "Your balance" in USSD response
+    And I should see "Enter BTC amount" in USSD response
+    When I enter "0.0001"
     Then I should see "Bitcoin Sale Quote" in USSD response
     And I should see "Select an agent" in USSD response
     When I select "1" for first agent
-    Then I should see "Sale initiated" in USSD response
+    Then I should see "Sale Initiated" in USSD response
     And I should see "Transaction ID" in USSD response
     And I should see "Code:" in USSD response
 
@@ -140,14 +138,14 @@ Feature: USSD Bitcoin (ckBTC) Menu Navigation and Operations
     And I should see "Your balance" in USSD response
     And I should see "Enter recipient phone number" in USSD response
     When I enter "+256700123457"
-    Then I should see "Enter amount" in USSD response
+    Then I should see "Enter BTC amount" in USSD response
     When I enter "0.0001"
-    Then I should see "Confirm" in USSD response
+    Then I should see "Send Summary" in USSD response
     And I should see "0.0001" in USSD response
     And I should see "+256700123457" in USSD response
-    When I enter PIN "1234"
-    Then I should see "sent successfully" in USSD response
-    And I should see "Transaction ID" in USSD response
+    When I enter "1"
+    Then I should see "Transaction ID" in USSD response
+    And I should see "Thank you" in USSD response
 
   Scenario: Bitcoin buy with insufficient balance fails gracefully
     When I dial "*229#"

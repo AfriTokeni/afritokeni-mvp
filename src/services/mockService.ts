@@ -3,20 +3,45 @@
  * Single source of truth for mock data in unit tests and playground
  */
 
+// Global flag for test mode (set by test setup)
+declare global {
+  var __AFRITOKENI_TEST_MODE__: boolean | undefined;
+}
+
 /**
  * Check if we should use mocks
+ * Returns true for:
+ * - Unit tests (global test flag or NODE_ENV === 'unit-test' or 'test')
+ * - USSD Playground (browser on localhost with /ussd path)
  */
 export function shouldUseMocks(): boolean {
-  // Unit test mode
-  if (process.env.NODE_ENV === 'unit-test') {
+  // Check global test flag first (set by test setup)
+  if (typeof globalThis !== 'undefined' && globalThis.__AFRITOKENI_TEST_MODE__) {
+    console.log('🎭 shouldUseMocks: true (global test flag)');
     return true;
   }
   
-  // Playground mode (browser only)
-  if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
-    return true;
+  // Unit test mode (Node.js environment)
+  if (typeof process !== 'undefined' && process.env) {
+    const nodeEnv = process.env.NODE_ENV;
+    if (nodeEnv === 'unit-test' || nodeEnv === 'test') {
+      console.log('🎭 shouldUseMocks: true (NODE_ENV=' + nodeEnv + ')');
+      return true;
+    }
   }
   
+  // Playground mode (browser only - USSD playground page)
+  if (typeof window !== 'undefined') {
+    const isLocalhost = window.location?.hostname === 'localhost';
+    const isUSSDPlayground = window.location?.pathname?.includes('/ussd');
+    
+    if (isLocalhost && isUSSDPlayground) {
+      console.log('🎭 shouldUseMocks: true (USSD playground mode)');
+      return true;
+    }
+  }
+  
+  console.log('🎭 shouldUseMocks: false (production mode)');
   return false;
 }
 

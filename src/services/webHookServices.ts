@@ -273,11 +273,11 @@ export class WebhookDataService {
 
   // Find user by phone number - handles both SMS users (phone as key) and web users (phone in email field)
   static async findUserByPhoneNumber(phoneNumber: string): Promise<User | null> {
-    // PLAYGROUND MODE: Return mock user immediately without hitting backend
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      console.log('✅ Playground mode: Returning mock user for', phoneNumber);
+    // MOCK MODE: Return mock user immediately in unit tests or playground
+    if (shouldUseMocks()) {
+      console.log('✅ Mock mode: Returning mock user for', phoneNumber);
       return {
-        id: 'playground-user-demo-123',
+        id: 'mock-user-demo-123',
         principalId: 'aaaaa-aa', // Valid ICP Principal ID for demo mode
         email: phoneNumber,
         firstName: 'Demo',
@@ -741,10 +741,9 @@ export class WebhookDataService {
 
     // Agent operations
     static async getAvailableAgents(): Promise<Agent[]> {
-      // PLAYGROUND MODE: Return mock agents immediately without hitting backend
-      // Check if we're in a non-production environment
-      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        console.log('✅ Playground mode detected: Returning mock agents without backend call');
+      // MOCK MODE: Return mock agents immediately in unit tests or playground
+      if (shouldUseMocks()) {
+        console.log('✅ Mock mode: Returning mock agents without backend call');
         return [
           {
             id: 'agent_001',

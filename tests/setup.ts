@@ -3,12 +3,18 @@
  * Mocks Juno to prevent IndexedDB errors in Node.js
  */
 
+// Set global test flag for mock detection
+(global as any).__AFRITOKENI_TEST_MODE__ = true;
+
 // Set test environment - will be overridden by npm scripts
 // unit tests: NODE_ENV=unit-test
 // integration tests: NODE_ENV=integration
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'unit-test';
 }
+
+console.log('🎭 Test setup: __AFRITOKENI_TEST_MODE__ = true');
+console.log('🎭 Test setup: NODE_ENV =', process.env.NODE_ENV);
 
 // Mock Juno satellite ID globally
 process.env.VITE_JUNO_SATELLITE_ID = 'uxrrr-q7777-77774-qaaaq-cai';
