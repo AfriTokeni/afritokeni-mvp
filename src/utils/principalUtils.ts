@@ -8,11 +8,22 @@ import { Principal } from '@dfinity/principal';
 /**
  * Generate a SHA-256 hash from a string
  * Principal.selfAuthenticating() requires exactly 32 bytes
+ * Works in both browser and Node.js environments
  */
 async function sha256(message: string): Promise<Uint8Array> {
   const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  return new Uint8Array(hashBuffer);
+  
+  // Check if we're in Node.js environment
+  if (typeof window === 'undefined' && typeof process !== 'undefined') {
+    // Node.js environment - use crypto module
+    const { createHash } = await import('crypto');
+    const hash = createHash('sha256').update(msgBuffer).digest();
+    return new Uint8Array(hash);
+  } else {
+    // Browser environment - use Web Crypto API
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    return new Uint8Array(hashBuffer);
+  }
 }
 
 /**
