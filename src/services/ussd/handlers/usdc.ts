@@ -27,7 +27,7 @@ async function safeGetExchangeRate(currency: string) {
 
 async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) {
   try {
-    return await CkUSDCService.getBalance(principalId, useSatellite);
+    return await CkUSDCService.getBalance(principalId, useSatellite, true);
   } catch (error) {
     console.log('🎭 Playground: Using mock USDC balance (simple)');
     return { balanceUSDC: '100.00', balanceCents: 10000, lastUpdated: new Date() };
@@ -36,7 +36,7 @@ async function safeGetBalanceSimple(principalId: string, useSatellite: boolean) 
 
 async function safeExchange(params: any) {
   try {
-    return await CkUSDCService.exchange(params);
+    return await CkUSDCService.exchange(params, true);
   } catch (error) {
     console.log('🎭 Playground: Using mock USDC exchange');
     return { 
