@@ -1,7 +1,7 @@
 import { TransactionService } from './transactionService';
 import { BalanceService } from './balanceService';
 import type { User } from '../types/auth';
-import { generatePrincipalFromIdentifier } from '../utils/principalUtils';
+import { generatePrincipalFromIdentifier } from '../utils/principalUtils.js';
 import { Transaction } from '../types/transaction';
 import { AnonymousIdentity } from "@dfinity/agent";
 import type { SatelliteOptions } from "@junobuild/core";

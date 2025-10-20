@@ -549,6 +549,7 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
   const inputParts = input.split('*');
   const currentInput = inputParts[inputParts.length - 1] || '';
   const lang = session.language || 'en';
+  console.log('current input', currentInput);
   
   switch (session.step) {
     case 1: {
@@ -556,6 +557,8 @@ async function handleBTCSell(input: string, session: USSDSession): Promise<strin
       if (!/^\d{4}$/.test(currentInput)) {
         return continueSession(`${TranslationService.translate('invalid_pin_format', lang)}.\n${TranslationService.translate('enter_pin_4digit', lang)}:`);
       }
+
+      console.log('Processing sell amount input:', currentInput);
       
       // Verify PIN
       let pinCorrect = false;
