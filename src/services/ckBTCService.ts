@@ -349,7 +349,11 @@ export class CkBTCService {
         });
 
         if ('Err' in result) {
-          throw new Error(`Withdrawal failed: ${JSON.stringify(result.Err)}`);
+          // Convert BigInt to string before JSON.stringify
+          const errorStr = typeof result.Err === 'object' 
+            ? JSON.stringify(result.Err, (_, v) => typeof v === 'bigint' ? v.toString() : v)
+            : String(result.Err);
+          throw new Error(`Withdrawal failed: ${errorStr}`);
         }
 
         transactionId = result.Ok.block_index.toString();
@@ -444,7 +448,11 @@ export class CkBTCService {
         });
 
         if ('Err' in result) {
-          throw new Error(`Transfer failed: ${JSON.stringify(result.Err)}`);
+          // Convert BigInt to string before JSON.stringify
+          const errorStr = typeof result.Err === 'object' 
+            ? JSON.stringify(result.Err, (_, v) => typeof v === 'bigint' ? v.toString() : v)
+            : String(result.Err);
+          throw new Error(`Transfer failed: ${errorStr}`);
         }
 
         transactionId = result.Ok.toString();
