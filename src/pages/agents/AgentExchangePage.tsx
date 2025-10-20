@@ -25,7 +25,7 @@ interface ExchangeRequest {
   customerPhone: string;
   type: 'buy' | 'sell';
   amount: number;
-  currency: string;
+  currency?: string;
   bitcoinAmount?: number; // Optional for USDC requests
   usdcAmount?: number; // Add USDC amount field
   currencyType: 'BTC' | 'USDC'; // Add currency type field
@@ -33,6 +33,74 @@ interface ExchangeRequest {
   createdAt: Date;
   location?: string;
 }
+
+const mockExchangeRequests: ExchangeRequest[] = [
+  {
+    id: 'req_btc_1',
+    customerName: 'Alice A.',
+    customerPhone: '+256701234567',
+    type: 'buy',
+    amount: 500_000, // UGX
+    bitcoinAmount: 0.0012,
+    usdcAmount: 0,
+    currencyType: 'BTC',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+    location: 'Kampala'
+  },
+  {
+    id: 'req_btc_2',
+    customerName: 'Brian B.',
+    customerPhone: '+256772345678',
+    type: 'sell',
+    amount: 200_000, // UGX (local amount expected when selling)
+    bitcoinAmount: 0.0005,
+    usdcAmount: 0,
+    currencyType: 'BTC',
+    status: 'processing',
+    createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+    location: 'Entebbe'
+  },
+  {
+    id: 'req_usdc_1',
+    customerName: 'Web Customer',
+    customerPhone: 'web@example.com',
+    type: 'buy',
+    amount: 150_000, // UGX
+    bitcoinAmount: 0,
+    usdcAmount: 40.5,
+    currencyType: 'USDC',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    location: 'Kampala'
+  },
+  {
+    id: 'req_usdc_2',
+    customerName: 'Charlie C.',
+    customerPhone: '+256783456789',
+    type: 'sell',
+    amount: 250_000, // UGX
+    bitcoinAmount: 0,
+    usdcAmount: 67.5,
+    currencyType: 'USDC',
+    status: 'processing',
+    createdAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
+    location: 'Mbarara'
+  },
+  {
+    id: 'req_btc_3',
+    customerName: 'Dana D.',
+    customerPhone: 'Platform User',
+    type: 'buy',
+    amount: 1_000_000, // UGX
+    bitcoinAmount: 0.0020,
+    usdcAmount: 0,
+    currencyType: 'BTC',
+    status: 'completed',
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+    location: 'Gulu'
+  }
+];
 
 const AgentExchangePage: React.FC = () => {
   const { user } = useAuthentication();
@@ -186,9 +254,12 @@ const AgentExchangePage: React.FC = () => {
           })
         );
         
-        console.log('Enhanced exchange requests:', enhancedRequests);
-        setExchangeRequests(enhancedRequests);
-        
+        if (enhancedRequests.length === 0) {
+          setExchangeRequests(mockExchangeRequests);
+        } else {
+          setExchangeRequests(enhancedRequests);
+        }
+
       } catch (error) {
         console.error('Error initializing exchange:', error);
         setError('Failed to load exchange data. Please try again.');
