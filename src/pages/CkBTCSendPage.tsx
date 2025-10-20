@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bitcoin, Zap, Send, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthentication } from '../context/AuthenticationContext';
+import { useDemoMode } from '../context/DemoModeContext';
 import { CkBTCService } from '../services/ckBTCService';
 import { CkBTCUtils, CKBTC_CONSTANTS } from '../types/ckbtc';
 import PageLayout from '../components/PageLayout';
@@ -19,6 +20,7 @@ type Step = 'amount' | 'recipient' | 'confirm' | 'success';
 export const CkBTCSendPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthentication();
+  const { isDemoMode } = useDemoMode();
   const currentUser = user.user;
 
   // Form state
@@ -88,7 +90,7 @@ export const CkBTCSendPage: React.FC = () => {
         recipient: recipientPrincipal,
         senderId: currentUser?.id || '',
         memo,
-      });
+      }, false, isDemoMode);
 
       if (result.success) {
         setTxResult(result);
