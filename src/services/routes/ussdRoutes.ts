@@ -119,6 +119,11 @@ export function createUSSDRoutes() {
           response = await handleRegistrationCheck('', session, sendSMSNotification, hasUserPin);
       }
 
+      if (!response.startsWith('END')) {
+        console.log(`💾 Saving session state: menu=${session.currentMenu}, step=${session.step}`);
+        ussdSessions.set(sessionId, session);
+      }
+
       // Clean up session if ended
       if (response.startsWith('END')) {
         ussdSessions.delete(sessionId);
