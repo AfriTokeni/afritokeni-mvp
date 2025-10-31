@@ -62,8 +62,9 @@
 			{:else}
 				<article class="prose prose-sm sm:prose-base lg:prose-lg prose-neutral max-w-none
 					prose-headings:font-bold
-					prose-h1:text-2xl sm:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h1:mb-3 sm:prose-h1:mb-4 prose-h1:mt-6 sm:prose-h1:mt-8
+					prose-h1:hidden
 					prose-h2:text-xl sm:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h2:mb-2 sm:prose-h2:mb-3 prose-h2:mt-6 sm:prose-h2:mt-8 prose-h2:border-b prose-h2:border-neutral-200 prose-h2:pb-2
+					first:prose-h2:hidden
 					prose-h3:text-lg sm:prose-h3:text-xl lg:prose-h3:text-2xl prose-h3:mb-2 prose-h3:mt-4 sm:prose-h3:mt-6
 					prose-h4:text-base sm:prose-h4:text-lg lg:prose-h4:text-xl prose-h4:mb-2 prose-h4:mt-3 sm:prose-h4:mt-4
 					prose-p:text-neutral-700 prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base
