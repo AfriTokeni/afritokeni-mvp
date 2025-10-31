@@ -21,7 +21,7 @@
 				<a href="/how-it-works" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
 					How It Works
 				</a>
-				<a href="/tariff" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
+				<a href="/pricing" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
 					Pricing
 				</a>
 				<a href="/info/dao" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
@@ -71,7 +71,7 @@
 						How It Works
 					</a>
 					<a 
-						href="/tariff" 
+						href="/pricing" 
 						class="block text-gray-600 hover:text-gray-900 font-medium transition-colors py-2"
 						onclick={() => isMobileMenuOpen = false}
 					>
