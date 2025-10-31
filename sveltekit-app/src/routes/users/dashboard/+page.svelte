@@ -1,17 +1,69 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import DashboardLayout from '$lib/components/dashboard/DashboardLayout.svelte';
-	import { Bitcoin, DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight } from '@lucide/svelte';
+	import DemoModeModal from '$lib/components/dashboard/DemoModeModal.svelte';
+	import KYCStatusAlert from '$lib/components/dashboard/KYCStatusAlert.svelte';
+	import CurrencySelector from '$lib/components/dashboard/CurrencySelector.svelte';
+	import CkBTCBalanceCard from '$lib/components/dashboard/CkBTCBalanceCard.svelte';
+	import CkUSDCBalanceCard from '$lib/components/dashboard/CkUSDCBalanceCard.svelte';
+	import OnboardingModal from '$lib/components/dashboard/OnboardingModal.svelte';
+	import ProfileIncompleteBanner from '$lib/components/dashboard/ProfileIncompleteBanner.svelte';
+	import { Send, Bitcoin, ArrowUp, ArrowDown, Minus, Plus, Info } from '@lucide/svelte';
 
-	// Mock data for now - will connect to backend later
-	let balance = $state(250000); // UGX
-	let btcBalance = $state(0.00125);
-	let usdcBalance = $state(50.00);
+	// State
+	let isDemoMode = $state(false);
+	let showDemoModal = $state(false);
+	let showOnboarding = $state(false);
+	let showBanner = $state(false);
+	let missingFields = $state<string[]>([]);
+	let bannerDismissed = $state(false);
+	
+	// Mock user data
+	let currentUser = $state({
+		id: 'user123',
+		firstName: '',
+		lastName: '',
+		email: 'user@example.com',
+		preferredCurrency: 'UGX',
+		kycStatus: 'not_started' as 'not_started' | 'pending' | 'rejected' | 'approved',
+		location: { country: '', city: '' }
+	});
 
-	const recentTransactions = [
-		{ id: 1, type: 'receive', amount: 50000, currency: 'UGX', date: '2025-10-30', from: 'John Doe' },
-		{ id: 2, type: 'send', amount: 25000, currency: 'UGX', date: '2025-10-29', to: 'Jane Smith' },
-		{ id: 3, type: 'deposit', amount: 100000, currency: 'UGX', date: '2025-10-28', agent: 'Agent #123' }
-	];
+	let userCurrency = $derived(currentUser.preferredCurrency || 'UGX');
+	let balance = $state(250000);
+	let transactions = $state([
+		{ id: 1, type: 'receive', amount: 50000, description: 'Received from John Doe', createdAt: '2025-10-30', status: 'completed' },
+		{ id: 2, type: 'send', amount: 25000, description: 'Sent to Jane Smith', createdAt: '2025-10-29', status: 'completed' },
+		{ id: 3, type: 'deposit', amount: 100000, description: 'Cash deposit via Agent #123', createdAt: '2025-10-28', status: 'completed' }
+	]);
+
+	onMount(() => {
+		// Show demo modal on first login
+		const globalModalKey = `afritokeni_first_login_${currentUser.id}`;
+		const hasSeenModal = localStorage.getItem(globalModalKey);
+		
+		if (!hasSeenModal) {
+			showDemoModal = true;
+			localStorage.setItem(globalModalKey, 'true');
+		}
+
+		// Check for missing profile fields
+		const missing: string[] = [];
+		if (!currentUser.firstName || !currentUser.lastName) missing.push('Full Name');
+		if (!currentUser.preferredCurrency) missing.push('Preferred Currency');
+		if (!currentUser.location?.country || !currentUser.location?.city) missing.push('Location (Country & City)');
+		
+		missingFields = missing;
+
+		// Show onboarding if profile incomplete
+		const hasCompletedOnboarding = localStorage.getItem(`onboarding_completed_${currentUser.id}`);
+		if (missing.length > 0 && !hasCompletedOnboarding && hasSeenModal) {
+			showOnboarding = true;
+		} else if (missing.length > 0 && !bannerDismissed) {
+			showBanner = true;
+		}
+	});
 
 	function formatCurrency(amount: number): string {
 		return new Intl.NumberFormat('en-UG', {
@@ -20,45 +72,160 @@
 			minimumFractionDigits: 0
 		}).format(amount);
 	}
+
+	function formatDate(date: string): string {
+		return new Date(date).toLocaleDateString('en-US', {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric'
+		});
+	}
+
+	function getTransactionIcon(type: string) {
+		switch (type) {
+			case 'send': return ArrowUp;
+			case 'receive': return ArrowDown;
+			case 'withdraw': return Minus;
+			case 'deposit': return Plus;
+			default: return ArrowUp;
+		}
+	}
+
+	function handleOnboardingComplete(data: any) {
+		localStorage.setItem(`onboarding_completed_${currentUser.id}`, 'true');
+		showOnboarding = false;
+		showBanner = false;
+		// TODO: Update user profile
+	}
+
+	function enableDemoMode() {
+		isDemoMode = true;
+	}
+
+	function updateUserCurrency(currency: string) {
+		currentUser.preferredCurrency = currency;
+	}
 </script>
 
 <svelte:head>
 	<title>Dashboard - AfriTokeni</title>
 </svelte:head>
 
+<DemoModeModal 
+	{isOpen: showDemoModal}
+	{onClose: () => showDemoModal = false}
+	userType="user"
+	{onEnableDemo: enableDemoMode}
+/>
+
+<OnboardingModal
+	{isOpen: showOnboarding}
+	{onClose: () => {
+		showOnboarding = false;
+		localStorage.setItem(`onboarding_completed_${currentUser.id}`, 'true');
+	}}
+	{onComplete: handleOnboardingComplete}
+	currentData={{
+		firstName: currentUser.firstName,
+		lastName: currentUser.lastName,
+		email: currentUser.email,
+		phone: '',
+		preferredCurrency: currentUser.preferredCurrency,
+		country: currentUser.location?.country || '',
+		city: currentUser.location?.city || ''
+	}}
+/>
+
 <DashboardLayout userType="user">
-	<div class="space-y-6">
+	<div class="space-y-4 sm:space-y-6">
+		{#if showBanner && missingFields.length > 0}
+			<ProfileIncompleteBanner
+				{missingFields}
+				{onDismiss: () => {
+					bannerDismissed = true;
+					showBanner = false;
+				}}
+				{onComplete: () => {
+					showBanner = false;
+					showOnboarding = true;
+				}}
+			/>
+		{/if}
+
+		<KYCStatusAlert userType="user" kycStatus={currentUser.kycStatus} />
+
 		<!-- Balance Cards -->
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 			<!-- Local Currency Balance -->
-			<div class="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
-				<div class="flex items-center justify-between mb-4">
-					<span class="text-sm opacity-90">Local Currency</span>
-					<DollarSign class="w-5 h-5 opacity-90" />
+			<div class="bg-white border border-gray-200 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl hover:border-gray-300 transition-all">
+				<div class="flex justify-between items-start mb-3 sm:mb-4 lg:mb-6">
+					<div class="flex-1">
+						<div class="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
+							<div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+								<span class="text-gray-900 font-bold text-xs sm:text-sm">{userCurrency}</span>
+							</div>
+							<div class="min-w-0">
+								<p class="text-gray-900 font-semibold text-sm sm:text-base truncate">Ugandan Shilling</p>
+								<p class="text-gray-500 text-xs sm:text-sm">Primary balance</p>
+							</div>
+						</div>
+					</div>
+					<CurrencySelector 
+						currentCurrency={userCurrency}
+						{onCurrencyChange: updateUserCurrency}
+					/>
 				</div>
-				<div class="text-3xl font-bold mb-2">{formatCurrency(balance)}</div>
-				<div class="text-sm opacity-75">Ugandan Shilling</div>
+				<div class="mb-4 sm:mb-6">
+					<span class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-mono break-all">
+						{formatCurrency(balance)}
+					</span>
+				</div>
+				<div class="pt-3 sm:pt-4 border-t border-gray-100 space-y-2 sm:space-y-3">
+					<div class="flex justify-between items-center">
+						<span class="text-gray-500 text-xs sm:text-sm">Available Balance</span>
+						<div class="flex items-center space-x-1">
+							<div class="w-2 h-2 bg-green-500 rounded-full"></div>
+							<span class="text-green-600 font-medium text-xs sm:text-sm">Active</span>
+						</div>
+					</div>
+					
+					<div class="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 flex items-start space-x-2">
+						<Info class="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+						<div class="text-xs text-blue-900">
+							<p class="font-semibold mb-1">How to add money:</p>
+							<ul class="space-y-0.5 text-blue-800">
+								<li>• Deposit cash via agents</li>
+								<li>• Sell ckBTC/ckUSDC for cash</li>
+								<li>• Receive from other users</li>
+							</ul>
+						</div>
+					</div>
+					
+					<div class="text-xs text-gray-400">
+						Last updated: {new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+					</div>
+				</div>
 			</div>
 
-			<!-- Bitcoin Balance -->
-			<div class="bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl p-6 text-white">
-				<div class="flex items-center justify-between mb-4">
-					<span class="text-sm opacity-90">Bitcoin (ckBTC)</span>
-					<Bitcoin class="w-5 h-5 opacity-90" />
-				</div>
-				<div class="text-3xl font-bold mb-2">{btcBalance.toFixed(8)} BTC</div>
-				<div class="text-sm opacity-75">≈ {formatCurrency(btcBalance * 45000000)}</div>
-			</div>
+			<CkBTCBalanceCard
+				principalId={currentUser.id}
+				preferredCurrency={userCurrency}
+				showActions={true}
+				{isDemoMode}
+				{onDeposit: () => goto('/users/ckbtc/deposit')}
+				{onSend: () => goto('/users/ckbtc/send')}
+				{onExchange: () => goto('/users/ckbtc/exchange')}
+			/>
 
-			<!-- USDC Balance -->
-			<div class="bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl p-6 text-white">
-				<div class="flex items-center justify-between mb-4">
-					<span class="text-sm opacity-90">USDC (ckUSDC)</span>
-					<TrendingUp class="w-5 h-5 opacity-90" />
-				</div>
-				<div class="text-3xl font-bold mb-2">${usdcBalance.toFixed(2)}</div>
-				<div class="text-sm opacity-75">≈ {formatCurrency(usdcBalance * 3800)}</div>
-			</div>
+			<CkUSDCBalanceCard
+				principalId={currentUser.id}
+				preferredCurrency={userCurrency}
+				showActions={true}
+				{isDemoMode}
+				{onDeposit: () => goto('/users/ckusdc/deposit')}
+				{onSend: () => goto('/users/ckusdc/send')}
+				{onExchange: () => goto('/users/ckusdc/exchange')}
+			/>
 		</div>
 
 		<!-- Quick Actions -->
