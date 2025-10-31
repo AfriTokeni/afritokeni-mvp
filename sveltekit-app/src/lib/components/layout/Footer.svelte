@@ -70,7 +70,7 @@
 				<div>
 					<h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Product</h4>
 					<ul class="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-						<li><a href="/bitcoin-exchange" class="hover:text-white transition-colors">How It Works</a></li>
+						<li><a href="/how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
 						<li><a href="/pricing" class="hover:text-white transition-colors">Pricing</a></li>
 						<li><a href="/ussd" class="hover:text-white transition-colors">Try USSD</a></li>
 						<li><a href="/become-agent" class="hover:text-white transition-colors">Become an Agent</a></li>
