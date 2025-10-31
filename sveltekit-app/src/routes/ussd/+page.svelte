@@ -111,20 +111,21 @@
 			<p class="text-lg sm:text-xl lg:text-2xl opacity-90 max-w-2xl mx-auto">
 				Experience how AfriTokeni works on any phone - no internet required. Try the commands below!
 			</p>
-			<div class="mt-6 bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-lg p-4 max-w-2xl mx-auto">
-				<h3 class="font-bold text-white mb-2 text-sm sm:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
-				<p class="text-xs sm:text-sm text-white/90 mb-2">
-					<strong>Uganda:</strong> Dial <code class="bg-white/20 px-1.5 py-0.5 rounded font-mono text-xs">*284*78909#</code> for real USSD!
-				</p>
-				<p class="text-xs text-white/80">
-					<strong>Other countries:</strong> Coming soon! Use playground to test.
-				</p>
-			</div>
 		</div>
 	</div>
 
 	<div class="py-8 sm:py-10 lg:py-12">
 		<div class="max-w-6xl mx-auto px-4 sm:px-6">
+			<!-- Uganda Box -->
+			<div class="mb-8 bg-red-50 border-2 border-red-300 rounded-lg p-4 max-w-2xl mx-auto">
+				<h3 class="font-bold text-red-900 mb-2 text-sm sm:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
+				<p class="text-xs sm:text-sm text-red-800 mb-2">
+					<strong>Uganda:</strong> Dial <code class="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*284*78909#</code> for real USSD!
+				</p>
+				<p class="text-xs text-red-700">
+					<strong>Other countries:</strong> Coming soon! Use playground to test.
+				</p>
+			</div>
 
 			<!-- Phone Simulator - Centered -->
 			<div class="max-w-sm sm:max-w-md mx-auto">
@@ -201,21 +202,21 @@
 			</div>
 
 			<!-- CTA Section -->
-			<div class="mt-8 sm:mt-10 lg:mt-12 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-6 sm:p-8 lg:p-12 text-center text-white">
+			<div class="mt-8 sm:mt-10 lg:mt-12 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl p-6 sm:p-8 lg:p-12 text-center text-white">
 				<h2 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Ready to Start Banking?</h2>
 				<p class="text-base sm:text-lg lg:text-xl mb-4 sm:mb-6 opacity-90">
 					Experience the future of mobile banking with instant, fee-free transfers
 				</p>
 				<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
 					<a
-						href="/bitcoin-exchange"
-						class="bg-white text-blue-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
+						href="/how-it-works"
+						class="bg-white text-green-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
 					>
-						Start Banking Now
+						Learn How It Works
 					</a>
 					<a
 						href="/become-agent"
-						class="bg-white text-blue-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
+						class="bg-white text-green-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-neutral-100 transition-colors"
 					>
 						Become an Agent
 					</a>
