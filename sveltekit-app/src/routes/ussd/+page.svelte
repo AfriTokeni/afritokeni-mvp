@@ -92,36 +92,39 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
-	<div class="bg-gradient-to-br from-gray-50 to-gray-100 py-8 sm:py-10 lg:py-12">
-		<div class="max-w-6xl mx-auto px-4 sm:px-6">
-			<!-- Hero -->
-			<div class="text-center mb-8 sm:mb-10 lg:mb-12">
-				<div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-					<div class="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
-						<Globe class="w-3 h-3 sm:w-4 sm:h-4" />
-						🌍 Demo Mode - Works Worldwide
-					</div>
-					<div class="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
-						<Smartphone class="w-3 h-3 sm:w-4 sm:h-4" />
-						🇺🇬 Real USSD: Uganda Only
-					</div>
+	<!-- Hero Section with Gradient -->
+	<div class="bg-gradient-to-br from-green-600 to-teal-600 text-white py-12 sm:py-16 lg:py-20">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+			<div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+				<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
+					<Globe class="w-3 h-3 sm:w-4 sm:h-4" />
+					🌍 Demo Mode - Works Worldwide
 				</div>
-				<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
-					Try USSD Banking
-				</h1>
-				<p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-					Experience how AfriTokeni works on any phone - no internet required. Try the commands below!
-				</p>
-				<div class="mt-6 bg-red-50 border-2 border-red-300 rounded-lg p-4 max-w-2xl mx-auto">
-					<h3 class="font-bold text-red-900 mb-2 text-sm sm:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
-					<p class="text-xs sm:text-sm text-red-800 mb-2">
-						<strong>Uganda:</strong> Dial <code class="bg-red-100 px-1.5 py-0.5 rounded font-mono text-xs">*284*78909#</code> for real USSD!
-					</p>
-					<p class="text-xs text-red-700">
-						<strong>Other countries:</strong> Coming soon! Use playground to test.
-					</p>
+				<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
+					<Smartphone class="w-3 h-3 sm:w-4 sm:h-4" />
+					🇺🇬 Real USSD: Uganda Only
 				</div>
 			</div>
+			<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+				Try USSD Banking
+			</h1>
+			<p class="text-lg sm:text-xl lg:text-2xl opacity-90 max-w-2xl mx-auto">
+				Experience how AfriTokeni works on any phone - no internet required. Try the commands below!
+			</p>
+			<div class="mt-6 bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-lg p-4 max-w-2xl mx-auto">
+				<h3 class="font-bold text-white mb-2 text-sm sm:text-base">🇺🇬 REAL USSD: UGANDA ONLY</h3>
+				<p class="text-xs sm:text-sm text-white/90 mb-2">
+					<strong>Uganda:</strong> Dial <code class="bg-white/20 px-1.5 py-0.5 rounded font-mono text-xs">*284*78909#</code> for real USSD!
+				</p>
+				<p class="text-xs text-white/80">
+					<strong>Other countries:</strong> Coming soon! Use playground to test.
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="py-8 sm:py-10 lg:py-12">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6">
 
 			<!-- Phone Simulator - Centered -->
 			<div class="max-w-sm sm:max-w-md mx-auto">

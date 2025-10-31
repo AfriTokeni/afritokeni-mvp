@@ -7,20 +7,23 @@
 	<meta name="description" content="We're building the future of financial inclusion in Africa, one USSD transaction at a time." />
 </svelte:head>
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10 lg:py-12">
-	<!-- Hero -->
-	<div class="text-center mb-12 sm:mb-14 lg:mb-16">
-		<div class="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
+<!-- Hero Section with Gradient -->
+<div class="bg-gradient-to-br from-purple-600 to-pink-600 text-white py-12 sm:py-16 lg:py-20 mb-8 sm:mb-10 lg:mb-12">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+		<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
 			<Award class="w-3 h-3 sm:w-4 sm:h-4" />
 			World Hackathon League - ICP Track
 		</div>
-		<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+		<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
 			Banking the Unbanked
 		</h1>
-		<p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+		<p class="text-lg sm:text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
 			We're building the future of financial inclusion in Africa, one USSD transaction at a time.
 		</p>
 	</div>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10 lg:py-12">
 
 	<!-- Our Story -->
 	<div class="bg-white rounded-2xl p-4 sm:p-6 lg:p-8 xl:p-12 shadow-sm border border-gray-200 mb-8 sm:mb-10 lg:mb-12">

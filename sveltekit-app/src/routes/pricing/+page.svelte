@@ -98,18 +98,21 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
-	<div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:py-12">
-		<!-- Header -->
-		<div class="text-center mb-8 sm:mb-10 lg:mb-12">
-			<div class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
+	<!-- Hero Section with Gradient -->
+	<div class="bg-gradient-to-br from-purple-600 to-indigo-600 text-white py-12 sm:py-16 lg:py-20">
+		<div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+			<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
 				<Calculator class="w-3 h-3 sm:w-4 sm:h-4" />
 				Smart Pricing
 			</div>
-			<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">Transparent Pricing System</h1>
-			<p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+			<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">Transparent Pricing System</h1>
+			<p class="text-lg sm:text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
 				Fair compensation for agents with transparent, location-based pricing across Africa
 			</p>
 		</div>
+	</div>
+
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:py-12">
 
 		<!-- Navigation -->
 		<div class="flex justify-center mb-8 sm:mb-10 lg:mb-12">
