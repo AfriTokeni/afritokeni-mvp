@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { marked } from 'marked';
+	import SvelteMarkdown from 'svelte-markdown';
+	import remarkGfm from 'remark-gfm';
 
 	let markdown = $state('');
-	let htmlContent = $state('');
 	let loading = $state(true);
 
 	onMount(async () => {
@@ -12,19 +12,12 @@
 			const response = await fetch('/WHITEPAPER.md');
 			if (response.ok) {
 				markdown = await response.text();
-				// Convert markdown to HTML with GFM enabled
-				htmlContent = marked.parse(markdown, {
-					gfm: true,
-					breaks: false
-				}) as string;
 			} else {
 				markdown = '# Whitepaper\n\nWhitepaper content will be available soon.';
-				htmlContent = marked.parse(markdown) as string;
 			}
 		} catch (error) {
 			console.error('Error loading whitepaper:', error);
 			markdown = '# Whitepaper\n\nError loading whitepaper content.';
-			htmlContent = marked.parse(markdown) as string;
 		} finally {
 			loading = false;
 		}
@@ -66,7 +59,7 @@
 					prose-img:rounded-lg prose-img:shadow-md
 					prose-hr:border-neutral-200 prose-hr:my-6 sm:prose-hr:my-8
 				">
-					{@html htmlContent}
+					<SvelteMarkdown source={markdown} options={{ remarkPlugins: [remarkGfm] }} />
 				</article>
 			{/if}
 		</div>
