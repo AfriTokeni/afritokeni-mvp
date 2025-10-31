@@ -6,28 +6,25 @@
 	let htmlContent = $state('');
 	let loading = $state(true);
 
-	// Configure marked options for better rendering
-	marked.setOptions({
-		gfm: true, // GitHub Flavored Markdown
-		breaks: true // Convert \n to <br>
-	});
-
 	onMount(async () => {
 		try {
 			// Fetch the whitepaper markdown from the docs folder
 			const response = await fetch('/WHITEPAPER.md');
 			if (response.ok) {
 				markdown = await response.text();
-				// Convert markdown to HTML
-				htmlContent = await marked.parse(markdown);
+				// Convert markdown to HTML with GFM enabled
+				htmlContent = marked.parse(markdown, {
+					gfm: true,
+					breaks: false
+				}) as string;
 			} else {
 				markdown = '# Whitepaper\n\nWhitepaper content will be available soon.';
-				htmlContent = await marked.parse(markdown);
+				htmlContent = marked.parse(markdown) as string;
 			}
 		} catch (error) {
 			console.error('Error loading whitepaper:', error);
 			markdown = '# Whitepaper\n\nError loading whitepaper content.';
-			htmlContent = await marked.parse(markdown);
+			htmlContent = marked.parse(markdown) as string;
 		} finally {
 			loading = false;
 		}
