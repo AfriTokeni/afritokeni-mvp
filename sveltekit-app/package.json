@@ -27,8 +27,7 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.552.0",
-		"rehype-raw": "^7.0.0",
-		"remark-gfm": "^4.0.1",
-		"svelte-markdown": "^0.4.1"
+		"marked": "^16.4.1",
+		"remark-gfm": "^4.0.1"
 	}
 }
