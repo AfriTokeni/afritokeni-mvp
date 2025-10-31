@@ -95,7 +95,6 @@
 		localStorage.setItem(`onboarding_completed_${currentUser.id}`, 'true');
 		showOnboarding = false;
 		showBanner = false;
-		// TODO: Update user profile
 	}
 
 	function enableDemoMode() {
@@ -161,7 +160,7 @@
 				<div class="flex justify-between items-start mb-3 sm:mb-4 lg:mb-6">
 					<div class="flex-1">
 						<div class="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-							<div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+							<div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0">
 								<span class="text-gray-900 font-bold text-xs sm:text-sm">{userCurrency}</span>
 							</div>
 							<div class="min-w-0">
@@ -172,7 +171,7 @@
 					</div>
 					<CurrencySelector 
 						currentCurrency={userCurrency}
-						onCurrencyChange={(currency) => updateUserCurrency(currency)}
+						onCurrencyChange={updateUserCurrency}
 					/>
 				</div>
 				<div class="mb-4 sm:mb-6">
@@ -190,7 +189,7 @@
 					</div>
 					
 					<div class="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 flex items-start space-x-2">
-						<Info class="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+						<Info class="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 shrink-0 mt-0.5" />
 						<div class="text-xs text-blue-900">
 							<p class="font-semibold mb-1">How to add money:</p>
 							<ul class="space-y-0.5 text-blue-800">
@@ -203,6 +202,10 @@
 					
 					<div class="text-xs text-gray-400">
 						Last updated: {new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+					</div>
+				</div>
+			</div>
+
 			<CkBTCBalanceCard
 				principalId={currentUser.id}
 				preferredCurrency={userCurrency}
@@ -222,6 +225,12 @@
 				onSend={() => goto('/users/ckusdc/send')}
 				onExchange={() => goto('/users/ckusdc/exchange')}
 			/>
+		</div>
+
+		<!-- Quick Actions -->
+		<div>
+			<h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Quick Actions</h2>
+			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 				<button 
 					onclick={() => goto('/users/deposit')}
 					class="bg-white border border-gray-200 p-4 sm:p-6 rounded-xl sm:rounded-2xl hover:border-gray-400 transition-all text-center group"
@@ -288,20 +297,21 @@
 							<!-- Mobile Layout -->
 							<div class="sm:hidden">
 								<div class="flex items-start space-x-2 sm:space-x-3">
-									<div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-										<svelte:component this={getTransactionIcon(transaction.type)} class="w-4 h-4 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-500' : transaction.type === 'receive' ? 'text-green-500' : transaction.type === 'deposit' ? 'text-blue-500' : 'text-orange-500'}" />
+									<div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0">
+										{@const Icon = getTransactionIcon(transaction.type)}
+										<Icon class="w-4 h-4 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-500' : transaction.type === 'receive' ? 'text-green-500' : transaction.type === 'deposit' ? 'text-blue-500' : 'text-orange-500'}" />
 									</div>
 									<div class="flex-1 min-w-0">
 										<div class="flex justify-between items-start mb-1">
 											<p class="font-medium text-neutral-900 text-xs sm:text-sm truncate pr-2">{transaction.description}</p>
-											<p class="font-semibold text-sm sm:text-base font-mono flex-shrink-0 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-600' : 'text-green-600'}">
+											<p class="font-semibold text-sm sm:text-base font-mono shrink-0 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-600' : 'text-green-600'}">
 												{transaction.type === 'send' || transaction.type === 'withdraw' ? '-' : '+'}
 												{formatCurrency(transaction.amount)}
 											</p>
 										</div>
 										<div class="flex justify-between items-center gap-2">
 											<p class="text-xs text-neutral-500 truncate">{formatDate(transaction.createdAt)}</p>
-											<p class="text-xs text-neutral-500 capitalize flex-shrink-0">{transaction.status}</p>
+											<p class="text-xs text-neutral-500 capitalize shrink-0">{transaction.status}</p>
 										</div>
 									</div>
 								</div>
@@ -310,15 +320,16 @@
 							<!-- Desktop Layout -->
 							<div class="hidden sm:flex items-center justify-between">
 								<div class="flex items-center space-x-3 lg:space-x-4 flex-1 min-w-0">
-									<div class="w-10 h-10 lg:w-12 lg:h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
-										<svelte:component this={getTransactionIcon(transaction.type)} class="w-4 h-4 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-500' : transaction.type === 'receive' ? 'text-green-500' : transaction.type === 'deposit' ? 'text-blue-500' : 'text-orange-500'}" />
+									<div class="w-10 h-10 lg:w-12 lg:h-12 bg-neutral-100 rounded-xl flex items-center justify-center shrink-0">
+										{@const Icon = getTransactionIcon(transaction.type)}
+										<Icon class="w-4 h-4 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-500' : transaction.type === 'receive' ? 'text-green-500' : transaction.type === 'deposit' ? 'text-blue-500' : 'text-orange-500'}" />
 									</div>
 									<div class="min-w-0 flex-1">
 										<p class="font-medium text-neutral-900 text-sm lg:text-base truncate">{transaction.description}</p>
 										<p class="text-xs sm:text-sm text-neutral-500">{formatDate(transaction.createdAt)}</p>
 									</div>
 								</div>
-								<div class="text-right flex-shrink-0 ml-2 lg:ml-4">
+								<div class="text-right shrink-0 ml-2 lg:ml-4">
 									<p class="font-semibold text-sm lg:text-base font-mono {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-600' : 'text-green-600'}">
 										{transaction.type === 'send' || transaction.type === 'withdraw' ? '-' : '+'}
 										{formatCurrency(transaction.amount)}
