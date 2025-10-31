@@ -27,6 +27,8 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.552.0",
+		"flowbite": "^3.1.2",
+		"flowbite-svelte": "^1.20.1",
 		"marked": "^16.4.1",
 		"remark-gfm": "^4.0.1"
 	}
