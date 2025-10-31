@@ -6,6 +6,12 @@
 	let htmlContent = $state('');
 	let loading = $state(true);
 
+	// Configure marked options for better rendering
+	marked.setOptions({
+		gfm: true, // GitHub Flavored Markdown
+		breaks: true // Convert \n to <br>
+	});
+
 	onMount(async () => {
 		try {
 			// Fetch the whitepaper markdown from the docs folder
