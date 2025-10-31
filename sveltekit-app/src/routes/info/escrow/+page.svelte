@@ -1,272 +1,252 @@
 <script lang="ts">
-	import { Lock, Shield, Clock, CheckCircle, AlertCircle } from '@lucide/svelte';
+	import { Lock, Shield, Clock, CheckCircle, AlertTriangle, ArrowRight } from '@lucide/svelte';
 </script>
 
 <svelte:head>
-	<title>Escrow Protection - AfriTokeni</title>
-	<meta name="description" content="Learn how AfriTokeni's escrow system protects both users and agents during Bitcoin exchanges." />
+	<title>Escrow Protection System - AfriTokeni</title>
+	<meta name="description" content="AfriTokeni holds your Bitcoin in secure escrow until both parties confirm the exchange. Zero fraud risk." />
 </svelte:head>
 
 <!-- Hero Section -->
-<section class="bg-gradient-to-br from-blue-50 to-cyan-50 py-12 sm:py-16 md:py-20">
-	<div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-		<div class="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 border border-blue-200 text-blue-700 text-sm font-medium mb-6">
-			<Shield class="w-4 h-4 mr-2" />
-			Security First
+<div class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white py-16 sm:py-20">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+		<div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
+			<Lock class="w-8 h-8 sm:w-10 sm:h-10" />
 		</div>
-		<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-			Escrow Protection System
+		<h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
+			Escrow Protected Transactions
 		</h1>
-		<p class="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-			AfriTokeni holds your Bitcoin in secure escrow until both parties complete the exchange. No one can disappear with your money.
+		<p class="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto">
+			AfriTokeni holds your Bitcoin in secure escrow until both parties confirm the exchange. Zero fraud risk.
 		</p>
 	</div>
-</section>
+</div>
+
+<!-- Problem Section -->
+<div class="py-12 sm:py-16 bg-white">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 sm:p-8 mb-8">
+			<div class="flex items-start gap-4">
+				<AlertTriangle class="w-6 h-6 sm:w-8 sm:h-8 text-red-600 shrink-0 mt-1" />
+				<div>
+					<h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">The Problem Without Escrow</h2>
+					<ul class="space-y-2 text-gray-700">
+						<li class="flex items-start gap-2">
+							<span class="text-red-600 font-bold">•</span>
+							<span>Agent receives Bitcoin, disappears without giving cash</span>
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="text-red-600 font-bold">•</span>
+							<span>User claims they sent Bitcoin but didn't</span>
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="text-red-600 font-bold">•</span>
+							<span>No way to reverse fraudulent transactions</span>
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="text-red-600 font-bold">•</span>
+							<span>Trust-based system vulnerable to scams</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 <!-- How It Works -->
-<section class="py-12 sm:py-16 md:py-20 bg-white">
-	<div class="max-w-6xl mx-auto px-4 sm:px-6">
-		<div class="text-center mb-12">
-			<h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-				How Escrow Works
-			</h2>
-			<p class="text-lg text-gray-600 max-w-3xl mx-auto">
-				A simple 7-step process that protects everyone
-			</p>
-		</div>
-
-		<div class="space-y-8">
-			<!-- Step 1 -->
-			<div class="flex gap-4 sm:gap-6">
-				<div class="flex-shrink-0">
-					<div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+<div class="py-12 sm:py-16 bg-gray-50">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">How Escrow Works</h2>
+		
+		<div class="space-y-6">
+			<div class="bg-white rounded-xl p-6 sm:p-8 border-2 border-gray-200">
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl font-bold shrink-0">
 						1
 					</div>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-xl font-bold text-gray-900 mb-2">User Selects Amount & Agent</h3>
-					<p class="text-gray-600">
-						Choose how much Bitcoin you want to buy/sell and select a nearby agent from the map.
-					</p>
+					<div>
+						<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">User Initiates Exchange</h3>
+						<p class="text-gray-600">
+							User selects amount and agent. AfriTokeni generates unique escrow address and 6-digit code (e.g., "BTC-847291").
+						</p>
+					</div>
 				</div>
 			</div>
 
-			<!-- Step 2 -->
-			<div class="flex gap-4 sm:gap-6">
-				<div class="flex-shrink-0">
-					<div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+			<div class="bg-white rounded-xl p-6 sm:p-8 border-2 border-gray-200">
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl font-bold shrink-0">
 						2
 					</div>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-xl font-bold text-gray-900 mb-2">AfriTokeni Creates Escrow</h3>
-					<p class="text-gray-600">
-						We generate a unique Bitcoin address and 6-digit exchange code (e.g., <code class="bg-gray-100 px-2 py-1 rounded font-mono text-sm">BTC-847291</code>).
-					</p>
+					<div>
+						<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Bitcoin Sent to Escrow</h3>
+						<p class="text-gray-600">
+							User sends Bitcoin to AfriTokeni's escrow address (NOT directly to agent). Funds locked until code verification.
+						</p>
+					</div>
 				</div>
 			</div>
 
-			<!-- Step 3 -->
-			<div class="flex gap-4 sm:gap-6">
-				<div class="flex-shrink-0">
-					<div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+			<div class="bg-white rounded-xl p-6 sm:p-8 border-2 border-gray-200">
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl font-bold shrink-0">
 						3
 					</div>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-xl font-bold text-gray-900 mb-2">User Sends Bitcoin to Escrow</h3>
-					<p class="text-gray-600">
-						Send Bitcoin to the escrow address (NOT directly to the agent). Your Bitcoin is held safely by AfriTokeni.
-					</p>
+					<div>
+						<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Agent Notified</h3>
+						<p class="text-gray-600">
+							Once Bitcoin confirmed on blockchain, agent receives SMS notification with transaction details.
+						</p>
+					</div>
 				</div>
 			</div>
 
-			<!-- Step 4 -->
-			<div class="flex gap-4 sm:gap-6">
-				<div class="flex-shrink-0">
-					<div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+			<div class="bg-white rounded-xl p-6 sm:p-8 border-2 border-gray-200">
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl font-bold shrink-0">
 						4
 					</div>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-xl font-bold text-gray-900 mb-2">Agent Gets Notified</h3>
-					<p class="text-gray-600">
-						Once Bitcoin is confirmed on the blockchain, the agent receives an SMS notification to meet you.
-					</p>
+					<div>
+						<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">In-Person Meeting</h3>
+						<p class="text-gray-600">
+							User meets agent in person. User shows 6-digit exchange code. Agent verifies ID.
+						</p>
+					</div>
 				</div>
 			</div>
 
-			<!-- Step 5 -->
-			<div class="flex gap-4 sm:gap-6">
-				<div class="flex-shrink-0">
-					<div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+			<div class="bg-white rounded-xl p-6 sm:p-8 border-2 border-gray-200">
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl font-bold shrink-0">
 						5
 					</div>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-xl font-bold text-gray-900 mb-2">In-Person Meeting</h3>
-					<p class="text-gray-600">
-						Meet the agent at the agreed location. Show your 6-digit exchange code on your phone.
-					</p>
+					<div>
+						<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Code Verification</h3>
+						<p class="text-gray-600">
+							Agent enters 6-digit code via USSD or app. AfriTokeni verifies and releases Bitcoin to agent's wallet.
+						</p>
+					</div>
 				</div>
 			</div>
 
-			<!-- Step 6 -->
-			<div class="flex gap-4 sm:gap-6">
-				<div class="flex-shrink-0">
-					<div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+			<div class="bg-white rounded-xl p-6 sm:p-8 border-2 border-green-200 bg-green-50">
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl font-bold shrink-0">
 						6
 					</div>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-xl font-bold text-gray-900 mb-2">Agent Scans Code</h3>
-					<p class="text-gray-600">
-						Agent enters the 6-digit code. AfriTokeni releases the Bitcoin to the agent's wallet.
-					</p>
-				</div>
-			</div>
-
-			<!-- Step 7 -->
-			<div class="flex gap-4 sm:gap-6">
-				<div class="flex-shrink-0">
-					<div class="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-						7
-					</div>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-xl font-bold text-gray-900 mb-2">Agent Gives You Cash</h3>
-					<p class="text-gray-600">
-						Agent hands you the local currency. Transaction complete! Both parties are protected.
-					</p>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
-
-<!-- Key Features -->
-<section class="py-12 sm:py-16 md:py-20 bg-gray-50">
-	<div class="max-w-6xl mx-auto px-4 sm:px-6">
-		<div class="text-center mb-12">
-			<h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-				Security Features
-			</h2>
-		</div>
-
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-			<!-- 6-Digit Codes -->
-			<div class="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-					<Lock class="w-6 h-6 text-blue-600" />
-				</div>
-				<h3 class="text-xl font-bold text-gray-900 mb-3">6-Digit Exchange Codes</h3>
-				<p class="text-gray-600 mb-4">
-					Every transaction gets a unique code. Only the person with the code can release the Bitcoin from escrow.
-				</p>
-				<div class="bg-gray-50 rounded-lg p-4 font-mono text-center text-2xl font-bold text-gray-900">
-					BTC-847291
-				</div>
-			</div>
-
-			<!-- 24-Hour Refund -->
-			<div class="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-					<Clock class="w-6 h-6 text-orange-600" />
-				</div>
-				<h3 class="text-xl font-bold text-gray-900 mb-3">24-Hour Auto-Refund</h3>
-				<p class="text-gray-600 mb-4">
-					If the exchange isn't completed within 24 hours, your Bitcoin is automatically refunded to your wallet.
-				</p>
-				<div class="flex items-center gap-2 text-sm text-gray-600">
-					<CheckCircle class="w-5 h-5 text-green-600" />
-					<span>No manual intervention needed</span>
-				</div>
-			</div>
-
-			<!-- Agent Verification -->
-			<div class="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-					<Shield class="w-6 h-6 text-green-600" />
-				</div>
-				<h3 class="text-xl font-bold text-gray-900 mb-3">Agent Verification</h3>
-				<p class="text-gray-600 mb-4">
-					All agents are KYC-verified and rated by the community. See their transaction history and ratings before choosing.
-				</p>
-				<div class="flex items-center gap-2 text-sm text-gray-600">
-					<CheckCircle class="w-5 h-5 text-green-600" />
-					<span>Community ratings & reviews</span>
-				</div>
-			</div>
-
-			<!-- Dispute Resolution -->
-			<div class="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-					<AlertCircle class="w-6 h-6 text-purple-600" />
-				</div>
-				<h3 class="text-xl font-bold text-gray-900 mb-3">Dispute Resolution</h3>
-				<p class="text-gray-600 mb-4">
-					If something goes wrong, our support team can review the transaction and resolve disputes fairly.
-				</p>
-				<div class="flex items-center gap-2 text-sm text-gray-600">
-					<CheckCircle class="w-5 h-5 text-green-600" />
-					<span>24/7 support available</span>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
-
-<!-- Why Escrow Matters -->
-<section class="py-12 sm:py-16 md:py-20 bg-white">
-	<div class="max-w-4xl mx-auto px-4 sm:px-6">
-		<div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 sm:p-8 lg:p-12 border-2 border-red-200">
-			<div class="flex items-start gap-4 mb-6">
-				<div class="flex-shrink-0">
-					<AlertCircle class="w-8 h-8 text-red-600" />
-				</div>
-				<div>
-					<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-						Why Escrow Protection Matters
-					</h2>
-					<div class="space-y-4 text-gray-700">
-						<p>
-							<strong>Without escrow:</strong> Users send Bitcoin directly to agents. If the agent disappears, the user loses their money with no recourse.
-						</p>
-						<p>
-							<strong>With escrow:</strong> AfriTokeni holds the Bitcoin until both parties confirm the exchange. Neither party can cheat the other.
-						</p>
-						<p class="text-lg font-semibold text-red-900">
-							Escrow eliminates the #1 risk in peer-to-peer Bitcoin exchanges: trust.
+					<div>
+						<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Cash Handed Over</h3>
+						<p class="text-gray-600">
+							Agent gives cash to user. Transaction complete. Both parties protected throughout.
 						</p>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-</section>
+</div>
 
-<!-- CTA Section -->
-<section class="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-blue-600 to-cyan-600">
-	<div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-		<h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">
-			Ready to Exchange Bitcoin Safely?
+<!-- Security Features -->
+<div class="py-12 sm:py-16 bg-white">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">Security Features</h2>
+		
+		<div class="grid sm:grid-cols-2 gap-6">
+			<div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+				<Shield class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 mb-4" />
+				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">6-Digit Codes</h3>
+				<p class="text-gray-600 text-sm sm:text-base">
+					Unique codes prevent unauthorized Bitcoin release. Only user and agent know the code.
+				</p>
+			</div>
+
+			<div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+				<Clock class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 mb-4" />
+				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">24-Hour Refund</h3>
+				<p class="text-gray-600 text-sm sm:text-base">
+					If code not verified within 24 hours, Bitcoin automatically refunded to user.
+				</p>
+			</div>
+
+			<div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+				<CheckCircle class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 mb-4" />
+				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Agent Verification</h3>
+				<p class="text-gray-600 text-sm sm:text-base">
+					All agents KYC-verified. Rating system tracks performance and trustworthiness.
+				</p>
+			</div>
+
+			<div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+				<Lock class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 mb-4" />
+				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Blockchain Secured</h3>
+				<p class="text-gray-600 text-sm sm:text-base">
+					All transactions recorded on Internet Computer blockchain. Immutable and transparent.
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Example Transaction -->
+<div class="py-12 sm:py-16 bg-gray-50">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Example Transaction</h2>
+		
+		<div class="bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-200">
+			<div class="space-y-4 text-sm sm:text-base">
+				<div class="flex justify-between items-center pb-4 border-b border-gray-200">
+					<span class="text-gray-600">User wants to exchange:</span>
+					<span class="font-bold text-gray-900">0.01 BTC</span>
+				</div>
+				<div class="flex justify-between items-center pb-4 border-b border-gray-200">
+					<span class="text-gray-600">Current rate:</span>
+					<span class="font-bold text-gray-900">1 BTC = 138,500,000 UGX</span>
+				</div>
+				<div class="flex justify-between items-center pb-4 border-b border-gray-200">
+					<span class="text-gray-600">Cash to receive:</span>
+					<span class="font-bold text-gray-900">1,385,000 UGX</span>
+				</div>
+				<div class="flex justify-between items-center pb-4 border-b border-gray-200">
+					<span class="text-gray-600">Agent fee (2%):</span>
+					<span class="font-bold text-gray-900">27,700 UGX</span>
+				</div>
+				<div class="flex justify-between items-center pb-4 border-b border-gray-200">
+					<span class="text-gray-600">Escrow code:</span>
+					<span class="font-mono font-bold text-blue-600">BTC-847291</span>
+				</div>
+				<div class="flex justify-between items-center pt-2">
+					<span class="text-gray-600 font-semibold">User receives:</span>
+					<span class="font-bold text-green-600 text-lg sm:text-xl">1,357,300 UGX</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- CTA -->
+<div class="py-12 sm:py-16 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+		<h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
+			Start Using Escrow-Protected Exchanges
 		</h2>
-		<p class="text-lg sm:text-xl text-blue-100 mb-8">
-			Join thousands of users who trust AfriTokeni's escrow system
+		<p class="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8">
+			Zero fraud risk. Both parties protected. Instant Bitcoin transfers.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
 			<a
-				href="/"
-				class="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transform hover:scale-105 transition-all duration-200 shadow-lg"
+				href="/auth/register"
+				class="inline-flex items-center justify-center gap-2 bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
 			>
-				Get Started
+				Create Account
+				<ArrowRight class="w-5 h-5" />
 			</a>
 			<a
-				href="/info/ckbtc"
-				class="bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg border-2 border-blue-500"
+				href="/"
+				class="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-white/20 transition-colors border-2 border-white/30"
 			>
-				Learn About ckBTC
+				Learn More
 			</a>
 		</div>
 	</div>
-</section>
+</div>

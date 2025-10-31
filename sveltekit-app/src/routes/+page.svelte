@@ -59,7 +59,7 @@
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
 			<!-- Escrow Protection -->
-			<a href="/escrow" class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 sm:p-8 border-2 border-blue-200 hover:border-blue-400 transition-all hover:shadow-lg flex flex-col">
+			<a href="/info/escrow" class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 sm:p-8 border-2 border-blue-200 hover:border-blue-400 transition-all hover:shadow-lg flex flex-col">
 				<div class="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
 					<Lock class="w-6 h-6 sm:w-8 sm:h-8 text-white" />
 				</div>
@@ -73,7 +73,7 @@
 			</a>
 
 			<!-- Lightning Speed -->
-			<a href="/ckbtc" class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 sm:p-8 border-2 border-yellow-200 hover:border-orange-400 transition-all hover:shadow-lg flex flex-col">
+			<a href="/info/ckbtc" class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 sm:p-8 border-2 border-yellow-200 hover:border-orange-400 transition-all hover:shadow-lg flex flex-col">
 				<div class="w-12 h-12 sm:w-16 sm:h-16 bg-orange-600 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
 					<Zap class="w-6 h-6 sm:w-8 sm:h-8 text-white" />
 				</div>
@@ -87,7 +87,7 @@
 			</a>
 
 			<!-- ckUSDC Stable Value -->
-			<a href="/ckusdc" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 sm:p-8 border-2 border-green-200 hover:border-green-400 transition-all hover:shadow-lg flex flex-col">
+			<a href="/info/ckusdc" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 sm:p-8 border-2 border-green-200 hover:border-green-400 transition-all hover:shadow-lg flex flex-col">
 				<div class="w-12 h-12 sm:w-16 sm:h-16 bg-green-600 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
 					<Lock class="w-6 h-6 sm:w-8 sm:h-8 text-white" />
 				</div>
@@ -101,7 +101,7 @@
 			</a>
 
 			<!-- DAO Governance -->
-			<a href="/dao-info" class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 sm:p-8 border-2 border-purple-200 hover:border-purple-400 transition-all hover:shadow-lg flex flex-col sm:col-span-2 lg:col-span-1">
+			<a href="/info/dao" class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 sm:p-8 border-2 border-purple-200 hover:border-purple-400 transition-all hover:shadow-lg flex flex-col sm:col-span-2 lg:col-span-1">
 				<div class="w-12 h-12 sm:w-16 sm:h-16 bg-purple-600 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
 					<Globe class="w-6 h-6 sm:w-8 sm:h-8 text-white" />
 				</div>
