@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { marked } from 'marked';
 
 	let markdown = $state('');
+	let htmlContent = $state('');
 	let loading = $state(true);
 
 	onMount(async () => {
@@ -10,12 +12,16 @@
 			const response = await fetch('/WHITEPAPER.md');
 			if (response.ok) {
 				markdown = await response.text();
+				// Convert markdown to HTML
+				htmlContent = await marked.parse(markdown);
 			} else {
 				markdown = '# Whitepaper\n\nWhitepaper content will be available soon.';
+				htmlContent = await marked.parse(markdown);
 			}
 		} catch (error) {
 			console.error('Error loading whitepaper:', error);
 			markdown = '# Whitepaper\n\nError loading whitepaper content.';
+			htmlContent = await marked.parse(markdown);
 		} finally {
 			loading = false;
 		}
@@ -57,7 +63,7 @@
 					prose-img:rounded-lg prose-img:shadow-md
 					prose-hr:border-neutral-200 prose-hr:my-6 sm:prose-hr:my-8
 				">
-					{@html markdown.replace(/\n/g, '<br>').replace(/^# (.+)$/gm, '<h1>$1</h1>').replace(/^## (.+)$/gm, '<h2>$1</h2>').replace(/^### (.+)$/gm, '<h3>$3</h3>')}
+					{@html htmlContent}
 				</article>
 			{/if}
 		</div>
