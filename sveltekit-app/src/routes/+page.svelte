@@ -86,14 +86,14 @@
 				</div>
 			</a>
 
-			<!-- ckUSDC Stable Value -->
-			<a href="/info/ckusdc" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 sm:p-8 border-2 border-green-200 hover:border-green-400 transition-all hover:shadow-lg flex flex-col">
+			<!-- ckUSD Stable Value -->
+			<a href="/info/ckusd" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 sm:p-8 border-2 border-green-200 hover:border-green-400 transition-all hover:shadow-lg flex flex-col">
 				<div class="w-12 h-12 sm:w-16 sm:h-16 bg-green-600 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
 					<Lock class="w-6 h-6 sm:w-8 sm:h-8 text-white" />
 				</div>
-				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">ckUSDC Stable</h3>
+				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">ckUSD Stable</h3>
 				<p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-3 sm:mb-4">
-					Protect yourself from Bitcoin volatility. ckUSDC stays pegged to $1 USD. Instant transfers, stable value.
+					Protect yourself from Bitcoin volatility. ckUSD stays pegged to $1 USD. Instant transfers, stable value.
 				</p>
 				<div class="text-xs sm:text-sm font-semibold text-green-600 mt-auto flex items-center gap-2">
 					Learn More →
