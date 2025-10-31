@@ -293,12 +293,12 @@
 			<div class="divide-y divide-gray-100">
 				{#if transactions.length > 0}
 					{#each transactions.slice(0, 5) as transaction}
+						{@const Icon = getTransactionIcon(transaction.type)}
 						<div class="p-3 sm:p-4 lg:p-6 hover:bg-gray-50 transition-colors">
 							<!-- Mobile Layout -->
 							<div class="sm:hidden">
 								<div class="flex items-start space-x-2 sm:space-x-3">
 									<div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0">
-										{@const Icon = getTransactionIcon(transaction.type)}
 										<Icon class="w-4 h-4 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-500' : transaction.type === 'receive' ? 'text-green-500' : transaction.type === 'deposit' ? 'text-blue-500' : 'text-orange-500'}" />
 									</div>
 									<div class="flex-1 min-w-0">
@@ -321,7 +321,6 @@
 							<div class="hidden sm:flex items-center justify-between">
 								<div class="flex items-center space-x-3 lg:space-x-4 flex-1 min-w-0">
 									<div class="w-10 h-10 lg:w-12 lg:h-12 bg-neutral-100 rounded-xl flex items-center justify-center shrink-0">
-										{@const Icon = getTransactionIcon(transaction.type)}
 										<Icon class="w-4 h-4 {transaction.type === 'send' || transaction.type === 'withdraw' ? 'text-red-500' : transaction.type === 'receive' ? 'text-green-500' : transaction.type === 'deposit' ? 'text-blue-500' : 'text-orange-500'}" />
 									</div>
 									<div class="min-w-0 flex-1">
