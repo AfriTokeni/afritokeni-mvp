@@ -11,11 +11,13 @@
 			const response = await fetch('/WHITEPAPER.md');
 			if (response.ok) {
 				const markdown = await response.text();
+				console.log('Markdown loaded, length:', markdown.length);
 				// Parse markdown to HTML with GFM support
 				htmlContent = marked.parse(markdown, { 
 					gfm: true,
 					breaks: false
 				}) as string;
+				console.log('HTML generated, length:', htmlContent.length);
 			} else {
 				htmlContent = marked.parse('# Whitepaper\n\nWhitepaper content will be available soon.') as string;
 			}
