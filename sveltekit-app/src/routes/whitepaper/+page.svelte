@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { marked } from 'marked';
+	import { FileText } from '@lucide/svelte';
 
 	let htmlContent = $state('');
 	let loading = $state(true);
@@ -36,6 +37,22 @@
 </svelte:head>
 
 <div class="min-h-screen bg-white">
+	<!-- Hero Section with Gradient -->
+	<div class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white py-12 sm:py-16 lg:py-20">
+		<div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+			<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
+				<FileText class="w-3 h-3 sm:w-4 sm:h-4" />
+				Technical Documentation
+			</div>
+			<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+				AfriTokeni Whitepaper
+			</h1>
+			<p class="text-lg sm:text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
+				SMS-Accessible Crypto Banking for Africa
+			</p>
+		</div>
+	</div>
+
 	<main class="flex-1">
 		<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
 			{#if loading}
