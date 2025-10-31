@@ -72,15 +72,15 @@
 					<ul class="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
 						<li><a href="/bitcoin-exchange" class="hover:text-white transition-colors">How It Works</a></li>
 						<li><a href="/tariff" class="hover:text-white transition-colors">Pricing</a></li>
-						<li><a href="/sms" class="hover:text-white transition-colors">SMS Demo</a></li>
+						<li><a href="/ussd" class="hover:text-white transition-colors">Try USSD</a></li>
 						<li><a href="/become-agent" class="hover:text-white transition-colors">Become an Agent</a></li>
 					</ul>
 				</div>
 				<div>
 					<h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h4>
 					<ul class="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-						<li><a href="/about" class="hover:text-white transition-colors">About</a></li>
-						<li><a href="/dao-info" class="hover:text-white transition-colors">DAO Governance</a></li>
+						<li><a href="/info/about" class="hover:text-white transition-colors">About</a></li>
+						<li><a href="/info/dao" class="hover:text-white transition-colors">DAO Governance</a></li>
 						<li><a href="/whitepaper" class="hover:text-white transition-colors">Whitepaper</a></li>
 						<li><a href="mailto:info@afritokeni.com" class="hover:text-white transition-colors">Contact</a></li>
 					</ul>
