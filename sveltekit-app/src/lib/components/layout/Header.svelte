@@ -24,13 +24,13 @@
 				<a href="/tariff" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
 					Pricing
 				</a>
-				<a href="/dao-info" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
+				<a href="/info/dao" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
 					DAO
 				</a>
 				<a href="/ussd" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
 					Try USSD
 				</a>
-				<a href="/about" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
+				<a href="/info/about" class="text-gray-600 hover:text-gray-900 font-medium transition-colors text-sm lg:text-base">
 					About
 				</a>
 			</nav>
@@ -78,7 +78,7 @@
 						Pricing
 					</a>
 					<a 
-						href="/dao-info" 
+						href="/info/dao" 
 						class="block text-gray-600 hover:text-gray-900 font-medium transition-colors py-2"
 						onclick={() => isMobileMenuOpen = false}
 					>
@@ -92,7 +92,7 @@
 						Try USSD
 					</a>
 					<a 
-						href="/about" 
+						href="/info/about" 
 						class="block text-gray-600 hover:text-gray-900 font-medium transition-colors py-2"
 						onclick={() => isMobileMenuOpen = false}
 					>
