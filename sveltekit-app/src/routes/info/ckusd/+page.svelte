@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Lock, Shield, TrendingUp, DollarSign, ArrowRight, CheckCircle, AlertCircle } from '@lucide/svelte';
+	import { Lock, Shield, TrendingUp, DollarSign, ArrowRight, CircleCheckBig, AlertCircle } from '@lucide/svelte';
 </script>
 
 <svelte:head>
@@ -87,7 +87,7 @@
 
 		<div class="bg-green-50 border-2 border-green-200 rounded-2xl p-6 sm:p-8">
 			<div class="flex items-start gap-4">
-				<CheckCircle class="w-6 h-6 sm:w-8 sm:h-8 text-green-600 shrink-0 mt-1" />
+				<CircleCheckBig class="w-6 h-6 sm:w-8 sm:h-8 text-green-600 shrink-0 mt-1" />
 				<div>
 					<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">With ckUSD</h3>
 					<div class="space-y-3 text-gray-700 text-sm sm:text-base">
@@ -189,7 +189,7 @@
 			</div>
 
 			<div class="bg-white rounded-xl p-6 border-2 border-gray-200">
-				<CheckCircle class="w-8 h-8 sm:w-10 sm:h-10 text-green-600 mb-4" />
+				<CircleCheckBig class="w-8 h-8 sm:w-10 sm:h-10 text-green-600 mb-4" />
 				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Remittances</h3>
 				<p class="text-gray-600 text-sm sm:text-base">
 					Send money home. Recipient gets exact amount sent. No surprise value changes.

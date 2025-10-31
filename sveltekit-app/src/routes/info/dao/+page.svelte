@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Vote, Coins, Users, TrendingUp, Shield, Zap, ArrowRight, CheckCircle } from '@lucide/svelte';
+	import { Vote, Coins, Users, TrendingUp, Shield, Zap, ArrowRight, CircleCheckBig } from '@lucide/svelte';
 </script>
 
 <svelte:head>
@@ -133,7 +133,7 @@
 				<h3 class="text-2xl font-bold text-gray-900 mb-6">Token Utility</h3>
 				<div class="space-y-4">
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-6 h-6 text-green-500 shrink-0 mt-1" />
+						<CircleCheckBig class="w-6 h-6 text-green-500 shrink-0 mt-1" />
 						<div>
 							<h4 class="font-semibold text-gray-900">Governance Voting</h4>
 							<p class="text-gray-600 text-sm">1 AFRI = 1 vote on platform decisions</p>
@@ -141,7 +141,7 @@
 					</div>
 
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-6 h-6 text-green-500 shrink-0 mt-1" />
+						<CircleCheckBig class="w-6 h-6 text-green-500 shrink-0 mt-1" />
 						<div>
 							<h4 class="font-semibold text-gray-900">Staking Rewards</h4>
 							<p class="text-gray-600 text-sm">Earn 5 AFRI per day per 1,000 AFRI staked</p>
@@ -149,7 +149,7 @@
 					</div>
 
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-6 h-6 text-green-500 shrink-0 mt-1" />
+						<CircleCheckBig class="w-6 h-6 text-green-500 shrink-0 mt-1" />
 						<div>
 							<h4 class="font-semibold text-gray-900">Fee Discounts</h4>
 							<p class="text-gray-600 text-sm">Token holders get reduced transaction fees</p>
@@ -157,7 +157,7 @@
 					</div>
 
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-6 h-6 text-green-500 shrink-0 mt-1" />
+						<CircleCheckBig class="w-6 h-6 text-green-500 shrink-0 mt-1" />
 						<div>
 							<h4 class="font-semibold text-gray-900">Premium Features</h4>
 							<p class="text-gray-600 text-sm">Access advanced platform capabilities</p>
@@ -165,7 +165,7 @@
 					</div>
 
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-6 h-6 text-green-500 shrink-0 mt-1" />
+						<CircleCheckBig class="w-6 h-6 text-green-500 shrink-0 mt-1" />
 						<div>
 							<h4 class="font-semibold text-gray-900">Voting Power Multiplier</h4>
 							<p class="text-gray-600 text-sm">Longer staking = More voting power (up to 3x)</p>
@@ -197,28 +197,28 @@
 				<h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">For Users</h3>
 				<div class="space-y-3 sm:space-y-4">
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
+						<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
 						<div>
 							<span class="text-sm sm:text-base font-semibold text-gray-900">Transaction Rewards</span>
 							<p class="text-xs sm:text-sm text-gray-600">Earn 10 AFRI per Bitcoin exchange</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
+						<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
 						<div>
 							<span class="text-sm sm:text-base font-semibold text-gray-900">Referral Bonus</span>
 							<p class="text-xs sm:text-sm text-gray-600">100 AFRI for each friend you refer</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
+						<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
 						<div>
 							<span class="text-sm sm:text-base font-semibold text-gray-900">Weekly Airdrops</span>
 							<p class="text-xs sm:text-sm text-gray-600">Active users get weekly token drops</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
+						<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0 mt-0.5" />
 						<div>
 							<span class="text-sm sm:text-base font-semibold text-gray-900">Voting Participation</span>
 							<p class="text-xs sm:text-sm text-gray-600">50 AFRI for participating in governance</p>
@@ -232,14 +232,14 @@
 				<h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">For Agents</h3>
 				<div class="space-y-3 sm:space-y-4">
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 shrink-0 mt-0.5" />
+						<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 shrink-0 mt-0.5" />
 						<div>
 							<span class="text-sm sm:text-base font-semibold text-gray-900">Service Rewards</span>
 							<p class="text-xs sm:text-sm text-gray-600">50 AFRI per Bitcoin exchange facilitated</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 shrink-0 mt-0.5" />
+						<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 shrink-0 mt-0.5" />
 						<div>
 							<span class="text-sm sm:text-base font-semibold text-gray-900">Volume Bonuses</span>
 							<p class="text-xs sm:text-sm text-gray-600">Extra tokens for high transaction volumes</p>
@@ -308,27 +308,27 @@
 			<h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">What Can Be Governed?</h3>
 			<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 				<div class="flex items-center gap-3">
-					<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+					<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
 					<span class="text-sm sm:text-base text-gray-700">Transaction fees</span>
 				</div>
 				<div class="flex items-center gap-3">
-					<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+					<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
 					<span class="text-sm sm:text-base text-gray-700">Agent requirements</span>
 				</div>
 				<div class="flex items-center gap-3">
-					<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+					<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
 					<span class="text-sm sm:text-base text-gray-700">New features</span>
 				</div>
 				<div class="flex items-center gap-3">
-					<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+					<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
 					<span class="text-sm sm:text-base text-gray-700">Token distribution</span>
 				</div>
 				<div class="flex items-center gap-3">
-					<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+					<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
 					<span class="text-sm sm:text-base text-gray-700">Partnership approvals</span>
 				</div>
 				<div class="flex items-center gap-3">
-					<CheckCircle class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+					<CircleCheckBig class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
 					<span class="text-sm sm:text-base text-gray-700">Treasury spending</span>
 				</div>
 			</div>

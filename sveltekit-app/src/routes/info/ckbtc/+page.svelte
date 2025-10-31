@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Zap, Bitcoin, DollarSign, Clock, Shield, ArrowRight, CheckCircle } from '@lucide/svelte';
+	import { Zap, Bitcoin, DollarSign, Clock, Shield, ArrowRight, CircleCheckBig } from '@lucide/svelte';
 </script>
 
 <svelte:head>
@@ -202,7 +202,7 @@
 			</div>
 
 			<div class="bg-white rounded-xl p-6 border-2 border-gray-200">
-				<CheckCircle class="w-8 h-8 sm:w-10 sm:h-10 text-orange-600 mb-4" />
+				<CircleCheckBig class="w-8 h-8 sm:w-10 sm:h-10 text-orange-600 mb-4" />
 				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">SMS Accessible</h3>
 				<p class="text-gray-600 text-sm sm:text-base">
 					Send and receive ckBTC via USSD on any phone. No internet required for basic operations.

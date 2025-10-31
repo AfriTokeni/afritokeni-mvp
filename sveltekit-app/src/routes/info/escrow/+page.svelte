@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Lock, Shield, Clock, CheckCircle, AlertTriangle, ArrowRight } from '@lucide/svelte';
+	import { Lock, Shield, Clock, CircleCheckBig, AlertTriangle, ArrowRight } from '@lucide/svelte';
 </script>
 
 <svelte:head>
@@ -170,7 +170,7 @@
 			</div>
 
 			<div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
-				<CheckCircle class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 mb-4" />
+				<CircleCheckBig class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 mb-4" />
 				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Agent Verification</h3>
 				<p class="text-gray-600 text-sm sm:text-base">
 					All agents KYC-verified. Rating system tracks performance and trustworthiness.
