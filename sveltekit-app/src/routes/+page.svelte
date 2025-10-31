@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Smartphone, Zap, Lock, Bitcoin, Globe } from '@lucide/svelte';
-	import SavingsComparisonTable from '$lib/components/SavingsComparisonTable.svelte';
+	import SavingsComparisonTable from '$lib/components/landing/SavingsComparisonTable.svelte';
 	
 	function handleICPLogin() {
 		// TODO: Implement ICP login
