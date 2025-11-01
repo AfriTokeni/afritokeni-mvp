@@ -12,6 +12,15 @@
 
 	onMount(() => {
 		loadTransactions();
+		
+		// Get search query from URL parameter
+		if (typeof window !== 'undefined') {
+			const urlParams = new URLSearchParams(window.location.search);
+			const searchParam = urlParams.get('search');
+			if (searchParam) {
+				searchQuery = searchParam;
+			}
+		}
 	});
 
 	async function loadTransactions() {

@@ -49,11 +49,16 @@
 
 	const routes = userRoutes; // Can extend for agent/admin later
 
-	function handleSearch(e: Event) {
-		e.preventDefault();
+	// Navigate to history page when user types in search
+	$effect(() => {
 		if (searchQuery.trim()) {
 			goto(`/${userType}s/history?search=${encodeURIComponent(searchQuery)}`);
 		}
+	});
+
+	function handleSearch(e: Event) {
+		e.preventDefault();
+		// Already handled by $effect above
 	}
 
 	function handleAvatarClick() {
