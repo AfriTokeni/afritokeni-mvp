@@ -11,6 +11,13 @@
   "bitcoinBalance": 0.00125,
   "ckBTCBalance": 0.00125,
   "ckUSDBalance": 50.00,
+  "daoTokens": 1000,
+  "daoTokensBreakdown": {
+    "transactions": 250,
+    "agentActivity": 500,
+    "referrals": 150,
+    "staking": 100
+  },
   "preferredCurrency": "UGX",
   "location": {
     "country": "Uganda",

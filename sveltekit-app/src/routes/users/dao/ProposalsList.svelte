@@ -68,8 +68,8 @@
 					<div class="bg-red-500" style="width: {noPercentage}%"></div>
 				</div>
 				<div class="flex items-center justify-between mt-2 text-xs sm:text-sm gap-2">
-					<span class="text-green-600 font-semibold">{yesPercentage}% Yes ({proposal.votesYes.toLocaleString()})</span>
-					<span class="text-red-600 font-semibold">{noPercentage}% No ({proposal.votesNo.toLocaleString()})</span>
+					<span class="text-green-600 font-semibold">{yesPercentage}% Yes ({(proposal.votes?.yes || 0).toLocaleString()})</span>
+					<span class="text-red-600 font-semibold">{noPercentage}% No ({(proposal.votes?.no || 0).toLocaleString()})</span>
 				</div>
 			</div>
 
@@ -102,7 +102,7 @@
 			<!-- Time Remaining -->
 			<div class="flex items-center gap-1.5 sm:gap-2 mt-3 sm:mt-4 text-xs sm:text-sm text-gray-500">
 				<Clock class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-				<span class="wrap-break-word">Ends: {proposal.endsAt.toLocaleDateString()}</span>
+				<span class="wrap-break-word">Ends: {new Date(proposal.votingEndsAt || 0).toLocaleDateString()}</span>
 			</div>
 		</div>
 	{/each}

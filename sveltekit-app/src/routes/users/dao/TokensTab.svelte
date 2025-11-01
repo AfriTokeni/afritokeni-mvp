@@ -2,9 +2,15 @@
 	interface Props {
 		balance: number;
 		totalSupply: number;
+		breakdown?: {
+			transactions: number;
+			agentActivity: number;
+			referrals: number;
+			staking: number;
+		};
 	}
 
-	let { balance, totalSupply }: Props = $props();
+	let { balance, totalSupply, breakdown }: Props = $props();
 </script>
 
 <div class="space-y-4 sm:space-y-6">
@@ -14,19 +20,19 @@
 		<div class="space-y-2.5 sm:space-y-3">
 			<div class="flex items-center justify-between gap-2">
 				<span class="text-xs sm:text-sm text-gray-600">From Transactions</span>
-				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">250 AFRI</span>
+				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">{breakdown?.transactions || 0} AFRI</span>
 			</div>
 			<div class="flex items-center justify-between gap-2">
 				<span class="text-xs sm:text-sm text-gray-600">From Agent Activity</span>
-				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">500 AFRI</span>
+				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">{breakdown?.agentActivity || 0} AFRI</span>
 			</div>
 			<div class="flex items-center justify-between gap-2">
 				<span class="text-xs sm:text-sm text-gray-600">From Referrals</span>
-				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">150 AFRI</span>
+				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">{breakdown?.referrals || 0} AFRI</span>
 			</div>
 			<div class="flex items-center justify-between gap-2">
 				<span class="text-xs sm:text-sm text-gray-600">From Staking</span>
-				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">100 AFRI</span>
+				<span class="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">{breakdown?.staking || 0} AFRI</span>
 			</div>
 			<div class="pt-2.5 sm:pt-3 border-t border-gray-200 flex items-center justify-between gap-2">
 				<span class="text-sm sm:text-base font-bold text-gray-900">Total Balance</span>

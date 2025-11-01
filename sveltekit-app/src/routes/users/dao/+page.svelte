@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Vote, TrendingUp, Users, Coins } from '@lucide/svelte';
-	import { mockProposals, mockLeaderboard, mockDAOStats, type Proposal } from '$lib/utils/dao';
+	import { type Proposal } from '$lib/utils/dao';
+	import { getDAOProposals, getLeaderboard } from '$lib/services/shared/daoService';
+	import { getUserData } from '$lib/services/user/userService';
+	import { demoMode } from '$lib/stores/demoMode';
 	import DAOStats from './DAOStats.svelte';
 	import ProposalsList from './ProposalsList.svelte';
 	import TokensTab from './TokensTab.svelte';
@@ -13,24 +16,41 @@
 	let activeTab = $state<Tab>('proposals');
 	let proposals = $state<Proposal[]>([]);
 	let leaderboard = $state<any[]>([]);
-	let tokenBalance = $state(1000);
+	let currentUser = $state<any>(null);
+	let tokenBalance = $state(0);
 	let totalSupply = $state(0);
 	let totalHolders = $state(0);
 	let activeProposalsCount = $state(0);
 	let loading = $state(true);
 
+	// Subscribe to demo mode changes
+	$effect(() => {
+		// This will re-run when demoMode changes
+		const isDemoMode = $demoMode;
+		console.log('Demo mode changed:', isDemoMode);
+		loadData();
+	});
+
 	onMount(() => {
 		loadData();
 	});
 
-	function loadData() {
+	async function loadData() {
 		loading = true;
-		// Load mock data
-		proposals = mockProposals;
-		leaderboard = mockLeaderboard;
-		totalSupply = mockDAOStats.totalSupply;
-		totalHolders = mockDAOStats.totalHolders;
-		activeProposalsCount = mockDAOStats.activeProposals;
+		// Load user data and DAO data
+		currentUser = await getUserData();
+		proposals = await getDAOProposals();
+		leaderboard = await getLeaderboard();
+		
+		console.log('DAO Data loaded:', { currentUser, proposals, leaderboard });
+		
+		// Get token balance from user data
+		tokenBalance = currentUser?.daoTokens || 0;
+		
+		// Calculate stats from data
+		totalSupply = leaderboard.reduce((sum: number, holder: any) => sum + (holder.balance || 0), 0);
+		totalHolders = leaderboard.length;
+		activeProposalsCount = proposals.filter((p: any) => p.status === 'active').length;
 		loading = false;
 	}
 
@@ -41,15 +61,6 @@
 </script>
 
 <div class="space-y-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<div>
-			<h1 class="text-2xl sm:text-3xl font-bold text-gray-900">DAO Governance</h1>
-			<p class="text-sm sm:text-base text-gray-600 mt-1">Participate in AfriTokeni's decentralized governance</p>
-		</div>
-		<Vote class="w-10 h-10 sm:w-12 sm:h-12 text-gray-900" />
-	</div>
-
 	<!-- Stats -->
 	<DAOStats
 		{tokenBalance}
@@ -95,7 +106,7 @@
 	{#if activeTab === 'proposals'}
 		<ProposalsList {proposals} onVote={handleVote} />
 	{:else if activeTab === 'my-tokens'}
-		<TokensTab balance={tokenBalance} {totalSupply} />
+		<TokensTab balance={tokenBalance} {totalSupply} breakdown={currentUser?.daoTokensBreakdown} />
 	{:else if activeTab === 'leaderboard'}
 		<LeaderboardTab {leaderboard} {totalSupply} />
 	{/if}
