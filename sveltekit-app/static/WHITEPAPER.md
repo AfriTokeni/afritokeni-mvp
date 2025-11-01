@@ -705,6 +705,94 @@ Piga *384*22948# kuanza kipindi kipya
 - Performance monitoring
 - Rating system
 
+### 6.3 Non-Custodial Architecture
+
+**⚠️ CRITICAL: AfriTokeni is 100% NON-CUSTODIAL**
+
+AfriTokeni NEVER holds, controls, or has access to user funds. This is a fundamental architectural principle for security, legal compliance, and user protection.
+
+**How User Funds Work**:
+
+```
+User's Internet Identity/NFID
+    ↓
+User's ICP Principal (USER OWNS THIS)
+    ↓
+ckBTC/ckUSD Ledger Canister (ICP Blockchain)
+    ↓
+User's Balance (ON-CHAIN, USER-CONTROLLED)
+```
+
+**What AfriTokeni Does** ✅:
+- **Provides UI**: Web and SMS interface to interact with ICP blockchain
+- **Facilitates matching**: Connects users with agents for cash exchanges
+- **Stores metadata**: Transaction history, preferences (NOT funds)
+- **Provides information**: Exchange rates, agent locations, status updates
+
+**What AfriTokeni NEVER Does** ❌:
+- **Hold funds**: No platform wallet, no pooled funds, no custody
+- **Control keys**: Users control their own Internet Identity/NFID
+- **Sign transactions**: Only users can sign their own transactions
+- **Access balances**: We can only READ public ledger data, never MOVE funds
+
+**Transaction Flow (Non-Custodial)**:
+1. User initiates transaction in AfriTokeni UI
+2. User signs transaction with their Internet Identity/NFID
+3. Transaction sent DIRECTLY to ICP ledger canister
+4. Ledger updates user's balance on-chain
+5. AfriTokeni stores transaction METADATA in Juno (not funds!)
+
+**Agent Exchange Flow (Non-Custodial)**:
+
+*Cash → Bitcoin*:
+- User brings cash to agent
+- Agent verifies cash
+- Agent sends ckBTC from **AGENT'S principal** to **USER'S principal**
+- User receives ckBTC in their own wallet
+- Agent keeps the cash
+
+*Bitcoin → Cash*:
+- User sends ckBTC from **USER'S principal** to **AGENT'S principal**
+- Agent receives ckBTC in their own wallet
+- Agent gives cash to user
+
+**CRITICAL**: At no point does AfriTokeni hold funds. Transfers are always:
+- User's principal → Agent's principal (direct)
+- Agent's principal → User's principal (direct)
+
+**What We Store in Juno** (Metadata Only):
+- ✅ Transaction IDs, timestamps, amounts, status
+- ✅ User preferences (currency, language, notifications)
+- ✅ Agent information (location, ratings, availability)
+- ✅ Exchange history (for user's transaction view)
+- ❌ Private keys (NEVER)
+- ❌ Actual funds (NEVER)
+- ❌ Control over balances (NEVER)
+
+**Security Benefits**:
+- **No single point of failure**: No platform wallet to hack
+- **User sovereignty**: Users can access funds through any ICP wallet
+- **Regulatory clarity**: Non-custodial = no money transmission license
+- **Transparency**: All transactions on-chain and publicly verifiable
+
+**Emergency Scenarios**:
+
+*What if AfriTokeni goes offline?*
+- ✅ Users can still access funds via Internet Identity
+- ✅ Users can transfer ckBTC/ckUSD using any ICP wallet
+- ✅ Funds are on ICP blockchain, not on our servers
+
+*What if AfriTokeni is hacked?*
+- ✅ No funds to steal (we don't hold any)
+- ✅ No private keys to compromise (we don't have any)
+- ✅ Worst case: Transaction metadata leaked (not funds)
+
+**Legal Compliance**:
+- Non-custodial = Not a money transmitter
+- No custody = Not a financial institution
+- P2P marketplace = No banking license required
+- Users control keys = User responsibility for security
+
 ---
 
 ## 7. Agent Network
@@ -1038,6 +1126,92 @@ The platform automatically distributes AFRI tokens from the treasury to users an
 - Marketing: 20% of revenue
 
 **Break-even**: ~5,000 active users
+
+### 9.4 Non-Custodial Fee Collection Architecture
+
+**Challenge**: How do we collect fees while remaining 100% non-custodial?
+
+**Solution**: Smart Contract Fee Intermediary
+
+AfriTokeni deploys a transparent ICP canister that acts as a fee collection intermediary:
+
+**How It Works**:
+
+1. **User Initiates Transfer**:
+   - User wants to send 100,000 UGX worth of ckBTC to recipient
+   - User approves transfer via Internet Identity/NFID
+   - Single transaction from user's perspective
+
+2. **AfriTokeni Canister Processes**:
+   ```
+   User's Principal (100,000 UGX worth of ckBTC)
+        ↓
+   AfriTokeni Fee Canister (transparent smart contract)
+        ├─→ 0.5% (500 UGX) → AfriTokeni Principal (platform fee)
+        └─→ 99.5% (99,500 UGX) → Recipient's Principal
+   ```
+
+3. **Fee Distribution**:
+   - Platform fees: Collected in AfriTokeni's ICP principal
+   - Agent commissions: Paid directly to agent's principal
+   - AfriTokeni's 10% cut: Deducted from agent commission automatically
+
+**Security & Transparency**:
+- ✅ **Open Source**: Fee canister code is publicly auditable
+- ✅ **Non-Custodial**: Canister cannot hold funds, only route them
+- ✅ **Atomic**: Fee deduction and transfer happen in single transaction
+- ✅ **User Controlled**: User signs transaction with their Internet Identity
+- ✅ **No Custody**: AfriTokeni never holds user funds, only receives fees
+
+**Example Transaction Flow**:
+
+*User-to-User Transfer*:
+```
+User A sends 100,000 UGX worth of ckBTC to User B
+↓
+AfriTokeni Canister:
+  - Deducts 500 UGX (0.5%) → AfriTokeni Principal
+  - Sends 99,500 UGX → User B's Principal
+↓
+Result:
+  - User A: -100,000 UGX
+  - User B: +99,500 UGX
+  - AfriTokeni: +500 UGX (fee)
+```
+
+*Agent Exchange*:
+```
+User buys ckBTC from Agent with 100,000 UGX cash
+↓
+Agent transfers ckBTC to user via AfriTokeni Canister:
+  - Agent commission: 5,000 UGX (5% for rural area)
+  - AfriTokeni's 10% of commission: 500 UGX
+  - User receives: ckBTC worth 95,000 UGX
+↓
+AfriTokeni Canister:
+  - Deducts 500 UGX → AfriTokeni Principal (10% of agent commission)
+  - Sends ckBTC worth 95,000 UGX → User's Principal
+  - Agent keeps: 4,500 UGX (90% of commission)
+↓
+Result:
+  - User: +ckBTC worth 95,000 UGX (paid 100,000 cash)
+  - Agent: +100,000 UGX cash, +4,500 UGX net commission
+  - AfriTokeni: +500 UGG platform fee
+```
+
+**Technical Implementation**:
+- Fee canister written in Motoko/Rust
+- Deployed on ICP mainnet
+- Upgradeable via DAO governance
+- All transactions logged on-chain
+- Real-time fee tracking and reporting
+
+**Advantages Over Custodial Models**:
+- ✅ No regulatory burden (not a money transmitter)
+- ✅ No security risk (no pooled funds to hack)
+- ✅ User sovereignty (users always control their keys)
+- ✅ Transparent fees (all on-chain, publicly auditable)
+- ✅ Instant settlement (no waiting for AfriTokeni to process)
 
 ---
 

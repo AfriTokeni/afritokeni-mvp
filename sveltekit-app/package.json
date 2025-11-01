@@ -26,11 +26,17 @@
 		"vite": "^7.1.10"
 	},
 	"dependencies": {
+		"@dfinity/agent": "^3.4.1",
+		"@dfinity/identity": "^3.4.1",
+		"@dfinity/principal": "^3.4.1",
+		"@junobuild/core": "^2.2.1",
 		"@lucide/svelte": "^0.552.0",
+		"ethers": "^6.15.0",
 		"flowbite": "^3.1.2",
 		"flowbite-svelte": "^1.20.1",
 		"leaflet": "^1.9.4",
 		"marked": "^16.4.1",
+		"nanoid": "^5.1.6",
 		"remark-gfm": "^4.0.1",
 		"svelte-leafletjs": "^2.0.0"
 	}
