@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Trophy, Medal, Award } from '@lucide/svelte';
-	import { mockLeaderboard, mockDAOStats, type LeaderboardEntry } from '$lib/utils/dao';
+	import { type LeaderboardEntry } from '$lib/utils/dao';
+	import { getLeaderboard } from '$lib/services/shared/daoService';
 
 	// State
 	let leaderboard = $state<LeaderboardEntry[]>([]);
@@ -12,11 +13,11 @@
 		loadLeaderboard();
 	});
 
-	function loadLeaderboard() {
+	async function loadLeaderboard() {
 		loading = true;
-		// Load mock data
-		leaderboard = mockLeaderboard;
-		totalSupply = mockDAOStats.totalSupply;
+		leaderboard = await getLeaderboard();
+		// Calculate total supply from leaderboard
+		totalSupply = leaderboard.reduce((sum, holder) => sum + (holder.balance || 0), 0);
 		loading = false;
 	}
 
@@ -87,7 +88,7 @@
 
 						<!-- Holder Info -->
 						<div class="flex-1 min-w-0">
-							<p class="text-sm sm:text-base font-semibold text-gray-900 truncate">{holder.address}</p>
+							<p class="text-sm sm:text-base font-semibold text-gray-900 truncate">{holder.name || holder.userId || 'Anonymous'}</p>
 							<p class="text-xs sm:text-sm text-gray-600 wrap-break-word">
 								{getPercentage(holder.balance)}% of total supply
 							</p>
