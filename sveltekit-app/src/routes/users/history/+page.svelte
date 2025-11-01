@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { ArrowUp, ArrowDown, Plus, Minus, Search, Send, Banknote, LayoutDashboard } from '@lucide/svelte';
-	import { mockTransactions, formatCurrency, formatDate, getTransactionDescription, type Transaction, type TransactionType } from '$lib/utils/transactions';
+	import { formatCurrency, formatDate, getTransactionDescription, type Transaction, type TransactionType } from '$lib/utils/transactions';
+	import { getTransactions } from '$lib/services/user/userService';
 
 	// State
 	let transactions = $state<Transaction[]>([]);
@@ -13,10 +14,9 @@
 		loadTransactions();
 	});
 
-	function loadTransactions() {
+	async function loadTransactions() {
 		loading = true;
-		// Load mock data
-		transactions = mockTransactions;
+		transactions = await getTransactions();
 		loading = false;
 	}
 
