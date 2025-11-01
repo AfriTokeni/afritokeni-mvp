@@ -4,6 +4,7 @@
 	import { Search, LogOut, ChevronRight } from '@lucide/svelte';
 	import type { Component } from 'svelte';
 	import CollapsibleSidebar from './CollapsibleSidebar.svelte';
+	import DemoModeToggle from '$lib/components/shared/DemoModeToggle.svelte';
 	
 	// Import user routes
 	import { 
@@ -80,7 +81,10 @@
 			</div>
 			
 			<div class="flex items-center gap-2 md:gap-4 shrink-0">
-				<!-- Demo Mode Toggle - TODO: Add when migrated -->
+				<!-- Demo Mode Toggle -->
+				<div class="hidden lg:block">
+					<DemoModeToggle />
+				</div>
 				
 				<!-- Search Bar - Hidden on mobile -->
 				<form onsubmit={handleSearch} class="relative hidden lg:block">
