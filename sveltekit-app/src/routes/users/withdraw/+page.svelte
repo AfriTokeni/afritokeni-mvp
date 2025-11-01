@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { formatCurrencyAmount, type AfricanCurrency } from '$lib/types/currency';
+	import { getUserData, getUserBalance } from '$lib/services/user/userService';
 	import AmountStep from './AmountStep.svelte';
 	import AgentStep from './AgentStep.svelte';
 	import ConfirmationStep from './ConfirmationStep.svelte';
@@ -20,7 +21,7 @@
 	let withdrawalCode = $state('');
 	let finalLocalAmount = $state(0);
 	let finalBtcAmount = $state('');
-	let withdrawType = $state<'cash' | 'bitcoin' | 'ckusdc'>('cash');
+	let withdrawType = $state<'cash' | 'bitcoin' | 'ckusd'>('cash');
 	let withdrawalFee = $state(0);
 	let isCreatingTransaction = $state(false);
 	let transactionError = $state<string | null>(null);
@@ -28,11 +29,16 @@
 	let showConfirmModal = $state(false);
 	let pendingAgent = $state<Agent | null>(null);
 
-	// Mock user data
-	const currentUser = { id: 'user_123', preferredCurrency: 'UGX' };
-	const defaultCurrency = currentUser.preferredCurrency || 'UGX';
+	// User data
+	let currentUser = $state<any>(null);
+	let userBalance = $state(0);
+	const defaultCurrency = $derived(currentUser?.preferredCurrency || 'UGX');
 	const userCurrency = $derived(selectedCurrency || defaultCurrency);
-	const userBalance = 500000; // Mock balance
+
+	onMount(async () => {
+		currentUser = await getUserData();
+		userBalance = await getUserBalance();
+	});
 
 	// Mock Bitcoin exchange rate
 	function getBtcExchangeRate(currency: string) {

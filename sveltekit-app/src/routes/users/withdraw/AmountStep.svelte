@@ -1,19 +1,19 @@
 <script lang="ts">
 	import PrimaryBalanceCard from '$lib/components/dashboard/PrimaryBalanceCard.svelte';
 	import CkBTCBalanceCard from '$lib/components/dashboard/CkBTCBalanceCard.svelte';
-	import CkUSDCBalanceCard from '$lib/components/dashboard/CkUSDCBalanceCard.svelte';
+	import CkUSDBalanceCard from '$lib/components/dashboard/CkUSDBalanceCard.svelte';
 
 	interface Props {
 		exchangeRate: number;
 		userBalance: number;
 		preferredCurrency: string;
 		ckBTCBalance: number;
-		ckUSDCBalance: number;
+		ckUSDBalance: number;
 		onCurrencyChange: (currency: string) => void;
 		onContinue: (localAmount: string, btcAmount: string, fee: number, withdrawType: 'cash' | 'bitcoin' | 'ckusdc') => void;
 	}
 
-	let { exchangeRate, userBalance, preferredCurrency, ckBTCBalance, ckUSDCBalance, onCurrencyChange, onContinue }: Props = $props();
+	let { exchangeRate, userBalance, preferredCurrency, ckBTCBalance, ckUSDBalance, onCurrencyChange, onContinue }: Props = $props();
 
 	let amount = $state('');
 	let withdrawType = $state<'cash' | 'bitcoin' | 'ckusdc'>('cash');
@@ -40,7 +40,7 @@
 				{preferredCurrency}
 				showActions={false}
 			/>
-			<CkUSDCBalanceCard
+			<CkUSDBalanceCard
 				principalId="user_123"
 				{preferredCurrency}
 				showActions={false}

@@ -1,12 +1,14 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Send, Bitcoin, DollarSign, AlertCircle, Search } from '@lucide/svelte';
 	import { formatCurrencyAmount, type AfricanCurrency } from '$lib/types/currency';
 	import PrimaryBalanceCard from '$lib/components/dashboard/PrimaryBalanceCard.svelte';
 	import CkBTCBalanceCard from '$lib/components/dashboard/CkBTCBalanceCard.svelte';
-	import CkUSDCBalanceCard from '$lib/components/dashboard/CkUSDCBalanceCard.svelte';
+	import CkUSDBalanceCard from '$lib/components/dashboard/CkUSDBalanceCard.svelte';
+	import { getUserData, getUserBalance } from '$lib/services/user/userService';
 
-	type SendType = 'local' | 'ckbtc' | 'ckusdc';
+	type SendType = 'local' | 'ckbtc' | 'ckusd';
 	type SendStep = 'amount' | 'recipient' | 'confirmation';
 
 	// State
@@ -21,12 +23,16 @@
 	let searchQuery = $state('');
 	let showContactDropdown = $state(false);
 	let walletAddress = $state('');
+	let currentUser = $state<any>(null);
+	let displayBalance = $state(0);
 
-	// Mock user data
-	const currentUser = { id: 'user_123', preferredCurrency: 'UGX' };
-	const defaultCurrency = currentUser.preferredCurrency || 'UGX';
+	const defaultCurrency = $derived(currentUser?.preferredCurrency || 'UGX');
 	const userCurrency = $derived(selectedCurrency || defaultCurrency);
-	const displayBalance = 500000; // Mock balance
+
+	onMount(async () => {
+		currentUser = await getUserData();
+		displayBalance = await getUserBalance();
+	});
 
 	// Demo contacts
 	const demoContacts = [
@@ -87,7 +93,7 @@
 			return;
 		}
 		
-		if ((sendType === 'ckbtc' || sendType === 'ckusdc') && !walletAddress.trim()) {
+		if ((sendType === 'ckbtc' || sendType === 'ckusd') && !walletAddress.trim()) {
 			error = 'Please enter wallet address';
 			return;
 		}
@@ -105,7 +111,7 @@
 		
 		if (sendType === 'ckbtc' && contact.btcWallet) {
 			walletAddress = contact.btcWallet;
-		} else if (sendType === 'ckusdc' && contact.usdcWallet) {
+		} else if (sendType === 'ckusd' && contact.usdcWallet) {
 			walletAddress = contact.usdcWallet;
 		}
 	}
@@ -156,12 +162,12 @@
 						onCurrencyChange={(currency) => selectedCurrency = currency}
 					/>
 					<CkBTCBalanceCard
-						principalId={currentUser.id}
+						principalId={currentUser?.id || ''}
 						preferredCurrency={userCurrency}
 						showActions={false}
 					/>
-					<CkUSDCBalanceCard
-						principalId={currentUser.id}
+					<CkUSDBalanceCard
+						principalId={currentUser?.id || ''}
 						preferredCurrency={userCurrency}
 						showActions={false}
 					/>
@@ -206,16 +212,16 @@
 
 					<button
 						type="button"
-						onclick={() => sendType = 'ckusdc'}
-						class="p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all {sendType === 'ckusdc' ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:border-gray-300'}"
+						onclick={() => sendType = 'ckusd'}
+						class="p-4 sm:p-6 border-2 rounded-xl sm:rounded-2xl text-left transition-all {sendType === 'ckusd' ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:border-gray-300'}"
 					>
 						<div class="flex items-start space-x-2 sm:space-x-3">
 							<div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center bg-green-50 shrink-0">
 								<DollarSign class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
 							</div>
 							<div class="min-w-0">
-								<h3 class="text-sm sm:text-base font-bold text-gray-900 mb-1">Send ckUSDC</h3>
-								<p class="text-xs sm:text-sm text-gray-600">Send Chain Key USDC</p>
+								<h3 class="text-sm sm:text-base font-bold text-gray-900 mb-1">Send ckUSD</h3>
+								<p class="text-xs sm:text-sm text-gray-600">Send Chain Key USD</p>
 							</div>
 						</div>
 					</button>
@@ -236,7 +242,7 @@
 			<div class="mb-4 sm:mb-6">
 				<div class="flex items-center justify-between mb-2 sm:mb-3">
 					<label for="amount" class="block text-xs sm:text-sm font-medium text-gray-700">
-						Amount {sendType === 'ckbtc' && '(ckBTC)'} {sendType === 'ckusdc' && '(ckUSDC)'}
+						Amount {sendType === 'ckbtc' && '(ckBTC)'} {sendType === 'ckusd' && '(ckUSD)'}
 					</label>
 				</div>
 				<input
@@ -244,7 +250,7 @@
 					type="number"
 					bind:value={localAmount}
 					oninput={(e) => handleAmountChange(e.currentTarget.value)}
-					placeholder={sendType === 'ckbtc' ? '0.00000000' : sendType === 'ckusdc' ? '0.00' : '0'}
+					placeholder={sendType === 'ckbtc' ? '0.00000000' : sendType === 'ckusd' ? '0.00' : '0'}
 					class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-base sm:text-lg font-mono"
 					step={sendType === 'ckbtc' ? '0.00000001' : '0.01'}
 				/>
@@ -257,7 +263,7 @@
 						<span>Amount:</span>
 						<span class="font-medium">
 							{sendType === 'ckbtc' ? `₿${parseFloat(localAmount).toFixed(8)} BTC` :
-							 sendType === 'ckusdc' ? `$${parseFloat(localAmount).toFixed(2)} USDC` :
+							 sendType === 'ckusd' ? `$${parseFloat(localAmount).toFixed(2)} USDC` :
 							 formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}
 						</span>
 					</div>
@@ -265,7 +271,7 @@
 						<span>Fee (0.5%):</span>
 						<span>
 							{sendType === 'ckbtc' ? `₿${(parseFloat(localAmount) * 0.005).toFixed(8)} BTC` :
-							 sendType === 'ckusdc' ? `$${(parseFloat(localAmount) * 0.005).toFixed(2)} USDC` :
+							 sendType === 'ckusd' ? `$${(parseFloat(localAmount) * 0.005).toFixed(2)} USDC` :
 							 formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}
 						</span>
 					</div>
@@ -273,7 +279,7 @@
 						<span>Total:</span>
 						<span>
 							{sendType === 'ckbtc' ? `₿${(parseFloat(localAmount) * 1.005).toFixed(8)} BTC` :
-							 sendType === 'ckusdc' ? `$${(parseFloat(localAmount) * 1.005).toFixed(2)} USDC` :
+							 sendType === 'ckusd' ? `$${(parseFloat(localAmount) * 1.005).toFixed(2)} USDC` :
 							 formatCurrencyAmount(parseFloat(localAmount) + calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}
 						</span>
 					</div>
@@ -316,7 +322,7 @@
 						{#if showContactDropdown && searchQuery && filteredContacts.length > 0}
 							<div class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
 								{#each filteredContacts as contact}
-									{@const hasWallet = sendType === 'ckbtc' ? contact.btcWallet : sendType === 'ckusdc' ? contact.usdcWallet : true}
+									{@const hasWallet = sendType === 'ckbtc' ? contact.btcWallet : sendType === 'ckusd' ? contact.usdcWallet : true}
 									<button
 										type="button"
 										onclick={() => selectContact(contact)}
@@ -327,7 +333,7 @@
 												<div class="text-sm sm:text-base font-medium text-gray-900 truncate">{contact.name}</div>
 												<div class="text-xs sm:text-sm text-gray-500 truncate">{contact.phone}</div>
 											</div>
-											{#if sendType === 'ckbtc' || sendType === 'ckusdc'}
+											{#if sendType === 'ckbtc' || sendType === 'ckusd'}
 												<div class="text-xs shrink-0">
 													{#if hasWallet}
 														<span class="text-green-600">✓ Has wallet</span>
@@ -348,7 +354,7 @@
 				</div>
 
 				<!-- Wallet Address for crypto -->
-				{#if sendType === 'ckbtc' || sendType === 'ckusdc'}
+				{#if sendType === 'ckbtc' || sendType === 'ckusd'}
 					<div>
 						<div class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
 							{sendType === 'ckbtc' ? 'Bitcoin' : 'USDC'} Wallet Address {walletAddress && '✓'}
@@ -391,7 +397,7 @@
 						<span class="text-gray-600">Amount:</span>
 						<span class="font-medium">
 							{sendType === 'ckbtc' ? `₿${parseFloat(localAmount).toFixed(8)} BTC` :
-							 sendType === 'ckusdc' ? `$${parseFloat(localAmount).toFixed(2)} USDC` :
+							 sendType === 'ckusd' ? `$${parseFloat(localAmount).toFixed(2)} USDC` :
 							 formatCurrencyAmount(parseFloat(localAmount), userCurrency as AfricanCurrency)}
 						</span>
 					</div>
@@ -399,7 +405,7 @@
 						<span class="text-gray-600">Fee (0.5%):</span>
 						<span class="font-medium text-orange-600">
 							{sendType === 'ckbtc' ? `₿${(parseFloat(localAmount) * 0.005).toFixed(8)} BTC` :
-							 sendType === 'ckusdc' ? `$${(parseFloat(localAmount) * 0.005).toFixed(2)} USDC` :
+							 sendType === 'ckusd' ? `$${(parseFloat(localAmount) * 0.005).toFixed(2)} USDC` :
 							 formatCurrencyAmount(calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}
 						</span>
 					</div>
@@ -407,7 +413,7 @@
 						<span>Total:</span>
 						<span>
 							{sendType === 'ckbtc' ? `₿${(parseFloat(localAmount) * 1.005).toFixed(8)} BTC` :
-							 sendType === 'ckusdc' ? `$${(parseFloat(localAmount) * 1.005).toFixed(2)} USDC` :
+							 sendType === 'ckusd' ? `$${(parseFloat(localAmount) * 1.005).toFixed(2)} USDC` :
 							 formatCurrencyAmount(parseFloat(localAmount) + calculateFee(parseFloat(localAmount)), userCurrency as AfricanCurrency)}
 						</span>
 					</div>
