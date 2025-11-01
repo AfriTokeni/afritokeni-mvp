@@ -1,12 +1,8 @@
 <script lang="ts">
 	import { Menu, X } from '@lucide/svelte';
+	import SignInButtonSmall from '$lib/components/auth/SignInButtonSmall.svelte';
 	
 	let isMobileMenuOpen = $state(false);
-	
-	function handleICPLogin() {
-		// TODO: Implement ICP login
-		console.log('ICP Login clicked');
-	}
 </script>
 
 <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -37,12 +33,9 @@
 
 			<div class="flex items-center gap-3">
 				<!-- Sign In Button - Hidden on small screens -->
-				<button
-					onclick={handleICPLogin}
-					class="hidden sm:block bg-black text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-800 transition-all duration-200 transform hover:scale-105"
-				>
-					Sign In
-				</button>
+				<div class="hidden sm:block">
+					<SignInButtonSmall />
+				</div>
 
 				<!-- Mobile Menu Button -->
 				<button
@@ -99,15 +92,9 @@
 						About
 					</a>
 					<!-- Sign In Button in Mobile Menu -->
-					<button
-						onclick={() => {
-							handleICPLogin();
-							isMobileMenuOpen = false;
-						}}
-						class="w-full mt-4 bg-black text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all duration-200"
-					>
-						Sign In
-					</button>
+					<div class="mt-4">
+						<SignInButtonSmall />
+					</div>
 				</nav>
 			</div>
 		{/if}

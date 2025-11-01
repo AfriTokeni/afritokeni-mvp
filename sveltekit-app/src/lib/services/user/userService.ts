@@ -9,6 +9,8 @@ import { demoMode } from '$lib/stores/demoMode';
 import { get } from 'svelte/store';
 import { CkBTCService, CkUSDService } from '$lib/services/icp';
 import { generatePrincipalFromPhone, generatePrincipalFromIdentifier, isPhoneNumber } from '$lib/utils/principalUtils';
+import { principalId as authPrincipalId, isAuthenticated } from '$lib/stores/auth';
+import { getDoc } from '@junobuild/core';
 
 const DEMO_PATHS = {
 	USER: '/data/demo/user.json',
@@ -30,8 +32,9 @@ async function fetchDemoData<T>(path: string): Promise<T> {
 /**
  * Get user profile data
  * 
- * TEMPORARY: Falls back to demo data when no real auth is available
- * TODO: Implement real authentication (Internet Identity / Juno)
+ * REAL JUNO INTEGRATION:
+ * - Demo mode: Returns JSON file
+ * - Real mode: Fetches from Juno datastore using authenticated principal
  */
 export async function getUserData() {
 	if (isDemoMode()) {
@@ -39,15 +42,31 @@ export async function getUserData() {
 	}
 	
 	try {
-		// TODO: Implement real user authentication
-		// const response = await fetch('/api/user');
-		// return response.json();
+		// Check if user is authenticated
+		const authenticated = get(isAuthenticated);
+		const principal = get(authPrincipalId);
 		
-		// TEMPORARY: Fallback to demo data until auth is implemented
-		console.warn('⚠️ No real authentication yet - using demo data');
-		return fetchDemoData(DEMO_PATHS.USER);
+		if (!authenticated || !principal) {
+			console.warn('⚠️ User not authenticated with Juno');
+			return null;
+		}
+
+		// Fetch user data from Juno datastore
+		console.log('📡 Fetching user data from Juno for principal:', principal);
+		const result = await getDoc({
+			collection: 'users',
+			key: principal
+		});
+
+		if (!result) {
+			console.warn('⚠️ No user data found in Juno for principal:', principal);
+			return null;
+		}
+
+		console.log('✅ User data loaded from Juno');
+		return result.data;
 	} catch (error) {
-		console.error('Failed to fetch user data:', error);
+		console.error('❌ Failed to fetch user data from Juno:', error);
 		return null;
 	}
 }
