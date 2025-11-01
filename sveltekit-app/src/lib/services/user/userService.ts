@@ -47,7 +47,9 @@ export async function getUserData() {
  */
 export async function getTransactions() {
 	if (isDemoMode()) {
-		return fetchDemoData(DEMO_PATHS.TRANSACTIONS);
+		const data: any = await fetchDemoData(DEMO_PATHS.TRANSACTIONS);
+		// Handle both array and object with user-transactions key
+		return Array.isArray(data) ? data : (data['user-transactions'] || []);
 	}
 	try {
 		// const response = await fetch('/api/transactions');
