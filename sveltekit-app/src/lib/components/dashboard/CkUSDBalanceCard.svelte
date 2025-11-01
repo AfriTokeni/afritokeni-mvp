@@ -142,6 +142,12 @@
 			{/if}
 		</div>
 
+		<!-- Info Badge -->
+		<div class="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-white/60 rounded-lg border border-green-200">
+			<p class="text-xs sm:text-sm text-neutral-700">
+				<span class="font-semibold">Stable Value:</span> ckUSD is pegged 1:1 with USD.
+			</p>
+		</div>
 
 		<!-- Quick Actions -->
 		{#if showActions}
