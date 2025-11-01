@@ -8,7 +8,7 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<div class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white py-16 sm:py-20">
+<div class="bg-linear-to-br from-blue-600 to-indigo-600 text-white py-16 sm:py-20">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 		<div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
 			<Lock class="w-8 h-8 sm:w-10 sm:h-10" />
@@ -225,7 +225,7 @@
 </div>
 
 <!-- CTA -->
-<div class="py-12 sm:py-16 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+<div class="py-12 sm:py-16 bg-linear-to-br from-blue-600 to-indigo-600 text-white">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 		<h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
 			Start Using Escrow-Protected Exchanges

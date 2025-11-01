@@ -1,6 +1,11 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { Search, LogOut, ChevronRight } from '@lucide/svelte';
+	import type { Component } from 'svelte';
+	import CollapsibleSidebar from './CollapsibleSidebar.svelte';
+	
+	// Import user routes
 	import { 
 		LayoutDashboard, 
 		Send, 
@@ -9,18 +14,14 @@
 		Trophy, 
 		MapPin, 
 		History, 
-		User, 
-		LogOut,
-		ChevronRight,
-		Search
+		User 
 	} from '@lucide/svelte';
-	import type { ComponentType } from 'svelte';
 
 	interface Route {
 		id: string;
 		path: string;
 		label: string;
-		icon: ComponentType;
+		icon: any;
 	}
 
 	interface Props {
@@ -30,8 +31,9 @@
 
 	let { userType, children }: Props = $props();
 
-	let isExpanded = $state(false);
 	let searchQuery = $state('');
+	let profileImage = $state<string | null>(null);
+	let userName = $state('');
 
 	const userRoutes: Route[] = [
 		{ id: 'dashboard', path: '/users/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -46,15 +48,6 @@
 
 	const routes = userRoutes; // Can extend for agent/admin later
 
-	function isActive(path: string): boolean {
-		return $page.url.pathname === path || $page.url.pathname.startsWith(path + '/');
-	}
-
-	function getPageTitle(): string {
-		const currentRoute = routes.find(r => isActive(r.path));
-		return currentRoute?.label || 'Dashboard';
-	}
-
 	function handleSearch(e: Event) {
 		e.preventDefault();
 		if (searchQuery.trim()) {
@@ -62,68 +55,22 @@
 		}
 	}
 
-	function handleLogout() {
-		// TODO: Implement logout
-		goto('/');
+	function handleAvatarClick() {
+		goto(`/${userType}s/${userType === 'agent' ? 'settings' : 'profile'}`);
+	}
+
+	function getPageTitle(): string {
+		const currentRoute = routes.find(r => page.url.pathname.includes(r.path));
+		return currentRoute?.label || 'Dashboard';
 	}
 </script>
 
 <div class="min-h-screen bg-white">
-	<!-- Desktop Sidebar -->
-	<div
-		class="fixed left-0 top-0 h-screen bg-black text-white transition-all duration-300 ease-in-out z-50 hidden md:block {isExpanded ? 'w-64' : 'w-16'}"
-		onmouseenter={() => isExpanded = true}
-		onmouseleave={() => isExpanded = false}
-	>
-		<!-- Logo Section -->
-		<div class="h-16 flex items-center justify-center border-b border-gray-800">
-			<div class="flex items-center gap-3">
-				<div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-					<span class="text-black font-bold text-sm">AT</span>
-				</div>
-				{#if isExpanded}
-					<span class="font-bold text-lg whitespace-nowrap">AfriTokeni</span>
-				{/if}
-			</div>
-		</div>
-
-		<!-- Navigation Items -->
-		<nav class="flex-1 py-6">
-			<ul class="space-y-1 px-2">
-				{#each routes as route}
-					{@const active = isActive(route.path)}
-					<li>
-						<button
-							onclick={() => goto(route.path)}
-							class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 {active ? 'bg-white text-black' : 'text-gray-400 hover:bg-gray-900 hover:text-white'}"
-						>
-							<svelte:component this={route.icon} class="w-5 h-5 flex-shrink-0" />
-							{#if isExpanded}
-								<span class="text-sm font-medium whitespace-nowrap">{route.label}</span>
-							{/if}
-							{#if !isExpanded && active}
-								<ChevronRight class="w-3 h-3 ml-auto" />
-							{/if}
-						</button>
-					</li>
-				{/each}
-			</ul>
-		</nav>
-
-		<!-- Logout Button -->
-		<div class="p-2 border-t border-gray-800">
-			<button
-				onclick={handleLogout}
-				class="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-400 hover:bg-gray-900 hover:text-white transition-all duration-200"
-			>
-				<LogOut class="w-5 h-5 flex-shrink-0" />
-				{#if isExpanded}
-					<span class="text-sm font-medium whitespace-nowrap">Logout</span>
-				{/if}
-			</button>
-		</div>
-	</div>
-
+	<!-- Demo Mode Banner - TODO: Add when migrated -->
+	
+	<!-- Collapsible Sidebar -->
+	<CollapsibleSidebar {routes} {userType} />
+	
 	<!-- Main Content Area -->
 	<div class="md:ml-16 transition-all duration-300">
 		<!-- Top Header Bar -->
@@ -132,7 +79,9 @@
 				<h1 class="text-base md:text-xl lg:text-2xl font-bold text-black truncate">{getPageTitle()}</h1>
 			</div>
 			
-			<div class="flex items-center gap-2 md:gap-4 flex-shrink-0">
+			<div class="flex items-center gap-2 md:gap-4 shrink-0">
+				<!-- Demo Mode Toggle - TODO: Add when migrated -->
+				
 				<!-- Search Bar - Hidden on mobile -->
 				<form onsubmit={handleSearch} class="relative hidden lg:block">
 					<Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -144,14 +93,18 @@
 					/>
 				</form>
 				
-				<!-- User Avatar -->
+				<!-- User Avatar - Clickable, hidden on small mobile -->
 				<button
-					onclick={() => goto(`/${userType}s/profile`)}
+					onclick={handleAvatarClick}
 					class="w-10 h-10 bg-black rounded-full items-center justify-center hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden hidden sm:flex"
 				>
-					<span class="text-white text-sm font-semibold">
-						{userType === 'user' ? 'U' : userType === 'agent' ? 'A' : 'AD'}
-					</span>
+					{#if profileImage}
+						<img src={profileImage} alt="Profile" class="w-full h-full object-cover" />
+					{:else}
+						<span class="text-white text-sm font-semibold">
+							{userName.charAt(0).toUpperCase() || (userType === 'user' ? 'U' : userType === 'agent' ? 'A' : 'AD')}
+						</span>
+					{/if}
 				</button>
 			</div>
 		</header>
@@ -160,21 +113,5 @@
 		<main class="p-4 md:p-8 pb-20 md:pb-8">
 			{@render children?.()}
 		</main>
-	</div>
-
-	<!-- Mobile Bottom Navigation -->
-	<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-		<nav class="flex justify-around items-center h-16 px-2">
-			{#each routes.slice(0, 5) as route}
-				{@const active = isActive(route.path)}
-				<button
-					onclick={() => goto(route.path)}
-					class="flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-lg transition-colors {active ? 'text-black' : 'text-gray-400'}"
-				>
-					<svelte:component this={route.icon} class="w-5 h-5" />
-					<span class="text-xs font-medium">{route.label.split(' ')[0]}</span>
-				</button>
-			{/each}
-		</nav>
 	</div>
 </div>

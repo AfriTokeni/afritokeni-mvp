@@ -93,7 +93,7 @@
 
 <div class="min-h-screen bg-gray-50">
 	<!-- Hero Section with Gradient -->
-	<div class="bg-gradient-to-br from-green-600 to-teal-600 text-white py-12 sm:py-16 lg:py-20">
+	<div class="bg-linear-to-br from-green-600 to-teal-600 text-white py-12 sm:py-16 lg:py-20">
 		<div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
 			<div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
 				<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">

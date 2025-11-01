@@ -22,7 +22,7 @@
 
 <div class="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6 rounded-lg shadow-sm">
 	<div class="flex items-start">
-		<div class="flex-shrink-0">
+		<div class="shrink-0">
 			<AlertCircle class="h-5 w-5 text-orange-500" />
 		</div>
 		<div class="ml-3 flex-1">

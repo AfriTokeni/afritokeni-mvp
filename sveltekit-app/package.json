@@ -29,7 +29,9 @@
 		"@lucide/svelte": "^0.552.0",
 		"flowbite": "^3.1.2",
 		"flowbite-svelte": "^1.20.1",
+		"leaflet": "^1.9.4",
 		"marked": "^16.4.1",
-		"remark-gfm": "^4.0.1"
+		"remark-gfm": "^4.0.1",
+		"svelte-leafletjs": "^2.0.0"
 	}
 }

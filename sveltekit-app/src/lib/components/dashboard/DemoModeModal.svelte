@@ -31,7 +31,7 @@
 			<div class="p-4 sm:p-6 md:p-8">
 				<!-- Icon -->
 				<div class="flex justify-center mb-6">
-					<div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+					<div class="w-16 h-16 bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
 						<Zap class="w-8 h-8 text-white" />
 					</div>
 				</div>
@@ -48,10 +48,10 @@
 				<div class="mb-3 sm:mb-4">
 					<button
 						onclick={handleStartDemo}
-						class="w-full border-2 border-purple-200 rounded-xl p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-white hover:border-purple-300 transition-all cursor-pointer text-left"
+						class="w-full border-2 border-purple-200 rounded-xl p-4 sm:p-6 bg-linear-to-br from-purple-50 to-white hover:border-purple-300 transition-all cursor-pointer text-left"
 					>
 						<div class="flex items-start gap-3 sm:gap-4">
-							<div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+							<div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-lg flex items-center justify-center shrink-0">
 								<span class="text-white font-bold text-base sm:text-lg">PG</span>
 							</div>
 							<div class="flex-1 min-w-0">
@@ -82,7 +82,7 @@
 						class="w-full border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:border-gray-300 transition-all cursor-pointer text-left"
 					>
 						<div class="flex items-start gap-3 sm:gap-4">
-							<div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+							<div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
 								<FileText class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
 							</div>
 							<div class="flex-1 min-w-0">
@@ -105,7 +105,7 @@
 
 				<!-- Tip -->
 				<div class="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-					<Lightbulb class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+					<Lightbulb class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
 					<p class="text-sm text-yellow-800">
 						<span class="font-semibold">Tip:</span> Try the playground first to see what our platform can do, then switch to your real account for actual transactions!
 					</p>

@@ -38,7 +38,7 @@
 
 <div class="min-h-screen bg-white">
 	<!-- Hero Section with Gradient -->
-	<div class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white py-12 sm:py-16 lg:py-20">
+	<div class="bg-linear-to-br from-blue-600 to-indigo-600 text-white py-12 sm:py-16 lg:py-20">
 		<div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
 			<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
 				<FileText class="w-3 h-3 sm:w-4 sm:h-4" />

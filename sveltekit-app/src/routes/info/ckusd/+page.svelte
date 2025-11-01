@@ -8,7 +8,7 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<div class="bg-gradient-to-br from-green-600 to-emerald-600 text-white py-16 sm:py-20">
+<div class="bg-linear-to-br from-green-600 to-emerald-600 text-white py-16 sm:py-20">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 		<div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
 			<Lock class="w-8 h-8 sm:w-10 sm:h-10" />
@@ -204,7 +204,7 @@
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 		<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Smart Strategy: Use Both</h2>
 		
-		<div class="bg-gradient-to-br from-green-50 to-orange-50 rounded-2xl p-6 sm:p-8 border-2 border-gray-200">
+		<div class="bg-linear-to-br from-green-50 to-orange-50 rounded-2xl p-6 sm:p-8 border-2 border-gray-200">
 			<div class="space-y-6">
 				<div class="flex items-start gap-4">
 					<div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">
@@ -242,7 +242,7 @@
 </div>
 
 <!-- CTA -->
-<div class="py-12 sm:py-16 bg-gradient-to-br from-green-600 to-emerald-600 text-white">
+<div class="py-12 sm:py-16 bg-linear-to-br from-green-600 to-emerald-600 text-white">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 		<h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
 			Start Using ckUSD Today

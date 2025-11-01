@@ -8,7 +8,7 @@
 </svelte:head>
 
 <!-- Hero Section with Gradient -->
-<div class="bg-gradient-to-br from-purple-600 to-pink-600 text-white py-12 sm:py-16 lg:py-20 mb-8 sm:mb-10 lg:mb-12">
+<div class="bg-linear-to-br from-purple-600 to-pink-600 text-white py-12 sm:py-16 lg:py-20 mb-8 sm:mb-10 lg:mb-12">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
 		<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
 			<Award class="w-3 h-3 sm:w-4 sm:h-4" />
@@ -46,14 +46,14 @@
 
 	<!-- Mission & Vision -->
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10 lg:mb-12">
-		<div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 sm:p-6 lg:p-8 border-2 border-blue-200">
+		<div class="bg-linear-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 sm:p-6 lg:p-8 border-2 border-blue-200">
 			<Target class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-blue-600 mb-3 sm:mb-4" />
 			<h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Our Mission</h3>
 			<p class="text-sm sm:text-base text-gray-600 leading-relaxed">
 				Provide USSD-accessible Bitcoin banking to every African, regardless of location, phone type, or internet access. Financial inclusion is a right, not a privilege.
 			</p>
 		</div>
-		<div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 sm:p-6 lg:p-8 border-2 border-purple-200">
+		<div class="bg-linear-to-br from-purple-50 to-pink-50 rounded-2xl p-4 sm:p-6 lg:p-8 border-2 border-purple-200">
 			<Globe class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-purple-600 mb-3 sm:mb-4" />
 			<h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Our Vision</h3>
 			<p class="text-sm sm:text-base text-gray-600 leading-relaxed">

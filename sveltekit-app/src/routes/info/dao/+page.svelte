@@ -8,7 +8,7 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<div class="bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-600 text-white py-12 sm:py-16 lg:py-20">
+<div class="bg-linear-to-br from-blue-600 via-cyan-600 to-teal-600 text-white py-12 sm:py-16 lg:py-20">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="text-center">
 			<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-4 sm:mb-6">
@@ -36,7 +36,7 @@
 		</div>
 
 		<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-			<div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 sm:p-8 border border-blue-100">
+			<div class="bg-linear-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 sm:p-8 border border-blue-100">
 				<Users class="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mb-4" />
 				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Community Owned</h3>
 				<p class="text-sm sm:text-base text-gray-600">
@@ -44,7 +44,7 @@
 				</p>
 			</div>
 
-			<div class="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-2xl p-6 sm:p-8 border border-cyan-100">
+			<div class="bg-linear-to-br from-cyan-50 to-teal-50 rounded-2xl p-6 sm:p-8 border border-cyan-100">
 				<Shield class="w-10 h-10 sm:w-12 sm:h-12 text-cyan-600 mb-4" />
 				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Transparent</h3>
 				<p class="text-sm sm:text-base text-gray-600">
@@ -52,7 +52,7 @@
 				</p>
 			</div>
 
-			<div class="bg-gradient-to-br from-teal-50 to-green-50 rounded-2xl p-6 sm:p-8 border border-teal-100 sm:col-span-2 lg:col-span-1">
+			<div class="bg-linear-to-br from-teal-50 to-green-50 rounded-2xl p-6 sm:p-8 border border-teal-100 sm:col-span-2 lg:col-span-1">
 				<Zap class="w-10 h-10 sm:w-12 sm:h-12 text-teal-600 mb-4" />
 				<h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">SMS Accessible</h3>
 				<p class="text-sm sm:text-base text-gray-600">
@@ -193,7 +193,7 @@
 
 		<div class="grid lg:grid-cols-2 gap-6 lg:gap-8">
 			<!-- Users -->
-			<div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 sm:p-8 border border-blue-200">
+			<div class="bg-linear-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 sm:p-8 border border-blue-200">
 				<h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">For Users</h3>
 				<div class="space-y-3 sm:space-y-4">
 					<div class="flex items-start gap-3">
@@ -228,7 +228,7 @@
 			</div>
 
 			<!-- Agents -->
-			<div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 sm:p-8 border border-green-200">
+			<div class="bg-linear-to-br from-green-50 to-emerald-50 rounded-2xl p-6 sm:p-8 border border-green-200">
 				<h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">For Agents</h3>
 				<div class="space-y-3 sm:space-y-4">
 					<div class="flex items-start gap-3">
@@ -337,7 +337,7 @@
 </div>
 
 <!-- SMS Voting -->
-<div class="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
+<div class="py-12 sm:py-16 lg:py-20 bg-linear-to-br from-blue-600 to-cyan-600 text-white">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="text-center mb-8 sm:mb-12">
 			<h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Vote via SMS</h2>

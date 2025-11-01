@@ -1,13 +1,18 @@
+<!--
+ * ckUSDC Balance Card Component
+ * 
+ * Displays user's ckUSDC balance with local currency equivalent
+ * Provides quick actions for deposit, send, and exchange
+-->
 <script lang="ts">
-	import { DollarSign, TrendingUp, Send, Download, RefreshCw } from '@lucide/svelte';
 	import { onMount } from 'svelte';
+	import { DollarSign, TrendingUp, Send, Download, RefreshCw } from '@lucide/svelte';
 
 	interface Props {
 		principalId: string;
 		preferredCurrency?: string;
 		showActions?: boolean;
 		isAgent?: boolean;
-		isDemoMode?: boolean;
 		onDeposit?: () => void;
 		onSend?: () => void;
 		onExchange?: () => void;
@@ -18,7 +23,6 @@
 		preferredCurrency = 'UGX',
 		showActions = true,
 		isAgent = false,
-		isDemoMode = false,
 		onDeposit,
 		onSend,
 		onExchange
@@ -32,29 +36,14 @@
 	async function fetchBalance() {
 		try {
 			error = null;
-			
-			if (isDemoMode) {
-				const demoBalance = {
-					ckUSDCBalance: 5000, // $50 in cents
-					digitalBalance: 250000
-				};
-				
-				const exchangeRate = 3800; // 1 USDC = 3800 UGX
-				const usdcAmount = demoBalance.ckUSDCBalance / 100;
-				balance = {
-					balanceUSDC: usdcAmount.toFixed(2),
-					localCurrencyEquivalent: usdcAmount * exchangeRate,
-					localCurrency: preferredCurrency,
-					lastUpdated: new Date()
-				};
-			} else {
-				balance = {
-					balanceUSDC: '0.00',
-					localCurrencyEquivalent: 0,
-					localCurrency: preferredCurrency,
-					lastUpdated: new Date()
-				};
-			}
+			// TODO: Implement real service when migrated
+			// Mock data for now
+			balance = {
+				balanceUSDC: '0.00',
+				localCurrencyEquivalent: 0,
+				localCurrency: preferredCurrency,
+				lastUpdated: new Date()
+			};
 		} catch (err: any) {
 			console.error('Error fetching ckUSDC balance:', err);
 			error = err.message || 'Failed to load balance';
@@ -73,7 +62,7 @@
 		await fetchBalance();
 	}
 
-	function formatLocalCurrency(amount: number | undefined): string {
+	function formatLocalCurrency(amount: number | undefined) {
 		if (!amount) return '0.00';
 		return new Intl.NumberFormat('en-US', {
 			minimumFractionDigits: 2,
@@ -98,27 +87,25 @@
 		<div class="flex items-center justify-between mb-3 sm:mb-4">
 			<h3 class="text-base sm:text-lg font-semibold text-neutral-900">ckUSDC Balance</h3>
 			<div class="p-1.5 sm:p-2 bg-red-50 rounded-full">
-				<DollarSign class="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+				<DollarSign class="w-5 h-5 sm:w-6 sm:h-6 text-red-500 shrink-0" />
 			</div>
 		</div>
-		<p class="text-xs sm:text-sm text-red-600">{error}</p>
+		<p class="text-xs sm:text-sm text-red-600 wrap-break-word">{error}</p>
 		<button
 			onclick={handleRefresh}
 			class="mt-3 sm:mt-4 text-xs sm:text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-2"
 		>
-			<RefreshCw class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+			<RefreshCw class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
 			Try Again
 		</button>
 	</div>
 {:else}
-	<div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-sm border border-green-200 p-4 sm:p-5 md:p-6">
+	<div class="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl shadow-sm border border-green-200 p-4 sm:p-5 md:p-6">
+		<!-- Header -->
 		<div class="flex items-center justify-between mb-3 sm:mb-4">
 			<div>
 				<h3 class="text-base sm:text-lg font-semibold text-neutral-900">ckUSDC Balance</h3>
-				<div class="flex items-center gap-1.5 sm:gap-2 mt-1">
-					<TrendingUp class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" />
-					<p class="text-xs sm:text-sm text-neutral-600">Stablecoin</p>
-				</div>
+				<p class="text-xs sm:text-sm text-neutral-600 mt-1">Stable Value Storage</p>
 			</div>
 			<div class="flex items-center gap-1 sm:gap-2">
 				<button
@@ -127,47 +114,49 @@
 					class="p-1.5 sm:p-2 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50"
 					title="Refresh balance"
 				>
-					<RefreshCw class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 {isRefreshing ? 'animate-spin' : ''}" />
+					<RefreshCw class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 shrink-0 {isRefreshing ? 'animate-spin' : ''}" />
 				</button>
 				<div class="p-1.5 sm:p-2 bg-green-100 rounded-full">
-					<DollarSign class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+					<DollarSign class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 shrink-0" />
 				</div>
 			</div>
 		</div>
 
+		<!-- Balance Display -->
 		<div class="mb-3 sm:mb-4">
 			<div class="flex items-baseline gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-				<span class="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono">
+				<span class="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono wrap-break-word">
 					${balance?.balanceUSDC || '0.00'}
 				</span>
+				<span class="text-xs sm:text-sm text-neutral-600 font-semibold">ckUSDC</span>
 			</div>
 			
 			{#if balance?.localCurrencyEquivalent !== undefined}
 				<div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-600">
-					<TrendingUp class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-					<span>
+					<TrendingUp class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+					<span class="wrap-break-word">
 						≈ {formatLocalCurrency(balance.localCurrencyEquivalent)} {balance.localCurrency}
 					</span>
 				</div>
 			{/if}
 		</div>
 
+		<!-- Info Badge - Hidden on mobile -->
 		<div class="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-white/60 rounded-lg border border-green-200 hidden md:block">
-			<div class="flex items-start gap-2">
-				<DollarSign class="w-4 h-4 text-green-600 mt-0.5" />
-				<p class="text-xs sm:text-sm text-neutral-700">
-					<span class="font-semibold">Stable Value:</span> 1 USDC = $1 USD always.
-				</p>
-			</div>
+			<p class="text-xs sm:text-sm text-neutral-700 wrap-break-word">
+				<span class="font-semibold">Stable Value:</span> ckUSDC is pegged 1:1 with USD, 
+				protecting you from Bitcoin volatility.
+			</p>
 		</div>
 
+		<!-- Quick Actions -->
 		{#if showActions}
 			<div class="grid grid-cols-3 gap-1.5 sm:gap-2">
 				<button
 					onclick={onDeposit}
 					class="flex flex-col items-center gap-0.5 sm:gap-1 p-2 sm:p-2.5 md:p-3 bg-white hover:bg-green-50 rounded-lg border border-green-200 transition-colors"
 				>
-					<Download class="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+					<Download class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 shrink-0" />
 					<span class="text-[10px] sm:text-xs font-medium text-neutral-900">Deposit</span>
 				</button>
 				
@@ -175,7 +164,7 @@
 					onclick={onSend}
 					class="flex flex-col items-center gap-0.5 sm:gap-1 p-2 sm:p-2.5 md:p-3 bg-white hover:bg-green-50 rounded-lg border border-green-200 transition-colors"
 				>
-					<Send class="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+					<Send class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 shrink-0" />
 					<span class="text-[10px] sm:text-xs font-medium text-neutral-900">Send</span>
 				</button>
 				
@@ -183,13 +172,14 @@
 					onclick={onExchange}
 					class="flex flex-col items-center gap-0.5 sm:gap-1 p-2 sm:p-2.5 md:p-3 bg-white hover:bg-green-50 rounded-lg border border-green-200 transition-colors"
 				>
-					<RefreshCw class="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+					<RefreshCw class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 shrink-0" />
 					<span class="text-[10px] sm:text-xs font-medium text-neutral-900">Exchange</span>
 				</button>
 			</div>
 		{/if}
 
-		<div class="text-[10px] sm:text-xs text-gray-400 mt-2 sm:mt-3">
+		<!-- Last Updated -->
+		<div class="text-[10px] sm:text-xs text-gray-400 mt-2 sm:mt-3 wrap-break-word">
 			Last updated: {balance?.lastUpdated.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
 		</div>
 	</div>

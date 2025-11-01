@@ -75,7 +75,7 @@
 		</div>
 
 		<!-- Calculator -->
-		<div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 mb-10 border border-gray-200/60 backdrop-blur-sm">
+		<div class="bg-linear-to-br from-gray-50 to-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 mb-10 border border-gray-200/60 backdrop-blur-sm">
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 				<!-- Amount -->
 				<div class="group">
@@ -191,7 +191,7 @@
 		<div class="hidden sm:block overflow-hidden rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-gray-200 mb-6">
 			<table class="w-full border-collapse bg-white min-w-[640px]">
 				<thead>
-					<tr class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
+					<tr class="bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
 						<th class="text-left py-5 px-8 text-white/90 font-semibold text-sm tracking-wide">Provider</th>
 						<th class="text-center py-5 px-6 text-white/90 font-semibold text-sm tracking-wide">Transfer Fee</th>
 						<th class="text-center py-5 px-6 text-white/90 font-semibold text-sm tracking-wide">Speed</th>
@@ -206,7 +206,7 @@
 						<td class="py-7 px-8">
 							<div class="flex items-center gap-4">
 								<div class="relative">
-									<div class="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-xl shadow-blue-500/30 ring-2 ring-blue-100">
+									<div class="w-12 h-12 bg-linear-to-br from-blue-600 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-xl shadow-blue-500/30 ring-2 ring-blue-100">
 										A
 									</div>
 									<div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
