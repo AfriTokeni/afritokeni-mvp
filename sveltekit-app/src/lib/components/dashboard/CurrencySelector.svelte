@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Settings, Check, Search } from '@lucide/svelte';
+	import { getActiveCurrencies } from '$lib/types/currency';
 
 	interface Props {
 		currentCurrency: string;
@@ -11,19 +12,8 @@
 	let isOpen = $state(false);
 	let searchQuery = $state('');
 
-	// Mock active currencies - will be replaced with actual data
-	const activeCurrencies = [
-		{ code: 'UGX', name: 'Ugandan Shilling', symbol: 'USh', country: 'Uganda' },
-		{ code: 'NGN', name: 'Nigerian Naira', symbol: '₦', country: 'Nigeria' },
-		{ code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh', country: 'Kenya' },
-		{ code: 'GHS', name: 'Ghanaian Cedi', symbol: 'GH₵', country: 'Ghana' },
-		{ code: 'ZAR', name: 'South African Rand', symbol: 'R', country: 'South Africa' },
-		{ code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh', country: 'Tanzania' },
-		{ code: 'RWF', name: 'Rwandan Franc', symbol: 'FRw', country: 'Rwanda' },
-		{ code: 'ETB', name: 'Ethiopian Birr', symbol: 'Br', country: 'Ethiopia' },
-		{ code: 'EGP', name: 'Egyptian Pound', symbol: 'E£', country: 'Egypt' },
-		{ code: 'MAD', name: 'Moroccan Dirham', symbol: 'DH', country: 'Morocco' }
-	];
+	// Get all active currencies from the currency type definitions
+	const activeCurrencies = getActiveCurrencies();
 
 	const filteredCurrencies = $derived(
 		activeCurrencies.filter(c => 
@@ -115,7 +105,7 @@
 			
 			<div class="p-3 border-t border-neutral-100 bg-neutral-50">
 				<p class="text-neutral-500 text-xs text-center">
-					Supporting 39 African currencies
+					Supporting 33 African currencies
 				</p>
 			</div>
 		</div>
