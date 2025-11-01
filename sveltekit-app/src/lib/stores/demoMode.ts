@@ -21,6 +21,10 @@ function createDemoModeStore() {
 			if (browser) {
 				localStorage.setItem('afritokeni_demo_mode', 'true');
 				console.log('🎭 Demo mode enabled');
+				// Reload page after a short delay
+				setTimeout(() => {
+					window.location.reload();
+				}, 100);
 			}
 		},
 		disable: () => {

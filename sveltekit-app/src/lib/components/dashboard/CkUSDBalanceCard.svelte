@@ -1,7 +1,7 @@
 <!--
- * ckUSDC Balance Card Component
+ * ckUSD Balance Card Component
  * 
- * Displays user's ckUSDC balance with local currency equivalent
+ * Displays user's ckUSD balance with local currency equivalent
  * Provides quick actions for deposit, send, and exchange
 -->
 <script lang="ts">
@@ -36,16 +36,17 @@
 	async function fetchBalance() {
 		try {
 			error = null;
-			// TODO: Implement real service when migrated
-			// Mock data for now
+			// Import from userService
+			const { getCkUSDBalance } = await import('$lib/services/user/userService');
+			const ckusdBalance = await getCkUSDBalance();
 			balance = {
-				balanceUSDC: '0.00',
+				balanceUSD: ckusdBalance.toFixed(2),
 				localCurrencyEquivalent: 0,
 				localCurrency: preferredCurrency,
 				lastUpdated: new Date()
 			};
 		} catch (err: any) {
-			console.error('Error fetching ckUSDC balance:', err);
+			console.error('Error fetching ckUSD balance:', err);
 			error = err.message || 'Failed to load balance';
 		} finally {
 			isLoading = false;
@@ -85,7 +86,7 @@
 {:else if error}
 	<div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 sm:p-5 md:p-6">
 		<div class="flex items-center justify-between mb-3 sm:mb-4">
-			<h3 class="text-base sm:text-lg font-semibold text-neutral-900">ckUSDC Balance</h3>
+			<h3 class="text-base sm:text-lg font-semibold text-neutral-900">ckUSD Balance</h3>
 			<div class="p-1.5 sm:p-2 bg-red-50 rounded-full">
 				<DollarSign class="w-5 h-5 sm:w-6 sm:h-6 text-red-500 shrink-0" />
 			</div>
@@ -104,7 +105,7 @@
 		<!-- Header -->
 		<div class="flex items-center justify-between mb-3 sm:mb-4">
 			<div>
-				<h3 class="text-base sm:text-lg font-semibold text-neutral-900">ckUSDC Balance</h3>
+				<h3 class="text-base sm:text-lg font-semibold text-neutral-900">ckUSD Balance</h3>
 				<p class="text-xs sm:text-sm text-neutral-600 mt-1">Stable Value Storage</p>
 			</div>
 			<div class="flex items-center gap-1 sm:gap-2">
@@ -126,9 +127,9 @@
 		<div class="mb-3 sm:mb-4">
 			<div class="flex items-baseline gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
 				<span class="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 font-mono wrap-break-word">
-					${balance?.balanceUSDC || '0.00'}
+					${balance?.balanceUSD || '0.00'}
 				</span>
-				<span class="text-xs sm:text-sm text-neutral-600 font-semibold">ckUSDC</span>
+				<span class="text-xs sm:text-sm text-neutral-600 font-semibold">ckUSD</span>
 			</div>
 			
 			{#if balance?.localCurrencyEquivalent !== undefined}
@@ -141,13 +142,6 @@
 			{/if}
 		</div>
 
-		<!-- Info Badge - Hidden on mobile -->
-		<div class="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-white/60 rounded-lg border border-green-200 hidden md:block">
-			<p class="text-xs sm:text-sm text-neutral-700 wrap-break-word">
-				<span class="font-semibold">Stable Value:</span> ckUSDC is pegged 1:1 with USD, 
-				protecting you from Bitcoin volatility.
-			</p>
-		</div>
 
 		<!-- Quick Actions -->
 		{#if showActions}

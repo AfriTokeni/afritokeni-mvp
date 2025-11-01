@@ -4,7 +4,8 @@
 	import AgentSearchFilters from './AgentSearchFilters.svelte';
 	import AgentCard from './AgentCard.svelte';
 	import AgentMap from './AgentMap.svelte';
-	import { mockAgents, calculateDistance, type Agent, type UserLocation } from '$lib/utils/agents';
+	import { calculateDistance, type Agent, type UserLocation } from '$lib/utils/agents';
+	import { getAgents } from '$lib/services/agent/agentService';
 	import 'leaflet/dist/leaflet.css';
 
 	let agents = $state<Agent[]>([]);
@@ -21,10 +22,16 @@
 		requestUserLocation();
 	});
 
-	function loadAgents() {
+	async function loadAgents() {
 		loading = true;
-		agents = mockAgents;
-		loading = false;
+		try {
+			agents = await getAgents();
+		} catch (error) {
+			console.error('Failed to load agents:', error);
+			agents = [];
+		} finally {
+			loading = false;
+		}
 	}
 
 	function requestUserLocation() {

@@ -36,11 +36,12 @@
 	async function fetchBalance() {
 		try {
 			error = null;
-			// TODO: Implement real service when migrated
-			// Mock data for now
+			// Import from userService
+			const { getCkBTCBalance } = await import('$lib/services/user/userService');
+			const ckbtcBalance = await getCkBTCBalance();
 			balance = {
-				balanceSatoshis: 0,
-				balanceBTC: '0.00000000',
+				balanceSatoshis: Math.round(ckbtcBalance * 100000000),
+				balanceBTC: ckbtcBalance.toFixed(8),
 				localCurrencyEquivalent: 0,
 				localCurrency: preferredCurrency,
 				lastUpdated: new Date()

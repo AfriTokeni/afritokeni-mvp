@@ -6,7 +6,8 @@
 	import { AFRICAN_CURRENCIES, formatCurrencyAmount } from '$lib/types/currency';
 	import CurrencySelector from '$lib/components/dashboard/CurrencySelector.svelte';
 	import CkBTCBalanceCard from '$lib/components/dashboard/CkBTCBalanceCard.svelte';
-	import CkUSDCBalanceCard from '$lib/components/dashboard/CkUSDCBalanceCard.svelte';
+	import CkUSDBalanceCard from '$lib/components/dashboard/CkUSDBalanceCard.svelte';
+	import { getUserData, getUserBalance, getTransactions, getCkBTCBalance, getCkUSDBalance } from '$lib/services/user/userService';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -17,45 +18,20 @@
 	let showBanner = $state(false);
 	let missingFields = $state<string[]>([]);
 	let bannerDismissed = $state(false);
-	let demoBalance = $state<any>(null);
-	let demoTransactions = $state<any[]>([]);
-
-	// Mock user data - will be replaced with real auth
-	const currentUser = $state({
-		id: 'user_123',
-		firstName: 'John',
-		lastName: 'Doe',
-		email: 'john@example.com',
-		preferredCurrency: 'UGX',
-		location: { country: 'Uganda', city: 'Kampala' }
-	});
+	let currentUser = $state<any>(null);
+	let balance = $state(0);
+	let transactions = $state<any[]>([]);
 
 	const userCurrency = $derived(currentUser?.preferredCurrency || 'UGX');
 	const currencyInfo = $derived(AFRICAN_CURRENCIES[userCurrency as keyof typeof AFRICAN_CURRENCIES]);
 
-	// Mock balance and transactions
-	let balance = $state({ balance: 500000 });
-	let transactions = $state([
-		{
-			id: '1',
-			type: 'deposit',
-			description: 'Cash deposit via agent',
-			amount: 100000,
-			createdAt: new Date(),
-			status: 'completed'
-		},
-		{
-			id: '2',
-			type: 'send',
-			description: 'Sent to +256 700 123 456',
-			amount: 50000,
-			createdAt: new Date(Date.now() - 86400000),
-			status: 'completed'
-		}
-	]);
-
-	// Show demo modal on first login
-	onMount(() => {
+	onMount(async () => {
+		// Load user data from service
+		currentUser = await getUserData();
+		balance = await getUserBalance();
+		transactions = await getTransactions();
+		
+		// Show demo modal on first login
 		if (!browser || !currentUser?.id) return;
 		
 		const globalModalKey = `afritokeni_first_login_${currentUser.id}`;
@@ -113,11 +89,11 @@
 	}
 
 	function getDisplayBalance(): number {
-		return balance?.balance || 0;
+		return balance || 0;
 	}
 
 	function getDisplayTransactions() {
-		return transactions.slice(0, 5);
+		return Array.isArray(transactions) ? transactions.slice(0, 5) : [];
 	}
 
 	function updateUserCurrency(currency: string) {
@@ -193,8 +169,8 @@
 			onExchange={() => goto('/users/ckbtc/exchange')}
 		/>
 
-		<!-- ckUSDC Balance -->
-		<CkUSDCBalanceCard
+		<!-- ckUSD Balance -->
+		<CkUSDBalanceCard
 			principalId={currentUser.id}
 			preferredCurrency={userCurrency}
 			showActions={true}
