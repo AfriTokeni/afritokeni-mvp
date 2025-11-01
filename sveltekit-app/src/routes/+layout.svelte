@@ -2,11 +2,10 @@
 	import '../app.css';
 	import DemoModeBanner from '$lib/components/shared/DemoModeBanner.svelte';
 	import { onMount } from 'svelte';
-	import { initSatellite, getDoc, authSubscribe, type User as JunoUser } from '@junobuild/core';
+	import { initSatellite, getDoc, onAuthStateChange, type User as JunoUser } from '@junobuild/core';
 	import { initJunoAuth } from '$lib/stores/auth';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { env } from '$env/dynamic/public';
 	
 	let { children } = $props();
 	let isCheckingRole = $state(false);
@@ -58,32 +57,24 @@
 		if (!browser) return;
 
 		try {
-			// Initialize Juno satellite from environment variables
-			const isProduction = env.PUBLIC_ENV === 'production';
-			const satelliteId = isProduction 
-				? env.PUBLIC_JUNO_SATELLITE_ID_PROD
-				: env.PUBLIC_JUNO_SATELLITE_ID_DEV;
-			
+			const satelliteId = import.meta.env.VITE_SATELLITE_ID;
 			if (!satelliteId) {
-				throw new Error('Juno satellite ID not configured. Please set PUBLIC_JUNO_SATELLITE_ID_DEV and PUBLIC_JUNO_SATELLITE_ID_PROD in .env');
+				throw new Error('VITE_SATELLITE_ID not provided. Ensure the Juno Vite plugin is configured.');
 			}
-			
-			console.log(`🚀 Initializing Juno with ${isProduction ? 'production' : 'development'} satellite:`, satelliteId);
-			
+			const useContainer = import.meta.env.DEV === true;
+			console.log(`🚀 Initializing Juno with satellite ${satelliteId} (${useContainer ? 'emulator' : 'remote'})`);
 			await initSatellite({
-				satelliteId,
+				container: useContainer,
 				workers: {
-					auth: true,
-				},
+					auth: true
+				}
 			});
-			
-			console.log('✅ Juno satellite initialized');
 
 			// Initialize auth subscription
 			const unsubscribe = initJunoAuth();
 
 			// Subscribe to auth changes and redirect accordingly
-			const authUnsubscribe = authSubscribe((user) => {
+			const authUnsubscribe = onAuthStateChange((user) => {
 				if (user) {
 					console.log('👤 User authenticated, checking role...');
 					checkAndRedirectUser(user);

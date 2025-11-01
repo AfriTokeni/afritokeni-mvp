@@ -6,7 +6,7 @@
  */
 
 import { writable, derived, type Readable } from 'svelte/store';
-import { authSubscribe, type User as JunoUser } from '@junobuild/core';
+import { onAuthStateChange, type User as JunoUser } from '@junobuild/core';
 import { browser } from '$app/environment';
 
 export interface AuthUser {
@@ -56,7 +56,7 @@ export function initJunoAuth() {
 	console.log('🔐 Initializing Juno authentication...');
 
 	// Subscribe to Juno auth state changes
-	const unsubscribe = authSubscribe((user) => {
+	const unsubscribe = onAuthStateChange((user) => {
 		console.log('🔐 Juno auth state changed:', user ? 'Authenticated' : 'Not authenticated');
 		if (user) {
 			console.log('👤 Principal ID:', user.key);

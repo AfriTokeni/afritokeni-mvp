@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { LogOut, ChevronRight } from '@lucide/svelte';
+	import { signOut } from '@junobuild/core';
 
 	interface Route {
 		id: string;
@@ -19,9 +20,20 @@
 
 	let isExpanded = $state(false);
 
-	function handleLogout() {
-		// TODO: Implement logout
-		goto('/');
+	let isLoggingOut = $state(false);
+
+	async function handleLogout() {
+		if (isLoggingOut) return;
+
+		isLoggingOut = true;
+		try {
+			await signOut({ windowReload: false });
+		} catch (error) {
+			console.error('Sign out failed:', error);
+		} finally {
+			isLoggingOut = false;
+			goto('/');
+		}
 	}
 
 	function isActive(path: string): boolean {
@@ -77,11 +89,16 @@
 	<div class="p-2 border-t border-gray-800">
 		<button
 			onclick={handleLogout}
-			class="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-400 hover:bg-gray-900 hover:text-white transition-all duration-200"
+			disabled={isLoggingOut}
+			class="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-400 hover:bg-gray-900 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 		>
-			<LogOut class="w-5 h-5 shrink-0" />
+			{#if isLoggingOut}
+				<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0"></div>
+			{:else}
+				<LogOut class="w-5 h-5 shrink-0" />
+			{/if}
 			{#if isExpanded}
-				<span class="text-sm font-medium whitespace-nowrap">Logout</span>
+				<span class="text-sm font-medium whitespace-nowrap">{isLoggingOut ? 'Signing out...' : 'Logout'}</span>
 			{/if}
 		</button>
 	</div>
@@ -105,10 +122,19 @@
 		<!-- Logout Button -->
 		<button
 			onclick={handleLogout}
-			class="flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors shrink-0 min-w-[70px] text-gray-400 hover:text-red-500"
+			disabled={isLoggingOut}
+			class="flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors shrink-0 min-w-[70px] text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
 		>
-			<LogOut class="w-5 h-5 mb-1" />
-			<span class="text-xs font-medium whitespace-nowrap">Sign Out</span>
+			{#if isLoggingOut}
+				<div class="w-5 h-5 mb-1 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+			{:else}
+				<LogOut class="w-5 h-5 mb-1" />
+			{/if}
+			{#if isLoggingOut}
+				<span class="text-xs font-medium whitespace-nowrap">Signing out...</span>
+			{:else}
+				<span class="text-xs font-medium whitespace-nowrap">Sign Out</span>
+			{/if}
 		</button>
 	</div>
 </div>
