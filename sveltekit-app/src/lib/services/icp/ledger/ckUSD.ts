@@ -47,11 +47,10 @@ import {
 	type USDExchangeRate,
 	type CkUSDTransaction,
 	type CkUSDTransactionStatus,
-	type EthereumDepositAddress,
 	CKUSD_CONSTANTS,
-	CKUSD_TESTNET_CONFIG,
 	CkUSDUtils
 } from './types';
+import { CKUSD_LEDGER_CANISTER_ID } from '../canisters/config';
 import {
 	shouldUseMocks,
 	MOCK_CKUSD_BALANCE,
@@ -63,12 +62,26 @@ import {
 import { JUNO_SATELLITE_ID } from '../canisters/config';
 
 /**
+ * Ethereum Deposit Address
+ * Used for ckUSD deposits via Ethereum
+ */
+export interface EthereumDepositAddress {
+	address: string;
+	principalId: string;
+	createdAt: Date;
+	expiresAt: Date;
+}
+
+/**
  * ckUSD Service Class
  * 
  * SECURITY: All methods respect non-custodial architecture
  */
 export class CkUSDService {
-	private static config: CkUSDConfig = CKUSD_TESTNET_CONFIG;
+	private static config: CkUSDConfig = {
+		ledgerCanisterId: CKUSD_LEDGER_CANISTER_ID,
+		network: 'mainnet'
+	};
 
 	/**
 	 * Initialize ckUSD service with configuration
